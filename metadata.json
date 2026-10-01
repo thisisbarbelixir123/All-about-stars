@@ -1,0 +1,6 @@
+{
+  "name": "All About Stars",
+  "description": "All About Stars: An interactive 3D cosmic star comparator, astrophysical catalog, Hertzsprung–Russell diagram, and cosmic scale explorer spanning from relativistic neutron stars to colossal red hypergiants.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

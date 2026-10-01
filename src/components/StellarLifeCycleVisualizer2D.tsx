@@ -1,0 +1,1643 @@
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import {
+  STELLAR_TRACKS,
+  StellarTrack,
+  LifeCycleCheckpoint,
+  interpolateCheckpoint,
+} from '../data/stellarLifeCycleData';
+import { STARS_CATALOG } from '../data/stars';
+import { StarData } from '../types';
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+  Sparkles,
+  Flame,
+  Layers,
+  Thermometer,
+  Zap,
+  Info,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  Compass,
+  Gauge,
+  Sliders,
+  Clock,
+  Timer,
+} from 'lucide-react';
+
+interface StellarLifeCycleVisualizer2DProps {
+  onSelectStar?: (star: StarData) => void;
+}
+
+export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2DProps> = ({
+  onSelectStar,
+}) => {
+  const [selectedTrackId, setSelectedTrackId] = useState<string>('solar');
+  const [progress, setProgress] = useState<number>(0.25); // Default to Main Sequence
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0); // 0.5x, 1x, 2x, 5x
+  const [isFullscreenStage, setIsFullscreenStage] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'simulator' | 'matrix'>('simulator');
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(performance.now());
+  const stageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Active track
+  const currentTrack: StellarTrack = useMemo(() => {
+    return STELLAR_TRACKS.find((t) => t.id === selectedTrackId) || STELLAR_TRACKS[0];
+  }, [selectedTrackId]);
+
+  // Clean, non-overcomplicated evolutionary stage name for simulator header
+  const simpleStageName = useMemo(() => {
+    if (selectedTrackId === 'solar') {
+      if (progress < 0.05) return 'Giant Molecular Cloud';
+      if (progress < 0.20) return 'Protostar phase';
+      if (progress < 0.40) return 'Main-sequence phase';
+      if (progress < 0.60) return 'Red Giant';
+      if (progress < 0.70) return 'Planetary Nebula';
+      if (progress < 0.96) return 'White Dwarf';
+      return 'Black Dwarf';
+    }
+    if (selectedTrackId === 'low-mass') {
+      if (progress < 0.08) return 'Giant Molecular Cloud';
+      if (progress < 0.30) return 'Protostar phase';
+      if (progress < 0.65) return 'Main-sequence phase';
+      if (progress < 0.80) return 'Blue Dwarf phase';
+      if (progress < 0.97) return 'White Dwarf';
+      return 'Black Dwarf';
+    }
+    if (selectedTrackId === 'massive') {
+      if (progress < 0.06) return 'Giant Molecular Cloud';
+      if (progress < 0.20) return 'Protostar phase';
+      if (progress < 0.45) return 'Main-sequence phase';
+      if (progress < 0.74) return 'Red Supergiant';
+      if (progress < 0.82) return 'Supernova';
+      if (progress < 0.97) return 'Neutron Star / Pulsar';
+      return 'Cold Neutron Star';
+    }
+    if (selectedTrackId === 'hyper-massive') {
+      if (progress < 0.06) return 'Giant Molecular Cloud';
+      if (progress < 0.18) return 'Protostar phase';
+      if (progress < 0.35) return 'Main-sequence phase';
+      if (progress < 0.55) return 'Hypergiant';
+      if (progress < 0.75) return 'Hypernova';
+      return 'Black Hole';
+    }
+    return 'Main-sequence phase';
+  }, [selectedTrackId, progress]);
+
+  // Interpolated astrophysics telemetry
+  const telemetry = useMemo(() => {
+    return interpolateCheckpoint(currentTrack, progress);
+  }, [currentTrack, progress]);
+
+  // When track changes, reset progress to main sequence (usually ~0.25–0.3)
+  const handleTrackChange = (trackId: string) => {
+    setSelectedTrackId(trackId);
+    const targetTrack = STELLAR_TRACKS.find((t) => t.id === trackId) || STELLAR_TRACKS[0];
+    const msPoint = targetTrack.checkpoints.find((c) => c.category === 'main-sequence');
+    setProgress(msPoint ? msPoint.progress : 0.25);
+    setIsPlaying(false);
+  };
+
+  // Step controls
+  const handleStep = (delta: number) => {
+    setProgress((prev) => Math.max(0, Math.min(1, prev + delta)));
+  };
+
+  // Jump to specific checkpoint
+  const handleJumpToCheckpoint = (cp: LifeCycleCheckpoint) => {
+    setProgress(cp.progress);
+  };
+
+  // Jump to specific category
+  const handleJumpToCategory = (cat: string) => {
+    const cp = currentTrack.checkpoints.find((c) => c.category === cat);
+    if (cp) setProgress(cp.progress);
+  };
+
+  // Keyboard shortcut: Space to play/pause
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only if not focused in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsPlaying((prev) => !prev);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        handleStep(0.01);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        handleStep(-0.01);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Animation playback loop
+  useEffect(() => {
+    if (!isPlaying) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+
+    lastTimeRef.current = performance.now();
+
+    const loop = (time: number) => {
+      const dt = (time - lastTimeRef.current) / 1000;
+      lastTimeRef.current = time;
+
+      // Complete cycle in 24 seconds at 1x speed
+      const rate = (1 / 24) * playbackSpeed;
+      setProgress((prev) => {
+        const next = prev + dt * rate;
+        if (next >= 1.0) {
+          setIsPlaying(false);
+          return 1.0;
+        }
+        return next;
+      });
+
+      animationFrameRef.current = requestAnimationFrame(loop);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying, playbackSpeed]);
+
+  // Canvas rendering loop
+  const renderCanvas = useCallback(
+    (time: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const cx = width / 2;
+      const cy = height / 2;
+
+      // Clear dark cosmic background
+      ctx.fillStyle = '#020510';
+      ctx.fillRect(0, 0, width, height);
+
+      // Subtle ambient background space dust
+      const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, width * 0.7);
+      bgGrad.addColorStop(0, '#060c22');
+      bgGrad.addColorStop(0.6, '#030614');
+      bgGrad.addColorStop(1, '#010309');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw faint background stars
+      const starSeedCount = 70;
+      for (let i = 0; i < starSeedCount; i++) {
+        const sx = ((i * 137.5) % width);
+        const sy = ((i * 249.7) % height);
+        const radius = (i % 3 === 0) ? 1.2 : 0.7;
+        const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(time * 0.001 + i));
+        ctx.fillStyle = `rgba(255, 255, 255, ${twinkle * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Subtle ambient orbital reference rings (very soft, no harsh straight crosshairs)
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.min(width, height) * 0.38, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const visualType = telemetry.current.visualType;
+      const nextVisualType = telemetry.next.visualType;
+      const alpha = telemetry.alpha;
+      const tSec = time * 0.001;
+
+      // Color helper
+      const parseRgb = (rgbStr: string) => {
+        const match = rgbStr.match(/\d+/g);
+        if (match && match.length >= 3) {
+          return { r: parseInt(match[0], 10), g: parseInt(match[1], 10), b: parseInt(match[2], 10) };
+        }
+        return { r: 255, g: 255, b: 255 };
+      };
+      const mainRgb = parseRgb(telemetry.interpolatedColor);
+      const glowRgb = parseRgb(telemetry.interpolatedGlow);
+
+      // Standardized constant radius for compact remnants and newborn collapse cores
+      // Guarantees zero resizing stutters across planetary nebula / supernova / hypernova to remnants
+      const REMNANT_RADIUS = 13;
+
+      // Continuous smooth star radius calculation (No discrete jumps between normal star and giant, or blue dwarf to white dwarf!)
+      // Smoothly maps continuous telemetry.interpolatedRadius across orders of magnitude
+      const getContinuousStarRadius = () => {
+        const minPx = Math.min(width, height) * 0.12;
+        const maxPx = Math.min(width, height) * 0.35;
+        const logVal = Math.log10(Math.max(0.08, telemetry.interpolatedRadius));
+        const norm = Math.max(0, Math.min(1, (logVal + 1.1) / 4.1));
+        const pulse = Math.sin(tSec * 1.5) * (1.0 + norm * 2.0);
+        const normalStarR = minPx + norm * (maxPx - minPx) + pulse;
+
+        // Smooth contraction from blue dwarf into degenerate white dwarf remnant (REMNANT_RADIUS = 13)
+        if (visualType === 'star' && nextVisualType === 'cooling-white-dwarf') {
+          return (1 - alpha) * normalStarR + alpha * REMNANT_RADIUS;
+        }
+        return normalStarR;
+      };
+
+      // Helper to draw realistic, isotropic, silky-smooth Star Model (NO straight rays, NO orb light, NO blotchy cells)
+      const drawStarModel = (
+        radius: number,
+        opacity: number = 1.0,
+        tempK: number = telemetry.interpolatedTemp
+      ) => {
+        if (opacity <= 0.01) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+
+        const starR = Math.max(12, radius);
+
+        // When contracting from blue dwarf to white dwarf, gently fade the outer corona into the compact degenerate core
+        const coronaMultiplier = (visualType === 'star' && nextVisualType === 'cooling-white-dwarf')
+          ? Math.max(0, 1 - alpha * 0.9)
+          : 1.0;
+
+        // 1. Dual-Layer Volumetric Coronal Bloom (smooth atmospheric inverse-square radiance falloff)
+        // Outer diffuse halo
+        const outerHaloR = starR * 2.3;
+        const outerHalo = ctx.createRadialGradient(cx, cy, starR * 0.85, cx, cy, outerHaloR);
+        outerHalo.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.26 * coronaMultiplier})`);
+        outerHalo.addColorStop(0.45, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.08 * coronaMultiplier})`);
+        outerHalo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = outerHalo;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerHaloR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner luminous corona
+        const innerCoronaR = starR * 1.48;
+        const innerCorona = ctx.createRadialGradient(cx, cy, starR * 0.7, cx, cy, innerCoronaR);
+        innerCorona.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.62 * coronaMultiplier})`);
+        innerCorona.addColorStop(0.55, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.22 * coronaMultiplier})`);
+        innerCorona.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = innerCorona;
+        ctx.beginPath();
+        ctx.arc(cx, cy, innerCoronaR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Silky-Smooth Photosphere Disk with Concentric Isotropic Eddington Limb Darkening
+        // (Smooth continuous radial gradation centered at cx, cy — completely smooth, no blotchy granulation)
+        const photoGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, starR);
+        // Central incandescent core emission
+        photoGrad.addColorStop(0, '#ffffff');
+        photoGrad.addColorStop(
+          0.2,
+          `rgba(${Math.min(255, mainRgb.r + 55)}, ${Math.min(255, mainRgb.g + 55)}, ${Math.min(255, mainRgb.b + 55)}, 1)`
+        );
+        photoGrad.addColorStop(0.62, telemetry.interpolatedColor);
+        photoGrad.addColorStop(0.86, telemetry.interpolatedGlow);
+        // True physical limb darkening to deeper saturated hue at tangent
+        photoGrad.addColorStop(
+          1,
+          `rgba(${Math.round(glowRgb.r * 0.65)}, ${Math.round(glowRgb.g * 0.65)}, ${Math.round(glowRgb.b * 0.65)}, 1)`
+        );
+
+        ctx.fillStyle = photoGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, starR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Delicate Magnetic Prominence Arches (subtle, soft loops flowing from limb)
+        const loopCount = 4;
+        for (let m = 0; m < loopCount; m++) {
+          const baseAngle = (m / loopCount) * Math.PI * 2 + tSec * 0.08;
+          const span = 0.24 + 0.08 * Math.sin(tSec * 1.1 + m);
+          const angle1 = baseAngle;
+          const angle2 = baseAngle + span;
+
+          const p1x = cx + Math.cos(angle1) * (starR - 1);
+          const p1y = cy + Math.sin(angle1) * (starR - 1);
+          const p2x = cx + Math.cos(angle2) * (starR - 1);
+          const p2y = cy + Math.sin(angle2) * (starR - 1);
+
+          const midAngle = (angle1 + angle2) / 2;
+          const loopH = starR + 8 + 10 * (0.5 + 0.5 * Math.sin(tSec * 1.3 + m * 2.1));
+          const apexx = cx + Math.cos(midAngle) * loopH;
+          const apexy = cy + Math.sin(midAngle) * loopH;
+
+          ctx.strokeStyle = `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.38)`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(p1x, p1y);
+          ctx.quadraticCurveTo(apexx, apexy, p2x, p2y);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      };
+
+      // -------------------------------------------------------------
+      // 1. NEBULA / MOLECULAR CLOUD (GENTLE COLLAPSE & INFALL)
+      // -------------------------------------------------------------
+      if (visualType === 'nebula' || (visualType === 'protostar' && alpha < 0.3)) {
+        const nebulaWeight = visualType === 'nebula' ? (nextVisualType === 'protostar' ? 1 - alpha : 1.0) : 0.3 - alpha;
+        if (nebulaWeight > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(1, nebulaWeight));
+
+          const cloudRadius = Math.min(width, height) * (0.42 - alpha * 0.1);
+          const cloudCount = 10;
+          for (let i = 0; i < cloudCount; i++) {
+            const angle = (i / cloudCount) * Math.PI * 2 + tSec * 0.04;
+            const dist = cloudRadius * (0.28 + 0.32 * Math.sin(i * 1.5 + tSec * 0.1));
+            const nx = cx + Math.cos(angle) * dist;
+            const ny = cy + Math.sin(angle) * dist;
+            const nr = cloudRadius * (0.42 + 0.08 * Math.sin(i * 2.1));
+
+            const nGrad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+            nGrad.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.38)`);
+            nGrad.addColorStop(0.55, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.16)`);
+            nGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.fillStyle = nGrad;
+            ctx.beginPath();
+            ctx.arc(nx, ny, nr, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Dense gravitational infall core condensation
+          const coreR = (16 + 5 * Math.sin(tSec * 2)) * (1 + alpha * 0.5);
+          const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.5);
+          cGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+          cGrad.addColorStop(0.35, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.65)`);
+          cGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = cGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, coreR * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Infalling curvilinear gas streamlets
+          for (let p = 0; p < 14; p++) {
+            const pAngle = (p / 14) * Math.PI * 2 + tSec * 0.25;
+            const progressLoop = ((tSec * 0.35 + p * 0.12) % 1);
+            const pDist = (cloudRadius * 0.75) * (1 - progressLoop);
+            const px = cx + Math.cos(pAngle + progressLoop * 0.8) * pDist;
+            const py = cy + Math.sin(pAngle + progressLoop * 0.8) * pDist;
+            ctx.fillStyle = `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, ${0.7 * (1 - progressLoop)})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 2. PROTOSTAR (ACCRETION DISK & SOFT BIPOLAR OUTFLOWS)
+      // -------------------------------------------------------------
+      if (visualType === 'protostar' || (nextVisualType === 'protostar' && visualType === 'nebula')) {
+        const protoWeight = visualType === 'protostar'
+          ? (nextVisualType === 'star' ? 1 - alpha : 1.0)
+          : alpha;
+
+        if (protoWeight > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(1, protoWeight));
+
+          // Soft Bipolar Outflow Cones (smooth gradients, NO straight line needle cuts)
+          const jetLen = Math.min(width, height) * 0.44;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(Math.PI / 6);
+
+          const jetGrad = ctx.createLinearGradient(0, -jetLen, 0, jetLen);
+          jetGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+          jetGrad.addColorStop(0.3, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.6)`);
+          jetGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.95)');
+          jetGrad.addColorStop(0.7, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.6)`);
+          jetGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = jetGrad;
+
+          // Upper plume
+          ctx.beginPath();
+          ctx.moveTo(-5, 0);
+          ctx.quadraticCurveTo(-18, -jetLen * 0.5, -28, -jetLen);
+          ctx.lineTo(28, -jetLen);
+          ctx.quadraticCurveTo(18, -jetLen * 0.5, 5, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          // Lower plume
+          ctx.beginPath();
+          ctx.moveTo(-5, 0);
+          ctx.quadraticCurveTo(-18, jetLen * 0.5, -28, jetLen);
+          ctx.lineTo(28, jetLen);
+          ctx.quadraticCurveTo(18, jetLen * 0.5, 5, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
+          // Swirling Accretion Disk (Inclined Ellipse)
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(-Math.PI / 12);
+          ctx.scale(1, 0.36);
+          const diskR = Math.min(width, height) * 0.38;
+          const diskGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, diskR);
+          diskGrad.addColorStop(0, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.9)`);
+          diskGrad.addColorStop(0.4, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.65)`);
+          diskGrad.addColorStop(0.75, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.25)`);
+          diskGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = diskGrad;
+          ctx.beginPath();
+          ctx.arc(0, 0, diskR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          // Central Embryonic Core
+          const protoR = 24 + 2 * Math.sin(tSec * 3);
+          drawStarModel(protoR, protoWeight);
+
+          ctx.restore();
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 3. MAIN SEQUENCE STAR & GIANT (CONTINUOUS RESIZING WITHOUT STUTTERS)
+      // -------------------------------------------------------------
+      if (
+        visualType === 'star' ||
+        visualType === 'giant' ||
+        (nextVisualType === 'star' && visualType === 'protostar')
+      ) {
+        const starR = getContinuousStarRadius();
+
+        let opacity = 1.0;
+        if (visualType === 'protostar') {
+          opacity = alpha; // Fading in smoothly from protostar
+        } else if (
+          visualType === 'giant' &&
+          (nextVisualType === 'planetary-nebula' ||
+            nextVisualType === 'supernova' ||
+            nextVisualType === 'hypernova')
+        ) {
+          // Envelope begins expanding smoothly into explosion
+          opacity = Math.max(0, 1 - alpha * 0.85);
+        }
+
+        drawStarModel(starR, opacity);
+      }
+
+      // -------------------------------------------------------------
+      // 4. PLANETARY NEBULA (EXPANDING GAS SHELLS & WHITE DWARF FORMATION)
+      // -------------------------------------------------------------
+      const isPnActive =
+        visualType === 'planetary-nebula' ||
+        (visualType === 'giant' && nextVisualType === 'planetary-nebula') ||
+        (visualType === 'planetary-nebula' && nextVisualType === 'cooling-white-dwarf');
+
+      if (isPnActive) {
+        let pnAlpha = 1.0;
+        let expansion = 0.5;
+
+        if (visualType === 'giant') {
+          pnAlpha = alpha * 0.9;
+          expansion = alpha * 0.4;
+        } else if (visualType === 'planetary-nebula') {
+          if (nextVisualType === 'cooling-white-dwarf') {
+            pnAlpha = Math.max(0, 1 - alpha * 0.9);
+            expansion = 0.4 + alpha * 0.6;
+          } else {
+            pnAlpha = 1.0;
+            expansion = 0.5;
+          }
+        }
+
+        if (pnAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = pnAlpha;
+
+          const maxShellR = Math.min(width, height) * (0.32 + expansion * 0.22);
+
+          // Outer Red [H-alpha] Ionized Gas Envelope
+          const rOuter = maxShellR * (0.85 + 0.04 * Math.sin(tSec * 1.5));
+          const gradRed = ctx.createRadialGradient(cx, cy, rOuter * 0.65, cx, cy, rOuter);
+          gradRed.addColorStop(0, 'rgba(239, 68, 68, 0)');
+          gradRed.addColorStop(0.55, 'rgba(239, 68, 68, 0.45)');
+          gradRed.addColorStop(0.85, 'rgba(220, 38, 38, 0.65)');
+          gradRed.addColorStop(1, 'rgba(185, 28, 28, 0)');
+          ctx.fillStyle = gradRed;
+          ctx.beginPath();
+          ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Mid Green-Emerald [N II] Ionized Layer
+          const rMid = maxShellR * 0.62;
+          const gradGreen = ctx.createRadialGradient(cx, cy, rMid * 0.5, cx, cy, rMid);
+          gradGreen.addColorStop(0, 'rgba(16, 185, 129, 0)');
+          gradGreen.addColorStop(0.7, 'rgba(16, 185, 129, 0.45)');
+          gradGreen.addColorStop(1, 'rgba(5, 150, 105, 0)');
+          ctx.fillStyle = gradGreen;
+          ctx.beginPath();
+          ctx.arc(cx, cy, rMid, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Inner Turquoise Cyan [O III] Glowing Ring
+          const rInner = maxShellR * 0.42;
+          const gradCyan = ctx.createRadialGradient(cx, cy, rInner * 0.25, cx, cy, rInner);
+          gradCyan.addColorStop(0, 'rgba(6, 182, 212, 0.15)');
+          gradCyan.addColorStop(0.65, 'rgba(6, 182, 212, 0.7)');
+          gradCyan.addColorStop(1, 'rgba(8, 145, 178, 0)');
+          ctx.fillStyle = gradCyan;
+          ctx.beginPath();
+          ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+
+        // Central Ultra-Hot Nascent White Dwarf Core (Same exact REMNANT_RADIUS for seamless transition)
+        const coreAlpha =
+          visualType === 'giant'
+            ? alpha
+            : visualType === 'planetary-nebula'
+            ? 1.0
+            : 1.0;
+
+        if (coreAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = coreAlpha;
+
+          const coreGlow = ctx.createRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
+          coreGlow.addColorStop(0, '#ffffff');
+          coreGlow.addColorStop(0.4, '#38bdf8');
+          coreGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = coreGlow;
+          ctx.beginPath();
+          ctx.arc(cx, cy, REMNANT_RADIUS * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, cy, REMNANT_RADIUS, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 5. SUPERNOVA EXPLOSION (CORE-COLLAPSE SHOCKWAVE & NEUTRON STAR FORMATION)
+      // -------------------------------------------------------------
+      const isSnActive =
+        visualType === 'supernova' ||
+        (visualType === 'giant' && nextVisualType === 'supernova') ||
+        (visualType === 'supernova' && nextVisualType === 'pulsar');
+
+      if (isSnActive) {
+        let snAlpha = 1.0;
+        let expansion = 0.5;
+
+        if (visualType === 'giant') {
+          snAlpha = alpha;
+          expansion = alpha * 0.4;
+        } else if (visualType === 'supernova') {
+          if (nextVisualType === 'pulsar') {
+            snAlpha = Math.max(0, 1 - alpha * 0.9);
+            expansion = 0.4 + alpha * 0.6;
+          } else {
+            snAlpha = 1.0;
+            expansion = 0.5;
+          }
+        }
+
+        if (snAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = snAlpha;
+
+          const blastR = Math.min(width, height) * (0.32 + expansion * 0.24);
+
+          // Multi-harmonic turbulent shock front
+          const shockGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, blastR);
+          shockGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+          shockGrad.addColorStop(0.25, 'rgba(147, 197, 253, 0.85)');
+          shockGrad.addColorStop(0.55, 'rgba(59, 130, 246, 0.55)');
+          shockGrad.addColorStop(0.85, 'rgba(239, 68, 68, 0.35)');
+          shockGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+          ctx.fillStyle = shockGrad;
+
+          ctx.beginPath();
+          const steps = 40;
+          for (let s = 0; s <= steps; s++) {
+            const sAngle = (s / steps) * Math.PI * 2;
+            const undulation = 1 + 0.08 * Math.sin(sAngle * 7 + tSec * 2.5) + 0.05 * Math.cos(sAngle * 11 - tSec * 1.8);
+            const r = blastR * undulation;
+            const sx = cx + Math.cos(sAngle) * r;
+            const sy = cy + Math.sin(sAngle) * r;
+            if (s === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          }
+          ctx.closePath();
+          ctx.fill();
+
+          // Expanding curved plasma filaments
+          for (let w = 0; w < 12; w++) {
+            const wAngle = (w / 12) * Math.PI * 2 + tSec * 0.15;
+            const wDist = blastR * 0.65;
+            const wx = cx + Math.cos(wAngle) * wDist;
+            const wy = cy + Math.sin(wAngle) * wDist;
+            const wGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, blastR * 0.25);
+            wGrad.addColorStop(0, 'rgba(224, 242, 254, 0.5)');
+            wGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+            ctx.fillStyle = wGrad;
+            ctx.beginPath();
+            ctx.arc(wx, wy, blastR * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+
+        // Central Collapsed Neutron Core (Standardized REMNANT_RADIUS = 13 for seamless morphing into pulsar)
+        const coreAlpha =
+          visualType === 'giant'
+            ? alpha
+            : visualType === 'supernova'
+            ? 1.0
+            : 1.0;
+
+        if (coreAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = coreAlpha;
+
+          const nsGlow = ctx.createRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
+          nsGlow.addColorStop(0, '#ffffff');
+          nsGlow.addColorStop(0.4, '#38bdf8');
+          nsGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = nsGlow;
+          ctx.beginPath();
+          ctx.arc(cx, cy, REMNANT_RADIUS * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, cy, REMNANT_RADIUS, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 6. HYPERNOVA / COLLAPSAR & RELATIVISTIC GRB JETS
+      // -------------------------------------------------------------
+      const isHnActive =
+        visualType === 'hypernova' ||
+        (visualType === 'giant' && nextVisualType === 'hypernova') ||
+        (visualType === 'hypernova' && nextVisualType === 'black-hole');
+
+      if (isHnActive) {
+        let hAlpha = 1.0;
+        let expansion = 0.5;
+
+        if (visualType === 'giant') {
+          hAlpha = alpha;
+          expansion = alpha * 0.4;
+        } else if (visualType === 'hypernova') {
+          if (nextVisualType === 'black-hole') {
+            hAlpha = Math.max(0, 1 - alpha);
+            expansion = 0.4 + alpha * 0.7;
+          } else {
+            hAlpha = 1.0;
+            expansion = 0.5;
+          }
+        }
+
+        if (hAlpha > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = hAlpha;
+
+          const jetHeight = Math.min(width, height) * (0.44 + expansion * 0.12);
+
+          ctx.save();
+          ctx.translate(cx, cy);
+
+          // Relativistic Polar Jet Breakout (Smooth Gaussian falloff beams)
+          const grbGrad = ctx.createLinearGradient(0, -jetHeight, 0, jetHeight);
+          grbGrad.addColorStop(0, 'rgba(244, 63, 94, 0)');
+          grbGrad.addColorStop(0.2, 'rgba(251, 113, 133, 0.9)');
+          grbGrad.addColorStop(0.5, 'rgba(255, 255, 255, 1)');
+          grbGrad.addColorStop(0.8, 'rgba(251, 113, 133, 0.9)');
+          grbGrad.addColorStop(1, 'rgba(244, 63, 94, 0)');
+          ctx.fillStyle = grbGrad;
+
+          ctx.beginPath();
+          ctx.moveTo(-4, 0);
+          ctx.quadraticCurveTo(-12, -jetHeight * 0.5, -24, -jetHeight);
+          ctx.lineTo(24, -jetHeight);
+          ctx.quadraticCurveTo(12, -jetHeight * 0.5, 4, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(-4, 0);
+          ctx.quadraticCurveTo(-12, jetHeight * 0.5, -24, jetHeight);
+          ctx.lineTo(24, jetHeight);
+          ctx.quadraticCurveTo(12, jetHeight * 0.5, 4, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.restore();
+
+          // Equatorial Blast Torus
+          const blastR = Math.min(width, height) * (0.35 + expansion * 0.15);
+          const bGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, blastR);
+          bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+          bGrad.addColorStop(0.3, 'rgba(244, 63, 94, 0.7)');
+          bGrad.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
+          bGrad.addColorStop(1, 'rgba(126, 34, 206, 0)');
+          ctx.fillStyle = bGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, blastR, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+
+        // Central Singularity Collapse Core (REMNANT_RADIUS = 13 for seamless morph into black hole)
+        if (nextVisualType !== 'black-hole') {
+          const coreAlpha =
+            visualType === 'giant'
+              ? alpha
+              : visualType === 'hypernova'
+              ? 1.0
+              : 1.0;
+
+          if (coreAlpha > 0.01) {
+            ctx.save();
+            ctx.globalAlpha = coreAlpha;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx, cy, REMNANT_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+      }
+
+      // -------------------------------------------------------------
+      // 7. COOLING WHITE DWARF (SLIDING THROUGH OBAFGKM+ THERMAL SEQUENCE)
+      // -------------------------------------------------------------
+      if (visualType === 'cooling-white-dwarf') {
+        const wdR = REMNANT_RADIUS; // Standardized constant radius (13px)
+        const tempK = telemetry.interpolatedTemp;
+
+        const haloFactor = Math.min(1.0, Math.max(0.04, (tempK - 500) / 25000));
+        const wdGlowR = wdR * (1.8 + haloFactor * 2.2);
+
+        ctx.save();
+
+        if (haloFactor > 0.05) {
+          const wdGlow = ctx.createRadialGradient(cx, cy, wdR * 0.5, cx, cy, wdGlowR);
+          wdGlow.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.55 * haloFactor})`);
+          wdGlow.addColorStop(0.5, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.2 * haloFactor})`);
+          wdGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = wdGlow;
+          ctx.beginPath();
+          ctx.arc(cx, cy, wdGlowR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Silky-smooth photosphere disk
+        const wdSphere = ctx.createRadialGradient(cx, cy, 0, cx, cy, wdR);
+        if (tempK > 5000) {
+          wdSphere.addColorStop(0, '#ffffff');
+          wdSphere.addColorStop(0.35, telemetry.interpolatedColor);
+        } else {
+          wdSphere.addColorStop(0, `rgba(${Math.min(255, mainRgb.r + 40)}, ${Math.min(255, mainRgb.g + 40)}, ${Math.min(255, mainRgb.b + 40)}, 1)`);
+          wdSphere.addColorStop(0.4, telemetry.interpolatedColor);
+        }
+        wdSphere.addColorStop(0.85, telemetry.interpolatedGlow);
+        wdSphere.addColorStop(
+          1,
+          `rgba(${Math.round(glowRgb.r * 0.6)}, ${Math.round(glowRgb.g * 0.6)}, ${Math.round(glowRgb.b * 0.6)}, 1)`
+        );
+
+        ctx.fillStyle = wdSphere;
+        ctx.beginPath();
+        ctx.arc(cx, cy, wdR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // -------------------------------------------------------------
+      // 8. BLACK DWARF (FINAL COLD STASIS MONOLITH)
+      // -------------------------------------------------------------
+      if (visualType === 'black-dwarf') {
+        const bdR = REMNANT_RADIUS; // Standardized constant radius (13px)
+
+        ctx.save();
+
+        // Faint ambient starlight refraction rim
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.28)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, bdR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Pure pitch-black interior
+        ctx.fillStyle = '#020409';
+        ctx.beginPath();
+        ctx.arc(cx, cy, bdR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Specular highlight on crystallized carbon surface
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.beginPath();
+        ctx.arc(cx - bdR * 0.35, cy - bdR * 0.35, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // -------------------------------------------------------------
+      // 9. NEUTRON STAR / PULSAR & DECAYING BEACON
+      // -------------------------------------------------------------
+      if (visualType === 'pulsar') {
+        const isFadingToCold = nextVisualType === 'cold-neutron-star';
+        // When approaching cold neutron star, rotation slows down drastically, lighthouse beacon fades, magnetic loops decay
+        const spinSpeed = isFadingToCold ? 6 * Math.max(0.1, 1 - alpha * 0.85) : 6;
+        const beamAngle = tSec * spinSpeed;
+        const beamFade = isFadingToCold ? Math.max(0, 1 - alpha) : 1.0;
+        const beamLen = Math.min(width, height) * 0.44 * (isFadingToCold ? 1 - alpha * 0.6 : 1.0);
+
+        ctx.save();
+
+        if (beamFade > 0.01) {
+          // Twin Relativistic Synchrotron Beams (Lighthouse)
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(beamAngle);
+
+          const bGrad = ctx.createLinearGradient(0, -beamLen, 0, beamLen);
+          bGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+          bGrad.addColorStop(0.3, `rgba(103, 232, 249, ${0.85 * beamFade})`);
+          bGrad.addColorStop(0.5, `rgba(255, 255, 255, ${beamFade})`);
+          bGrad.addColorStop(0.7, `rgba(103, 232, 249, ${0.85 * beamFade})`);
+          bGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = bGrad;
+
+          ctx.beginPath();
+          ctx.moveTo(-2, 0);
+          ctx.lineTo(-20, -beamLen);
+          ctx.lineTo(20, -beamLen);
+          ctx.lineTo(2, 0);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(-2, 0);
+          ctx.lineTo(-20, beamLen);
+          ctx.lineTo(20, beamLen);
+          ctx.lineTo(2, 0);
+          ctx.fill();
+
+          // Magnetic dipole loops (decaying with alpha toward 0)
+          ctx.strokeStyle = `rgba(6, 182, 212, ${0.35 * beamFade})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 32, 14, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.restore();
+
+          // Concentric pulsating radio waves (decaying toward 0)
+          const waveR = (tSec * 60) % (beamLen * 0.7);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${Math.max(0, 1 - waveR / (beamLen * 0.7)) * 0.4 * beamFade})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(cx, cy, waveR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Ultra-dense blue-white core (Standardized REMNANT_RADIUS = 13)
+        const nsR = REMNANT_RADIUS;
+        const glowFactor = isFadingToCold ? Math.max(0.1, 1 - alpha * 0.9) : 1.0;
+
+        if (glowFactor > 0.05) {
+          const nsGlow = ctx.createRadialGradient(cx, cy, nsR * 0.5, cx, cy, nsR * 2.6);
+          nsGlow.addColorStop(0, `rgba(255, 255, 255, ${glowFactor})`);
+          nsGlow.addColorStop(0.4, `rgba(56, 189, 248, ${glowFactor * 0.8})`);
+          nsGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = nsGlow;
+          ctx.beginPath();
+          ctx.arc(cx, cy, nsR * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (isFadingToCold) {
+          // Cross-fade core color from hot white to cold slate
+          const rSlate = Math.round(255 * (1 - alpha) + 11 * alpha);
+          const gSlate = Math.round(255 * (1 - alpha) + 17 * alpha);
+          const bSlate = Math.round(255 * (1 - alpha) + 32 * alpha);
+          ctx.fillStyle = `rgb(${rSlate}, ${gSlate}, ${bSlate})`;
+        } else {
+          ctx.fillStyle = '#ffffff';
+        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, nsR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // -------------------------------------------------------------
+      // 9b. COLD NEUTRON STAR (EXTINGUISHED BEACON, BLACK MONUMENT)
+      //     Directly matches black dwarf phase for a star!
+      // -------------------------------------------------------------
+      if (visualType === 'cold-neutron-star') {
+        const nsR = REMNANT_RADIUS; // Standardized constant radius (13px)
+
+        ctx.save();
+
+        // 1. Extreme Gravitational Light Lensing Rim (Bends ambient starlight without active emission)
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, nsR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 2. Pitch-Cold Degenerate Nuclear Matter Interior (Zero emission, cold stasis with CMB)
+        ctx.fillStyle = '#060a14';
+        ctx.beginPath();
+        ctx.arc(cx, cy, nsR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Subtle Specular Highlight on Solid Crystalline Crust (Nuclear Pasta Lattice)
+        ctx.fillStyle = 'rgba(186, 230, 253, 0.3)';
+        ctx.beginPath();
+        ctx.arc(cx - nsR * 0.35, cy - nsR * 0.35, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // -------------------------------------------------------------
+      // 10. STELLAR-MASS BLACK HOLE (ANIMATED ACCRETION DISK & LENSING)
+      // -------------------------------------------------------------
+      const isBhActive =
+        visualType === 'black-hole' ||
+        (visualType === 'hypernova' && nextVisualType === 'black-hole');
+
+      if (isBhActive) {
+        const bhR = REMNANT_RADIUS; // Standardized constant radius (13px)
+        const bhAlpha = visualType === 'black-hole' ? 1.0 : Math.min(1, alpha * 1.15);
+
+        ctx.save();
+        ctx.globalAlpha = bhAlpha;
+
+        // In the isolated final black hole phase (progress near 1.0), accretion disk is exhausted
+        const isIsolated = visualType === 'black-hole' && telemetry.current.progress >= 0.95;
+        const diskFade = isIsolated ? Math.max(0, 1 - (progress - 0.95) / 0.05) : 1.0;
+
+        if (diskFade > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = bhAlpha * diskFade;
+
+          // Upper Einstein Gravitational Lensing Arc (Interstellar back-disk deflection)
+          const lensGrad = ctx.createLinearGradient(cx, cy - bhR * 2.8, cx, cy - bhR);
+          lensGrad.addColorStop(0, 'rgba(232, 121, 249, 0)');
+          lensGrad.addColorStop(0.4, 'rgba(217, 70, 239, 0.45)');
+          lensGrad.addColorStop(0.8, 'rgba(255, 255, 255, 0.85)');
+          lensGrad.addColorStop(1, 'rgba(232, 121, 249, 0.3)');
+          ctx.strokeStyle = lensGrad;
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy - 1, bhR * 2.2, bhR * 1.35, 0, Math.PI * 1.06, Math.PI * 1.94);
+          ctx.stroke();
+
+          // Swirling Relativistic Accretion Disk with Doppler Beaming & Rotation
+          ctx.save();
+          ctx.translate(cx, cy);
+          const diskTilt = -Math.PI / 10 + Math.sin(tSec * 0.5) * 0.02;
+          ctx.rotate(diskTilt);
+          ctx.scale(1, 0.38);
+
+          const diskR = Math.min(width, height) * 0.38;
+
+          // Left Approaching Side (Relativistically Beamed / Blueshifted / Brighter)
+          const leftGrad = ctx.createRadialGradient(-diskR * 0.45, 0, bhR, 0, 0, diskR);
+          leftGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+          leftGrad.addColorStop(0.25, 'rgba(232, 121, 249, 0.85)');
+          leftGrad.addColorStop(0.65, 'rgba(168, 85, 247, 0.45)');
+          leftGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = leftGrad;
+          ctx.beginPath();
+          ctx.arc(0, 0, diskR, Math.PI * 0.5, Math.PI * 1.5);
+          ctx.fill();
+
+          // Right Receding Side (Redshifted / Amber-Dimmed)
+          const rightGrad = ctx.createRadialGradient(diskR * 0.45, 0, bhR, 0, 0, diskR);
+          rightGrad.addColorStop(0, 'rgba(251, 113, 133, 0.55)');
+          rightGrad.addColorStop(0.45, 'rgba(190, 18, 60, 0.28)');
+          rightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = rightGrad;
+          ctx.beginPath();
+          ctx.arc(0, 0, diskR, -Math.PI * 0.5, Math.PI * 0.5);
+          ctx.fill();
+
+          // Keplerian rotating plasma filaments swirling into ISCO
+          for (let s = 0; s < 10; s++) {
+            const streamPhase = ((tSec * 0.35 + s * 0.1) % 1);
+            const sDist = diskR * (0.92 - streamPhase * 0.65);
+            const sAngle = streamPhase * Math.PI * 2.8 + (s / 10) * Math.PI * 2;
+            const sx = Math.cos(sAngle) * sDist;
+            const sy = Math.sin(sAngle) * sDist;
+            const isLeft = Math.cos(sAngle) < 0;
+            ctx.fillStyle = isLeft
+              ? `rgba(245, 208, 254, ${0.75 * (1 - streamPhase)})`
+              : `rgba(251, 113, 133, ${0.45 * (1 - streamPhase)})`;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2.2 * (1 - streamPhase * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+          ctx.restore();
+        }
+
+        // Gravitational Lensing Halo (Einstein Ring with subtle dynamic shimmer)
+        const lensedR = bhR * 2.8;
+        const ringShimmer = 0.35 + 0.08 * Math.sin(tSec * 2.5);
+        ctx.strokeStyle = `rgba(232, 121, 249, ${ringShimmer})`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, lensedR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Absolute Black Event Horizon (Gravitational Singularity Shadow, radius = 13px)
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(cx, cy, bhR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shimmering Einstein Photon Sphere Rim (Orbiting photons at ISCO)
+        const photonPulse = 0.85 + 0.15 * Math.sin(tSec * 4.0);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.9 * photonPulse})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, bhR + 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    },
+    [telemetry, selectedTrackId]
+  );
+
+  // Render canvas on every change and animation frame
+  useEffect(() => {
+    let animId: number;
+    const render = (time: number) => {
+      renderCanvas(time);
+      animId = requestAnimationFrame(render);
+    };
+    animId = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(animId);
+  }, [renderCanvas]);
+
+  // Resize canvas to match container DPI
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isFullscreenStage]);
+
+  // Catalog star examples for current checkpoint
+  const exampleStars = useMemo(() => {
+    const ids = telemetry.current.analogousStarIds || [];
+    return STARS_CATALOG.filter((s) => ids.includes(s.id));
+  }, [telemetry]);
+
+  return (
+    <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+      {/* ------------------------------------------------------------- */}
+      {/* 1. TOP HEADER & VIEW MODE SELECTOR                            */}
+      {/* ------------------------------------------------------------- */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#030612]/95 border border-cyan-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sliders className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              Interactive 2D Stellar Life Cycles Simulator
+            </h3>
+          </div>
+        </div>
+
+        {/* View Switcher: Simulator vs. Stage Matrix */}
+        <div className="flex items-center gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono shrink-0">
+          <button
+            onClick={() => setActiveTab('simulator')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
+              activeTab === 'simulator'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>2D Slider Simulator</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('matrix')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
+              activeTab === 'matrix'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>All Evolutionary Tracks</span>
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'simulator' && (
+        <div className="flex flex-col gap-5 sm:gap-6">
+          {/* ------------------------------------------------------------- */}
+          {/* 2. 2D STAGE & ASTROPHYSICS HUD (Adjusted for mobile screens) */}
+          {/* ------------------------------------------------------------- */}
+          <div
+            ref={stageContainerRef}
+            className={`rounded-2xl bg-[#030612] border border-cyan-500/30 overflow-hidden relative shadow-[0_12px_40px_rgba(0,0,0,0.8)] ${
+              isFullscreenStage ? 'fixed inset-4 z-50 flex flex-col' : 'flex flex-col'
+            }`}
+          >
+            {/* Top HUD Overlay within Stage - Shows ONLY their evolutionary stage */}
+            <div className="p-3 sm:p-4 bg-gradient-to-b from-[#040816]/95 via-[#040816]/70 to-transparent flex items-center justify-between gap-3 z-10">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse shadow-sm"
+                  style={{ backgroundColor: telemetry.interpolatedColor }}
+                />
+                <h4 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-wide">
+                  {simpleStageName}
+                </h4>
+              </div>
+
+              <button
+                onClick={() => setIsFullscreenStage((prev) => !prev)}
+                title={isFullscreenStage ? 'Exit Fullscreen' : 'Expand Stage'}
+                className="p-1.5 rounded-lg bg-[#020512]/90 hover:bg-cyan-950 border border-cyan-500/25 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                {isFullscreenStage ? (
+                  <Minimize2 className="w-4 h-4" />
+                ) : (
+                  <Maximize2 className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Canvas 2D Viewport - Adjusted for mobile screens */}
+            <div className="w-full h-56 sm:h-80 md:h-[400px] relative">
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full block cursor-grab active:cursor-grabbing"
+              />
+
+              {/* Bottom Visual Subtitles / Physical Dynamics Tag */}
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none text-[10px] sm:text-[11px] font-mono">
+                <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 max-w-xs sm:max-w-md pointer-events-auto truncate">
+                  <span className="text-cyan-400 font-bold">Core: </span>
+                  <span>{telemetry.current.coreEngine}</span>
+                </div>
+
+                <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 pointer-events-auto hidden md:block">
+                  <span className="text-amber-400 font-bold">Radius: </span>
+                  <span>
+                    {telemetry.interpolatedRadius >= 1
+                      ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
+                      : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* ------------------------------------------------------------- */}
+            {/* 4. SIMPLIFIED SCRUBBER                                        */}
+            {/* ------------------------------------------------------------- */}
+            <div className="p-3 sm:p-4 bg-[#020512] border-t border-cyan-500/20 flex flex-col gap-2.5 sm:gap-3">
+              {/* Clean Timeline Info */}
+              <div className="flex items-center justify-between text-xs font-mono text-slate-300">
+                <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Timeline</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-cyan-300 font-bold">{telemetry.interpolatedAgeLabel}</span>
+                  <span className="text-slate-500">•</span>
+                  <span className="text-slate-400 font-medium">{(progress * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+
+              {/* Range Input Slider with custom style */}
+              <div className="relative flex items-center py-1">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.001"
+                  value={progress}
+                  onChange={(e) => {
+                    setProgress(parseFloat(e.target.value));
+                    setIsPlaying(false);
+                  }}
+                  aria-label="Timeline progress slider"
+                  className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-lg appearance-none cursor-ew-resize accent-cyan-400 focus:outline-none border border-cyan-500/30"
+                />
+              </div>
+
+              {/* Milestone Dots (clean, without overlapping text on mobile) */}
+              <div className="relative w-full h-3 select-none">
+                {currentTrack.checkpoints.map((cp, idx) => {
+                  const isPassed = progress >= cp.progress;
+                  const isNear = Math.abs(progress - cp.progress) < 0.04;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleJumpToCheckpoint(cp)}
+                      title={`${cp.stageName} (${(cp.progress * 100).toFixed(0)}%)`}
+                      style={{ left: `${cp.progress * 100}%` }}
+                      className="absolute top-0 -translate-x-1/2 flex flex-col items-center cursor-pointer"
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full border transition-transform ${
+                          isNear
+                            ? 'bg-cyan-400 border-white scale-125 shadow-[0_0_8px_rgba(6,182,212,0.8)]'
+                            : isPassed
+                            ? 'bg-cyan-600 border-cyan-400'
+                            : 'bg-slate-800 border-slate-700'
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Compact Playback Controls & Speeds */}
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-cyan-500/10">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={() => setIsPlaying((prev) => !prev)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs font-mono shadow hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                  >
+                    {isPlaying ? (
+                      <>
+                        <Pause className="w-3.5 h-3.5 fill-current" />
+                        <span>PAUSE</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>PLAY</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProgress(0);
+                      setIsPlaying(false);
+                    }}
+                    title="Reset to start"
+                    className="p-1.5 rounded-lg bg-[#040816] hover:bg-cyan-950/60 border border-cyan-500/25 text-slate-400 hover:text-white transition-all cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Right: Speed Multiplier */}
+                <div className="flex items-center gap-1 p-0.5 bg-[#040816] rounded-lg border border-cyan-500/20 text-xs font-mono">
+                  {[0.5, 1.0, 2.0].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setPlaybackSpeed(s)}
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
+                        playbackSpeed === s
+                          ? 'bg-cyan-500 text-slate-950 font-bold'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {s}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* 4. EVOLUTIONARY TRACKS TOGGLES - FOUR SMALL BUTTONS ABOVE DESCRIPTION */}
+          {/* ------------------------------------------------------------- */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+            {[
+              { id: 'low-mass', label: 'Red Dwarf', color: '#f43f5e' },
+              { id: 'solar', label: 'Sun-like Stars', color: '#f59e0b' },
+              { id: 'massive', label: 'Massive Stars', color: '#38bdf8' },
+              { id: 'hyper-massive', label: 'Hyper-massive Stars', color: '#818cf8' },
+            ].map((t) => {
+              const isSelected = t.id === selectedTrackId;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => handleTrackChange(t.id)}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center shadow-sm ${
+                    isSelected
+                      ? 'bg-[#091535] border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400 font-bold'
+                      : 'bg-[#040816]/90 border-cyan-500/20 text-slate-300 hover:text-white hover:border-cyan-500/40 hover:bg-[#070f24]'
+                  }`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: t.color }}
+                  />
+                  <span className="truncate">{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* 5. DETAILED ASTROPHYSICAL TELEMETRY PROFILE                   */}
+          {/* ------------------------------------------------------------- */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left 7 cols: Plain-English Astrophysics & Key Phenomena */}
+            <div className="lg:col-span-7 p-5 sm:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col justify-between gap-4 shadow-sm">
+              <div>
+                <div className="flex items-center justify-between gap-2 border-b border-cyan-500/15 pb-3 mb-3">
+                  <div>
+                    <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold block">
+                      CURRENT EVOLUTIONARY PHASE
+                    </span>
+                    <h4 className="text-base sm:text-lg font-bold text-white">
+                      {simpleStageName}
+                    </h4>
+                  </div>
+                  <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#020512] border border-cyan-500/20 text-cyan-300 shrink-0">
+                    {telemetry.current.timeElapsedLabel}
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  {telemetry.current.shortDescription}
+                </p>
+
+                <div className="mt-3 p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs text-slate-300 leading-relaxed">
+                  <strong className="text-cyan-300 block font-mono mb-1">
+                    Astrophysical Mechanics:
+                  </strong>
+                  {telemetry.current.detailedPhysics}
+                </div>
+              </div>
+
+              {/* Key Observable Phenomena */}
+              <div>
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2 font-bold">
+                  Key Physical Signatures & Phenomena:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {telemetry.current.keyPhenomena.map((ph, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2 rounded-lg bg-[#020512] border border-cyan-500/15 text-[11px] font-mono text-slate-300 flex items-center gap-1.5"
+                    >
+                      <span className="text-cyan-400 font-bold">•</span>
+                      <span className="truncate">{ph}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right 5 cols: Physics Specs Grid & Real Database Star Analogues */}
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              <div className="p-5 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col gap-3 shadow-sm">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
+                  Astrophysical Parameters
+                </span>
+
+                {/* Continuous Object Age & Cosmic Epoch Card */}
+                <div className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/30 flex items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-inner">
+                      <Clock className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-slate-400 block font-semibold">
+                        Object Age (Continuous)
+                      </span>
+                      <span className="text-sm font-bold text-white font-mono tracking-wide">
+                        {telemetry.interpolatedAgeLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right font-mono text-[10px]">
+                    <span className="text-cyan-300 font-bold block">
+                      {(progress * 100).toFixed(1)}% Lifespan
+                    </span>
+                    <span className="text-slate-400">
+                      {telemetry.interpolatedAgeYears > 0
+                        ? `${Math.round(telemetry.interpolatedAgeYears).toLocaleString()} yr`
+                        : 'Pre-Stellar Infall'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                    <span className="text-slate-500 block text-[10px] uppercase">
+                      Surface Temperature
+                    </span>
+                    <span className="text-white font-bold">
+                      {telemetry.interpolatedTemp.toLocaleString()} K
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                    <span className="text-slate-500 block text-[10px] uppercase">Core Temp</span>
+                    <span className="text-amber-300 font-bold">
+                      {telemetry.current.coreTempKelvin > 0
+                        ? `${telemetry.current.coreTempKelvin.toLocaleString()} K`
+                        : 'Cold Degenerate'}
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                    <span className="text-slate-500 block text-[10px] uppercase">
+                      Physical Radius
+                    </span>
+                    <span className="text-cyan-300 font-bold">
+                      {telemetry.interpolatedRadius >= 1
+                        ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
+                        : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                    <span className="text-slate-500 block text-[10px] uppercase">Luminosity</span>
+                    <span className="text-slate-200">
+                      {telemetry.interpolatedLuminosity >= 1
+                        ? `${telemetry.interpolatedLuminosity.toLocaleString()} L☉`
+                        : `${telemetry.interpolatedLuminosity.toFixed(5)} L☉`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs font-mono space-y-1.5">
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase">
+                      Dominant Supporting Pressure:
+                    </span>
+                    <span className="text-cyan-300 font-semibold leading-tight block">
+                      {telemetry.current.dominantPressure}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Database Real Star Examples */}
+              {exampleStars.length > 0 && (
+                <div className="p-4 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col gap-2 shadow-sm">
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
+                    Catalog Real-World Analogues in this Stage:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {exampleStars.map((star) => (
+                      <button
+                        key={star.id}
+                        onClick={() => onSelectStar?.(star)}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#020512] hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-xs text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 font-mono group"
+                        title={`Inspect ${star.name} (${star.spectralClass}) in 3D Dossier`}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: star.colorHex }}
+                        />
+                        <span className="font-semibold">{star.name}</span>
+                        <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-300" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 7. ALL EVOLUTIONARY TRACKS MATRIX VIEW                         */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'matrix' && (
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          <div className="p-4 rounded-2xl bg-[#030612]/90 border border-cyan-500/20">
+            <h4 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+              Comparative Matrix of All Stellar Evolutionary Tracks
+            </h4>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {STELLAR_TRACKS.map((track) => (
+              <div
+                key={track.id}
+                className="p-5 sm:p-6 rounded-2xl bg-[#040816]/90 border border-cyan-500/25 flex flex-col gap-4 shadow-sm"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/15 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: track.accentColor }}
+                      />
+                      <h4 className="text-base sm:text-lg font-bold text-white">{track.name}</h4>
+                    </div>
+                    <span className="text-xs font-mono text-cyan-400">{track.massLabel}</span>
+                  </div>
+                  <div className="text-xs text-slate-400 max-w-md sm:text-right font-mono">
+                    <span className="text-slate-500 block">Lifespan: {track.typicalLifespan}</span>
+                    <span className="text-cyan-300 font-semibold">Fate: {track.fateSummary}</span>
+                  </div>
+                </div>
+
+                {/* Steps Timeline Horizontal Ribbon */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {track.checkpoints.map((cp, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 flex flex-col justify-between relative overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
+                        <span>STAGE {idx + 1}</span>
+                        <span className="text-cyan-400/80">{cp.timeElapsedLabel}</span>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white mb-1">{cp.stageName}</div>
+                        <p className="text-[11px] text-slate-300 leading-relaxed line-clamp-3">
+                          {cp.shortDescription}
+                        </p>
+                      </div>
+
+                      <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 flex items-center justify-between">
+                        <span>{cp.surfaceTempKelvin.toLocaleString()} K</span>
+                        <span className="text-cyan-400 font-semibold">
+                          {cp.spectralClassEquivalent}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => {
+                      setSelectedTrackId(track.id);
+                      setActiveTab('simulator');
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer"
+                  >
+                    <span>Load {track.name} into 2D Slider Simulator</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

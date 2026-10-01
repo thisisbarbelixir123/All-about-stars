@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <defs>
+    <!-- Background Space Gradient -->
+    <radialGradient id="spaceGlow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a1226" />
+      <stop offset="60%" stop-color="#040711" />
+      <stop offset="100%" stop-color="#010206" />
+    </radialGradient>
+
+    <!-- Pistol Star White Hypergiant Glow -->
+    <radialGradient id="pistolStarGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="70%" stop-color="#e2f1ff" />
+      <stop offset="88%" stop-color="#8ec5fc" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- La Superba Red Carbon Giant -->
+    <radialGradient id="laSuperbaGlow" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#ff9977" />
+      <stop offset="40%" stop-color="#ff3b19" />
+      <stop offset="80%" stop-color="#ba1100" />
+      <stop offset="95%" stop-color="#540700" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- R Doradus Gigantic Red Giant -->
+    <radialGradient id="rDoradusGlow" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#ff8566" />
+      <stop offset="40%" stop-color="#e62e0b" />
+      <stop offset="80%" stop-color="#991500" />
+      <stop offset="95%" stop-color="#4d0500" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Deneb Blue-White Supergiant -->
+    <radialGradient id="denebGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="75%" stop-color="#e0edff" />
+      <stop offset="90%" stop-color="#93c5fd" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Enif Orange Supergiant -->
+    <radialGradient id="enifGlow" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#ffc078" />
+      <stop offset="60%" stop-color="#f97316" />
+      <stop offset="90%" stop-color="#c2410c" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Gacrux Red Giant -->
+    <radialGradient id="gacruxGlow" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#ffa07a" />
+      <stop offset="60%" stop-color="#ea580c" />
+      <stop offset="100%" stop-color="#9a3412" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Filter for soft aura -->
+    <filter id="coronaBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Deep Cosmos Background -->
+  <rect width="1280" height="720" fill="url(#spaceGlow)" />
+
+  <!-- Top Scale Metric -->
+  <text x="640" y="80" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="bold" fill="#3b82f6" letter-spacing="2">
+    10<tspan dy="-18" font-size="28">12</tspan><tspan dy="18" font-size="44"> meters</tspan>
+  </text>
+
+  <!-- Top-left cut-off giant star edge -->
+  <circle cx="-60" cy="-40" r="260" fill="url(#laSuperbaGlow)" opacity="0.85" filter="url(#coronaBlur)" />
+
+  <!-- Pistol Star (Large Left Luminary) -->
+  <g filter="url(#coronaBlur)">
+    <circle cx="200" cy="380" r="125" fill="#38bdf8" opacity="0.3" />
+    <circle cx="200" cy="380" r="105" fill="url(#pistolStarGlow)" />
+  </g>
+  <text x="200" y="525" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="bold" fill="#ffffff" letter-spacing="1">
+    Pistol Star
+  </text>
+
+  <!-- Central Earth Orbit Reference Circle -->
+  <g>
+    <circle cx="640" cy="360" r="180" fill="none" stroke="#64748b" stroke-width="26" opacity="0.55" />
+    <circle cx="640" cy="360" r="180" fill="none" stroke="#94a3b8" stroke-width="3" opacity="0.7" />
+    
+    <!-- Central Solar System Reference Objects -->
+    <circle cx="590" cy="320" r="32" fill="url(#gacruxGlow)" />
+    <text x="590" y="325" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="bold" fill="#f8fafc">Gacrux</text>
+
+    <!-- Rigel (small blue) -->
+    <circle cx="525" cy="455" r="22" fill="#bfdbfe" />
+    <text x="525" y="488" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="9" fill="#cbd5e1">Rigel</text>
+
+    <!-- Enif (orange) -->
+    <circle cx="770" cy="580" r="48" fill="url(#enifGlow)" />
+    <text x="770" y="642" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Enif</text>
+
+    <!-- Sun & Distance indicator -->
+    <line x1="560" y1="520" x2="610" y2="520" stroke="#cbd5e1" stroke-width="2" />
+    <line x1="560" y1="514" x2="560" y2="526" stroke="#cbd5e1" stroke-width="2" />
+    <line x1="610" y1="514" x2="610" y2="526" stroke="#cbd5e1" stroke-width="2" />
+    <text x="585" y="538" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="9" fill="#94a3b8">Distance from</text>
+    <text x="585" y="550" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="9" fill="#94a3b8">Earth to Sun</text>
+  </g>
+
+  <!-- Deneb (White Supergiant) -->
+  <g filter="url(#coronaBlur)">
+    <circle cx="800" cy="300" r="70" fill="#60a5fa" opacity="0.3" />
+    <circle cx="800" cy="300" r="62" fill="url(#denebGlow)" />
+  </g>
+  <text x="800" y="388" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
+    Deneb
+  </text>
+
+  <!-- La Superba (Top Right Glowing Red Carbon Star) -->
+  <g filter="url(#coronaBlur)">
+    <circle cx="980" cy="180" r="120" fill="#dc2626" opacity="0.4" />
+    <circle cx="980" cy="180" r="100" fill="url(#laSuperbaGlow)" />
+  </g>
+  <text x="980" y="315" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    La Superba
+  </text>
+
+  <!-- R Doradus (Bottom Right Huge Red Giant) -->
+  <g filter="url(#coronaBlur)">
+    <circle cx="1020" cy="530" r="150" fill="#b91c1c" opacity="0.4" />
+    <circle cx="1020" cy="530" r="130" fill="url(#rDoradusGlow)" />
+  </g>
+  <text x="1020" y="688" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="bold" fill="#ffffff">
+    R Doradus
+  </text>
+
+  <!-- Huge Bottom Linear Metric Text -->
+  <text x="640" y="630" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-size="48" font-weight="bold" fill="#334155" opacity="0.95" letter-spacing="1">
+    1,000,000,000,000 m
+  </text>
+
+  <!-- Footer Navigation / Scale Bar -->
+  <rect x="0" y="670" width="1280" height="50" fill="#1e293b" opacity="0.9" />
+  
+  <!-- Slider Track -->
+  <rect x="180" y="690" width="920" height="10" rx="5" fill="#0f172a" />
+  <circle cx="940" cy="695" r="14" fill="#cbd5e1" stroke="#475569" stroke-width="2" />
+
+  <!-- Logarithmic Power Indicator on right -->
+  <text x="1225" y="692" text-anchor="end" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="bold" fill="#e2e8f0">
+    10<tspan dy="-10" font-size="15">11.6</tspan>
+  </text>
+  
+  <!-- Magnifying glass search icon -->
+  <circle cx="1255" cy="690" r="7" fill="none" stroke="#cbd5e1" stroke-width="2" />
+  <line x1="1260" y1="695" x2="1267" y2="702" stroke="#cbd5e1" stroke-width="2.5" />
+
+  <!-- Copyright string on bottom left -->
+  <text x="15" y="700" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#94a3b8">
+    Copyright © 2012 Cary and Michael Huang (http://htwins.net)
+  </text>
+</svg>

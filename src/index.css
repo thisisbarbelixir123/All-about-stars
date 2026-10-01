@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #02040a;
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, .font-title, .font-display {
+    font-family: 'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* Custom Deep Space Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
+}
+
+/* Cosmic Ambient Glows & Starlight Effects */
+.cosmic-glass {
+  background: linear-gradient(135deg, rgba(11, 17, 36, 0.85) 0%, rgba(4, 7, 18, 0.92) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+.cosmic-glass-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cosmic-glass-hover:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 40px 0 rgba(6, 182, 212, 0.15), 0 0 20px 0 rgba(14, 165, 233, 0.08);
+  transform: translateY(-2px);
+}
+
+.cosmic-glow-cyan {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
+}
+
+.cosmic-glow-amber {
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+}
+
+.cosmic-glow-star {
+  filter: drop-shadow(0 0 16px currentColor);
+}
+
+@keyframes float-slow-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(6deg); }
+}
+
+@keyframes float-slow-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(14px) rotate(-8deg); }
+}
+
+@keyframes float-slow-3 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-5deg); }
+}
+
+@keyframes float-slow-4 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(12px) rotate(7deg); }
+}
+
+.animate-float-1 {
+  animation: float-slow-1 8s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: float-slow-2 9.5s ease-in-out infinite;
+}
+
+.animate-float-3 {
+  animation: float-slow-3 7.5s ease-in-out infinite;
+}
+
+.animate-float-4 {
+  animation: float-slow-4 10s ease-in-out infinite;
+}
+
