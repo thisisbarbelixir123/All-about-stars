@@ -16,6 +16,7 @@ import { AboutPage } from './components/AboutPage';
 import { StellarSuikaGame } from './components/StellarSuikaGame';
 import { PresetSlider } from './components/PresetSlider';
 import { EncyclopediaDropdown } from './components/EncyclopediaDropdown';
+import { soundEffects } from './utils/soundEffects';
 
 import { 
   Sparkles, 
@@ -135,14 +136,19 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isSuikaOpen) {
+          soundEffects.play('closeModal');
           setIsSuikaOpen(false);
         } else if (detailModalStar) {
+          soundEffects.play('closeModal');
           setDetailModalStar(null);
         } else if (isAboutOpen) {
+          soundEffects.play('closeModal');
           setIsAboutOpen(false);
         } else if (activeOverlay) {
+          soundEffects.play('closeModal');
           setActiveOverlay(null);
         } else if (isHomeOpen) {
+          soundEffects.play('closeModal');
           setIsHomeOpen(false);
         }
       }
@@ -761,7 +767,10 @@ export default function App() {
                   <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center sm:text-left">
                     <span className="text-slate-300 font-bold">Copyright © 2026 B123 Entertainment.</span>
                     <span className="hidden sm:inline text-slate-600">•</span>
-                    <span className="hidden xs:inline">All About Stars — 3D Cosmic Astrophysics & Scale Explorer</span>
+                    <span className="hidden xs:inline flex items-center gap-1.5">
+                      <img src="/starpedia_logo.svg" alt="Starpedia 3D" className="w-4 h-4 rounded aspect-square inline-block" />
+                      <span>Starpedia 3D: Stars of the Universe</span>
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-[11px] sm:text-xs">
@@ -809,11 +818,13 @@ export default function App() {
                     setFrontpageInitialSection('what-is-a-star');
                     setActiveOverlay('frontpage');
                   }}
-                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all"
+                  className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all"
                   title="Go to Encyclopedia Frontpage: What is a Star?"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Encyclopedia</span>
+                  <div className="w-4 h-4 aspect-square rounded border border-cyan-400/80 p-0.5 bg-[#020512] flex items-center justify-center overflow-hidden shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.4)]">
+                    <img src="/starpedia_logo.svg" alt="Starpedia 3D" className="w-full h-full object-contain aspect-square" />
+                  </div>
+                  <span>Starpedia 3D</span>
                 </button>
 
                 {/* Module Switcher Tabs: Frontpage (What is a star?), Stellar Catalog, H-R Diagram, Constellation Guide */}

@@ -34,12 +34,16 @@ import {
   Target,
   Compass,
   Sun,
-  Search
+  Search,
+  Orbit,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { StarData, StageSortKey, SortDirection, TourLength, PresetComparison } from '../types';
 import { PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
+import { soundEffects } from '../utils/soundEffects';
 
 const TOUR_DURATION_MAP: Record<TourLength, number> = {
   short: 2500,
@@ -197,6 +201,19 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       return isIPad || isAndroidTablet || (hasCoarsePointer && isTabletDimensions) || isTabletDimensions;
     })()
   );
+
+  // Mobile detection helper across window dimensions and container size
+  const checkIsMobile = useCallback(() => {
+    if (isMobile) return true;
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 768 || window.innerHeight < 550) return true;
+    }
+    if (containerRef.current) {
+      if (containerRef.current.clientWidth < 768 || containerRef.current.clientHeight < 550) return true;
+    }
+    return false;
+  }, [isMobile]);
+
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -241,6 +258,40 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const encyclopediaMenuRef = useRef<HTMLDivElement>(null);
   const mobileEncyclopediaMenuRef = useRef<HTMLDivElement>(null);
   const [encyclopediaDropdownAlign, setEncyclopediaDropdownAlign] = useState<'center' | 'left' | 'right'>('center');
+
+  // Sound FX State listener
+  const [isSoundOn, setIsSoundOn] = useState(() => soundEffects.isSoundEnabled());
+  useEffect(() => {
+    return soundEffects.subscribe((enabled) => setIsSoundOn(enabled));
+  }, []);
+
+  // Complete Catalog (All Stars Preset): default spiral layout on desktop/tablet when sorted ascending by size; normal mode otherwise
+  const [allStarsLayoutMode, setAllStarsLayoutMode] = useState<'normal' | 'spiral'>(() => {
+    if (typeof window !== 'undefined') {
+      const isNarrow = window.innerWidth < 768 || window.innerHeight < 550;
+      if (isNarrow) return 'normal';
+      const saved = localStorage.getItem('cosmic_all_stars_layout_mode');
+      if (saved === 'normal' || saved === 'spiral') return saved;
+    }
+    return 'spiral';
+  });
+
+  const handleToggleLayoutMode = useCallback(() => {
+    if (checkIsMobile()) return; // Spiral mode is not available on mobile
+    if (sortKey !== 'size' || sortDirection !== 'asc') return; // Only available when sorted ascending by size
+    setAllStarsLayoutMode((prev) => {
+      const next = prev === 'spiral' ? 'normal' : 'spiral';
+      soundEffects.play(next === 'spiral' ? 'toggleOn' : 'toggleOff');
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('cosmic_all_stars_layout_mode', next);
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  }, [checkIsMobile, sortKey, sortDirection]);
 
   useEffect(() => {
     if (isEncyclopediaMenuOpen && encyclopediaMenuRef.current) {
@@ -335,18 +386,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const currentCameraPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 15, 60));
   const currentLookAtRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
   const cameraDistanceRef = useRef(40);
-
-  // Mobile detection helper across window dimensions and container size
-  const checkIsMobile = useCallback(() => {
-    if (isMobile) return true;
-    if (typeof window !== 'undefined') {
-      if (window.innerWidth < 768 || window.innerHeight < 550) return true;
-    }
-    if (containerRef.current) {
-      if (containerRef.current.clientWidth < 768 || containerRef.current.clientHeight < 550) return true;
-    }
-    return false;
-  }, [isMobile]);
 
   // Default camera angle when a star is focused:
   // On mobile devices, the elevation angle is slightly wider / shallower (Math.PI / 2.65 ≈ 68° vs desktop Math.PI / 3 = 60°)
@@ -459,6 +498,34 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     return list;
   }, [stars, sortKey, sortDirection]);
 
+  // Spiral mode is only available when the all stars preset is sorted ascending by size on desktop/tablet.
+  // When switching into mobile mode, changing presets, or changing sort to anything other than size ascending,
+  // automatically switch back into normal mode. When returning to size ascending in All Stars, restore spiral mode.
+  useEffect(() => {
+    const handleCheckModeEligibility = () => {
+      const isMob = checkIsMobile();
+      const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+      const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+      if (isMob || !isSizeAscending || !isAllStars) {
+        if (allStarsLayoutMode === 'spiral') {
+          setAllStarsLayoutMode('normal');
+        }
+      } else {
+        const saved = typeof window !== 'undefined' ? localStorage.getItem('cosmic_all_stars_layout_mode') : null;
+        if ((saved === 'spiral' || saved === null) && allStarsLayoutMode !== 'spiral') {
+          setAllStarsLayoutMode('spiral');
+        }
+      }
+    };
+    handleCheckModeEligibility();
+    window.addEventListener('resize', handleCheckModeEligibility);
+    window.addEventListener('orientationchange', handleCheckModeEligibility);
+    return () => {
+      window.removeEventListener('resize', handleCheckModeEligibility);
+      window.removeEventListener('orientationchange', handleCheckModeEligibility);
+    };
+  }, [checkIsMobile, sortKey, sortDirection, activePresetId, sortedStars.length, allStarsLayoutMode]);
+
   // Formatted metric string based on current sortKey
   const getStarMetricFormatted = useCallback((star: StarData) => {
     if (sortKey === 'distance') {
@@ -540,43 +607,84 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
   // Compute 3D radii and positions for each star based on true physical dimensions with constant proportional spacing
   const starScales = useMemo(() => {
-    const scales: Record<string, { radius: number; physicalRadius: number; xPos: number; rawD: number }> = {};
+    const scales: Record<string, { radius: number; physicalRadius: number; xPos: number; zPos: number; rawD: number }> = {};
+    const isMob = checkIsMobile();
+    const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+    const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+    // Spiral mode is only available when the all stars preset is sorted ascending by size
+    const useSpiral = !isMob && isAllStars && isSizeAscending && allStarsLayoutMode === 'spiral';
 
-    // Left-aligned side-by-side mode (sorted by user metric, 1:1 physical scale)
-    let currentX = 0;
-    
-    // Constant proportional spacing factor:
-    // Gap between any two adjacent star surfaces is mathematically identical in proportion (38% of sum of radii)
-    // completely invariant to whether the star is 20 km or 3 billion km!
-    const PROPORTIONAL_GAP_FACTOR = 0.38;
+    if (useSpiral) {
+      // Golden / Archimedean celestial spiral layout for the Complete Astronomical Catalog:
+      // Winds stars in a majestic galactic spiral on the X-Z plane with zero overlaps.
+      let currentTheta = 0;
+      let currentR = 0.5;
 
-    sortedStars.forEach((star, idx) => {
-      // True 1:1 physical radius (Sun = 1.0, 20 km neutron star = 0.0000143606 units = 10 km radius)
-      const effectiveSolar = getTruePhysicalSolar(star);
-      const radius = effectiveSolar;
+      sortedStars.forEach((star, idx) => {
+        const effectiveSolar = getTruePhysicalSolar(star);
+        const radius = effectiveSolar;
 
-      if (idx === 0) {
-        // Left-align: Place first star's center at its radius so its leftmost surface is at exactly x = 0
-        currentX = radius;
-      } else {
-        const prevStar = sortedStars[idx - 1];
-        const prevRadius = scales[prevStar.id]?.radius || 0.1;
-        // Strict proportional spacing regardless of star size:
-        const gap = (prevRadius + radius) * PROPORTIONAL_GAP_FACTOR;
-        currentX += prevRadius + radius + gap;
-      }
-      
-      scales[star.id] = {
-        radius,
-        physicalRadius: radius,
-        xPos: currentX,
-        rawD: effectiveSolar,
-      };
-    });
+        if (idx === 0) {
+          currentR = Math.max(0.5, radius * 4);
+          currentTheta = 0;
+        } else {
+          const prevStar = sortedStars[idx - 1];
+          const prevRadius = scales[prevStar.id]?.radius || 0.1;
+          // Chord distance along the spiral arm between surface of star and prev star:
+          const chord = (prevRadius + radius) * 1.38;
+          const minRForChord = chord / 1.5;
+          if (currentR < minRForChord) currentR = minRForChord;
 
-    // Left-aligned stellar lineup: starts at x = 0 and extends along positive X
+          // Angular step along the circle arc:
+          const dTheta = chord / currentR;
+          currentTheta += dTheta;
+
+          // Radial expansion per step: ensures radial distance between turns clears star diameter:
+          const dR = ((2 * radius * 1.5) / (2 * Math.PI)) * dTheta;
+          currentR += dR;
+        }
+
+        const xPos = currentR * Math.cos(currentTheta);
+        const zPos = currentR * Math.sin(currentTheta);
+
+        scales[star.id] = {
+          radius,
+          physicalRadius: radius,
+          xPos,
+          zPos,
+          rawD: effectiveSolar,
+        };
+      });
+    } else {
+      // Left-aligned side-by-side mode (sorted by user metric, 1:1 physical scale)
+      let currentX = 0;
+      const PROPORTIONAL_GAP_FACTOR = 0.38;
+
+      sortedStars.forEach((star, idx) => {
+        const effectiveSolar = getTruePhysicalSolar(star);
+        const radius = effectiveSolar;
+
+        if (idx === 0) {
+          currentX = radius;
+        } else {
+          const prevStar = sortedStars[idx - 1];
+          const prevRadius = scales[prevStar.id]?.radius || 0.1;
+          const gap = (prevRadius + radius) * PROPORTIONAL_GAP_FACTOR;
+          currentX += prevRadius + radius + gap;
+        }
+
+        scales[star.id] = {
+          radius,
+          physicalRadius: radius,
+          xPos: currentX,
+          zPos: 0,
+          rawD: effectiveSolar,
+        };
+      });
+    }
+
     return scales;
-  }, [sortedStars, getTruePhysicalSolar]);
+  }, [sortedStars, getTruePhysicalSolar, activePresetId, allStarsLayoutMode, checkIsMobile, sortKey, sortDirection]);
 
   // Main Three.js Initialization & Scene Setup
   useEffect(() => {
@@ -735,28 +843,37 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       // 1. Continuous Procedural Cosmic Grid:
       // Encompasses all 4 sides of the graph, including the area outside the comparison view.
       // Recursively activates 10x10 subgrids when zoomed into a smaller cell.
-      const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; rawD: number }>;
+      const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; zPos?: number; rawD: number }>;
       const minX = scaleList.reduce((min, curr) => Math.min(min, curr.xPos - curr.radius), 0);
       const maxX = scaleList.reduce((max, curr) => Math.max(max, curr.xPos + curr.radius), 10);
-      const maxRadius = scaleList.reduce((max, curr) => Math.max(max, curr.radius), 1);
+      const minZ = scaleList.reduce((min, curr) => Math.min(min, (curr.zPos || 0) - curr.radius), -1);
+      const maxZ = scaleList.reduce((max, curr) => Math.max(max, (curr.zPos || 0) + curr.radius), 1);
 
       const gridHandle = createContinuousGridMesh({
         yLevel: 0,
         leftAligned: false,
-        comparisonBounds: { minX, maxX, minZ: -maxRadius, maxZ: maxRadius },
+        comparisonBounds: { minX, maxX, minZ, maxZ },
       });
       celestialGridGroup.add(gridHandle.mesh);
       continuousGridRef.current = gridHandle;
 
       // 2. Vertical height drop line and true-ground footprint anchor under each star
-      renderedStars.forEach((star) => {
+      // When large catalog (>50 stars) is displayed, guide footprints are focused on the active star and landmarks for silky FPS
+      const isLargeCatalog = renderedStars.length > 50;
+      const activeStarId = focusedStarId ?? selectedStarId;
+      const targetStarsForGuides = isLargeCatalog
+        ? renderedStars.filter(s => s.id === activeStarId || s.id === 'sun' || s.id === renderedStars[0]?.id || s.id === renderedStars[renderedStars.length - 1]?.id)
+        : renderedStars;
+
+      targetStarsForGuides.forEach((star) => {
         const sc = starScales[star.id];
         if (!sc) return;
 
+        const starZ = sc.zPos || 0;
         // Vertical height drop line from star center to grid floor
         const heightPoints = [
-          new THREE.Vector3(sc.xPos, 0, 0),
-          new THREE.Vector3(sc.xPos, sc.radius * 2, 0),
+          new THREE.Vector3(sc.xPos, 0, starZ),
+          new THREE.Vector3(sc.xPos, sc.radius * 2, starZ),
         ];
         const heightGeo = new THREE.BufferGeometry().setFromPoints(heightPoints);
         let heightLine: THREE.Line;
@@ -794,7 +911,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         });
         const footMesh = new THREE.Mesh(footGeo, footMat);
         footMesh.rotation.x = Math.PI / 2;
-        footMesh.position.set(sc.xPos, 0, 0);
+        footMesh.position.set(sc.xPos, 0, starZ);
         celestialGridGroup.add(footMesh);
       });
     }
@@ -803,20 +920,30 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
     const newInteractiveMeshes: THREE.Object3D[] = [];
 
+    // Shared Unit Geometries: Desktop and Tablet modes are restored to higher-poly models (64x64 segments)
+    const isMobGeo = checkIsMobile();
+    const isLargeCatalog = renderedStars.length > 50;
+    const sphereSegments = isMobGeo ? (isLargeCatalog ? 20 : 28) : 64;
+    const coronaSegments = isMobGeo ? (isLargeCatalog ? 16 : 20) : 48;
+
+    const sharedSphereGeo = new THREE.SphereGeometry(1, sphereSegments, sphereSegments);
+    const sharedCoronaGeo = new THREE.SphereGeometry(1, coronaSegments, coronaSegments);
+    const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
+
     renderedStars.forEach((star) => {
       const scaleInfo = starScales[star.id];
       if (!scaleInfo) return;
 
       const starGroup = new THREE.Group();
       const starY = scaleInfo.radius;
-      starGroup.position.set(scaleInfo.xPos, starY, 0);
+      starGroup.position.set(scaleInfo.xPos, starY, scaleInfo.zPos || 0);
       starGroup.userData = { starId: star.id, starData: star };
 
       // Invisible hit sphere for easy selection of sub-pixel compact stars
       if (isCompactRemnant(star)) {
-        const hitGeo = new THREE.SphereGeometry(Math.max(1.5, scaleInfo.radius * 2), 16, 16);
         const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-        const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+        const hitMesh = new THREE.Mesh(sharedHitGeo, hitMat);
+        hitMesh.scale.setScalar(Math.max(1.5, scaleInfo.radius * 2));
         hitMesh.name = `StarHitTarget-${star.id}`;
         hitMesh.userData = { starData: star };
         starGroup.add(hitMesh);
@@ -826,9 +953,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       const baseColor = new THREE.Color(star.colorHex);
       const coronaColor = new THREE.Color(star.coronaColorHex);
 
-      const isMobGeo = checkIsMobile();
-      const sphereSegments = isMobGeo ? 32 : 44;
-      const sphereGeo = new THREE.SphereGeometry(scaleInfo.radius, sphereSegments, sphereSegments);
       const isContactBinary = star.id === 'vfts-352' || star.stellarStage === 'Contact Binary';
       const isPulsar = isPulsarOrNeutronStar(star);
       const bdType = getBrownDwarfType(star);
@@ -999,11 +1123,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 return;
               } else if (brownDwarfType < 2.5) {
                 // CLASS T (600 - 1,300 K): Methane Brown Dwarf (NOT GLOWING, Gas Giant Jovian Texture)
-                // Rich plum, deep magenta, dark aubergine, dusty rose belts
-                vec3 colBand1 = vec3(0.38, 0.11, 0.27); // Deep wine magenta
-                vec3 colBand2 = vec3(0.17, 0.05, 0.15); // Dark aubergine belt
-                vec3 colBand3 = vec3(0.48, 0.16, 0.36); // Methane zone
-                vec3 colStorm = vec3(0.62, 0.22, 0.44); // Methane storm vortex
+                vec3 colBand1 = vec3(0.38, 0.11, 0.27);
+                vec3 colBand2 = vec3(0.17, 0.05, 0.15);
+                vec3 colBand3 = vec3(0.48, 0.16, 0.36);
+                vec3 colStorm = vec3(0.62, 0.22, 0.44);
 
                 float blend1 = primaryBands * 0.5 + 0.5;
                 float blend2 = secondaryBands * 0.5 + 0.5;
@@ -1013,20 +1136,18 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 surface = mix(surface, vec3(0.12, 0.04, 0.14), polarFactor * 0.65);
                 surface += (fineBelts - 0.5) * 0.08 * vec3(0.3, 0.1, 0.2);
 
-                // Non-glowing matte planetary lighting (diffuse spherical terminator / limb shading)
+                // Non-glowing matte planetary lighting
                 surface *= (0.35 + 0.65 * limbDarkening);
-                // Subtle gas giant atmospheric haze along perimeter (diffuse, non-emissive)
                 surface += vec3(0.24, 0.08, 0.20) * pow(1.0 - limb, 4.2) * 0.25;
 
                 gl_FragColor = vec4(surface, 1.0);
                 return;
               } else {
-                // CLASS Y (<600 K down to 250 K / -23°C): Ultracool Ice Brown Dwarf (NOT GLOWING, Sub-Zero Jovian Texture)
-                // Slate violet, muted charcoal-indigo, cool dusty mauve, water-ice cloud decks
-                vec3 colBand1 = vec3(0.25, 0.18, 0.27); // Slate violet zone
-                vec3 colBand2 = vec3(0.12, 0.09, 0.15); // Dark charcoal-indigo belt
-                vec3 colBand3 = vec3(0.32, 0.25, 0.35); // Ammonia / water ice cloud band
-                vec3 colStorm = vec3(0.44, 0.35, 0.46); // Water ice storm swirl
+                // CLASS Y (<600 K down to 250 K / -23°C): Ultracool Ice Brown Dwarf
+                vec3 colBand1 = vec3(0.25, 0.18, 0.27);
+                vec3 colBand2 = vec3(0.12, 0.09, 0.15);
+                vec3 colBand3 = vec3(0.32, 0.25, 0.35);
+                vec3 colStorm = vec3(0.44, 0.35, 0.46);
 
                 float blend1 = primaryBands * 0.5 + 0.5;
                 float blend2 = secondaryBands * 0.5 + 0.5;
@@ -1036,9 +1157,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 surface = mix(surface, vec3(0.08, 0.06, 0.10), polarFactor * 0.7);
                 surface += (fineBelts - 0.5) * 0.06 * vec3(0.2, 0.2, 0.25);
 
-                // Completely non-glowing planetary body (crisp Jovian gas giant lighting)
                 surface *= (0.30 + 0.70 * limbDarkening);
-                // Muted cold atmospheric limb rim
                 surface += vec3(0.15, 0.14, 0.20) * pow(1.0 - limb, 4.5) * 0.18;
 
                 gl_FragColor = vec4(surface, 1.0);
@@ -1072,16 +1191,16 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         const lobeRadius = scaleInfo.radius * 0.62;
         const lobeOffset = scaleInfo.radius * 0.42;
 
-        const lobeAGeo = new THREE.SphereGeometry(lobeRadius, 32, 32);
-        const lobeAMesh = new THREE.Mesh(lobeAGeo, customMat);
+        const lobeAMesh = new THREE.Mesh(sharedSphereGeo, customMat);
+        lobeAMesh.scale.setScalar(lobeRadius);
         lobeAMesh.position.set(-lobeOffset, 0, 0);
         lobeAMesh.name = `Photosphere-A-${star.id}`;
         lobeAMesh.userData = { starId: star.id, starData: star };
         starGroup.add(lobeAMesh);
         newInteractiveMeshes.push(lobeAMesh);
 
-        const lobeBGeo = new THREE.SphereGeometry(lobeRadius, 32, 32);
-        const lobeBMesh = new THREE.Mesh(lobeBGeo, customMat);
+        const lobeBMesh = new THREE.Mesh(sharedSphereGeo, customMat);
+        lobeBMesh.scale.setScalar(lobeRadius);
         lobeBMesh.position.set(lobeOffset, 0, 0);
         lobeBMesh.name = `Photosphere-B-${star.id}`;
         lobeBMesh.userData = { starId: star.id, starData: star };
@@ -1094,13 +1213,13 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         bridgeMesh.userData = { starId: star.id, starData: star };
         starGroup.add(bridgeMesh);
       } else {
-        const photosphere = new THREE.Mesh(sphereGeo, customMat);
+        const photosphere = new THREE.Mesh(sharedSphereGeo, customMat);
+        photosphere.scale.setScalar(scaleInfo.radius);
         photosphere.name = `Photosphere-${star.id}`;
         photosphere.userData = { starId: star.id, starData: star };
         starGroup.add(photosphere);
         newInteractiveMeshes.push(photosphere);
       }
-
 
       // 2. Atmospheric Corona Glow Halo (Disabled for Class T & Y brown dwarfs, Faint for Class L)
       if (showCorona && bdType < 1.5) {
@@ -1149,20 +1268,21 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           const coronaLobeRadius = scaleInfo.radius * 0.76;
           const lobeOffset = scaleInfo.radius * 0.42;
 
-          const coronaMeshA = new THREE.Mesh(new THREE.SphereGeometry(coronaLobeRadius, 32, 32), createCoronaMat());
+          const coronaMeshA = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
+          coronaMeshA.scale.setScalar(coronaLobeRadius);
           coronaMeshA.position.set(-lobeOffset, 0, 0);
           coronaMeshA.name = 'CoronaA';
           starGroup.add(coronaMeshA);
 
-          const coronaMeshB = new THREE.Mesh(new THREE.SphereGeometry(coronaLobeRadius, 32, 32), createCoronaMat());
+          const coronaMeshB = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
+          coronaMeshB.scale.setScalar(coronaLobeRadius);
           coronaMeshB.position.set(lobeOffset, 0, 0);
           coronaMeshB.name = 'CoronaB';
           starGroup.add(coronaMeshB);
         } else {
           const coronaRadius = scaleInfo.radius * (isFaintL ? 1.08 : 1.22);
-          const coronaSegments = isMobGeo ? 24 : 32;
-          const coronaGeo = new THREE.SphereGeometry(coronaRadius, coronaSegments, coronaSegments);
-          const coronaMesh = new THREE.Mesh(coronaGeo, createCoronaMat());
+          const coronaMesh = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
+          coronaMesh.scale.setScalar(coronaRadius);
           coronaMesh.name = 'Corona';
           starGroup.add(coronaMesh);
         }
@@ -1173,10 +1293,17 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     });
 
     interactiveMeshesRef.current = newInteractiveMeshes;
+
+    return () => {
+      sharedSphereGeo.dispose();
+      sharedCoronaGeo.dispose();
+      sharedHitGeo.dispose();
+    };
   }, [stars, starScales, scaleMode, showCorona, viewMode, wireframe, showGrid]);
 
   // Camera framing calculation:
   // Dynamically scales distance and target elevation based on true star radius.
+  // In spiral mode, frames focused stars from sideways (horizontal profile view along the spiral curve).
   // On mobile devices, the default camera angle and distance are slightly wider,
   // targeting slightly lower on the star so the top apex sits comfortably with ample headroom
   // below the top toolbar, ensuring the label reliably stays above the highlighted star.
@@ -1190,8 +1317,15 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const aspect = cameraRef.current?.aspect || (typeof window !== 'undefined' ? window.innerWidth / (window.innerHeight || 1) : 1.0);
     const portraitFactor = aspect < 1.0 ? Math.max(1.0, 0.95 / aspect) : 1.0;
 
-    // Target the star center for close-up mode; on mobile, target slightly lower (0.94 * r)
-    // so the top apex of the star has generous headroom below the top header
+    const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+    const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+    const isSpiralMode = !isMob && isAllStars && isSizeAscending && allStarsLayoutMode === 'spiral';
+
+    // In spiral mode, selecting a star only zooms in to focus on the star without changing the POV (camera angle)
+    const framingAngle = isSpiralMode
+      ? { ...cameraAngleRef.current }
+      : getDefaultCameraAngle(isMob);
+
     const targetY = isTour ? r * 1.05 : (isMob ? r * 0.94 : r);
 
     // Scale distance proportionally with star radius down to micro-scales for pulsars and white dwarfs
@@ -1202,28 +1336,51 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const dist = baseDist * portraitFactor;
 
     return {
-      target: new THREE.Vector3(scaleInfo.xPos, targetY, 0),
+      target: new THREE.Vector3(scaleInfo.xPos, targetY, scaleInfo.zPos || 0),
       distance: dist,
-      angle: getDefaultCameraAngle(isMob),
+      angle: framingAngle,
     };
-  }, [starScales, checkIsMobile, getDefaultCameraAngle]);
+  }, [starScales, checkIsMobile, getDefaultCameraAngle, activePresetId, sortedStars, allStarsLayoutMode, sortKey, sortDirection]);
 
   // Smooth Focus Transition Effect whenever focused/selected star or modes change
   useEffect(() => {
     const activeId = focusedStarId ?? selectedStarId;
 
     if (!activeId) {
-      // Unfocused mode: view whole left-aligned stellar array for panoramic exploration
-      const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; rawD: number }>;
+      // Unfocused mode: view whole stellar array or spiral for panoramic exploration
+      const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; zPos?: number; rawD: number }>;
       const minX = scaleList.reduce((min, curr) => Math.min(min, curr.xPos - curr.radius), 0);
       const maxX = scaleList.reduce((max, curr) => Math.max(max, curr.xPos + curr.radius), 10);
+      const minZ = scaleList.reduce((min, curr) => Math.min(min, (curr.zPos || 0) - curr.radius), 0);
+      const maxZ = scaleList.reduce((max, curr) => Math.max(max, (curr.zPos || 0) + curr.radius), 0);
       const totalWidth = Math.max(10, maxX - minX);
+      const totalDepth = Math.max(10, maxZ - minZ);
+      const totalSpan = Math.max(totalWidth, totalDepth);
       const midX = (minX + maxX) / 2;
+      const midZ = (minZ + maxZ) / 2;
       const maxRadius = scaleList.reduce((max, curr) => Math.max(max, curr.radius), 1);
-      cameraTargetRef.current.set(midX, maxRadius * 0.45, 0);
+
+      const isMob = checkIsMobile();
+      const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+      const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+      const isSpiralActive = !isMob && isAllStars && isSizeAscending && allStarsLayoutMode === 'spiral';
+
+      if (isSpiralActive && sortedStars.length > 0) {
+        // Zoom is centered directly into the smallest star in the catalog
+        const smallestStar = sortedStars[0];
+        const smallestScale = starScales[smallestStar.id];
+        if (smallestScale) {
+          cameraTargetRef.current.set(smallestScale.xPos, smallestScale.radius, smallestScale.zPos || 0);
+        } else {
+          cameraTargetRef.current.set(0, 0, 0);
+        }
+      } else {
+        cameraTargetRef.current.set(midX, maxRadius * 0.45, midZ);
+      }
+
       const aspect = cameraRef.current?.aspect || (typeof window !== 'undefined' ? window.innerWidth / (window.innerHeight || 1) : 1.0);
       const portraitFactor = aspect < 1.0 ? Math.max(1.15, 1.05 / aspect) : 1.0;
-      cameraDistanceRef.current = Math.max(45, totalWidth * 0.75 * portraitFactor, maxRadius * 2.8 * (aspect < 1.0 ? 1.25 : 1.0));
+      cameraDistanceRef.current = Math.max(45, totalSpan * 0.75 * portraitFactor, maxRadius * 2.8 * (aspect < 1.0 ? 1.25 : 1.0));
     } else {
       const framing = getCameraFramingForStar(activeId, isTourPlayingRef.current);
       if (framing) {
@@ -1299,6 +1456,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   // Navigation functions: Next / Previous star
   const handlePrevStar = useCallback(() => {
     if (sortedStars.length === 0) return;
+    soundEffects.play('nav');
     const isFirstToLast = activeStarIndex <= 0;
     const targetStar = isFirstToLast ? sortedStars[sortedStars.length - 1] : sortedStars[activeStarIndex - 1];
     const framing = getCameraFramingForStar(targetStar.id, isTourPlayingRef.current);
@@ -1315,6 +1473,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
   const handleNextStar = useCallback(() => {
     if (sortedStars.length === 0) return;
+    soundEffects.play('nav');
     if (activeStarIndex === -1 || activeStarIndex >= sortedStars.length - 1) {
       if (isTourPlaying) {
         setIsTourPlaying(false);
@@ -1343,6 +1502,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   }, [sortedStars, activeStarIndex, onSelectStar, isTourPlaying, getCameraFramingForStar, snapCameraToTarget]);
 
   const handleUnfocus = useCallback(() => {
+    soundEffects.play('unfocus');
     onSelectStar(null);
   }, [onSelectStar]);
 
@@ -1350,6 +1510,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const willPlay = !isTourPlayingRef.current;
     isTourPlayingRef.current = willPlay;
     setIsTourPlaying(willPlay);
+    soundEffects.play(willPlay ? 'toggleOn' : 'toggleOff');
 
     if (willPlay) {
       // If starting tour and no star is focused or already on the last star, immediately focus the first star
@@ -1442,10 +1603,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         if (activeStar) {
           const sc = starScalesRef.current[activeStar.id];
           if (sc) {
-            focusedLightRef.current.position.set(sc.xPos, sc.radius, 0);
-            focusedLightRef.current.distance = Math.max(5, sc.radius * 16);
+            focusedLightRef.current.position.set(sc.xPos, sc.radius, sc.zPos || 0);
+            focusedLightRef.current.distance = Math.max(0.00005, sc.radius * 3.2);
             focusedLightRef.current.color.set(activeStar.colorHex);
-            focusedLightRef.current.intensity = 2.4;
+            focusedLightRef.current.intensity = 1.8;
           }
         } else {
           focusedLightRef.current.position.copy(cameraTargetRef.current);
@@ -1552,7 +1713,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             const width = containerRef.current.clientWidth;
             const height = containerRef.current.clientHeight;
             const starApexY = sc.radius * 2;
-            const tempVec = new THREE.Vector3(sc.xPos, starApexY, 0).project(cameraRef.current);
+            const tempVec = new THREE.Vector3(sc.xPos, starApexY, sc.zPos || 0).project(cameraRef.current);
 
             if (tempVec.z > 1.0 || Math.abs(tempVec.x) > 1.4 || Math.abs(tempVec.y) > 1.4) {
               el.style.opacity = '0';
@@ -1700,6 +1861,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     );
 
     onSelectStar(star);
+    soundEffects.play('select');
     const framing = getCameraFramingForStar(star.id, isTourPlayingRef.current);
     if (framing) {
       cameraTargetRef.current.copy(framing.target);
@@ -1759,11 +1921,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const handleZoom = (direction: 'in' | 'out') => {
     const factor = direction === 'in' ? 0.75 : 1.35;
     cameraDistanceRef.current = Math.max(0.000005, Math.min(150000, cameraDistanceRef.current * factor));
+    soundEffects.play(direction === 'in' ? 'zoomIn' : 'zoomOut');
   };
 
   const handleResetCamera = () => {
+    soundEffects.play('reset');
     const isMob = checkIsMobile();
-    cameraAngleRef.current = getDefaultCameraAngle(isMob);
     const activeId = focusedStarId ?? selectedStarId;
 
     if (activeId) {
@@ -1771,32 +1934,73 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       if (framing) {
         cameraTargetRef.current.copy(framing.target);
         cameraDistanceRef.current = framing.distance;
+        cameraAngleRef.current = { ...framing.angle };
       }
     } else {
+      cameraAngleRef.current = getDefaultCameraAngle(isMob);
       handleFitAllStars();
     }
   };
 
   const handleFitAllStars = () => {
+    soundEffects.play('reset');
     const isMob = checkIsMobile();
     cameraAngleRef.current = getDefaultCameraAngle(isMob);
-    const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; rawD: number }>;
+    const scaleList = Object.values(starScales) as Array<{ radius: number; xPos: number; zPos?: number; rawD: number }>;
+    if (scaleList.length === 0) return;
     const minX = scaleList.reduce((min: number, curr) => Math.min(min, curr.xPos - curr.radius), 0);
     const maxX = scaleList.reduce((max: number, curr) => Math.max(max, curr.xPos + curr.radius), 10);
+    const minZ = scaleList.reduce((min: number, curr) => Math.min(min, (curr.zPos || 0) - curr.radius), 0);
+    const maxZ = scaleList.reduce((max: number, curr) => Math.max(max, (curr.zPos || 0) + curr.radius), 0);
     const totalWidth = Math.max(10, maxX - minX);
+    const totalDepth = Math.max(10, maxZ - minZ);
+    const totalSpan = Math.max(totalWidth, totalDepth);
     const midX = (minX + maxX) / 2;
+    const midZ = (minZ + maxZ) / 2;
     const maxRadius = scaleList.reduce((max: number, curr) => Math.max(max, curr.radius), 1);
-    cameraTargetRef.current.set(midX, maxRadius * 0.45, 0);
+
+    const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+    const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+    const isSpiralActive = !isMob && isAllStars && isSizeAscending && allStarsLayoutMode === 'spiral';
+
+    if (isSpiralActive && sortedStars.length > 0) {
+      // Zoom is centered directly into the smallest star in the catalog
+      const smallestStar = sortedStars[0];
+      const smallestScale = starScales[smallestStar.id];
+      if (smallestScale) {
+        cameraTargetRef.current.set(smallestScale.xPos, smallestScale.radius, smallestScale.zPos || 0);
+      } else {
+        cameraTargetRef.current.set(0, 0, 0);
+      }
+    } else {
+      cameraTargetRef.current.set(midX, maxRadius * 0.45, midZ);
+    }
+
     const aspect = cameraRef.current?.aspect || (typeof window !== 'undefined' ? window.innerWidth / (window.innerHeight || 1) : 1.0);
     const portraitFactor = aspect < 1.0 ? Math.max(1.15, 1.05 / aspect) : 1.0;
-    cameraDistanceRef.current = Math.max(45, totalWidth * 0.75 * portraitFactor, maxRadius * 2.8 * (aspect < 1.0 ? 1.25 : 1.0));
+    cameraDistanceRef.current = Math.max(45, totalSpan * 0.75 * portraitFactor, maxRadius * 2.8 * (aspect < 1.0 ? 1.25 : 1.0));
   };
 
-  // Focus on the Center-Left Edge Anchor Point (0, 0) of the extended 10x10 continuous grid
+  // Focus on the Center-Left Edge Anchor Point (0, 0) of the extended 10x10 continuous grid or smallest star in spiral
   const handleFocusAnchor = () => {
     onSelectStar(null);
     cameraAngleRef.current = { theta: 0, phi: Math.PI / 3.4 };
-    cameraTargetRef.current.set(0, 0, 0);
+    const isMob = checkIsMobile();
+    const isSizeAscending = sortKey === 'size' && sortDirection === 'asc';
+    const isAllStars = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
+    const isSpiralActive = !isMob && isAllStars && isSizeAscending && allStarsLayoutMode === 'spiral';
+
+    if (isSpiralActive && sortedStars.length > 0) {
+      const smallestStar = sortedStars[0];
+      const sc = starScales[smallestStar.id];
+      if (sc) {
+        cameraTargetRef.current.set(sc.xPos, sc.radius, sc.zPos || 0);
+      } else {
+        cameraTargetRef.current.set(0, 0, 0);
+      }
+    } else {
+      cameraTargetRef.current.set(0, 0, 0);
+    }
     const firstStar = sortedStars[0];
     const firstR = firstStar ? starScales[firstStar.id]?.radius || 1 : 1;
     cameraDistanceRef.current = Math.max(0.005, Math.min(3.5, firstR * 3.2));
@@ -1917,8 +2121,19 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         e.preventDefault();
         setWireframe((prev) => !prev);
       }
+      // Layout toggle in All Stars Catalog (Spiral vs Normal) - Desktop & Tablet only, only when sorted ascending by size
+      else if (
+        (e.key === 'l' || e.key === 'L') &&
+        !checkIsMobile() &&
+        (activePresetId === 'all-stars-catalog' || sortedStars.length > 500) &&
+        sortKey === 'size' &&
+        sortDirection === 'asc'
+      ) {
+        e.preventDefault();
+        handleToggleLayoutMode();
+      }
       // 11. Toggle Preset Search Stars & List (replaces Show all stars)
-      else if (e.key === 'b' || e.key === 'B' || e.key === 'l' || e.key === 'L') {
+      else if (e.key === 'b' || e.key === 'B') {
         e.preventDefault();
         setIsPresetSearchActive((prev) => {
           const next = !prev;
@@ -1967,6 +2182,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         e.preventDefault();
         setShowShortcutsHelp((prev) => !prev);
       }
+      // 19. Toggle Sound Effects (Mute / Unmute)
+      else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        soundEffects.toggleSound();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -1989,6 +2209,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   ]);
 
   const renderTopStageControls = (isMobile: boolean = false) => {
+    const isAllStarsPreset = activePresetId === 'all-stars-catalog' || sortedStars.length > 500;
     return (
       <div className={`flex items-center gap-1 sm:gap-1.5 bg-[#040816]/90 backdrop-blur-xl p-1 sm:p-1.5 rounded-xl border border-cyan-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-200`}>
         {isTopPanelMinimized ? (
@@ -2058,6 +2279,29 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <StageKbd variant="neutral">A</StageKbd>
             </button>
 
+            {/* All-Stars Layout Mode Toggle (Spiral vs Normal) - Only on desktop & tablet when sorted ascending by size, hidden on mobile */}
+            {isAllStarsPreset && !isMobile && !checkIsMobile() && sortKey === 'size' && sortDirection === 'asc' && (
+              <button
+                id="btn-toggle-spiral-normal"
+                onClick={handleToggleLayoutMode}
+                title={`All Stars Preset: ${allStarsLayoutMode === 'spiral' ? 'Spiral Mode (Default/Active)' : 'Normal Lineup (Active)'}. Click to toggle layout mode (L)`}
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95 ${
+                  allStarsLayoutMode === 'spiral'
+                    ? 'bg-purple-950/80 border-purple-500/50 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                    : 'bg-slate-800/80 border-slate-600 text-slate-200 hover:text-white'
+                }`}
+              >
+                <Orbit className={`w-3.5 h-3.5 shrink-0 ${allStarsLayoutMode === 'spiral' ? 'text-purple-400 animate-spin-slow' : 'text-slate-400'}`} />
+                <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>
+                  {allStarsLayoutMode === 'spiral' ? 'Spiral Mode' : 'Normal Lineup'}
+                </span>
+                <span className={isTabletDevice ? 'inline' : 'inline lg:hidden'}>
+                  {allStarsLayoutMode === 'spiral' ? 'Spiral' : 'Normal'}
+                </span>
+                <StageKbd variant={allStarsLayoutMode === 'spiral' ? 'amber' : 'neutral'} className="hidden lg:inline-flex">L</StageKbd>
+              </button>
+            )}
+
             <div className="h-4 w-[1px] bg-cyan-500/20 mx-0.5" />
 
             {/* More... Menu for Spin, Wire, and Grid */}
@@ -2065,7 +2309,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <button
                 id={isMobile ? "btn-mobile-stage-toggles-more" : "btn-stage-toggles-more"}
                 onClick={() => setIsTogglesMenuOpen((prev) => !prev)}
-                title="More Scene Options (Spin, Wireframe, Grid)"
+                title="More Scene Options (Spin, Wireframe, Grid, Layout)"
                 className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer select-none active:scale-95 ${
                   (isAutoRotating || wireframe || showGrid)
                     ? 'bg-cyan-950/80 border-cyan-400/50 text-cyan-300 shadow-sm'
@@ -2134,6 +2378,28 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                       <StageKbd variant={showGrid ? 'cyan' : 'neutral'} className="hidden lg:inline-flex">G</StageKbd>
                     </div>
                   </button>
+
+                  {isAllStarsPreset && !isMobile && !checkIsMobile() && sortKey === 'size' && sortDirection === 'asc' && (
+                    <button
+                      id="btn-overlay-toggle-layout"
+                      onClick={handleToggleLayoutMode}
+                      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                        allStarsLayoutMode === 'spiral'
+                          ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
+                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Orbit className={`w-3.5 h-3.5 ${allStarsLayoutMode === 'spiral' ? 'text-purple-400' : 'text-slate-400'}`} />
+                        <span>Spiral Layout</span>
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {allStarsLayoutMode === 'spiral' && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
+                        <span className="text-[10px] text-slate-400">{allStarsLayoutMode === 'spiral' ? 'Spiral' : 'Normal'}</span>
+                        <StageKbd variant="neutral" className="hidden lg:inline-flex">L</StageKbd>
+                      </div>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -2158,6 +2424,27 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               )}
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isFullscreen ? 'Exit' : 'Full'}</span>
               <StageKbd variant={isFullscreen ? 'active' : 'cyan'} className="hidden lg:inline-flex">F</StageKbd>
+            </button>
+
+            {/* Sound Effects Toggle (Mute / Unmute) */}
+            <button
+              id={isMobile ? "btn-mobile-toggle-sound" : "btn-toggle-sound"}
+              onClick={() => soundEffects.toggleSound()}
+              title={isSoundOn ? 'Sound Effects Enabled (M to mute)' : 'Sound Effects Muted (M to unmute)'}
+              aria-label={isSoundOn ? 'Mute Sound Effects' : 'Unmute Sound Effects'}
+              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                isSoundOn 
+                  ? 'text-cyan-400 hover:text-white hover:bg-cyan-500/20' 
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10 opacity-70'
+              }`}
+            >
+              {isSoundOn ? (
+                <Volume2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+              ) : (
+                <VolumeX className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+              )}
+              <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isSoundOn ? 'SFX' : 'Muted'}</span>
+              <StageKbd variant={isSoundOn ? 'cyan' : 'neutral'} className="hidden lg:inline-flex">M</StageKbd>
             </button>
 
             {/* Keyboard Shortcuts Help - HIDDEN on mobile and tablet */}
@@ -2309,15 +2596,17 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                       if (onOpenHome) onOpenHome();
                     }
                   }}
-                  title={isHomeOpen ? 'Close Homepage (Return to 3D Stage)' : 'Home'}
-                  aria-label="Home"
-                  className={`p-2 rounded-xl backdrop-blur-xl active:scale-95 cursor-pointer shrink-0 transition-all ${
+                  title={isHomeOpen ? 'Close Homepage (Return to 3D Stage)' : 'Starpedia 3D Home'}
+                  aria-label="Starpedia 3D Home"
+                  className={`p-1 rounded-xl backdrop-blur-xl active:scale-95 cursor-pointer shrink-0 transition-all flex items-center justify-center ${
                     isHomeOpen
                       ? 'bg-blue-600 text-white border border-blue-400 shadow-[0_0_14px_rgba(37,99,235,0.7)]'
                       : 'bg-[#040816]/95 border border-cyan-500/35 text-cyan-300 hover:text-white shadow-lg'
                   }`}
                 >
-                  <Home className={`w-4 h-4 ${isHomeOpen ? 'fill-white/20' : ''}`} />
+                  <div className="w-6 h-6 aspect-square rounded-lg border border-cyan-400/80 p-0.5 bg-[#020512] flex items-center justify-center overflow-hidden shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.35)]">
+                    <img src="/starpedia_logo.svg" alt="Starpedia 3D Logo" className="w-full h-full object-contain aspect-square rounded-sm" />
+                  </div>
                 </button>
 
                 {/* Encyclopedia button next to Home button on mobile */}
@@ -2758,8 +3047,25 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           {/* DESKTOP / TABLET TOP BAR (hidden md:flex) - ONLY when NOT on homescreen */}
           {!isHomeOpen && (
             <div className="hidden md:flex flex-wrap items-center justify-between gap-2 sm:gap-3 w-full">
-            {/* Left Side: Sort Order & Auto Tour Controls */}
+            {/* Left Side: Brand Logo, Sort Order & Auto Tour Controls */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pointer-events-auto">
+              {/* Starpedia 3D Square Logo & Home Navigation */}
+              {onOpenHome && (
+                <button
+                  id="btn-desktop-top-home"
+                  onClick={onOpenHome}
+                  title="Return to Starpedia 3D Homepage (Home)"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#040816]/95 hover:bg-cyan-950/70 border border-cyan-500/35 hover:border-cyan-400 text-slate-200 hover:text-white shadow-lg backdrop-blur-xl active:scale-95 cursor-pointer transition-all shrink-0"
+                >
+                  <div className="w-5 h-5 aspect-square rounded-md border border-cyan-400/80 p-0.5 bg-[#020512] flex items-center justify-center overflow-hidden shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.4)]">
+                    <img src="/starpedia_logo.svg" alt="Starpedia 3D Logo" className="w-full h-full object-contain aspect-square rounded-sm" />
+                  </div>
+                  <span className="font-['Orbitron',sans-serif] font-bold text-xs tracking-wider text-cyan-300 hidden xl:inline">
+                    STARPEDIA <span className="text-white">3D</span>
+                  </span>
+                </button>
+              )}
+
               {/* 3D Stage Canvas Sort Button & Toggles */}
               {onSortChange && (
             <div className="relative pointer-events-auto" ref={sortMenuRef}>
@@ -2974,107 +3280,83 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       {/* Bottom Floating Control Caliper & Interactive Filmstrip - ONLY when NOT on homescreen */}
       {!isHomeOpen && (
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 sm:gap-3 pointer-events-none z-20 max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] overflow-hidden">
-        {/* Merged Focused & Hover Star Strip (Cannot overflow on mobile portrait) */}
-        {displayStar && (
+        {/* Focused Star Info Bar - Only appears when a star is focused, NOT when hovered */}
+        {activeFocusedStar && (
           <div 
             id="stage-focused-star-strip"
-            className={`flex items-center justify-between gap-1.5 sm:gap-3 bg-[#040816]/95 backdrop-blur-2xl px-2 py-1.5 sm:px-4 sm:py-2 rounded-xl border transition-all pointer-events-auto shadow-lg w-full max-w-full min-w-0 overflow-hidden ${
-              isPreviewing
-                ? 'border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                : 'border-cyan-500/40 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
-            }`}
+            className="flex items-center justify-between gap-1.5 sm:gap-3 bg-[#040816]/95 backdrop-blur-2xl px-2 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-cyan-500/40 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all pointer-events-auto w-full max-w-full min-w-0 overflow-hidden"
           >
             <div 
               className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1 cursor-pointer select-none overflow-hidden"
               onClick={() => {
-                if (isPreviewing) {
-                  handleFocusStar(displayStar);
-                } else if (onInspectStar) {
-                  onInspectStar(displayStar);
+                if (onInspectStar) {
+                  onInspectStar(activeFocusedStar);
                 }
               }}
-              title={isPreviewing ? `Click to track ${displayStar.name}` : `Click to open ${displayStar.name} dossier`}
+              title={`Click to open ${activeFocusedStar.name} dossier`}
             >
               <span 
                 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full aspect-square shrink-0 shadow-md ring-1 ring-white/30"
-                style={{ backgroundColor: displayStar.colorHex, boxShadow: `0 0 10px ${displayStar.colorHex}` }}
+                style={{ backgroundColor: activeFocusedStar.colorHex, boxShadow: `0 0 10px ${activeFocusedStar.colorHex}` }}
               />
               
               <div className="flex items-center gap-x-1 sm:gap-x-2 text-[10px] sm:text-xs font-mono min-w-0 flex-1 overflow-hidden">
                 <span className="font-bold text-white flex items-center gap-1 sm:gap-1.5 min-w-0 shrink overflow-hidden">
-                  <span className={isPreviewing ? 'text-cyan-400 font-semibold shrink-0' : 'text-slate-400 font-semibold shrink-0'}>
-                    {isPreviewing ? 'Viewing:' : 'Target:'}
-                  </span>
                   <span className="text-cyan-300 font-bold truncate min-w-0">
-                    {displayStar.name}
+                    {activeFocusedStar.name}
                   </span>
                   <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 font-mono border border-cyan-500/30 shrink-0 whitespace-nowrap">
-                    {displayStar.spectralType}
+                    {activeFocusedStar.spectralType}
                   </span>
                 </span>
 
                 <span className="text-slate-300 shrink-0 whitespace-nowrap">
-                  {formatPhysicalDiameter(displayStar.diameterKm, displayStar.diameterSolar).solarFormatted}
+                  {formatPhysicalDiameter(activeFocusedStar.diameterKm, activeFocusedStar.diameterSolar).solarFormatted}
                 </span>
 
                 <span className="hidden sm:inline text-slate-400 shrink-0 whitespace-nowrap">
-                  ({formatPhysicalDiameter(displayStar.diameterKm, displayStar.diameterSolar).metricSi})
+                  ({formatPhysicalDiameter(activeFocusedStar.diameterKm, activeFocusedStar.diameterSolar).metricSi})
                 </span>
 
                 <span className="hidden md:inline text-slate-500 shrink-0">•</span>
 
                 <span className="hidden md:inline text-slate-300 shrink-0 whitespace-nowrap">
-                  {displayStar.temperature.toLocaleString()} K
+                  {activeFocusedStar.temperature.toLocaleString()} K
                 </span>
 
                 <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline text-slate-500 shrink-0'}>•</span>
 
                 <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline text-slate-300 shrink-0 truncate'}>
-                  {displayStar.constellation}
+                  {activeFocusedStar.constellation}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-              {isPreviewing ? (
+              {onInspectStar && (
                 <button
-                  id="btn-preview-hover-focus"
-                  onClick={() => handleFocusStar(displayStar)}
-                  className="p-1.5 sm:px-3 sm:py-1 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 hover:brightness-110 active:scale-95 text-slate-950 font-bold text-[11px] sm:text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-1 shrink-0"
-                  title={`Focus on ${displayStar.name}`}
-                  aria-label={`Focus on ${displayStar.name}`}
+                  id="btn-preview-dossier"
+                  onClick={() => onInspectStar(activeFocusedStar)}
+                  title="Open Star Dossier (D)"
+                  aria-label="Open Star Dossier"
+                  className="p-1.5 sm:px-3 sm:py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] sm:text-xs font-mono font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 shrink-0"
                 >
-                  <Target className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden md:inline">Focus</span>
+                  <Menu className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">Dossier</span>
+                  <span className="hidden lg:inline-flex"><StageKbd variant="cyan">D</StageKbd></span>
                 </button>
-              ) : (
-                <>
-                  {onInspectStar && (
-                    <button
-                      id="btn-preview-dossier"
-                      onClick={() => onInspectStar(displayStar)}
-                      title="Open Star Dossier (D)"
-                      aria-label="Open Star Dossier"
-                      className="p-1.5 sm:px-3 sm:py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] sm:text-xs font-mono font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 shrink-0"
-                    >
-                      <Menu className="w-3.5 h-3.5 shrink-0" />
-                      <span className="hidden md:inline">Dossier</span>
-                      <span className="hidden lg:inline-flex"><StageKbd variant="cyan">D</StageKbd></span>
-                    </button>
-                  )}
-                  <button
-                    id="btn-preview-unfocus"
-                    onClick={handleUnfocus}
-                    className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 shrink-0"
-                    title="Unfocus Star (U)"
-                    aria-label="Unfocus Star"
-                  >
-                    <X className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden md:inline">Unfocus</span>
-                    <span className="hidden lg:inline-flex"><StageKbd variant="amber">U</StageKbd></span>
-                  </button>
-                </>
               )}
+              <button
+                id="btn-preview-unfocus"
+                onClick={handleUnfocus}
+                className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 shrink-0"
+                title="Unfocus Star (U)"
+                aria-label="Unfocus Star"
+              >
+                <X className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden md:inline">Unfocus</span>
+                <span className="hidden lg:inline-flex"><StageKbd variant="amber">U</StageKbd></span>
+              </button>
             </div>
           </div>
         )}
@@ -3429,6 +3711,25 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                             {wireframe && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
                           </button>
 
+                          {/* Sound Effects Toggle */}
+                          <button
+                            id="btn-mobile-compact-sound"
+                            onClick={() => soundEffects.toggleSound()}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                              isSoundOn ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              {isSoundOn ? (
+                                <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+                              ) : (
+                                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+                              )}
+                              <span>Sound Effects</span>
+                            </span>
+                            {isSoundOn && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                          </button>
+
                           {/* Quick Viewport Reset & Fit */}
                           <div className="grid grid-cols-2 gap-1 pt-1 border-t border-cyan-500/20">
                             <button
@@ -3678,6 +3979,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <span className="text-slate-300">Toggle Fullscreen</span>
                   <StageKbd variant="cyan">F</StageKbd>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300">Toggle Sound Effects (SFX)</span>
+                  <StageKbd variant="cyan">M</StageKbd>
+                </div>
               </div>
 
               <div className="space-y-2.5 bg-slate-900/60 p-3.5 rounded-xl border border-cyan-500/15">
@@ -3725,6 +4030,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Toggle Sort Order (Asc/Desc)</span>
                   <StageKbd variant="cyan">X</StageKbd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300">Toggle Catalog Spiral / Normal</span>
+                  <StageKbd variant="amber">L</StageKbd>
                 </div>
               </div>
             </div>

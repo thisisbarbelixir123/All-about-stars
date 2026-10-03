@@ -271,8 +271,26 @@ export const STAR_FRAGMENT_SHADER = `
   }
 `;
 
+// Shared Unit Geometries to prevent GPU buffer churn across stages
+let sharedUnitSphere64: THREE.SphereGeometry | null = null;
+let sharedUnitSphere48: THREE.SphereGeometry | null = null;
+let sharedUnitSphere32: THREE.SphereGeometry | null = null;
+
+export const getSharedUnitSphere = (highDetail: boolean = true): THREE.SphereGeometry => {
+  if (highDetail) {
+    if (!sharedUnitSphere64) sharedUnitSphere64 = new THREE.SphereGeometry(1, 64, 64);
+    return sharedUnitSphere64;
+  }
+  if (!sharedUnitSphere48) sharedUnitSphere48 = new THREE.SphereGeometry(1, 48, 48);
+  return sharedUnitSphere48;
+};
+
 // Creates the exact custom shader material matching StarCanvas3D
-export const createStarShaderMaterial = (star: StarData, wireframe: boolean = false): THREE.ShaderMaterial => {
+export const createStarShaderMaterial = (
+  star: StarData,
+  wireframe: boolean = false,
+  timeUniform?: { value: number }
+): THREE.ShaderMaterial => {
   const baseColor = new THREE.Color(star.colorHex);
   const coronaColor = new THREE.Color(star.coronaColorHex);
   const isContactBinary = star.id === 'vfts-352' || star.stellarStage === 'Contact Binary';
@@ -282,7 +300,7 @@ export const createStarShaderMaterial = (star: StarData, wireframe: boolean = fa
   return new THREE.ShaderMaterial({
     wireframe,
     uniforms: {
-      time: { value: 0 },
+      time: timeUniform || { value: 0 },
       baseColor: { value: baseColor },
       coronaColor: { value: coronaColor },
       temperature: { value: star.temperature },
@@ -296,7 +314,10 @@ export const createStarShaderMaterial = (star: StarData, wireframe: boolean = fa
 };
 
 // Creates the exact corona atmospheric halo shader material matching StarCanvas3D
-export const createCoronaShaderMaterial = (star: StarData): THREE.ShaderMaterial => {
+export const createCoronaShaderMaterial = (
+  star: StarData,
+  timeUniform?: { value: number }
+): THREE.ShaderMaterial => {
   const coronaColor = new THREE.Color(star.coronaColorHex);
   const bdType = getBrownDwarfType(star);
   const isFaintL = bdType === 1.0;
@@ -308,7 +329,7 @@ export const createCoronaShaderMaterial = (star: StarData): THREE.ShaderMaterial
     depthWrite: false,
     depthTest: true,
     uniforms: {
-      time: { value: 0 },
+      time: timeUniform || { value: 0 },
       glowColor: { value: isFaintL ? new THREE.Color('#8a2014') : coronaColor },
       glowIntensity: { value: isFaintL ? 0.20 : 0.70 },
     },
@@ -346,6 +367,7 @@ export interface CreateStarMeshOptions {
   wireframe?: boolean;
   showCorona?: boolean;
   lightIntensityMultiplier?: number;
+  timeUniform?: { value: number };
 }
 
 /**
@@ -357,7 +379,7 @@ export const createStarMeshGroup = (
   radius: number,
   options: CreateStarMeshOptions = {}
 ): THREE.Group => {
-  const { wireframe = false, showCorona = true, lightIntensityMultiplier = 1.0 } = options;
+  const { wireframe = false, showCorona = true, lightIntensityMultiplier = 1.0, timeUniform } = options;
   const starGroup = new THREE.Group();
   starGroup.userData = { starId: star.id, starData: star, radius };
 
@@ -365,20 +387,21 @@ export const createStarMeshGroup = (
   const bdType = getBrownDwarfType(star);
   const baseColor = new THREE.Color(star.colorHex);
 
-  const starMat = createStarShaderMaterial(star, wireframe);
+  const starMat = createStarShaderMaterial(star, wireframe, timeUniform);
 
   if (isContactBinary) {
     const lobeRadius = radius * 0.62;
     const lobeOffset = radius * 0.42;
 
-    const lobeAGeo = new THREE.SphereGeometry(lobeRadius, 32, 32);
-    const lobeAMesh = new THREE.Mesh(lobeAGeo, starMat);
+    const lobeGeo = getSharedUnitSphere(false);
+    const lobeAMesh = new THREE.Mesh(lobeGeo, starMat);
+    lobeAMesh.scale.setScalar(lobeRadius);
     lobeAMesh.position.set(-lobeOffset, 0, 0);
     lobeAMesh.name = `Photosphere-A-${star.id}`;
     starGroup.add(lobeAMesh);
 
-    const lobeBGeo = new THREE.SphereGeometry(lobeRadius, 32, 32);
-    const lobeBMesh = new THREE.Mesh(lobeBGeo, starMat);
+    const lobeBMesh = new THREE.Mesh(lobeGeo, starMat);
+    lobeBMesh.scale.setScalar(lobeRadius);
     lobeBMesh.position.set(lobeOffset, 0, 0);
     lobeBMesh.name = `Photosphere-B-${star.id}`;
     starGroup.add(lobeBMesh);
@@ -389,8 +412,9 @@ export const createStarMeshGroup = (
     bridgeMesh.name = `Photosphere-Neck-${star.id}`;
     starGroup.add(bridgeMesh);
   } else {
-    const sphereGeo = new THREE.SphereGeometry(radius, 48, 48);
+    const sphereGeo = getSharedUnitSphere(true);
     const photosphere = new THREE.Mesh(sphereGeo, starMat);
+    photosphere.scale.setScalar(radius);
     photosphere.name = `Photosphere-${star.id}`;
     starGroup.add(photosphere);
   }
@@ -398,25 +422,29 @@ export const createStarMeshGroup = (
   // Atmospheric Corona Glow Halo (Disabled for Class T & Y brown dwarfs, Faint for Class L)
   if (showCorona && bdType < 1.5) {
     const isFaintL = bdType === 1.0;
-    const coronaMat = createCoronaShaderMaterial(star);
+    const coronaMat = createCoronaShaderMaterial(star, timeUniform);
 
     if (isContactBinary) {
       const coronaLobeRadius = radius * 0.76;
       const lobeOffset = radius * 0.42;
+      const coronaGeo = getSharedUnitSphere(false);
 
-      const coronaMeshA = new THREE.Mesh(new THREE.SphereGeometry(coronaLobeRadius, 32, 32), coronaMat);
+      const coronaMeshA = new THREE.Mesh(coronaGeo, coronaMat);
+      coronaMeshA.scale.setScalar(coronaLobeRadius);
       coronaMeshA.position.set(-lobeOffset, 0, 0);
       coronaMeshA.name = 'CoronaA';
       starGroup.add(coronaMeshA);
 
-      const coronaMeshB = new THREE.Mesh(new THREE.SphereGeometry(coronaLobeRadius, 32, 32), coronaMat);
+      const coronaMeshB = new THREE.Mesh(coronaGeo, coronaMat);
+      coronaMeshB.scale.setScalar(coronaLobeRadius);
       coronaMeshB.position.set(lobeOffset, 0, 0);
       coronaMeshB.name = 'CoronaB';
       starGroup.add(coronaMeshB);
     } else {
       const coronaRadius = radius * (isFaintL ? 1.08 : 1.22);
-      const coronaGeo = new THREE.SphereGeometry(coronaRadius, 32, 32);
+      const coronaGeo = getSharedUnitSphere(false);
       const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
+      coronaMesh.scale.setScalar(coronaRadius);
       coronaMesh.name = 'Corona';
       starGroup.add(coronaMesh);
     }

@@ -326,16 +326,38 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* CENTERED HERO CONTENT & APP TITLE - FRONT LAYER (Z-20) */}
         <div className={`relative z-20 flex flex-col items-center justify-center ${
-          isMobile && !isTablet ? 'gap-1.5' : 'gap-3 sm:gap-5'
-        } max-w-3xl mx-auto my-auto pointer-events-none px-2`}>
+          isMobile && !isTablet ? 'gap-2.5' : 'gap-3.5 sm:gap-4'
+        } max-w-4xl mx-auto my-auto pointer-events-none px-3 text-center`}>
+          {/* Brand Container: Starpedia 3D placed in the same container next to the square logo */}
+          <div className="inline-flex items-center gap-2.5 sm:gap-3.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-[#04081c]/90 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-xl pointer-events-auto">
+            {/* Square Contained App Logo */}
+            <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 aspect-square rounded-xl border border-cyan-400/90 p-0.5 bg-black shadow-[0_0_12px_rgba(6,182,212,0.5)] flex items-center justify-center overflow-hidden shrink-0">
+              <img 
+                src="/starpedia_logo.svg" 
+                alt="Starpedia 3D Logo" 
+                className="w-full h-full object-contain aspect-square rounded-lg" 
+              />
+            </div>
+
+            <div className="flex flex-col items-start text-left leading-tight">
+              <span className="font-['Orbitron',sans-serif] font-black tracking-widest text-base sm:text-lg md:text-xl text-white">
+                STARPEDIA <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">3D</span>
+              </span>
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-cyan-300/85">
+                Stellar Edition
+              </span>
+            </div>
+          </div>
+
+          {/* The Bigger Headline Text: Stars of the Universe */}
           <h1 className={`${
-            isMobile && !isTablet ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-5xl md:text-6xl lg:text-7xl'
-          } font-black text-white tracking-widest leading-tight drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)]`}>
-            ALL ABOUT <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">STARS</span>
+            isMobile && !isTablet ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+          } font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-cyan-200 tracking-tight leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)] font-['Orbitron',sans-serif]`}>
+            Stars of the Universe
           </h1>
 
           <p className={`${
-            isMobile && !isTablet ? 'text-[11px] leading-snug max-w-md' : 'text-xs sm:text-sm md:text-base max-w-lg leading-relaxed'
+            isMobile && !isTablet ? 'text-[11px] leading-snug max-w-md' : 'text-xs sm:text-sm md:text-base max-w-xl leading-relaxed'
           } text-slate-200 font-mono drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]`}>
             Compare cosmic titans 1:1, discover stellar physics, and explore astronomical wonders in interactive 3D.
           </p>

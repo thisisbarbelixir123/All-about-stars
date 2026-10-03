@@ -69,17 +69,14 @@ const EARTH_TEXTURE_URL = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/exam
 const EARTH_SPECULAR_URL = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_specular_2048.jpg';
 const EARTH_CLOUDS_URL = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_clouds_1024.png';
 
-/**
- * Creates a photorealistic 3D Earth mesh group with high-resolution NASA Blue Marble
- * surface imagery, ocean specular reflectivity, an independent floating cloud layer,
- * and Rayleigh scattering atmospheric limb glow.
- */
-function createEarthMeshGroup(radius: number, wireframe: boolean): THREE.Group {
-  const group = new THREE.Group();
-  group.name = 'Earth_Comparison_Group';
-  group.userData.isEarthGroup = true;
+// Global texture cache for Earth textures to prevent repeated creation and network requests
+let cachedEarthCanvasTexture: THREE.CanvasTexture | null = null;
+let cachedEarthTexture: THREE.Texture | null = null;
+let cachedSpecularTexture: THREE.Texture | null = null;
+let cachedCloudsTexture: THREE.Texture | null = null;
 
-  // 1. Procedural instant-fallback canvas texture (ensures no untextured blank sphere during load)
+function getEarthFallbackTexture(): THREE.CanvasTexture {
+  if (cachedEarthCanvasTexture) return cachedEarthCanvasTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;
@@ -125,60 +122,83 @@ function createEarthMeshGroup(radius: number, wireframe: boolean): THREE.Group {
     ctx.fill();
   }
 
-  const fallbackTexture = new THREE.CanvasTexture(canvas);
-  fallbackTexture.wrapS = THREE.RepeatWrapping;
-  fallbackTexture.wrapT = THREE.ClampToEdgeWrapping;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  cachedEarthCanvasTexture = texture;
+  return texture;
+}
+
+/**
+ * Creates a photorealistic 3D Earth mesh group with high-resolution NASA Blue Marble
+ * surface imagery, ocean specular reflectivity, an independent floating cloud layer,
+ * and Rayleigh scattering atmospheric limb glow.
+ */
+function createEarthMeshGroup(radius: number, wireframe: boolean): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'Earth_Comparison_Group';
+  group.userData.isEarthGroup = true;
+
+  // 1. Procedural instant-fallback canvas texture (cached, zero allocation on repeated calls)
+  const fallbackTexture = getEarthFallbackTexture();
 
   // 2. Main Earth Sphere with Standard Material (supports roughness & specular reflections)
-  const earthGeo = new THREE.SphereGeometry(radius, 64, 64);
+  const earthGeo = new THREE.SphereGeometry(radius, 48, 48);
   const earthMat = new THREE.MeshStandardMaterial({
-    map: fallbackTexture,
+    map: cachedEarthTexture || fallbackTexture,
     roughness: 0.7,
     metalness: 0.1,
     wireframe,
   });
+  if (cachedSpecularTexture) {
+    earthMat.roughnessMap = cachedSpecularTexture;
+    earthMat.roughness = 0.85;
+    earthMat.metalness = 0.15;
+  }
   const earthMesh = new THREE.Mesh(earthGeo, earthMat);
   earthMesh.name = 'Earth_Surface_Mesh';
   group.add(earthMesh);
 
-  // Load realistic high-resolution NASA Blue Marble texture
-  const textureLoader = new THREE.TextureLoader();
-  textureLoader.crossOrigin = 'anonymous';
+  // Load realistic high-resolution NASA Blue Marble texture if not cached
+  if (!cachedEarthTexture) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
 
-  textureLoader.load(
-    EARTH_TEXTURE_URL,
-    (tex) => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.ClampToEdgeWrapping;
-      earthMat.map = tex;
-      earthMat.needsUpdate = true;
-    },
-    undefined,
-    () => {
-      // Fallback already in place
-    }
-  );
+    textureLoader.load(
+      EARTH_TEXTURE_URL,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        cachedEarthTexture = tex;
+        earthMat.map = tex;
+        earthMat.needsUpdate = true;
+      },
+      undefined,
+      () => {}
+    );
 
-  // Load NASA specular reflection map for realistic oceans
-  textureLoader.load(
-    EARTH_SPECULAR_URL,
-    (specTex) => {
-      specTex.wrapS = THREE.RepeatWrapping;
-      specTex.wrapT = THREE.ClampToEdgeWrapping;
-      earthMat.roughnessMap = specTex;
-      earthMat.roughness = 0.85;
-      earthMat.metalness = 0.15;
-      earthMat.needsUpdate = true;
-    },
-    undefined,
-    () => {}
-  );
+    textureLoader.load(
+      EARTH_SPECULAR_URL,
+      (specTex) => {
+        specTex.wrapS = THREE.RepeatWrapping;
+        specTex.wrapT = THREE.ClampToEdgeWrapping;
+        cachedSpecularTexture = specTex;
+        earthMat.roughnessMap = specTex;
+        earthMat.roughness = 0.85;
+        earthMat.metalness = 0.15;
+        earthMat.needsUpdate = true;
+      },
+      undefined,
+      () => {}
+    );
+  }
 
   if (!wireframe) {
     // 3. Floating Atmospheric Cloud Layer (elevated by 1.5% above the crust)
-    const cloudGeo = new THREE.SphereGeometry(radius * 1.015, 48, 48);
+    const cloudGeo = new THREE.SphereGeometry(radius * 1.015, 36, 36);
     const cloudMat = new THREE.MeshStandardMaterial({
+      map: cachedCloudsTexture || undefined,
       transparent: true,
       opacity: 0.82,
       blending: THREE.AdditiveBlending,
@@ -188,20 +208,25 @@ function createEarthMeshGroup(radius: number, wireframe: boolean): THREE.Group {
     cloudMesh.name = 'Earth_Clouds_Mesh';
     group.add(cloudMesh);
 
-    textureLoader.load(
-      EARTH_CLOUDS_URL,
-      (cloudTex) => {
-        cloudTex.wrapS = THREE.RepeatWrapping;
-        cloudTex.wrapT = THREE.ClampToEdgeWrapping;
-        cloudMat.map = cloudTex;
-        cloudMat.needsUpdate = true;
-      },
-      undefined,
-      () => {}
-    );
+    if (!cachedCloudsTexture) {
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.crossOrigin = 'anonymous';
+      textureLoader.load(
+        EARTH_CLOUDS_URL,
+        (cloudTex) => {
+          cloudTex.wrapS = THREE.RepeatWrapping;
+          cloudTex.wrapT = THREE.ClampToEdgeWrapping;
+          cachedCloudsTexture = cloudTex;
+          cloudMat.map = cloudTex;
+          cloudMat.needsUpdate = true;
+        },
+        undefined,
+        () => {}
+      );
+    }
 
     // 4. Rayleigh Atmospheric Scattering Rim Glow
-    const atmoGeo = new THREE.SphereGeometry(radius * 1.032, 48, 48);
+    const atmoGeo = new THREE.SphereGeometry(radius * 1.032, 36, 36);
     const atmoMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
@@ -220,6 +245,9 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(performance.now());
+  const sharedTimeUniformRef = useRef<{ value: number }>({ value: 0 });
+  const isTabVisibleRef = useRef<boolean>(true);
+  const restoreDprTimerRef = useRef<number | null>(null);
 
   // Toggleable Mode: 'compare-sun' vs 'compare-earth' vs 'solar-system'
   const [activeStageMode, setActiveStageMode] = useState<'compare-sun' | 'compare-earth' | 'solar-system'>('compare-sun');
@@ -503,6 +531,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     cameraRef.current = camera;
 
     // 2. Renderer
+    const isMob = typeof window !== 'undefined' && window.innerWidth < 768;
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true, 
       alpha: true, 
@@ -510,12 +539,18 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       powerPreference: 'high-performance' 
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMob ? 1.2 : 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
+
+    // Background tab throttling: pause CPU/GPU rendering when tab is hidden
+    const handleVisibility = () => {
+      isTabVisibleRef.current = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     // 3. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
@@ -545,8 +580,13 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     // Animation Loop
     let lastTime = performance.now();
     const animate = () => {
+      animFrameRef.current = requestAnimationFrame(animate);
+
+      // Throttling: pause when tab is inactive
+      if (!isTabVisibleRef.current) return;
+
       const now = performance.now();
-      const delta = (now - lastTime) / 1000;
+      const delta = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
       const elapsedTime = (now - startTimeRef.current) * 0.001;
 
@@ -616,12 +656,8 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
           if (item.earthGlow) item.earthGlow.position.copy(pos);
         });
 
-        // Update exact shader uniforms time for all star photosphere and corona shaders
-        dynamicGroup.traverse((child) => {
-          if (child instanceof THREE.Mesh && child.material instanceof THREE.ShaderMaterial && child.material.uniforms?.time) {
-            child.material.uniforms.time.value = elapsedTime % 600.0;
-          }
-        });
+        // O(1) Instant uniform update across all shaders (zero tree traversal!)
+        sharedTimeUniformRef.current.value = elapsedTime % 600.0;
       }
 
       // Update procedural continuous grid positioning and scale
@@ -672,13 +708,13 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       }
 
       renderer.render(scene, camera);
-      animFrameRef.current = requestAnimationFrame(animate);
     };
 
     animFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (continuousGridRef.current) {
         continuousGridRef.current.dispose();
         continuousGridRef.current = null;
@@ -720,14 +756,22 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       // =========================================================================
 
       // --- 1. The Sun (Sol) --- sits on the grid floor at y = 0
-      const sunGroup = createStarMeshGroup(SUN_REFERENCE_STAR, sunRadius, { wireframe, showCorona: true });
+      const sunGroup = createStarMeshGroup(SUN_REFERENCE_STAR, sunRadius, { 
+        wireframe, 
+        showCorona: true, 
+        timeUniform: sharedTimeUniformRef.current 
+      });
       sunGroup.position.set(sunX, sunRadius, 0);
       sunGroup.userData.isRotatingStarGroup = true;
       sunGroup.userData.starType = 'sun';
       dynamicGroup.add(sunGroup);
 
       // --- 2. The Target Star --- sits on the grid floor at y = 0
-      const starGroup = createStarMeshGroup(star, starRadius, { wireframe, showCorona: true });
+      const starGroup = createStarMeshGroup(star, starRadius, { 
+        wireframe, 
+        showCorona: true, 
+        timeUniform: sharedTimeUniformRef.current 
+      });
       starGroup.position.set(starX, starRadius, 0);
       starGroup.userData.isRotatingStarGroup = true;
       starGroup.userData.starType = 'star';
@@ -852,7 +896,11 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       dynamicGroup.add(earthGroup);
 
       // --- 2. The Target Star --- sits on the grid floor at y = 0
-      const starGroup = createStarMeshGroup(star, starRadius, { wireframe, showCorona: true });
+      const starGroup = createStarMeshGroup(star, starRadius, { 
+        wireframe, 
+        showCorona: true, 
+        timeUniform: sharedTimeUniformRef.current 
+      });
       starGroup.position.set(earthCompareStarX, starRadius, 0);
       starGroup.userData.isRotatingStarGroup = true;
       starGroup.userData.starType = 'star';
@@ -967,7 +1015,11 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       // =========================================================================
       
       // Central Host Star with exact physical scale and matching shader texture
-      const hostStarGroup = createStarMeshGroup(star, starOverlayRadius, { wireframe, showCorona: true });
+      const hostStarGroup = createStarMeshGroup(star, starOverlayRadius, { 
+        wireframe, 
+        showCorona: true, 
+        timeUniform: sharedTimeUniformRef.current 
+      });
       hostStarGroup.position.set(0, 0, 0);
       hostStarGroup.userData.isRotatingStarGroup = true;
       hostStarGroup.userData.starType = 'star';
@@ -1206,9 +1258,31 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     }
   }, [activeStageMode, star, wireframe, habitableZone, focusTarget]);
 
+  // Dynamic DPR during user drag / manipulation for buttery smooth frame rate on all devices
+  const triggerDossierInteractionDpr = () => {
+    if (rendererRef.current) {
+      const isMob = typeof window !== 'undefined' && window.innerWidth < 768;
+      const lowDpr = isMob ? 0.85 : 1.0;
+      if (rendererRef.current.getPixelRatio() !== lowDpr) {
+        rendererRef.current.setPixelRatio(lowDpr);
+      }
+    }
+    if (restoreDprTimerRef.current !== null) {
+      window.clearTimeout(restoreDprTimerRef.current);
+    }
+    restoreDprTimerRef.current = window.setTimeout(() => {
+      if (rendererRef.current) {
+        const isMob = typeof window !== 'undefined' && window.innerWidth < 768;
+        const normalDpr = Math.min(window.devicePixelRatio || 1, isMob ? 1.2 : 1.5);
+        rendererRef.current.setPixelRatio(normalDpr);
+      }
+    }, 160);
+  };
+
   // Pointer/Touch Event Handlers for 3D Orbiting
   const handlePointerDown = (e: React.PointerEvent) => {
     isDraggingRef.current = true;
+    triggerDossierInteractionDpr();
     pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
     prevMouseRef.current = { x: e.clientX, y: e.clientY };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -1216,6 +1290,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
+    triggerDossierInteractionDpr();
     const dx = e.clientX - prevMouseRef.current.x;
     const dy = e.clientY - prevMouseRef.current.y;
     prevMouseRef.current = { x: e.clientX, y: e.clientY };
@@ -1229,6 +1304,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
   const handlePointerUp = (e: React.PointerEvent) => {
     isDraggingRef.current = false;
+    triggerDossierInteractionDpr();
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {

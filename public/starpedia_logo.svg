@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Space Gradient -->
+    <radialGradient id="spaceBgGlow" cx="45%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#050e26" />
+      <stop offset="60%" stop-color="#020612" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Rounded Square Container Clip Path -->
+    <clipPath id="squareBorderInnerClip">
+      <rect x="36" y="36" width="440" height="440" rx="72" ry="72" />
+    </clipPath>
+
+    <!-- Sun Glow / Photosphere Gradients -->
+    <radialGradient id="sunCorona" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="30%" stop-color="#FFF566" stop-opacity="0.95" />
+      <stop offset="60%" stop-color="#FFB300" stop-opacity="0.8" />
+      <stop offset="85%" stop-color="#FF7A00" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#FF4500" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="sunBody" cx="44%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#FFFFF2" />
+      <stop offset="22%" stop-color="#FFF26A" />
+      <stop offset="55%" stop-color="#FFC51A" />
+      <stop offset="85%" stop-color="#FF9500" />
+      <stop offset="100%" stop-color="#E65C00" />
+    </radialGradient>
+
+    <!-- Saturn Lighting & Shading (Light source is the Sun at top-right) -->
+    <radialGradient id="saturnLighting" cx="62%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#FFFBEB" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#FDE68A" stop-opacity="0.4" />
+      <stop offset="65%" stop-color="#92622B" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#120E09" stop-opacity="0.98" />
+    </radialGradient>
+
+    <!-- Saturn Cloud Bands -->
+    <linearGradient id="saturnBands" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8C7043" />
+      <stop offset="10%" stop-color="#BFA169" />
+      <stop offset="18%" stop-color="#E0CFA2" />
+      <stop offset="26%" stop-color="#D4BC88" />
+      <stop offset="34%" stop-color="#F2E6C4" />
+      <stop offset="42%" stop-color="#C7A566" />
+      <stop offset="50%" stop-color="#ECDDB5" />
+      <stop offset="60%" stop-color="#B89355" />
+      <stop offset="70%" stop-color="#DFCE9E" />
+      <stop offset="80%" stop-color="#997740" />
+      <stop offset="90%" stop-color="#6E4F23" />
+      <stop offset="100%" stop-color="#36240E" />
+    </linearGradient>
+
+    <clipPath id="saturnSphereClip">
+      <circle cx="232" cy="300" r="126" />
+    </clipPath>
+
+    <!-- Ring Shadow on Planet Face -->
+    <linearGradient id="ringShadowOnPlanet" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#000000" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Saturn Shadow on Back Rings -->
+    <radialGradient id="ringShadowOnBack" cx="30%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.95" />
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Cyan Border Gradient -->
+    <linearGradient id="cyanBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. BASE BACKGROUND & DISTANT STARS (Clipped inside rounded frame) -->
+  <g clip-path="url(#squareBorderInnerClip)">
+    <rect x="0" y="0" width="512" height="512" fill="url(#spaceBgGlow)" />
+    <!-- Distant Cosmic Micro Stars -->
+    <circle cx="85" cy="90" r="1.5" fill="#FFFFFF" opacity="0.6" />
+    <circle cx="130" cy="145" r="1.2" fill="#7DD3FC" opacity="0.5" />
+    <circle cx="430" cy="400" r="1.5" fill="#FFFFFF" opacity="0.65" />
+    <circle cx="85" cy="425" r="1.2" fill="#BAE6FD" opacity="0.4" />
+    <circle cx="450" cy="95" r="1.2" fill="#FFFFFF" opacity="0.6" />
+  </g>
+
+  <!-- 2. THE SUN (Upper Right) -->
+  <!-- Outer Solar Glare & Corona -->
+  <circle cx="365" cy="148" r="155" fill="url(#sunCorona)" />
+  <!-- Solid Photosphere Body -->
+  <circle cx="365" cy="148" r="98" fill="url(#sunBody)" />
+  <!-- Core White Specular Glint -->
+  <ellipse cx="350" cy="130" rx="55" ry="46" fill="#FFFFFF" opacity="0.45" />
+
+  <!-- 3. CYAN ROUNDED SQUARE BORDER (Drawn in background/midground so rings can pop outside!) -->
+  <rect 
+    x="36" 
+    y="36" 
+    width="440" 
+    height="440" 
+    rx="72" 
+    ry="72" 
+    fill="none" 
+    stroke="url(#cyanBorderGrad)" 
+    stroke-width="16" 
+    stroke-linejoin="round"
+  />
+
+  <!-- 4. SATURN BACK RINGS (Tilted at ~ -22 degrees, passes BEHIND planet sphere) -->
+  <g transform="translate(232, 300) rotate(-22)">
+    <!-- Back arc clipped above planet center -->
+    <g clip-path="polygon(-450 -350, 450 -350, 450 0, -450 0)">
+      <!-- Outer Ring A -->
+      <ellipse cx="0" cy="0" rx="288" ry="72" fill="none" stroke="#7A6A55" stroke-width="19" opacity="0.88" />
+      <!-- Cassini Division (Dark gap) -->
+      <ellipse cx="0" cy="0" rx="268" ry="67" fill="none" stroke="#080706" stroke-width="8" opacity="0.95" />
+      <!-- Main Ring B (Bright, luminous golden-cream) -->
+      <ellipse cx="0" cy="0" rx="254" ry="63" fill="none" stroke="#E6D6B6" stroke-width="24" opacity="0.96" />
+      <ellipse cx="0" cy="0" rx="232" ry="58" fill="none" stroke="#CBB48E" stroke-width="17" opacity="0.92" />
+      <!-- Inner Ring C (Crepe ring) -->
+      <ellipse cx="0" cy="0" rx="206" ry="51" fill="none" stroke="#4A3F33" stroke-width="24" opacity="0.65" />
+      <!-- Saturn's Shadow cast on Back Rings (To the lower-left away from the Sun) -->
+      <ellipse cx="-45" cy="-8" rx="90" ry="52" fill="url(#ringShadowOnBack)" opacity="0.92" />
+    </g>
+  </g>
+
+  <!-- 5. SATURN PLANET SPHERE (Center-Left Foreground) -->
+  <g>
+    <!-- Base Color -->
+    <circle cx="232" cy="300" r="126" fill="#D2BC90" />
+    <g clip-path="url(#saturnSphereClip)">
+      <rect x="95" y="165" width="275" height="275" fill="url(#saturnBands)" />
+      <!-- Photorealistic Spherical Lighting & Shadow -->
+      <circle cx="232" cy="300" r="126" fill="url(#saturnLighting)" />
+      <!-- Ring Shadow Cast across Saturn's Northern/Mid latitudes -->
+      <ellipse cx="232" cy="278" rx="130" ry="24" fill="url(#ringShadowOnPlanet)" transform="rotate(-6, 232, 278)" opacity="0.85" />
+      <!-- Sunward Rim Glow -->
+      <circle cx="232" cy="300" r="126" fill="none" stroke="#FFF7D6" stroke-width="3.5" opacity="0.5" />
+    </g>
+  </g>
+
+  <!-- 6. SATURN FRONT RINGS (Passes IN FRONT of planet sphere and breaks out of the cyan frame!) -->
+  <g transform="translate(232, 300) rotate(-22)">
+    <!-- Front arc clipped below planet center -->
+    <g clip-path="polygon(-450 0, 450 0, 450 350, -450 350)">
+      <!-- Inner Ring C (Semi-translucent over planet body) -->
+      <ellipse cx="0" cy="0" rx="206" ry="51" fill="none" stroke="#4A3F33" stroke-width="24" opacity="0.55" />
+      <!-- Main Ring B -->
+      <ellipse cx="0" cy="0" rx="232" ry="58" fill="none" stroke="#CBB48E" stroke-width="17" opacity="0.94" />
+      <ellipse cx="0" cy="0" rx="254" ry="63" fill="none" stroke="#E6D6B6" stroke-width="24" opacity="0.98" />
+      <!-- Cassini Division (Dark gap) -->
+      <ellipse cx="0" cy="0" rx="268" ry="67" fill="none" stroke="#080706" stroke-width="8" opacity="0.95" />
+      <!-- Outer Ring A -->
+      <ellipse cx="0" cy="0" rx="288" ry="72" fill="none" stroke="#7A6A55" stroke-width="19" opacity="0.9" />
+    </g>
+  </g>
+</svg>

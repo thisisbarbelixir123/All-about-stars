@@ -35,12 +35,25 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               </span>
             </div>
 
-            <h1 
-              id="about-title" 
-              className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-['Orbitron',sans-serif]"
-            >
-              ABOUT <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">PROJECT</span>
-            </h1>
+            <div className="flex flex-col gap-2">
+              {/* Brand Container with Logo next to Starpedia 3D */}
+              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-xl bg-cyan-950/40 border border-cyan-400/40 backdrop-blur-md shadow-md w-fit">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 aspect-square rounded-lg border border-cyan-400/80 p-0.5 bg-black shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center justify-center overflow-hidden shrink-0">
+                  <img src="/starpedia_logo.svg" alt="Starpedia 3D Logo" className="w-full h-full object-contain aspect-square rounded-sm" />
+                </div>
+                <div className="font-['Orbitron',sans-serif] font-bold text-sm sm:text-base text-white tracking-wider">
+                  STARPEDIA <span className="bg-gradient-to-r from-cyan-400 to-sky-300 bg-clip-text text-transparent">3D</span>
+                </div>
+              </div>
+
+              {/* The Bigger Headline: Stars of the Universe */}
+              <h1 
+                id="about-title" 
+                className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-['Orbitron',sans-serif]"
+              >
+                Stars of the Universe
+              </h1>
+            </div>
 
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
               An interactive 3D cosmic star comparator, astrophysical catalog, Hertzsprung–Russell diagram, and cosmic scale explorer spanning from relativistic neutron stars to colossal red hypergiants.

@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { StarDossier3DStage } from './StarDossier3DStage';
+import { soundEffects } from '../utils/soundEffects';
 import { 
   X, 
   Sparkles, 
@@ -52,6 +53,11 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const [starClicks, setStarClicks] = useState<number>(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Play open sound effect when dossier opens
+  useEffect(() => {
+    soundEffects.play('openModal');
+  }, []);
 
   // Reset clicks whenever modal star changes
   useEffect(() => {
