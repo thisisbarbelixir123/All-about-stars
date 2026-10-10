@@ -280,10 +280,21 @@ export const StarModelCanvas: React.FC<{
 
     const cx = size / 2;
     const cy = size / 2;
-    const r = diameter / 2;
+    const safeDiameter = Number.isFinite(diameter) && diameter > 0 ? diameter : 24;
+    const r = safeDiameter / 2;
+
+    const createSafeRadial = (x0: number, y0: number, r0: number, x1: number, y1: number, r1: number) => {
+      const sX0 = Number.isFinite(x0) ? x0 : 0;
+      const sY0 = Number.isFinite(y0) ? y0 : 0;
+      const sR0 = Number.isFinite(r0) ? Math.max(0, r0) : 0;
+      const sX1 = Number.isFinite(x1) ? x1 : sX0;
+      const sY1 = Number.isFinite(y1) ? y1 : sY0;
+      const sR1 = Number.isFinite(r1) ? Math.max(0.001, r1) : Math.max(1, sR0 + 1);
+      return ctx.createRadialGradient(sX0, sY0, sR0, sX1, sY1, sR1);
+    };
 
     // 1. Outer corona glow
-    const coronaGrad = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 1.35);
+    const coronaGrad = createSafeRadial(cx, cy, r * 0.6, cx, cy, r * 1.35);
     coronaGrad.addColorStop(0, tier.glowColor);
     coronaGrad.addColorStop(1, 'transparent');
     ctx.fillStyle = coronaGrad;
@@ -292,7 +303,7 @@ export const StarModelCanvas: React.FC<{
     ctx.fill();
 
     // 2. Star body gradient
-    const bodyGrad = ctx.createRadialGradient(
+    const bodyGrad = createSafeRadial(
       cx - r * 0.25,
       cy - r * 0.25,
       0,
@@ -1216,8 +1227,19 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
             const isDropperReady = canDropRef.current && droppingStarIdRef.current === null;
             const currentScale = getSupernovaSizeScale(supernovaCountRef.current);
             const redDwarfDef = STAR_TIERS[0]; // Always Proxima Centauri (Red Dwarf)
-            const previewRadius = redDwarfDef.radius * currentScale;
-            const dropX = Math.max(previewRadius + 6, Math.min(width - previewRadius - 6, dropperXRef.current));
+            const previewRadius = Number.isFinite(redDwarfDef.radius * currentScale) ? Math.max(4, redDwarfDef.radius * currentScale) : 10;
+            const safeCurrentX = Number.isFinite(dropperXRef.current) ? dropperXRef.current : width / 2;
+            const dropX = Math.max(previewRadius + 6, Math.min(width - previewRadius - 6, safeCurrentX));
+
+            const createSafeDropperRadial = (x0: number, y0: number, r0: number, x1: number, y1: number, r1: number) => {
+              const sX0 = Number.isFinite(x0) ? x0 : 0;
+              const sY0 = Number.isFinite(y0) ? y0 : 0;
+              const sR0 = Number.isFinite(r0) ? Math.max(0, r0) : 0;
+              const sX1 = Number.isFinite(x1) ? x1 : sX0;
+              const sY1 = Number.isFinite(y1) ? y1 : sY0;
+              const sR1 = Number.isFinite(r1) ? Math.max(0.001, r1) : Math.max(1, sR0 + 1);
+              return ctx.createRadialGradient(sX0, sY0, sR0, sX1, sY1, sR1);
+            };
 
             // Aiming vertical dashed line
             ctx.save();
@@ -1233,7 +1255,8 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
             // Preview star at dropper - precisely matching red dwarf (only shown when ready to drop, prevents spam confusion)
             if (isDropperReady) {
               ctx.save();
-              const grad = ctx.createRadialGradient(dropX, 48, 0, dropX, 48, previewRadius);
+              const sPreviewR = Number.isFinite(previewRadius) ? Math.max(1, previewRadius) : 10;
+              const grad = createSafeDropperRadial(dropX, 48, 0, dropX, 48, sPreviewR);
               grad.addColorStop(0, redDwarfDef.coreColor);
               grad.addColorStop(0.7, redDwarfDef.color);
               grad.addColorStop(1, redDwarfDef.glowColor);
@@ -1264,8 +1287,18 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
 
             ctx.save();
 
+            const createSafeRadial = (x0: number, y0: number, r0: number, x1: number, y1: number, r1: number) => {
+              const sX0 = Number.isFinite(x0) ? x0 : 0;
+              const sY0 = Number.isFinite(y0) ? y0 : 0;
+              const sR0 = Number.isFinite(r0) ? Math.max(0, r0) : 0;
+              const sX1 = Number.isFinite(x1) ? x1 : sX0;
+              const sY1 = Number.isFinite(y1) ? y1 : sY0;
+              const sR1 = Number.isFinite(r1) ? Math.max(0.001, r1) : Math.max(1, sR0 + 1);
+              return ctx.createRadialGradient(sX0, sY0, sR0, sX1, sY1, sR1);
+            };
+
             // Outer glowing corona
-            const coronaGrad = ctx.createRadialGradient(star.x, star.y, r * 0.7, star.x, star.y, r * 1.35);
+            const coronaGrad = createSafeRadial(star.x, star.y, r * 0.7, star.x, star.y, r * 1.35);
             coronaGrad.addColorStop(0, def.glowColor);
             coronaGrad.addColorStop(1, 'transparent');
             ctx.fillStyle = coronaGrad;
@@ -1274,7 +1307,7 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
             ctx.fill();
 
             // Star Body
-            const bodyGrad = ctx.createRadialGradient(
+            const bodyGrad = createSafeRadial(
               star.x - r * 0.25,
               star.y - r * 0.25,
               0,

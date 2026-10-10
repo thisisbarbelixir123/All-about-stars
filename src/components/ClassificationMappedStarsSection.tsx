@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { StarData } from '../types';
 import { ChevronRight, ChevronDown, ChevronUp, Search, Sparkles } from 'lucide-react';
+import { StarDot2D } from './StarDot2D';
 
 interface ClassificationMappedStarsSectionProps {
   title: string;
@@ -85,10 +86,7 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
                 className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg bg-slate-900 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-[10px] sm:text-xs font-mono text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1 group max-w-full"
                 title={`Inspect ${star.name} (${star.spectralType})`}
               >
-                <span
-                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: star.colorHex || categoryColor }}
-                />
+                <StarDot2D star={star} colorHex={star.colorHex || categoryColor} sizeClassName="w-2 h-2" />
                 <span className="font-semibold break-words">{star.name}</span>
                 <span className="text-[9px] text-slate-400 font-normal">({star.spectralType})</span>
                 <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-300 shrink-0" />
@@ -130,10 +128,7 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
                     title={`Inspect ${star.name} (${star.spectralType}, ${star.constellation})`}
                   >
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0 shadow-sm"
-                        style={{ backgroundColor: star.colorHex || categoryColor }}
-                      />
+                      <StarDot2D star={star} colorHex={star.colorHex || categoryColor} sizeClassName="w-2.5 h-2.5" />
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-semibold font-mono text-slate-200 group-hover:text-white truncate">
                           {star.name}

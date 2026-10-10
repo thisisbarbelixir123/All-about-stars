@@ -7,6 +7,7 @@ import {
 } from '../data/stellarLifeCyclesData';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
+import { StarDot2D } from './StarDot2D';
 import {
   Play,
   Pause,
@@ -510,51 +511,278 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
     starGroup.add(pulsarGroup);
     pulsarJetsRef.current = pulsarGroup;
 
-    // 7. Black Hole Event Horizon, Accretion Disk & Jets
+    // 7. Realistic General-Relativistic Black Hole (Kerr Metric, Lensing Canopies, Doppler Disk, Jets)
     const blackHoleGroup = new THREE.Group();
 
     // Event Horizon Sphere (Pure Total Absorption)
-    const horizonGeo = new THREE.SphereGeometry(1.5, 32, 32);
+    const horizonGeo = new THREE.SphereGeometry(1.5, 48, 48);
     const horizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
     const horizonMesh = new THREE.Mesh(horizonGeo, horizonMat);
     blackHoleGroup.add(horizonMesh);
 
-    // Photon Sphere Lensing Glow
-    const photonRingGeo = new THREE.RingGeometry(1.52, 1.85, 48);
+    // Gravitational Redshift Sheath (Horizon boundary transition g_00 -> 0)
+    const redshiftSheathGeo = new THREE.SphereGeometry(1.58, 36, 36);
+    const redshiftSheathMat = new THREE.MeshBasicMaterial({
+      color: 0x881337,
+      transparent: true,
+      opacity: 0.32,
+      blending: THREE.AdditiveBlending,
+    });
+    const redshiftSheath = new THREE.Mesh(redshiftSheathGeo, redshiftSheathMat);
+    blackHoleGroup.add(redshiftSheath);
+
+    // Primary razor-sharp photon ring (n = 1 caustics)
+    const photonRingGeo = new THREE.RingGeometry(1.62, 1.84, 64);
     const photonRingMat = new THREE.MeshBasicMaterial({
-      color: 0x00ddff,
+      color: 0xffffff,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
       blending: THREE.AdditiveBlending,
     });
     const photonRing = new THREE.Mesh(photonRingGeo, photonRingMat);
     blackHoleGroup.add(photonRing);
 
-    // Accretion Disk Ring
-    const diskGeo = new THREE.RingGeometry(2.0, 9.5, 64);
-    const diskMat = new THREE.MeshBasicMaterial({
-      color: 0xffaa00,
+    // Secondary diffuse photon halo (n = 2 caustics)
+    const photonHaloGeo = new THREE.RingGeometry(1.54, 2.15, 64);
+    const photonHaloMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
+    });
+    const photonHalo = new THREE.Mesh(photonHaloGeo, photonHaloMat);
+    blackHoleGroup.add(photonHalo);
+
+    // Relativistic Accretion Disk with ISCO Gap & Doppler Beaming Vertex Colors
+    const diskRInner = 2.4; // Clear ISCO boundary
+    const diskROuter = 10.5;
+    const diskRadialSegments = 28;
+    const diskThetaSegments = 72;
+    const diskGeo = new THREE.RingGeometry(diskRInner, diskROuter, diskThetaSegments, diskRadialSegments);
+    const diskPosAttr = diskGeo.attributes.position;
+    const diskColors = new Float32Array(diskPosAttr.count * 3);
+
+    for (let i = 0; i < diskPosAttr.count; i++) {
+      const vx = diskPosAttr.getX(i);
+      const vy = diskPosAttr.getY(i);
+      const r = Math.sqrt(vx * vx + vy * vy);
+      const rFrac = Math.max(0, Math.min(1, (r - diskRInner) / (diskROuter - diskRInner)));
+      const cosTheta = r > 0.001 ? vx / r : 0; // cos(theta): -1 on approaching left, +1 on receding right
+
+      // Doppler beaming factor: approaching side (vx < 0) is blinding blueshifted cyan-white
+      // receding side (vx > 0) is dimmed and redshifted amber-crimson
+      if (cosTheta < 0) {
+        // Approaching side
+        const factor = -cosTheta; // 0 to 1
+        const rVal = 0.5 + 0.5 * (1 - rFrac) + factor * 0.5;
+        const gVal = 0.7 + 0.3 * factor - rFrac * 0.4;
+        const bVal = 1.0 - rFrac * 0.3;
+        diskColors[i * 3] = Math.min(1, rVal * (1 - rFrac * 0.3));
+        diskColors[i * 3 + 1] = Math.min(1, gVal * (1 - rFrac * 0.3));
+        diskColors[i * 3 + 2] = Math.min(1, bVal * (1 - rFrac * 0.4));
+      } else {
+        // Receding side
+        const factor = cosTheta; // 0 to 1
+        const rVal = (0.9 - factor * 0.3) * (1 - rFrac * 0.5);
+        const gVal = (0.35 - factor * 0.25) * (1 - rFrac * 0.6);
+        const bVal = (0.1 - factor * 0.08) * (1 - rFrac * 0.7);
+        diskColors[i * 3] = Math.max(0, rVal);
+        diskColors[i * 3 + 1] = Math.max(0, gVal);
+        diskColors[i * 3 + 2] = Math.max(0, bVal);
+      }
+    }
+    diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColors, 3));
+    const diskMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.88,
       blending: THREE.AdditiveBlending,
     });
     const accretionDisk = new THREE.Mesh(diskGeo, diskMat);
-    accretionDisk.rotation.x = Math.PI / 2.5;
+    accretionDisk.rotation.x = Math.PI / 2.3;
     blackHoleGroup.add(accretionDisk);
 
-    // Relativistic Polar Jets
-    const jetGeo = new THREE.CylinderGeometry(0.2, 1.2, 22, 16);
-    const jetMat = new THREE.MeshBasicMaterial({
-      color: 0x00eeff,
+    // Relativistic Gravitational Lensing: Upper Einstein Canopy
+    // Bent rear accretion disk curved over the event horizon
+    const canopySteps = 48;
+    const canopyRings = 16;
+    const canopyGeo = new THREE.BufferGeometry();
+    const canopyPositions: number[] = [];
+    const canopyColArr: number[] = [];
+    const canopyIndices: number[] = [];
+
+    for (let ri = 0; ri <= canopyRings; ri++) {
+      const rFrac = ri / canopyRings;
+      const rVal = diskRInner + rFrac * (diskROuter * 0.85 - diskRInner);
+      const apexH = 2.1 + (1 - rFrac) * 1.8;
+
+      for (let st = 0; st <= canopySteps; st++) {
+        const phi = (st / canopySteps) * Math.PI; // 0 to PI
+        const x = -rVal * Math.cos(phi);
+        const y = Math.sin(phi) * apexH;
+        const z = -Math.sin(phi) * (rVal * 0.4);
+
+        canopyPositions.push(x, y, z);
+
+        const cosTheta = -Math.cos(phi); // negative on left, positive on right
+        if (cosTheta < 0) {
+          canopyColArr.push(0.9, 0.95, 1.0);
+        } else {
+          canopyColArr.push(0.85 * (1 - cosTheta * 0.3), 0.3 * (1 - cosTheta * 0.5), 0.1);
+        }
+      }
+    }
+
+    for (let ri = 0; ri < canopyRings; ri++) {
+      for (let st = 0; st < canopySteps; st++) {
+        const a = ri * (canopySteps + 1) + st;
+        const b = (ri + 1) * (canopySteps + 1) + st;
+        const c = (ri + 1) * (canopySteps + 1) + (st + 1);
+        const d = ri * (canopySteps + 1) + (st + 1);
+        canopyIndices.push(a, b, d);
+        canopyIndices.push(b, c, d);
+      }
+    }
+    canopyGeo.setAttribute('position', new THREE.Float32BufferAttribute(canopyPositions, 3));
+    canopyGeo.setAttribute('color', new THREE.Float32BufferAttribute(canopyColArr, 3));
+    canopyGeo.setIndex(canopyIndices);
+    const canopyMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.72,
       blending: THREE.AdditiveBlending,
     });
-    const jetMesh = new THREE.Mesh(jetGeo, jetMat);
-    jetMesh.position.set(0, 0, 0);
-    blackHoleGroup.add(jetMesh);
+    const upperCanopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
+    upperCanopyMesh.rotation.x = 0.15;
+    blackHoleGroup.add(upperCanopyMesh);
+
+    // Relativistic Gravitational Lensing: Lower Einstein Crescent
+    const lowerCanopyGeo = new THREE.BufferGeometry();
+    const lowerPositions: number[] = [];
+    const lowerColArr: number[] = [];
+    const lowerIndices: number[] = [];
+
+    for (let ri = 0; ri <= canopyRings; ri++) {
+      const rFrac = ri / canopyRings;
+      const rVal = diskRInner + rFrac * (diskROuter * 0.7 - diskRInner);
+      const apexH = -(1.8 + (1 - rFrac) * 1.3);
+
+      for (let st = 0; st <= canopySteps; st++) {
+        const phi = (st / canopySteps) * Math.PI;
+        const x = -rVal * Math.cos(phi);
+        const y = Math.sin(phi) * apexH;
+        const z = -Math.sin(phi) * (rVal * 0.3);
+
+        lowerPositions.push(x, y, z);
+        const cosTheta = -Math.cos(phi);
+        if (cosTheta < 0) {
+          lowerColArr.push(0.85, 0.9, 1.0);
+        } else {
+          lowerColArr.push(0.75 * (1 - cosTheta * 0.3), 0.25 * (1 - cosTheta * 0.5), 0.08);
+        }
+      }
+    }
+
+    for (let ri = 0; ri < canopyRings; ri++) {
+      for (let st = 0; st < canopySteps; st++) {
+        const a = ri * (canopySteps + 1) + st;
+        const b = (ri + 1) * (canopySteps + 1) + st;
+        const c = (ri + 1) * (canopySteps + 1) + (st + 1);
+        const d = ri * (canopySteps + 1) + (st + 1);
+        lowerIndices.push(a, b, d);
+        lowerIndices.push(b, c, d);
+      }
+    }
+    lowerCanopyGeo.setAttribute('position', new THREE.Float32BufferAttribute(lowerPositions, 3));
+    lowerCanopyGeo.setAttribute('color', new THREE.Float32BufferAttribute(lowerColArr, 3));
+    lowerCanopyGeo.setIndex(lowerIndices);
+    const lowerCanopyMesh = new THREE.Mesh(lowerCanopyGeo, canopyMat);
+    lowerCanopyMesh.rotation.x = -0.12;
+    blackHoleGroup.add(lowerCanopyMesh);
+
+    // Swirling Keplerian Disk Particles
+    const bhParticleCount = 200;
+    const bhPartGeo = new THREE.BufferGeometry();
+    const bhPartPos = new Float32Array(bhParticleCount * 3);
+    const bhPartCol = new Float32Array(bhParticleCount * 3);
+
+    for (let i = 0; i < bhParticleCount; i++) {
+      const pR = diskRInner + Math.random() * (diskROuter - diskRInner);
+      const pTheta = Math.random() * Math.PI * 2;
+      const px = pR * Math.cos(pTheta);
+      const pz = pR * Math.sin(pTheta);
+      const py = (Math.random() - 0.5) * 0.25;
+
+      bhPartPos[i * 3] = px;
+      bhPartPos[i * 3 + 1] = py;
+      bhPartPos[i * 3 + 2] = pz;
+
+      const isApproaching = px < 0;
+      if (isApproaching) {
+        bhPartCol[i * 3] = 0.95;
+        bhPartCol[i * 3 + 1] = 0.98;
+        bhPartCol[i * 3 + 2] = 1.0;
+      } else {
+        bhPartCol[i * 3] = 0.9;
+        bhPartCol[i * 3 + 1] = 0.35;
+        bhPartCol[i * 3 + 2] = 0.1;
+      }
+    }
+    bhPartGeo.setAttribute('position', new THREE.BufferAttribute(bhPartPos, 3));
+    bhPartGeo.setAttribute('color', new THREE.BufferAttribute(bhPartCol, 3));
+    const bhPartMat = new THREE.PointsMaterial({
+      size: 0.16,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const bhParticlePoints = new THREE.Points(bhPartGeo, bhPartMat);
+    bhParticlePoints.rotation.x = Math.PI / 2.3;
+    blackHoleGroup.add(bhParticlePoints);
+
+    // Relativistic Polar Jets (Blandford-Znajek Collimated Outflows)
+    const jetCoreGeo = new THREE.CylinderGeometry(0.16, 0.8, 26, 16);
+    const jetCoreMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
+    });
+    const jetCoreMesh = new THREE.Mesh(jetCoreGeo, jetCoreMat);
+    blackHoleGroup.add(jetCoreMesh);
+
+    const jetSheathGeo = new THREE.CylinderGeometry(0.45, 2.2, 28, 16);
+    const jetSheathMat = new THREE.MeshBasicMaterial({
+      color: 0x4f46e5,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+    });
+    const jetSheathMesh = new THREE.Mesh(jetSheathGeo, jetSheathMat);
+    blackHoleGroup.add(jetSheathMesh);
+
+    // Traveling Mach diamond shock rings along the jet axis
+    const shockDistances = [-11, -7, -3.5, 3.5, 7, 11];
+    shockDistances.forEach((dist) => {
+      const shockGeo = new THREE.RingGeometry(0.25, 0.85, 24);
+      const shockMat = new THREE.MeshBasicMaterial({
+        color: 0x67e8f9,
+        transparent: true,
+        opacity: 0.7,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+      });
+      const shockMesh = new THREE.Mesh(shockGeo, shockMat);
+      shockMesh.position.y = dist;
+      shockMesh.rotation.x = Math.PI / 2;
+      blackHoleGroup.add(shockMesh);
+    });
 
     blackHoleGroup.visible = false;
     starGroup.add(blackHoleGroup);
@@ -979,18 +1207,21 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
 
           {/* Cosmic Analog Star Card (Clickable to Catalog!) */}
           <div className="p-3.5 rounded-xl bg-[#040818]/90 border border-slate-800 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <span className="text-[10px] font-mono uppercase text-slate-500 block">
-                Cosmic Exemplar in Catalog
-              </span>
-              <div className="text-xs font-bold text-white truncate">
-                {currentStage.analogStarName}
-              </div>
-              {currentStage.analogStarConstellation && (
-                <div className="text-[10px] text-slate-400 font-mono">
-                  Constellation: {currentStage.analogStarConstellation}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <StarDot2D star={catalogStar} colorHex={catalogStar?.colorHex || '#38bdf8'} sizeClassName="w-3.5 h-3.5" />
+              <div className="min-w-0">
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">
+                  Cosmic Exemplar in Catalog
+                </span>
+                <div className="text-xs font-bold text-white truncate">
+                  {currentStage.analogStarName}
                 </div>
-              )}
+                {currentStage.analogStarConstellation && (
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    Constellation: {currentStage.analogStarConstellation}
+                  </div>
+                )}
+              </div>
             </div>
 
             {catalogStar && onSelectStar ? (

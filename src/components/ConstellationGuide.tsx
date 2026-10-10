@@ -24,6 +24,7 @@ import {
   EXTRA_CATALOG_FIGURE_STARS,
   STAR_CONSTELLATION_LOCATIONS
 } from '../data/catalogStarsConstellationLocations';
+import { StarDot2D } from './StarDot2D';
 import {
   Sparkles,
   Compass,
@@ -94,9 +95,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [inspectedConstellation]);
 
-  // Mythbuster birthday calculator state
-  const [calcMonth, setCalcMonth] = useState<number>(3);
-  const [calcDay, setCalcDay] = useState<number>(15);
+  // Mythbuster birthday calculator state (defaults dynamically to today's local date)
+  const [calcMonth, setCalcMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [calcDay, setCalcDay] = useState<number>(() => new Date().getDate());
 
   // Astrometric Sky Map layer toggles
   const [skyMapOptions, setSkyMapOptions] = useState({
@@ -194,68 +195,78 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     // Ophiuchus: Nov 29 - Dec 17
     // Sagittarius: Dec 18 - Jan 18
 
-    let astronomical = 'Pisces (The Fishes)';
-    let symbol = '♓';
+    let astronomical = 'Virgo (The Maiden)';
+    let symbol = '♍';
     let isOph = false;
-    let daysIn = 37.7;
-    let desc = 'The Sun is physically crossing through Pisces.';
+    let daysIn = 44.5;
+    let desc = 'The Sun is physically crossing through Virgo.';
 
     if ((m === 1 && d >= 19) || (m === 2 && d <= 15)) {
       astronomical = 'Capricornus (The Sea-Goat)';
       symbol = '♑';
       daysIn = 27.8;
+      desc = 'The Sun is physically crossing through Capricornus.';
     } else if ((m === 2 && d >= 16) || (m === 3 && d <= 11)) {
       astronomical = 'Aquarius (The Water-Bearer)';
       symbol = '♒';
       daysIn = 24.1;
+      desc = 'The Sun is physically crossing through Aquarius.';
     } else if ((m === 3 && d >= 12) || (m === 4 && d <= 17)) {
       astronomical = 'Pisces (The Fishes)';
       symbol = '♓';
       daysIn = 37.7;
-      desc = 'The Sun is physically in Pisces! (Creator’s sign too 🐟✨)';
+      desc = 'The Sun is physically crossing through Pisces.';
     } else if ((m === 4 && d >= 18) || (m === 5 && d <= 13)) {
       astronomical = 'Aries (The Ram)';
       symbol = '♈';
       daysIn = 25.5;
+      desc = 'The Sun is physically crossing through Aries.';
     } else if ((m === 5 && d >= 14) || (m === 6 && d <= 21)) {
       astronomical = 'Taurus (The Bull)';
       symbol = '♉';
       daysIn = 38.2;
+      desc = 'The Sun is physically crossing through Taurus.';
     } else if ((m === 6 && d >= 22) || (m === 7 && d <= 20)) {
       astronomical = 'Gemini (The Twins)';
       symbol = '♊';
       daysIn = 29.3;
+      desc = 'The Sun is physically crossing through Gemini.';
     } else if ((m === 7 && d >= 21) || (m === 8 && d <= 10)) {
       astronomical = 'Cancer (The Crab)';
       symbol = '♋';
       daysIn = 21.1;
+      desc = 'The Sun is physically crossing through Cancer.';
     } else if ((m === 8 && d >= 11) || (m === 9 && d <= 16)) {
       astronomical = 'Leo (The Lion)';
       symbol = '♌';
       daysIn = 36.9;
+      desc = 'The Sun is physically crossing through Leo.';
     } else if ((m === 9 && d >= 17) || (m === 10 && d <= 30)) {
       astronomical = 'Virgo (The Maiden)';
       symbol = '♍';
       daysIn = 44.5;
+      desc = 'The Sun is physically crossing through Virgo (its longest zodiac transit at 44.5 days).';
     } else if ((m === 10 && d >= 31) || (m === 11 && d <= 22)) {
       astronomical = 'Libra (The Scales)';
       symbol = '♎';
       daysIn = 23.0;
+      desc = 'The Sun is physically crossing through Libra.';
     } else if (m === 11 && d >= 23 && d <= 28) {
       astronomical = 'Scorpius (The Scorpion)';
       symbol = '♏';
       daysIn = 6.8;
-      desc = 'The Sun only spends 6 days in Scorpius before entering Ophiuchus!';
+      desc = 'The Sun only spends 6.8 days crossing through Scorpius before entering Ophiuchus!';
     } else if ((m === 11 && d >= 29) || (m === 12 && d <= 17)) {
       astronomical = 'Ophiuchus (The Serpent Bearer)';
       symbol = '⛎';
       isOph = true;
       daysIn = 18.6;
-      desc = 'You were born under the 13th astronomical zodiac constellation: Ophiuchus!';
+      desc = 'You were born when the Sun was physically in the 13th astronomical constellation: Ophiuchus!';
     } else {
       astronomical = 'Sagittarius (The Archer)';
       symbol = '♐';
       daysIn = 31.9;
+      desc = 'The Sun is physically crossing through Sagittarius toward the galactic core.';
     }
 
     return { traditional, astronomical, symbol, isOph, daysIn, desc };
@@ -1142,14 +1153,26 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto text-slate-200">
-      {/* Top Banner & Sub-Tabs */}
-      <div className="flex flex-col gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#071329] via-[#0b1b3b] to-[#081024] border border-cyan-500/30 shadow-lg">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 shrink-0" />
-            <span>Constellation Guide</span>
-          </h2>
+      {/* Top Banner (Uniform Hero Section) */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+        <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2 max-w-3xl">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+              <Compass className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+              <span>Constellation Guide</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              Discover all 88 official IAU constellations dividing the celestial sphere, compare 2D Earth perspective against true 3D stellar depths, explore the real 13 astronomical zodiac constellations, and debunk astrological lore.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-3 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-bold shadow-sm">
+              88 IAU Sectors
+            </span>
+          </div>
         </div>
+      </div>
 
         {/* Sub-Tabs Switcher - Separate Buttons (No Sliding Panel) */}
         <div className="flex flex-wrap items-center gap-2 p-1.5 bg-[#020512] rounded-2xl border border-cyan-500/25 max-w-full">
@@ -1211,40 +1234,29 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             <span>Personality Mythbuster</span>
           </button>
         </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* SUB-TAB 1: WHAT ARE CONSTELLATIONS? */}
       {/* ========================================================================= */}
       {activeTab === 'what-are' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Hero Core Concept Box */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-[#061026] border border-cyan-500/30 relative overflow-hidden">
-            <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Sub-tab Hero Banner: What Are Constellations? */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
-              <div className="flex-1">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-semibold mb-3">
-                  <Eye className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>The 3D Space vs. 2D Earth Projection Paradox</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
-                  Physical Reality vs. Celestial Coordinates
-                </h3>
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                  In three-dimensional space, <strong className="text-cyan-300">constellations do not physically exist</strong>.
-                  The stars that form familiar patterns like Orion or the Big Dipper are separated by dozens,
-                  hundreds, or even thousands of light-years in radial depth. They have no gravitational binding, no
-                  common birth nebula, and are moving in completely different galactic orbits.
+              <div className="flex-1 space-y-2">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+                  <span>Physical Reality vs. Celestial Coordinates</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  In three-dimensional space, <strong className="text-cyan-300 font-semibold">constellations do not physically exist</strong>. The stars that form familiar patterns like Orion or the Big Dipper are separated by dozens, hundreds, or even thousands of light-years in radial depth. They have no gravitational binding, no common birth nebula, and are moving in completely different galactic orbits.
                 </p>
-                <div className="mt-4 p-4 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs sm:text-sm text-blue-200 leading-relaxed">
-                  <strong className="text-white block mb-1">
+                <div className="mt-3 p-3.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 leading-relaxed font-sans">
+                  <strong className="text-white block mb-0.5">
                     📍 Why are constellations still indispensable to modern astronomy?
                   </strong>
-                  While physically meaningless in deep space, they are <strong className="text-cyan-300 font-bold">essential locators</strong> for
-                  mapping the night sky from Earth. Just like postal codes or country boundaries on a globe, the 88
-                  standardized IAU boundaries divide the entire celestial sphere into 88 precise sectors, allowing
-                  astronomers to instantly coordinate telescopes, report newly discovered exoplanets, locate meteor
-                  shower radiants, and communicate where transient supernovae erupt.
+                  While physically meaningless in deep space, they are <strong className="text-cyan-300 font-bold">essential standardized sectors</strong> for mapping the night sky from Earth—functioning just like postal codes or country boundaries on a globe.
                 </div>
               </div>
 
@@ -1341,6 +1353,22 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'all-88' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          {/* Sub-tab Hero Banner: All 88 Constellations */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+                  <span>All 88 Constellations Directory</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  The International Astronomical Union (IAU) formally divides the entire celestial sphere into 88 unambiguous sectors. Filter and sort by celestial hemisphere, constellation family, total celestial area, or brightest alpha star.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Search, Filters & Sorters */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#050c20] border border-cyan-500/25 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             {/* Search input */}
@@ -1499,8 +1527,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
                     {/* Principal Star & Action */}
                     <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[9px]">
-                      <span className="text-slate-400 truncate flex items-center gap-0.5">
-                        <Star className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      <span className="text-slate-400 truncate flex items-center gap-1">
+                        <StarDot2D star={principalStar} colorHex={principalStar?.colorHex || '#fef08a'} sizeClassName="w-2 h-2" />
                         <span className="text-white font-medium truncate">{constellation.principalStarName.split('(')[0]}</span>
                       </span>
 
@@ -1594,7 +1622,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   <div className="pt-1.5 sm:pt-2.5 border-t border-slate-800 flex flex-col gap-1.5 sm:gap-2">
                     <div className="flex items-center justify-between text-[10px] sm:text-xs">
                       <span className="text-slate-400 text-[9px] sm:text-[11px] flex items-center gap-1 shrink-0">
-                        <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400" />
+                        <StarDot2D star={principalStar} colorHex={principalStar?.colorHex || '#fef08a'} sizeClassName="w-2 h-2" />
                         <span>Principal:</span>
                       </span>
                       <span className="text-white font-semibold text-[9.5px] sm:text-[11px] truncate max-w-[85px] sm:max-w-[130px]" title={constellation.principalStarName}>
@@ -1609,10 +1637,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                             e.stopPropagation();
                             onSelectStar(principalStar);
                           }}
-                          className="flex-1 py-1 sm:py-1.5 px-1.5 sm:px-2 rounded-lg bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 hover:text-white border border-cyan-500/40 text-[10px] sm:text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95"
+                          className="flex-1 py-1 sm:py-1.5 px-1.5 sm:px-2 rounded-lg bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 hover:text-white border border-cyan-500/40 text-[10px] sm:text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors active:scale-95"
                           title={`Inspect ${principalStar.name} in 3D Comparator`}
                         >
-                          <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-cyan-400 shrink-0" />
+                          <StarDot2D star={principalStar} sizeClassName="w-2 h-2" />
                           <span>Inspect</span>
                         </button>
                       )}
@@ -1641,21 +1669,30 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'zodiac-13' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Explainer Hero Box */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#0b1736] via-[#101e47] to-[#0b1430] border border-amber-500/35 relative overflow-hidden">
+          {/* Sub-tab Hero Banner: 13 Zodiac Signs */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+                  <span>The 13 Signs of the Astronomical Zodiac</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  The ecliptic path of the Sun physically crosses 13 distinct astronomical constellations—not 12—including Ophiuchus the Serpent Bearer. Over the last 2,500 years, axial precession has shifted the actual dates the Sun spends in each constellation by almost a full month.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Explainer Details & Ophiuchus Callout */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#040816] border border-cyan-500/20">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 text-xs font-mono font-semibold mb-3">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>The Real Astronomical Highway</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                  The 13 Signs of the Astronomical Zodiac (Yes, Thirteen!)
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              <div className="max-w-3xl space-y-3">
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                   {ZODIAC_13_EXPLAINER.introduction}
                 </p>
-                <div className="mt-3 p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs sm:text-sm text-amber-200 leading-relaxed">
+                <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs sm:text-sm text-amber-200 leading-relaxed font-sans">
                   <strong className="text-white block mb-0.5">
                     ⏳ The Precession of the Equinoxes (The 1-Month Shift):
                   </strong>
@@ -1754,7 +1791,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       onClick={() => onSelectStar(star)}
                       className="w-full py-2 px-3 rounded-xl bg-slate-800/80 hover:bg-cyan-950 hover:text-cyan-300 hover:border-cyan-500/40 border border-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer mt-1"
                     >
-                      <Star className="w-3.5 h-3.5 text-amber-400" />
+                      <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
                       <span>Inspect {star.name.split('(')[0]}</span>
                     </button>
                   )}
@@ -1770,33 +1807,45 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'mythbuster' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          {/* Sub-tab Hero Banner: Personality Mythbuster */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <HelpCircle className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400 shrink-0" />
+                  <span>Personality Mythbuster</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  Astrology and zodiac personality tropes explored through empirical astrophysics: test where the Sun was physically located on your date of birth, examine axial precession shifts, and learn why gravity and distance rule out astrological determinism.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Big Mythbuster Verdict Card */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-[#140608] border-2 border-rose-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(244,63,94,0.2)]">
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#140608] border border-rose-500/40 relative overflow-hidden shadow-lg">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs font-mono font-semibold mb-3">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Empirical Science vs. Cultural Folklore</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   {MYTHBUSTER_INFO.title}
                 </h3>
-                <div className="mt-2 text-lg sm:text-xl font-bold text-rose-400">
+                <div className="mt-1 text-base sm:text-lg font-bold text-rose-400">
                   {MYTHBUSTER_INFO.verdict}
                 </div>
-                <p className="text-sm sm:text-base text-slate-300 mt-2 max-w-2xl leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">
                   {MYTHBUSTER_INFO.friendlyNote}
                 </p>
               </div>
 
-              {/* Pisces Easter Egg Callout */}
-              <div className="w-full md:w-72 p-5 rounded-2xl bg-[#1e0a10] border border-rose-500/40 text-center flex flex-col items-center gap-2 shrink-0">
-                <div className="w-14 h-14 rounded-full bg-rose-950/80 border border-rose-500 flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(244,63,94,0.4)]">
-                  ♓
+              {/* Astrophysics Perspective Callout */}
+              <div className="w-full md:w-72 p-4 rounded-2xl bg-[#091530] border border-cyan-500/40 text-center flex flex-col items-center gap-2 shrink-0">
+                <div className="w-10 h-10 rounded-full bg-cyan-950/80 border border-cyan-400 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                  🔭
                 </div>
-                <div className="text-sm font-bold text-white">A Note from the Creator</div>
-                <p className="text-xs text-rose-200/90 leading-snug">
-                  "Yes, I am a Pisces! Astrology is charming cultural mythology and fun folklore. But as lovers of real
+                <div className="text-xs font-bold text-white">Astrophysical Reality</div>
+                <p className="text-[11px] text-cyan-200/90 leading-snug">
+                  "Astrology is charming cultural mythology and fun folklore. But as lovers of real
                   stars, we celebrate the wondrous truth: stars are nuclear titans, not mystical mood-rings!"
                 </p>
               </div>
@@ -1818,7 +1867,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </p>
 
             {/* Select Date Controls */}
-            <div className="flex flex-wrap items-center gap-3 mb-5">
+            <div className="flex flex-wrap items-end gap-3 mb-5">
               <div>
                 <label className="block text-[10px] font-mono text-slate-400 mb-1">Birth Month</label>
                 <select
@@ -1854,6 +1903,22 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const now = new Date();
+                    setCalcMonth(now.getMonth() + 1);
+                    setCalcDay(now.getDate());
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Reset to today's astronomical date"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Today's Transit</span>
+                </button>
               </div>
             </div>
 
@@ -2293,29 +2358,32 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   </div>
 
                   {/* Principal Star Action */}
-                  {starMap.get(inspectedConstellation.principalStarId) && (
-                    <div className="p-3.5 rounded-xl bg-[#04091c] border border-cyan-500/20 flex items-center justify-between gap-3">
-                      <div className="text-xs">
-                        <span className="text-slate-400 block text-[10px]">Principal Star:</span>
-                        <span className="text-white font-bold text-sm">
-                          {starMap.get(inspectedConstellation.principalStarId)?.name}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => {
-                          const star = starMap.get(inspectedConstellation.principalStarId);
-                          if (star) {
+                  {starMap.get(inspectedConstellation.principalStarId) && (() => {
+                    const pStar = starMap.get(inspectedConstellation.principalStarId)!;
+                    return (
+                      <div className="p-3.5 rounded-xl bg-[#04091c] border border-cyan-500/20 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 text-xs">
+                          <StarDot2D star={pStar} sizeClassName="w-3.5 h-3.5" />
+                          <div>
+                            <span className="text-slate-400 block text-[10px]">Principal Star:</span>
+                            <span className="text-white font-bold text-sm">
+                              {pStar.name}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
                             setInspectedConstellation(null);
-                            onSelectStar(star);
-                          }
-                        }}
-                        className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-transform active:scale-95 shrink-0"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect Star in 3D</span>
-                      </button>
-                    </div>
-                  )}
+                            onSelectStar(pStar);
+                          }}
+                          className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-transform active:scale-95 shrink-0"
+                        >
+                          <StarDot2D star={pStar} sizeClassName="w-2.5 h-2.5" />
+                          <span>Inspect Star in 3D</span>
+                        </button>
+                      </div>
+                    );
+                  })()}
 
                   {/* Cataloged Constellation Stars List with Known Locations */}
                   {(() => {
@@ -2364,10 +2432,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                               >
                                 <div className="flex flex-col gap-1 min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span
-                                      className="w-2 h-2 rounded-full shrink-0 shadow-[0_0_8px_currentColor]"
-                                      style={{ backgroundColor: st.colorHex || '#38bdf8' }}
-                                    />
+                                    <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
                                     <span className="font-bold text-xs sm:text-sm text-white truncate">
                                       {cleanName}
                                     </span>
@@ -2421,7 +2486,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                                   className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/50 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0 shadow"
                                   title={`Open 3D Star Dossier for ${cleanName}`}
                                 >
-                                  <Eye className="w-3.5 h-3.5" />
+                                  <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
                                   <span>Inspect in 3D</span>
                                 </button>
                               </div>

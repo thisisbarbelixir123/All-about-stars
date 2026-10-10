@@ -107,8 +107,13 @@ export function normalizeSpectralClassification(
     sClass = 'NS';
   } else if (firstLetter === 'C') {
     sClass = 'C';
-  } else if (firstLetter === 'S' && !sType.startsWith('SD')) {
+  } else if (firstLetter === 'S' && !sType.toLowerCase().startsWith('sd')) {
     sClass = 'S';
+  } else if (sType.toLowerCase().startsWith('sd')) {
+    const sdLetter = sType.charAt(2).toUpperCase();
+    if (['O', 'B', 'A', 'F', 'G', 'K', 'M'].includes(sdLetter)) {
+      sClass = sdLetter as SpectralClass;
+    }
   } else if (['O', 'B', 'A', 'F', 'G', 'K', 'M', 'T', 'Y'].includes(firstLetter)) {
     sClass = firstLetter as SpectralClass;
   } else if (firstLetter === 'L' && !sType.startsWith('LBV')) {

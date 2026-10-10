@@ -491,6 +491,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'enif',
     name: 'Enif (Epsilon Pegasi)',
     alternateNames: ['Epsilon Pegasi', '8 Pegasi', 'HD 206778', 'HR 8308', 'HIP 107315'],
+    bayerDesignation: 'ε Peg',
     constellation: 'Pegasus',
     diameterSolar: 185, // ~257 Million km (~1.72 AU)
     temperature: 4379,
@@ -535,6 +536,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'alsuhail',
     name: 'Alsuhail (Lambda Velorum)',
     alternateNames: ['Lambda Velorum', 'HD 78647', 'HR 3634', 'HIP 44816'],
+    bayerDesignation: 'λ Vel',
     constellation: 'Vela',
     diameterSolar: 210, // ~292 Million km (~1.95 AU)
     temperature: 4000,
@@ -579,6 +581,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'tarazed',
     name: 'Tarazed (Gamma Aquilae)',
     alternateNames: ['Gamma Aquilae', '50 Aquilae', 'HD 186791', 'HR 7525', 'HIP 97278'],
+    bayerDesignation: 'γ Aql',
     constellation: 'Aquila',
     diameterSolar: 110, // ~153 Million km (~1.02 AU)
     temperature: 4210,
@@ -623,6 +626,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'sadr',
     name: 'Sadr (Gamma Cygni)',
     alternateNames: ['Gamma Cygni', '37 Cygni', 'HD 194093', 'HR 7796', 'HIP 100453'],
+    bayerDesignation: 'γ Cyg',
     constellation: 'Cygnus',
     diameterSolar: 150, // ~209 Million km (~1.40 AU)
     temperature: 5790,
@@ -667,6 +671,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'almaaz',
     name: 'Almaaz (Epsilon Aurigae)',
     alternateNames: ['Epsilon Aurigae', '7 Aurigae', 'HD 31964', 'HR 1605', 'HIP 23416'],
+    bayerDesignation: 'ε Aur',
     constellation: 'Auriga',
     diameterSolar: 143, // ~199 Million km (~1.33 AU)
     temperature: 7750,
@@ -755,6 +760,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'gacrux',
     name: 'Gacrux (Gamma Crucis)',
     alternateNames: ['Gamma Crucis', 'HD 108903', 'HR 4763', 'HIP 61084'],
+    bayerDesignation: 'γ Cru',
     constellation: 'Crux',
     diameterSolar: 113, // ~157 Million km (~1.05 AU)
     temperature: 3626,
@@ -799,6 +805,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'menkar',
     name: 'Menkar (Alpha Ceti)',
     alternateNames: ['Alpha Ceti', '92 Ceti', 'HD 18884', 'HR 911', 'HIP 14135'],
+    bayerDesignation: 'α Cet',
     constellation: 'Cetus',
     diameterSolar: 115, // ~160 Million km (~1.07 AU)
     temperature: 3795,
@@ -843,6 +850,7 @@ export const STARS_LUMINOUS_GIANTS: StarData[] = [
     id: 'avior',
     name: 'Avior (Epsilon Carinae)',
     alternateNames: ['Epsilon Carinae', 'HD 71129', 'HR 3307', 'HIP 41037'],
+    bayerDesignation: 'ε Car',
     constellation: 'Carina',
     diameterSolar: 153, // ~213 Million km (~1.42 AU)
     temperature: 4100,

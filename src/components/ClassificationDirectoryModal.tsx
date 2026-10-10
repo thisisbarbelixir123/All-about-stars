@@ -11,6 +11,7 @@ import {
   CheckCircle,
   ExternalLink
 } from 'lucide-react';
+import { StarDot2D } from './StarDot2D';
 import {
   getComprehensiveStarMapping,
   MappedClassificationInfo
@@ -41,6 +42,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
   const stats = useMemo(() => {
     let harvardCount = 0;
     let otherCount = 0;
+    let remnantCount = 0;
     const yerkesCount: Record<string, number> = {};
     let variableCount = 0;
     let exoplanetCount = 0;
@@ -48,6 +50,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
     for (const rec of mappedRecords) {
       if (rec.harvardClass) harvardCount++;
       if (rec.otherClass) otherCount++;
+      if (rec.remnantClass) remnantCount++;
       yerkesCount[rec.yerkesClass] = (yerkesCount[rec.yerkesClass] || 0) + 1;
       if (rec.variableTypes.length > 0) variableCount++;
       if (rec.star.exoplanetSystem && rec.star.exoplanetSystem.hasExoplanets) exoplanetCount++;
@@ -57,6 +60,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
       total: stars.length,
       harvardCount,
       otherCount,
+      remnantCount,
       yerkesCount,
       variableCount,
       exoplanetCount,
@@ -70,6 +74,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
       // Subsystem filter
       if (selectedSubsystemFilter === 'harvard' && !rec.harvardClass) return false;
       if (selectedSubsystemFilter === 'other' && !rec.otherClass) return false;
+      if (selectedSubsystemFilter === 'remnant' && !rec.remnantClass) return false;
       if (selectedSubsystemFilter === 'variable' && rec.variableTypes.length === 0) return false;
       if (selectedSubsystemFilter === 'exoplanet' && (!rec.star.exoplanetSystem || !rec.star.exoplanetSystem.hasExoplanets)) return false;
       if (selectedSubsystemFilter === 'hypergiant' && rec.yerkesClass !== 'Ia+') return false;
@@ -182,9 +187,10 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
           {/* Subsystem Filter Pills */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none font-mono text-xs shrink-0">
             {[
-              { id: 'all', label: 'All (557)' },
-              { id: 'harvard', label: 'Harvard (470)' },
-              { id: 'other', label: 'Exotic/Other (87)' },
+              { id: 'all', label: `All (${stats.total})` },
+              { id: 'harvard', label: `Harvard (${stats.harvardCount})` },
+              { id: 'other', label: `Other Classes (${stats.otherCount})` },
+              { id: 'remnant', label: `Stellar Remnants (${stats.remnantCount})` },
               { id: 'hypergiant', label: 'Hypergiants (Ia+)' },
               { id: 'supergiant', label: 'Supergiants (I)' },
               { id: 'main-sequence', label: 'Main Sequence (V)' },
@@ -234,10 +240,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
                 >
                   {/* Left Column: Color, Name, Constellation, Spectral Class */}
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/30 shadow-md"
-                      style={{ backgroundColor: s.colorHex }}
-                    />
+                    <StarDot2D star={s} sizeClassName="w-3.5 h-3.5" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-white group-hover:text-cyan-200 transition-colors font-mono">
@@ -296,7 +299,7 @@ export const ClassificationDirectoryModal: React.FC<ClassificationDirectoryModal
 
         {/* Modal Footer */}
         <div className="p-3 bg-[#020512] border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Stellar Classification Engine • All 557 Stars Fully Mapped</span>
+          <span>Stellar Classification Engine</span>
           <button
             type="button"
             onClick={onClose}

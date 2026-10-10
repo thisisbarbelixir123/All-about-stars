@@ -16,6 +16,7 @@ import {
   Zap,
   Compass,
   Maximize2,
+  BarChart2,
 } from 'lucide-react';
 
 interface HRDiagramProps {
@@ -835,40 +836,41 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
   return (
     <div className={`w-full flex flex-col ${isMobileMode ? 'gap-1.5' : 'gap-4'}`}>
-      {/* Top Header Card: Hidden in mobile landscape to maximize canvas viewport */}
+      {/* Top Header Card (Uniform Hero Banner): Hidden in mobile landscape to maximize canvas viewport */}
       {(!isMobileMode || !isLandscape) && (
-        <div className={`flex ${
-          isMobileMode ? 'flex-row items-center justify-between p-2 rounded-xl' : 'flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl'
-        } bg-gradient-to-r from-[#030612]/95 via-[#060e26]/95 to-[#040817]/95 border border-cyan-500/25 shadow-xl`}>
-          <div>
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <h2 className="text-sm sm:text-lg md:text-xl font-black text-white tracking-wide flex items-center gap-1.5 sm:gap-2 font-sans">
-                <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
-                Hertzsprung–Russell Diagram
-              </h2>
-              <span
-                id="hr-diagram-star-count"
-                className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 font-mono border border-cyan-500/40"
-              >
-                {filteredStars.length}
-              </span>
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 ${
+          isMobileMode ? 'p-3.5' : 'p-5 sm:p-6'
+        } shadow-xl backdrop-blur-md`}>
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-2 max-w-3xl">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                <BarChart2 className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-400 shrink-0" />
+                <span>Hertzsprung–Russell Diagram</span>
+                <span
+                  id="hr-diagram-star-count"
+                  className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 font-mono border border-indigo-500/40 font-bold ml-1"
+                >
+                  {filteredStars.length}
+                </span>
+              </h1>
+              {!isMobileMode && (
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  The foundational map of stellar astrophysics. Plots stellar luminosity against effective surface temperature, mapping the Main Sequence, giant branches, and white dwarf cooling curves according to the Stefan–Boltzmann law.
+                </p>
+              )}
             </div>
-            {!isMobileMode && (
-              <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                The master map of stellar astrophysics. Plots luminosity against surface temperature, revealing the life cycles, evolutionary tracks, and physical radii of stars according to the Stefan–Boltzmann law.
-              </p>
+
+            {onOpenClassificationGuide && (
+              <button
+                onClick={onOpenClassificationGuide}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Classification Guide</span>
+              </button>
             )}
           </div>
-
-          {onOpenClassificationGuide && (
-            <button
-              onClick={onOpenClassificationGuide}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/30 text-cyan-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer shadow-sm shrink-0"
-            >
-              <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400" />
-              <span>Guide</span>
-            </button>
-          )}
         </div>
       )}
 

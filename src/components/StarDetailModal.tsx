@@ -276,8 +276,27 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                   <span
                     onClick={handleDossierStarClick}
                     className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/30 whitespace-nowrap cursor-pointer select-none"
+                    title={`Bayer Designation: ${star.bayerDesignation}`}
                   >
                     {star.bayerDesignation}
+                  </span>
+                )}
+                {star.flamsteedDesignation && (
+                  <span
+                    onClick={handleDossierStarClick}
+                    className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091429] text-sky-300 font-mono border border-sky-500/30 whitespace-nowrap cursor-pointer select-none"
+                    title={`Flamsteed Number: ${star.flamsteedDesignation}`}
+                  >
+                    {star.flamsteedDesignation}
+                  </span>
+                )}
+                {star.gouldDesignation && (
+                  <span
+                    onClick={handleDossierStarClick}
+                    className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#081a1c] text-emerald-300 font-mono border border-emerald-500/30 whitespace-nowrap cursor-pointer select-none"
+                    title={`Gould Designation: ${star.gouldDesignation}`}
+                  >
+                    {star.gouldDesignation}
                   </span>
                 )}
                 <button

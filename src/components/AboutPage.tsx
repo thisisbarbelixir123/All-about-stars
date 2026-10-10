@@ -36,11 +36,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             </div>
 
             <div className="flex flex-col gap-2">
-              {/* Brand Container with Logo next to Starpedia 3D */}
-              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-xl bg-cyan-950/40 border border-cyan-400/40 backdrop-blur-md shadow-md w-fit">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 aspect-square rounded-lg border border-cyan-400/80 p-0.5 bg-black shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center justify-center overflow-hidden shrink-0">
-                  <img src="/starpedia_logo.svg" alt="Starpedia 3D Logo" className="w-full h-full object-contain aspect-square rounded-sm" />
-                </div>
+              {/* Brand Header */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-950/40 border border-cyan-400/40 backdrop-blur-md shadow-md w-fit">
                 <div className="font-['Orbitron',sans-serif] font-bold text-sm sm:text-base text-white tracking-wider">
                   STARPEDIA <span className="bg-gradient-to-r from-cyan-400 to-sky-300 bg-clip-text text-transparent">3D</span>
                 </div>

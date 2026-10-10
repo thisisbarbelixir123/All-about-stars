@@ -3,6 +3,8 @@ import { StarData, PresetComparison } from '../types';
 import { STARS_CATALOG, PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { HeroStar3D, ActiveStarInfo } from './HeroStar3D';
+import { AmbientSoundToggle } from './AmbientSoundToggle';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   ArrowRight,
   Play,
@@ -231,33 +233,42 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className={`${isTablet ? 'block' : 'hidden md:block'} absolute top-10 left-10 w-72 h-72 bg-blue-950/20 rounded-full blur-[100px] pointer-events-none`} />
         <div className={`${isTablet ? 'block' : 'hidden md:block'} absolute bottom-10 right-10 w-72 h-72 bg-amber-950/20 rounded-full blur-[100px] pointer-events-none`} />
 
-        {/* 3D FLOATING STARS & SHUFFLE: ENABLED ON DESKTOP & TABLETS (NONE ON MOBILE) */}
-        {!isMobile && (
-          <div className={isTablet ? 'contents' : 'hidden md:contents'}>
-            {/* Enter 3D Mode Button */}
-            <button
-              id="btn-homescreen-enter-3d"
-              onClick={() => {
-                if (onClose) onClose();
-                else onNavigateTab('3d-stage');
-              }}
-              title="Enter 3D Stage Comparator"
-              className="absolute top-4 left-4 z-30 px-3 py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group active:scale-95"
-            >
-              <Play className="w-3.5 h-3.5 fill-cyan-400 group-hover:fill-white transition-colors" />
-              <span className="text-[11px] font-bold">3D Mode</span>
-            </button>
+        {/* TOP CONTROLS: 3D MODE BUTTON, PWA INSTALL & AMBIENT SOUND (ACCESSIBLE ON ALL DEVICES) */}
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30">
+          <button
+            id="btn-homescreen-enter-3d"
+            onClick={() => {
+              if (onClose) onClose();
+              else onNavigateTab('3d-stage');
+            }}
+            title="Enter 3D Stage Comparator"
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group active:scale-95"
+          >
+            <Play className="w-3.5 h-3.5 fill-cyan-400 group-hover:fill-white transition-colors" />
+            <span className="text-[10px] sm:text-[11px] font-bold">3D Mode</span>
+          </button>
+        </div>
 
-            {/* Re-roll Floating Stars Button */}
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-1.5 sm:gap-2">
+          <PWAInstallButton />
+          <AmbientSoundToggle />
+          {!isMobile && (
             <button
+              type="button"
               id="btn-reroll-hero-stars"
               onClick={handleShuffleHeroStars}
               title="Randomize Hero 3D Stars & Positions"
-              className="absolute top-4 right-4 z-30 p-2 sm:px-3 sm:py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-slate-400 hover:text-cyan-300 text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-slate-400 hover:text-cyan-300 text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group"
             >
               <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-90 transition-transform" />
-              <span className="text-[11px]">Shuffle 3D Stars</span>
+              <span className="text-[11px] hidden sm:inline">Shuffle 3D Stars</span>
             </button>
+          )}
+        </div>
+
+        {/* 3D FLOATING STARS: ENABLED ON DESKTOP & TABLETS (NONE ON MOBILE) */}
+        {!isMobile && (
+          <div className={isTablet ? 'contents' : 'hidden md:contents'}>
 
             {/* 4 MOVEABLE, GLOWING & RESIZABLE 3D STAR MODELS FROM CATALOG (30PX-300PX TABLET, 40PX-400PX DESKTOP) - BACK LAYER (Z-10) */}
             {heroStars.map((star, idx) => (
@@ -328,25 +339,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className={`relative z-20 flex flex-col items-center justify-center ${
           isMobile && !isTablet ? 'gap-2.5' : 'gap-3.5 sm:gap-4'
         } max-w-4xl mx-auto my-auto pointer-events-none px-3 text-center`}>
-          {/* Brand Container: Starpedia 3D placed in the same container next to the square logo */}
-          <div className="inline-flex items-center gap-2.5 sm:gap-3.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-[#04081c]/90 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-xl pointer-events-auto">
-            {/* Square Contained App Logo */}
-            <div className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 aspect-square rounded-xl border border-cyan-400/90 p-0.5 bg-black shadow-[0_0_12px_rgba(6,182,212,0.5)] flex items-center justify-center overflow-hidden shrink-0">
-              <img 
-                src="/starpedia_logo.svg" 
-                alt="Starpedia 3D Logo" 
-                className="w-full h-full object-contain aspect-square rounded-lg" 
-              />
-            </div>
-
-            <div className="flex flex-col items-start text-left leading-tight">
-              <span className="font-['Orbitron',sans-serif] font-black tracking-widest text-base sm:text-lg md:text-xl text-white">
-                STARPEDIA <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">3D</span>
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-cyan-300/85">
-                Stellar Edition
-              </span>
-            </div>
+          {/* Starpedia 3D Logo (without favicon) */}
+          <div className="inline-flex items-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-xl bg-[#04081c]/90 border border-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.3)] backdrop-blur-xl pointer-events-auto">
+            <span className="font-['Orbitron',sans-serif] font-bold tracking-widest text-xs sm:text-sm text-white">
+              STARPEDIA <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">3D</span>
+            </span>
           </div>
 
           {/* The Bigger Headline Text: Stars of the Universe */}

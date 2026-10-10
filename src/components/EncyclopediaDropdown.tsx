@@ -5,7 +5,8 @@ import {
   Sun, 
   Grid, 
   BarChart2, 
-  Compass 
+  Compass,
+  Telescope
 } from 'lucide-react';
 
 interface EncyclopediaDropdownProps {
@@ -13,6 +14,11 @@ interface EncyclopediaDropdownProps {
   onOpenCatalog: () => void;
   onOpenHRDiagram: () => void;
   onOpenConstellations: () => void;
+  onOpenDiscovery?: () => void;
+  onOpenNomenclature?: () => void;
+  onOpenTours?: () => void;
+  onOpenQuiz?: () => void;
+  onOpenObservationDeck?: () => void;
   activeOverlay?: string | null;
   buttonId?: string;
   menuId?: string;
@@ -24,6 +30,11 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
   onOpenCatalog,
   onOpenHRDiagram,
   onOpenConstellations,
+  onOpenDiscovery,
+  onOpenNomenclature,
+  onOpenTours,
+  onOpenQuiz,
+  onOpenObservationDeck,
   activeOverlay,
   buttonId = 'btn-stage-canvas-encyclopedia',
   menuId = 'menu-stage-canvas-encyclopedia',
@@ -31,6 +42,7 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const handleOpenDiscovery = onOpenDiscovery || onOpenNomenclature;
 
   // Close popover on outside click
   useEffect(() => {
@@ -80,7 +92,7 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
         >
           <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1.5 mb-1.5">
             <span>Star Encyclopedia</span>
-            <span className="text-cyan-400 font-normal">4 modules</span>
+            <span className="text-cyan-400 font-normal">5 modules</span>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -151,6 +163,82 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
                 <div className="text-[10px] text-slate-400 font-sans break-words">All 88 IAU constellations & lore</div>
               </div>
             </button>
+
+            {handleOpenDiscovery && (
+              <button
+                id="btn-encyclopedia-menu-discovery"
+                onClick={() => {
+                  setIsOpen(false);
+                  handleOpenDiscovery();
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+              >
+                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Telescope className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Stellar Discovery</div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Methods, telescopes, timeline & naming</div>
+                </div>
+              </button>
+            )}
+
+            {onOpenTours && (
+              <button
+                id="btn-encyclopedia-menu-tours"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenTours();
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+              >
+                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Compass className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Cosmic Expeditions</div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Guided multi-stop narrated tours</div>
+                </div>
+              </button>
+            )}
+
+            {onOpenQuiz && (
+              <button
+                id="btn-encyclopedia-menu-quiz"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenQuiz();
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-amber-500/15 border border-transparent hover:border-amber-500/30 text-slate-200 hover:text-white cursor-pointer group"
+              >
+                <div className="p-1.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 group-hover:scale-105 transition-transform shrink-0">
+                  <BookOpen className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-amber-300 break-words">Stellar Quiz</div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Astrophysics knowledge challenges</div>
+                </div>
+              </button>
+            )}
+
+            {onOpenObservationDeck && (
+              <button
+                id="btn-encyclopedia-menu-deck"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenObservationDeck();
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+              >
+                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Grid className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Observation Deck</div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Saved stars, notes & target lists</div>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       )}

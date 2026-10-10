@@ -12,6 +12,10 @@ import {
 import { StellarCrossSectionVisualizer } from './StellarCrossSectionVisualizer';
 import { StellarLifeCycleVisualizer2D } from './StellarLifeCycleVisualizer2D';
 import { ThermonuclearEngineVisualizer } from './ThermonuclearEngineVisualizer';
+import { AnimatedStarrySkyPanel } from './AnimatedStarrySkyPanel';
+import { VariableStarGraphic } from './VariableStarGraphic';
+import { StellarRemnantGraphic } from './StellarRemnantGraphic';
+import { StarDot2D } from './StarDot2D';
 import {
   SPECTRAL_CLASSES_GUIDE,
   EXOTIC_CLASSES_GUIDE,
@@ -19,6 +23,7 @@ import {
   VARIABLE_STARS_GUIDE,
   STAR_SYSTEMS_GUIDE,
   STELLAR_POPULATIONS_GUIDE,
+  STELLAR_REMNANTS_GUIDE,
   HYPOTHETICAL_STARS_GUIDE,
   STELLAR_MYTHS_GUIDE,
   CLASSIFICATION_QUIZ,
@@ -29,7 +34,6 @@ import {
   Sun,
   Flame,
   Layers,
-  Compass,
   HelpCircle,
   CheckCircle2,
   XCircle,
@@ -43,7 +47,6 @@ import {
   Zap,
   Lightbulb,
   ArrowRight,
-  BarChart2,
   Activity,
   Atom,
   Scale,
@@ -53,7 +56,6 @@ import {
   Grid,
   ShieldAlert,
   Sliders,
-  Database,
 } from 'lucide-react';
 import { ClassificationMappedStarsSection } from './ClassificationMappedStarsSection';
 import { ClassificationDirectoryModal } from './ClassificationDirectoryModal';
@@ -64,6 +66,7 @@ import {
   getMappedStarsForVariable,
   getMappedStarsForStarSystem,
   getMappedStarsForPopulation,
+  getMappedStarsForRemnant,
 } from '../utils/stellarClassificationMapping';
 
 interface StarEncyclopediaFrontpageProps {
@@ -97,18 +100,19 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
   // 3: Yerkes Luminosity System (MKK)
   // 4: Star Systems
   // 5: Stellar Populations
-  // 6: Hypothetical Stars
+  // 6: Stellar Remnants
+  // 7: Hypothetical Stars
   const [classificationSystemIndex, setClassificationSystemIndex] = useState<number>(() => {
     if (initialSection === 'luminosity-stages') return 3;
     return 0;
   });
 
   const handlePrevClassificationSystem = () => {
-    setClassificationSystemIndex((prev) => (prev - 1 + 7) % 7);
+    setClassificationSystemIndex((prev) => (prev - 1 + 8) % 8);
   };
 
   const handleNextClassificationSystem = () => {
-    setClassificationSystemIndex((prev) => (prev + 1) % 7);
+    setClassificationSystemIndex((prev) => (prev + 1) % 8);
   };
 
   // Other Spectral Classes Mobile Carousel state
@@ -131,6 +135,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
   // Variable Stars Carousel state
   const [activeVariableIndex, setActiveVariableIndex] = useState<number>(0);
+  // Contracted by default on mobiles
+  const [isMobileVariableGraphicOpen, setIsMobileVariableGraphicOpen] = useState<boolean>(false);
 
   const handlePrevVariable = () => {
     isNavigatedByArrowRef.current = true;
@@ -179,6 +185,20 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
   const handleNextPopulation = () => {
     isNavigatedByArrowRef.current = true;
     setActivePopulationIndex((prev) => (prev + 1) % STELLAR_POPULATIONS_GUIDE.length);
+  };
+
+  // Stellar Remnants Carousel state
+  const [activeRemnantIndex, setActiveRemnantIndex] = useState<number>(0);
+  const [isMobileRemnantGraphicOpen, setIsMobileRemnantGraphicOpen] = useState<boolean>(false);
+
+  const handlePrevRemnant = () => {
+    isNavigatedByArrowRef.current = true;
+    setActiveRemnantIndex((prev) => (prev - 1 + STELLAR_REMNANTS_GUIDE.length) % STELLAR_REMNANTS_GUIDE.length);
+  };
+
+  const handleNextRemnant = () => {
+    isNavigatedByArrowRef.current = true;
+    setActiveRemnantIndex((prev) => (prev + 1) % STELLAR_REMNANTS_GUIDE.length);
   };
 
   // Hypothetical Stars Carousel state
@@ -258,6 +278,19 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       }
     }
   }, [activePopulationIndex]);
+
+  useEffect(() => {
+    if (!isNavigatedByArrowRef.current) return;
+    isNavigatedByArrowRef.current = false;
+    const activeBtn = document.getElementById(`btn-remnant-select-${activeRemnantIndex}`);
+    if (activeBtn && activeBtn.parentElement) {
+      const container = activeBtn.parentElement;
+      if (container.scrollWidth > container.clientWidth) {
+        const targetScrollLeft = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.clientWidth / 2);
+        container.scrollTo({ left: Math.max(0, targetScrollLeft), behavior: 'smooth' });
+      }
+    }
+  }, [activeRemnantIndex]);
 
   useEffect(() => {
     if (!isNavigatedByArrowRef.current) return;
@@ -400,126 +433,6 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Hero Banner: Star Encyclopedia Frontpage */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-cyan-500/20 pb-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono uppercase tracking-wider font-bold">
-              Encyclopedia Frontpage
-            </span>
-            <span className="text-slate-500">•</span>
-            <span className="text-[11px] font-mono text-slate-400">Astrophysics Primer & Classification Guide</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
-            <Sun className="w-8 h-8 sm:w-9 sm:h-9 text-amber-400 animate-pulse" />
-            <span>What is a Star?</span>
-          </h1>
-
-          <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-            {WHAT_IS_A_STAR_CORE_INFO.scientificDefinition}
-          </p>
-        </div>
-
-        {/* Quick Jump Buttons to other Encyclopedia Modules */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {onJumpToCatalog && (
-            <button
-              onClick={onJumpToCatalog}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#081226] hover:bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm hover:border-cyan-400/60"
-              title="Open Stellar Catalog"
-            >
-              <Grid className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Stellar Catalog ({STARS_CATALOG.length})</span>
-            </button>
-          )}
-
-          {onJumpToHRDiagram && (
-            <button
-              onClick={onJumpToHRDiagram}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#081226] hover:bg-cyan-950/80 border border-cyan-500/30 text-indigo-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm hover:border-indigo-400/60"
-              title="Explore H-R Diagram"
-            >
-              <BarChart2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>H-R Diagram</span>
-            </button>
-          )}
-
-          {onJumpToConstellations && (
-            <button
-              onClick={onJumpToConstellations}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#081226] hover:bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm hover:border-cyan-400/60"
-              title="Explore Constellation Guide"
-            >
-              <Compass className="w-3.5 h-3.5 text-cyan-400" />
-              <span>88 Constellations</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Cosmic Statistics / Key Numbers Ribbon: Compact on mobile, unambiguous wording, no overflow */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-        <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
-          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
-            <Atom className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="Estimated number of stars in the Milky Way Galaxy">
-              Milky Way Stars
-            </div>
-            <div className="text-[11px] sm:text-sm lg:text-base font-bold text-white font-mono leading-tight break-words mt-0.5">
-              100–400 Billion
-            </div>
-          </div>
-        </div>
-
-        <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
-          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-indigo-950/80 text-indigo-400 border border-indigo-500/30 shrink-0 aspect-square flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="Estimated total stars across the observable universe">
-              Universe Stars
-            </div>
-            <div className="text-[11px] sm:text-sm lg:text-base font-bold text-white font-mono leading-tight break-words mt-0.5">
-              <span>~2 × 10²⁴ Stars</span>
-              <span className="block text-[9px] sm:text-xs text-indigo-300/80 font-normal">
-                (2 Septillion)
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
-          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-500/30 shrink-0 aspect-square flex items-center justify-center">
-            <Scale className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="The mechanical equilibrium balancing inward gravity with outward pressure">
-              Core Equilibrium
-            </div>
-            <div className="text-[11px] sm:text-sm lg:text-base font-bold text-amber-300 font-mono leading-tight break-words mt-0.5">
-              Hydrostatic Equilibrium
-            </div>
-          </div>
-        </div>
-
-        <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
-          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-rose-950/80 text-rose-400 border border-rose-500/30 shrink-0 aspect-square flex items-center justify-center">
-            <Flame className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="The nuclear process generating radiant power in stellar interiors">
-              Power Source
-            </div>
-            <div className="text-[11px] sm:text-sm lg:text-base font-bold text-rose-300 font-mono leading-tight break-words mt-0.5">
-              Thermonuclear Fusion
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Frontpage Navigation Tabs - Merged into 5 clean tabs */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-[#020512] rounded-2xl border border-cyan-500/25 shadow-inner shrink-0">
         <button
@@ -532,7 +445,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           }`}
         >
           <Sun className="w-4 h-4 shrink-0 text-amber-400" />
-          <span>What is a Star? (Foundations)</span>
+          <span>What is a Star?</span>
         </button>
 
         <button
@@ -561,7 +474,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           }`}
         >
           <Activity className="w-4 h-4 shrink-0 text-emerald-400" />
-          <span>Stellar Life Cycles (2D Simulator)</span>
+          <span>Stellar Life Cycles</span>
         </button>
 
         <button
@@ -592,10 +505,90 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION 1: WHAT IS A STAR? (DEEP ASTROPHYSICS FOUNDATIONS)              */}
+      {/* SECTION 1: WHAT IS A STAR?                                                */}
       {/* ========================================================================= */}
       {activeSection === 'what-is-a-star' && (
         <div className="flex flex-col gap-5 sm:gap-6 animate-in fade-in duration-200">
+          {/* Hero Banner: What is a Star? (Wrapped in Animated Night Sky Graphics) */}
+          <AnimatedStarrySkyPanel className="border border-cyan-500/30">
+            <div className="space-y-3 max-w-3xl">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+                <Sun className="w-8 h-8 sm:w-9 sm:h-9 text-amber-400 animate-pulse shrink-0" />
+                <span>What is a Star?</span>
+              </h1>
+
+              <div className="space-y-2 text-slate-300 font-sans">
+                <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-normal">
+                  At its heart, a <strong className="text-cyan-300 font-semibold">star</strong> is a colossal, glowing ball of superheated gas held together by gravity. Deep inside its core, nuclear fusion turns hydrogen into helium, unleashing the brilliant light and warmth that shines across the cosmos for millions or billions of years—just like our own Sun!
+                </p>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Every pinpoint of light in the night sky is a distant sun. From compact red dwarfs to giant luminous beacons, stars power the universe, illuminate orbiting worlds, and forge the fundamental chemical elements that build planets, oceans, and life itself.
+                </p>
+              </div>
+            </div>
+          </AnimatedStarrySkyPanel>
+
+          {/* Cosmic Statistics / Key Numbers Ribbon: Four Info Panels */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
+                <Atom className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="Estimated number of stars in the Milky Way Galaxy">
+                  Milky Way Stars
+                </div>
+                <div className="text-[11px] sm:text-sm lg:text-base font-bold text-white font-mono leading-tight break-words mt-0.5">
+                  100–400 Billion
+                </div>
+              </div>
+            </div>
+
+            <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-indigo-950/80 text-indigo-400 border border-indigo-500/30 shrink-0 aspect-square flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="Estimated total stars across the observable universe">
+                  Universe Stars
+                </div>
+                <div className="text-[11px] sm:text-sm lg:text-base font-bold text-white font-mono leading-tight break-words mt-0.5">
+                  <span>~2 × 10²⁴ Stars</span>
+                  <span className="block text-[9px] sm:text-xs text-indigo-300/80 font-normal">
+                    (2 Septillion)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-500/30 shrink-0 aspect-square flex items-center justify-center">
+                <Scale className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="The mechanical equilibrium balancing inward gravity with outward pressure">
+                  Core Equilibrium
+                </div>
+                <div className="text-[11px] sm:text-sm lg:text-base font-bold text-amber-300 font-mono leading-tight break-words mt-0.5">
+                  Hydrostatic Equilibrium
+                </div>
+              </div>
+            </div>
+
+            <div className="p-2 sm:p-3.5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 overflow-hidden shadow-sm">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg bg-rose-950/80 text-rose-400 border border-rose-500/30 shrink-0 aspect-square flex items-center justify-center">
+                <Flame className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 leading-tight break-words" title="The nuclear process generating radiant power in stellar interiors">
+                  Power Source
+                </div>
+                <div className="text-[11px] sm:text-sm lg:text-base font-bold text-rose-300 font-mono leading-tight break-words mt-0.5">
+                  Thermonuclear Fusion
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Mobile Accessibility: Expand / Contract Toolbar with Separate Buttons */}
           <div className="flex items-center justify-end gap-1.5 p-2 rounded-xl bg-[#040816] border border-cyan-500/20">
             <button
@@ -1038,6 +1031,22 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {/* ========================================================================= */}
       {(activeSection === 'spectral-classes' || activeSection === 'luminosity-stages') && (
         <div className="flex flex-col gap-5 sm:gap-6 animate-in fade-in duration-200">
+          {/* Hero Banner: Stellar Classification Systems */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <Flame className="w-6 h-6 sm:w-7 sm:h-7 text-orange-400 shrink-0" />
+                  <span>Stellar Classification Systems</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  From Annie Jump Cannon’s Harvard spectral sequence to the Yerkes luminosity matrix, explore the physical frameworks used by astrophysicists to organize stars by surface temperature, luminosity, chemistry, and evolutionary state.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Subsystem Switcher within Stellar Classification Systems */}
           <div className="p-1.5 sm:p-2 rounded-2xl bg-[#040816] border border-cyan-500/25 flex flex-wrap items-center justify-between gap-2 shadow-lg">
             <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono w-full sm:w-auto">
@@ -1048,7 +1057,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 { id: 3, label: 'Yerkes Luminosity System (MKK)' },
                 { id: 4, label: 'Star Systems' },
                 { id: 5, label: 'Stellar Populations' },
-                { id: 6, label: 'Hypothetical Stars' },
+                { id: 6, label: 'Stellar Remnants' },
+                { id: 7, label: 'Hypothetical Stars' },
               ].map((sys) => (
                 <button
                   key={sys.id}
@@ -1064,19 +1074,6 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 </button>
               ))}
             </div>
-
-            {/* Direct button to open complete 557-star classification directory */}
-            <button
-              type="button"
-              id="btn-open-classification-directory"
-              onClick={() => setIsClassificationDirectoryOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
-              title="Browse complete mapping of all 557 stars in catalog"
-            >
-              <Database className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>All 557 Stars Mapped</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">100%</span>
-            </button>
           </div>
 
           {/* ------------------------------------------------------------- */}
@@ -1328,7 +1325,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       onClick={() => {
                         setActiveExoticIndex(idx);
                       }}
-                      className={`p-1 sm:p-3 rounded-xl sm:rounded-2xl border text-center sm:text-left transition-colors duration-150 cursor-pointer flex flex-col items-center sm:items-stretch justify-center sm:justify-between relative group w-[calc((100%-24px)/7)] sm:w-36 sm:min-w-[130px] sm:max-w-[144px] sm:aspect-[3/2] shrink-0 min-w-[44px] min-h-[52px] sm:min-h-[96px] h-auto ${
+                      className={`p-1 sm:p-3 rounded-xl sm:rounded-2xl border text-center sm:text-left transition-colors duration-150 cursor-pointer flex flex-col items-center sm:items-stretch justify-center sm:justify-between relative group w-[calc((100%-16px)/5)] sm:w-36 sm:min-w-[130px] sm:max-w-[144px] sm:aspect-[3/2] shrink-0 min-w-[48px] min-h-[52px] sm:min-h-[96px] h-auto ${
                         isSelected
                           ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-cyan-400'
                           : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24]'
@@ -1572,6 +1569,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               >
                 {VARIABLE_STARS_GUIDE.map((item, idx) => {
                   const isSelected = idx === activeVariableIndex;
+                  const itemArchetype = getExampleStars(item.exampleStarIds || [])[0] || null;
                   return (
                     <button
                       key={item.id}
@@ -1588,9 +1586,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       title={item.buttonTitle}
                     >
                       <div className="flex items-center justify-between w-full gap-1 mb-1">
-                        <span
-                          className="w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0 rounded-full border border-white/40 shadow-sm"
-                          style={{ backgroundColor: item.colorHex, boxShadow: `0 0 8px ${item.colorHex}` }}
+                        <StarDot2D
+                          star={itemArchetype}
+                          colorHex={itemArchetype?.colorHex || item.colorHex}
+                          sizeClassName="w-2.5 h-2.5 sm:w-3 sm:h-3"
                         />
                       </div>
                       <div className="w-full text-left leading-tight min-w-0">
@@ -1607,6 +1606,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               {(() => {
                 const activeVariableItem = VARIABLE_STARS_GUIDE[activeVariableIndex] || VARIABLE_STARS_GUIDE[0];
                 const catalogStars = getExampleStars(activeVariableItem.exampleStarIds || []);
+                const archetypeStar = catalogStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1627,9 +1627,9 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                         <div
                           className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border border-white/30"
                           style={{
-                            backgroundColor: activeVariableItem.colorHex,
+                            backgroundColor: archetypeStar?.colorHex || activeVariableItem.colorHex,
                             color: '#02040a',
-                            boxShadow: `0 0 20px ${activeVariableItem.colorHex}66`,
+                            boxShadow: `0 0 20px ${(archetypeStar?.colorHex || activeVariableItem.colorHex)}66`,
                           }}
                         >
                           <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
@@ -1670,9 +1670,88 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       )}
                     </div>
 
-                    {/* Content Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 min-w-0">
-                      {/* Left Column: Explanation & Mechanism */}
+                    {/* Visual Graphic & Content Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 min-w-0 items-start">
+                      {/* Left Column: Variable Star Visual Graphic (Normal Square Aspect Ratio, Animation Only) + Profile Stats */}
+                      <div className="lg:col-span-5 flex flex-col gap-3 sm:gap-4 items-center min-w-0">
+                        {/* Mobile Collapsible Header / Toggle (Contracted by Default on Mobile) */}
+                        <div className="w-full block lg:hidden">
+                          <button
+                            type="button"
+                            onClick={() => setIsMobileVariableGraphicOpen((prev) => !prev)}
+                            className="w-full p-2.5 rounded-xl bg-[#030718] hover:bg-[#071333] border border-cyan-500/35 flex items-center justify-between gap-2.5 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+                            aria-expanded={isMobileVariableGraphicOpen}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {archetypeStar && <StarDot2D star={archetypeStar} sizeClassName="w-3.5 h-3.5" />}
+                              <div className="min-w-0 text-left">
+                                <span className="text-xs font-mono font-bold text-white truncate block">
+                                  {archetypeStar ? archetypeStar.name : activeVariableItem.name}
+                                </span>
+                                <span className="text-[10px] text-cyan-400/90 font-mono block">
+                                  1:1 Square Stellar Graphic
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-xs font-mono text-cyan-400 font-semibold shrink-0 bg-cyan-950/80 px-2 py-1 rounded-lg border border-cyan-500/30">
+                              <span>{isMobileVariableGraphicOpen ? 'Hide' : 'Expand Simulation'}</span>
+                              {isMobileVariableGraphicOpen ? (
+                                <ChevronUp className="w-4 h-4 text-cyan-300" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-cyan-300" />
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Contractable on mobile (collapsed by default) */}
+                          {isMobileVariableGraphicOpen && (
+                            <div className="mt-3 w-full max-w-[340px] sm:max-w-[380px] mx-auto aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative animate-in fade-in zoom-in-95 duration-200">
+                              <VariableStarGraphic
+                                variableId={activeVariableItem.id}
+                                archetypeStar={archetypeStar}
+                                colorHex={activeVariableItem.colorHex}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Desktop Graphic (Always Visible Alongside Content in 1:1 Square Aspect Ratio) */}
+                        <div className="hidden lg:block w-full aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative">
+                          <VariableStarGraphic
+                            variableId={activeVariableItem.id}
+                            archetypeStar={archetypeStar}
+                            colorHex={activeVariableItem.colorHex}
+                          />
+                        </div>
+
+                        {/* Astrophysical Profile Quick Stats */}
+                        <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
+                            <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.category}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Cycle Period</span>
+                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.periodRange}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype Star</span>
+                            <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
+                              {archetypeStar ? (
+                                <>
+                                  <StarDot2D star={archetypeStar} sizeClassName="w-3.5 h-3.5 shrink-0" />
+                                  <span>{archetypeStar.name} ({archetypeStar.spectralType})</span>
+                                </>
+                              ) : (
+                                activeVariableItem.tag
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Physical Mechanisms & Mapped Stars */}
                       <div className="lg:col-span-7 flex flex-col justify-between gap-3 sm:gap-4 min-w-0">
                         <div className="min-w-0 space-y-3">
                           <div>
@@ -1712,27 +1791,6 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                             </div>
                           </div>
                         )}
-                      </div>
-
-                      {/* Right Column: Physical Profile & Examples */}
-                      <div className="lg:col-span-5 flex flex-col gap-2.5 sm:gap-3 min-w-0">
-                        <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold">
-                          Astrophysical Profile
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
-                            <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.category}</span>
-                          </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Cycle Period</span>
-                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.periodRange}</span>
-                          </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 sm:col-span-2">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Classification Tag</span>
-                            <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.tag}</span>
-                          </div>
-                        </div>
 
                         {/* Mapped Stars from Catalog */}
                         <ClassificationMappedStarsSection
@@ -1972,6 +2030,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               >
                 {STAR_SYSTEMS_GUIDE.map((item, idx) => {
                   const isSelected = idx === activeStarSystemIndex;
+                  const itemArchetype = getExampleStars(item.exampleStarIds || [])[0] || null;
                   return (
                     <button
                       key={item.id}
@@ -1988,9 +2047,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       title={item.buttonTitle}
                     >
                       <div className="flex items-center justify-between w-full gap-1 mb-1">
-                        <span
-                          className="w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0 rounded-full border border-white/40 shadow-sm"
-                          style={{ backgroundColor: item.colorHex, boxShadow: `0 0 8px ${item.colorHex}` }}
+                        <StarDot2D
+                          star={itemArchetype}
+                          colorHex={itemArchetype?.colorHex || item.colorHex}
+                          sizeClassName="w-2.5 h-2.5 sm:w-3 sm:h-3"
                         />
                         <span className="text-[9px] sm:text-[10px] font-mono text-cyan-400/80 truncate">
                           {item.multiplicity}
@@ -2389,9 +2449,298 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           )}
 
           {/* ------------------------------------------------------------- */}
-          {/* CAROUSEL PANEL 6: HYPOTHETICAL STARS                          */}
+          {/* CAROUSEL PANEL 6: STELLAR REMNANTS                            */}
           {/* ------------------------------------------------------------- */}
           {classificationSystemIndex === 6 && (
+            <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
+              {/* Stellar Remnants Quick Selector Buttons */}
+              <div
+                className="flex items-center sm:items-stretch gap-1 sm:gap-2.5 overflow-x-auto scrollbar-none w-full max-w-full py-2.5 sm:py-3 px-1"
+                onWheel={(e) => {
+                  if (e.deltaY !== 0 && e.currentTarget.scrollWidth > e.currentTarget.clientWidth) {
+                    e.currentTarget.scrollLeft += e.deltaY;
+                  }
+                }}
+              >
+                {STELLAR_REMNANTS_GUIDE.map((item, idx) => {
+                  const isSelected = idx === activeRemnantIndex;
+                  const itemArchetype = getExampleStars(item.exampleStarIds || [])[0] || null;
+                  return (
+                    <button
+                      key={item.id}
+                      id={`btn-remnant-select-${idx}`}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setActiveRemnantIndex(idx);
+                      }}
+                      className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl border text-center sm:text-left transition-colors duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:w-40 sm:min-w-[140px] sm:max-w-[155px] sm:aspect-[3/2] min-h-[56px] sm:min-h-[96px] h-auto ${
+                        isSelected
+                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-cyan-400'
+                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24]'
+                      }`}
+                      title={`${item.buttonTitle} (${item.code})`}
+                    >
+                      <div className="flex items-center justify-between w-full gap-1 mb-1">
+                        {itemArchetype ? (
+                          <StarDot2D star={itemArchetype} sizeClassName="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                        ) : (
+                          <span
+                            className="w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0 rounded-full border border-white/40 shadow-sm"
+                            style={{ backgroundColor: item.colorHex, boxShadow: `0 0 8px ${item.colorHex}` }}
+                          />
+                        )}
+                        <span className="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">
+                          {item.abbreviation}
+                        </span>
+                      </div>
+                      <div className="w-full text-left leading-tight min-w-0">
+                        <span className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-200 transition-colors whitespace-normal break-words">
+                          {item.buttonTitle}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Stellar Remnants Card - Carousel UI */}
+              {(() => {
+                const activeRemnantItem = STELLAR_REMNANTS_GUIDE[activeRemnantIndex] || STELLAR_REMNANTS_GUIDE[0];
+                const catalogStars = getExampleStars(activeRemnantItem.exampleStarIds || []);
+                const archetypeStar = catalogStars[0] || null;
+
+                return (
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                    {/* Header with Carousel Navigation & Quick Actions */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <div
+                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border border-white/30"
+                          style={{
+                            background: `radial-gradient(circle at 35% 35%, #ffffff, ${activeRemnantItem.colorHex} 65%, #050b1a)`,
+                            boxShadow: `0 0 24px ${activeRemnantItem.colorHex}66`,
+                          }}
+                        >
+                          <span className="text-xs sm:text-sm font-black font-mono text-slate-950 drop-shadow">
+                            {activeRemnantItem.abbreviation}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h3 className="text-base sm:text-2xl font-black text-white tracking-tight break-words">
+                              {activeRemnantItem.name}
+                            </h3>
+                            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
+                              {activeRemnantItem.tag}
+                            </span>
+                          </div>
+                          <span className="text-[11px] sm:text-xs text-slate-400 font-mono block truncate mt-0.5">
+                            {activeRemnantItem.code} • {activeRemnantItem.category}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Previous / Next Controls */}
+                      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 self-end sm:self-center">
+                        <button
+                          type="button"
+                          id="btn-prev-remnant"
+                          onClick={handlePrevRemnant}
+                          className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-cyan-950 text-slate-300 hover:text-white border border-cyan-500/20 hover:border-cyan-400 transition-colors flex items-center gap-1 text-xs font-mono cursor-pointer"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span className="hidden sm:inline">Prev</span>
+                        </button>
+                        <span className="text-[10px] sm:text-xs font-mono text-slate-500 px-1">
+                          ({activeRemnantIndex + 1}/{STELLAR_REMNANTS_GUIDE.length})
+                        </span>
+                        <button
+                          type="button"
+                          id="btn-next-remnant"
+                          onClick={handleNextRemnant}
+                          className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-cyan-950 text-slate-300 hover:text-white border border-cyan-500/20 hover:border-cyan-400 transition-colors flex items-center gap-1 text-xs font-mono cursor-pointer"
+                        >
+                          <span className="hidden sm:inline">Next</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Main Content Layout with 1:1 Square Animated Model */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-6 min-w-0">
+                      {/* Left Column: Animated Model and Physical Stats */}
+                      <div className="lg:col-span-5 flex flex-col gap-2.5 sm:gap-3 min-w-0">
+                        {/* Mobile Toggle Button for Animated Model (Contracted by default on mobile) */}
+                        <div className="block lg:hidden">
+                          <button
+                            type="button"
+                            id="btn-toggle-mobile-remnant-graphic"
+                            onClick={() => setIsMobileRemnantGraphicOpen((prev) => !prev)}
+                            className="w-full py-2 px-3 rounded-xl bg-[#030718] hover:bg-[#06102c] border border-cyan-500/25 flex items-center justify-between text-xs font-mono text-cyan-300 transition-all cursor-pointer shadow-sm"
+                          >
+                            <span className="font-semibold flex items-center gap-2">
+                              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                              Relativistic Simulation Model
+                            </span>
+                            <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                              <span>{isMobileRemnantGraphicOpen ? 'Hide' : 'Expand Simulation'}</span>
+                              {isMobileRemnantGraphicOpen ? (
+                                <ChevronUp className="w-4 h-4 text-cyan-300" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-cyan-300" />
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Contractable on mobile (collapsed by default) */}
+                          {isMobileRemnantGraphicOpen && (
+                            <div className="mt-3 w-full max-w-[340px] sm:max-w-[380px] mx-auto aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative animate-in fade-in zoom-in-95 duration-200">
+                              <StellarRemnantGraphic
+                                remnantId={activeRemnantItem.id}
+                                archetypeStar={archetypeStar}
+                                colorHex={activeRemnantItem.colorHex}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Desktop Graphic (Always Visible Alongside Content in 1:1 Square Aspect Ratio) */}
+                        <div className="hidden lg:block w-full aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative">
+                          <StellarRemnantGraphic
+                            remnantId={activeRemnantItem.id}
+                            archetypeStar={archetypeStar}
+                            colorHex={activeRemnantItem.colorHex}
+                          />
+                        </div>
+
+                        {/* Astrophysical Profile Quick Stats */}
+                        <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Density & Gravity</span>
+                            <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.density}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Mass</span>
+                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.typicalMass}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Diameter</span>
+                            <span className="text-purple-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.typicalDiameter}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Support / Horizon</span>
+                            <span className="text-emerald-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.quantumSupportOrHorizon}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Benchmark / Archetype Star</span>
+                            <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
+                              {archetypeStar ? (
+                                <>
+                                  <StarDot2D star={archetypeStar} sizeClassName="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate">{archetypeStar.name}</span>
+                                </>
+                              ) : (
+                                <span>{activeRemnantItem.externalExamples?.[0] || 'Relativistic Benchmark'}</span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Physical Mechanisms & Distinguishing Features */}
+                      <div className="lg:col-span-7 flex flex-col gap-2.5 sm:gap-3.5 min-w-0">
+                        {/* Plain-English Explanation */}
+                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15">
+                          <span className="text-xs font-bold text-cyan-400 font-mono block mb-1">
+                            Physical Explanation:
+                          </span>
+                          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                            {activeRemnantItem.explanation}
+                          </p>
+                        </div>
+
+                        {/* Formation Mechanism */}
+                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15">
+                          <span className="text-xs font-bold text-indigo-400 font-mono block mb-1">
+                            Formation & Collapse Pathway:
+                          </span>
+                          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                            {activeRemnantItem.formationMechanism}
+                          </p>
+                        </div>
+
+                        {/* Distinguishing Astrophysical Features */}
+                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15 flex flex-col gap-2 min-w-0">
+                          <span className="text-xs font-bold text-amber-400 font-mono block">
+                            Key Distinguishing Astrophysical Features:
+                          </span>
+                          <ul className="space-y-1.5 text-xs text-slate-300 font-sans list-none">
+                            {activeRemnantItem.distinguishingFeatures.map((feat, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-cyan-400 font-bold mt-0.5 shrink-0">✓</span>
+                                <span className="leading-snug">{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Mapped Stars from Catalog or Benchmark Note */}
+                        {(() => {
+                          const mappedStars = getMappedStarsForRemnant(activeRemnantItem.id, STARS_CATALOG);
+                          if (mappedStars.length > 0) {
+                            return (
+                              <ClassificationMappedStarsSection
+                                title={`Mapped ${activeRemnantItem.name}`}
+                                categoryColor={activeRemnantItem.colorHex}
+                                benchmarkStarIds={activeRemnantItem.exampleStarIds || []}
+                                allMappedStars={mappedStars}
+                                onSelectStar={onSelectStar}
+                              />
+                            );
+                          }
+                          return (
+                            <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 text-xs font-mono space-y-1.5">
+                              <div className="flex items-center gap-2 text-cyan-300 font-semibold">
+                                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                                <span>Astrophysical Singularity Benchmark Note</span>
+                              </div>
+                              <p className="text-slate-300 font-sans text-xs leading-relaxed">
+                                Gravitational singularities and black hole candidates (Cygnus X-1, Gaia BH1, Sagittarius A*) are modeled as general-relativistic classification benchmarks. Individual stellar dossiers in the catalog are currently reserved for thermonuclear and degenerate stars.
+                              </p>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Observational Benchmarks */}
+                        {activeRemnantItem.externalExamples && activeRemnantItem.externalExamples.length > 0 && (
+                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1 break-words">
+                              Historic &amp; Observational Benchmarks:
+                            </span>
+                            <div className="flex flex-wrap gap-1 min-w-0">
+                              {activeRemnantItem.externalExamples.map((ext, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
+                                >
+                                  {ext}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CAROUSEL PANEL 7: HYPOTHETICAL STARS                          */}
+          {/* ------------------------------------------------------------- */}
+          {classificationSystemIndex === 7 && (
             <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
               {/* Hypothetical Stars Quick Selector Buttons */}
               <div
@@ -2615,11 +2964,21 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {/* SECTION 5: COMMON MYTHS VS FACTS                                         */}
       {/* ========================================================================= */}
       {activeSection === 'myths' && (
-        <div className="flex flex-col gap-4 animate-in fade-in duration-200">
-          <div className="p-4 rounded-2xl bg-[#030612]/90 border border-cyan-500/20">
-            <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
-              Astrophysics Myths Debunked
-            </h3>
+        <div className="flex flex-col gap-5 sm:gap-6 animate-in fade-in duration-200">
+          {/* Hero Banner: Myths & Realities */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-3xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+                  <span>Myths &amp; Realities</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  Uncover widespread science-fiction tropes, visual misconceptions, and historical lore—contrasted directly against empirical astrophysical measurements and nuclear realities.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2659,46 +3018,53 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {/* ========================================================================= */}
       {activeSection === 'quiz' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200 max-w-4xl mx-auto w-full">
-          <div className="p-5 rounded-2xl bg-[#030612]/90 border border-cyan-500/25 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Award className="w-5 h-5 text-cyan-400" />
-                <span>Test Your Stellar Astrophysics Knowledge</span>
-              </h3>
-            </div>
-
-            {quizSubmitted ? (
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block">Your Score</span>
-                  <span className="text-lg font-black font-mono text-cyan-300">
-                    {quizScore} / {CLASSIFICATION_QUIZ.length}
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    setQuizAnswers({});
-                    setQuizSubmitted(false);
-                  }}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Retry</span>
-                </button>
+          {/* Hero Banner: Knowledge Check */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-2xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                  <Award className="w-6 h-6 sm:w-7 sm:h-7 text-purple-400 shrink-0" />
+                  <span>Knowledge Check</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                  Put your astrophysical comprehension to the test with these fundamental questions spanning stellar structure, spectral types, nuclear synthesis, and cosmic evolution.
+                </p>
               </div>
-            ) : (
-              <button
-                onClick={() => setQuizSubmitted(true)}
-                disabled={Object.keys(quizAnswers).length === 0}
-                className={`px-4 py-2 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer ${
-                  Object.keys(quizAnswers).length > 0
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                Submit Answers
-              </button>
-            )}
+
+              {quizSubmitted ? (
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <span className="text-[10px] font-mono uppercase text-slate-400 block">Your Score</span>
+                    <span className="text-lg font-black font-mono text-cyan-300">
+                      {quizScore} / {CLASSIFICATION_QUIZ.length}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setQuizAnswers({});
+                      setQuizSubmitted(false);
+                    }}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setQuizSubmitted(true)}
+                  disabled={Object.keys(quizAnswers).length === 0}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer shrink-0 shadow-md ${
+                    Object.keys(quizAnswers).length > 0
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  Grade Quiz ({Object.keys(quizAnswers).length}/{CLASSIFICATION_QUIZ.length})
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col gap-4">

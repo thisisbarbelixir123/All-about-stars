@@ -24,6 +24,8 @@ import { STARS_LARGE_AND_EXOTIC } from './starsLargeAndExotic';
 import { STARS_DISTANT_EXTREMES_AND_VARIABLES } from './starsDistantExtremesAndVariables';
 import { STARS_NEW_CATALOG_ADDITIONS } from './starsNewCatalogAdditions';
 import { STARS_NEIGHBORS_30LY } from './starsNeighbors30ly';
+import { STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS } from './starsSubdwarfsAndDesignations';
+import { STARS_HOT_SUBDWARFS_BLUE_STRAGGLERS_AND_GAIA } from './starsHotSubdwarfsBlueStragglersGaia';
 
 const RAW_STARS_CATALOG: StarData[] = [
   ...STARS_HYPERGIANTS,
@@ -50,7 +52,9 @@ const RAW_STARS_CATALOG: StarData[] = [
   ...STARS_LARGE_AND_EXOTIC,
   ...STARS_DISTANT_EXTREMES_AND_VARIABLES,
   ...STARS_NEW_CATALOG_ADDITIONS,
-  ...STARS_NEIGHBORS_30LY
+  ...STARS_NEIGHBORS_30LY,
+  ...STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS,
+  ...STARS_HOT_SUBDWARFS_BLUE_STRAGGLERS_AND_GAIA,
 ];
 
 // Deduplicate star records by unique ID
@@ -524,6 +528,58 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'atria', 'alpha-tucanae', 'alioth', 'polaris', 'regor', 'spica', 'beta-volantis', 'anser'
     ],
     desc: 'The brightest principal star from each of the 88 modern IAU constellations.'
+  },
+  {
+    id: 'subdwarfs-and-designations',
+    title: 'Subdwarfs, Blue Stragglers & Gaia',
+    defaultSortKey: 'size',
+    defaultSortDirection: 'asc',
+    starIds: [
+      'pg-1159-035',
+      'cd-30-11223',
+      'v361-hydrae',
+      'kpd-1930-2752',
+      'feige-34',
+      'smss-j031300',
+      'sdss-j102915',
+      'groombridge-1830',
+      'kapteyns-star',
+      'sneden-star',
+      'cayrel-star',
+      'he-0107-5240',
+      'he-1327-2326',
+      'mu-cassiopeiae',
+      'hd-49798',
+      'gaia-bh1-companion',
+      'gaia-dr3-3425',
+      'methuselah-star',
+      'bss-19-m67',
+      'wss-308',
+      'bss-47-tuc',
+      'v383-carinae',
+      'gaia-dr3-fast-mover',
+      'gaia-dr3-1007',
+      'gaia-bh2-companion',
+      '54-piscium',
+      '18-scorpii',
+      '61-virginis',
+      '70-ophiuchi-a',
+      '70-ophiuchi-b',
+      '55-cancri',
+      '47-ursae-majoris',
+      '16-cygni-a',
+      '16-cygni-b',
+      '14-g-crateris',
+      '23-g-carinae',
+      '145-g-hydrae',
+      '171-g-arae',
+      '20-g-volantis',
+      '41-g-chamaeleontis',
+      'chi-draconis',
+      'eta-leporis',
+      'theta-apodis'
+    ],
+    desc: 'O/B-type hot subdwarfs, rejuvenated blue stragglers, Gaia black hole binaries, and historic Flamsteed & Gould stars.'
   },
   {
     id: 'all-stars-catalog',

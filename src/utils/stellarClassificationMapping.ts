@@ -3,7 +3,8 @@ import { StarData, SpectralClass } from '../types';
 export interface MappedClassificationInfo {
   star: StarData;
   harvardClass?: 'O' | 'B' | 'A' | 'F' | 'G' | 'K' | 'M';
-  otherClass?: 'WR' | 'LBV' | 'WD' | 'NS' | 'BD' | 'C' | 'S';
+  otherClass?: 'WR' | 'LBV' | 'BD' | 'C' | 'S';
+  remnantClass?: 'WD' | 'RQNS' | 'PSR' | 'MSP' | 'SGR' | 'X-NS' | 'SBH' | 'SMBH';
   yerkesClass: 'Ia+' | 'I' | 'II' | 'III' | 'IV' | 'V' | 'VI' | 'VII';
   yerkesTitle: string;
   variableTypes: string[];
@@ -99,6 +100,21 @@ export function isDegenerateRemnant(star: StarData): boolean {
 }
 
 /**
+ * Checks if a star is a subdwarf (VI)
+ */
+export function isSubdwarf(star: StarData): boolean {
+  const stage = star.stellarStage || '';
+  const spec = star.spectralType || '';
+  return (
+    stage === 'Subdwarf' ||
+    spec.startsWith('sd') ||
+    spec.includes('sd') ||
+    spec.includes('VI') ||
+    (star.metallicityFeH !== undefined && star.metallicityFeH <= -1.0)
+  );
+}
+
+/**
  * Maps any star to its Yerkes Luminosity Class
  */
 export function getStarYerkesClass(star: StarData): { classNumeral: 'Ia+' | 'I' | 'II' | 'III' | 'IV' | 'V' | 'VI' | 'VII'; title: string } {
@@ -114,6 +130,9 @@ export function getStarYerkesClass(star: StarData): { classNumeral: 'Ia+' | 'I' 
   if (isBrightGiant(star)) {
     return { classNumeral: 'II', title: 'Bright Giants' };
   }
+  if (isSubdwarf(star)) {
+    return { classNumeral: 'VI', title: 'Subdwarfs' };
+  }
   if (isNormalGiant(star)) {
     return { classNumeral: 'III', title: 'Normal Giants' };
   }
@@ -122,9 +141,6 @@ export function getStarYerkesClass(star: StarData): { classNumeral: 'Ia+' | 'I' 
   }
   if (isMainSequence(star)) {
     return { classNumeral: 'V', title: 'Main Sequence Dwarfs' };
-  }
-  if (star.metallicityFeH !== undefined && star.metallicityFeH < -1.0) {
-    return { classNumeral: 'VI', title: 'Subdwarfs' };
   }
   return { classNumeral: 'V', title: 'Main Sequence Dwarfs' };
 }
@@ -151,6 +167,7 @@ export function getStarVariableCategories(star: StarData): string[] {
 
   // RR Lyrae / ancient horizontal branch
   if (
+    star.id === 'rr-lyrae' ||
     star.id === 'delta-scuti' ||
     star.id === 'gamma-doradus' ||
     combined.includes('rr lyrae') ||
@@ -198,9 +215,14 @@ export function getStarVariableCategories(star: StarData): string[] {
 
   // Cataclysmic & Eclipsing Binaries
   if (
+    star.id === 't-coronae-borealis' ||
+    star.id === 'u-geminorum' ||
+    star.id === 'v838-monocerotis' ||
     star.id === 'algol' ||
     star.id === 'sheliak' ||
     star.id === 'hde-226868' ||
+    combined.includes('recurrent nova') ||
+    combined.includes('dwarf nova') ||
     combined.includes('eclipsing binary') ||
     combined.includes('cataclysmic') ||
     combined.includes('accretion disk') ||
@@ -228,6 +250,7 @@ export function getStarVariableCategories(star: StarData): string[] {
 
   // Rotational Variables (spots, magnetic patches)
   if (
+    star.id === 'cor-caroli' ||
     star.id === 'barnards-star' ||
     star.id === 'kapteyns-star' ||
     star.id === 'przybylski-star' ||
@@ -235,6 +258,7 @@ export function getStarVariableCategories(star: StarData): string[] {
     combined.includes('starspot') ||
     combined.includes('rotational modulation') ||
     combined.includes('by draconis') ||
+    combined.includes('alpha-2 canum venaticorum') ||
     combined.includes('roap')
   ) {
     vars.push('Rotational / Magnetic Variable');
@@ -307,12 +331,59 @@ export function getComprehensiveStarMapping(star: StarData): MappedClassificatio
   const isHarvard = ['O', 'B', 'A', 'F', 'G', 'K', 'M'].includes(star.spectralClass);
   const harvardClass = isHarvard ? (star.spectralClass as any) : undefined;
   
-  let otherClass: 'WR' | 'LBV' | 'WD' | 'NS' | 'BD' | 'C' | 'S' | undefined;
-  if (!isHarvard) {
+  let otherClass: 'WR' | 'LBV' | 'BD' | 'C' | 'S' | undefined;
+  let remnantClass: 'WD' | 'RQNS' | 'PSR' | 'MSP' | 'SGR' | 'X-NS' | 'SBH' | 'SMBH' | undefined;
+
+  // Determine Remnants
+  const stage = (star.stellarStage || '').toLowerCase();
+  const spec = (star.spectralType || '').toLowerCase();
+  const desc = `${star.description || ''} ${(star.notableFacts || []).join(' ')} ${star.name}`.toLowerCase();
+
+  if (
+    star.spectralClass === 'WD' ||
+    stage.includes('white dwarf') ||
+    spec.includes('wd') ||
+    spec.startsWith('d') ||
+    ['sirius-b', 'procyon-b', 'van-maanens-star', '40-eridani-b', 'bpm-37093', 'stein-2051-b', 'lp-40-365'].includes(star.id)
+  ) {
+    remnantClass = 'WD';
+  } else if (
+    ['sgr-1935-2154', 'swift-j1818-1607', 'magnetar-1e-2259', 'magnetar-1e-1048'].includes(star.id) ||
+    desc.includes('magnetar') ||
+    desc.includes('sgr') ||
+    desc.includes('soft gamma repeater')
+  ) {
+    remnantClass = 'SGR';
+  } else if (
+    ['black-widow-pulsar', 'redback-pulsar', 'lich-pulsar', 'double-pulsar-a', 'double-pulsar-b'].includes(star.id) ||
+    desc.includes('millisecond') ||
+    desc.includes('spider') ||
+    desc.includes('black widow')
+  ) {
+    remnantClass = 'MSP';
+  } else if (
+    star.id === 'scorpius-x-1-ns' ||
+    desc.includes('lmxb') ||
+    desc.includes('accreting neutron')
+  ) {
+    remnantClass = 'X-NS';
+  } else if (
+    ['crab-pulsar', 'vela-pulsar', 'psr-b0950-08', 'psr-b0656-14', 'psr-b1055-52', 'hulse-taylor-pulsar'].includes(star.id) ||
+    star.id.includes('pulsar')
+  ) {
+    remnantClass = 'PSR';
+  } else if (
+    star.spectralClass === 'NS' ||
+    stage.includes('neutron star') ||
+    ['rx-j1856-3754', 'calvera', 'rx-j0720-3125', 'rx-j0806-4123', 'rx-j1308-2127', 'rx-j1605-3249', 'rx-j0420-5022', 'vela-jr-cco', 'pks-1209-cco'].includes(star.id)
+  ) {
+    remnantClass = 'RQNS';
+  }
+
+  // Determine Other Spectral Classes (excluding remnants which are now in Stellar Remnants)
+  if (!isHarvard && !remnantClass) {
     if (star.spectralClass === 'WR' || star.stellarStage === 'Wolf-Rayet') otherClass = 'WR';
     else if (star.spectralClass === 'LBV' || star.stellarStage === 'Luminous Blue Variable') otherClass = 'LBV';
-    else if (star.spectralClass === 'WD' || star.stellarStage === 'White Dwarf') otherClass = 'WD';
-    else if (star.spectralClass === 'NS' || star.stellarStage === 'Neutron Star / Pulsar') otherClass = 'NS';
     else if (['L', 'T', 'Y'].includes(star.spectralClass) || star.stellarStage === 'Brown Dwarf') otherClass = 'BD';
     else if (star.spectralClass === 'C' || star.stellarStage === 'Carbon Star') otherClass = 'C';
     else if (star.spectralClass === 'S' || star.stellarStage === 'S-Type Star') otherClass = 'S';
@@ -327,6 +398,7 @@ export function getComprehensiveStarMapping(star: StarData): MappedClassificatio
     star,
     harvardClass,
     otherClass,
+    remnantClass,
     yerkesClass: yerkes.classNumeral,
     yerkesTitle: yerkes.title,
     variableTypes: vars,
@@ -441,4 +513,90 @@ export function getMappedStarsForPopulation(popId: string, catalog: StarData[]):
     return catalog.filter((s) => getStarPopulation(s) === 'Population II');
   }
   return catalog.filter((s) => getStarPopulation(s) === 'Population I');
+}
+
+/**
+ * Returns all stars mapped to a Stellar Remnant class
+ */
+export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[]): StarData[] {
+  const id = remnantId.toLowerCase();
+  return catalog.filter((s) => {
+    const sc = s.spectralClass;
+    const stage = (s.stellarStage || '').toLowerCase();
+    const spec = (s.spectralType || '').toLowerCase();
+    const desc = `${s.description || ''} ${(s.notableFacts || []).join(' ')} ${s.name}`.toLowerCase();
+
+    // 1. White Dwarfs
+    if (id.includes('white-dwarf')) {
+      return (
+        sc === 'WD' ||
+        stage.includes('white dwarf') ||
+        spec.includes('wd') ||
+        spec.startsWith('d') ||
+        ['sirius-b', 'procyon-b', 'van-maanens-star', '40-eridani-b', 'bpm-37093', 'stein-2051-b', 'lp-40-365'].includes(s.id)
+      );
+    }
+
+    // 2. Radio-Quiet Neutron Stars
+    if (id.includes('radio-quiet')) {
+      return (
+        ['rx-j1856-3754', 'calvera', 'rx-j0720-3125', 'rx-j0806-4123', 'rx-j1308-2127', 'rx-j1605-3249', 'rx-j0420-5022', 'vela-jr-cco', 'pks-1209-cco'].includes(s.id) ||
+        desc.includes('magnificent seven') ||
+        desc.includes('isolated neutron star') ||
+        desc.includes('central compact object') ||
+        (spec.includes('(ins)') && !s.id.includes('pulsar'))
+      );
+    }
+
+    // 3. Radio Pulsars
+    if (id.includes('radio-pulsar')) {
+      return (
+        ['crab-pulsar', 'vela-pulsar', 'psr-b0950-08', 'psr-b0656-14', 'psr-b1055-52', 'hulse-taylor-pulsar'].includes(s.id) ||
+        (s.id.includes('pulsar') && !s.id.includes('widow') && !s.id.includes('redback') && !s.id.includes('double'))
+      );
+    }
+
+    // 4. Millisecond Pulsars
+    if (id.includes('millisecond')) {
+      return (
+        ['black-widow-pulsar', 'redback-pulsar', 'lich-pulsar', 'double-pulsar-a', 'double-pulsar-b'].includes(s.id) ||
+        desc.includes('millisecond') ||
+        desc.includes('spider') ||
+        desc.includes('black widow')
+      );
+    }
+
+    // 5. Magnetars
+    if (id.includes('magnetar')) {
+      return (
+        ['sgr-1935-2154', 'swift-j1818-1607', 'magnetar-1e-2259', 'magnetar-1e-1048'].includes(s.id) ||
+        desc.includes('magnetar') ||
+        desc.includes('sgr') ||
+        desc.includes('axp') ||
+        desc.includes('soft gamma repeater')
+      );
+    }
+
+    // 6. Accreting Neutron Stars
+    if (id.includes('accreting')) {
+      return (
+        s.id === 'scorpius-x-1-ns' ||
+        desc.includes('lmxb') ||
+        desc.includes('accreting neutron') ||
+        desc.includes('x-ray burst')
+      );
+    }
+
+    // 7. Stellar-Mass Black Holes (Removed from catalog and dossiers for now)
+    if (id.includes('stellar-black-hole')) {
+      return false;
+    }
+
+    // 8. Supermassive Black Holes (Removed from catalog and dossiers for now)
+    if (id.includes('supermassive')) {
+      return false;
+    }
+
+    return false;
+  });
 }

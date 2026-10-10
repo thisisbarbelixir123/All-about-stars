@@ -315,6 +315,7 @@ export const STARS_HYPERGIANTS: StarData[] = [
     id: 'mu-cephei',
     name: 'Mu Cephei (Herschel’s Garnet Star)',
     alternateNames: ['HD 206936', 'HR 8316', 'Garnet Star'],
+    bayerDesignation: 'μ Cep',
     constellation: 'Cepheus',
     diameterSolar: 1260,
     temperature: 3750,

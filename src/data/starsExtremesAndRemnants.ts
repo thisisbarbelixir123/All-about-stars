@@ -864,6 +864,7 @@ export const STARS_EXTREMES_AND_REMNANTS: StarData[] = [
     id: 'alcyone',
     name: 'Alcyone (Eta Tauri)',
     alternateNames: ['Eta Tauri', 'η Tau', '25 Tauri', 'Brightest Star of the Pleiades', 'HD 23630', 'HIP 17702'],
+    bayerDesignation: 'η Tau',
     constellation: 'Taurus',
     diameterSolar: 9.3,
     temperature: 12258,

@@ -7,6 +7,7 @@ import {
 } from '../data/stellarLifeCycleData';
 import { STARS_CATALOG } from '../data/stars';
 import { StarData } from '../types';
+import { StarDot2D } from './StarDot2D';
 import {
   Play,
   Pause,
@@ -27,10 +28,34 @@ import {
   Sliders,
   Clock,
   Timer,
+  Activity,
 } from 'lucide-react';
 
 interface StellarLifeCycleVisualizer2DProps {
   onSelectStar?: (star: StarData) => void;
+}
+
+// Pre-computed relativistic jet knots for Black Hole rendering
+const BH_JET_KNOTS: { dist: number; speed: number; size: number; dir: number }[] = [];
+for (let i = 0; i < 24; i++) {
+  BH_JET_KNOTS.push({
+    dist: (i * 7.5 + 15) % 150,
+    speed: 35 + (i * 9) % 30,
+    size: 1.5 + (i % 3) * 0.7,
+    dir: i % 2 === 0 ? 1 : -1,
+  });
+}
+
+// Pre-computed Keplerian differential disk particles for Black Hole accretion disk
+const BH_DISK_PARTICLES: { dist: number; angle: number; speed: number; size: number; alpha: number }[] = [];
+for (let i = 0; i < 54; i++) {
+  BH_DISK_PARTICLES.push({
+    dist: 30 + (i * 2.2) % 95,
+    angle: (i / 54) * Math.PI * 2,
+    speed: 0.75 + (i % 5) * 0.22,
+    size: 1.2 + (i % 3) * 0.7,
+    alpha: 0.38 + (i % 4) * 0.16,
+  });
 }
 
 export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2DProps> = ({
@@ -41,7 +66,6 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0); // 0.5x, 1x, 2x, 5x
   const [isFullscreenStage, setIsFullscreenStage] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'simulator' | 'matrix'>('simulator');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -189,15 +213,36 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
       const width = canvas.width;
       const height = canvas.height;
+      if (!width || !height || width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) {
+        return;
+      }
       const cx = width / 2;
       const cy = height / 2;
+
+      // Safe radial gradient creator to guarantee finite, non-negative numbers
+      const createSafeRadialGradient = (
+        x0: number,
+        y0: number,
+        r0: number,
+        x1: number,
+        y1: number,
+        r1: number
+      ) => {
+        const safeX0 = Number.isFinite(x0) ? x0 : 0;
+        const safeY0 = Number.isFinite(y0) ? y0 : 0;
+        const safeR0 = Number.isFinite(r0) ? Math.max(0, r0) : 0;
+        const safeX1 = Number.isFinite(x1) ? x1 : safeX0;
+        const safeY1 = Number.isFinite(y1) ? y1 : safeY0;
+        const safeR1 = Number.isFinite(r1) ? Math.max(0.001, r1) : Math.max(1, safeR0 + 1);
+        return ctx.createRadialGradient(safeX0, safeY0, safeR0, safeX1, safeY1, safeR1);
+      };
 
       // Clear dark cosmic background
       ctx.fillStyle = '#020510';
       ctx.fillRect(0, 0, width, height);
 
       // Subtle ambient background space dust
-      const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, width * 0.7);
+      const bgGrad = createSafeRadialGradient(cx, cy, 10, cx, cy, width * 0.7);
       bgGrad.addColorStop(0, '#060c22');
       bgGrad.addColorStop(0.6, '#030614');
       bgGrad.addColorStop(1, '#010309');
@@ -281,7 +326,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         // 1. Dual-Layer Volumetric Coronal Bloom (smooth atmospheric inverse-square radiance falloff)
         // Outer diffuse halo
         const outerHaloR = starR * 2.3;
-        const outerHalo = ctx.createRadialGradient(cx, cy, starR * 0.85, cx, cy, outerHaloR);
+        const outerHalo = createSafeRadialGradient(cx, cy, starR * 0.85, cx, cy, outerHaloR);
         outerHalo.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.26 * coronaMultiplier})`);
         outerHalo.addColorStop(0.45, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.08 * coronaMultiplier})`);
         outerHalo.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -292,7 +337,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
         // Inner luminous corona
         const innerCoronaR = starR * 1.48;
-        const innerCorona = ctx.createRadialGradient(cx, cy, starR * 0.7, cx, cy, innerCoronaR);
+        const innerCorona = createSafeRadialGradient(cx, cy, starR * 0.7, cx, cy, innerCoronaR);
         innerCorona.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.62 * coronaMultiplier})`);
         innerCorona.addColorStop(0.55, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.22 * coronaMultiplier})`);
         innerCorona.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -301,27 +346,29 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         ctx.arc(cx, cy, innerCoronaR, 0, Math.PI * 2);
         ctx.fill();
 
-        // 2. Silky-Smooth Photosphere Disk with Concentric Isotropic Eddington Limb Darkening
-        // (Smooth continuous radial gradation centered at cx, cy — completely smooth, no blotchy granulation)
-        const photoGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, starR);
+        // 2. Silky-Smooth Photosphere Disk with Radiant Luminous Edge (no dark circumference)
+        const photoGrad = createSafeRadialGradient(cx, cy, 0, cx, cy, starR);
         // Central incandescent core emission
         photoGrad.addColorStop(0, '#ffffff');
         photoGrad.addColorStop(
           0.2,
           `rgba(${Math.min(255, mainRgb.r + 55)}, ${Math.min(255, mainRgb.g + 55)}, ${Math.min(255, mainRgb.b + 55)}, 1)`
         );
-        photoGrad.addColorStop(0.62, telemetry.interpolatedColor);
-        photoGrad.addColorStop(0.86, telemetry.interpolatedGlow);
-        // True physical limb darkening to deeper saturated hue at tangent
-        photoGrad.addColorStop(
-          1,
-          `rgba(${Math.round(glowRgb.r * 0.65)}, ${Math.round(glowRgb.g * 0.65)}, ${Math.round(glowRgb.b * 0.65)}, 1)`
-        );
+        photoGrad.addColorStop(0.6, telemetry.interpolatedColor);
+        photoGrad.addColorStop(0.85, telemetry.interpolatedGlow);
+        photoGrad.addColorStop(1, telemetry.interpolatedColor);
 
         ctx.fillStyle = photoGrad;
         ctx.beginPath();
         ctx.arc(cx, cy, starR, 0, Math.PI * 2);
         ctx.fill();
+
+        // Luminous radiant limb highlight - no dark circumference
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        ctx.restore();
 
         // 3. Delicate Magnetic Prominence Arches (subtle, soft loops flowing from limb)
         const loopCount = 4;
@@ -370,7 +417,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
             const ny = cy + Math.sin(angle) * dist;
             const nr = cloudRadius * (0.42 + 0.08 * Math.sin(i * 2.1));
 
-            const nGrad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+            const nGrad = createSafeRadialGradient(nx, ny, 0, nx, ny, nr);
             nGrad.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.38)`);
             nGrad.addColorStop(0.55, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.16)`);
             nGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -383,7 +430,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
           // Dense gravitational infall core condensation
           const coreR = (16 + 5 * Math.sin(tSec * 2)) * (1 + alpha * 0.5);
-          const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.5);
+          const cGrad = createSafeRadialGradient(cx, cy, 0, cx, cy, coreR * 2.5);
           cGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
           cGrad.addColorStop(0.35, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.65)`);
           cGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -460,7 +507,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.rotate(-Math.PI / 12);
           ctx.scale(1, 0.36);
           const diskR = Math.min(width, height) * 0.38;
-          const diskGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, diskR);
+          const diskGrad = createSafeRadialGradient(0, 0, 20, 0, 0, diskR);
           diskGrad.addColorStop(0, `rgba(${mainRgb.r}, ${mainRgb.g}, ${mainRgb.b}, 0.9)`);
           diskGrad.addColorStop(0.4, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.65)`);
           diskGrad.addColorStop(0.75, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.25)`);
@@ -538,7 +585,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
           // Outer Red [H-alpha] Ionized Gas Envelope
           const rOuter = maxShellR * (0.85 + 0.04 * Math.sin(tSec * 1.5));
-          const gradRed = ctx.createRadialGradient(cx, cy, rOuter * 0.65, cx, cy, rOuter);
+          const gradRed = createSafeRadialGradient(cx, cy, rOuter * 0.65, cx, cy, rOuter);
           gradRed.addColorStop(0, 'rgba(239, 68, 68, 0)');
           gradRed.addColorStop(0.55, 'rgba(239, 68, 68, 0.45)');
           gradRed.addColorStop(0.85, 'rgba(220, 38, 38, 0.65)');
@@ -550,7 +597,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
           // Mid Green-Emerald [N II] Ionized Layer
           const rMid = maxShellR * 0.62;
-          const gradGreen = ctx.createRadialGradient(cx, cy, rMid * 0.5, cx, cy, rMid);
+          const gradGreen = createSafeRadialGradient(cx, cy, rMid * 0.5, cx, cy, rMid);
           gradGreen.addColorStop(0, 'rgba(16, 185, 129, 0)');
           gradGreen.addColorStop(0.7, 'rgba(16, 185, 129, 0.45)');
           gradGreen.addColorStop(1, 'rgba(5, 150, 105, 0)');
@@ -561,7 +608,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
           // Inner Turquoise Cyan [O III] Glowing Ring
           const rInner = maxShellR * 0.42;
-          const gradCyan = ctx.createRadialGradient(cx, cy, rInner * 0.25, cx, cy, rInner);
+          const gradCyan = createSafeRadialGradient(cx, cy, rInner * 0.25, cx, cy, rInner);
           gradCyan.addColorStop(0, 'rgba(6, 182, 212, 0.15)');
           gradCyan.addColorStop(0.65, 'rgba(6, 182, 212, 0.7)');
           gradCyan.addColorStop(1, 'rgba(8, 145, 178, 0)');
@@ -585,7 +632,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.save();
           ctx.globalAlpha = coreAlpha;
 
-          const coreGlow = ctx.createRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
+          const coreGlow = createSafeRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
           coreGlow.addColorStop(0, '#ffffff');
           coreGlow.addColorStop(0.4, '#38bdf8');
           coreGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
@@ -635,7 +682,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           const blastR = Math.min(width, height) * (0.32 + expansion * 0.24);
 
           // Multi-harmonic turbulent shock front
-          const shockGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, blastR);
+          const shockGrad = createSafeRadialGradient(cx, cy, 10, cx, cy, blastR);
           shockGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
           shockGrad.addColorStop(0.25, 'rgba(147, 197, 253, 0.85)');
           shockGrad.addColorStop(0.55, 'rgba(59, 130, 246, 0.55)');
@@ -663,7 +710,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
             const wDist = blastR * 0.65;
             const wx = cx + Math.cos(wAngle) * wDist;
             const wy = cy + Math.sin(wAngle) * wDist;
-            const wGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, blastR * 0.25);
+            const wGrad = createSafeRadialGradient(wx, wy, 0, wx, wy, blastR * 0.25);
             wGrad.addColorStop(0, 'rgba(224, 242, 254, 0.5)');
             wGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
             ctx.fillStyle = wGrad;
@@ -687,7 +734,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.save();
           ctx.globalAlpha = coreAlpha;
 
-          const nsGlow = ctx.createRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
+          const nsGlow = createSafeRadialGradient(cx, cy, REMNANT_RADIUS * 0.5, cx, cy, REMNANT_RADIUS * 2.6);
           nsGlow.addColorStop(0, '#ffffff');
           nsGlow.addColorStop(0.4, '#38bdf8');
           nsGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
@@ -768,7 +815,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
           // Equatorial Blast Torus
           const blastR = Math.min(width, height) * (0.35 + expansion * 0.15);
-          const bGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, blastR);
+          const bGrad = createSafeRadialGradient(cx, cy, 10, cx, cy, blastR);
           bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
           bGrad.addColorStop(0.3, 'rgba(244, 63, 94, 0.7)');
           bGrad.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
@@ -815,7 +862,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         ctx.save();
 
         if (haloFactor > 0.05) {
-          const wdGlow = ctx.createRadialGradient(cx, cy, wdR * 0.5, cx, cy, wdGlowR);
+          const wdGlow = createSafeRadialGradient(cx, cy, wdR * 0.5, cx, cy, wdGlowR);
           wdGlow.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.55 * haloFactor})`);
           wdGlow.addColorStop(0.5, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${0.2 * haloFactor})`);
           wdGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -826,7 +873,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         }
 
         // Silky-smooth photosphere disk
-        const wdSphere = ctx.createRadialGradient(cx, cy, 0, cx, cy, wdR);
+        const wdSphere = createSafeRadialGradient(cx, cy, 0, cx, cy, wdR);
         if (tempK > 5000) {
           wdSphere.addColorStop(0, '#ffffff');
           wdSphere.addColorStop(0.35, telemetry.interpolatedColor);
@@ -834,16 +881,20 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           wdSphere.addColorStop(0, `rgba(${Math.min(255, mainRgb.r + 40)}, ${Math.min(255, mainRgb.g + 40)}, ${Math.min(255, mainRgb.b + 40)}, 1)`);
           wdSphere.addColorStop(0.4, telemetry.interpolatedColor);
         }
-        wdSphere.addColorStop(0.85, telemetry.interpolatedGlow);
-        wdSphere.addColorStop(
-          1,
-          `rgba(${Math.round(glowRgb.r * 0.6)}, ${Math.round(glowRgb.g * 0.6)}, ${Math.round(glowRgb.b * 0.6)}, 1)`
-        );
+        wdSphere.addColorStop(0.8, telemetry.interpolatedGlow);
+        wdSphere.addColorStop(1, telemetry.interpolatedColor);
 
         ctx.fillStyle = wdSphere;
         ctx.beginPath();
         ctx.arc(cx, cy, wdR, 0, Math.PI * 2);
         ctx.fill();
+
+        // Luminous radiant limb highlight - no dark circumference
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        ctx.restore();
 
         ctx.restore();
       }
@@ -942,7 +993,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         const glowFactor = isFadingToCold ? Math.max(0.1, 1 - alpha * 0.9) : 1.0;
 
         if (glowFactor > 0.05) {
-          const nsGlow = ctx.createRadialGradient(cx, cy, nsR * 0.5, cx, cy, nsR * 2.6);
+          const nsGlow = createSafeRadialGradient(cx, cy, nsR * 0.5, cx, cy, nsR * 2.6);
           nsGlow.addColorStop(0, `rgba(255, 255, 255, ${glowFactor})`);
           nsGlow.addColorStop(0.4, `rgba(56, 189, 248, ${glowFactor * 0.8})`);
           nsGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
@@ -964,6 +1015,13 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         ctx.beginPath();
         ctx.arc(cx, cy, nsR, 0, Math.PI * 2);
         ctx.fill();
+
+        // Luminous radiant limb highlight - no dark circumference
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        ctx.restore();
 
         ctx.restore();
       }
@@ -999,15 +1057,22 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         ctx.restore();
       }
 
-      // -------------------------------------------------------------
-      // 10. STELLAR-MASS BLACK HOLE (ANIMATED ACCRETION DISK & LENSING)
-      // -------------------------------------------------------------
+      // -----------------------------------------------------------------------
+      // 10. STELLAR-MASS BLACK HOLE (REALISTIC GENERAL RELATIVISTIC MODEL)
+      //     Accurate Kerr Shadow, Multi-Order Photon Rings, Dual Einstein Lensing
+      //     Canopies, ISCO Gap, Relativistic Plunge Region, and Doppler Beaming
+      // -----------------------------------------------------------------------
       const isBhActive =
         visualType === 'black-hole' ||
         (visualType === 'hypernova' && nextVisualType === 'black-hole');
 
       if (isBhActive) {
-        const bhR = REMNANT_RADIUS; // Standardized constant radius (13px)
+        const bhR = REMNANT_RADIUS; // Standardized Event Horizon core radius (13px)
+        const rShadow = bhR * 1.38; // Apparent Shadow Boundary (~18px, photon capture sphere)
+        const rISCO = bhR * 2.15; // Innermost Stable Circular Orbit (~28px)
+        const rDiskOut = Math.min(width, height) * 0.36; // Outer Accretion Disk Boundary
+        const diskAspect = 0.32; // Inclination projection factor
+        const diskTilt = -Math.PI / 10 + Math.sin(tSec * 0.5) * 0.02;
         const bhAlpha = visualType === 'black-hole' ? 1.0 : Math.min(1, alpha * 1.15);
 
         ctx.save();
@@ -1017,96 +1082,361 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         const isIsolated = visualType === 'black-hole' && telemetry.current.progress >= 0.95;
         const diskFade = isIsolated ? Math.max(0, 1 - (progress - 0.95) / 0.05) : 1.0;
 
+        // -------------------------------------------------------------
+        // 1. RELATIVISTIC BIPOLAR JETS (Blandford-Znajek Outflow)
+        // -------------------------------------------------------------
+        if (diskFade > 0.03) {
+          ctx.save();
+          ctx.globalAlpha = bhAlpha * diskFade * 0.85;
+
+          const jetLen = Math.min(width, height) * 0.42;
+
+          // Diffuse synchrotron glow lobes
+          const jetUp = createSafeRadialGradient(cx, cy - jetLen * 0.5, 4, cx, cy - jetLen * 0.5, jetLen * 0.6);
+          jetUp.addColorStop(0, 'rgba(99, 102, 241, 0.28)');
+          jetUp.addColorStop(0.5, 'rgba(56, 189, 248, 0.09)');
+          jetUp.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = jetUp;
+          ctx.fillRect(cx - 45, cy - jetLen, 90, jetLen);
+
+          const jetDn = createSafeRadialGradient(cx, cy + jetLen * 0.5, 4, cx, cy + jetLen * 0.5, jetLen * 0.6);
+          jetDn.addColorStop(0, 'rgba(99, 102, 241, 0.28)');
+          jetDn.addColorStop(0.5, 'rgba(56, 189, 248, 0.09)');
+          jetDn.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = jetDn;
+          ctx.fillRect(cx - 45, cy, 90, jetLen);
+
+          // Helical magnetic field flux ropes wrapping the jet column
+          ctx.lineWidth = 1.1;
+          for (let dir = -1; dir <= 1; dir += 2) {
+            ctx.strokeStyle = dir === 1 ? 'rgba(129, 140, 248, 0.38)' : 'rgba(56, 189, 248, 0.32)';
+            ctx.beginPath();
+            for (let t = 12; t < jetLen; t += 3) {
+              const helixAngle = t * 0.14 - tSec * 4.2 * dir;
+              const helixR = t * 0.055 + 1.8;
+              const hx = cx + Math.cos(helixAngle) * helixR;
+              const hy = cy - t * dir;
+              if (t === 12) ctx.moveTo(hx, hy);
+              else ctx.lineTo(hx, hy);
+            }
+            ctx.stroke();
+          }
+
+          // Traveling Mach diamond shock nodes
+          for (const knot of BH_JET_KNOTS) {
+            const currentDist = (knot.dist + tSec * knot.speed) % (jetLen * 0.95) + 14;
+            const jetY = cy - currentDist * knot.dir;
+            const jetSpread = currentDist * 0.045;
+            const jx = cx + Math.sin(tSec * 2.5 + currentDist * 0.12) * jetSpread;
+
+            ctx.fillStyle = knot.dir === 1 ? '#ffffff' : '#c7d2fe';
+            ctx.beginPath();
+            ctx.arc(jx, jetY, knot.size * 0.85, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
         if (diskFade > 0.01) {
           ctx.save();
           ctx.globalAlpha = bhAlpha * diskFade;
 
-          // Upper Einstein Gravitational Lensing Arc (Interstellar back-disk deflection)
-          const lensGrad = ctx.createLinearGradient(cx, cy - bhR * 2.8, cx, cy - bhR);
-          lensGrad.addColorStop(0, 'rgba(232, 121, 249, 0)');
-          lensGrad.addColorStop(0.4, 'rgba(217, 70, 239, 0.45)');
-          lensGrad.addColorStop(0.8, 'rgba(255, 255, 255, 0.85)');
-          lensGrad.addColorStop(1, 'rgba(232, 121, 249, 0.3)');
-          ctx.strokeStyle = lensGrad;
-          ctx.lineWidth = 3.2;
-          ctx.beginPath();
-          ctx.ellipse(cx, cy - 1, bhR * 2.2, bhR * 1.35, 0, Math.PI * 1.06, Math.PI * 1.94);
-          ctx.stroke();
-
-          // Swirling Relativistic Accretion Disk with Doppler Beaming & Rotation
+          // -------------------------------------------------------------
+          // 2. RELATIVISTIC GRAVITATIONAL LENSING: UPPER EINSTEIN CANOPY
+          //    The back half of the accretion disk deflected over the horizon
+          // -------------------------------------------------------------
           ctx.save();
           ctx.translate(cx, cy);
-          const diskTilt = -Math.PI / 10 + Math.sin(tSec * 0.5) * 0.02;
           ctx.rotate(diskTilt);
-          ctx.scale(1, 0.38);
 
-          const diskR = Math.min(width, height) * 0.38;
+          const canopyBands = 4;
+          for (let b = canopyBands - 1; b >= 0; b--) {
+            const r0 = rISCO + (b / canopyBands) * (rDiskOut - rISCO);
+            const r1 = rISCO + ((b + 1) / canopyBands) * (rDiskOut - rISCO);
 
-          // Left Approaching Side (Relativistically Beamed / Blueshifted / Brighter)
-          const leftGrad = ctx.createRadialGradient(-diskR * 0.45, 0, bhR, 0, 0, diskR);
-          leftGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-          leftGrad.addColorStop(0.25, 'rgba(232, 121, 249, 0.85)');
-          leftGrad.addColorStop(0.65, 'rgba(168, 85, 247, 0.45)');
-          leftGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          ctx.fillStyle = leftGrad;
-          ctx.beginPath();
-          ctx.arc(0, 0, diskR, Math.PI * 0.5, Math.PI * 1.5);
-          ctx.fill();
+            // Deflection apex heights over the horizon
+            const h0 = rShadow * 1.04 + (r0 - rISCO) * 0.65;
+            const h1 = rShadow * 1.04 + (r1 - rISCO) * 0.65;
 
-          // Right Receding Side (Redshifted / Amber-Dimmed)
-          const rightGrad = ctx.createRadialGradient(diskR * 0.45, 0, bhR, 0, 0, diskR);
-          rightGrad.addColorStop(0, 'rgba(251, 113, 133, 0.55)');
-          rightGrad.addColorStop(0.45, 'rgba(190, 18, 60, 0.28)');
-          rightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          ctx.fillStyle = rightGrad;
-          ctx.beginPath();
-          ctx.arc(0, 0, diskR, -Math.PI * 0.5, Math.PI * 0.5);
-          ctx.fill();
+            // Relativistic Doppler gradient across the lensed band
+            const bandGrad = ctx.createLinearGradient(-r1, 0, r1, 0);
+            if (b === 0) {
+              // Searing inner ISCO layer (T ~ 10^7 K, blueshifted X-ray / UV peak)
+              bandGrad.addColorStop(0, '#ffffff'); // Approaching left peak
+              bandGrad.addColorStop(0.2, '#cffafe');
+              bandGrad.addColorStop(0.42, '#38bdf8');
+              bandGrad.addColorStop(0.7, '#6366f1');
+              bandGrad.addColorStop(0.88, '#9f1239'); // Receding right redshift
+              bandGrad.addColorStop(1, 'rgba(159, 18, 57, 0.1)');
+            } else if (b === 1 || b === 2) {
+              bandGrad.addColorStop(0, '#e0f2fe');
+              bandGrad.addColorStop(0.22, '#38bdf8');
+              bandGrad.addColorStop(0.46, '#6366f1');
+              bandGrad.addColorStop(0.76, '#4338ca');
+              bandGrad.addColorStop(0.92, '#881337');
+              bandGrad.addColorStop(1, 'rgba(136, 19, 55, 0.08)');
+            } else {
+              bandGrad.addColorStop(0, '#38bdf8');
+              bandGrad.addColorStop(0.25, '#818cf8');
+              bandGrad.addColorStop(0.5, '#4f46e5');
+              bandGrad.addColorStop(0.8, '#312e81');
+              bandGrad.addColorStop(0.95, '#4c0519');
+              bandGrad.addColorStop(1, 'rgba(76, 5, 25, 0.03)');
+            }
 
-          // Keplerian rotating plasma filaments swirling into ISCO
-          for (let s = 0; s < 10; s++) {
-            const streamPhase = ((tSec * 0.35 + s * 0.1) % 1);
-            const sDist = diskR * (0.92 - streamPhase * 0.65);
-            const sAngle = streamPhase * Math.PI * 2.8 + (s / 10) * Math.PI * 2;
-            const sx = Math.cos(sAngle) * sDist;
-            const sy = Math.sin(sAngle) * sDist;
-            const isLeft = Math.cos(sAngle) < 0;
-            ctx.fillStyle = isLeft
-              ? `rgba(245, 208, 254, ${0.75 * (1 - streamPhase)})`
-              : `rgba(251, 113, 133, ${0.45 * (1 - streamPhase)})`;
+            ctx.fillStyle = bandGrad;
             ctx.beginPath();
-            ctx.arc(sx, sy, 2.2 * (1 - streamPhase * 0.5), 0, Math.PI * 2);
+            ctx.moveTo(-r1, 0);
+            ctx.bezierCurveTo(-r1 * 0.7, -h1 * 1.06, r1 * 0.7, -h1 * 1.06, r1, 0);
+            ctx.lineTo(r0, 0);
+            ctx.bezierCurveTo(r0 * 0.7, -h0 * 1.06, -r0 * 0.7, -h0 * 1.06, -r0, 0);
+            ctx.closePath();
             ctx.fill();
           }
 
+          // Sharp caustic rim on upper canopy
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(-rISCO, 0);
+          ctx.bezierCurveTo(-rISCO * 0.7, -rShadow * 1.12, rISCO * 0.7, -rShadow * 1.12, rISCO, 0);
+          ctx.stroke();
+
+          // -------------------------------------------------------------
+          // 3. RELATIVISTIC GRAVITATIONAL LENSING: LOWER EINSTEIN CRESCENT
+          // -------------------------------------------------------------
+          const lowerH0 = rShadow * 1.05;
+          const lowerH1 = rShadow * 1.05 + (rDiskOut - rISCO) * 0.22;
+          const lowerGrad = ctx.createLinearGradient(-rDiskOut * 0.8, 0, rDiskOut * 0.8, 0);
+          lowerGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+          lowerGrad.addColorStop(0.25, 'rgba(103, 232, 249, 0.75)');
+          lowerGrad.addColorStop(0.55, 'rgba(99, 102, 241, 0.42)');
+          lowerGrad.addColorStop(0.85, 'rgba(159, 18, 57, 0.22)');
+          lowerGrad.addColorStop(1, 'rgba(159, 18, 57, 0.03)');
+
+          ctx.fillStyle = lowerGrad;
+          ctx.beginPath();
+          ctx.moveTo(-rDiskOut * 0.82, 0);
+          ctx.bezierCurveTo(-rDiskOut * 0.55, lowerH1 * 1.1, rDiskOut * 0.55, lowerH1 * 1.1, rDiskOut * 0.82, 0);
+          ctx.lineTo(rISCO * 1.12, 0);
+          ctx.bezierCurveTo(rISCO * 0.65, lowerH0 * 1.1, -rISCO * 0.65, lowerH0 * 1.1, -rISCO * 1.12, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          // -------------------------------------------------------------
+          // 4. BACK HALF OF EQUATORIAL DISK (ANNULUS SEGMENT: y < 0)
+          //    Leaves the central cavity inside ISCO completely clear!
+          // -------------------------------------------------------------
+          ctx.save();
+          ctx.scale(1, diskAspect);
+
+          const backDiskGrad = ctx.createLinearGradient(-rDiskOut, 0, rDiskOut, 0);
+          backDiskGrad.addColorStop(0, '#ffffff');
+          backDiskGrad.addColorStop(0.2, '#67e8f9');
+          backDiskGrad.addColorStop(0.42, '#38bdf8');
+          backDiskGrad.addColorStop(0.68, '#4338ca');
+          backDiskGrad.addColorStop(0.88, '#9f1239');
+          backDiskGrad.addColorStop(1, 'rgba(63, 7, 19, 0.05)');
+
+          ctx.fillStyle = backDiskGrad;
+          ctx.beginPath();
+          ctx.arc(0, 0, rDiskOut, Math.PI, 0, false);
+          ctx.arc(0, 0, rISCO, 0, Math.PI, true);
+          ctx.closePath();
+          ctx.fill();
+
+          // Concentric Keplerian differential shear rings
+          ctx.lineWidth = 0.9;
+          for (let sRing = 1; sRing <= 3; sRing++) {
+            const rad = rISCO + sRing * ((rDiskOut - rISCO) / 4);
+            ctx.strokeStyle = `rgba(103, 232, 249, ${(0.16 / sRing).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, rad, Math.PI, 0, false);
+            ctx.stroke();
+          }
+
+          // Back half of spiral density waves
+          for (let arm = 0; arm < 2; arm++) {
+            const armOffset = arm * Math.PI + tSec * 1.5;
+            ctx.strokeStyle = arm === 0 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(56, 189, 248, 0.25)';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            for (let t = 0; t <= 24; t++) {
+              const th = (t / 24) * Math.PI * 1.6 + armOffset;
+              const rad = rISCO + (t / 24) * (rDiskOut - rISCO);
+              const sx = Math.cos(th) * rad;
+              const sy = Math.sin(th) * rad;
+              if (sy < 1.5) {
+                if (t === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+              }
+            }
+            ctx.stroke();
+          }
           ctx.restore();
+
+          ctx.restore(); // Restore inclination frame
+          ctx.restore(); // Restore diskFade save
+        }
+
+        // -------------------------------------------------------------
+        // 5. RELATIVISTIC PLUNGE REGION (Inside ISCO down to Horizon)
+        // -------------------------------------------------------------
+        if (diskFade > 0.05) {
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(diskTilt);
+          ctx.scale(1, diskAspect * 1.25);
+          for (let sp = 0; sp < 7; sp++) {
+            const streamAngle = (sp / 7) * Math.PI * 2 + tSec * 3.6;
+            ctx.beginPath();
+            for (let st = 0; st <= 14; st++) {
+              const prog = st / 14;
+              const rad = rISCO * (1 - prog) + rShadow * prog;
+              const th = streamAngle + prog * 1.7;
+              const px = Math.cos(th) * rad;
+              const py = Math.sin(th) * rad;
+
+              const pAlpha = (1 - prog) * 0.65 * diskFade;
+              ctx.strokeStyle = `rgba(103, 232, 249, ${pAlpha.toFixed(3)})`;
+              ctx.lineWidth = 1.3 * (1 - prog);
+
+              if (st === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+          }
           ctx.restore();
         }
 
-        // Gravitational Lensing Halo (Einstein Ring with subtle dynamic shimmer)
-        const lensedR = bhR * 2.8;
-        const ringShimmer = 0.35 + 0.08 * Math.sin(tSec * 2.5);
-        ctx.strokeStyle = `rgba(232, 121, 249, ${ringShimmer})`;
+        // -------------------------------------------------------------
+        // 6. THE MULTI-ORDER PHOTON RINGS (n = 1, n = 2 Caustics)
+        // -------------------------------------------------------------
+        ctx.save();
+        // Secondary n=2 inner photon sub-ring (photons orbiting 360°)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rShadow * 0.98, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Primary n=1 razor-sharp caustic ring (photons orbiting 180°)
+        const photonPulse = 0.88 + 0.12 * Math.sin(tSec * 4.0);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${(0.95 * photonPulse).toFixed(3)})`;
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.arc(cx, cy, lensedR, 0, Math.PI * 2);
+        ctx.arc(cx, cy, rShadow * 1.02, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Absolute Black Event Horizon (Gravitational Singularity Shadow, radius = 13px)
-        ctx.fillStyle = '#000000';
+        // Relativistic Doppler asymmetric booster on approaching side
+        const ringGlow = createSafeRadialGradient(cx - rShadow * 0.35, cy, rShadow * 0.4, cx, cy, rShadow * 1.2);
+        ringGlow.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+        ringGlow.addColorStop(0.35, 'rgba(103, 232, 249, 0.55)');
+        ringGlow.addColorStop(0.7, 'rgba(56, 189, 248, 0.2)');
+        ringGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.strokeStyle = ringGlow;
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+        ctx.restore();
+
+        // -------------------------------------------------------------
+        // 7. EVENT HORIZON PITCH-BLACK KERR SHADOW (The Singularity)
+        // -------------------------------------------------------------
+        ctx.save();
+        // Gravitational redshift edge halo (g_00 -> 0 transition)
+        const horizonRedshift = createSafeRadialGradient(cx, cy, rShadow * 0.8, cx, cy, rShadow * 1.06);
+        horizonRedshift.addColorStop(0, '#000000');
+        horizonRedshift.addColorStop(0.82, 'rgba(159, 18, 57, 0.42)');
+        horizonRedshift.addColorStop(0.96, 'rgba(56, 189, 248, 0.18)');
+        horizonRedshift.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = horizonRedshift;
         ctx.beginPath();
-        ctx.arc(cx, cy, bhR, 0, Math.PI * 2);
+        ctx.arc(cx, cy, rShadow * 1.06, 0, Math.PI * 2);
         ctx.fill();
 
-        // Shimmering Einstein Photon Sphere Rim (Orbiting photons at ISCO)
-        const photonPulse = 0.85 + 0.15 * Math.sin(tSec * 4.0);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.9 * photonPulse})`;
-        ctx.lineWidth = 1.2;
+        // Absolute pitch-black Kerr event horizon silhouette
+        ctx.fillStyle = '#000000';
         ctx.beginPath();
-        ctx.arc(cx, cy, bhR + 0.5, 0, Math.PI * 2);
-        ctx.stroke();
-
+        ctx.ellipse(cx - 1.0, cy, rShadow, rShadow * 0.98, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
+
+        // -------------------------------------------------------------
+        // 8. FRONT HALF OF EQUATORIAL DISK (ANNULUS SEGMENT: y > 0)
+        //    Slices cleanly across the lower horizon with clear ISCO hole!
+        // -------------------------------------------------------------
+        if (diskFade > 0.01) {
+          ctx.save();
+          ctx.globalAlpha = bhAlpha * diskFade;
+          ctx.translate(cx, cy);
+          ctx.rotate(diskTilt);
+          ctx.scale(1, diskAspect);
+
+          const frontDiskGrad = ctx.createLinearGradient(-rDiskOut, 0, rDiskOut, 0);
+          frontDiskGrad.addColorStop(0, '#ffffff'); // Approaching blueshifted side
+          frontDiskGrad.addColorStop(0.18, '#67e8f9');
+          frontDiskGrad.addColorStop(0.38, '#38bdf8');
+          frontDiskGrad.addColorStop(0.65, '#4338ca');
+          frontDiskGrad.addColorStop(0.85, '#9f1239'); // Receding redshifted side
+          frontDiskGrad.addColorStop(1, 'rgba(63, 7, 19, 0.06)');
+
+          ctx.fillStyle = frontDiskGrad;
+          ctx.beginPath();
+          // Outer half-ellipse (y > 0) from +rDiskOut to -rDiskOut
+          ctx.arc(0, 0, rDiskOut, 0, Math.PI, false);
+          // Inner half-ellipse (y > 0) from -rISCO to +rISCO (opening the inner hole!)
+          ctx.arc(0, 0, rISCO, Math.PI, 0, true);
+          ctx.closePath();
+          ctx.fill();
+
+          // Searing ISCO inner edge luminous filament (T > 10^7 K)
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.arc(0, 0, rISCO, 0.1, Math.PI - 0.1);
+          ctx.stroke();
+
+          // Front half spiral density shock waves
+          for (let arm = 0; arm < 2; arm++) {
+            const armOffset = arm * Math.PI + tSec * 1.5;
+            ctx.strokeStyle = arm === 0 ? 'rgba(255, 255, 255, 0.45)' : 'rgba(56, 189, 248, 0.35)';
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            for (let t = 0; t <= 24; t++) {
+              const th = (t / 24) * Math.PI * 1.6 + armOffset;
+              const rad = rISCO + (t / 24) * (rDiskOut - rISCO);
+              const sx = Math.cos(th) * rad;
+              const sy = Math.sin(th) * rad;
+              if (sy > -1.5) {
+                if (t === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+              }
+            }
+            ctx.stroke();
+          }
+
+          // Differential Keplerian disk particles
+          for (const p of BH_DISK_PARTICLES) {
+            const keplerSpeed = (p.speed * 26) / Math.sqrt(p.dist);
+            const pAngle = p.angle + tSec * keplerSpeed;
+            const px = Math.cos(pAngle) * p.dist;
+            const py = Math.sin(pAngle) * p.dist;
+
+            if (py > 0 && p.dist >= rISCO * 0.95) {
+              const isApproaching = Math.cos(pAngle) < 0; // Approaching left side
+              const dopplerBoost = isApproaching ? Math.min(1.0, p.alpha * 1.6) : p.alpha * 0.35;
+              ctx.fillStyle = isApproaching
+                ? `rgba(255, 255, 255, ${dopplerBoost.toFixed(3)})`
+                : `rgba(244, 63, 94, ${dopplerBoost.toFixed(3)})`;
+              ctx.beginPath();
+              ctx.arc(px, py, p.size * (isApproaching ? 1.2 : 0.8), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          ctx.restore();
+        }
+
+        ctx.restore(); // Restore bhAlpha
       }
     },
     [telemetry, selectedTrackId]
@@ -1147,50 +1477,27 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* ------------------------------------------------------------- */}
-      {/* 1. TOP HEADER & VIEW MODE SELECTOR                            */}
+      {/* 1. TOP HEADER (UNIFORM HERO BANNER)                           */}
       {/* ------------------------------------------------------------- */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#030612]/95 border border-cyan-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-        <div>
-          <div className="flex items-center gap-2">
-            <Sliders className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              Interactive 2D Stellar Life Cycles Simulator
-            </h3>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+        <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2 max-w-3xl">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+              <Activity className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400 shrink-0" />
+              <span>Stellar Life Cycles</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              Trace how stellar birth mass dictates cosmic destiny—from multi-trillion-year red dwarf stability and Sun-like planetary nebulae to runaway core collapse, supernova nucleosynthesis, and neutron star or black hole remnants.
+            </p>
           </div>
-        </div>
-
-        {/* View Switcher: Simulator vs. Stage Matrix */}
-        <div className="flex items-center gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono shrink-0">
-          <button
-            onClick={() => setActiveTab('simulator')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
-              activeTab === 'simulator'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>2D Slider Simulator</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('matrix')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
-              activeTab === 'matrix'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>All Evolutionary Tracks</span>
-          </button>
         </div>
       </div>
 
-      {activeTab === 'simulator' && (
-        <div className="flex flex-col gap-5 sm:gap-6">
-          {/* ------------------------------------------------------------- */}
-          {/* 2. 2D STAGE & ASTROPHYSICS HUD (Adjusted for mobile screens) */}
-          {/* ------------------------------------------------------------- */}
+      <div className="flex flex-col gap-5 sm:gap-6">
+        {/* ------------------------------------------------------------- */}
+        {/* 2. 2D STAGE & ASTROPHYSICS HUD (Adjusted for mobile screens) */}
+        {/* ------------------------------------------------------------- */}
           <div
             ref={stageContainerRef}
             className={`rounded-2xl bg-[#030612] border border-cyan-500/30 overflow-hidden relative shadow-[0_12px_40px_rgba(0,0,0,0.8)] ${
@@ -1543,10 +1850,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
                         className="px-2.5 py-1.5 rounded-lg bg-[#020512] hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-xs text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 font-mono group"
                         title={`Inspect ${star.name} (${star.spectralClass}) in 3D Dossier`}
                       >
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: star.colorHex }}
-                        />
+                        <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
                         <span className="font-semibold">{star.name}</span>
                         <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-300" />
                       </button>
@@ -1557,87 +1861,111 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
             </div>
           </div>
         </div>
-      )}
 
-      {/* ------------------------------------------------------------- */}
-      {/* 7. ALL EVOLUTIONARY TRACKS MATRIX VIEW                         */}
-      {/* ------------------------------------------------------------- */}
-      {activeTab === 'matrix' && (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          <div className="p-4 rounded-2xl bg-[#030612]/90 border border-cyan-500/20">
-            <h4 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
-              Comparative Matrix of All Stellar Evolutionary Tracks
-            </h4>
+        {/* ------------------------------------------------------------- */}
+        {/* 5. ALL EVOLUTIONARY TRACKS (MERGED DIRECTLY INTO SIMULATOR)   */}
+        {/* ------------------------------------------------------------- */}
+        <div className="flex flex-col gap-5 pt-4 border-t border-cyan-500/20">
+          <div className="p-4 rounded-2xl bg-[#030612]/90 border border-cyan-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h4 className="text-sm font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
+                <Layers className="w-4 h-4 text-cyan-400" />
+                <span>Comparative Matrix of All Stellar Evolutionary Tracks</span>
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Click any stage checkpoint or track to simulate its lifecycle and inspect physical conditions above.
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col gap-6">
-            {STELLAR_TRACKS.map((track) => (
-              <div
-                key={track.id}
-                className="p-5 sm:p-6 rounded-2xl bg-[#040816]/90 border border-cyan-500/25 flex flex-col gap-4 shadow-sm"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/15 pb-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: track.accentColor }}
-                      />
-                      <h4 className="text-base sm:text-lg font-bold text-white">{track.name}</h4>
+            {STELLAR_TRACKS.map((track) => {
+              const isTrackSelected = track.id === selectedTrackId;
+              return (
+                <div
+                  key={track.id}
+                  className={`p-5 sm:p-6 rounded-2xl transition-all flex flex-col gap-4 shadow-sm ${
+                    isTrackSelected
+                      ? 'bg-[#060e2a] border-2 border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
+                      : 'bg-[#040816]/90 border border-cyan-500/25 hover:border-cyan-500/50'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/15 pb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: track.accentColor }}
+                        />
+                        <h4 className="text-base sm:text-lg font-bold text-white">{track.name}</h4>
+                        {isTrackSelected && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                            Active in Simulator
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-mono text-cyan-400">{track.massLabel}</span>
                     </div>
-                    <span className="text-xs font-mono text-cyan-400">{track.massLabel}</span>
+                    <div className="text-xs text-slate-400 max-w-md sm:text-right font-mono">
+                      <span className="text-slate-500 block">Lifespan: {track.typicalLifespan}</span>
+                      <span className="text-cyan-300 font-semibold">Fate: {track.fateSummary}</span>
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400 max-w-md sm:text-right font-mono">
-                    <span className="text-slate-500 block">Lifespan: {track.typicalLifespan}</span>
-                    <span className="text-cyan-300 font-semibold">Fate: {track.fateSummary}</span>
-                  </div>
-                </div>
 
-                {/* Steps Timeline Horizontal Ribbon */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {track.checkpoints.map((cp, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 flex flex-col justify-between relative overflow-hidden"
+                  {/* Steps Timeline Horizontal Ribbon */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {track.checkpoints.map((cp, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          setSelectedTrackId(track.id);
+                          setProgress(cp.progress);
+                          stageContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 hover:border-cyan-400/60 hover:bg-[#071333] transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer group shadow-xs"
+                        title={`Click to simulate ${cp.stageName} above`}
+                      >
+                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
+                          <span className="group-hover:text-cyan-400 font-bold">STAGE {idx + 1}</span>
+                          <span className="text-cyan-400/80">{cp.timeElapsedLabel}</span>
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors mb-1">
+                            {cp.stageName}
+                          </div>
+                          <p className="text-[11px] text-slate-300 leading-relaxed line-clamp-3">
+                            {cp.shortDescription}
+                          </p>
+                        </div>
+
+                        <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 flex items-center justify-between">
+                          <span>{cp.surfaceTempKelvin.toLocaleString()} K</span>
+                          <span className="text-cyan-400 font-semibold">
+                            {cp.spectralClassEquivalent}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={() => {
+                        setSelectedTrackId(track.id);
+                        setProgress(0);
+                        stageContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm hover:border-cyan-400"
                     >
-                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
-                        <span>STAGE {idx + 1}</span>
-                        <span className="text-cyan-400/80">{cp.timeElapsedLabel}</span>
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white mb-1">{cp.stageName}</div>
-                        <p className="text-[11px] text-slate-300 leading-relaxed line-clamp-3">
-                          {cp.shortDescription}
-                        </p>
-                      </div>
-
-                      <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 flex items-center justify-between">
-                        <span>{cp.surfaceTempKelvin.toLocaleString()} K</span>
-                        <span className="text-cyan-400 font-semibold">
-                          {cp.spectralClassEquivalent}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                      <span>Simulate {track.name}</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() => {
-                      setSelectedTrackId(track.id);
-                      setActiveTab('simulator');
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer"
-                  >
-                    <span>Load {track.name} into 2D Slider Simulator</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
-      )}
-    </div>
+      </div>
   );
 };

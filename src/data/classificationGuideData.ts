@@ -99,6 +99,28 @@ export interface StellarPopulationGuideItem {
   externalExamples?: string[];
 }
 
+export interface StellarRemnantGuideItem {
+  id: string;
+  code: string;
+  abbreviation: string;
+  name: string;
+  buttonTitle: string;
+  mobileTitle: string;
+  category: string;
+  temperature: string;
+  colorHex: string;
+  tag: string;
+  density: string;
+  typicalMass: string;
+  typicalDiameter: string;
+  quantumSupportOrHorizon: string;
+  explanation: string;
+  formationMechanism: string;
+  distinguishingFeatures: string[];
+  exampleStarIds: string[];
+  externalExamples?: string[];
+}
+
 export interface HypotheticalStarGuideItem {
   id: string;
   name: string;
@@ -436,44 +458,6 @@ export const EXOTIC_CLASSES_GUIDE: ExoticClassGuideItem[] = [
     exampleStarIds: ['eta-carinae-a', 'pistol-star', 's-doradus', 'cygnus-ob2-12', 'v4998-sagittarii', 'lbv-1806-20', 'p-cygni'],
   },
   {
-    code: 'WD / VII',
-    abbreviation: 'WD',
-    name: 'White Dwarfs',
-    buttonTitle: 'White Dwarfs',
-    mobileTitle: 'White Dwarf',
-    category: 'Compact Remnants',
-    temperature: '4,000 to 150,000 K (cooling over time)',
-    colorHex: '#e0f2fe',
-    tag: 'Quantum Degenerate Solid',
-    explanation:
-      'The super-dense Earth-sized crystal carbon-oxygen core left behind when a star like our Sun sheds its outer layers as a planetary nebula. No active nuclear fusion occurs; it is held up against collapse purely by quantum Electron Degeneracy Pressure.',
-    distinguishingFeatures: [
-      'Packs roughly 0.6 to 1.4 solar masses into an Earth-sized volume (a single teaspoon weighs over 5 tons!)',
-      'Spectral subtypes: DA (hydrogen atmosphere), DB (neutral helium), DZ (metal-polluted by shredded asteroids), DQ (carbon-enriched)',
-      'Cooling timescales exceed hundreds of trillions of years before eventually becoming cold "Black Dwarfs"',
-    ],
-    exampleStarIds: ['sirius-b', 'van-maanens-star', 'procyon-b', '40-eridani-b', 'gd-358', 'bpm-37093', 'stein-2051-b', 'lp-40-365'],
-  },
-  {
-    code: 'NS / Pulsar',
-    abbreviation: 'NS',
-    name: 'Neutron Stars & Pulsars',
-    buttonTitle: 'Neutron Stars',
-    mobileTitle: 'Neutron Star',
-    category: 'Extreme Relics',
-    temperature: '600,000 to 2,000,000+ K (surface)',
-    colorHex: '#c084fc',
-    tag: 'Atomic Nucleus City',
-    explanation:
-      'The ultra-dense stellar corpse left behind by a core-collapse supernova (Type II). Gravity crushes electrons and protons together into solid neutron matter, packing 1.4 to 2.2 Suns into a city-sized sphere only ~20 km (12 miles) in diameter.',
-    distinguishingFeatures: [
-      'Nuclear density exceeding 10¹⁴ g/cm³ (a teaspoon weighs 1 billion tons on Earth)',
-      'Pulsars sweep relativistic radio and X-ray beam cones like cosmic lighthouses spinning hundreds of times per second',
-      'Magnetars possess the strongest magnetic fields in the cosmos (up to 10¹⁵ Gauss), warping electron orbits into needles',
-    ],
-    exampleStarIds: ['crab-pulsar', 'vela-pulsar', 'lich-pulsar', 'psr-j1748-2446ad', 'sgr-1806-20', 'geminga', 'hulse-taylor-pulsar'],
-  },
-  {
     code: 'L / T / Y',
     abbreviation: 'BD',
     name: 'Brown Dwarfs',
@@ -656,7 +640,19 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
     howItWorks:
       'Low metallicity decreases atmospheric opacity (less line blanketing and electron-scattering), resulting in higher effective surface temperatures for a given mass and smaller, denser radii.',
     typicalSizeComparison: '0.2 to 0.8 times the diameter of the Sun.',
-    exampleStarIds: ['kapteyns-star', 'methuselah-star'],
+    exampleStarIds: [
+      'hd-49798',
+      'v361-hydrae',
+      'kpd-1930-2752',
+      'groombridge-1830',
+      'kapteyns-star',
+      'methuselah-star',
+      'smss-j031300',
+      'sdss-j102915',
+      'sneden-star',
+      'cayrel-star',
+      'mu-cassiopeiae'
+    ],
     coreEnergySource: 'Pristine metal-poor core Hydrogen fusion',
     fate: 'Extremely long lifespans (tens to hundreds of billions of years), slowly evolving into helium white dwarfs.',
   },
@@ -699,7 +695,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Surface temperature peaks at maximum expansion velocity rather than maximum radius',
       'Encompasses Cepheids, RR Lyraes, Miras, RV Tauri, and Delta Scuti stars',
     ],
-    exampleStarIds: ['polaris', 'delta-cephei', 'betelgeuse', 'mira'],
+    exampleStarIds: ['polaris', 'delta-cephei', 'betelgeuse', 'mira-a'],
     externalExamples: ['Polaris (Alpha UMi)', 'Delta Cephei', 'RR Lyrae', 'Betelgeuse (Alpha Ori)'],
   },
   {
@@ -720,7 +716,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Rapid brightness rise followed by a gentler, asymmetric decline',
       'Subdivided into Classical Cepheids (Pop I, massive young stars) and Type II Cepheids (Pop II, older low-mass stars like W Virginis)',
     ],
-    exampleStarIds: ['delta-cephei', 'polaris'],
+    exampleStarIds: ['delta-cephei', 'polaris', 'mekbuda', 'beta-doradus'],
     externalExamples: ['Delta Cephei (Archetype)', 'Polaris (Closest Cepheid)', 'Eta Aquilae', 'V1 in Andromeda (Hubble’s discovery)'],
   },
   {
@@ -741,7 +737,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Nearly constant average luminosity (~40–50 L☉) across the entire class',
       'Characteristic Blazhko Effect: Periodic modulation of pulsation amplitude and phase over cycles of tens to hundreds of days',
     ],
-    exampleStarIds: ['delta-scuti', 'gamma-doradus', 'methuselah-star'],
+    exampleStarIds: ['rr-lyrae', 'delta-scuti', 'gamma-doradus', 'methuselah-star'],
     externalExamples: ['RR Lyrae (Archetype)', 'XZ Cygni', 'V445 Lyr', 'Globular Cluster M3 Variables'],
   },
   {
@@ -762,7 +758,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Surrounded by vast expanding circumstellar dust and gas envelopes',
       'Major cosmic factories for interstellar dust grains that seed future planetary systems',
     ],
-    exampleStarIds: ['mira', 'chi-cygni', 'r-andromedae'],
+    exampleStarIds: ['mira-a', 'chi-cygni', 'r-andromedae'],
     externalExamples: ['Mira / Omicron Ceti ("The Wonderful")', 'Chi Cygni', 'R Hydrae', 'R Leonis'],
   },
   {
@@ -783,7 +779,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Episodes of sudden dimming caused by dust condensation from convective mass ejections (e.g. Betelgeuse "Great Dimming" of 2019-2020)',
       'High mass-loss rates via slow, cool stellar winds',
     ],
-    exampleStarIds: ['betelgeuse', 'antares', 'mu-cephei'],
+    exampleStarIds: ['betelgeuse', 'antares', 'mu-cephei', 'scheat'],
     externalExamples: ['Betelgeuse (Alpha Orionis)', 'Antares (Alpha Scorpii)', 'Mu Cephei (Garnet Star)', 'Rasalgethi'],
   },
   {
@@ -804,7 +800,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Dwarf novae (like SS Cygni) exhibit frequent milder outbursts driven by disk gravitational instabilities',
       'Does not destroy the white dwarf; mass continues to accumulate towards the Chandrasekhar limit (potential Type Ia supernova)',
     ],
-    exampleStarIds: ['algol', 'sheliak', 'hde-226868'],
+    exampleStarIds: ['t-coronae-borealis', 'u-geminorum', 'v838-monocerotis'],
     externalExamples: ['T Coronae Borealis ("Blaze Star", recurrent nova)', 'SS Cygni (Dwarf Nova archetype)', 'U Geminorum', 'Nova Muscae 1991'],
   },
   {
@@ -846,8 +842,29 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'BY Draconis stars feature giant starspots shifting across differential rotational latitudes',
       'Alpha² Canum Venaticorum stars display extreme magnetic and chemical abundance patches of silicon, chromium, and europium',
     ],
-    exampleStarIds: ['barnards-star', 'kapteyns-star'],
+    exampleStarIds: ['cor-caroli', 'barnards-star', 'kapteyns-star'],
     externalExamples: ['BY Draconis (Archetype)', 'Alpha² Canum Venaticorum (Cor Caroli)', 'FK Comae Berenices', 'V410 Tauri'],
+  },
+  {
+    id: 'eclipsing-binaries',
+    name: 'Eclipsing Binaries (Algol Variables)',
+    buttonTitle: 'Eclipsing Binaries',
+    category: 'Extrinsic Eclipsing',
+    colorHex: '#818cf8',
+    tag: 'Demon Star Eclipses',
+    periodRange: 'Hours to days (Algol: 2.867 days)',
+    variabilityType: 'Extrinsic (Eclipsing)',
+    explanation:
+      'Binary star systems whose orbital plane aligns with our line of sight so that the stars regularly occult each other, producing clockwork periodic dips in total observed brightness. Studying their light curves yields exact stellar radii, masses, and orbital inclinations without direct spatial resolution.',
+    mechanism:
+      'Geometric mutual line-of-sight occultation. Deep primary minima occur when the hotter star is eclipsed by the cooler companion; shallow secondary minima occur when the hotter star eclipses the cooler companion.',
+    distinguishingFeatures: [
+      'Clockwork photometric light curves with steep primary and secondary minima',
+      'Algol (Beta Persei) is the historical archetype, dimming from mag 2.1 to 3.4 every 2.87 days',
+      'Revealed the famous "Algol Paradox" of stellar mass transfer across the L1 Lagrange point',
+    ],
+    exampleStarIds: ['algol-a', 'algol-b'],
+    externalExamples: ['Algol A & B (Beta Persei / EA archetype)', 'Beta Lyrae (EB mass transfer)', 'W Ursae Majoris (EW contact)', 'Castor C (YY Gem)'],
   },
 ];
 
@@ -889,7 +906,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Algol (Beta Persei) archetype: "Demon Star" dims from mag 2.1 to 3.4 every 2.87 days',
       'Allows direct calculation of true physical stellar radii without requiring interferometry',
     ],
-    exampleStarIds: ['algol'],
+    exampleStarIds: ['algol-a', 'algol-b'],
     externalExamples: ['Algol (Beta Persei / The Demon Star)', 'Beta Lyrae (Sheliak / Mass transfer system)', 'Castor C (YY Geminorum)', 'EE Cephei'],
   },
   {
@@ -951,7 +968,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Septuple Systems (7 stars): Nu Scorpii (Jabbah) and AR Cassiopeiae',
       'Octuple & Nonuple Systems (8 & 9 stars): HD 98800 (quadruple with protoplanetary disks), candidate nonuple systems like QZ Carinae complex!',
     ],
-    exampleStarIds: ['castor', 'alpha-centauri-a', 'polaris', 'mizar'],
+    exampleStarIds: ['castor-a', 'alpha-centauri-a', 'polaris', 'mizar-a'],
     externalExamples: ['Castor (Alpha Geminorum, 6 stars)', 'Nu Scorpii (7 stars)', 'AR Cassiopeiae (7 stars)', 'HD 98800 (4 stars + disk)', 'Candidate 9-star system in Carina OB1'],
   },
   {
@@ -1071,6 +1088,232 @@ export const STELLAR_POPULATIONS_GUIDE: StellarPopulationGuideItem[] = [
       'GN-z11 (Distant z ≈ 10.6 galaxy with candidate Pop III He II signatures)',
       'Pair-Instability Supernova Progenitors (140–260 M☉ primordial titans)',
     ],
+  },
+];
+
+export const STELLAR_REMNANTS_GUIDE: StellarRemnantGuideItem[] = [
+  {
+    id: 'white-dwarfs',
+    code: 'WD (DA/DB/DZ/DQ)',
+    abbreviation: 'WD',
+    name: 'White Dwarfs',
+    buttonTitle: 'White Dwarfs',
+    mobileTitle: 'White Dwarf',
+    category: 'Electron-Degenerate Relics',
+    tag: 'Quantum Electron Lattice',
+    colorHex: '#e0f2fe',
+    density: '~10⁶ g/cm³ (1 tsp ≈ 5.5 tons)',
+    typicalMass: '0.5 to 1.44 M☉ (Chandrasekhar Limit)',
+    typicalDiameter: '~7,000 to 12,000 km (Earth-sized)',
+    quantumSupportOrHorizon: 'Electron Degeneracy Pressure (Pauli Exclusion)',
+    temperature: '4,000 to 150,000+ K (Cooling)',
+    explanation:
+      'The super-dense Earth-sized crystal carbon-oxygen core left behind when a low-to-intermediate-mass star like our Sun sheds its outer layers as a planetary nebula. No active nuclear fusion occurs; it is held up against gravitational collapse purely by quantum Electron Degeneracy Pressure.',
+    formationMechanism:
+      'Asymptotic Giant Branch (AGB) envelope ejection via planetary nebula, leaving behind the inert degenerate C-O or O-Ne core.',
+    distinguishingFeatures: [
+      'Packs roughly 0.6 to 1.4 solar masses into an Earth-sized volume with colossal surface gravity (log g ≈ 8.0, 100,000× Earth gravity)',
+      'Spectral subtypes: DA (hydrogen atmosphere), DB (neutral helium), DO (hot ionized helium), DZ (metal-polluted by shredded asteroids), DQ (carbon-enriched)',
+      'Cooling timescales exceed hundreds of trillions of years before eventually fading into cold hypothetical Black Dwarfs',
+      'Can detonate in catastrophic Type Ia thermonuclear supernovae upon accreting mass past the 1.44 M☉ Chandrasekhar limit',
+    ],
+    exampleStarIds: ['sirius-b', 'procyon-b', 'van-maanens-star', '40-eridani-b', 'bpm-37093', 'stein-2051-b', 'lp-40-365'],
+    externalExamples: ['Sirius B (First discovered white dwarf, DA2)', 'Procyon B', 'Van Maanen’s Star (DZ metal-polluted archetype)', 'BPM 37093 ("Lucy" crystallized diamond core)'],
+  },
+  {
+    id: 'radio-quiet-neutron-stars',
+    code: 'RQNS / INS / CCO',
+    abbreviation: 'RQNS',
+    name: 'Radio-Quiet Neutron Stars',
+    buttonTitle: 'Radio-Quiet Neutron Stars',
+    mobileTitle: 'Radio-Quiet NS',
+    category: 'Thermal Relic Neutron Stars',
+    tag: 'Million-Degree Thermal Emitter',
+    colorHex: '#38bdf8',
+    density: '~10¹⁴ g/cm³ (1 tsp ≈ 1 billion tons)',
+    typicalMass: '1.2 to 2.1 M☉',
+    typicalDiameter: '~18 to 25 km (City-sized)',
+    quantumSupportOrHorizon: 'Neutron Degeneracy & Strong Nuclear Repulsion',
+    temperature: '500,000 to 3,000,000 K (Thermal Soft X-rays)',
+    explanation:
+      'Isolated neutron stars and Central Compact Objects (CCOs) that lack active radio pulsation beams, glowing purely through their scorching million-degree surface thermal X-ray emission. Archetypes include "The Magnificent Seven" (isolated thermal neutron stars within 1,500 light-years) and young remnants in supernova cores.',
+    formationMechanism:
+      'Core-collapse supernova (Type II/Ib/Ic) where magnetic dipole alignment, low rotational spin-down energy, or beamed radio geometry produces zero detectable radio pulses at Earth.',
+    distinguishingFeatures: [
+      'Packs ~1.4 Suns into a 20 km city-sized sphere with a pure blackbody thermal spectrum peaking in soft X-rays',
+      'Extremely weak or sub-critical radio luminosity, with no detectable non-thermal synchrotron radio emission',
+      'Includes The Magnificent Seven (such as RX J1856.3-3754 and Calvera) and Central Compact Objects in supernova remnants (Vela Jr, Cas A)',
+      'Strong gravitational light-bending: extreme spacetime curvature allows observers to see more than 60% of the star’s surface at once',
+    ],
+    exampleStarIds: ['rx-j1856-3754', 'calvera', 'rx-j0720-3125', 'rx-j0806-4123', 'rx-j1308-2127', 'rx-j1605-3249', 'rx-j0420-5022'],
+    externalExamples: ['RX J1856.3-3754 (Brightest of The Magnificent Seven, ~400 ly)', 'Calvera (Ursa Minor isolated NS)', '1E 1207.4-5209 (PKS 1209 CCO)', 'Cas A Central Compact Object'],
+  },
+  {
+    id: 'radio-pulsars',
+    code: 'PSR (Rotation-Powered)',
+    abbreviation: 'PSR',
+    name: 'Radio Pulsars',
+    buttonTitle: 'Radio Pulsars',
+    mobileTitle: 'Radio Pulsar',
+    category: 'Relativistic Beaming Relics',
+    tag: 'Cosmic Lighthouse Beacons',
+    colorHex: '#a855f7',
+    density: '~10¹⁴ g/cm³',
+    typicalMass: '1.25 to 2.0 M☉',
+    typicalDiameter: '~20 to 24 km',
+    quantumSupportOrHorizon: 'Neutron Degeneracy Pressure',
+    temperature: '1,000,000 to 4,000,000 K',
+    explanation:
+      'Rapidly spinning, highly magnetized neutron stars whose magnetic poles are tilted with respect to their rotational axis. Relativistic electrons accelerate along magnetic field lines, blasting focused synchrotron radiation beam cones into space that sweep across our line of sight with atomic-clock precision.',
+    formationMechanism:
+      'Conservation of angular momentum and magnetic flux compression during the catastrophic core-collapse supernova of a massive star (8–20 M☉).',
+    distinguishingFeatures: [
+      'Rotational periods ranging from milliseconds to several seconds with regular ticking precision rivaling atomic clocks',
+      'Relativistic beaming: Synchrotron radiation emitted along dipolar open field lines creates distinct periodic pulse spikes',
+      'Power energetic Pulsar Wind Nebulae (PWN), like the Crab Nebula illuminated by the central Crab Pulsar',
+      'Gradually lose rotational kinetic energy via magnetic dipole braking (spin-down luminosity)',
+    ],
+    exampleStarIds: ['crab-pulsar', 'vela-pulsar', 'psr-b0950-08', 'psr-b0656-14', 'psr-b1055-52', 'hulse-taylor-pulsar'],
+    externalExamples: ['Crab Pulsar (PSR B0531+21, 33 ms period in Crab Nebula)', 'Vela Pulsar (PSR B0833-45)', 'PSR B1919+21 (First pulsar discovered by Jocelyn Bell Burnell in 1967)', 'Hulse-Taylor Binary Pulsar (PSR B1913+16, Nobel Prize 1993)'],
+  },
+  {
+    id: 'millisecond-pulsars',
+    code: 'MSP (Recycled / Spider)',
+    abbreviation: 'MSP',
+    name: 'Millisecond & Spider Pulsars',
+    buttonTitle: 'Millisecond Pulsars',
+    mobileTitle: 'Millisecond Pulsar',
+    category: 'Spun-Up Binary Relics',
+    tag: 'Sub-Millisecond RPM',
+    colorHex: '#ec4899',
+    density: '~10¹⁴ to 10¹⁵ g/cm³',
+    typicalMass: '1.4 to 2.35 M☉ (Massive compact cores)',
+    typicalDiameter: '~20 to 22 km',
+    quantumSupportOrHorizon: 'Neutron Degeneracy & Repulsive Strong Force',
+    temperature: '1,000,000 to 5,000,000 K',
+    explanation:
+      'Old, dead pulsars resurrected and "recycled" into ultra-fast spins (up to 716 rotations per second!) by siphoning matter and angular momentum from a binary companion star. Extreme subclasses include "Black Widows" and "Redbacks" (Spider Pulsars), whose high-energy particle winds actively blast and vaporize their donor stars.',
+    formationMechanism:
+      'Long-term accretion spin-up in Low-Mass X-ray Binaries (LMXBs) transferring angular momentum over hundreds of millions of years.',
+    distinguishingFeatures: [
+      'Incredible spin rates: PSR J1748-2446ad spins 716 times per second (equator traveling at 24% the speed of light!)',
+      'Spider Pulsars: Black Widows evaporate low-mass brown dwarf companions (< 0.05 M☉); Redbacks consume heavier degenerate subgiants (~0.2–0.4 M☉)',
+      'Can retain planets: Lich (PSR B1257+12) hosted the first confirmed extrasolar planets in human history (1992)',
+      'Extremely stable long-term rotation used by Pulsar Timing Arrays (PTAs) to detect cosmological gravitational waves',
+    ],
+    exampleStarIds: ['black-widow-pulsar', 'redback-pulsar', 'lich-pulsar', 'double-pulsar-a', 'double-pulsar-b'],
+    externalExamples: ['PSR J1748-2446ad (Fastest spinning known neutron star, 716 Hz)', 'Black Widow Pulsar (PSR B1957+20)', 'Lich (PSR B1257+12, first exoplanets)', 'PSR J0737-3039 (First known double pulsar system)'],
+  },
+  {
+    id: 'magnetars',
+    code: 'SGR / AXP',
+    abbreviation: 'SGR',
+    name: 'Magnetars',
+    buttonTitle: 'Magnetars',
+    mobileTitle: 'Magnetar',
+    category: 'Ultra-Magnetic Relics',
+    tag: '10¹⁵ Gauss Magnetic Field',
+    colorHex: '#f43f5e',
+    density: '~10¹⁴ g/cm³',
+    typicalMass: '1.3 to 2.2 M☉',
+    typicalDiameter: '~20 to 22 km',
+    quantumSupportOrHorizon: 'Neutron Degeneracy Pressure',
+    temperature: '5,000,000 to 15,000,000 K (Hot spots & flares)',
+    explanation:
+      'The most intensely magnetic objects known in the universe, packing magnetic field strengths of 10¹⁴ to 10¹⁵ Gauss (100 trillion times Earth’s magnetic field). The magnetic energy density exceeds nuclear matter bonds; magnetic stress fractures the solid neutron crust in colossal "Starquakes", triggering blinding Soft Gamma Repeater (SGR) flares and Fast Radio Bursts (FRBs).',
+    formationMechanism:
+      'Formed via convective helical dynamo amplification in rapidly rotating proto-neutron stars born from ultra-massive, highly magnetic progenitor stars.',
+    distinguishingFeatures: [
+      'Magnetic field (10¹⁵ G) is so intense that quantum vacuum birefringence occurs, warping atom shapes into needle cylinders',
+      'Starquakes: Crust ruptures release giant gamma-ray flares; on Dec 27 2004, SGR 1806-20 released more energy in 0.1s than our Sun emits in 150,000 years!',
+      'Direct engine of Galactic Fast Radio Bursts (FRBs), as proven by SGR 1935+2154 in 2020',
+      'Decelerate rapidly through ferocious magnetic braking, exhausting magnetic reservoirs within ~10,000 years',
+    ],
+    exampleStarIds: ['sgr-1935-2154', 'swift-j1818-1607', 'magnetar-1e-2259', 'magnetar-1e-1048'],
+    externalExamples: ['SGR 1935+2154 (First confirmed Galactic FRB emitter)', 'SGR 1806-20 (Historic 2004 giant gamma flare)', '1E 2259+586 (Anomalous X-ray Pulsar in CTB 109)', 'Swift J1818.0-1607 (Youngest known magnetar, ~240 years old)'],
+  },
+  {
+    id: 'accreting-neutron-stars',
+    code: 'LMXB / HMXB',
+    abbreviation: 'X-NS',
+    name: 'Accreting Neutron Stars & X-Ray Binaries',
+    buttonTitle: 'Accreting Neutron Stars',
+    mobileTitle: 'Accreting NS',
+    category: 'Relativistic Binary Relics',
+    tag: 'Thermonuclear Surface Bursts',
+    colorHex: '#06b6d4',
+    density: '~10¹⁴ g/cm³',
+    typicalMass: '1.4 to 2.1 M☉',
+    typicalDiameter: '~20 to 24 km',
+    quantumSupportOrHorizon: 'Neutron Degeneracy Pressure',
+    temperature: '10,000,000 to 30,000,000 K (Inner disk)',
+    explanation:
+      'Neutron stars locked in tight binary orbits with companion donor stars, siphoning hydrogen and helium gas across the inner Lagrangian point. The in-falling matter crashes into the neutron star surface at over 100,000 km/s, producing continuous intense X-rays and runaway thermonuclear explosions (Type I X-ray Bursts).',
+    formationMechanism:
+      'Supernova in a close binary system that survives the kick, followed by companion star expansion (Roche-lobe overflow or stellar wind capture).',
+    distinguishingFeatures: [
+      'Scorpius X-1: The brightest persistent extrasolar X-ray source in the sky, emitting thousands of times more energy in X-rays than the Sun does across all wavelengths',
+      'Type I X-ray Bursts: Runaway helium flashes detonating across the entire neutron star surface in seconds',
+      'Relativistic accretion disks reaching millions of degrees with collimated radio plasma jets',
+    ],
+    exampleStarIds: ['scorpius-x-1-ns'],
+    externalExamples: ['Scorpius X-1 (Prototype LMXB, discovered 1962)', 'Centaurus X-3 (First discovered X-ray pulsar)', 'Hercules X-1', 'Cygnus X-2'],
+  },
+  {
+    id: 'stellar-black-holes',
+    code: 'SBH (Singularity)',
+    abbreviation: 'SBH',
+    name: 'Stellar-Mass Black Holes',
+    buttonTitle: 'Stellar Black Holes',
+    mobileTitle: 'Stellar Black Hole',
+    category: 'Spacetime Gravitational Singularities',
+    tag: 'Event Horizon & ISCO',
+    colorHex: '#6366f1',
+    density: 'Singularity (Infinite central density)',
+    typicalMass: '3 to 100+ M☉ (Tolman-Oppenheimer-Volkoff limit surpassed)',
+    typicalDiameter: 'Schwarzschild Radius: r_s = 2GM/c² (~18 to 300 km shadow)',
+    quantumSupportOrHorizon: 'Schwarzschild / Kerr Event Horizon (No outward force can balance gravity)',
+    temperature: '< 10⁻⁷ K (Hawking temp); Accretion disk > 10,000,000 K',
+    explanation:
+      'The ultimate stellar gravitational relics formed when stars with initial masses exceeding ~20–25 M☉ exhaust all fuel and collapse past the Tolman-Oppenheimer-Volkoff neutron limit. Gravity overwhelms all quantum degenerate forces, collapsing the core to an infinitesimal gravitational singularity enclosed by an inescapable Event Horizon from which not even light can escape.',
+    formationMechanism:
+      'Core collapse of an ultra-massive star (Type Ib/c supernova, collapsar, or direct "unnovae" collapse without explosion).',
+    distinguishingFeatures: [
+      'Event Horizon: One-way causal membrane where escape velocity equals the speed of light c',
+      'Innermost Stable Circular Orbit (ISCO) and glowing relativistic photon ring wrapping warped images of space',
+      'Doppler beaming: Relativistic blueshift makes the side of the accretion disk rotating toward the observer dramatically brighter',
+      'Iconic systems: Cygnus X-1 (21.2 M☉, the first confirmed black hole) and Gaia BH1 (9.6 M☉, the closest known black hole at 1,560 ly)',
+    ],
+    exampleStarIds: [],
+    externalExamples: ['Cygnus X-1 (Historic first confirmed black hole, 21.2 M☉)', 'Gaia BH1 (Closest known black hole, 1,560 ly)', 'V404 Cygni (Active microquasar)', 'GRO J1655-40 (High-spin microquasar)'],
+  },
+  {
+    id: 'supermassive-black-holes',
+    code: 'SMBH (Galactic Cores)',
+    abbreviation: 'SMBH',
+    name: 'Supermassive Black Holes',
+    buttonTitle: 'Supermassive Black Holes',
+    mobileTitle: 'Supermassive BH',
+    category: 'Galactic Core Singularities',
+    tag: 'Millions to Billions of Solar Masses',
+    colorHex: '#f59e0b',
+    density: 'Singularity (Mean horizon density lower than water)',
+    typicalMass: '100,000 to over 60 Billion M☉',
+    typicalDiameter: 'Tens of millions to billions of kilometers (Size of planetary systems)',
+    quantumSupportOrHorizon: 'Kerr Metric Event Horizon & Ergosphere',
+    temperature: '< 10⁻¹⁴ K Hawking; Relativistic corona > 100,000,000 K',
+    explanation:
+      'Monstrous black holes residing at the gravitational hearts of almost all massive galaxies. When actively feeding on gas and disrupted stars, they power Active Galactic Nuclei (AGN), blazars, and quasars that outshine entire galaxies. Sagittarius A* anchors the dynamical center of our Milky Way with 4.15 million solar masses.',
+    formationMechanism:
+      'Direct collapse of primordial supermassive gas clouds at Cosmic Dawn, merged stellar-mass seed black holes, and runaway accretion in dense galactic cores.',
+    distinguishingFeatures: [
+      'Sagittarius A*: 4.15 million M☉ singularity directly imaged by the Event Horizon Telescope in 2022',
+      'Ergosphere and frame-dragging: Rotational dragging of spacetime enables Penrose process energy extraction',
+      'Relativistic plasma jets launched across millions of light-years at 0.999c, terminating in radio lobes',
+      'Orbital resonance: Fast-moving S-stars orbit Sgr A* at up to 8% the speed of light with pronounced relativistic precession',
+    ],
+    exampleStarIds: [],
+    externalExamples: ['Sagittarius A* (Milky Way core, 4.15 million M☉)', 'M87* (First black hole ever imaged by EHT, 6.5 billion M☉)', 'TON 618 (66 billion M☉ ultramassive black hole)', 'Centaurus A Core Singularity'],
   },
 ];
 

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Bookmark } from 'lucide-react';
+import { StarDot2D } from './StarDot2D';
+import { isStarBookmarked, toggleStarBookmark, subscribeAstronomyData } from '../utils/bookmarks';
+import { soundEffects } from '../utils/soundEffects';
 
 interface StarCardProps {
   star: StarData;
@@ -17,6 +20,22 @@ export const StarCard: React.FC<StarCardProps> = ({
   onViewDetails,
   isCompact = false,
 }) => {
+  const [bookmarked, setBookmarked] = useState<boolean>(() => isStarBookmarked(star.id));
+
+  useEffect(() => {
+    setBookmarked(isStarBookmarked(star.id));
+    return subscribeAstronomyData(() => {
+      setBookmarked(isStarBookmarked(star.id));
+    });
+  }, [star.id]);
+
+  const handleToggleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = toggleStarBookmark(star.id);
+    setBookmarked(next);
+    soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+  };
+
   const scaleObj = formatPhysicalDiameter(star.diameterKm, star.diameterSolar);
 
   if (isCompact) {
@@ -37,13 +56,7 @@ export const StarCard: React.FC<StarCardProps> = ({
         {/* Top: Name & Spectral Type */}
         <div className="flex items-start justify-between gap-1">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <div
-              className="w-2.5 h-2.5 rounded-full aspect-square shrink-0 ring-1 ring-white/30 shadow-sm"
-              style={{
-                backgroundColor: star.colorHex,
-                boxShadow: `0 0 6px ${star.colorHex}99`,
-              }}
-            />
+            <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
             <div className="min-w-0">
               <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors truncate font-sans" title={star.name}>
                 {star.name}
@@ -54,17 +67,29 @@ export const StarCard: React.FC<StarCardProps> = ({
             </div>
           </div>
 
-          <span 
-            className="text-[8px] px-1 py-0.2 rounded font-mono font-bold border shrink-0"
-            style={{
-              borderColor: `${star.colorHex}66`,
-              backgroundColor: `${star.colorHex}22`,
-              color: '#f8fafc',
-            }}
-            title={`Spectral Class: ${star.spectralType}`}
-          >
-            {star.spectralType}
-          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={handleToggleBookmark}
+              className={`p-0.5 rounded transition-colors cursor-pointer ${
+                bookmarked ? 'text-amber-400' : 'text-slate-500 hover:text-amber-300'
+              }`}
+              title={bookmarked ? 'Remove bookmark' : 'Bookmark star'}
+            >
+              <Bookmark className={`w-3 h-3 ${bookmarked ? 'fill-amber-400' : ''}`} />
+            </button>
+
+            <span 
+              className="text-[8px] px-1 py-0.2 rounded font-mono font-bold border shrink-0"
+              style={{
+                borderColor: `${star.colorHex}66`,
+                backgroundColor: `${star.colorHex}22`,
+                color: '#f8fafc',
+              }}
+              title={`Spectral Class: ${star.spectralType}`}
+            >
+              {star.spectralType}
+            </span>
+          </div>
         </div>
 
         {/* Ultra-compact 3-metric strip */}
@@ -126,13 +151,7 @@ export const StarCard: React.FC<StarCardProps> = ({
         <div className="flex items-start justify-between gap-1 sm:gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             {/* Spectral Color Dot */}
-            <div
-              className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full aspect-square shrink-0 ring-1 ring-white/30 shadow-sm"
-              style={{
-                backgroundColor: star.colorHex,
-                boxShadow: `0 0 8px ${star.colorHex}99`,
-              }}
-            />
+            <StarDot2D star={star} sizeClassName="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
             <div className="min-w-0">
               <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors truncate font-sans" title={star.name}>
                 {star.name}
@@ -143,18 +162,32 @@ export const StarCard: React.FC<StarCardProps> = ({
             </div>
           </div>
 
-          {/* Spectral Class Pill */}
-          <span 
-            className="text-[8.5px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-md font-mono font-bold border shrink-0 shadow-sm whitespace-nowrap"
-            style={{
-              borderColor: `${star.colorHex}66`,
-              backgroundColor: `${star.colorHex}22`,
-              color: '#f8fafc',
-            }}
-            title={`Spectral Class: ${star.spectralType}`}
-          >
-            {star.spectralType}
-          </span>
+          {/* Spectral Class Pill & Bookmark Button */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={handleToggleBookmark}
+              className={`p-1 rounded-lg transition-colors cursor-pointer border ${
+                bookmarked
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-sm'
+                  : 'bg-white/5 text-slate-400 hover:text-amber-300 border-transparent hover:border-slate-700'
+              }`}
+              title={bookmarked ? 'Remove bookmark' : 'Bookmark star'}
+            >
+              <Bookmark className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${bookmarked ? 'fill-amber-400' : ''}`} />
+            </button>
+
+            <span 
+              className="text-[8.5px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-md font-mono font-bold border shrink-0 shadow-sm whitespace-nowrap"
+              style={{
+                borderColor: `${star.colorHex}66`,
+                backgroundColor: `${star.colorHex}22`,
+                color: '#f8fafc',
+              }}
+              title={`Spectral Class: ${star.spectralType}`}
+            >
+              {star.spectralType}
+            </span>
+          </div>
         </div>
 
         {/* Compact 3-Column Astronomical Metrics: Diameter, Mass, Temperature */}

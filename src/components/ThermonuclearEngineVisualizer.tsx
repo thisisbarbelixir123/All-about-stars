@@ -447,7 +447,11 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
       ctx.fillRect(0, 0, width, height);
 
       // Core stellar plasma ambient gradient
-      const plasmaGrad = ctx.createRadialGradient(cx, cy, 15, cx, cy, Math.max(width, height) * 0.55);
+      const safeCx = Number.isFinite(cx) ? cx : 0;
+      const safeCy = Number.isFinite(cy) ? cy : 0;
+      const maxDim = Number.isFinite(width) && Number.isFinite(height) ? Math.max(width, height) : 300;
+      const safeOuterR = Math.max(20, maxDim * 0.55);
+      const plasmaGrad = ctx.createRadialGradient(safeCx, safeCy, 15, safeCx, safeCy, safeOuterR);
       if (selectedFusionId === 'pp-chain') {
         plasmaGrad.addColorStop(0, 'rgba(249, 115, 22, 0.15)');
         plasmaGrad.addColorStop(0.4, 'rgba(239, 68, 68, 0.07)');
@@ -1078,30 +1082,33 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
           ctx.globalAlpha = p.alpha ?? 1;
 
           // Outer glowing halo
-          const haloGrad = ctx.createRadialGradient(p.x, p.y, p.radius * 0.4, p.x, p.y, p.radius * 2.0);
+          const pR = Number.isFinite(p.radius) && p.radius > 0 ? p.radius : 4;
+          const pX = Number.isFinite(p.x) ? p.x : 0;
+          const pY = Number.isFinite(p.y) ? p.y : 0;
+          const haloGrad = ctx.createRadialGradient(pX, pY, Math.max(0, pR * 0.4), pX, pY, Math.max(0.1, pR * 2.0));
           haloGrad.addColorStop(0, p.glowColor);
           haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = haloGrad;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius * 2.0, 0, Math.PI * 2);
+          ctx.arc(pX, pY, pR * 2.0, 0, Math.PI * 2);
           ctx.fill();
 
           // Particle Sphere
           const pGrad = ctx.createRadialGradient(
-            p.x - p.radius * 0.35,
-            p.y - p.radius * 0.35,
-            p.radius * 0.1,
-            p.x,
-            p.y,
-            p.radius
+            pX - pR * 0.35,
+            pY - pR * 0.35,
+            Math.max(0, pR * 0.1),
+            pX,
+            pY,
+            Math.max(0.1, pR)
           );
           pGrad.addColorStop(0, '#ffffff');
           pGrad.addColorStop(0.3, p.color);
-          pGrad.addColorStop(1, '#0f172a');
+          pGrad.addColorStop(1, p.color);
 
           ctx.fillStyle = pGrad;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.arc(pX, pY, pR, 0, Math.PI * 2);
           ctx.fill();
 
           // Inner charge symbol

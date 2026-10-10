@@ -47,6 +47,8 @@ const STELLAR_STAGES_LIST: StellarStage[] = [
   'Red Giant',
   'Bright Giant',
   'Subgiant',
+  'Subdwarf',
+  'Blue Straggler',
   'Carbon Star',
   'S-Type Star',
   'Main Sequence',

@@ -1931,3 +1931,4 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
     description: 'An ultra-cool red dwarf in Aquila right at the hydrogen-burning boundary with brown dwarfs.'
   })
 ];
+

@@ -10,6 +10,8 @@ export type StellarStage =
   | 'Red Giant'
   | 'Bright Giant'
   | 'Subgiant'
+  | 'Subdwarf'
+  | 'Blue Straggler'
   | 'Carbon Star'
   | 'S-Type Star'
   | 'Main Sequence'
@@ -53,6 +55,8 @@ export interface StarData {
   name: string;
   alternateNames: string[];
   bayerDesignation?: string;
+  flamsteedDesignation?: string;
+  gouldDesignation?: string;
   constellation: string;
   // Size metrics
   diameterSolar: number; // in Solar Diameters (1 D_sun = 1,392,700 km)

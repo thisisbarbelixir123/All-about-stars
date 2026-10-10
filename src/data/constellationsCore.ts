@@ -335,7 +335,7 @@ export const MYTHBUSTER_INFO = {
   title: 'Mythbuster: Do Constellations Define Your Personality?',
   subtitle: 'The Real Science of Interstellar Physics vs. Cultural Astrology',
   verdict: 'Myth Busted: Absolutely Not (Astrophysically Speaking)',
-  friendlyNote: '…but it is totally harmless fun to enjoy! (The creator is a Pisces, btw 🐟✨)',
+  friendlyNote: '…but it is totally harmless fun to enjoy! As long as we appreciate the real astrophysics behind the sky ✨',
   sections: [
     {
       title: '1. The Gravity and Physics of Distant Stars',
@@ -358,9 +358,9 @@ export const MYTHBUSTER_INFO = {
         'Why do astrological personality descriptions often feel so surprisingly accurate? Psychologists call this the Forer (or Barnum) Effect. When statements are phrased in vague, universally relatable, and flattering terms ("You have a need for other people to like and admire you, but can be self-critical at times"), the human brain naturally projects its own memories onto them and finds confirmation.'
     },
     {
-      title: '5. The Verdict & The Creator’s Confession',
+      title: '5. The Verdict: Science vs. Folklore',
       content:
-        'Does that mean horoscopes are bad? Not at all! As long as people understand the distinction between real empirical astrophysics and playful cultural folklore, enjoying astrology as an icebreaker, artistic inspiration, or fun conversation starter is completely fine and harmless. And as a fun note: the creator of this stellar comparator is a proud Pisces ♓ — who nonetheless loves the cold, rigorous beauty of actual astrophysics!'
+        'Does that mean horoscopes are bad? Not at all! As long as people understand the distinction between real empirical astrophysics and playful cultural folklore, enjoying astrology as an icebreaker, artistic inspiration, or fun conversation starter is completely fine and harmless. Real stars, however, are thermonuclear engines of gas and plasma governed by quantum mechanics and gravitation!'
     }
   ]
 };

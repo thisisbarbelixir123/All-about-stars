@@ -16,7 +16,15 @@ import { AboutPage } from './components/AboutPage';
 import { StellarSuikaGame } from './components/StellarSuikaGame';
 import { PresetSlider } from './components/PresetSlider';
 import { EncyclopediaDropdown } from './components/EncyclopediaDropdown';
+import { StellarDiscoveryGuide } from './components/StellarDiscoveryGuide';
+import { StarDot2D } from './components/StarDot2D';
 import { soundEffects } from './utils/soundEffects';
+import { spaceAudio } from './utils/spaceAudioEngine';
+import { AmbientSoundToggle } from './components/AmbientSoundToggle';
+import { PWAInstallButton } from './components/PWAInstallButton';
+import { OfflineIndicator } from './components/OfflineIndicator';
+import { CommandPaletteModal } from './components/CommandPaletteModal';
+import { KeyboardShortcutsHelpModal } from './components/KeyboardShortcutsHelpModal';
 
 import { 
   Sparkles, 
@@ -36,6 +44,7 @@ import {
   Search,
   Heart,
   BookOpen,
+  Bookmark,
   Home,
   Monitor,
   AlertTriangle,
@@ -43,15 +52,17 @@ import {
   ExternalLink,
   X,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Telescope,
+  Keyboard
 } from 'lucide-react';
 
 export default function App() {
   // Homepage Overlay State - Open on startup by default
   const [isHomeOpen, setIsHomeOpen] = useState<boolean>(true);
 
-  // Integrated 3D Mode Overlays: Frontpage (What is a star?), Catalog, H-R Diagram, Classification Guide, Constellation Guide
-  const [activeOverlay, setActiveOverlay] = useState<'frontpage' | 'catalog' | 'hr-diagram' | 'guide' | 'constellations' | null>(null);
+  // Integrated 3D Mode Overlays: Frontpage (What is a star?), Catalog, H-R Diagram, Classification Guide, Constellation Guide, Discovery
+  const [activeOverlay, setActiveOverlay] = useState<'frontpage' | 'catalog' | 'hr-diagram' | 'guide' | 'constellations' | 'discovery' | 'nomenclature' | null>(null);
   const [frontpageInitialSection, setFrontpageInitialSection] = useState<'what-is-a-star' | 'spectral-classes' | 'luminosity-stages' | 'life-cycles' | 'myths' | 'quiz'>('what-is-a-star');
 
   // Dedicated Separate Overlay for About App
@@ -131,31 +142,135 @@ export default function App() {
   const [focusedStar, setFocusedStar] = useState<StarData | null>(null);
   const [detailModalStar, setDetailModalStar] = useState<StarData | null>(null);
 
-  // Global Escape key listener: closes Star Detail Dossier if open, else closes About or Overlay if open, else closes Homepage if open
+  // Command Palette & Keyboard Shortcuts modal states
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState<boolean>(false);
+
+  // Global Keyboard Shortcuts listener:
+  // - Escape: closes topmost modal
+  // - ⌘K / Ctrl+K / /: opens Command Palette & Star Search
+  // - ?: opens Keyboard Shortcuts Cheat Sheet
+  // - M: toggles ambient cosmic space audio
+  // - 1-5: jumps to primary subsystems
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      // Escape always closes topmost modal
       if (e.key === 'Escape') {
+        if (isCommandPaletteOpen) {
+          setIsCommandPaletteOpen(false);
+          return;
+        }
+        if (isShortcutsHelpOpen) {
+          setIsShortcutsHelpOpen(false);
+          return;
+        }
         if (isSuikaOpen) {
           soundEffects.play('closeModal');
           setIsSuikaOpen(false);
-        } else if (detailModalStar) {
+          return;
+        }
+        if (detailModalStar) {
           soundEffects.play('closeModal');
           setDetailModalStar(null);
-        } else if (isAboutOpen) {
+          return;
+        }
+        if (isAboutOpen) {
           soundEffects.play('closeModal');
           setIsAboutOpen(false);
-        } else if (activeOverlay) {
+          return;
+        }
+        if (activeOverlay) {
           soundEffects.play('closeModal');
           setActiveOverlay(null);
-        } else if (isHomeOpen) {
+          return;
+        }
+        if (isHomeOpen) {
           soundEffects.play('closeModal');
           setIsHomeOpen(false);
+          return;
         }
+      }
+
+      // If typing in an input, ignore global hotkeys
+      if (isInput) return;
+
+      // Command Palette: ⌘K, Ctrl+K, or /
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || e.key === '/') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      // Shortcuts Help: ? or Shift+/
+      if (e.key === '?') {
+        e.preventDefault();
+        setIsShortcutsHelpOpen((prev) => !prev);
+        return;
+      }
+
+      // Ambient Audio toggle: M
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        spaceAudio.toggleMute();
+        return;
+      }
+
+      // Tab navigation
+      if (e.key === '1') {
+        setIsHomeOpen(true);
+        setActiveOverlay(null);
+      } else if (e.key === '2') {
+        setIsHomeOpen(false);
+        setActiveOverlay('catalog');
+      } else if (e.key === '3') {
+        setIsHomeOpen(false);
+        setActiveOverlay('hr-diagram');
+      } else if (e.key === '4') {
+        setIsHomeOpen(false);
+        setFrontpageInitialSection('life-cycles');
+        setActiveOverlay('frontpage');
+      } else if (e.key === '5') {
+        setIsHomeOpen(false);
+        setFrontpageInitialSection('spectral-classes');
+        setActiveOverlay('guide');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSuikaOpen, detailModalStar, isAboutOpen, activeOverlay, isHomeOpen]);
+  }, [
+    isCommandPaletteOpen,
+    isShortcutsHelpOpen,
+    isSuikaOpen,
+    detailModalStar,
+    isAboutOpen,
+    activeOverlay,
+    isHomeOpen,
+  ]);
+
+  const handleCommandNavigate = (tabId: string) => {
+    if (tabId === 'overview') {
+      setIsHomeOpen(true);
+      setActiveOverlay(null);
+    } else if (tabId === 'explorer' || tabId === 'catalog') {
+      setIsHomeOpen(false);
+      setActiveOverlay('catalog');
+    } else if (tabId === 'hr-diagram') {
+      setIsHomeOpen(false);
+      setActiveOverlay('hr-diagram');
+    } else if (tabId === 'lifecycle') {
+      setIsHomeOpen(false);
+      setFrontpageInitialSection('life-cycles');
+      setActiveOverlay('frontpage');
+    } else if (tabId === 'remnants') {
+      setIsHomeOpen(false);
+      setActiveOverlay('guide');
+    } else if (tabId === 'game') {
+      setIsSuikaOpen(true);
+    }
+  };
 
   // 3D Canvas Settings - Default to 1:1 accurate real scale
   const [showCorona, setShowCorona] = useState<boolean>(true);
@@ -241,6 +356,8 @@ export default function App() {
         const matchesSearch =
           star.name.toLowerCase().includes(q) ||
           (star.bayerDesignation && star.bayerDesignation.toLowerCase().includes(q)) ||
+          (star.flamsteedDesignation && star.flamsteedDesignation.toLowerCase().includes(q)) ||
+          (star.gouldDesignation && star.gouldDesignation.toLowerCase().includes(q)) ||
           (star.constellation && star.constellation.toLowerCase().includes(q)) ||
           (star.spectralType && star.spectralType.toLowerCase().includes(q)) ||
           (star.stellarStage && star.stellarStage.toLowerCase().includes(q)) ||
@@ -342,6 +459,44 @@ export default function App() {
 
     return result;
   }, [filterState]);
+
+  // Dynamic comparison grid rows adjusted after combined star diameter count per row
+  const [isDiameterWeightedGrid, setIsDiameterWeightedGrid] = useState<boolean>(false);
+
+  // Multi-column catalog density mode: default across mobile, tablet, and desktop modes (can be more than two columns)
+  const [catalogColumnLayout, setCatalogColumnLayout] = useState<'multi' | '2-col' | '3-col' | '4-col'>('multi');
+
+  const isCompleteCatalog = filteredStars.length >= 100;
+  const isNonSizeSort = !(filterState.sortBy === 'diameter-desc' || filterState.sortBy === 'diameter-asc');
+
+  const diameterGroupedRows = useMemo(() => {
+    const rows: Array<{ stars: StarData[]; totalDiameterSolar: number }> = [];
+    let currentStars: StarData[] = [];
+    let currentTotalD = 0;
+    // In complete catalog mode outside of size sorting, when the row stars' total diameter
+    // exceeds 16,000 solar diameters, it switches into another row.
+    const MAX_DIAMETER_BUDGET = 16000;
+    const MIN_STARS_PER_ROW = 1;
+
+    filteredStars.forEach((star) => {
+      const starWeight = star.diameterSolar;
+      if (
+        currentStars.length >= MIN_STARS_PER_ROW &&
+        currentTotalD + starWeight > MAX_DIAMETER_BUDGET
+      ) {
+        rows.push({ stars: currentStars, totalDiameterSolar: currentTotalD });
+        currentStars = [star];
+        currentTotalD = starWeight;
+      } else {
+        currentStars.push(star);
+        currentTotalD += starWeight;
+      }
+    });
+    if (currentStars.length > 0) {
+      rows.push({ stars: currentStars, totalDiameterSolar: currentTotalD });
+    }
+    return rows;
+  }, [filteredStars]);
 
   // Handler to add star to comparison
   const handleAddStarToCompare = (star: StarData) => {
@@ -617,6 +772,14 @@ export default function App() {
                 setIsHomeOpen(false);
                 setActiveOverlay('constellations');
               }}
+              onOpenDiscovery={() => {
+                setIsHomeOpen(false);
+                setActiveOverlay('discovery');
+              }}
+              onOpenNomenclature={() => {
+                setIsHomeOpen(false);
+                setActiveOverlay('discovery');
+              }}
             />
           </div>
 
@@ -635,10 +798,30 @@ export default function App() {
             />
           </div>
 
-          {/* Right: Fullscreen Toggle, About Project & Buy Me a Coffee */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto shrink-0">
+          {/* Right: Sound, PWA, Shortcuts, Fullscreen, About & Coffee */}
+          <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto shrink-0">
+
+            {/* Ambient Cosmic Sound */}
+            <AmbientSoundToggle />
+
+            {/* PWA Install */}
+            <PWAInstallButton />
+
+            {/* Keyboard Shortcuts Help */}
+            <button
+              type="button"
+              id="btn-topbar-shortcuts"
+              onClick={() => setIsShortcutsHelpOpen(true)}
+              title="Keyboard Shortcuts (?)"
+              className="p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent hover:border-cyan-500/30 transition-all cursor-pointer"
+              aria-label="Keyboard Shortcuts"
+            >
+              <Keyboard className="w-4 h-4" />
+            </button>
+
             {/* Fullscreen Page Toggle */}
             <button
+              type="button"
               id="btn-topbar-fullscreen"
               onClick={toggleFullscreen}
               title={isFullscreen ? 'Exit Fullscreen' : 'Display Fullscreen'}
@@ -719,6 +902,8 @@ export default function App() {
             setActiveOverlay('frontpage');
           }}
           onOpenConstellations={() => setActiveOverlay('constellations')}
+          onOpenDiscovery={() => setActiveOverlay('discovery')}
+          onOpenNomenclature={() => setActiveOverlay('discovery')}
           isMobile={isMobile}
           isTablet={isTablet}
         >
@@ -768,7 +953,6 @@ export default function App() {
                     <span className="text-slate-300 font-bold">Copyright © 2026 B123 Entertainment.</span>
                     <span className="hidden sm:inline text-slate-600">•</span>
                     <span className="hidden xs:inline flex items-center gap-1.5">
-                      <img src="/starpedia_logo.svg" alt="Starpedia 3D" className="w-4 h-4 rounded aspect-square inline-block" />
                       <span>Starpedia 3D: Stars of the Universe</span>
                     </span>
                   </div>
@@ -818,12 +1002,10 @@ export default function App() {
                     setFrontpageInitialSection('what-is-a-star');
                     setActiveOverlay('frontpage');
                   }}
-                  className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all"
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all"
                   title="Go to Encyclopedia Frontpage: What is a Star?"
                 >
-                  <div className="w-4 h-4 aspect-square rounded border border-cyan-400/80 p-0.5 bg-[#020512] flex items-center justify-center overflow-hidden shrink-0 shadow-[0_0_6px_rgba(6,182,212,0.4)]">
-                    <img src="/starpedia_logo.svg" alt="Starpedia 3D" className="w-full h-full object-contain aspect-square" />
-                  </div>
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Starpedia 3D</span>
                 </button>
 
@@ -903,6 +1085,20 @@ export default function App() {
                       88
                     </span>
                   </button>
+
+                  <button
+                    id="overlay-tab-discovery"
+                    onClick={() => setActiveOverlay('discovery')}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                      activeOverlay === 'discovery' || activeOverlay === 'nomenclature'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                    title="Stellar Discovery, Telescopes & Nomenclature"
+                  >
+                    <Telescope className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-cyan-400" />
+                    <span>Discovery</span>
+                  </button>
                 </div>
               </div>
 
@@ -934,6 +1130,27 @@ export default function App() {
             } scrollbar-thin`}>
               {activeOverlay === 'catalog' && (
                 <div className="flex flex-col gap-5 sm:gap-6 max-w-7xl mx-auto">
+                  {/* Hero Banner: Stellar Catalog */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+                    <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="space-y-2 max-w-3xl">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
+                          <Grid className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+                          <span>Stellar Catalog</span>
+                        </h1>
+                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                          Explore our comprehensive registry of {STARS_CATALOG.length} stars across 88 constellations—from immediate solar neighbors to cosmic hypergiants—complete with spectral classes, physical diameters, and 3D celestial coordinates.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-3 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-bold shadow-sm">
+                          {STARS_CATALOG.length} Mapped Stars
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Expandable/Contractable Catalog Overview & Quick Highlights Panel */}
                   <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all shadow-md">
                     <button
@@ -1036,27 +1253,127 @@ export default function App() {
                     }}
                   />
 
-                  {/* Catalog Filter count */}
-                  <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
-                    <span>
-                      Showing <strong className="text-cyan-400 font-bold">{filteredStars.length}</strong> of{' '}
-                      {STARS_CATALOG.length} Stars in Database
-                    </span>
-                    <span className="hidden sm:inline text-slate-500">
-                      Explore detailed astrophysics dossier for any star
-                    </span>
+                  {/* Catalog Filter count & Layout Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono text-slate-400 px-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span>
+                        Showing <strong className="text-cyan-400 font-bold">{filteredStars.length}</strong> of{' '}
+                        {STARS_CATALOG.length} Stars in Database
+                      </span>
+                      {isCompleteCatalog && isNonSizeSort ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1">
+                          <Layers className="w-3 h-3 text-cyan-400" />
+                          <span>Diameter-Adjusted Rows (Non-Size Sort, 20,000 D☉)</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1">
+                          <Grid className="w-3 h-3 text-cyan-400" />
+                          <span>Multi-Column Mode (Default: 3+ Cols)</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Layout Controls: Density selector & Diameter-Balanced rows */}
+                    <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                      {/* Column Density Mode Selector */}
+                      <div className="flex items-center bg-[#030614]/90 border border-cyan-500/30 rounded-lg p-0.5">
+                        {(['multi', '2-col', '3-col', '4-col'] as const).map((mode) => (
+                          <button
+                            key={mode}
+                            type="button"
+                            onClick={() => {
+                              setCatalogColumnLayout(mode);
+                              if (isDiameterWeightedGrid) setIsDiameterWeightedGrid(false);
+                            }}
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                              (!isCompleteCatalog || (!isNonSizeSort && !isDiameterWeightedGrid)) &&
+                              catalogColumnLayout === mode
+                                ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-400/40 shadow-sm'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                            title={`${
+                              mode === 'multi'
+                                ? 'Adaptive Multi-Column (Default: 3 col mobile, 4-6 col desktop)'
+                                : `${mode.replace('-col', '')} Columns`
+                            }`}
+                          >
+                            {mode === 'multi' ? 'Multi (Default)' : mode.replace('-col', ' Col')}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Comparison grid adjusted after combined star diameter count per row (Complete catalog mode only) */}
+                      {isCompleteCatalog && (
+                        <button
+                          type="button"
+                          id="btn-toggle-diameter-grid"
+                          onClick={() => setIsDiameterWeightedGrid((prev) => !prev)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer ${
+                            isDiameterWeightedGrid || isNonSizeSort
+                              ? 'bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.3)] font-bold'
+                              : 'bg-[#040816]/90 border-cyan-500/30 text-slate-400 hover:text-white'
+                          }`}
+                          title="Adjust comparison grid rows after 20,000 solar diameters per row"
+                        >
+                          <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Diameter Rows</span>
+                          {(isDiameterWeightedGrid || isNonSizeSort) && (
+                            <span className="text-[9px] text-cyan-300">ON</span>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {filteredStars.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
-                      {filteredStars.map((star) => (
-                        <StarCard
-                          key={star.id}
-                          star={star}
-                          onViewDetails={(s) => setDetailModalStar(s)}
-                        />
-                      ))}
-                    </div>
+                    (isCompleteCatalog && (isDiameterWeightedGrid || isNonSizeSort)) ? (
+                      <div className="flex flex-col gap-3">
+                        {diameterGroupedRows.map((row, rowIdx) => (
+                          <div
+                            key={`diameter-row-${rowIdx}`}
+                            className="p-2 sm:p-2.5 rounded-2xl bg-[#030614]/85 border border-cyan-500/20 flex flex-col gap-2"
+                          >
+                            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 px-1">
+                              <span className="text-cyan-300 font-bold">
+                                Row {rowIdx + 1}
+                              </span>
+                              <span className="text-slate-400">
+                                Combined Diameter: <strong className="text-amber-400 font-bold">{row.totalDiameterSolar.toFixed(1)} D☉</strong> · {row.stars.length} stars
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1.5 sm:gap-2">
+                              {row.stars.map((star) => (
+                                <StarCard
+                                  key={star.id}
+                                  star={star}
+                                  isCompact={true}
+                                  onViewDetails={(s) => setDetailModalStar(s)}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={
+                        catalogColumnLayout === '2-col'
+                          ? 'grid grid-cols-2 gap-2 sm:gap-3'
+                          : catalogColumnLayout === '3-col'
+                          ? 'grid grid-cols-3 gap-1.5 sm:gap-2.5'
+                          : catalogColumnLayout === '4-col'
+                          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-2.5'
+                          : 'grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2.5'
+                      }>
+                        {filteredStars.map((star) => (
+                          <StarCard
+                            key={star.id}
+                            star={star}
+                            isCompact={catalogColumnLayout !== '2-col' || isMobile}
+                            onViewDetails={(s) => setDetailModalStar(s)}
+                          />
+                        ))}
+                      </div>
+                    )
                   ) : (
                     <div className="p-12 text-center bg-[#070b18]/80 rounded-2xl border border-cyan-500/20 text-slate-400 backdrop-blur-xl">
                       <p className="text-base font-semibold text-slate-300">No stars found matching your filters.</p>
@@ -1122,6 +1439,28 @@ export default function App() {
                       handleAddStarToCompare(s);
                       setFocusedStar(s);
                       setActiveOverlay(null);
+                    }}
+                  />
+                </div>
+              )}
+
+              {(activeOverlay === 'discovery' || activeOverlay === 'nomenclature') && (
+                <div className="max-w-7xl mx-auto">
+                  <StellarDiscoveryGuide
+                    onSelectStar={(s) => setDetailModalStar(s)}
+                    onCompareStar={(s) => {
+                      handleAddStarToCompare(s);
+                      setFocusedStar(s);
+                      setActiveOverlay(null);
+                    }}
+                    onJumpToCatalog={(searchQuery) => {
+                      if (searchQuery) {
+                        setFilterState((prev) => ({
+                          ...prev,
+                          searchQuery,
+                        }));
+                      }
+                      setActiveOverlay('catalog');
                     }}
                   />
                 </div>
@@ -1214,6 +1553,27 @@ export default function App() {
         presetToEdit={stagePresetModalState.presetToEdit}
         onSaveStage={handleSaveStageStars}
         onSavePreset={handleSavePreset}
+      />
+
+      {/* Offline Mode Status Indicator */}
+      <OfflineIndicator />
+
+      {/* Global Command Palette & Quick Star Search (⌘K or /) */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectStar={(star) => {
+          setFocusedStar(star);
+          setDetailModalStar(star);
+        }}
+        onNavigateTab={handleCommandNavigate}
+        onToggleSound={() => spaceAudio.toggleMute()}
+      />
+
+      {/* Tactile Keyboard Shortcuts Cheat-Sheet (?) */}
+      <KeyboardShortcutsHelpModal
+        isOpen={isShortcutsHelpOpen}
+        onClose={() => setIsShortcutsHelpOpen(false)}
       />
     </div>
   );
