@@ -4,6 +4,7 @@ import {
   Sun, 
   Orbit, 
   RotateCw, 
+  RotateCcw,
   Maximize2, 
   Minimize2, 
   Flame, 
@@ -11,6 +12,7 @@ import {
   Sparkles,
   CheckCircle2,
   ZoomIn,
+  ZoomOut,
   Eye,
   Focus,
   Layers,
@@ -19,7 +21,11 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
-  Crosshair
+  Crosshair,
+  Play,
+  Pause,
+  ExternalLink,
+  Share2
 } from 'lucide-react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
@@ -41,9 +47,11 @@ import {
   generateKeplerianRibbonGeometry
 } from '../utils/orbitalUtils';
 
+
 interface StarDossier3DStageProps {
   star: StarData;
-  onStarClick?: () => void;
+  onStarClick?: (starId?: string) => void;
+  initialMode?: 'compare-sun' | 'compare-earth' | 'solar-system';
 }
 
 // Planetary orbital configuration (AU_SCALE = 10 units per AU)
@@ -241,7 +249,7 @@ function createEarthMeshGroup(radius: number, wireframe: boolean): THREE.Group {
   return group;
 }
 
-export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, onStarClick }) => {
+export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, onStarClick, initialMode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(performance.now());
@@ -250,15 +258,19 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
   const restoreDprTimerRef = useRef<number | null>(null);
 
   // Toggleable Mode: 'compare-sun' vs 'compare-earth' vs 'solar-system'
-  const [activeStageMode, setActiveStageMode] = useState<'compare-sun' | 'compare-earth' | 'solar-system'>('compare-sun');
+  const [activeStageMode, setActiveStageMode] = useState<'compare-sun' | 'compare-earth' | 'solar-system'>(
+    initialMode || 'compare-sun'
+  );
   const [isAutoRotating, setIsAutoRotating] = useState<boolean>(true);
   const [wireframe, setWireframe] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [focusTarget, setFocusTarget] = useState<'both' | 'star' | 'sun' | 'earth'>('both');
+  const [focusTarget, setFocusTarget] = useState<'both' | 'star' | 'sun' | 'earth'>('star');
   const [selectedBodyName, setSelectedBodyName] = useState<string | null>(null);
   const [showOrbitalLegend, setShowOrbitalLegend] = useState<boolean>(false);
   const [orbitalFilter, setOrbitalFilter] = useState<'all' | 'dwarf' | 'minor'>('all');
   const [isInspectMinimized, setIsInspectMinimized] = useState<boolean>(true);
+
+
 
   // References to keep camera and interactive controls smooth
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -287,9 +299,24 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
   const cameraSphericalRef = useRef({
     radius: 20,
     theta: Math.PI / 4,
-    phi: Math.PI / 2.8,
+    phi: Math.PI / 3.85,
     targetRadius: 20,
   });
+
+  // Entry Fly-In Animation Controller (scales fly-in parameters dynamically to star size)
+  const entryAnimRef = useRef<{
+    active: boolean;
+    startTime: number;
+    duration: number;
+    startRadius: number;
+    destRadius: number;
+    startTheta: number;
+    destTheta: number;
+    startPhi: number;
+    destPhi: number;
+    startTarget: THREE.Vector3;
+    destTarget: THREE.Vector3;
+  } | null>(null);
 
   const isSun = star.id === 'sun' || (star.diameterSolar === 1.0 && star.temperature === 5778);
   const effectiveSolar = useMemo(() => getEffectiveSolarDiameter(star), [star]);
@@ -387,75 +414,288 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
   // radiusUnits = (effectiveSolar * 0.009309 * AU_SCALE) / 2
   const starOverlayRadius = (effectiveSolar * 0.009309 * AU_SCALE) / 2;
 
-  // Handler to switch camera focus in Compare modes
-  const handleSetFocus = (target: 'both' | 'star' | 'sun' | 'earth') => {
-    setFocusTarget(target);
-    const sph = cameraSphericalRef.current;
-    if (target === 'both') {
-      if (activeStageMode === 'compare-sun') {
-        cameraTargetRef.current.set(compareMidX, Math.max(sunRadius, starRadius) * 0.5, 0);
-        sph.targetRadius = Math.max(3.2, separation * 1.6);
-      } else if (activeStageMode === 'compare-earth') {
-        cameraTargetRef.current.set(earthCompareMidX, Math.max(earthRadius, starRadius) * 0.5, 0);
-        sph.targetRadius = Math.max(0.035, earthSeparation * 1.7);
+  // Helper to compute ideal camera target, angles, and entry fly-in vectors adjusted by star size
+  const getCameraFramingForMode = (
+    mode: 'compare-sun' | 'compare-earth' | 'solar-system', 
+    focus: 'both' | 'star' | 'sun' | 'earth' = 'both'
+  ) => {
+    const highAnglePhi = starRadius > 2.0 ? Math.PI / 4.25 : Math.PI / 3.85;
+    const destTarget = new THREE.Vector3(0, 0, 0);
+    let destRadius = 20;
+    let destPhi = highAnglePhi;
+    let destTheta = Math.PI / 4;
+
+    if (mode === 'compare-sun') {
+      if (focus === 'star') {
+        destTarget.set(starX, starRadius * (starRadius > 2.0 ? 0.85 : 1.0), 0);
+        destRadius = Math.max(0.00005, starRadius * 3.8);
+        destPhi = starRadius > 2.0 ? Math.PI / 4.1 : Math.PI / 3.75;
+      } else if (focus === 'sun') {
+        destTarget.set(sunX, sunRadius, 0);
+        destRadius = sunRadius * 3.8;
+        destPhi = Math.PI / 3.6;
+      } else {
+        const targetY = Math.max(sunRadius, starRadius) * (starRadius > 2.0 ? 0.40 : 0.45);
+        destTarget.set(compareMidX, targetY, 0);
+        destRadius = Math.max(4.0, separation * 2.15, starRadius * 2.85);
+        destPhi = highAnglePhi;
       }
-      sph.phi = Math.PI / 2.8;
-    } else if (target === 'star') {
-      const targetX = activeStageMode === 'compare-earth' ? earthCompareStarX : starX;
-      cameraTargetRef.current.set(targetX, starRadius, 0);
-      sph.targetRadius = Math.max(0.00005, starRadius * 3.4);
-      sph.phi = Math.PI / 2.6;
-    } else if (target === 'sun') {
-      cameraTargetRef.current.set(sunX, sunRadius, 0);
-      sph.targetRadius = sunRadius * 3.4;
-      sph.phi = Math.PI / 2.6;
-    } else if (target === 'earth') {
-      cameraTargetRef.current.set(earthX, earthRadius, 0);
-      sph.targetRadius = Math.max(0.025, earthRadius * 3.4);
-      sph.phi = Math.PI / 2.6;
+    } else if (mode === 'compare-earth') {
+      if (focus === 'star') {
+        destTarget.set(earthCompareStarX, starRadius * (starRadius > 2.0 ? 0.85 : 1.0), 0);
+        destRadius = Math.max(0.00005, starRadius * 3.8);
+        destPhi = starRadius > 2.0 ? Math.PI / 4.1 : Math.PI / 3.75;
+      } else if (focus === 'earth') {
+        destTarget.set(earthX, earthRadius, 0);
+        destRadius = Math.max(0.025, earthRadius * 3.8);
+        destPhi = Math.PI / 3.6;
+      } else {
+        const earthTargetY = Math.max(earthRadius, starRadius) * (starRadius > 2.0 ? 0.40 : 0.45);
+        destTarget.set(earthCompareMidX, earthTargetY, 0);
+        destRadius = Math.max(0.045, earthSeparation * 2.15, starRadius * 2.85);
+        destPhi = highAnglePhi;
+      }
+    } else {
+      // Solar system mode: Central host star is the showcased star
+      destTarget.set(0, 0, 0);
+      const starRadiusUnits = (star.diameterAU / 2) * AU_SCALE;
+      const hzOuterUnits = habitableZone.rawOuter * AU_SCALE;
+      if (starRadiusUnits > 25 || hzOuterUnits > 70) {
+        destRadius = Math.max(starRadiusUnits * 3.2, hzOuterUnits * 1.8);
+      } else {
+        destRadius = 55;
+      }
+      destPhi = Math.PI / 3.5;
+    }
+
+    // Dynamic entry fly-in starting distance, adjusted by physical star size:
+    // Ensures compact stars start at an intimate sub-unit approach, while hypergiants
+    // start from deep cosmic vantage points without near/far clipping.
+    let flyInScaleFactor = 4.2;
+    if (starRadius < 0.05) {
+      flyInScaleFactor = 4.8;
+    } else if (starRadius > 200.0) {
+      flyInScaleFactor = 3.2; // Hypergiants have enormous base radius; 3.2x gives magnificent deep space entry
+    } else if (starRadius > 20.0) {
+      flyInScaleFactor = 3.6;
+    }
+    const startRadius = Math.max(0.08, destRadius * flyInScaleFactor);
+    const startPhi = Math.max(0.22, destPhi - 0.24); // Elevated high approach angle
+    const startTheta = destTheta - 0.55; // Rotational swoop inward
+
+    // Target position at start of fly-in: initially focus directly on the showcased target star!
+    const startTarget = destTarget.clone();
+    if (mode === 'compare-sun') {
+      startTarget.set(starX, starRadius, 0);
+    } else if (mode === 'compare-earth') {
+      startTarget.set(earthCompareStarX, starRadius, 0);
+    }
+
+    return {
+      destTarget,
+      destRadius,
+      destPhi,
+      destTheta,
+      startRadius,
+      startPhi,
+      startTheta,
+      startTarget,
+    };
+  };
+
+  const lastInitializedStarIdRef = useRef<string | null>(null);
+  const [isModeSwitching, setIsModeSwitching] = useState(false);
+
+  // Unified smooth camera transition function (handles both initial outer fly-in and silky in-dossier glides)
+  const transitionCamera = (params: {
+    target: THREE.Vector3;
+    radius: number;
+    phi: number;
+    theta?: number;
+    duration?: number;
+    isInitialEntry?: boolean;
+    startRadius?: number;
+    startPhi?: number;
+    startTheta?: number;
+    startTarget?: THREE.Vector3;
+  }) => {
+    const sph = cameraSphericalRef.current;
+    const now = performance.now();
+    const duration = params.duration ?? (params.isInitialEntry ? 1850 : 1100);
+
+    let startRadius: number;
+    let startPhi: number;
+    let startTheta: number;
+    let startTarget: THREE.Vector3;
+
+    if (params.isInitialEntry && params.startRadius !== undefined) {
+      // First entry fly-in for a star: initiate from outer celestial distance
+      startRadius = params.startRadius;
+      startPhi = params.startPhi ?? Math.max(0.22, params.phi - 0.24);
+      startTheta = params.startTheta ?? (params.theta ?? Math.PI / 4) - 0.55;
+      startTarget = params.startTarget ? params.startTarget.clone() : params.target.clone();
+
+      sph.radius = startRadius;
+      sph.targetRadius = params.radius;
+      sph.phi = startPhi;
+      sph.theta = startTheta;
+      cameraTargetRef.current.copy(startTarget);
+
+      const startX = startTarget.x + startRadius * Math.sin(startPhi) * Math.sin(startTheta);
+      const startY = startTarget.y + startRadius * Math.cos(startPhi);
+      const startZ = startTarget.z + startRadius * Math.sin(startPhi) * Math.cos(startTheta);
+      currentCameraPosRef.current.set(startX, startY, startZ);
+      currentLookAtRef.current.copy(startTarget);
+
+      if (cameraRef.current) {
+        cameraRef.current.position.set(startX, startY, startZ);
+        cameraRef.current.lookAt(startTarget);
+        cameraRef.current.near = Math.max(0.000001, Math.min(40.0, startRadius * 0.008));
+        cameraRef.current.far = Math.max(150000, startRadius * 45.0);
+        cameraRef.current.updateProjectionMatrix();
+      }
+    } else {
+      // In-dossier transition: ALWAYS start smoothly from CURRENT camera coordinates (zero popping!)
+      startRadius = sph.radius;
+      startPhi = sph.phi;
+      startTheta = sph.theta;
+      startTarget = cameraTargetRef.current.clone();
+      sph.targetRadius = params.radius;
+    }
+
+    const destTheta = params.theta !== undefined ? params.theta : startTheta;
+
+    entryAnimRef.current = {
+      active: true,
+      startTime: now,
+      duration,
+      startRadius,
+      destRadius: params.radius,
+      startTheta,
+      destTheta,
+      startPhi,
+      destPhi: params.phi,
+      startTarget,
+      destTarget: params.target.clone(),
+    };
+  };
+
+  // Helper to trigger smooth transitions based on mode and focus target
+  const transitionToFraming = (
+    mode: 'compare-sun' | 'compare-earth' | 'solar-system' = activeStageMode,
+    focus: 'both' | 'star' | 'sun' | 'earth' = 'star',
+    forceInitialEntry: boolean = false
+  ) => {
+    setFocusTarget(focus);
+    const framing = getCameraFramingForMode(mode, focus);
+    const isFirstForStar = forceInitialEntry || lastInitializedStarIdRef.current !== star.id;
+
+    if (isFirstForStar) {
+      lastInitializedStarIdRef.current = star.id;
+      transitionCamera({
+        target: framing.destTarget,
+        radius: framing.destRadius,
+        phi: framing.destPhi,
+        theta: framing.destTheta,
+        duration: 1850,
+        isInitialEntry: true,
+        startRadius: framing.startRadius,
+        startPhi: framing.startPhi,
+        startTheta: framing.startTheta,
+        startTarget: framing.startTarget,
+      });
+    } else {
+      transitionCamera({
+        target: framing.destTarget,
+        radius: framing.destRadius,
+        phi: framing.destPhi,
+        theta: framing.destTheta,
+        duration: 1100,
+        isInitialEntry: false,
+      });
     }
   };
 
-  // Focus presets for Solar System mode
+  // Switch stage mode with smooth visual fade and smooth camera transition
+  const handleSwitchMode = (newMode: 'compare-sun' | 'compare-earth' | 'solar-system') => {
+    if (newMode === activeStageMode) return;
+    setIsModeSwitching(true);
+    setTimeout(() => {
+      setActiveStageMode(newMode);
+      setIsModeSwitching(false);
+    }, 70);
+    transitionToFraming(newMode, 'star');
+  };
+
+  const handleZoomIn = () => {
+    if (entryAnimRef.current?.active) entryAnimRef.current.active = false;
+    const sph = cameraSphericalRef.current;
+    sph.targetRadius = Math.max(0.00003, sph.targetRadius * 0.72);
+  };
+
+  const handleZoomOut = () => {
+    if (entryAnimRef.current?.active) entryAnimRef.current.active = false;
+    const sph = cameraSphericalRef.current;
+    const maxZoom = Math.max(120000, habitableZone.rawOuter * AU_SCALE * 3.5);
+    sph.targetRadius = Math.min(maxZoom, sph.targetRadius * 1.38);
+  };
+
+  // Handler to switch camera focus in Compare modes (triggers smooth glide to selected entity)
+  const handleSetFocus = (target: 'both' | 'star' | 'sun' | 'earth') => {
+    transitionToFraming(activeStageMode, target);
+  };
+
+  // Focus presets for Solar System mode (smoothly glides camera to target preset)
   const handleSetSolarPreset = (preset: 'host' | 'inner' | 'mid' | 'outer' | 'dwarf' | 'sedna' | 'hz') => {
     if (!cameraRef.current) return;
-    const sph = cameraSphericalRef.current;
-    cameraTargetRef.current.set(0, 0, 0);
+    setSelectedBodyName(null);
 
     if (preset === 'host') {
-      // Zoom directly onto host star at center, even if tiny white dwarf or pulsar
-      sph.targetRadius = Math.max(0.05, starOverlayRadius * 4.0);
-      sph.phi = Math.PI / 2.8;
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: Math.max(0.18, starOverlayRadius * 4.2),
+        phi: Math.PI / 3.5,
+      });
     } else if (preset === 'inner') {
-      sph.targetRadius = 25;
-      sph.phi = Math.PI / 3.2;
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: 25,
+        phi: Math.PI / 3.5,
+      });
     } else if (preset === 'mid') {
-      sph.targetRadius = 75;
-      sph.phi = Math.PI / 3.2;
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: 75,
+        phi: Math.PI / 3.5,
+      });
     } else if (preset === 'outer') {
-      sph.targetRadius = 240;
-      sph.phi = Math.PI / 3.0;
-      setSelectedBodyName(null);
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: 240,
+        phi: Math.PI / 3.4,
+      });
     } else if (preset === 'dwarf') {
-      // Frame all dwarf planets: Pluto (39.5 AU), Haumea (43.1 AU), Makemake (45.8 AU), and Eris (37.9 - 97.7 AU)
-      // Elevated perspective showcases the dramatic 44° tilt of Eris and 17.2° tilt of Pluto
-      sph.targetRadius = 780;
-      sph.phi = Math.PI / 2.7;
-      sph.theta = Math.PI / 3.2;
-      setSelectedBodyName(null);
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: 780,
+        phi: Math.PI / 3.2,
+        theta: Math.PI / 3.2,
+      });
     } else if (preset === 'sedna') {
-      // Frame Sedna & Deep Trans-Neptunian Detached Space (506 AU semi-major axis, 936 AU aphelion)
-      // Displays the immense scale of the inner Oort Cloud relative to the inner solar system
-      sph.targetRadius = 7800;
-      sph.phi = Math.PI / 2.75;
-      sph.theta = Math.PI / 3.2;
       setSelectedBodyName('Sedna');
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: 7800,
+        phi: Math.PI / 3.2,
+        theta: Math.PI / 3.2,
+      });
     } else if (preset === 'hz') {
-      // Unclamped Goldilocks Habitable Zone framing for stars of any luminosity/scale
       const hzTarget = Math.max(25, habitableZone.rawOuter * AU_SCALE * 1.8);
-      sph.targetRadius = hzTarget;
-      sph.phi = Math.PI / 3.4;
-      setSelectedBodyName(null);
+      transitionCamera({
+        target: new THREE.Vector3(0, 0, 0),
+        radius: hzTarget,
+        phi: Math.PI / 3.5,
+      });
     }
   };
 
@@ -463,55 +703,29 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     const body = SOLAR_BODIES.find((b) => b.name === bodyName);
     if (!body) return;
     setSelectedBodyName(bodyName);
-    const sph = cameraSphericalRef.current;
     
-    // Smoothly focus camera onto this body's orbital zone
+    // Smoothly transition camera onto this body's orbital zone
     const meanRadiusUnits = body.semiMajorAxisAU * AU_SCALE;
-    if (body.name === 'Sedna') {
-      sph.targetRadius = 7800;
-      sph.phi = Math.PI / 2.75;
-    } else {
-      sph.targetRadius = Math.max(16, Math.min(1200, meanRadiusUnits * 1.55));
-      if (body.inclinationDeg > 8) {
-        sph.phi = Math.PI / 2.65;
-      } else {
-        sph.phi = Math.PI / 3.15;
-      }
-    }
-    sph.theta = (body.ascendingNodeDeg * Math.PI) / 180 + Math.PI / 4;
+    const destRadius = body.name === 'Sedna' ? 7800 : Math.max(16, Math.min(1200, meanRadiusUnits * 1.55));
+    const destPhi = body.name === 'Sedna' ? Math.PI / 3.2 : (body.inclinationDeg > 8 ? Math.PI / 3.1 : Math.PI / 3.4);
+    const destTheta = (body.ascendingNodeDeg * Math.PI) / 180 + Math.PI / 4;
+
+    transitionCamera({
+      target: new THREE.Vector3(0, 0, 0),
+      radius: destRadius,
+      phi: destPhi,
+      theta: destTheta,
+      duration: 1200,
+    });
   };
 
   const resetCamera = () => {
-    setFocusTarget('both');
-    const sph = cameraSphericalRef.current;
-    if (activeStageMode === 'compare-sun') {
-      cameraTargetRef.current.set(compareMidX, Math.max(sunRadius, starRadius) * 0.5, 0);
-      sph.targetRadius = Math.max(3.2, separation * 1.6);
-      sph.theta = Math.PI / 4;
-      sph.phi = Math.PI / 2.8;
-    } else if (activeStageMode === 'compare-earth') {
-      cameraTargetRef.current.set(earthCompareMidX, Math.max(earthRadius, starRadius) * 0.5, 0);
-      sph.targetRadius = Math.max(0.035, earthSeparation * 1.7);
-      sph.theta = Math.PI / 4;
-      sph.phi = Math.PI / 2.8;
-    } else {
-      cameraTargetRef.current.set(0, 0, 0);
-      const starRadiusUnits = (star.diameterAU / 2) * AU_SCALE;
-      const hzOuterUnits = habitableZone.rawOuter * AU_SCALE;
-      // Expanded viewpoint: automatically scale camera distance to capture habitable zone of large/luminous stars
-      if (starRadiusUnits > 25 || hzOuterUnits > 70) {
-        sph.targetRadius = Math.max(starRadiusUnits * 2.5, hzOuterUnits * 1.5);
-      } else {
-        sph.targetRadius = 55;
-      }
-      sph.theta = Math.PI / 4;
-      sph.phi = Math.PI / 3.2;
-    }
+    transitionToFraming(activeStageMode, 'star');
   };
 
-  // Reset camera when switching modes
+  // Launch smooth transition when switching modes or selecting a new star
   useEffect(() => {
-    resetCamera();
+    transitionToFraming(activeStageMode, 'star');
   }, [activeStageMode, star.id]);
 
   // Main Three.js Scene Setup and Animation Loop
@@ -529,6 +743,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.0001, 150000);
     cameraRef.current = camera;
+    transitionToFraming(activeStageMode, 'star', true);
 
     // 2. Renderer
     const isMob = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -590,36 +805,88 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       lastTime = now;
       const elapsedTime = (now - startTimeRef.current) * 0.001;
 
-      // Auto-rotation in yaw
-      if (isAutoRotating && !isDraggingRef.current) {
-        cameraSphericalRef.current.theta += delta * 0.22;
-      }
-
-      // Smooth camera damping for zoom distance
       const sph = cameraSphericalRef.current;
-      sph.radius += (sph.targetRadius - sph.radius) * 0.1;
 
-      // Spherical coordinates relative to cameraTarget
-      const target = cameraTargetRef.current;
-      const targetX = target.x + sph.radius * Math.sin(sph.phi) * Math.sin(sph.theta);
-      const targetY = target.y + sph.radius * Math.cos(sph.phi);
-      const targetZ = target.z + sph.radius * Math.sin(sph.phi) * Math.cos(sph.theta);
+      // Smooth Camera Transition Handler (handles both initial outer fly-in and silky in-dossier glides)
+      const anim = entryAnimRef.current;
+      if (anim && anim.active) {
+        const rawProgress = Math.min(1, (now - anim.startTime) / anim.duration);
+        // Quintic smootherstep (6t^5 - 15t^4 + 10t^3) for zero acceleration jerk and zero deceleration jerk:
+        const t = rawProgress;
+        const ease = t * t * t * (t * (t * 6 - 15) + 10);
 
-      currentCameraPosRef.current.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.1);
-      currentLookAtRef.current.lerp(target, 0.1);
+        // 1. Logarithmic smooth zoom interpolation (natural visual scaling across any orders of magnitude)
+        const logStartR = Math.log(Math.max(0.0000001, anim.startRadius));
+        const logDestR = Math.log(Math.max(0.0000001, anim.destRadius));
+        sph.radius = Math.exp(logStartR + (logDestR - logStartR) * ease);
+        sph.targetRadius = anim.destRadius;
 
-      camera.position.copy(currentCameraPosRef.current);
-      camera.lookAt(currentLookAtRef.current);
+        // 2. Shortest-arc spherical angular interpolation around Y-axis (prevents 360° spin flips)
+        const diffTheta = ((anim.destTheta - anim.startTheta) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
+        sph.theta = anim.startTheta + diffTheta * ease;
 
-      // Dynamically adjust near and far planes based on current distance to maintain pristine depth-buffer precision
-      // Completely eliminates near-plane clipping on sub-solar stars (pulsars / white dwarfs) and prevents Z-fighting
-      const dist = sph.radius;
-      const targetNear = Math.max(0.000001, Math.min(40.0, dist * 0.008));
-      const targetFar = Math.max(150000, dist * 35.0);
-      if (Math.abs(camera.near - targetNear) > targetNear * 0.1 || Math.abs(camera.far - targetFar) > 100) {
-        camera.near = targetNear;
-        camera.far = targetFar;
-        camera.updateProjectionMatrix();
+        // 3. Polar pitch angle interpolation
+        sph.phi = anim.startPhi + (anim.destPhi - anim.startPhi) * ease;
+
+        // 4. Smooth target position interpolation
+        cameraTargetRef.current.lerpVectors(anim.startTarget, anim.destTarget, ease);
+
+        const target = cameraTargetRef.current;
+        const camX = target.x + sph.radius * Math.sin(sph.phi) * Math.sin(sph.theta);
+        const camY = target.y + sph.radius * Math.cos(sph.phi);
+        const camZ = target.z + sph.radius * Math.sin(sph.phi) * Math.cos(sph.theta);
+
+        currentCameraPosRef.current.set(camX, camY, camZ);
+        currentLookAtRef.current.copy(target);
+
+        camera.position.set(camX, camY, camZ);
+        camera.lookAt(target);
+
+        // Dynamically adjust near and far planes based on current distance during transition
+        const dist = sph.radius;
+        const targetNear = Math.max(0.000001, Math.min(40.0, dist * 0.008));
+        const targetFar = Math.max(150000, dist * 40.0);
+        if (Math.abs(camera.near - targetNear) > targetNear * 0.1 || Math.abs(camera.far - targetFar) > 100) {
+          camera.near = targetNear;
+          camera.far = targetFar;
+          camera.updateProjectionMatrix();
+        }
+
+        if (rawProgress >= 1) {
+          anim.active = false;
+        }
+      } else {
+        // Auto-rotation in yaw
+        if (isAutoRotating && !isDraggingRef.current) {
+          const autoRate = 0.22;
+          cameraSphericalRef.current.theta += delta * autoRate;
+        }
+
+        // Smooth camera damping for zoom distance
+        sph.radius += (sph.targetRadius - sph.radius) * 0.08;
+
+        // Spherical coordinates relative to cameraTarget
+        const target = cameraTargetRef.current;
+        const targetX = target.x + sph.radius * Math.sin(sph.phi) * Math.sin(sph.theta);
+        const targetY = target.y + sph.radius * Math.cos(sph.phi);
+        const targetZ = target.z + sph.radius * Math.sin(sph.phi) * Math.cos(sph.theta);
+
+        currentCameraPosRef.current.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.12);
+        currentLookAtRef.current.lerp(target, 0.12);
+
+        camera.position.copy(currentCameraPosRef.current);
+        camera.lookAt(currentLookAtRef.current);
+
+        // Dynamically adjust near and far planes based on current distance to maintain pristine depth-buffer precision
+        // Completely eliminates near-plane clipping on sub-solar stars (pulsars / white dwarfs) and prevents Z-fighting
+        const dist = sph.radius;
+        const targetNear = Math.max(0.000001, Math.min(40.0, dist * 0.008));
+        const targetFar = Math.max(150000, dist * 35.0);
+        if (Math.abs(camera.near - targetNear) > targetNear * 0.1 || Math.abs(camera.far - targetFar) > 100) {
+          camera.near = targetNear;
+          camera.far = targetFar;
+          camera.updateProjectionMatrix();
+        }
       }
 
       // Rotate star meshes and particle belts, and update Keplerian orbital positions
@@ -871,18 +1138,6 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       }
       dynamicGroup.add(starDropLine);
 
-      // Re-center camera appropriately
-      if (focusTarget === 'both') {
-        cameraTargetRef.current.set(compareMidX, Math.max(sunRadius, starRadius) * 0.5, 0);
-        cameraSphericalRef.current.targetRadius = Math.max(3.2, separation * 1.6);
-      } else if (focusTarget === 'star') {
-        cameraTargetRef.current.set(starX, starRadius, 0);
-        cameraSphericalRef.current.targetRadius = Math.max(0.00005, starRadius * 3.4);
-      } else if (focusTarget === 'sun') {
-        cameraTargetRef.current.set(sunX, sunRadius, 0);
-        cameraSphericalRef.current.targetRadius = sunRadius * 3.4;
-      }
-
     } else if (activeStageMode === 'compare-earth') {
       // =========================================================================
       // MODE 2: 3D SIZE & TEXTURE COMPARISON AGAINST EARTH (12,742 KM / 1.00 D⊕)
@@ -997,21 +1252,9 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       }
       dynamicGroup.add(starDropLine);
 
-      // Re-center camera appropriately
-      if (focusTarget === 'both') {
-        cameraTargetRef.current.set(earthCompareMidX, Math.max(earthRadius, starRadius) * 0.5, 0);
-        cameraSphericalRef.current.targetRadius = Math.max(0.035, earthSeparation * 1.7);
-      } else if (focusTarget === 'star') {
-        cameraTargetRef.current.set(earthCompareStarX, starRadius, 0);
-        cameraSphericalRef.current.targetRadius = Math.max(0.00005, starRadius * 3.4);
-      } else if (focusTarget === 'earth') {
-        cameraTargetRef.current.set(earthX, earthRadius, 0);
-        cameraSphericalRef.current.targetRadius = Math.max(0.025, earthRadius * 3.4);
-      }
-
-    } else {
+    } else if (activeStageMode === 'solar-system') {
       // =========================================================================
-      // MODE 2: STAR IN PLACE IN SOLAR SYSTEM (EXACT SOLAR OVERLAY PARITY)
+      // MODE 3: STAR IN PLACE IN SOLAR SYSTEM (EXACT SOLAR OVERLAY PARITY)
       // =========================================================================
       
       // Central Host Star with exact physical scale and matching shader texture
@@ -1282,6 +1525,9 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
   // Pointer/Touch Event Handlers for 3D Orbiting
   const handlePointerDown = (e: React.PointerEvent) => {
     isDraggingRef.current = true;
+    if (entryAnimRef.current?.active) {
+      entryAnimRef.current.active = false;
+    }
     triggerDossierInteractionDpr();
     pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
     prevMouseRef.current = { x: e.clientX, y: e.clientY };
@@ -1290,6 +1536,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
+
     triggerDossierInteractionDpr();
     const dx = e.clientX - prevMouseRef.current.x;
     const dy = e.clientY - prevMouseRef.current.y;
@@ -1298,8 +1545,8 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     const sph = cameraSphericalRef.current;
     sph.theta -= dx * 0.008;
     sph.phi -= dy * 0.008;
-    // Clamp polar angle so scene doesn't flip
-    sph.phi = Math.max(0.08, Math.min(Math.PI / 2.02, sph.phi));
+    // Allow free 360-degree spherical orbiting around system from top, side, and underneath
+    sph.phi = Math.max(0.04, Math.min(Math.PI - 0.04, sph.phi));
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -1322,6 +1569,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, cameraRef.current);
       const hits = raycaster.intersectObjects(dynamicGroupRef.current.children, true);
+
       let hitOther = false;
       if (hits.length > 0) {
         let obj: THREE.Object3D | null = hits[0].object;
@@ -1355,6 +1603,9 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    if (entryAnimRef.current?.active) {
+      entryAnimRef.current.active = false;
+    }
     const sph = cameraSphericalRef.current;
     const zoomStep = Math.max(0.00002, sph.targetRadius * 0.08);
     const zoomFactor = Math.sign(e.deltaY) * zoomStep;
@@ -1370,7 +1621,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-cyan-500/25">
           <button
             id="btn-stage-toggle-sun"
-            onClick={() => setActiveStageMode('compare-sun')}
+            onClick={() => handleSwitchMode('compare-sun')}
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeStageMode === 'compare-sun'
                 ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
@@ -1384,7 +1635,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
           <button
             id="btn-stage-toggle-earth"
-            onClick={() => setActiveStageMode('compare-earth')}
+            onClick={() => handleSwitchMode('compare-earth')}
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeStageMode === 'compare-earth'
                 ? 'bg-gradient-to-r from-sky-400 to-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(56,189,248,0.4)]'
@@ -1398,7 +1649,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
           <button
             id="btn-stage-toggle-solar"
-            onClick={() => setActiveStageMode('solar-system')}
+            onClick={() => handleSwitchMode('solar-system')}
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeStageMode === 'solar-system'
                 ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
@@ -1413,6 +1664,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
         {/* View Controls & Focus Tools */}
         <div className="flex items-center gap-2 flex-wrap">
+
           {/* Solar System Presets */}
           {activeStageMode === 'solar-system' && (
             <div className="flex items-center gap-1 bg-black/40 border border-cyan-500/20 rounded-lg p-0.5 text-[10px] font-mono text-slate-300 overflow-x-auto max-w-full scrollbar-none">
@@ -1507,13 +1759,31 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
             <RotateCw className={`w-3.5 h-3.5 ${isAutoRotating ? 'animate-spin-slow' : ''}`} />
           </button>
 
+          {/* Zoom In Button */}
+          <button
+            onClick={handleZoomIn}
+            className="p-1.5 rounded-lg bg-black/50 border border-slate-700 hover:border-cyan-500/40 text-slate-400 hover:text-white transition-all cursor-pointer"
+            title="Zoom camera in (+)"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Zoom Out Button */}
+          <button
+            onClick={handleZoomOut}
+            className="p-1.5 rounded-lg bg-black/50 border border-slate-700 hover:border-cyan-500/40 text-slate-400 hover:text-white transition-all cursor-pointer"
+            title="Zoom camera out (-)"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+
           {/* Reset Camera */}
           <button
             onClick={resetCamera}
             className="p-1.5 rounded-lg bg-black/50 border border-slate-700 hover:border-cyan-500/40 text-slate-400 hover:text-white transition-all cursor-pointer"
-            title="Reset camera angle"
+            title="Reset camera angle and framing"
           >
-            <ZoomIn className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
 
           {/* Expand / Collapse Height */}
@@ -1527,17 +1797,20 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
         </div>
       </div>
 
-      {/* 3D Canvas Stage Viewport (Reduced height on mobile to prevent screen overflow) */}
+      {/* 3D Canvas Stage Viewport (Compact responsive height on desktop to occupy 1/2 of view) */}
       <div 
         className={`order-1 md:order-2 relative w-full overflow-hidden select-none cursor-grab active:cursor-grabbing ${
-          isExpanded ? 'h-[360px] sm:h-[460px] md:h-[560px]' : 'h-[240px] xs:h-[270px] sm:h-[320px] md:h-[400px]'
+          isExpanded ? 'h-[360px] sm:h-[440px] md:h-[480px] lg:h-[460px]' : 'h-[240px] xs:h-[270px] sm:h-[310px] md:h-[340px] lg:h-[340px] xl:h-[360px]'
         }`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onWheel={handleWheel}
       >
-        <div ref={containerRef} className="w-full h-full pointer-events-auto" />
+        <div 
+          ref={containerRef} 
+          className={`w-full h-full pointer-events-auto transition-opacity duration-200 ${isModeSwitching ? 'opacity-30' : 'opacity-100'}`} 
+        />
 
         {/* Inspect HUD & Minimizable Controls (Moved to bottom right on mobile) */}
         <div className="absolute bottom-2 right-2 sm:bottom-auto sm:right-auto sm:top-2.5 sm:left-2.5 z-20 pointer-events-none flex flex-col items-end sm:items-start gap-1.5 max-w-[calc(100%-1rem)] sm:max-w-xs md:max-w-sm max-h-[calc(100%-1rem)]">
@@ -1844,6 +2117,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
               </div>
             </div>
           )}
+
         </div>
 
         {/* Interactive Gesture Hint Pill at bottom right */}

@@ -1,157 +1,73 @@
-/**
- * Procedural Space Sound Engine (Web Audio API)
- * Generates an ethereal, non-looping cosmic soundscape using real-time synthesis:
- * - Sub-bass deep-space resonant drone (55Hz / 110Hz harmonics)
- * - Cosmic microwave background (pink-noise buffer with sweeping resonant filter)
- * - Ethereal celestial chimes and acoustic interaction feedback
- * Zero external audio assets, zero bundle weight, works completely offline.
- */
+// Procedural Web Audio API Space Sound Synthesizer & Ambient Soundscape
+// Generates ethereal space drones, cosmic pink noise, and celestial spectral chimes
+// Zero network dependencies, zero latency, lightweight and offline capable.
+
+export interface SpaceAudioState {
+  isPlaying: boolean;
+  isMuted: boolean;
+  volume: number;
+}
 
 class SpaceAudioEngine {
   private ctx: AudioContext | null = null;
-  private isMuted: boolean = false;
-  private volume: number = 0.45;
   private isPlaying: boolean = false;
+  private isMuted: boolean = false;
+  private volume: number = 0.25;
 
-  // Audio Graph Nodes
   private masterGain: GainNode | null = null;
-  private droneGain: GainNode | null = null;
   private droneOsc1: OscillatorNode | null = null;
   private droneOsc2: OscillatorNode | null = null;
-  private droneFilter: BiquadFilterNode | null = null;
+  private droneGain1: GainNode | null = null;
+  private droneGain2: GainNode | null = null;
+  private filterNode: BiquadFilterNode | null = null;
   private lfoOsc: OscillatorNode | null = null;
-
-  private noiseSource: AudioBufferSourceNode | null = null;
+  private lfoGain: GainNode | null = null;
+  private noiseNode: AudioBufferSourceNode | null = null;
   private noiseGain: GainNode | null = null;
-  private noiseFilter: BiquadFilterNode | null = null;
+  private chimeTimer: ReturnType<typeof setInterval> | null = null;
 
-  // Listeners for UI state sync
-  private listeners: Set<(state: { isMuted: boolean; volume: number; isPlaying: boolean }) => void> = new Set();
+  private listeners: Set<(state: SpaceAudioState) => void> = new Set();
 
   constructor() {
-    // Read user preference from localStorage
-    try {
-      const savedMute = localStorage.getItem('starpedia_audio_muted');
-      if (savedMute !== null) {
-        this.isMuted = savedMute === 'true';
-      }
-      const savedVol = localStorage.getItem('starpedia_audio_volume');
-      if (savedVol !== null) {
-        const v = parseFloat(savedVol);
-        if (!isNaN(v) && v >= 0 && v <= 1) {
-          this.volume = v;
+    if (typeof window !== 'undefined') {
+      try {
+        const savedMuted = localStorage.getItem('cosmic_ambient_soundscape_muted');
+        if (savedMuted !== null) {
+          this.isMuted = savedMuted === 'true';
         }
+        const savedVol = localStorage.getItem('cosmic_ambient_soundscape_volume');
+        if (savedVol !== null) {
+          const v = parseFloat(savedVol);
+          if (!isNaN(v) && v >= 0 && v <= 1) {
+            this.volume = v;
+          }
+        }
+      } catch {
+        // LocalStorage fallback
       }
-    } catch {
-      // Ignore localStorage errors
     }
   }
 
-  /**
-   * Subscribe to audio state changes (for UI buttons/visualizers)
-   */
-  public subscribe(callback: (state: { isMuted: boolean; volume: number; isPlaying: boolean }) => void) {
-    this.listeners.add(callback);
-    callback(this.getState());
-    return () => {
-      this.listeners.delete(callback);
-    };
-  }
-
-  public getState() {
-    return {
-      isMuted: this.isMuted,
-      volume: this.volume,
-      isPlaying: this.isPlaying && !this.isMuted,
-    };
-  }
-
-  private notify() {
-    const st = this.getState();
-    this.listeners.forEach((cb) => cb(st));
-  }
-
-  /**
-   * Initialize AudioContext on first user interaction
-   */
-  private initContext() {
-    if (!this.ctx) {
+  private initAudio() {
+    if (this.ctx) return;
+    try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) return null;
-      this.ctx = new AudioCtx();
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+        this.masterGain = this.ctx.createGain();
+        const currentGain = this.isMuted ? 0 : this.volume;
+        this.masterGain.gain.setValueAtTime(currentGain, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
+      }
+    } catch (e) {
+      console.warn('Web Audio API not supported for space audio engine:', e);
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-    return this.ctx;
   }
 
-  /**
-   * Start or resume ambient soundscape
-   */
-  public async start() {
-    const ctx = this.initContext();
-    if (!ctx) return;
-
-    if (this.isPlaying) return;
-    this.isPlaying = true;
-
-    // Master Gain
-    this.masterGain = ctx.createGain();
-    const effectiveGain = this.isMuted ? 0 : this.volume;
-    this.masterGain.gain.setValueAtTime(0, ctx.currentTime);
-    this.masterGain.gain.linearRampToValueAtTime(effectiveGain, ctx.currentTime + 2.5);
-    this.masterGain.connect(ctx.destination);
-
-    // 1. Deep Space Drone Oscillators (Sub-bass A1 / A2)
-    this.droneGain = ctx.createGain();
-    this.droneGain.gain.value = 0.35;
-
-    this.droneFilter = ctx.createBiquadFilter();
-    this.droneFilter.type = 'lowpass';
-    this.droneFilter.frequency.setValueAtTime(120, ctx.currentTime);
-    this.droneFilter.Q.value = 3.5;
-
-    this.droneOsc1 = ctx.createOscillator();
-    this.droneOsc1.type = 'sine';
-    this.droneOsc1.frequency.setValueAtTime(55, ctx.currentTime); // A1 55Hz
-
-    this.droneOsc2 = ctx.createOscillator();
-    this.droneOsc2.type = 'sine';
-    this.droneOsc2.frequency.setValueAtTime(110.2, ctx.currentTime); // A2 110Hz + subtle chorus detune
-
-    // Modulation LFO for drone filter sweep
-    this.lfoOsc = ctx.createOscillator();
-    this.lfoOsc.type = 'sine';
-    this.lfoOsc.frequency.setValueAtTime(0.08, ctx.currentTime); // Ultra slow breathing (12.5s cycle)
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 45;
-    this.lfoOsc.connect(lfoGain);
-    lfoGain.connect(this.droneFilter.frequency);
-
-    this.droneOsc1.connect(this.droneFilter);
-    this.droneOsc2.connect(this.droneFilter);
-    this.droneFilter.connect(this.droneGain);
-    this.droneGain.connect(this.masterGain);
-
-    this.droneOsc1.start();
-    this.droneOsc2.start();
-    this.lfoOsc.start();
-
-    // 2. Cosmic Microwave Background Pink Noise Buffer
-    this.setupCosmicNoise(ctx);
-
-    this.notify();
-  }
-
-  private setupCosmicNoise(ctx: AudioContext) {
-    if (!this.masterGain) return;
-
-    // 5-second pink noise buffer
-    const bufferSize = ctx.sampleRate * 5;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-
+  private createPinkNoiseBuffer(ctx: AudioContext, seconds = 4): AudioBuffer {
+    const bufferSize = ctx.sampleRate * seconds;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
     let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
     for (let i = 0; i < bufferSize; i++) {
       const white = Math.random() * 2 - 1;
@@ -161,148 +77,271 @@ class SpaceAudioEngine {
       b3 = 0.86650 * b3 + white * 0.3104856;
       b4 = 0.55000 * b4 + white * 0.5329522;
       b5 = -0.7616 * b5 - white * 0.0168980;
-      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.06;
+      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
       b6 = white * 0.115926;
     }
-
-    this.noiseSource = ctx.createBufferSource();
-    this.noiseSource.buffer = noiseBuffer;
-    this.noiseSource.loop = true;
-
-    this.noiseFilter = ctx.createBiquadFilter();
-    this.noiseFilter.type = 'bandpass';
-    this.noiseFilter.frequency.setValueAtTime(320, ctx.currentTime);
-    this.noiseFilter.Q.value = 1.2;
-
-    this.noiseGain = ctx.createGain();
-    this.noiseGain.gain.value = 0.14;
-
-    this.noiseSource.connect(this.noiseFilter);
-    this.noiseFilter.connect(this.noiseGain);
-    this.noiseGain.connect(this.masterGain);
-
-    this.noiseSource.start();
+    return buffer;
   }
 
-  /**
-   * Toggle mute/unmute
-   */
-  public toggleMute(): boolean {
-    if (!this.isPlaying) {
-      this.isMuted = false;
-      this.start();
-      return false;
-    }
+  private startSynthesizer() {
+    if (!this.ctx || !this.masterGain) return;
+    const ctx = this.ctx;
+    const t = ctx.currentTime;
 
-    this.isMuted = !this.isMuted;
+    // 1. Resonant Bandpass Filter for deep cosmic atmosphere
+    this.filterNode = ctx.createBiquadFilter();
+    this.filterNode.type = 'bandpass';
+    this.filterNode.frequency.setValueAtTime(260, t);
+    this.filterNode.Q.setValueAtTime(1.8, t);
+    this.filterNode.connect(this.masterGain);
+
+    // 2. Slow LFO for organic breathing filter sweeps (0.07 Hz)
+    this.lfoOsc = ctx.createOscillator();
+    this.lfoGain = ctx.createGain();
+    this.lfoOsc.type = 'sine';
+    this.lfoOsc.frequency.setValueAtTime(0.07, t);
+    this.lfoGain.gain.setValueAtTime(90, t);
+    this.lfoOsc.connect(this.lfoGain);
+    this.lfoGain.connect(this.filterNode.frequency);
+    this.lfoOsc.start(t);
+
+    // 3. Drone Oscillator 1 (Sub-bass fundamental: 55 Hz / A1)
+    this.droneOsc1 = ctx.createOscillator();
+    this.droneGain1 = ctx.createGain();
+    this.droneOsc1.type = 'sine';
+    this.droneOsc1.frequency.setValueAtTime(55, t);
+    this.droneGain1.gain.setValueAtTime(0.4, t);
+    this.droneOsc1.connect(this.droneGain1);
+    this.droneGain1.connect(this.filterNode);
+    this.droneOsc1.start(t);
+
+    // 4. Drone Oscillator 2 (Harmonic fifth: 82.4 Hz / E2 with detune)
+    this.droneOsc2 = ctx.createOscillator();
+    this.droneGain2 = ctx.createGain();
+    this.droneOsc2.type = 'triangle';
+    this.droneOsc2.frequency.setValueAtTime(82.4, t);
+    this.droneGain2.gain.setValueAtTime(0.25, t);
+    this.droneOsc2.connect(this.droneGain2);
+    this.droneGain2.connect(this.filterNode);
+    this.droneOsc2.start(t);
+
+    // 5. Cosmic Solar Wind (Filtered looped pink noise)
     try {
-      localStorage.setItem('starpedia_audio_muted', String(this.isMuted));
+      const noiseBuffer = this.createPinkNoiseBuffer(ctx, 4);
+      this.noiseNode = ctx.createBufferSource();
+      this.noiseNode.buffer = noiseBuffer;
+      this.noiseNode.loop = true;
+
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.setValueAtTime(380, t);
+
+      this.noiseGain = ctx.createGain();
+      this.noiseGain.gain.setValueAtTime(0.18, t);
+
+      this.noiseNode.connect(noiseFilter);
+      noiseFilter.connect(this.noiseGain);
+      this.noiseGain.connect(this.masterGain);
+      this.noiseNode.start(t);
     } catch {
-      // Ignore
+      // Noise buffer optional fallback
     }
 
-    if (this.ctx && this.masterGain) {
-      const target = this.isMuted ? 0 : this.volume;
-      this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.masterGain.gain.linearRampToValueAtTime(target, this.ctx.currentTime + 0.3);
+    // 6. Ambient periodic chime (every 14s)
+    this.chimeTimer = setInterval(() => {
+      if (!this.isPlaying || this.isMuted) return;
+      this.playHarmonicChime();
+    }, 14000);
+  }
+
+  private playHarmonicChime() {
+    if (!this.ctx || !this.masterGain) return;
+    const ctx = this.ctx;
+    const t = ctx.currentTime;
+    const chordPitches = [440, 554.37, 659.25, 880, 1108.73];
+    const pitch = chordPitches[Math.floor(Math.random() * chordPitches.length)];
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(pitch, t);
+
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(0.04 * this.volume, t + 1.2);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 4.8);
+
+    if (pan) {
+      pan.pan.setValueAtTime((Math.random() - 0.5) * 0.8, t);
+      osc.connect(gain);
+      gain.connect(pan);
+      pan.connect(this.masterGain);
+    } else {
+      osc.connect(gain);
+      gain.connect(this.masterGain);
     }
 
+    osc.start(t);
+    osc.stop(t + 5);
+  }
+
+  private stopSynthesizer() {
+    if (this.chimeTimer) {
+      clearInterval(this.chimeTimer);
+      this.chimeTimer = null;
+    }
+
+    try {
+      if (this.droneOsc1) {
+        this.droneOsc1.stop();
+        this.droneOsc1.disconnect();
+        this.droneOsc1 = null;
+      }
+      if (this.droneOsc2) {
+        this.droneOsc2.stop();
+        this.droneOsc2.disconnect();
+        this.droneOsc2 = null;
+      }
+      if (this.lfoOsc) {
+        this.lfoOsc.stop();
+        this.lfoOsc.disconnect();
+        this.lfoOsc = null;
+      }
+      if (this.noiseNode) {
+        this.noiseNode.stop();
+        this.noiseNode.disconnect();
+        this.noiseNode = null;
+      }
+    } catch {
+      // Cleanup safety
+    }
+  }
+
+  public getState(): SpaceAudioState {
+    return {
+      isPlaying: this.isPlaying,
+      isMuted: this.isMuted,
+      volume: this.volume,
+    };
+  }
+
+  public subscribe(cb: (state: SpaceAudioState) => void): () => void {
+    this.listeners.add(cb);
+    cb(this.getState());
+    return () => this.listeners.delete(cb);
+  }
+
+  private notify() {
+    const st = this.getState();
+    this.listeners.forEach((cb) => cb(st));
+  }
+
+  public setVolume(vol: number): void {
+    this.volume = Math.max(0, Math.min(1, vol));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('cosmic_ambient_soundscape_volume', String(this.volume));
+      } catch {
+        // ignore
+      }
+    }
+    if (this.ctx && this.masterGain && !this.isMuted && this.isPlaying) {
+      this.masterGain.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.1);
+    }
+    this.notify();
+  }
+
+  public async toggleMute(): Promise<boolean> {
+    this.initAudio();
+    if (!this.ctx) return this.isMuted;
+
+    if (this.ctx.state === 'suspended') {
+      await this.ctx.resume().catch(() => {});
+    }
+
+    if (!this.isPlaying) {
+      this.startSynthesizer();
+      this.isPlaying = true;
+      this.isMuted = false;
+      if (this.masterGain) {
+        this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        this.masterGain.gain.linearRampToValueAtTime(this.volume, this.ctx.currentTime + 1.2);
+      }
+    } else if (this.isMuted) {
+      this.isMuted = false;
+      if (this.masterGain) {
+        this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        this.masterGain.gain.linearRampToValueAtTime(this.volume, this.ctx.currentTime + 0.6);
+      }
+    } else {
+      this.isMuted = true;
+      if (this.masterGain) {
+        this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, this.ctx.currentTime);
+        this.masterGain.gain.linearRampToValueAtTime(0.0001, this.ctx.currentTime + 0.5);
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('cosmic_ambient_soundscape_muted', String(this.isMuted));
+      } catch {
+        // ignore
+      }
+    }
     this.notify();
     return this.isMuted;
   }
 
   /**
-   * Set volume [0.0, 1.0]
+   * Plays a celestial chime tuned to the star's spectral classification
    */
-  public setVolume(vol: number) {
-    this.volume = Math.max(0, Math.min(1, vol));
-    try {
-      localStorage.setItem('starpedia_audio_volume', String(this.volume));
-    } catch {
-      // Ignore
+  public playCelestialChime(spectralClass?: string): void {
+    if (this.isMuted && !this.isPlaying) return;
+    this.initAudio();
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
     }
 
-    if (this.ctx && this.masterGain && !this.isMuted) {
-      this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.masterGain.gain.linearRampToValueAtTime(this.volume, this.ctx.currentTime + 0.1);
-    }
-
-    this.notify();
-  }
-
-  /**
-   * Play crystal celestial harmonic chime on star selection or warp
-   */
-  public playCelestialChime(spectralClass: string = 'G') {
-    if (this.isMuted || !this.ctx) return;
-    const ctx = this.ctx;
-    if (ctx.state === 'suspended') {
-      ctx.resume();
-    }
-
-    // Map spectral classes to celestial harmonic pitches (Pentatonic / Lydian)
-    const pitchMap: Record<string, number[]> = {
-      O: [523.25, 1046.5, 1567.98], // High searing C5, C6, G6
-      B: [493.88, 987.77, 1479.98], // B4, B5, F#6
-      A: [440.0, 880.0, 1318.51],   // A4, A5, E6
-      F: [392.0, 783.99, 1174.66],  // G4, G5, D6
-      G: [329.63, 659.25, 987.77],  // E4, E5, B5 (Solar warmth)
-      K: [293.66, 587.33, 880.0],   // D4, D5, A5
-      M: [220.0, 440.0, 659.25],    // Low deep red A3, A4, E5
+    const spectralPitchMap: Record<string, number> = {
+      O: 1046.5, // C6 - Brilliant, ultra-hot high pitch
+      B: 880.0,  // A5 - Crisp blue
+      A: 783.99, // G5 - Pure white
+      F: 659.25, // E5 - Warm white
+      G: 523.25, // C5 - Golden solar
+      K: 440.0,  // A4 - Deep orange
+      M: 329.63, // E4 - Warm resonant crimson
+      L: 261.63, // C4 - Brown dwarf
+      T: 196.0,  // G3 - Cool methane dwarf
+      Y: 130.81, // C3 - Deep sub-stellar
+      D: 1174.66, // D6 - White dwarf crystal ping
     };
 
-    const notes = pitchMap[spectralClass.toUpperCase()] || pitchMap['G'];
-    const now = ctx.currentTime;
+    const firstChar = (spectralClass || 'G').charAt(0).toUpperCase();
+    const freq = spectralPitchMap[firstChar] || 523.25;
 
-    notes.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = idx === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(freq, now);
-
-      const peak = 0.08 / (idx + 1);
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(peak, now + 0.03 + idx * 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2 + idx * 0.3);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now + idx * 0.02);
-      osc.stop(now + 1.8 + idx * 0.3);
-    });
-  }
-
-  /**
-   * Pulsar acoustic radio beacon pulse
-   */
-  public playPulsarBeep(freq: number = 880) {
-    if (this.isMuted || !this.ctx) return;
     const ctx = this.ctx;
-    const now = ctx.currentTime;
-
+    const t = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, now);
+    osc.type = firstChar === 'O' || firstChar === 'B' ? 'sine' : 'triangle';
+    osc.frequency.setValueAtTime(freq, t);
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(freq, now);
-    filter.Q.value = 5.0;
+    const chimeVol = (this.isMuted ? 0.15 : this.volume * 0.8);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(chimeVol, t + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
 
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.06, now + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
-
-    osc.connect(filter);
-    filter.connect(gain);
+    osc.connect(gain);
     gain.connect(ctx.destination);
 
-    osc.start(now);
-    osc.stop(now + 0.1);
+    osc.start(t);
+    osc.stop(t + 2.5);
   }
 }
 

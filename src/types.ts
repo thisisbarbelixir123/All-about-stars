@@ -73,6 +73,9 @@ export interface StarData {
   estimatedAgeMyr: number; // numeric age in Million Years for sorting & computation (e.g. 4600 for Sun)
   metallicityFeH?: number; // [Fe/H] relative to Sun (0.00 for Sun)
   rotationalVelocityKmS?: number; // Equatorial rotation velocity in km/s
+  rotationalPeriodDays?: number; // Stellar rotation period in Earth days
+  rotationalPeriodHours?: number; // Stellar rotation period in hours (for rapid rotators)
+  rotationalPeriodFormatted?: string; // Formatted display string (e.g. "25.38 Days", "8.0 Hours")
   distanceLy: number; // Light years
   distanceParsecs: number; // Parsecs
   apparentMagnitude: number; // m

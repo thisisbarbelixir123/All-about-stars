@@ -852,12 +852,12 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
     description: 'The second yellow giant in the Capella quadruple system in Auriga, glowing at 5,700 K.'
   }),
 
-  // 20. Capella H (Capella C / GJ 195 A)
+  // 20a. Capella H (Alpha Aurigae H / GJ 195 A)
   makeStar({
-    id: 'capella-hl',
-    name: 'Capella H (Capella C / GJ 195 A)',
-    alternateNames: ['GJ 195 A', 'Capella HL', 'Alpha Aurigae C'],
-    bayerDesignation: 'α Aur C',
+    id: 'capella-h',
+    name: 'Capella H (GJ 195 A / Alpha Aurigae H)',
+    alternateNames: ['GJ 195 A', 'Capella H', 'Alpha Aurigae H', 'Alpha Aurigae C', 'LDS 473 A'],
+    bayerDesignation: 'α Aur H',
     constellation: 'Auriga',
     diameterSolar: 0.54,
     temperature: 3700,
@@ -882,7 +882,7 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
       hasExoplanets: false,
       confirmedCount: 0,
       candidateCount: 0,
-      systemOverview: 'Consists of a pair of red dwarf stars (Capella H and L) orbiting each other every 388 days, orbiting the main giant pair at ~10,000 AU.',
+      systemOverview: 'Primary M1V dwarf of the distant binary pair (Capella H & L) orbiting each other every 388 days at ~40.3 AU, orbiting the giant pair (Aa & Ab) at ~10,000 AU.',
       planets: []
     },
     stellarStage: 'Red Dwarf',
@@ -890,11 +890,56 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
     futureFate: 'Helium White Dwarf',
     fusionProcess: 'Proton-Proton Hydrogen Fusion',
     notableFacts: [
-      'The red dwarf binary component of the Capella quadruple star system.',
-      'Orbits the primary yellow giant pair (Aa and Ab) at a distance of ~10,000 AU (~1.5 trillion km).',
-      'Contains two M-type dwarf stars (H and L) orbiting each other at ~45 AU.'
+      'The brighter red dwarf component in the distant binary pair orbiting the Capella giants.',
+      'Orbits mutual barycenter with ultra-cool dwarf Capella L every 388 days at ~40.3 AU.',
+      'Located approximately 10,000 AU (~1.5 trillion km or 0.16 ly) from the luminous Aa & Ab giant pair.'
     ],
-    description: 'The red dwarf binary pair orbiting the Capella giants at a distance of 10,000 AU.'
+    description: 'The primary M1V red dwarf of the distant binary companion pair in the Capella quadruple system.'
+  }),
+
+  // 20b. Capella L (Alpha Aurigae L / GJ 195 B)
+  makeStar({
+    id: 'capella-l',
+    name: 'Capella L (GJ 195 B / Alpha Aurigae L)',
+    alternateNames: ['GJ 195 B', 'Capella L', 'Alpha Aurigae L', 'Alpha Aurigae D', 'LDS 473 B'],
+    bayerDesignation: 'α Aur L',
+    constellation: 'Auriga',
+    diameterSolar: 0.24,
+    temperature: 3050,
+    spectralType: 'M5V',
+    spectralClass: 'M',
+    luminositySolar: 0.0013,
+    massSolar: 0.19,
+    estimatedAge: '~600 Million Years',
+    estimatedAgeMyr: 600,
+    metallicityFeH: -0.10,
+    rotationalVelocityKmS: 1.5,
+    distanceLy: 42.9,
+    apparentMagnitude: 13.7,
+    absoluteMagnitude: 13.0,
+    surfaceGravityLogG: 5.0,
+    colorHex: '#ef4444',
+    coronaColorHex: '#f87171',
+    solarEngulfment: 'Spans roughly 334,000 km (~0.0022 AU diameter)!',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 0.03, outer: 0.06 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      candidateCount: 0,
+      systemOverview: 'Faint M5V red dwarf companion orbiting Capella H every 388 days at ~40.3 AU.',
+      planets: []
+    },
+    stellarStage: 'Red Dwarf',
+    lifespanEstimate: '~200 Billion Years',
+    futureFate: 'Helium White Dwarf',
+    fusionProcess: 'Proton-Proton Hydrogen Fusion',
+    notableFacts: [
+      'The faint M5V secondary red dwarf in the Capella quadruple system.',
+      'Separated from Capella H by approximately 40.3 AU, completing an orbit every 388 days (1.06 years).',
+      'One of the faintest known components in naked-eye first-magnitude stellar systems.'
+    ],
+    description: 'The faint M5V secondary red dwarf companion co-orbiting Capella H in the outer quadrant of the Capella quadruple system.'
   }),
 
   // 21. Rasalhague (Alpha Ophiuchi)

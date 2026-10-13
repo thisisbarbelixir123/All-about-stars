@@ -137,10 +137,22 @@ export const STAR_FRAGMENT_SHADER = `
     float limbDarkening = pow(limb, 0.46);
 
     vec3 normPos = normalize(vLocalPos);
+
+    // Dynamic axial spin rotation around the stellar polar Y-axis:
+    // Ensures stars visibly rotate their photospheric convection cells, flares, and brown dwarf atmospheric cloud bands!
+    float spinAngle = time * 0.15;
+    float cosAngle = cos(spinAngle);
+    float sinAngle = sin(spinAngle);
+    normPos = vec3(
+      normPos.x * cosAngle + normPos.z * sinAngle,
+      normPos.y,
+      -normPos.x * sinAngle + normPos.z * cosAngle
+    );
+
     vec3 samplePos = normPos * 3.2;
-    vec3 q = samplePos + vec3(time * 0.06, time * 0.045, time * 0.02);
+    vec3 q = samplePos + vec3(time * 0.04, time * 0.03, time * 0.015);
     float f1 = fbm(q);
-    vec3 warpedP = samplePos + vec3(f1 * 0.7, f1 * 0.5, f1 * 0.3) + vec3(time * 0.03, -time * 0.02, time * 0.015);
+    vec3 warpedP = samplePos + vec3(f1 * 0.7, f1 * 0.5, f1 * 0.3) + vec3(time * 0.02, -time * 0.015, time * 0.01);
     float gran = fbm(warpedP);
 
     // 1. NEUTRON STARS & PULSARS

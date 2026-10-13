@@ -1,8 +1,11 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { StarDossier3DStage } from './StarDossier3DStage';
 import { soundEffects } from '../utils/soundEffects';
+import { STARS_CATALOG } from '../data/stars';
+import { getMultipleStarSystemForStar } from '../utils/multipleStarSystems';
+import { getEffectiveStarCount, MULTIPLE_STAR_SYSTEMS } from '../data/multipleStarSystemsData';
 import { 
   X, 
   Sparkles, 
@@ -13,7 +16,9 @@ import {
   Award,
   Atom,
   Zap,
-  Orbit
+  Orbit,
+  Share2,
+  ExternalLink
 } from 'lucide-react';
 
 interface StarDetailModalProps {
@@ -22,6 +27,9 @@ interface StarDetailModalProps {
   onCompareStar?: (star: StarData) => void;
   onOpenClassificationGuide?: () => void;
   onTriggerEasterEgg?: () => void;
+  onSelectStar?: (star: StarData) => void;
+  onOpenStellarSystemDossier?: (system: any) => void;
+  initialMode?: 'compare-sun' | 'compare-earth' | 'solar-system';
 }
 
 // Computes angular diameter from Earth's sky in arcmin / mas / μas
@@ -48,8 +56,13 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
   onCompareStar,
   onOpenClassificationGuide,
   onTriggerEasterEgg,
+  onSelectStar,
+  onOpenStellarSystemDossier,
+  initialMode,
 }) => {
   const [hoveredMetric, setHoveredMetric] = useState<'diameter' | 'mass' | 'temperature' | 'luminosity' | 'distance' | null>(null);
+
+  const knownMultipleSystem = useMemo(() => (star ? getMultipleStarSystemForStar(star.id) : undefined), [star]);
 
   const [starClicks, setStarClicks] = useState<number>(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -124,7 +137,24 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const isEligibleForMergeGame = isMergeGameEligibleStar(star?.id, star?.name);
 
-  const handleDossierStarClick = (e?: React.MouseEvent) => {
+  const handleDossierStarClick = (param?: any) => {
+    if (typeof param === 'string') {
+      let targetId = param;
+      for (const sys of MULTIPLE_STAR_SYSTEMS) {
+        const comp = sys.components.find((c) => c.id === param);
+        if (comp?.catalogStarId) {
+          targetId = comp.catalogStarId;
+          break;
+        }
+      }
+      const companion = STARS_CATALOG.find((s) => s.id === targetId);
+      if (companion && onSelectStar) {
+        soundEffects.play('click');
+        onSelectStar(companion);
+        return;
+      }
+    }
+    const e = param && typeof param === 'object' && 'stopPropagation' in param ? param : undefined;
     if (!star) return;
     if (e) e.stopPropagation();
 
@@ -235,9 +265,35 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const isSun = star.id === 'sun' || star.distanceLy < 0.0001;
 
+  const renderSuperimpositionScale = () => (
+    <div className="p-4 sm:p-5 rounded-2xl bg-[#030718]/75 backdrop-blur-md border border-amber-500/25 shadow-[0_0_25px_rgba(245,158,11,0.1)]">
+      <div className="flex items-center gap-2.5 text-amber-400 mb-2">
+        <Orbit className="w-5 h-5" />
+        <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
+          Solar System Superimposition Scale
+        </h3>
+      </div>
+      <p className="text-sm text-slate-200 mb-3">
+        If placed at the center of our Solar System where the Sun resides:
+      </p>
+      <div className="p-3.5 rounded-xl bg-[#02040c]/90 border border-amber-500/25 flex items-center justify-between gap-4 font-mono text-xs shadow-inner">
+        <span className="text-amber-300 font-bold">{star.solarEngulfment}</span>
+        <span className="text-slate-400 text-[11px]">
+          Diameter: {star.diameterAU.toFixed(3)} AU
+        </span>
+      </div>
+    </div>
+  );
+
+  const renderDescription = () => (
+    <div className="p-4 rounded-xl bg-[#02040c]/75 backdrop-blur-md border border-cyan-500/15 text-xs text-slate-400 leading-relaxed font-mono">
+      {star.description}
+    </div>
+  );
+
   return (
     <div 
-      className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none animate-in fade-in duration-200"
     >
       {/* Backdrop */}
       <div 
@@ -341,17 +397,34 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-x-hidden overflow-y-auto p-2.5 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 scrollbar-thin bg-transparent">
-          {/* Interactive 3D Dossier Stage: Size vs. Sun, Size vs. Earth & Solar System Architecture */}
-          <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} />
+        <div className="flex-1 overflow-x-hidden overflow-y-auto p-2.5 sm:p-4 md:p-6 scrollbar-thin bg-transparent">
+          {/* Responsive Desktop 2-Column Split: 3D Stage occupies 1/2 of view on desktop, and wraps other components (info panels) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 items-start">
+            {/* Left Column / 1st Half: 3D Comparison Stage (occupies 1/2 view on desktop) + Desktop Superimposition Scale & Description */}
+            <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:sticky lg:top-0">
+              {/* Interactive 3D Dossier Stage: Size vs. Sun, Size vs. Earth & Solar System Architecture */}
+              <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} initialMode={initialMode} />
 
-          {/* Key Metrics Grid: 5 Core Astrophysical Properties */}
-          <div 
-            ref={gridRef}
-            className="relative"
-            onMouseLeave={() => setHoveredMetric(null)}
-          >
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+              {/* On desktop: Superimposition Scale sits directly under the 3D Stage in the 1/2 column */}
+              <div className="hidden lg:block">
+                {renderSuperimpositionScale()}
+              </div>
+
+              {/* On desktop: Scientific Description sits directly under Superimposition */}
+              <div className="hidden lg:block">
+                {renderDescription()}
+              </div>
+            </div>
+
+            {/* Right Column / 2nd Half: Info Panels (Key Metrics, Exoplanets, Conjoined Binary, Fusion, Evolution, Facts) */}
+            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+              {/* Key Metrics Grid: 5 Core Astrophysical Properties */}
+              <div 
+                ref={gridRef}
+                className="relative"
+                onMouseLeave={() => setHoveredMetric(null)}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-2.5 md:gap-3">
               {/* 1. Physical Diameter Card */}
               <div
                 ref={cardDiameterRef}
@@ -490,7 +563,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                   setHoveredMetric(next);
                   updatePopoverPosition(next);
                 }}
-                className={`col-span-2 sm:col-span-1 p-2 sm:p-2.5 md:p-3.5 rounded-lg md:rounded-xl bg-[#020510]/80 border shadow-inner flex flex-col justify-between group cursor-pointer transition-all ${
+                className={`col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-1 p-2 sm:p-2.5 md:p-3.5 rounded-lg md:rounded-xl bg-[#020510]/80 border shadow-inner flex flex-col justify-between group cursor-pointer transition-all ${
                   hoveredMetric === 'distance' ? 'border-emerald-400 bg-[#050e28]/90 ring-1 ring-emerald-400/50' : 'border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#04081c]/80'
                 }`}
               >
@@ -743,7 +816,12 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             )}
           </div>
 
-          {/* Exoplanetary System & Known Worlds Section */}
+              {/* On mobile: Solar System Superimposition Scale appears right after Key Metrics */}
+              <div className="block lg:hidden">
+                {renderSuperimpositionScale()}
+              </div>
+
+              {/* Exoplanetary System & Known Worlds Section */}
           <div className="p-5 rounded-2xl bg-[#020514]/75 backdrop-blur-md border border-cyan-500/25 shadow-[0_0_30px_rgba(6,182,212,0.12)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-cyan-500/15 pb-3">
               <div className="flex items-center gap-2.5 text-cyan-300">
@@ -879,8 +957,45 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             )}
           </div>
 
+          {/* Dedicated Link to Stellar System Dossier */}
+          {knownMultipleSystem && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#0e072b]/90 via-[#07041a]/90 to-[#030112]/90 border border-purple-500/35 shadow-[0_0_30px_rgba(168,85,247,0.18)]">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-purple-300 mb-2 border-b border-purple-500/25 pb-2">
+                <div className="flex items-center gap-2">
+                  <Share2 className="w-4 h-4 text-purple-400 shrink-0" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-purple-200">
+                    Gravitationally Bound Stellar System
+                  </span>
+                </div>
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 font-mono border border-purple-400/50 font-bold">
+                  {knownMultipleSystem.systemType}
+                </span>
+              </div>
+
+              <h3 className="text-sm sm:text-base font-bold text-white mb-1">
+                {knownMultipleSystem.name}
+              </h3>
+
+              <p className="text-xs text-purple-200/80 leading-relaxed font-sans mb-3">
+                This star is one of <strong className="text-white">{knownMultipleSystem.components.length} gravitationally bound stars</strong> orbiting a common mutual center of mass.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {onOpenStellarSystemDossier && (
+                  <button
+                    onClick={() => onOpenStellarSystemDossier(knownMultipleSystem)}
+                    className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)] flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>Open {knownMultipleSystem.name.split(' (')[0]} System Dossier</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Conjoined Kissing Contact Binary Anatomy Section */}
-          {(star.id === 'vfts-352' || star.stellarStage === 'Contact Binary') && (
+          {(star.id === 'vfts-352' || star.id === 'w-ursae-majoris' || star.stellarStage === 'Contact Binary') && (
             <div className="p-5 rounded-2xl bg-[#02081c]/75 backdrop-blur-md border border-blue-400/40 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
               <div className="flex items-center justify-between gap-2.5 text-blue-300 mb-3 border-b border-blue-500/20 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -895,62 +1010,74 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               </div>
 
               <p className="text-xs text-slate-300 leading-relaxed mb-4">
-                VFTS 352 is the most massive and extreme <strong>overcontact binary system</strong> known. Two supermassive O-type stars orbit so closely (1.12-day period) that their surfaces overlap and physically touch, forming a continuous bridge of plasma that transfers mass and synchronizes their thermal envelopes.
+                {star.id === 'w-ursae-majoris' ? (
+                  <>
+                    <strong>W Ursae Majoris</strong> is the founding prototype of all <strong>overcontact binary systems</strong>. Two solar-type stars orbit so intimately (8.0-hour period) that both have filled their critical Roche lobes, forming a shared convective envelope that transfers heat and equalizes their photospheric temperatures.
+                  </>
+                ) : (
+                  <>
+                    <strong>VFTS 352</strong> is the most massive and extreme <strong>overcontact binary system</strong> known. Two supermassive O-type stars orbit so closely (1.12-day period) that their surfaces overlap and physically touch, forming a continuous bridge of plasma that transfers mass and synchronizes their thermal envelopes.
+                  </>
+                )}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
                 <div className="p-3 rounded-xl bg-[#020614]/80 border border-blue-500/30">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Primary Star (Lobe A)</div>
-                  <div className="text-cyan-300 font-bold text-sm">~29 M☉</div>
-                  <div className="text-[11px] text-slate-300 mt-0.5">Spectral: O4.5V(n)((f*))</div>
-                  <div className="text-[11px] text-slate-400">Radius: ~7.25 R☉</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                    {star.id === 'w-ursae-majoris' ? 'Primary Star (Lobe A)' : 'Primary Star (Lobe A)'}
+                  </div>
+                  <div className="text-cyan-300 font-bold text-sm">
+                    {star.id === 'w-ursae-majoris' ? '1.19 M☉' : '~29.6 M☉'}
+                  </div>
+                  <div className="text-[11px] text-slate-300 mt-0.5">
+                    Spectral: {star.id === 'w-ursae-majoris' ? 'F8Vp' : 'O4.5V(n)((f*))'}
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    Radius: {star.id === 'w-ursae-majoris' ? '1.08 R☉' : '~7.25 R☉'}
+                  </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#020614]/80 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
                   <div className="text-[10px] text-cyan-400 uppercase tracking-wider mb-1">Kissing Mass Bridge</div>
-                  <div className="text-white font-bold text-sm">~30% Mass Shared</div>
-                  <div className="text-[11px] text-slate-300 mt-0.5">Distance: 12M km center-to-center</div>
-                  <div className="text-[11px] text-emerald-300 font-bold">Overcontact Throat</div>
+                  <div className="text-white font-bold text-sm">
+                    {star.id === 'w-ursae-majoris' ? 'Shared Envelope' : '~30% Mass Shared'}
+                  </div>
+                  <div className="text-[11px] text-slate-300 mt-0.5">
+                    Period: {star.id === 'w-ursae-majoris' ? '8.0 Hours (0.33 days)' : '27.0 Hours (1.12 days)'}
+                  </div>
+                  <div className="text-[11px] text-emerald-300 font-bold">Overcontact Neck</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#020614]/80 border border-blue-500/30">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Secondary Star (Lobe B)</div>
-                  <div className="text-cyan-300 font-bold text-sm">~28 M☉</div>
-                  <div className="text-[11px] text-slate-300 mt-0.5">Spectral: O5.5V(n)((f*))</div>
-                  <div className="text-[11px] text-slate-400">Radius: ~7.20 R☉</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                    {star.id === 'w-ursae-majoris' ? 'Secondary Star (Lobe B)' : 'Secondary Star (Lobe B)'}
+                  </div>
+                  <div className="text-cyan-300 font-bold text-sm">
+                    {star.id === 'w-ursae-majoris' ? '0.57 M☉' : '~28.6 M☉'}
+                  </div>
+                  <div className="text-[11px] text-slate-300 mt-0.5">
+                    Spectral: {star.id === 'w-ursae-majoris' ? 'F8Vp' : 'O5.5V(n)((f*))'}
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    Radius: {star.id === 'w-ursae-majoris' ? '0.78 R☉' : '~6.95 R☉'}
+                  </div>
                 </div>
               </div>
 
               <div className="mt-3 p-3 rounded-xl bg-blue-950/40 border border-blue-500/20 text-[11px] text-blue-200/90 leading-relaxed font-mono flex items-start gap-2">
                 <span className="text-cyan-400 font-bold">•</span>
                 <span>
-                  <strong>Astrophysical Destiny:</strong> Because both stars are nearly equal in mass, they undergo deep rotational tidal locking and mass mixing. Theorists predict VFTS 352 will either merge catastrophically into a single rapidly spinning monster star or avoid full envelope merger and produce a <strong>binary black hole merger</strong> emitting high-frequency gravitational waves.
+                  <strong>Astrophysical Destiny:</strong>{' '}
+                  {star.id === 'w-ursae-majoris'
+                    ? 'Gravitational wave dissipation and magnetic braking will eventually drain orbital angular momentum, causing both stars to coalesce into a single rapidly-spinning, rejuvenated blue straggler star (FK Comae type).'
+                    : 'Because both stars are nearly equal in mass, they undergo deep rotational tidal locking and mass mixing. Theorists predict VFTS 352 will either merge catastrophically into a single rapidly spinning monster star or avoid full envelope merger and produce a binary black hole merger emitting high-frequency gravitational waves.'}
                 </span>
               </div>
             </div>
           )}
 
-          {/* Solar System Superimposition Scale (Engulfed Worlds index removed) */}
-          <div className="p-5 rounded-2xl bg-[#030718]/75 backdrop-blur-md border border-amber-500/25 shadow-[0_0_25px_rgba(245,158,11,0.1)]">
-            <div className="flex items-center gap-2.5 text-amber-400 mb-2">
-              <Orbit className="w-5 h-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
-                Solar System Superimposition Scale
-              </h3>
-            </div>
-            <p className="text-sm text-slate-200 mb-3">
-              If placed at the center of our Solar System where the Sun resides:
-            </p>
-            <div className="p-3.5 rounded-xl bg-[#02040c]/90 border border-amber-500/25 flex items-center justify-between gap-4 font-mono text-xs shadow-inner">
-              <span className="text-amber-300 font-bold">{star.solarEngulfment}</span>
-              <span className="text-slate-400 text-[11px]">
-                Diameter: {star.diameterAU.toFixed(3)} AU
-              </span>
-            </div>
-          </div>
-
           {/* Astrophysics Details & Fusion Mechanism */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
             <div className="p-5 rounded-2xl bg-[#020512]/75 backdrop-blur-md border border-cyan-500/20 space-y-3 shadow-inner">
               <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm">
                 <Atom className="w-4 h-4" />
@@ -1026,20 +1153,22 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             </ul>
           </div>
 
-          {/* Description */}
-          <div className="p-4 rounded-xl bg-[#02040c]/75 backdrop-blur-md border border-cyan-500/15 text-xs text-slate-400 leading-relaxed font-mono">
-            {star.description}
-          </div>
+              {/* On mobile: Description appears at the bottom of the dossier */}
+              <div className="block lg:hidden">
+                {renderDescription()}
+              </div>
 
-          {/* Mobile Bottom Close Action */}
-          <div className="pt-2 pb-1 sm:hidden flex justify-center">
-            <button
-              onClick={onClose}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#081026] hover:bg-[#0e1b3d] text-cyan-300 border border-cyan-500/30 text-xs font-mono font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-              <span>Close Star Dossier</span>
-            </button>
+              {/* Mobile Bottom Close Action */}
+              <div className="pt-2 pb-1 sm:hidden flex justify-center">
+                <button
+                  onClick={onClose}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#081026] hover:bg-[#0e1b3d] text-cyan-300 border border-cyan-500/30 text-xs font-mono font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Close Star Dossier</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
