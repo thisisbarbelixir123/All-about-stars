@@ -150,14 +150,14 @@ export const StarComparisonDock: React.FC<StarComparisonDockProps> = ({
                       </button>
                     )}
 
-                    {preset.isCustom && onDeletePreset && (
+                    {preset.id !== 'all-stars-catalog' && onDeletePreset && (
                       <button
                         id={`btn-delete-preset-${preset.id}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           onDeletePreset(preset.id);
                         }}
-                        title="Delete Custom Preset"
+                        title={`Delete preset: ${preset.title}`}
                         className="pr-2.5 pl-1 py-1.5 text-slate-500 hover:text-rose-400 text-xs font-mono transition-colors cursor-pointer"
                       >
                         ✕

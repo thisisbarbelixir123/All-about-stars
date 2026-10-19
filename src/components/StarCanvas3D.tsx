@@ -39,7 +39,8 @@ import {
   Search,
   Orbit,
   Volume2,
-  VolumeX
+  VolumeX,
+  Trash2
 } from 'lucide-react';
 import { StarData, StageSortKey, SortDirection, TourLength, PresetComparison } from '../types';
 import { PRESET_COMPARISONS } from '../data/stars';
@@ -3156,16 +3157,17 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                                         <Pencil className="w-3 h-3" />
                                       </button>
                                     )}
-                                    {preset.isCustom && onDeletePreset && (
+                                    {preset.id !== 'all-stars-catalog' && onDeletePreset && (
                                       <button
+                                        type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           onDeletePreset(preset.id);
                                         }}
-                                        title="Delete custom preset"
-                                        className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/20 rounded cursor-pointer"
+                                        title={`Delete preset: ${preset.title}`}
+                                        className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/20 rounded cursor-pointer transition-colors"
                                       >
-                                        <X className="w-3 h-3" />
+                                        <Trash2 className="w-3.5 h-3.5" />
                                       </button>
                                     )}
                                   </div>

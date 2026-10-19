@@ -13,6 +13,7 @@ import {
   Plus,
   Check,
   RotateCcw,
+  Trash2,
 } from 'lucide-react';
 
 interface StageAndPresetModalProps {
@@ -32,6 +33,8 @@ interface StageAndPresetModalProps {
     desc: string;
     starIds: string[];
   }) => void;
+  // Callback when deleting a preset
+  onDeletePreset?: (presetId: string) => void;
 }
 
 export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
@@ -42,6 +45,7 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
   presetToEdit,
   onSaveStage,
   onSavePreset,
+  onDeletePreset,
 }) => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
@@ -460,14 +464,32 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
 
           {/* Modal Footer */}
           <div className="p-4 border-t border-cyan-500/20 bg-[#060c22]/90 flex items-center justify-between gap-3">
-            <button
-              type="button"
-              id="btn-cancel-stage-preset"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                id="btn-cancel-stage-preset"
+                onClick={onClose}
+                className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              {mode === 'preset' && presetToEdit && onDeletePreset && presetToEdit.id !== 'all-stars-catalog' && (
+                <button
+                  type="button"
+                  id="btn-delete-stage-preset"
+                  onClick={() => {
+                    onClose();
+                    onDeletePreset(presetToEdit.id);
+                  }}
+                  className="px-3.5 py-2 rounded-xl border border-rose-500/30 text-rose-400 hover:text-rose-200 hover:bg-rose-950/40 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                  title={`Delete preset: ${presetToEdit.title}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Preset</span>
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-3">
               {selectedStarIds.length === 0 && (
