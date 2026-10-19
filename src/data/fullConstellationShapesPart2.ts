@@ -597,7 +597,7 @@ export const FULL_CONSTELLATION_SHAPES_PART_2: Record<string, ConstellationShape
       { x: 86, y: 82, catalogStarId: 'alya', name: "Alya (Theta Ser - Double Star Tail Tip)", mag: 4.03, isAsterismCore: true }
     ],
     lines: [
-      [0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [5, 6], [6, 7]
+      [0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]
     ],
     asterismLines: [[0, 1], [1, 2], [2, 0], [2, 3]]
   },

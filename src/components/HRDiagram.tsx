@@ -1761,7 +1761,11 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   zIndex: isHovered || isPinned ? 45 : isSelected ? 35 : 15,
                 }}
                 onMouseEnter={() => setHoveredStar(star)}
-                onMouseLeave={() => setHoveredStar(null)}
+                onMouseLeave={(event) => {
+                  const previewCard = document.getElementById('hr-star-preview-card');
+                  if (previewCard?.contains(event.relatedTarget as Node | null)) return;
+                  setHoveredStar(null);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isMobileMode) {
@@ -1824,42 +1828,61 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               }}
             >
               <div
-                className="bg-[#05091a]/95 backdrop-blur-xl p-3.5 rounded-xl border border-cyan-400/60 shadow-[0_12px_35px_rgba(0,0,0,0.85)] flex flex-col gap-2 w-[290px] sm:w-[320px] max-w-[92vw]"
+                id="hr-star-preview-card"
+                className="pointer-events-auto bg-[#05091a]/95 backdrop-blur-xl p-3.5 rounded-xl border border-cyan-400/60 shadow-[0_12px_35px_rgba(0,0,0,0.85)] flex flex-col gap-2 w-[290px] sm:w-[320px] max-w-[92vw]"
                 style={{
                   boxShadow: `0 0 25px ${displayStar.colorHex}44, 0 10px 30px rgba(0,0,0,0.9)`,
+                }}
+                onMouseLeave={() => {
+                  if (!pinnedStar) setHoveredStar(null);
                 }}
               >
                 {/* Header: Full star name displayed in full, with classification label placed below */}
                 <div className="border-b border-cyan-500/25 pb-2">
-                  <div className="flex items-start gap-2.5">
-                    <span
-                      className="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 shadow-[0_0_8px_currentColor]"
-                      style={{ backgroundColor: displayStar.colorHex }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs sm:text-sm font-bold text-white font-sans leading-snug break-words">
-                        {displayStar.name}
-                      </h4>
-                      {/* Classification label sits below the star name */}
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/40 font-semibold inline-block">
-                          {displayStar.spectralType}
-                        </span>
-                        {(displayStar.stellarStage === 'Carbon Star' || displayStar.spectralClass === 'C') && (
-                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-950 text-red-300 font-mono border border-red-500/60 font-bold inline-block">
-                            ★ Carbon Star (C/O &gt; 1)
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <span
+                        className="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 shadow-[0_0_8px_currentColor]"
+                        style={{ backgroundColor: displayStar.colorHex }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-white font-sans leading-snug break-words">
+                          {displayStar.name}
+                        </h4>
+                        {/* Classification label sits below the star name */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/40 font-semibold inline-block">
+                            {displayStar.spectralType}
                           </span>
-                        )}
-                        {(displayStar.stellarStage === 'S-Type Star' || displayStar.spectralClass === 'S') && (
-                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-orange-950 text-orange-300 font-mono border border-orange-500/60 font-bold inline-block">
-                            ★ S-Type Star (ZrO / ⁹⁹Tc)
+                          {(displayStar.stellarStage === 'Carbon Star' || displayStar.spectralClass === 'C') && (
+                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-950 text-red-300 font-mono border border-red-500/60 font-bold inline-block">
+                              ★ Carbon Star (C/O &gt; 1)
+                            </span>
+                          )}
+                          {(displayStar.stellarStage === 'S-Type Star' || displayStar.spectralClass === 'S') && (
+                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-orange-950 text-orange-300 font-mono border border-orange-500/60 font-bold inline-block">
+                              ★ S-Type Star (ZrO / ⁹⁹Tc)
+                            </span>
+                          )}
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {displayStar.constellation}
                           </span>
-                        )}
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          {displayStar.constellation}
-                        </span>
+                        </div>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      aria-label="Close star preview"
+                      title="Close star preview"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setPinnedStar(null);
+                        setHoveredStar(null);
+                      }}
+                      className="shrink-0 p-1 -mt-1 -mr-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 

@@ -2470,7 +2470,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                                         {st.stellarStage}
                                       </span>
                                     )}
-                                    {st.exoplanetSystem && (
+                                    {st.exoplanetSystem?.hasExoplanets && (
                                       <span className="px-1.5 py-0.5 rounded bg-indigo-950/70 border border-indigo-700/50 text-indigo-300 font-semibold">
                                         🪐 {st.exoplanetSystem.confirmedCount ? `${st.exoplanetSystem.confirmedCount} Planets` : 'Exoplanet Host'}
                                       </span>
