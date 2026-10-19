@@ -1246,7 +1246,7 @@ export const STARS_EXTREMES_AND_REMNANTS: StarData[] = [
     constellation: 'Libra',
     diameterSolar: 2.04,
     temperature: 5787,
-    spectralType: 'sdF3',
+    spectralType: 'F3IV',
     spectralClass: 'F',
     luminositySolar: 4.82,
     massSolar: 0.80,

@@ -22,7 +22,6 @@ export function isHypergiant(star: StarData): boolean {
     stage.includes('hypergiant') ||
     spec.includes('Ia+') ||
     spec.includes('Ia-0') ||
-    spec.includes('0') ||
     spec.includes('Ia-O') ||
     ['stephenson-2-18', 'uy-scuti', 'vy-canis-majoris', 'nml-cygni', 'westerlund-1-26', 'v354-cephei', 'ah-scorpii', 'kw-sagittarii', 'v382-carinae', 'v509-cassiopeiae', 'rho-cassiopeiae', 'eta-carinae-a', 'pistol-star', 's-doradus'].includes(star.id)
   );

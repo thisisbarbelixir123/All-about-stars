@@ -67,7 +67,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
     constellation: 'Hydrus',
     diameterSolar: 0.88,
     temperature: 5125,
-    spectralType: 'sdK',
+    spectralType: 'K1IV',
     spectralClass: 'K',
     luminositySolar: 0.52,
     massSolar: 0.75,
@@ -81,7 +81,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
     surfaceGravityLogG: 3.5,
     colorHex: '#ffc682',
     coronaColorHex: '#ffba6a',
-    solarEngulfment: 'Spans roughly 1.22 million km (~0.0082 AU), an ancient pristine subgiant/subdwarf.',
+    solarEngulfment: 'Spans roughly 1.22 million km (~0.0082 AU), an ancient pristine metal-poor subgiant.',
     engulfsPlanets: [],
     habitableZoneAU: { inner: 0.65, outer: 1.05 },
     exoplanetSystem: {
@@ -90,7 +90,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
       systemOverview: 'Formed from gas enriched by just a single low-energy primordial Population III supernova.',
       planets: []
     },
-    stellarStage: 'Subdwarf',
+    stellarStage: 'Subgiant',
     lifespanEstimate: '20 Billion Years',
     futureFate: 'White Dwarf',
     fusionProcess: 'Core Hydrogen Fusion in pristine gas',
@@ -99,7 +99,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
       'Believed to be a direct second-generation star born immediately after the universe’s first stars (Population III) went supernova ~13.6 billion years ago.',
       'Discovered in 2014 by Australian astronomer Stefan Keller using the automated SkyMapper survey telescope at Siding Spring Observatory.'
     ],
-    description: 'An ancient primordial relic star in Hydrus holding the cosmic record for the lowest iron metallicity ever discovered.'
+    description: 'An ancient primordial relic subgiant in Hydrus holding the cosmic record for the lowest iron metallicity ever discovered.'
   }),
 
   // 3. SDSS J102915+172927 (Caffau's Star - The Star That Shouldn't Exist)
@@ -153,7 +153,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
     constellation: 'Aquarius',
     diameterSolar: 1.25,
     temperature: 4850,
-    spectralType: 'sdK0',
+    spectralType: 'K0IV',
     spectralClass: 'K',
     luminositySolar: 1.35,
     massSolar: 0.80,
@@ -167,7 +167,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
     surfaceGravityLogG: 3.8,
     colorHex: '#ffb764',
     coronaColorHex: '#ffa949',
-    solarEngulfment: 'Spans 1.74 million km (~0.0116 AU), an ancient metal-poor halo subdwarf with extreme neutron-capture enrichment.',
+    solarEngulfment: 'Spans 1.74 million km (~0.0116 AU), an ancient metal-poor halo subgiant with extreme neutron-capture enrichment.',
     engulfsPlanets: [],
     habitableZoneAU: { inner: 1.0, outer: 1.6 },
     exoplanetSystem: {
@@ -176,7 +176,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
       systemOverview: 'Pure stellar laboratory for studying rapid neutron-capture (r-process) nucleosynthesis from early neutron star mergers.',
       planets: []
     },
-    stellarStage: 'Subdwarf',
+    stellarStage: 'Subgiant',
     lifespanEstimate: '18 Billion Years',
     futureFate: 'White Dwarf',
     fusionProcess: 'Core & Shell Hydrogen Fusion',
@@ -185,7 +185,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
       'Its chemical abundance pattern perfectly matches solar r-process abundances from barium to uranium, demonstrating universal physics across 13 billion years.',
       'Acts as a cosmic chronometer allowing nuclear cosmochronology dating of the early Milky Way.'
     ],
-    description: 'An ancient halo subdwarf in Aquarius that provided groundbreaking evidence for neutron star merger nucleosynthesis in the early cosmos.'
+    description: 'An ancient halo subgiant in Aquarius that provided groundbreaking evidence for neutron star merger nucleosynthesis in the early cosmos.'
   }),
 
   // 5. BPS CS 31082-001 (Cayrel’s Star - Uranium-Rich Chronometer)
@@ -196,7 +196,7 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
     constellation: 'Cetus',
     diameterSolar: 1.30,
     temperature: 4825,
-    spectralType: 'sdK1',
+    spectralType: 'K1IV',
     spectralClass: 'K',
     luminositySolar: 1.45,
     massSolar: 0.80,
@@ -219,16 +219,16 @@ export const STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS: StarData[] = [
       systemOverview: 'First star ever to have its age calculated directly using radioactive Uranium-238 decay.',
       planets: []
     },
-    stellarStage: 'Subdwarf',
+    stellarStage: 'Subgiant',
     lifespanEstimate: '18 Billion Years',
     futureFate: 'White Dwarf',
     fusionProcess: 'Core Hydrogen Fusion',
     notableFacts: [
       'The first star outside the solar system where the radioactive actinide Uranium-238 was directly detected and measured in high-resolution spectra.',
       'Enabled Roger Cayrel and his team to compute an unambiguous radioactive cosmic age of ~14.0 ± 2.4 billion years.',
-      'Ultra-r-process enriched halo subdwarf with an exceptionally pristine thorium and uranium fingerprint.'
+      'Ultra-r-process enriched halo subgiant with an exceptionally pristine thorium and uranium fingerprint.'
     ],
-    description: 'A celebrated uranium-bearing Population II subdwarf in Cetus used for radioactive cosmochronology dating of the Milky Way.'
+    description: 'A celebrated uranium-bearing Population II subgiant in Cetus used for radioactive cosmochronology dating of the Milky Way.'
   }),
 
   // 6. HE 0107-5240 (Christlieb’s Carbon-Enhanced Subdwarf)

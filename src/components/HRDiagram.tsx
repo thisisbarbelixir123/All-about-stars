@@ -169,8 +169,18 @@ type EvolutionaryFilter =
   | 'AGB'
   | 'CARBON_STARS'
   | 'SUBGIANTS'
+  | 'SUBDWARFS'
   | 'WHITE_DWARFS'
   | 'WOLF_RAYET';
+
+const isSubdwarfStar = (star: StarData) => {
+  const spectralType = star.spectralType.trim();
+  return (
+    star.stellarStage?.toLowerCase().includes('subdwarf') === true ||
+    /^(?:esd|usd|sd)[-:\s]*[OBAFGKMLTYCS]/i.test(spectralType) ||
+    /\bVI\b/.test(spectralType)
+  );
+};
 
 // Empirical points defining the Main Sequence (Luminosity Class V) locus: strictly O through M-class only
 const MAIN_SEQUENCE_CURVE = [
@@ -545,6 +555,9 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
           star.stellarStage.toLowerCase().includes('subgiant')
         );
       }
+      if (activeGroupFilter === 'SUBDWARFS') {
+        return isSubdwarfStar(star);
+      }
       if (activeGroupFilter === 'WHITE_DWARFS') {
         return star.stellarStage === 'White Dwarf';
       }
@@ -763,6 +776,43 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
     return validPts.reduce((acc, pt, idx) => {
       return idx === 0 ? `M ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}` : `${acc} L ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
     }, '');
+  }, [minTemp, maxTemp, minLumLog, maxLumLog]);
+
+  // Draw the cool metal-poor sequence and blue sdB/sdO locus as one connected trail.
+  const subdwarfSvgPath = useMemo(() => {
+    const luminosityOffset = Math.pow(10, -0.4 * 1.75);
+    const coolPts = MAIN_SEQUENCE_CURVE.filter(
+      (pt) => pt.T <= 7500 && pt.T >= 3000 && pt.T >= minTemp * 0.8 && pt.T <= maxTemp * 1.2
+    ).map((pt) => ({
+      x: getTempX(pt.T),
+      y: getLumY(pt.L * luminosityOffset),
+    }));
+
+    // Hot-subdwarf branch (listed hottest to coolest), followed by a smooth
+    // bridge into the cool subdwarf sequence. The HD 49798 high-luminosity branch
+    // is intentionally excluded from this locus.
+    const connectedSubdwarfPts = [
+      { T: 75000, L: 180 },
+      { T: 63000, L: 120 },
+      { T: 45000, L: 80 },
+      { T: 40000, L: 50 },
+      { T: 35200, L: 32 },
+      { T: 34500, L: 28 },
+      { T: 29200, L: 22 },
+      { T: 25000, L: 14 },
+      { T: 18000, L: 8 },
+      { T: 12000, L: 4.5 },
+      { T: 9000, L: 3.2 },
+      { T: 7500, L: MAIN_SEQUENCE_CURVE.find((pt) => pt.T === 7670)!.L * luminosityOffset },
+    ].map((pt) => ({ x: getTempX(pt.T), y: getLumY(pt.L) }));
+    connectedSubdwarfPts.push(...coolPts);
+
+    const makePath = (points: { x: number; y: number }[]) =>
+      points.reduce((acc, pt, idx) => {
+        return idx === 0 ? `M ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}` : `${acc} L ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
+      }, '');
+
+    return connectedSubdwarfPts.length >= 2 ? makePath(connectedSubdwarfPts) : '';
   }, [minTemp, maxTemp, minLumLog, maxLumLog]);
 
   // Luminous Blue Variables (LBV) Instability Strip Highlighted Area SVG Polygon
@@ -1003,6 +1053,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               { id: 'AGB', label: '★ AGB Branch' },
               { id: 'CARBON_STARS', label: '★ Carbon & S-Type (C/S)' },
               { id: 'SUBGIANTS', label: 'Subgiants (IV)' },
+              { id: 'SUBDWARFS', label: 'Subdwarfs (VI)' },
               { id: 'WHITE_DWARFS', label: 'White Dwarfs' },
               { id: 'WOLF_RAYET', label: 'Wolf-Rayet' },
             ].map((tab) => {
@@ -1415,7 +1466,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               );
             })}
 
-            {/* Stefan-Boltzmann Isoradius Lines (Constant Solar Radius fine dotted diagonals) */}
+            {/* Stefan-Boltzmann Isoradius Lines (Constant Solar Radius dotted diagonals) */}
             {showIsoradiusLines &&
               isoradiusLines.map(
                 (line) =>
@@ -1449,13 +1500,12 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   d={lbvAreaSvgPath}
                   fill="url(#lbv-strip-pattern)"
                 />
-                {/* Glowing dashed boundary line */}
+                {/* Glowing solid boundary line */}
                 <path
                   d={lbvAreaSvgPath}
                   fill="none"
                   stroke="#38bdf8"
                   strokeWidth="1.2"
-                  strokeDasharray="4 2.5"
                   strokeOpacity="0.85"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1550,7 +1600,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   fill="none"
                   stroke="#fbbf24"
                   strokeWidth="0.85"
-                  strokeDasharray="3 1.5"
                   strokeOpacity="0.85"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1575,7 +1624,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   fill="none"
                   stroke="#f87171"
                   strokeWidth="0.8"
-                  strokeDasharray="2 1.5"
                   strokeOpacity="0.85"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1591,9 +1639,23 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   fill="none"
                   stroke="#34d399"
                   strokeWidth="0.65"
-                  strokeDasharray="2 1"
                   strokeOpacity="0.7"
                   strokeLinecap="round"
+                />
+              </g>
+            )}
+
+            {/* Evolutionary Regions: Metal-Poor Subdwarf (Class VI) Trail */}
+            {showEvolutionaryZones && subdwarfSvgPath && (
+              <g id="subdwarf-group">
+                <path
+                  d={subdwarfSvgPath}
+                  fill="none"
+                  stroke="#a78bfa"
+                  strokeWidth="0.75"
+                  strokeOpacity="0.85"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </g>
             )}
@@ -1721,6 +1783,17 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 }}
               >
                 ★ Subgiants (IV)
+              </div>
+
+              {/* Subdwarf (VI) Trail Badge */}
+              <div
+                className="absolute pointer-events-none text-[8px] sm:text-[9px] font-mono font-bold text-violet-200 bg-violet-950/90 border border-violet-500/50 px-2 py-0.5 rounded-full shadow-md z-20 -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${getTempX(5500)}%`,
+                  top: `${getLumY(0.12)}%`,
+                }}
+              >
+                ★ Subdwarfs (VI)
               </div>
 
               {/* Brown Dwarfs Zone Badge */}
@@ -2035,6 +2108,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   { id: 'AGB', label: 'Asymptotic Giant Branch (AGB)' },
                   { id: 'CARBON_STARS', label: 'Carbon & S-Type Stars (C & S)' },
                   { id: 'SUBGIANTS', label: 'Subgiants (IV)' },
+                  { id: 'SUBDWARFS', label: 'Subdwarfs (VI)' },
                   { id: 'WHITE_DWARFS', label: 'White Dwarfs' },
                   { id: 'WOLF_RAYET', label: 'Wolf-Rayet' },
                 ].map((tab) => (

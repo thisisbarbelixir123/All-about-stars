@@ -604,7 +604,7 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
     howItWorks:
       'Core contraction heats up the surrounding hydrogen shell, starting the expansion process.',
     typicalSizeComparison: '1.5 to 4 times the diameter of the Sun.',
-    exampleStarIds: ['procyon-a', 'rasalhague', 'delta-scuti', 'algol-b', 'regulus'],
+    exampleStarIds: ['procyon-a', 'rasalhague', 'delta-scuti', 'algol-b', 'regulus', 'methuselah-star', 'sneden-star', 'cayrel-star', 'smss-j031300'],
     coreEnergySource: 'Transitioning from core hydrogen to shell hydrogen burning',
     fate: 'Evolves directly into a Class III Red Giant over tens of millions of years.',
   },
@@ -646,11 +646,7 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
       'kpd-1930-2752',
       'groombridge-1830',
       'kapteyns-star',
-      'methuselah-star',
-      'smss-j031300',
       'sdss-j102915',
-      'sneden-star',
-      'cayrel-star',
       'mu-cassiopeiae'
     ],
     coreEnergySource: 'Pristine metal-poor core Hydrogen fusion',
