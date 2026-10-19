@@ -46,6 +46,8 @@ import { PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
 import { soundEffects } from '../utils/soundEffects';
+import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
+import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
 
 const TOUR_DURATION_MAP: Record<TourLength, number> = {
   short: 2500,
@@ -988,6 +990,21 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Dynamically calibrate tone mapping exposure:
+  // In spiral layout, hundreds of stars are viewed simultaneously along the arm curve.
+  // A calibrated exposure prevents over-saturation/whitening while preserving rich colors and dark space contrast.
+  useEffect(() => {
+    if (rendererRef.current) {
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      rendererRef.current.toneMappingExposure = isSpiral ? 1.15 : 1.25;
+    }
+  }, [isAllStarsPreset, sortKey, allStarsLayoutMode]);
+
+  // Clear hovered star when preset or stars change to ensure zero stale hover state
+  useEffect(() => {
+    setHoveredStar(null);
+  }, [activePresetId, stars]);
+
   // Re-build 3D Star meshes when stars, scaleMode, or viewMode changes
   useEffect(() => {
     const scene = sceneRef.current;
@@ -1146,12 +1163,27 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         }
       }
 
-      const baseColor = new THREE.Color(star.colorHex);
-      const coronaColor = new THREE.Color(star.coronaColorHex);
+      const d65 = computeD65StellarColor({
+        spectralType: star.spectralType,
+        spectralClass: star.spectralClass,
+        temperature: star.temperature,
+        stellarStage: star.stellarStage,
+      });
+      const baseColor = new THREE.Color(d65.colorHex);
+      const coronaColor = new THREE.Color(d65.coronaColorHex);
 
       const isContactBinary = star.id === 'vfts-352' || star.stellarStage === 'Contact Binary';
       const isPulsar = isPulsarOrNeutronStar(star);
       const bdType = getBrownDwarfType(star);
+      const { classKey, subclass } = parseSpectralType(star.spectralType, star.spectralClass);
+      const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
+      const spectralSubclass = subclass;
+
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      // Compute visual density factor based on count of rendered stars and layout mode:
+      // In spiral mode, stars are packed tightly in curved logarithmic arms, so densityFactor is 1.0.
+      // In standard grid / comparison modes, density factor smoothly scales with star count.
+      const densityFactor = isSpiral ? 1.0 : Math.min(1.0, Math.max(0.0, (renderedStars.length - 8) / 80.0));
 
       const customMat = new THREE.ShaderMaterial({
         wireframe: wireframe,
@@ -1163,236 +1195,13 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           isPulsar: { value: isPulsar ? 1.0 : 0.0 },
           isContactBinary: { value: isContactBinary ? 1.0 : 0.0 },
           brownDwarfType: { value: bdType },
+          densityFactor: { value: densityFactor },
+          spectralClassIndex: { value: spectralClassIndex },
+          spectralSubclass: { value: spectralSubclass },
+          hasSpectralData: { value: 1.0 },
         },
-        vertexShader: `
-          #include <common>
-          #include <logdepthbuf_pars_vertex>
-          varying vec3 vNormal;
-          varying vec3 vPosition;
-          varying vec3 vLocalPos;
-          varying vec2 vUv;
-          varying vec3 vViewPosition;
-          void main() {
-            vNormal = normalize(normalMatrix * normal);
-            vPosition = position;
-            vLocalPos = normal; // Scale-invariant unit sphere vector
-            vUv = uv;
-            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            vViewPosition = -mvPosition.xyz;
-            gl_Position = projectionMatrix * mvPosition;
-            #include <logdepthbuf_vertex>
-          }
-        `,
-        fragmentShader: `
-          #include <common>
-          #include <logdepthbuf_pars_fragment>
-          uniform float time;
-          uniform vec3 baseColor;
-          uniform vec3 coronaColor;
-          uniform float temperature;
-          uniform float isPulsar;
-          uniform float isContactBinary;
-          uniform float brownDwarfType;
-          varying vec3 vNormal;
-          varying vec3 vPosition;
-          varying vec3 vLocalPos;
-          varying vec2 vUv;
-          varying vec3 vViewPosition;
-
-          // Smooth quintic interpolation polynomial (C2 continuity, zero grid artifacts)
-          vec3 quintic(vec3 t) {
-            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
-          }
-
-          // Dave Hoskins' float-stable 3D hash generator (zero precision degradation across all float scales)
-          float hash3D(vec3 p) {
-            p = fract(p * 0.1031);
-            p += dot(p, p.zyx + 31.32);
-            return fract((p.x + p.y) * p.z);
-          }
-
-          // Silky smooth 3D value noise with quintic interpolation
-          float smoothNoise(vec3 x) {
-            vec3 i = floor(x);
-            vec3 f = fract(x);
-            vec3 u = quintic(f);
-
-            return mix(
-              mix(
-                mix(hash3D(i + vec3(0.0, 0.0, 0.0)), hash3D(i + vec3(1.0, 0.0, 0.0)), u.x),
-                mix(hash3D(i + vec3(0.0, 1.0, 0.0)), hash3D(i + vec3(1.0, 1.0, 0.0)), u.x),
-                u.y
-              ),
-              mix(
-                mix(hash3D(i + vec3(0.0, 0.0, 1.0)), hash3D(i + vec3(1.0, 0.0, 1.0)), u.x),
-                mix(hash3D(i + vec3(0.0, 1.0, 1.0)), hash3D(i + vec3(1.0, 1.0, 1.0)), u.x),
-                u.y
-              ),
-              u.z
-            );
-          }
-
-          // Multi-octave Fractal Brownian Motion (FBM) for smooth natural plasma flow
-          float fbm(vec3 p) {
-            float value = 0.0;
-            float amplitude = 0.5;
-            vec3 shift = vec3(23.41, 57.19, 11.83);
-            for (int i = 0; i < 4; ++i) {
-              value += amplitude * smoothNoise(p);
-              p = p * 2.02 + shift;
-              amplitude *= 0.5;
-            }
-            return value;
-          }
-
-          void main() {
-            #include <logdepthbuf_fragment>
-            vec3 viewDir = normalize(vViewPosition);
-            float limb = dot(normalize(vNormal), viewDir);
-            limb = clamp(limb, 0.0, 1.0);
-            float limbDarkening = pow(limb, 0.46);
-
-            vec3 normPos = normalize(vLocalPos);
-
-            // Dynamic axial spin rotation around the stellar polar Y-axis:
-            // Ensures stars visibly rotate their photospheric convection cells, flares, and brown dwarf atmospheric cloud bands!
-            float spinAngle = time * 0.15;
-            float cosAngle = cos(spinAngle);
-            float sinAngle = sin(spinAngle);
-            normPos = vec3(
-              normPos.x * cosAngle + normPos.z * sinAngle,
-              normPos.y,
-              -normPos.x * sinAngle + normPos.z * cosAngle
-            );
-
-            vec3 samplePos = normPos * 3.2;
-            vec3 q = samplePos + vec3(time * 0.04, time * 0.03, time * 0.015);
-            float f1 = fbm(q);
-            vec3 warpedP = samplePos + vec3(f1 * 0.7, f1 * 0.5, f1 * 0.3) + vec3(time * 0.02, -time * 0.015, time * 0.01);
-            float gran = fbm(warpedP);
-
-            // 1. NEUTRON STARS & PULSARS
-            if (isPulsar > 0.5) {
-              vec3 pulsarPos = normPos * 3.8 + vec3(0.0, time * 0.12, 0.0);
-              float granPulsar = fbm(pulsarPos);
-              vec3 pulsarCore = mix(baseColor * 0.95, vec3(0.92, 0.97, 1.0), granPulsar * 0.55 + 0.25);
-              pulsarCore *= (0.58 + 0.42 * limbDarkening);
-
-              float fresnelPulsar = pow(1.0 - limb, 2.6);
-              pulsarCore += coronaColor * fresnelPulsar * 0.95;
-
-              gl_FragColor = vec4(pulsarCore, 1.0);
-              return;
-            }
-
-            // 2. SUBSTELLAR BROWN DWARFS (Class L, T, Y) - GAS GIANT BANDED ATMOSPHERE
-            if (brownDwarfType > 0.5) {
-              float y = normPos.y; // -1.0 (South) to +1.0 (North)
-              float lon = atan(normPos.z, normPos.x);
-
-              // Zonal differential wind shear (latitudinal jet streams)
-              float zonalVelocity = sin(y * 8.0) * 0.40 + sin(y * 16.0) * 0.15;
-              float dynamicLon = lon + time * (0.035 + zonalVelocity * 0.05);
-
-              // Multi-scale Jovian cloud banding
-              float primaryBands = sin(y * 22.0 + smoothNoise(vec3(dynamicLon * 2.0, y * 4.0, time * 0.02)) * 1.8);
-              float secondaryBands = sin(y * 52.0 + smoothNoise(vec3(dynamicLon * 4.0, y * 10.0, 0.8)) * 1.2);
-              float fineBelts = sin(y * 110.0 + smoothNoise(vec3(dynamicLon * 8.0, y * 20.0, 1.9)) * 0.8) * 0.5 + 0.5;
-
-              // Turbulent vortices & storm spots
-              vec3 stormPos = vec3(dynamicLon * 3.2, y * 7.5, time * 0.025);
-              float storms = smoothNoise(stormPos) * 0.6 + smoothNoise(stormPos * 2.4) * 0.3 + smoothNoise(stormPos * 5.0) * 0.1;
-              float polarFactor = smoothstep(0.68, 0.98, abs(y));
-
-              if (brownDwarfType < 1.5) {
-                // CLASS L (1,300 - 2,400 K): Warm Brown Dwarf with molten iron & silicate rain clouds + FAINT GLOW
-                vec3 colBand1 = vec3(0.55, 0.15, 0.08); // Deep crimson
-                vec3 colBand2 = vec3(0.26, 0.06, 0.03); // Dark iron belt
-                vec3 colBand3 = vec3(0.72, 0.22, 0.10); // Warm glowing amber zone
-                vec3 colStorm = vec3(0.88, 0.32, 0.12); // Hot iron-rich storm rift
-
-                float blend1 = primaryBands * 0.5 + 0.5;
-                float blend2 = secondaryBands * 0.5 + 0.5;
-                vec3 surface = mix(colBand1, colBand2, blend1);
-                surface = mix(surface, colBand3, blend2 * 0.6);
-                surface = mix(surface, colStorm, smoothstep(0.64, 0.84, storms) * 0.55);
-                surface = mix(surface, vec3(0.18, 0.05, 0.02), polarFactor * 0.7);
-                surface += fineBelts * 0.05 * vec3(0.4, 0.15, 0.05);
-
-                // Faint thermal glow: deep interior infrared heat leaking through silicate cloud breaks
-                float thermalBreak = smoothstep(0.4, 0.8, storms) * (1.0 - blend1 * 0.5);
-                vec3 thermalGlow = vec3(0.95, 0.35, 0.12) * thermalBreak * 0.40;
-
-                // Faint limb glow
-                surface = surface * (0.65 + 0.35 * limbDarkening) + thermalGlow;
-                surface += coronaColor * pow(1.0 - limb, 3.2) * 0.22;
-
-                gl_FragColor = vec4(surface, 1.0);
-                return;
-              } else if (brownDwarfType < 2.5) {
-                // CLASS T (600 - 1,300 K): Methane Brown Dwarf (NOT GLOWING, Gas Giant Jovian Texture)
-                vec3 colBand1 = vec3(0.38, 0.11, 0.27);
-                vec3 colBand2 = vec3(0.17, 0.05, 0.15);
-                vec3 colBand3 = vec3(0.48, 0.16, 0.36);
-                vec3 colStorm = vec3(0.62, 0.22, 0.44);
-
-                float blend1 = primaryBands * 0.5 + 0.5;
-                float blend2 = secondaryBands * 0.5 + 0.5;
-                vec3 surface = mix(colBand1, colBand2, blend1);
-                surface = mix(surface, colBand3, blend2 * 0.6);
-                surface = mix(surface, colStorm, smoothstep(0.65, 0.85, storms) * 0.45);
-                surface = mix(surface, vec3(0.12, 0.04, 0.14), polarFactor * 0.65);
-                surface += (fineBelts - 0.5) * 0.08 * vec3(0.3, 0.1, 0.2);
-
-                // Non-glowing matte planetary lighting
-                surface *= (0.35 + 0.65 * limbDarkening);
-                surface += vec3(0.24, 0.08, 0.20) * pow(1.0 - limb, 4.2) * 0.25;
-
-                gl_FragColor = vec4(surface, 1.0);
-                return;
-              } else {
-                // CLASS Y (<600 K down to 250 K / -23°C): Ultracool Ice Brown Dwarf
-                vec3 colBand1 = vec3(0.25, 0.18, 0.27);
-                vec3 colBand2 = vec3(0.12, 0.09, 0.15);
-                vec3 colBand3 = vec3(0.32, 0.25, 0.35);
-                vec3 colStorm = vec3(0.44, 0.35, 0.46);
-
-                float blend1 = primaryBands * 0.5 + 0.5;
-                float blend2 = secondaryBands * 0.5 + 0.5;
-                vec3 surface = mix(colBand1, colBand2, blend1);
-                surface = mix(surface, colBand3, blend2 * 0.55);
-                surface = mix(surface, colStorm, smoothstep(0.68, 0.88, storms) * 0.35);
-                surface = mix(surface, vec3(0.08, 0.06, 0.10), polarFactor * 0.7);
-                surface += (fineBelts - 0.5) * 0.06 * vec3(0.2, 0.2, 0.25);
-
-                surface *= (0.30 + 0.70 * limbDarkening);
-                surface += vec3(0.15, 0.14, 0.20) * pow(1.0 - limb, 4.5) * 0.18;
-
-                gl_FragColor = vec4(surface, 1.0);
-                return;
-              }
-            }
-
-            // 3. MAIN SEQUENCE, GIANTS, HYPERGIANTS, WHITE DWARFS & CONTACT BINARIES
-            vec3 deepCore = baseColor * 0.88;
-            vec3 brightSurface = mix(baseColor * 1.15, vec3(1.0, 0.99, 0.97), 0.48);
-            vec3 hotFaculae = mix(coronaColor * 1.25, vec3(1.0, 1.0, 1.0), 0.65);
-
-            vec3 plasmaColor = mix(deepCore, brightSurface, gran);
-            plasmaColor = mix(plasmaColor, hotFaculae, smoothstep(0.58, 0.86, gran) * 0.42);
-
-            if (isContactBinary > 0.5) {
-              plasmaColor = mix(plasmaColor, vec3(0.92, 0.96, 1.0), 0.18);
-            }
-
-            plasmaColor *= (0.48 + 0.52 * limbDarkening);
-
-            float fresnel = pow(1.0 - limb, 3.2);
-            plasmaColor += coronaColor * fresnel * 0.82;
-
-            gl_FragColor = vec4(plasmaColor, 1.0);
-          }
-        `,
+        vertexShader: STAR_VERTEX_SHADER,
+        fragmentShader: STAR_FRAGMENT_SHADER,
       });
 
       if (isContactBinary) {
@@ -1432,6 +1241,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       // 2. Atmospheric Corona Glow Halo (Disabled for Class T & Y brown dwarfs, Faint for Class L)
       if (showCorona && bdType < 1.5) {
         const isFaintL = bdType === 1.0;
+        // Density-adjusted glow intensity and corona radius matching hero image non-solid glow
+        const normalGlowIntensity = isSpiral ? 0.45 : (0.75 - densityFactor * 0.22);
+        const glowIntensityVal = isFaintL ? 0.30 : normalGlowIntensity;
+        const coronaRadiusMultiplier = isFaintL ? 1.4 : (isSpiral ? 1.6 : (2.2 - densityFactor * 0.3));
+
         const createCoronaMat = () => new THREE.ShaderMaterial({
           side: THREE.BackSide,
           transparent: true,
@@ -1440,8 +1254,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           depthTest: true,
           uniforms: {
             time: sharedTimeUniformRef.current,
-            glowColor: { value: isFaintL ? new THREE.Color('#8a2014') : coronaColor },
-            glowIntensity: { value: isFaintL ? 0.20 : 0.70 },
+            baseColor: { value: isFaintL ? new THREE.Color('#9e2819') : baseColor },
+            coronaColor: { value: isFaintL ? new THREE.Color('#781810') : coronaColor },
+            glowIntensity: { value: glowIntensityVal },
           },
           vertexShader: `
             #include <common>
@@ -1459,39 +1274,70 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           fragmentShader: `
             #include <common>
             #include <logdepthbuf_pars_fragment>
-            uniform vec3 glowColor;
+            uniform vec3 baseColor;
+            uniform vec3 coronaColor;
             uniform float glowIntensity;
+            uniform float time;
             varying vec3 vNormal;
             varying vec3 vViewPosition;
             void main() {
               #include <logdepthbuf_fragment>
               vec3 viewDir = normalize(vViewPosition);
-              float intensity = pow(clamp(0.65 - dot(vNormal, viewDir), 0.0, 1.0), 2.2);
-              gl_FragColor = vec4(glowColor * 1.5, clamp(intensity * glowIntensity, 0.0, glowIntensity));
+
+              // Normalized radial distance r from center of star disc on screen [0.0 = center, 1.0 = silhouette edge]:
+              float cosTheta = abs(dot(vNormal, viewDir));
+              float r = sqrt(clamp(1.0 - cosTheta * cosTheta, 0.0, 1.0));
+
+              // Dynamic subtle atmospheric convection
+              float pulse = 1.0 + 0.03 * sin(time * 1.6 + vNormal.x * 2.5 + vNormal.y * 2.0);
+
+              // Continuous smooth radial gradient matching Hero Image:
+              // Core starlight glow (#ffffff / core radiance transitioning to baseColor and coronaColor)
+              vec3 coreColor = mix(vec3(1.0), baseColor * 1.25, smoothstep(0.0, 0.38, r));
+              vec3 outerColor = mix(baseColor, coronaColor, smoothstep(0.30, 0.72, r));
+              vec3 finalColor = mix(coreColor, outerColor, smoothstep(0.18, 0.48, r));
+
+              // Strictly non-solid continuous falloff with zero hard edge or solid ring:
+              // Vanishes smoothly to absolute 0.0 well before the geometric edge (r >= 0.88 is completely transparent)
+              float falloff = 0.0;
+              if (r < 0.88) {
+                float normDist = r / 0.85;
+                float gaussian = exp(-normDist * normDist * 3.2);
+                float smoothFade = 1.0 - smoothstep(0.55, 0.85, r);
+                falloff = gaussian * smoothFade * pulse;
+              }
+
+              // Translucent ethereal alpha (strictly non-solid continuous gas)
+              float alpha = clamp(falloff * glowIntensity * 0.95, 0.0, 0.75);
+
+              gl_FragColor = vec4(finalColor * 1.35, alpha);
             }
           `,
         });
 
         if (isContactBinary) {
-          const coronaLobeRadius = scaleInfo.radius * 0.76;
+          const coronaLobeRadius = scaleInfo.radius * 0.72 * (isFaintL ? 1.4 : 2.0);
           const lobeOffset = scaleInfo.radius * 0.42;
 
           const coronaMeshA = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
           coronaMeshA.scale.setScalar(coronaLobeRadius);
           coronaMeshA.position.set(-lobeOffset, 0, 0);
           coronaMeshA.name = 'CoronaA';
+          coronaMeshA.raycast = () => {};
           starGroup.add(coronaMeshA);
 
           const coronaMeshB = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
           coronaMeshB.scale.setScalar(coronaLobeRadius);
           coronaMeshB.position.set(lobeOffset, 0, 0);
           coronaMeshB.name = 'CoronaB';
+          coronaMeshB.raycast = () => {};
           starGroup.add(coronaMeshB);
         } else {
-          const coronaRadius = scaleInfo.radius * (isFaintL ? 1.08 : 1.22);
+          const coronaRadius = scaleInfo.radius * coronaRadiusMultiplier;
           const coronaMesh = new THREE.Mesh(sharedCoronaGeo, createCoronaMat());
           coronaMesh.scale.setScalar(coronaRadius);
           coronaMesh.name = 'Corona';
+          coronaMesh.raycast = () => {};
           starGroup.add(coronaMesh);
         }
       }
@@ -1507,7 +1353,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       sharedCoronaGeo.dispose();
       sharedHitGeo.dispose();
     };
-  }, [stars, starScales, scaleMode, showCorona, viewMode, wireframe, showGrid]);
+  }, [stars, starScales, scaleMode, showCorona, viewMode, wireframe, showGrid, allStarsLayoutMode, isAllStarsPreset, sortKey]);
 
   // Camera framing calculation:
   // Dynamically scales distance and target elevation based on true star radius.
@@ -1560,10 +1406,16 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       const firstId = sortedStars[0]?.id;
       const lastId = sortedStars[sortedStars.length - 1]?.id;
 
-      // 1. In linear mode (or any mode): switching between first and last items
+      // 1. Switching between first and last items (biggest to smallest star)
       const isFirstLastSwitch =
         (prevId === firstId && nextId === lastId) ||
         (prevId === lastId && nextId === firstId);
+
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      if (isSpiral) {
+        return isFirstLastSwitch;
+      }
+
       if (isFirstLastSwitch) return true;
 
       // 2. In Complete Catalog multi-row grid mode: switching across rows
@@ -1585,7 +1437,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
       return false;
     },
-    [sortedStars, starScales]
+    [sortedStars, starScales, isAllStarsPreset, sortKey, allStarsLayoutMode]
   );
 
   // Position camera directly at target coordinates without flying / lerping through intermediate space
@@ -1742,6 +1594,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
   const starScalesRef = useRef(starScales);
   starScalesRef.current = starScales;
+
+  const sortedStarsRef = useRef(sortedStars);
+  sortedStarsRef.current = sortedStars;
 
   const selectedStarIdRef = useRef(selectedStarId);
   selectedStarIdRef.current = selectedStarId;
@@ -1936,7 +1791,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       // 3. Dynamic focused point light: moves to focused star or smoothly illuminates target
       if (focusedLightRef.current) {
         const activeStarId = focusedStarIdRef.current ?? selectedStarIdRef.current;
-        const activeStar = activeStarId ? sortedStars.find(s => s.id === activeStarId) : null;
+        const activeStar = activeStarId ? sortedStarsRef.current.find(s => s.id === activeStarId) : null;
         if (activeStar) {
           const sc = starScalesRef.current[activeStar.id];
           if (sc) {
@@ -1976,52 +1831,39 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         if (meshes.length > 0) {
           const intersects = raycaster.intersectObjects(meshes, false);
           if (intersects.length > 0) {
-            let bestDist = Infinity;
-            const seen = new Set<string>();
             for (const hitItem of intersects) {
               let obj: THREE.Object3D | null = hitItem.object;
               while (obj && (!obj.userData || !obj.userData.starData) && obj.parent) {
                 obj = obj.parent;
               }
               const s = obj?.userData?.starData as StarData | undefined;
-              if (s && !seen.has(s.id)) {
-                seen.add(s.id);
-                const scale = starScales[s.id];
-                if (scale && cameraRef.current) {
-                  const worldPos = new THREE.Vector3(scale.xPos, scale.radius, scale.zPos || 0);
-                  const proj = worldPos.clone().project(cameraRef.current);
-                  if (proj.z >= -1.0 && proj.z <= 1.0) {
-                    const sx = ((proj.x + 1) * 0.5) * rect.width + rect.left;
-                    const sy = ((-proj.y + 1) * 0.5) * rect.height + rect.top;
-                    const dist = Math.hypot(clientX - sx, clientY - sy);
-                    const isDirectPhotosphere = hitItem.object.name.startsWith('Photosphere');
-                    const sizeBonus = Math.min(1.0, Math.max(0.70, scale.radius));
-                    const adjustedDist = (isDirectPhotosphere ? dist * 0.8 : dist) * sizeBonus;
-                    if (adjustedDist < bestDist) {
-                      bestDist = adjustedDist;
-                      hoverStar = s;
-                    }
-                  }
-                }
+              if (s) {
+                hoverStar = s;
+                break;
               }
             }
           }
         }
 
-        // Screen-space proximity fallback for hover over small dwarf stars
-        if (cameraRef.current) {
-          let closestDist = hoverStar ? 12 : 24; // Proximity hover threshold
-          renderedStars.forEach((star) => {
-            const scale = starScales[star.id];
+        // Screen-space proximity fallback for hover over stars (only active when raycast did not directly pierce a star mesh, e.g. for sub-pixel dwarf stars)
+        if (!hoverStar && cameraRef.current) {
+          let closestDist = Infinity;
+          renderedStarsRef.current.forEach((star) => {
+            const scale = starScalesRef.current[star.id];
             if (!scale) return;
             const worldPos = new THREE.Vector3(scale.xPos, scale.radius, scale.zPos || 0);
-            const proj = worldPos.clone().project(cameraRef.current);
+            const edgeWorldPos = new THREE.Vector3(scale.xPos + scale.radius, scale.radius, scale.zPos || 0);
+            const proj = worldPos.clone().project(cameraRef.current!);
+            const projEdge = edgeWorldPos.clone().project(cameraRef.current!);
             if (proj.z >= -1.0 && proj.z <= 1.0) {
               const sx = ((proj.x + 1) * 0.5) * rect.width + rect.left;
               const sy = ((-proj.y + 1) * 0.5) * rect.height + rect.top;
+              const edgeSx = ((projEdge.x + 1) * 0.5) * rect.width + rect.left;
+              const edgeSy = ((-projEdge.y + 1) * 0.5) * rect.height + rect.top;
+              const screenRadiusPx = Math.hypot(edgeSx - sx, edgeSy - sy);
               const dist = Math.hypot(clientX - sx, clientY - sy);
-              const threshold = scale.radius < 0.6 ? 22 : (scale.radius < 1.5 ? 16 : 10);
-              if (dist < threshold && dist < closestDist) {
+              const threshold = Math.max(18, screenRadiusPx + 10);
+              if (dist <= threshold && dist < closestDist) {
                 closestDist = dist;
                 hoverStar = star;
               }
@@ -2281,59 +2123,39 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     let candidateStar: StarData | null = null;
 
     if (intersects.length > 0) {
-      // Find the star whose 2D projected center is closest to the click coordinates,
-      // weighting direct photosphere hits and smaller dwarf stars to prevent larger background meshes from occluding clicks
-      let bestDist = Infinity;
-      const seenStarIds = new Set<string>();
-
       for (const hitItem of intersects) {
         let obj: THREE.Object3D | null = hitItem.object;
         while (obj && (!obj.userData || !obj.userData.starData) && obj.parent) {
           obj = obj.parent;
         }
         const s = obj?.userData?.starData as StarData | undefined;
-        if (s && !seenStarIds.has(s.id)) {
-          seenStarIds.add(s.id);
-          const scale = starScales[s.id];
-          if (scale && cameraRef.current) {
-            const worldPos = new THREE.Vector3(scale.xPos, scale.radius, scale.zPos || 0);
-            const proj = worldPos.clone().project(cameraRef.current);
-            if (proj.z >= -1.0 && proj.z <= 1.0) {
-              const sx = ((proj.x + 1) * 0.5) * rect.width + rect.left;
-              const sy = ((-proj.y + 1) * 0.5) * rect.height + rect.top;
-              const sDist = Math.hypot(e.clientX - sx, e.clientY - sy);
-              
-              const isDirectPhotosphere = hitItem.object.name.startsWith('Photosphere');
-              // Factor star size: smaller stars receive preference when clicking within overlapping areas
-              const sizeBonus = Math.min(1.0, Math.max(0.70, scale.radius));
-              const adjustedDist = (isDirectPhotosphere ? sDist * 0.8 : sDist) * sizeBonus;
-
-              if (adjustedDist < bestDist) {
-                bestDist = adjustedDist;
-                candidateStar = s;
-              }
-            }
-          }
+        if (s) {
+          candidateStar = s;
+          break;
         }
       }
     }
 
     // Screen-space proximity fallback: allows easily tapping/clicking smaller dwarf stars
     // even at high zoom or viewing distances where ray hit precision is sub-pixel
-    if (cameraRef.current) {
-      let closestDist = candidateStar ? 14 : 32; // Generous fallback threshold when clicking
-      renderedStars.forEach((star) => {
-        const scale = starScales[star.id];
+    if (!candidateStar && cameraRef.current) {
+      let closestDist = Infinity;
+      renderedStarsRef.current.forEach((star) => {
+        const scale = starScalesRef.current[star.id] ?? starScales[star.id];
         if (!scale) return;
         const worldPos = new THREE.Vector3(scale.xPos, scale.radius, scale.zPos || 0);
-        const proj = worldPos.clone().project(cameraRef.current);
+        const edgeWorldPos = new THREE.Vector3(scale.xPos + scale.radius, scale.radius, scale.zPos || 0);
+        const proj = worldPos.clone().project(cameraRef.current!);
+        const projEdge = edgeWorldPos.clone().project(cameraRef.current!);
         if (proj.z >= -1.0 && proj.z <= 1.0) {
           const sx = ((proj.x + 1) * 0.5) * rect.width + rect.left;
           const sy = ((-proj.y + 1) * 0.5) * rect.height + rect.top;
+          const edgeSx = ((projEdge.x + 1) * 0.5) * rect.width + rect.left;
+          const edgeSy = ((-projEdge.y + 1) * 0.5) * rect.height + rect.top;
+          const screenRadiusPx = Math.hypot(edgeSx - sx, edgeSy - sy);
           const dist = Math.hypot(e.clientX - sx, e.clientY - sy);
-          // Scale threshold based on star radius: small stars get high priority
-          const threshold = scale.radius < 0.6 ? 28 : (scale.radius < 1.5 ? 20 : 14);
-          if (dist < threshold && dist < closestDist) {
+          const threshold = Math.max(20, screenRadiusPx + 14);
+          if (dist <= threshold && dist < closestDist) {
             closestDist = dist;
             candidateStar = star;
           }
@@ -2684,23 +2506,21 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <button
                 id={isMobile ? "btn-mobile-unfocus-stars" : "btn-unfocus-stars"}
                 onClick={handleUnfocus}
-                title="Unfocus Star (U)"
+                title="Unfocus Star"
                 className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 border border-amber-500/40 text-amber-300 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 <X className="w-3.5 h-3.5 shrink-0" />
                 <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>Unfocus</span>
-                <StageKbd variant="amber">U</StageKbd>
               </button>
             ) : (
               <button
                 id={isMobile ? "btn-mobile-reset-cam" : "btn-reset-cam"}
                 onClick={handleResetCamera}
-                title="Reset Camera (R)"
+                title="Reset Camera"
                 className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5 shrink-0" />
                 <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>Reset</span>
-                <StageKbd variant="cyan">R</StageKbd>
               </button>
             )}
 
@@ -2708,12 +2528,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <button
               id={isMobile ? "btn-mobile-fit-all" : "btn-fit-all"}
               onClick={handleFitAllStars}
-              title="Fit All Stars (A)"
+              title="Fit All Stars"
               className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-mono font-medium transition-all cursor-pointer shadow-sm active:scale-95"
             >
               <Telescope className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>Fit All</span>
-              <StageKbd variant="neutral">A</StageKbd>
             </button>
 
             {/* All-Stars Layout Mode Toggle (Spiral vs Normal) - Available on all devices */}
@@ -2753,7 +2572,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     ? 'Spiral'
                     : 'Grid'}
                 </span>
-                <StageKbd variant={sortKey !== 'size' ? 'cyan' : allStarsLayoutMode === 'spiral' ? 'amber' : 'neutral'} className="hidden lg:inline-flex">L</StageKbd>
               </button>
             )}
 
@@ -2796,7 +2614,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     </span>
                     <div className="flex items-center gap-1.5">
                       {isAutoRotating && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
-                      <StageKbd variant={isAutoRotating ? 'cyan' : 'neutral'} className="hidden lg:inline-flex">S</StageKbd>
                     </div>
                   </button>
 
@@ -2813,7 +2630,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     </span>
                     <div className="flex items-center gap-1.5">
                       {wireframe && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                      <StageKbd variant={wireframe ? 'amber' : 'neutral'} className="hidden lg:inline-flex">W</StageKbd>
                     </div>
                   </button>
 
@@ -2830,7 +2646,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     </span>
                     <div className="flex items-center gap-1.5">
                       {showGrid && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
-                      <StageKbd variant={showGrid ? 'cyan' : 'neutral'} className="hidden lg:inline-flex">G</StageKbd>
                     </div>
                   </button>
 
@@ -2858,7 +2673,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                         <span className="text-[10px] text-slate-400">
                           {sortKey !== 'size' ? 'Grid' : allStarsLayoutMode === 'spiral' ? 'Spiral' : 'Grid'}
                         </span>
-                        <StageKbd variant="neutral" className="hidden lg:inline-flex">L</StageKbd>
                       </div>
                     </button>
                   )}
@@ -2872,7 +2686,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <button
               id={isMobile ? "btn-mobile-toggle-fullscreen" : "btn-toggle-fullscreen"}
               onClick={toggleFullscreen}
-              title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
               className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 isFullscreen 
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.5)]' 
@@ -2885,14 +2699,13 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <Maximize2 className="w-3.5 h-3.5 shrink-0" />
               )}
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isFullscreen ? 'Exit' : 'Full'}</span>
-              <StageKbd variant={isFullscreen ? 'active' : 'cyan'} className="hidden lg:inline-flex">F</StageKbd>
             </button>
 
             {/* Sound Effects Toggle (Mute / Unmute) */}
             <button
               id={isMobile ? "btn-mobile-toggle-sound" : "btn-toggle-sound"}
               onClick={() => soundEffects.toggleSound()}
-              title={isSoundOn ? 'Sound Effects Enabled (M to mute)' : 'Sound Effects Muted (M to unmute)'}
+              title={isSoundOn ? 'Sound Effects Enabled' : 'Sound Effects Muted'}
               aria-label={isSoundOn ? 'Mute Sound Effects' : 'Unmute Sound Effects'}
               className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 isSoundOn 
@@ -2906,20 +2719,18 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <VolumeX className="w-3.5 h-3.5 shrink-0 text-slate-400" />
               )}
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isSoundOn ? 'SFX' : 'Muted'}</span>
-              <StageKbd variant={isSoundOn ? 'cyan' : 'neutral'} className="hidden lg:inline-flex">M</StageKbd>
             </button>
 
-            {/* Keyboard Shortcuts Help - HIDDEN on mobile and tablet */}
-            {!isMobile && (
+            {/* Keyboard Shortcuts Help - Desktop Only, Hidden on Mobile and Tablet */}
+            {!isMobile && !isTabletDevice && (
               <button
                 id="btn-shortcuts-help"
                 onClick={() => setShowShortcutsHelp(true)}
-                title="Keyboard Shortcuts (?)"
-                className={`${isTabletDevice ? 'hidden' : 'hidden lg:flex'} px-2 py-1 rounded-lg text-xs font-mono text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition-colors cursor-pointer items-center gap-1.5`}
+                title="Keyboard Shortcuts"
+                className="hidden lg:flex px-2 py-1 rounded-lg text-xs font-mono text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition-colors cursor-pointer items-center gap-1.5"
               >
                 <Keyboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Keys</span>
-                <StageKbd variant="cyan">?</StageKbd>
+                <span className="hidden sm:inline">Shortcuts</span>
               </button>
             )}
 
@@ -3577,7 +3388,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <button
                   id="btn-stage-canvas-sort-metric"
                   onClick={handleCycleSortMetric}
-                  title="Toggle Sort Metric (O): Size → Distance → Mass → Temperature → Luminosity → Apparent Magnitude"
+                  title="Toggle Sort Metric: Size → Distance → Mass → Temperature → Luminosity → Apparent Magnitude"
                   className="flex items-center gap-1.5 px-3 py-1.5 text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-all cursor-pointer select-none"
                 >
                   <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -3585,7 +3396,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <span className="text-cyan-300 font-bold capitalize">
                     {getSortMetricLabel(sortKey)}
                   </span>
-                  <StageKbd variant="cyan" className="hidden lg:inline-flex">O</StageKbd>
                 </button>
 
                 <div className="w-[1px] h-4 bg-cyan-500/20" />
@@ -3594,13 +3404,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <button
                   id="btn-stage-canvas-sort-direction"
                   onClick={() => onToggleSortDirection && onToggleSortDirection()}
-                  title={`Toggle Sort Order (X): Currently ${sortDirection === 'asc' ? 'Ascending (Smallest / Lowest First)' : 'Descending (Largest / Highest First)'}`}
+                  title={`Toggle Sort Order: Currently ${sortDirection === 'asc' ? 'Ascending (Smallest / Lowest First)' : 'Descending (Largest / Highest First)'}`}
                   className="flex items-center gap-1 px-2.5 py-1.5 text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-all cursor-pointer select-none"
                 >
                   <span className="text-[11px] font-semibold text-cyan-400">
                     {sortDirection === 'asc' ? 'Asc ↑' : 'Desc ↓'}
                   </span>
-                  <StageKbd variant="cyan" className="hidden lg:inline-flex">X</StageKbd>
                 </button>
 
                 <div className="w-[1px] h-4 bg-cyan-500/20" />
@@ -3626,7 +3435,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 >
                   <div className="flex items-center justify-between px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     <span>Sort Metric</span>
-                    <StageKbd variant="cyan">O</StageKbd>
                   </div>
                   <div className="flex flex-col gap-1 mt-1">
                     {[
@@ -3665,7 +3473,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
                   <div className="flex items-center justify-between px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     <span>Sort Order</span>
-                    <StageKbd variant="cyan">X</StageKbd>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-1">
                     <button
@@ -3707,7 +3514,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <button
               id="btn-auto-tour"
               onClick={handleToggleTour}
-              title={isTourPlaying ? 'Pause Auto Tour (T)' : `Play Auto Tour (${sortKey.toUpperCase()} order) (T)`}
+              title={isTourPlaying ? 'Pause Auto Tour' : `Play Auto Tour (${sortKey.toUpperCase()} order)`}
               className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl backdrop-blur-xl border text-xs font-mono font-semibold transition-all cursor-pointer shadow-lg active:scale-95 ${
                 isTourPlaying 
                   ? 'bg-amber-500/20 border-amber-400 text-amber-300 animate-pulse' 
@@ -3716,7 +3523,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             >
               {isTourPlaying ? <Pause className="w-3.5 h-3.5 text-amber-400 shrink-0" /> : <Play className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isTourPlaying ? 'Playing' : 'Auto Tour'}</span>
-              <StageKbd variant={isTourPlaying ? 'amber' : 'cyan'}>T</StageKbd>
             </button>
 
             {/* Tour Pace Dropdown Menu (Short / Medium / Long) */}
@@ -3724,7 +3530,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <button
                 id="btn-tour-pace-dropdown"
                 onClick={() => setIsTourPaceMenuOpen((prev) => !prev)}
-                title="Tour pace per star (P): Short, Medium, Long"
+                title="Tour pace per star: Short, Medium, Long"
                 className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl backdrop-blur-xl border text-xs font-mono transition-all cursor-pointer shadow-lg active:scale-95 ${
                   isTourPaceMenuOpen
                     ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
@@ -3744,7 +3550,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 >
                   <div className="flex items-center justify-between px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     <span>Tour Pace</span>
-                    <StageKbd variant="cyan">P</StageKbd>
                   </div>
                   <div className="flex flex-col gap-1 mt-1">
                     {(['short', 'medium', 'long'] as const).map((len) => (
@@ -3840,25 +3645,23 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <button
                   id="btn-preview-dossier"
                   onClick={() => onInspectStar(activeFocusedStar)}
-                  title="Open Star Dossier (D)"
+                  title="Open Star Dossier"
                   aria-label="Open Star Dossier"
                   className="p-1.5 sm:px-3 sm:py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] sm:text-xs font-mono font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 shrink-0"
                 >
                   <Menu className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden md:inline">Dossier</span>
-                  <span className="hidden lg:inline-flex"><StageKbd variant="cyan">D</StageKbd></span>
                 </button>
               )}
               <button
                 id="btn-preview-unfocus"
                 onClick={handleUnfocus}
                 className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 shrink-0"
-                title="Unfocus Star (U)"
+                title="Unfocus Star"
                 aria-label="Unfocus Star"
               >
                 <X className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden md:inline">Unfocus</span>
-                <span className="hidden lg:inline-flex"><StageKbd variant="amber">U</StageKbd></span>
               </button>
             </div>
           </div>
@@ -3931,13 +3734,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <button
                 id="btn-toggle-hide-controls"
                 onClick={() => setAreControlsHidden(false)}
-                title="Show All Controls (H)"
+                title="Show All Controls"
                 aria-label="Show Controls"
                 className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-1.5 bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.4)] shrink-0 ml-auto"
               >
                 <Eye className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-cyan-400 shrink-0" />
                 <span className="hidden md:inline text-[11px]">Show controls</span>
-                <StageKbd variant="cyan" className="hidden lg:inline-flex">H</StageKbd>
               </button>
             ) : (
               <>
@@ -3946,25 +3748,23 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <button
                     id="btn-nav-first-star"
                     onClick={handlePanToSmallest}
-                    title={`First Star (#1: ${sortedStars[0]?.name || 'First'}) (1)`}
+                    title={`First Star (#1: ${sortedStars[0]?.name || 'First'})`}
                     aria-label="First Star (#1)"
                     className={`${isPresetSearchActive ? 'hidden md:flex' : 'flex'} px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer items-center justify-center gap-1 text-[10px] sm:text-xs font-semibold shrink-0`}
                   >
                     <span className={isTabletDevice ? 'inline font-bold' : 'lg:hidden font-bold'}>#1</span>
                     <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>First (#1)</span>
-                    <StageKbd variant="cyan" className={isTabletDevice ? 'hidden' : 'hidden lg:inline-flex'}>1</StageKbd>
                   </button>
 
                   <button
                     id="btn-nav-prev-star"
                     onClick={handlePrevStar}
-                    title="Previous Star (←)"
+                    title="Previous Star"
                     aria-label="Previous Star"
                     className="p-1 sm:px-2 sm:py-1 rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer flex items-center justify-center gap-1"
                   >
                     <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
                     <span className="hidden md:inline text-[11px] font-mono font-semibold">Prev</span>
-                    <StageKbd variant="cyan" className={isTabletDevice ? 'hidden' : 'hidden lg:inline-flex'}>←</StageKbd>
                   </button>
 
                   <span className="text-[10px] sm:text-xs font-mono px-1 sm:px-2 text-cyan-300 font-bold border-x border-cyan-500/30 shrink-0">
@@ -3974,25 +3774,23 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <button
                     id="btn-nav-next-star"
                     onClick={handleNextStar}
-                    title="Next Star (→)"
+                    title="Next Star"
                     aria-label="Next Star"
                     className="p-1 sm:px-2 sm:py-1 rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer flex items-center justify-center gap-1"
                   >
                     <span className="hidden md:inline text-[11px] font-mono font-semibold">Next</span>
                     <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-                    <StageKbd variant="cyan" className={isTabletDevice ? 'hidden' : 'hidden lg:inline-flex'}>→</StageKbd>
                   </button>
 
                   <button
                     id="btn-nav-last-star"
                     onClick={handlePanToLargest}
-                    title={`Last Star (#${sortedStars.length}: ${sortedStars[sortedStars.length - 1]?.name || 'Last'}) (9)`}
+                    title={`Last Star (#${sortedStars.length}: ${sortedStars[sortedStars.length - 1]?.name || 'Last'})`}
                     aria-label={`Last Star (#${sortedStars.length})`}
                     className={`${isPresetSearchActive ? 'hidden md:flex' : 'flex'} px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-slate-300 hover:text-amber-300 hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer items-center justify-center gap-1 text-[10px] sm:text-xs font-semibold shrink-0`}
                   >
                     <span className={isTabletDevice ? 'inline font-bold' : 'lg:hidden font-bold'}>#{sortedStars.length}</span>
                     <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>Last (#{sortedStars.length})</span>
-                    <StageKbd variant="cyan" className={isTabletDevice ? 'hidden' : 'hidden lg:inline-flex'}>9</StageKbd>
                   </button>
                 </div>
 
@@ -4067,7 +3865,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                         id="btn-mobile-search-stars"
                         onClick={() => setIsPresetSearchActive(true)}
                         className="flex items-center gap-1 px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 shrink-0 bg-[#040816]/95 border-cyan-500/35 text-slate-200 hover:text-white hover:border-cyan-400"
-                        title={`Search Stars in Preset (${sortedStars.length}) (B)`}
+                        title={`Search Stars in Preset (${sortedStars.length})`}
                         aria-label={`Search Stars in Preset (${sortedStars.length})`}
                       >
                         <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -4085,13 +3883,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                           value={presetSearchQuery}
                           onChange={(e) => setPresetSearchQuery(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
+                            if ((e.key === 'b' || e.key === 'B' || e.key === 'c' || e.key === 'C') && (e.altKey || e.ctrlKey || e.metaKey)) {
+                              e.preventDefault();
                               e.stopPropagation();
-                              if (presetSearchQuery) {
-                                setPresetSearchQuery('');
-                              } else {
-                                setIsPresetSearchActive(false);
-                              }
+                              setIsPresetSearchActive(false);
+                              setPresetSearchQuery('');
                             } else if (e.key === 'Enter') {
                               e.stopPropagation();
                               if (filteredPresetStars.length > 0) {
@@ -4124,7 +3920,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                           className="p-0.5 text-cyan-400 hover:text-white shrink-0 cursor-pointer"
                           aria-label="Close search"
                         >
-                          <ChevronDown className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
@@ -4274,12 +4070,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                         id="btn-toggle-search-stars"
                         onClick={() => setIsPresetSearchActive(true)}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 bg-[#040816]/90 hover:bg-[#091330] border-cyan-500/30 text-slate-200 hover:text-white hover:border-cyan-400 shrink-0"
-                        title={`Search Stars in Preset (${sortedStars.length}) (B)`}
+                        title={`Search Stars in Preset (${sortedStars.length})`}
                         aria-label={`Search Stars in Preset (${sortedStars.length})`}
                       >
                         <Search className="w-3.5 h-3.5 text-cyan-400" />
                         <span>Search stars ({sortedStars.length})</span>
-                        <StageKbd variant="cyan">B</StageKbd>
                       </button>
                     ) : (
                       <div
@@ -4293,13 +4088,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                           value={presetSearchQuery}
                           onChange={(e) => setPresetSearchQuery(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
+                            if ((e.key === 'b' || e.key === 'B' || e.key === 'c' || e.key === 'C') && (e.altKey || e.ctrlKey || e.metaKey)) {
+                              e.preventDefault();
                               e.stopPropagation();
-                              if (presetSearchQuery) {
-                                setPresetSearchQuery('');
-                              } else {
-                                setIsPresetSearchActive(false);
-                              }
+                              setIsPresetSearchActive(false);
+                              setPresetSearchQuery('');
                             } else if (e.key === 'Enter') {
                               e.stopPropagation();
                               if (filteredPresetStars.length > 0) {
@@ -4333,73 +4126,40 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                             setIsPresetSearchActive(false);
                             setPresetSearchQuery('');
                           }}
-                          title="Close search (Esc)"
+                          title="Close search (Alt+B)"
                           className="flex items-center gap-1 text-slate-400 hover:text-white shrink-0 cursor-pointer pl-1 border-l border-cyan-500/30"
                           aria-label="Close search"
                         >
-                          <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />
-                          <StageKbd variant="cyan" className="text-[9px]">Esc</StageKbd>
+                          <X className="w-3.5 h-3.5 text-cyan-400 hover:text-white" />
+                          <span className="text-[10px] font-mono text-cyan-300">Close</span>
                         </button>
                       </div>
                     )}
 
-                    <div className="bg-[#040816]/90 backdrop-blur-xl px-3.5 py-1.5 rounded-xl border border-cyan-500/20 text-[11px] text-slate-400 font-mono hidden xl:flex items-center gap-3 shrink-0">
-                      <div className="flex items-center gap-1.5">
-                        <div className="flex gap-0.5">
-                          <StageKbd variant="cyan">←</StageKbd>
-                          <StageKbd variant="cyan">→</StageKbd>
-                        </div>
-                        <span>Step</span>
-                      </div>
-                      <span className="text-cyan-500/30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <div className="flex gap-0.5">
-                          <StageKbd variant="cyan">1</StageKbd>
-                          <StageKbd variant="cyan">9</StageKbd>
-                        </div>
-                        <span>#1/#N</span>
-                      </div>
-                      <span className="text-cyan-500/30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <StageKbd variant="amber">U</StageKbd>
-                        <span>Unfocus</span>
-                      </div>
-                      <span className="text-cyan-500/30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <StageKbd variant="cyan">F</StageKbd>
-                        <span>Full</span>
-                      </div>
-                      <span className="text-cyan-500/30">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <StageKbd variant="cyan">H</StageKbd>
-                        <span>Hide</span>
-                      </div>
-                    </div>
-
-                    <button
-                      id="btn-open-shortcuts-help"
-                      onClick={() => setShowShortcutsHelp(true)}
-                      title="Keyboard Shortcuts (?)"
-                      className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#040816]/90 hover:bg-cyan-950/50 border border-cyan-500/30 hover:border-cyan-400 text-xs font-mono text-cyan-300 hover:text-white backdrop-blur-xl transition-all cursor-pointer shadow-md"
-                    >
-                      <Keyboard className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Shortcuts</span>
-                      <StageKbd variant="cyan">?</StageKbd>
-                    </button>
+                    {!isMobile && !isTabletDevice && (
+                      <button
+                        id="btn-open-shortcuts-help"
+                        onClick={() => setShowShortcutsHelp(true)}
+                        title="Keyboard Shortcuts"
+                        className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#040816]/90 hover:bg-cyan-950/50 border border-cyan-500/30 hover:border-cyan-400 text-xs font-mono text-cyan-300 hover:text-white backdrop-blur-xl transition-all cursor-pointer shadow-md"
+                      >
+                        <Keyboard className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Shortcuts</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Hide controls button (Always rightmost: after more controls on mobile, after shortcuts on desktop) */}
-                  {/* On mobile: shown ONLY as icon. On desktop: icon + text + shortcut badge */}
+                  {/* On mobile: shown ONLY as icon. On desktop: icon + text */}
                   <button
                     id="btn-toggle-hide-controls"
                     onClick={() => setAreControlsHidden(true)}
-                    title="Hide Controls (H)"
+                    title="Hide Controls"
                     aria-label="Hide Controls"
                     className="p-1 sm:p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-1.5 bg-[#040816]/90 hover:bg-[#091330] border-cyan-500/30 text-slate-300 hover:text-white hover:border-cyan-400 shrink-0"
                   >
                     <EyeOff className="w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 text-slate-400 hover:text-cyan-300 shrink-0" />
                     <span className="hidden md:inline text-[11px]">Hide controls</span>
-                    <StageKbd variant="neutral" className="hidden lg:inline-flex">H</StageKbd>
                   </button>
                 </div>
               </>
@@ -4507,7 +4267,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <StageKbd variant="cyan">E</StageKbd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Search Stars / Show List</span>
+                  <span className="text-slate-300">Open Star Search (Close with Alt+B / ✕)</span>
                   <StageKbd variant="cyan">B</StageKbd>
                 </div>
                 <div className="flex items-center justify-between">
@@ -4556,7 +4316,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <div className="flex items-center justify-between pt-2 border-t border-cyan-500/20 text-[11px] text-slate-400 font-mono">
               <span className="flex items-center gap-1.5">
                 <StageKbd variant="neutral">Esc</StageKbd>
-                <span>exits fullscreen mode cleanly.</span>
+                <span>exits fullscreen mode cleanly (does not close star search).</span>
               </span>
               <button
                 onClick={() => setShowShortcutsHelp(false)}

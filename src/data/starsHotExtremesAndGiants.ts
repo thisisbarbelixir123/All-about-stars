@@ -398,56 +398,11 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
     description: 'The massive O8I blue supergiant primary of the legendary Plaskett’s Star binary system in Monoceros.'
   }),
 
-  // 10. Theta-1 Orionis C
-  makeStar({
-    id: 'theta1-orionis-c',
-    name: 'Theta-1 Orionis C',
-    alternateNames: ['Trapezium Star C', 'HD 37022', 'HIP 26221', 'HR 1895'],
-    bayerDesignation: 'θ¹ Ori C',
-    constellation: 'Orion',
-    diameterSolar: 10.6,
-    temperature: 39000,
-    spectralType: 'O7Vp',
-    spectralClass: 'O',
-    luminositySolar: 204000,
-    massSolar: 33.0,
-    estimatedAge: '~2.5 Million Years',
-    estimatedAgeMyr: 2.5,
-    metallicityFeH: 0.0,
-    rotationalVelocityKmS: 30,
-    distanceLy: 1344,
-    apparentMagnitude: 5.13,
-    absoluteMagnitude: -3.98,
-    surfaceGravityLogG: 4.1,
-    colorHex: '#8ac4ff',
-    coronaColorHex: '#bde0ff',
-    solarEngulfment: 'Spans roughly 14.76 Million km (~0.099 AU diameter)!',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 390, outer: 610 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      candidateCount: 0,
-      systemOverview: 'The primary ionizing engine of the Trapezium Cluster in the heart of the Great Orion Nebula (M42).',
-      planets: []
-    },
-    stellarStage: 'Main Sequence Dwarf',
-    lifespanEstimate: '< 4 Million Years Remaining',
-    futureFate: 'Type II Supernova / Neutron Star',
-    fusionProcess: 'Core CNO Hydrogen Fusion',
-    notableFacts: [
-      'The brightest and most massive star in the Trapezium cluster at the center of the Orion Nebula (M42).',
-      'Emits over 90% of the ionizing ultraviolet radiation that causes the entire Orion Nebula to glow with vibrant color.',
-      'Possesses an enormous 1,100 Gauss surface magnetic field that channels its supersonic stellar wind into complex X-ray magnetospheres.'
-    ],
-    description: 'The searing 39,000 K O-type star that illuminates and ionizes the entire Great Orion Nebula.'
-  }),
-
   // 11. Regor A (Gamma-2 Velorum A)
   makeStar({
     id: 'regor',
     name: 'Regor A (Gamma-2 Velorum A)',
-    alternateNames: ['Gamma-2 Velorum A', 'Suhail al-Muhlif A', 'Spectral Gem Primary', 'HD 68273 A', 'HIP 39953 A', 'WR 11'],
+    alternateNames: ['Gamma-2 Velorum', 'Gamma-2 Velorum A', 'γ² Vel', 'γ² Vel A', 'Suhail al-Muhlif', 'Suhail al-Muhlif A', 'Spectral Gem Primary', 'HD 68273', 'HD 68273 A', 'HIP 39953', 'HIP 39953 A', 'WR 11'],
     bayerDesignation: 'γ² Vel A',
     constellation: 'Vela',
     diameterSolar: 6.0,
@@ -486,51 +441,6 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
       'Named "Regor" ("Roger" spelled backwards) by Apollo 1 astronaut Gus Grissom in honor of crewmate Roger Chaffee.'
     ],
     description: 'The closest Wolf-Rayet star to Earth at 57,000 K, the WC8 carbon-sequence primary of Gamma-2 Velorum.'
-  }),
-
-  // 12. Mizar A (Zeta Ursae Majoris A)
-  makeStar({
-    id: 'mizar-a',
-    name: 'Mizar A (Zeta Ursae Majoris)',
-    alternateNames: ['HD 116656', 'HIP 65378', 'HR 5054', 'The Horse'],
-    bayerDesignation: 'ζ UMa A',
-    constellation: 'Ursa Major',
-    diameterSolar: 2.4,
-    temperature: 9000,
-    spectralType: 'A2V',
-    spectralClass: 'A',
-    luminositySolar: 33.3,
-    massSolar: 2.22,
-    estimatedAge: '~378 Million Years',
-    estimatedAgeMyr: 378,
-    metallicityFeH: 0.0,
-    rotationalVelocityKmS: 38,
-    distanceLy: 82.9,
-    apparentMagnitude: 2.23,
-    absoluteMagnitude: 0.20,
-    surfaceGravityLogG: 4.1,
-    colorHex: '#e0ecff',
-    coronaColorHex: '#f5f9ff',
-    solarEngulfment: 'Spans roughly 3.34 Million km (~0.022 AU diameter)!',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 5.0, outer: 7.8 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      candidateCount: 0,
-      systemOverview: 'Historic quadruple star system at the bend of the Big Dipper handle; paired with Alcor in a 6-star gravitational family.',
-      planets: []
-    },
-    stellarStage: 'Main Sequence Dwarf',
-    lifespanEstimate: '~1 Billion Years',
-    futureFate: 'Red Giant / White Dwarf',
-    fusionProcess: 'Core CNO Hydrogen Fusion',
-    notableFacts: [
-      'The historic first telescopic binary star ever discovered (by Benedetto Castelli and Galileo Galilei in 1617).',
-      'The historic first spectroscopic binary star ever discovered (by Antonia Maury and Edward Pickering in 1889).',
-      'Forms the famous ancient naked-eye eyesight test with companion star Alcor.'
-    ],
-    description: 'The famous star at the bend of the Big Dipper handle, the first telescopic binary discovered in history.'
   }),
 
   // 13. Alcor (80 Ursae Majoris)
@@ -837,7 +747,7 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
       hasExoplanets: false,
       confirmedCount: 0,
       candidateCount: 0,
-      systemOverview: 'Yellow giant companion orbiting Capella Aa in a 104-day orbit separated by only ~110 million km.',
+      systemOverview: 'Hotter yellow giant companion orbiting orange giant Capella Aa in a 104-day orbit separated by only ~110 million km.',
       planets: []
     },
     stellarStage: 'Red Giant',
@@ -846,10 +756,10 @@ export const STARS_HOT_EXTREMES_AND_GIANTS: StarData[] = [
     fusionProcess: 'Core Helium Fusion (Hertzsprung Gap Giant)',
     notableFacts: [
       'The secondary yellow giant in the quadruplet Capella system, currently traversing the Hertzsprung Gap.',
-      'Orbits giant Capella Aa in just 104 days at a distance comparable to Earth and the Sun.',
+      'Orbits orange giant Capella Aa in just 104 days at a distance comparable to Earth and the Sun.',
       'Fast rotator (36 km/s) driving powerful magnetic coronal activity and X-ray emission.'
     ],
-    description: 'The second yellow giant in the Capella quadruple system in Auriga, glowing at 5,700 K.'
+    description: 'The smaller, hotter yellow giant secondary in the Capella quadruple system in Auriga, glowing at 5,700 K.'
   }),
 
   // 20a. Capella H (Alpha Aurigae H / GJ 195 A)

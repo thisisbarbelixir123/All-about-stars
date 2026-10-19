@@ -2235,7 +2235,7 @@ export const STARS_REMAINING_MAIN_M_TO_Z: StarData[] = [
   makeStar({
     id: "alsephina",
     name: "Alsephina",
-    alternateNames: ["Delta Velorum","δ Vel","HD 74956","HIP 42913","HR 3485"],
+    alternateNames: ["Delta Velorum", "Delta Velorum A", "δ Vel", "δ Vel A", "Koo She", "HD 74956", "HIP 42913", "HR 3485"],
     bayerDesignation: "δ Vel",
     constellation: "Vela",
     diameterSolar: 2.9,

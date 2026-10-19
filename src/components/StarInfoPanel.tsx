@@ -2,7 +2,7 @@ import React from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { Menu, Plus, Check, X } from 'lucide-react';
-import { StageKbd } from './StarCanvas3D';
+
 
 export interface StarInfoPanelProps {
   star: StarData | null;
@@ -195,7 +195,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
           >
             <X className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 md:hidden" />
             <span className="hidden md:inline">Unfocus</span>
-            <StageKbd variant="amber" className="hidden lg:inline-flex">U</StageKbd>
+
           </button>
         )}
       </div>

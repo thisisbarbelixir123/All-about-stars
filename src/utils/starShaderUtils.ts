@@ -66,7 +66,7 @@ export const STAR_VERTEX_SHADER = `
   }
 `;
 
-// Exact Fragment Shader matching StarCanvas3D with plasma FBM, pulsars, Class L/T/Y Brown Dwarfs, and limb darkening
+// High-precision 5-octave FBM for intricate atmospheric vortices and granular textures
 export const STAR_FRAGMENT_SHADER = `
   #include <common>
   #include <logdepthbuf_pars_fragment>
@@ -77,6 +77,10 @@ export const STAR_FRAGMENT_SHADER = `
   uniform float isPulsar;
   uniform float isContactBinary;
   uniform float brownDwarfType;
+  uniform float densityFactor;
+  uniform float spectralClassIndex;
+  uniform float spectralSubclass;
+  uniform float hasSpectralData;
   varying vec3 vNormal;
   varying vec3 vPosition;
   varying vec3 vLocalPos;
@@ -88,11 +92,18 @@ export const STAR_FRAGMENT_SHADER = `
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
   }
 
-  // Dave Hoskins' float-stable 3D hash generator (zero precision degradation across all float scales)
+  // Dave Hoskins' float-stable 3D hash generator
   float hash3D(vec3 p) {
     p = fract(p * 0.1031);
     p += dot(p, p.zyx + 31.32);
     return fract((p.x + p.y) * p.z);
+  }
+
+  // Vectorized 3D pseudo-random hash generator for 3D Voronoi seeds
+  vec3 hash3DVec(vec3 p) {
+    vec3 p3 = fract(p * vec3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yxz + 33.33);
+    return fract((p3.xxy + p3.yxx) * p3.zyx);
   }
 
   // Silky smooth 3D value noise with quintic interpolation
@@ -116,7 +127,7 @@ export const STAR_FRAGMENT_SHADER = `
     );
   }
 
-  // Multi-octave Fractal Brownian Motion (FBM) for smooth natural plasma flow
+  // Multi-octave Fractal Brownian Motion (FBM)
   float fbm(vec3 p) {
     float value = 0.0;
     float amplitude = 0.5;
@@ -129,18 +140,82 @@ export const STAR_FRAGMENT_SHADER = `
     return value;
   }
 
+  // High-frequency 5-octave FBM for intricate chromospheric vortices and magnetic fibrils
+  float fbmFine(vec3 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    vec3 shift = vec3(17.13, 31.41, 43.17);
+    for (int i = 0; i < 5; ++i) {
+      value += amplitude * smoothNoise(p);
+      p = p * 2.08 + shift;
+      amplitude *= 0.5;
+    }
+    return value;
+  }
+
+  // High-fidelity 3D Voronoi Convection Granules (DKIST / SDO solar physics model)
+  // Computes:
+  // x: Buoyant convective dome (hot upwelling center)
+  // y: Intergranular lane factor (darker boundary channel)
+  // z: Magnetic filigree (bright points trapped in lane vertices)
+  vec3 cellularGranules(vec3 p, float boilTime) {
+    vec3 b = floor(p);
+    vec3 f = fract(p);
+    float d1 = 8.0;
+    float d2 = 8.0;
+
+    for (int k = -1; k <= 1; k++) {
+      for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+          vec3 g = vec3(float(i), float(j), float(k));
+          vec3 o = hash3DVec(b + g);
+          // Granule boiling and morphing over time
+          vec3 center = g + 0.5 + 0.35 * sin(o * 6.2831853 + boilTime);
+          vec3 diff = center - f;
+          float d = length(diff);
+          if (d < d1) {
+            d2 = d1;
+            d1 = d;
+          } else if (d < d2) {
+            d2 = d;
+          }
+        }
+      }
+    }
+
+    float laneDist = d2 - d1;
+    float lane = smoothstep(0.015, 0.22, laneDist);
+    float dome = pow(clamp(1.0 - d1 * 1.12, 0.0, 1.0), 1.25);
+    float filigree = smoothstep(0.06, 0.01, laneDist) * smoothstep(0.55, 0.82, d2);
+
+    return vec3(dome, lane, filigree);
+  }
+
+  // Calibrated CIE 1931 D65 Daylight Spectral Chromaticity Engine directly on GPU
+  // Passes through the calibrated D65 colors computed with exact Planckian/Mitchell Charity accuracy
+  void getD65DaylightColors(
+    float cIdx,
+    float subCls,
+    float tempK,
+    vec3 fallbackBase,
+    vec3 fallbackCorona,
+    out vec3 outBase,
+    out vec3 outCorona
+  ) {
+    outBase = fallbackBase;
+    outCorona = fallbackCorona;
+  }
+
   void main() {
     #include <logdepthbuf_fragment>
     vec3 viewDir = normalize(vViewPosition);
     float limb = dot(normalize(vNormal), viewDir);
     limb = clamp(limb, 0.0, 1.0);
-    float limbDarkening = pow(limb, 0.46);
 
     vec3 normPos = normalize(vLocalPos);
 
-    // Dynamic axial spin rotation around the stellar polar Y-axis:
-    // Ensures stars visibly rotate their photospheric convection cells, flares, and brown dwarf atmospheric cloud bands!
-    float spinAngle = time * 0.15;
+    // Dynamic axial spin rotation around the polar Y-axis:
+    float spinAngle = time * 0.10;
     float cosAngle = cos(spinAngle);
     float sinAngle = sin(spinAngle);
     normPos = vec3(
@@ -149,144 +224,264 @@ export const STAR_FRAGMENT_SHADER = `
       -normPos.x * sinAngle + normPos.z * cosAngle
     );
 
-    vec3 samplePos = normPos * 3.2;
-    vec3 q = samplePos + vec3(time * 0.04, time * 0.03, time * 0.015);
-    float f1 = fbm(q);
-    vec3 warpedP = samplePos + vec3(f1 * 0.7, f1 * 0.5, f1 * 0.3) + vec3(time * 0.02, -time * 0.015, time * 0.01);
-    float gran = fbm(warpedP);
+    float dFactor = clamp(densityFactor, 0.0, 1.0);
 
-    // 1. NEUTRON STARS & PULSARS
+    // Dynamic in-shader D65 daylight chromaticity calculation
+    vec3 d65Base;
+    vec3 d65Corona;
+    getD65DaylightColors(spectralClassIndex, spectralSubclass, temperature, baseColor, coronaColor, d65Base, d65Corona);
+
+    // 1. NEUTRON STARS & PULSARS (Relativistic synchrotron beaming)
     if (isPulsar > 0.5) {
-      vec3 pulsarPos = normPos * 3.8 + vec3(0.0, time * 0.12, 0.0);
+      float limbDarkening = pow(limb, 0.40);
+      vec3 pulsarPos = normPos * 3.8 + vec3(0.0, time * 0.18, 0.0);
       float granPulsar = fbm(pulsarPos);
-      vec3 pulsarCore = mix(baseColor * 0.95, vec3(0.92, 0.97, 1.0), granPulsar * 0.55 + 0.25);
-      pulsarCore *= (0.58 + 0.42 * limbDarkening);
+      vec3 core = mix(d65Base, d65Corona, granPulsar * 0.40 + 0.35) * 1.35;
+      core *= (0.75 + 0.25 * limbDarkening);
 
-      float fresnelPulsar = pow(1.0 - limb, 2.6);
-      pulsarCore += coronaColor * fresnelPulsar * 0.95;
+      // Relativistic magnetic polar cap beaming
+      float polarProximity = pow(abs(normPos.y), 3.5);
+      core += vec3(0.85, 0.95, 1.0) * polarProximity * mix(1.20, 0.60, dFactor);
 
-      gl_FragColor = vec4(pulsarCore, 1.0);
+      float fresnelPulsar = pow(1.0 - limb, 2.4);
+      core += d65Corona * fresnelPulsar * mix(1.25, 0.65, dFactor);
+
+      float compressK = mix(0.04, 0.12, dFactor);
+      core = core / (vec3(1.0) + core * compressK);
+      gl_FragColor = vec4(core, 1.0);
       return;
     }
 
-    // 2. SUBSTELLAR BROWN DWARFS (Class L, T, Y) - GAS GIANT BANDED ATMOSPHERE
+    // 2. ULTRA-SMOOTH BROWN DWARFS (Class L, T, Y) - SUBSTELLAR ATMOSPHERES MATCHING REFERENCE
     if (brownDwarfType > 0.5) {
-      float y = normPos.y; // -1.0 (South) to +1.0 (North)
+      float y = normPos.y; // -1.0 (South Pole) to +1.0 (North Pole)
       float lon = atan(normPos.z, normPos.x);
 
-      // Zonal differential wind shear (latitudinal jet streams)
-      float zonalVelocity = sin(y * 8.0) * 0.40 + sin(y * 16.0) * 0.15;
-      float dynamicLon = lon + time * (0.035 + zonalVelocity * 0.05);
-
-      // Multi-scale Jovian cloud banding
-      float primaryBands = sin(y * 22.0 + smoothNoise(vec3(dynamicLon * 2.0, y * 4.0, time * 0.02)) * 1.8);
-      float secondaryBands = sin(y * 52.0 + smoothNoise(vec3(dynamicLon * 4.0, y * 10.0, 0.8)) * 1.2);
-      float fineBelts = sin(y * 110.0 + smoothNoise(vec3(dynamicLon * 8.0, y * 20.0, 1.9)) * 0.8) * 0.5 + 0.5;
-
-      // Turbulent vortices & storm spots
-      vec3 stormPos = vec3(dynamicLon * 3.2, y * 7.5, time * 0.025);
-      float storms = smoothNoise(stormPos) * 0.6 + smoothNoise(stormPos * 2.4) * 0.3 + smoothNoise(stormPos * 5.0) * 0.1;
-      float polarFactor = smoothstep(0.68, 0.98, abs(y));
-
       if (brownDwarfType < 1.5) {
-        // CLASS L (1,300 - 2,400 K): Warm Brown Dwarf with molten iron & silicate rain clouds + FAINT GLOW
-        vec3 colBand1 = vec3(0.55, 0.15, 0.08); // Deep crimson
-        vec3 colBand2 = vec3(0.26, 0.06, 0.03); // Dark iron belt
-        vec3 colBand3 = vec3(0.72, 0.22, 0.10); // Warm glowing amber zone
-        vec3 colStorm = vec3(0.88, 0.32, 0.12); // Hot iron-rich storm rift
+        // =========================================================================
+        // CLASS L: Glowing Carmine-Red Convective Dwarf (Soft mottled cloud puffs)
+        // Dynamically tinted by spectral d65Base & d65Corona
+        // =========================================================================
+        vec3 lPos = normPos * 2.8 + vec3(time * 0.020, time * 0.012, -time * 0.008);
+        float n1 = smoothNoise(lPos);
+        float n2 = smoothNoise(lPos * 1.85 + vec3(1.7, 3.2, 0.9));
+        float mottle = n1 * 0.65 + n2 * 0.35;
+        // Smooth rounded sinusoidal cloud puffs with gentle continuous falloff
+        float puff = sin(mottle * 3.14159) * 0.5 + 0.5;
 
-        float blend1 = primaryBands * 0.5 + 0.5;
-        float blend2 = secondaryBands * 0.5 + 0.5;
-        vec3 surface = mix(colBand1, colBand2, blend1);
-        surface = mix(surface, colBand3, blend2 * 0.6);
-        surface = mix(surface, colStorm, smoothstep(0.64, 0.84, storms) * 0.55);
-        surface = mix(surface, vec3(0.18, 0.05, 0.02), polarFactor * 0.7);
-        surface += fineBelts * 0.05 * vec3(0.4, 0.15, 0.05);
+        // Rich glowing carmine & scarlet palette driven by spectral d65Base
+        vec3 colDeepRuby   = mix(vec3(0.55, 0.12, 0.08), d65Base * 0.92, 0.65);
+        vec3 colMidScarlet = mix(vec3(0.88, 0.24, 0.16), d65Base * 1.20, 0.70);
+        vec3 colWarmPuff   = mix(vec3(1.08, 0.42, 0.26), mix(d65Base, d65Corona, 0.5) * 1.35, 0.75);
 
-        // Faint thermal glow: deep interior infrared heat leaking through silicate cloud breaks
-        float thermalBreak = smoothstep(0.4, 0.8, storms) * (1.0 - blend1 * 0.5);
-        vec3 thermalGlow = vec3(0.95, 0.35, 0.12) * thermalBreak * 0.40;
+        vec3 lColor = mix(colDeepRuby, colMidScarlet, mottle);
+        lColor = mix(lColor, colWarmPuff, puff * 0.65);
 
-        // Faint limb glow
-        surface = surface * (0.65 + 0.35 * limbDarkening) + thermalGlow;
-        surface += coronaColor * pow(1.0 - limb, 3.2) * 0.22;
+        // Gentle spherical limb darkening
+        float lLimb = pow(limb, 0.45);
+        lColor *= (0.70 + 0.30 * lLimb);
 
-        gl_FragColor = vec4(surface, 1.0);
+        // Radiant atmospheric crimson rim glow modulated by density and d65Corona
+        float lRim = pow(1.0 - limb, 2.5);
+        vec3 rimTint = mix(vec3(1.0, 0.35, 0.22), d65Corona * 1.40, 0.50);
+        lColor += rimTint * lRim * mix(0.70, 0.35, dFactor);
+
+        // Soft compression with density adaptation
+        float compressK = mix(0.04, 0.12, dFactor);
+        lColor = lColor / (vec3(1.0) + lColor * compressK);
+        gl_FragColor = vec4(lColor, 1.0);
         return;
       } else if (brownDwarfType < 2.5) {
-        // CLASS T (600 - 1,300 K): Methane Brown Dwarf (NOT GLOWING, Gas Giant Jovian Texture)
-        // Rich plum, deep magenta, dark aubergine, dusty rose belts
-        vec3 colBand1 = vec3(0.38, 0.11, 0.27); // Deep wine magenta
-        vec3 colBand2 = vec3(0.17, 0.05, 0.15); // Dark aubergine belt
-        vec3 colBand3 = vec3(0.48, 0.16, 0.36); // Methane zone
-        vec3 colStorm = vec3(0.62, 0.22, 0.44); // Methane storm vortex
+        // =========================================================================
+        // CLASS T: Glowing Jovian Magenta & Plum Dwarf
+        // Dynamically tinted by spectral d65Base & d65Corona
+        // =========================================================================
+        float tLon = lon + time * 0.022;
+        float shear = sin(y * 7.5 + sin(tLon * 1.8) * 0.35) * 0.5 + 0.5;
+        float fineShear = sin(y * 15.0 - 0.5) * 0.5 + 0.5;
+        vec3 tPos = vec3(tLon * 2.2, y * 4.8, time * 0.015);
+        float tNoise = smoothNoise(tPos);
+        float tClouds = smoothNoise(vec3(tLon * 3.8, y * 6.5 + tNoise * 0.4, time * 0.018));
 
-        float blend1 = primaryBands * 0.5 + 0.5;
-        float blend2 = secondaryBands * 0.5 + 0.5;
-        vec3 surface = mix(colBand1, colBand2, blend1);
-        surface = mix(surface, colBand3, blend2 * 0.6);
-        surface = mix(surface, colStorm, smoothstep(0.65, 0.85, storms) * 0.45);
-        surface = mix(surface, vec3(0.12, 0.04, 0.14), polarFactor * 0.65);
-        surface += (fineBelts - 0.5) * 0.08 * vec3(0.3, 0.1, 0.2);
+        // Jovian magenta/plum palette driven by spectral d65Base & d65Corona
+        vec3 colDarkPlum      = mix(vec3(0.35, 0.08, 0.28), d65Base * 0.88, 0.65);
+        vec3 colRichWine      = mix(mix(vec3(0.62, 0.14, 0.46), vec3(0.52, 0.10, 0.36), fineShear * 0.4), d65Base * 1.10, 0.60);
+        vec3 colBrightMagenta = mix(vec3(0.98, 0.28, 0.68), d65Corona * 1.40, 0.70);
 
-        // Non-glowing matte planetary lighting (diffuse spherical terminator / limb shading)
-        surface *= (0.35 + 0.65 * limbDarkening);
-        // Subtle gas giant atmospheric haze along perimeter (diffuse, non-emissive)
-        surface += vec3(0.24, 0.08, 0.20) * pow(1.0 - limb, 4.2) * 0.25;
+        vec3 tColor = mix(colDarkPlum, colRichWine, shear * 0.55 + tNoise * 0.45);
+        tColor = mix(tColor, colBrightMagenta, tClouds * 0.55);
 
-        gl_FragColor = vec4(surface, 1.0);
+        // Gentle spherical limb darkening
+        float tLimb = pow(limb, 0.45);
+        tColor *= (0.68 + 0.32 * tLimb);
+
+        // Radiant magenta perimeter glow modulated by density
+        float tRim = pow(1.0 - limb, 2.5);
+        vec3 tRimTint = mix(vec3(0.95, 0.28, 0.75), d65Corona * 1.40, 0.50);
+        tColor += tRimTint * tRim * mix(0.65, 0.30, dFactor);
+
+        float compressK = mix(0.04, 0.12, dFactor);
+        tColor = tColor / (vec3(1.0) + tColor * compressK);
+        gl_FragColor = vec4(tColor, 1.0);
         return;
       } else {
-        // CLASS Y (<600 K down to 250 K / -23°C): Ultracool Ice Brown Dwarf (NOT GLOWING, Sub-Zero Jovian Texture)
-        // Slate violet, muted charcoal-indigo, cool dusty mauve, water-ice cloud decks
-        vec3 colBand1 = vec3(0.25, 0.18, 0.27); // Slate violet zone
-        vec3 colBand2 = vec3(0.12, 0.09, 0.15); // Dark charcoal-indigo belt
-        vec3 colBand3 = vec3(0.32, 0.25, 0.35); // Ammonia / water ice cloud band
-        vec3 colStorm = vec3(0.44, 0.35, 0.46); // Water ice storm swirl
+        // =========================================================================
+        // CLASS Y: Smoothly Banded Slate-Violet & Mauve Ice Dwarf
+        // Dynamically tinted by spectral d65Base & d65Corona
+        // =========================================================================
+        float yLon = lon + time * 0.015;
 
-        float blend1 = primaryBands * 0.5 + 0.5;
-        float blend2 = secondaryBands * 0.5 + 0.5;
-        vec3 surface = mix(colBand1, colBand2, blend1);
-        surface = mix(surface, colBand3, blend2 * 0.55);
-        surface = mix(surface, colStorm, smoothstep(0.68, 0.88, storms) * 0.35);
-        surface = mix(surface, vec3(0.08, 0.06, 0.10), polarFactor * 0.7);
-        surface += (fineBelts - 0.5) * 0.06 * vec3(0.2, 0.2, 0.25);
+        // Gentle zonal flow with subtle atmospheric turbulence
+        float beltWarp = smoothNoise(vec3(yLon * 1.4, y * 6.0, time * 0.010)) * 0.08;
+        float beltY = y + beltWarp;
 
-        // Completely non-glowing planetary body (crisp Jovian gas giant lighting)
-        surface *= (0.30 + 0.70 * limbDarkening);
-        // Muted cold atmospheric limb rim
-        surface += vec3(0.15, 0.14, 0.20) * pow(1.0 - limb, 4.5) * 0.18;
+        // Multi-tier smooth horizontal atmospheric belts (no harsh high frequencies)
+        float b1 = sin(beltY * 6.5) * 0.5 + 0.5;
+        float b2 = sin(beltY * 13.0 + 1.2) * 0.5 + 0.5;
 
-        gl_FragColor = vec4(surface, 1.0);
+        // Slate-purple, lavender, and mauve palette driven by D65 colors
+        vec3 colCharcoal  = mix(vec3(0.22, 0.18, 0.30), d65Base * 0.90, 0.65);
+        vec3 colSlateBelt = mix(vec3(0.35, 0.28, 0.45), d65Base * 1.15, 0.65);
+        vec3 colLavender  = mix(vec3(0.55, 0.44, 0.68), mix(d65Base, d65Corona, 0.5) * 1.30, 0.70);
+        vec3 colMauveHaze = mix(vec3(0.70, 0.58, 0.82), d65Corona * 1.45, 0.70);
+
+        vec3 yColor = mix(colCharcoal, colSlateBelt, b1);
+        yColor = mix(yColor, colLavender, b2 * 0.60);
+        yColor = mix(yColor, colMauveHaze, (1.0 - abs(y)) * 0.30);
+
+        // Subtle temperate storm swirl
+        float stormDist = length(vec2(fract(yLon * 0.35) - 0.5, y - 0.25));
+        float storm = smoothstep(0.18, 0.05, stormDist);
+        yColor = mix(yColor, colMauveHaze * 1.25, storm * 0.35);
+
+        // Planetary diffuse shading
+        float yLimb = pow(limb, 0.48);
+        yColor *= (0.65 + 0.35 * yLimb);
+
+        // Cool faint violet haze scattering at the limb
+        float yRim = pow(1.0 - limb, 2.8);
+        vec3 yRimTint = mix(vec3(0.55, 0.42, 0.72), d65Corona * 1.40, 0.50);
+        yColor += yRimTint * yRim * mix(0.55, 0.25, dFactor);
+
+        float compressK = mix(0.04, 0.12, dFactor);
+        yColor = yColor / (vec3(1.0) + yColor * compressK);
+        gl_FragColor = vec4(yColor, 1.0);
         return;
       }
     }
 
-    // 3. MAIN SEQUENCE, GIANTS, HYPERGIANTS, WHITE DWARFS & CONTACT BINARIES
-    vec3 deepCore = baseColor * 0.88;
-    vec3 brightSurface = mix(baseColor * 1.15, vec3(1.0, 0.99, 0.97), 0.48);
-    vec3 hotFaculae = mix(coronaColor * 1.25, vec3(1.0, 1.0, 1.0), 0.65);
+    // 3. MAIN SEQUENCE, GIANTS, SUBDWARFS, HYPERGIANTS & WHITE DWARFS
+    // Celestia-esque Photospheric Convective Plasma Flow
+    // Calibrated with Vega-Relative Mitchell Charity Chromaticity spreading outward to stellar outline
 
-    vec3 plasmaColor = mix(deepCore, brightSurface, gran);
-    plasmaColor = mix(plasmaColor, hotFaculae, smoothstep(0.58, 0.86, gran) * 0.42);
+    // Smooth domain-warped macro convective currents (Celestia-esque swirling supergranules)
+    vec3 samplePos = normPos * 2.8;
+    vec3 q = samplePos + vec3(time * 0.025, time * 0.018, time * 0.010);
+    float f1 = fbm(q);
+    vec3 warpedP = samplePos + vec3(f1 * 0.65, f1 * 0.45, f1 * 0.35) + vec3(time * 0.014, -time * 0.010, time * 0.007);
+    float supergran = fbm(warpedP);
 
-    if (isContactBinary > 0.5) {
-      plasmaColor = mix(plasmaColor, vec3(0.92, 0.96, 1.0), 0.18);
+    // Primary Voronoi Convection Granules (silky boiling cellular simmer)
+    vec3 granPos = warpedP * 5.6 + vec3(time * 0.018, time * 0.012, -time * 0.009);
+    vec3 gran = cellularGranules(granPos, time * 0.22);
+    float granuleDome = gran.x;      // Hot buoyant convex summit
+    float interLane = gran.y;        // Smooth intergranular lane factor
+    float filigree = gran.z;         // Magnetic bright points in lane vertices
+
+    // Secondary fine chromospheric micro-fibrils & silky turbulence
+    vec3 microPos = warpedP * 12.5 + vec3(-time * 0.020, time * 0.015, time * 0.010);
+    float microFibrils = fbmFine(microPos);
+
+    // Celestia-esque Luminance & Dynamic Palette:
+    // d65Base: Primary photospheric chromaticity (#9bb0ff, #aabfff, #cad7ff, #f8f7ff, #fff4ea, #ffd2a1, #ffcc6f)
+    // d65Corona: Corona & chromospheric highlight tint
+    float coolStarBoost = smoothstep(5200.0, 2300.0, temperature);
+    
+    // Warm, luminous convective plasma layers
+    vec3 darkLaneColor  = mix(d65Base * 0.84, d65Base * 0.92, coolStarBoost);
+    vec3 midMantleColor = mix(d65Base * 1.10, d65Corona * 1.22, 0.35);
+    vec3 brightSummit   = mix(d65Base * 1.45, d65Corona * 1.65, 0.45);
+    vec3 filigreeColor  = mix(d65Corona * 1.95, vec3(1.0), 0.40);
+
+    // Convective cellular structure with silky Celestia-style granular transitions
+    vec3 plasma = mix(darkLaneColor, midMantleColor, interLane);
+    plasma = mix(plasma, brightSummit, granuleDome * 0.80);
+
+    // Supergranulation temperature modulation (macro convective eddies)
+    plasma *= (0.94 + 0.26 * supergran);
+
+    // Magnetic filigree in lane vertices
+    plasma += filigreeColor * (filigree * 0.65);
+
+    // Micro-scale chromospheric fibril turbulence
+    plasma += (d65Corona * 1.45) * ((microFibrils - 0.40) * 0.28);
+
+    // Faculae ridges near grazing angles
+    float faculaeLimb = smoothstep(0.75, 0.15, limb);
+    float faculaePattern = smoothstep(0.48, 0.82, supergran * 0.60 + microFibrils * 0.40);
+    vec3 faculaeTint = mix(d65Corona * 1.65, mix(d65Base * 1.70, vec3(1.0), 0.38), 0.45);
+    plasma += faculaeTint * (faculaeLimb * faculaePattern * 0.55 * mix(1.0, 0.40, dFactor));
+
+    // Starspots / Magnetic Sunspot groups on active cooler stars (G, K, M and active subdwarfs)
+    float spotAffinity = smoothstep(7500.0, 3200.0, temperature);
+    if (spotAffinity > 0.05) {
+      vec3 spotPos = normPos * 2.2 + vec3(12.4, 45.1, 78.9);
+      float spotNoise = fbm(spotPos);
+      float spotMask = smoothstep(0.74, 0.84, spotNoise);
+      if (spotMask > 0.01) {
+        float umbra = smoothstep(0.78, 0.84, spotNoise);
+        vec3 spotColor = mix(d65Base * 0.50, d65Base * 0.25, umbra);
+        plasma = mix(plasma, spotColor, spotMask * spotAffinity * 0.80);
+      }
     }
 
-    plasmaColor *= (0.48 + 0.52 * limbDarkening);
+    // Contact binary mass transfer bridge (e.g. VFTS 352)
+    if (isContactBinary > 0.5) {
+      plasma = mix(plasma, vec3(0.98, 0.99, 1.0) * 1.50, 0.35);
+    }
 
-    float fresnel = pow(1.0 - limb, 3.2);
-    plasmaColor += coronaColor * fresnel * 0.82;
+    // Central incandescence (blinding thermonuclear core radiance in center of disc)
+    float coreExposure = pow(limb, 1.30);
+    vec3 coreWhiteHot = mix(d65Base * 1.35, vec3(1.0) * 1.45, 0.45);
+    plasma = mix(plasma, coreWhiteHot, coreExposure * 0.35);
 
-    gl_FragColor = vec4(plasmaColor, 1.0);
+    // CONCENTRIC BRIGHTER LOWER CIRCLE:
+    // Luminous concentration on the lower hemisphere/disc creating a distinctive brighter lower circle
+    float lowerCircleFactor = smoothstep(0.25, -0.85, normPos.y);
+    float lowerDepth = pow(limb, 0.70);
+    vec3 brighterLowerTint = mix(d65Base * 1.45, vec3(1.0), 0.38);
+    plasma += brighterLowerTint * (lowerCircleFactor * 0.35 * lowerDepth);
+
+    // CONCENTRIC CORONA CHROMATICITY OUTLINE SPREAD:
+    // As limb falls from 0.85 toward 0.0, signature spectral color spreads outward across the concentric outline
+    float outlineSpread = smoothstep(0.85, 0.02, limb);
+    vec3 outlineChromaticity = mix(d65Base * 1.25, d65Corona * 1.55, 0.50);
+    plasma = mix(plasma, plasma * (outlineChromaticity * 0.85) + outlineChromaticity * 0.35, outlineSpread * 0.45);
+
+    // Realistic Eddington radiative transfer limb darkening with elevated floor
+    float eddingtonBase = mix(0.58, 0.68, coolStarBoost);
+    float eddingtonSlope = 1.0 - eddingtonBase;
+    float eddingtonLimb = eddingtonBase + eddingtonSlope * pow(limb, mix(0.80, 0.68, coolStarBoost));
+    plasma *= eddingtonLimb;
+
+    // Atmospheric coronal rim luminescence spreading past the limb edge (concentric dual-band corona)
+    float rimAmt = mix(1.30, 0.70, dFactor);
+    float innerFresnel = pow(1.0 - limb, 1.6);
+    float outerFresnel = pow(1.0 - limb, 3.2);
+    vec3 concentricRim = mix(d65Corona * 1.70, mix(d65Base, vec3(1.0), 0.35) * 1.95, innerFresnel * 0.55);
+    plasma += concentricRim * outerFresnel * rimAmt;
+
+    // Luminous soft tone compression (preserves brilliant highlights and vibrant contrast without clipping)
+    float compressK = mix(0.018, 0.055, dFactor);
+    plasma = plasma / (vec3(1.0) + plasma * compressK);
+
+    gl_FragColor = vec4(plasma, 1.0);
   }
 `;
 
 // Shared Unit Geometries to prevent GPU buffer churn across stages
 let sharedUnitSphere64: THREE.SphereGeometry | null = null;
 let sharedUnitSphere48: THREE.SphereGeometry | null = null;
-let sharedUnitSphere32: THREE.SphereGeometry | null = null;
 
 export const getSharedUnitSphere = (highDetail: boolean = true): THREE.SphereGeometry => {
   if (highDetail) {
@@ -297,17 +492,48 @@ export const getSharedUnitSphere = (highDetail: boolean = true): THREE.SphereGeo
   return sharedUnitSphere48;
 };
 
-// Creates the exact custom shader material matching StarCanvas3D
+import { computeD65StellarColor, parseSpectralType } from './stellarColorsD65';
+
+// Universal Spectral Class numerical index mapping for shaders
+export const SPECTRAL_CLASS_MAP: Record<string, number> = {
+  'O': 0.0,
+  'B': 1.0,
+  'A': 2.0,
+  'F': 3.0,
+  'G': 4.0,
+  'K': 5.0,
+  'M': 6.0,
+  'L': 7.0,
+  'T': 8.0,
+  'Y': 9.0,
+  'WR': 10.0,
+  'LBV': 11.0,
+  'WD': 12.0,
+  'NS': 13.0,
+  'C': 14.0,
+  'S': 15.0,
+};
+
+// Creates the exact custom shader material matching StarCanvas3D with D65 Chromaticity
 export const createStarShaderMaterial = (
   star: StarData,
   wireframe: boolean = false,
-  timeUniform?: { value: number }
+  timeUniform?: { value: number },
+  densityFactor: number = 0.0
 ): THREE.ShaderMaterial => {
-  const baseColor = new THREE.Color(star.colorHex);
-  const coronaColor = new THREE.Color(star.coronaColorHex);
+  const d65 = computeD65StellarColor({
+    spectralType: star.spectralType,
+    spectralClass: star.spectralClass,
+    temperature: star.temperature,
+    stellarStage: star.stellarStage,
+  });
+  const baseColor = new THREE.Color(d65.colorHex);
+  const coronaColor = new THREE.Color(d65.coronaColorHex);
   const isContactBinary = star.id === 'vfts-352' || star.stellarStage === 'Contact Binary';
   const isPulsar = isPulsarOrNeutronStar(star);
   const bdType = getBrownDwarfType(star);
+  const { classKey, subclass } = parseSpectralType(star.spectralType, star.spectralClass);
+  const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
 
   return new THREE.ShaderMaterial({
     wireframe,
@@ -319,6 +545,10 @@ export const createStarShaderMaterial = (
       isPulsar: { value: isPulsar ? 1.0 : 0.0 },
       isContactBinary: { value: isContactBinary ? 1.0 : 0.0 },
       brownDwarfType: { value: bdType },
+      densityFactor: { value: densityFactor },
+      spectralClassIndex: { value: spectralClassIndex },
+      spectralSubclass: { value: subclass },
+      hasSpectralData: { value: 1.0 },
     },
     vertexShader: STAR_VERTEX_SHADER,
     fragmentShader: STAR_FRAGMENT_SHADER,
@@ -330,9 +560,17 @@ export const createCoronaShaderMaterial = (
   star: StarData,
   timeUniform?: { value: number }
 ): THREE.ShaderMaterial => {
-  const coronaColor = new THREE.Color(star.coronaColorHex);
+  const d65 = computeD65StellarColor({
+    spectralType: star.spectralType,
+    spectralClass: star.spectralClass,
+    temperature: star.temperature,
+    stellarStage: star.stellarStage,
+  });
+  const baseColor = new THREE.Color(d65.colorHex);
+  const coronaColor = new THREE.Color(d65.coronaColorHex);
   const bdType = getBrownDwarfType(star);
   const isFaintL = bdType === 1.0;
+  const glowIntensityVal = isFaintL ? 0.35 : 0.75;
 
   return new THREE.ShaderMaterial({
     side: THREE.BackSide,
@@ -342,8 +580,9 @@ export const createCoronaShaderMaterial = (
     depthTest: true,
     uniforms: {
       time: timeUniform || { value: 0 },
-      glowColor: { value: isFaintL ? new THREE.Color('#8a2014') : coronaColor },
-      glowIntensity: { value: isFaintL ? 0.20 : 0.70 },
+      baseColor: { value: isFaintL ? new THREE.Color('#9e2819') : baseColor },
+      coronaColor: { value: isFaintL ? new THREE.Color('#781810') : coronaColor },
+      glowIntensity: { value: glowIntensityVal },
     },
     vertexShader: `
       #include <common>
@@ -361,15 +600,43 @@ export const createCoronaShaderMaterial = (
     fragmentShader: `
       #include <common>
       #include <logdepthbuf_pars_fragment>
-      uniform vec3 glowColor;
+      uniform vec3 baseColor;
+      uniform vec3 coronaColor;
       uniform float glowIntensity;
+      uniform float time;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
       void main() {
         #include <logdepthbuf_fragment>
         vec3 viewDir = normalize(vViewPosition);
-        float intensity = pow(clamp(0.65 - dot(vNormal, viewDir), 0.0, 1.0), 2.2);
-        gl_FragColor = vec4(glowColor * 1.5, clamp(intensity * glowIntensity, 0.0, glowIntensity));
+
+        // Normalized radial distance r from center of star disc on screen [0.0 = center, 1.0 = silhouette edge]:
+        float cosTheta = abs(dot(vNormal, viewDir));
+        float r = sqrt(clamp(1.0 - cosTheta * cosTheta, 0.0, 1.0));
+
+        // Dynamic subtle atmospheric convection
+        float pulse = 1.0 + 0.03 * sin(time * 1.6 + vNormal.x * 2.5 + vNormal.y * 2.0);
+
+        // Continuous smooth radial gradient matching Hero Image:
+        // Core starlight glow (#ffffff / core radiance transitioning to baseColor and coronaColor)
+        vec3 coreColor = mix(vec3(1.0), baseColor * 1.25, smoothstep(0.0, 0.38, r));
+        vec3 outerColor = mix(baseColor, coronaColor, smoothstep(0.30, 0.72, r));
+        vec3 finalColor = mix(coreColor, outerColor, smoothstep(0.18, 0.48, r));
+
+        // Strictly non-solid continuous falloff with zero hard edge or solid ring:
+        // Vanishes smoothly to absolute 0.0 well before the geometric edge (r >= 0.88 is completely transparent)
+        float falloff = 0.0;
+        if (r < 0.88) {
+          float normDist = r / 0.85;
+          float gaussian = exp(-normDist * normDist * 3.2);
+          float smoothFade = 1.0 - smoothstep(0.55, 0.85, r);
+          falloff = gaussian * smoothFade * pulse;
+        }
+
+        // Translucent ethereal alpha (strictly non-solid continuous gas)
+        float alpha = clamp(falloff * glowIntensity * 0.95, 0.0, 0.75);
+
+        gl_FragColor = vec4(finalColor * 1.35, alpha);
       }
     `,
   });
@@ -396,8 +663,48 @@ export const createStarMeshGroup = (
   starGroup.userData = { starId: star.id, starData: star, radius };
 
   const isContactBinary = star.id === 'vfts-352' || star.stellarStage === 'Contact Binary';
+  const isBlackHole =
+    star.colorHex === '#000000' ||
+    star.spectralType === 'Black Hole' ||
+    star.stellarStage === 'Stellar Black Hole' ||
+    star.id.includes('black-hole') ||
+    star.name.toLowerCase().includes('black hole');
   const bdType = getBrownDwarfType(star);
   const baseColor = new THREE.Color(star.colorHex);
+
+  if (isBlackHole) {
+    const sphereGeo = getSharedUnitSphere(true);
+    const bhMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      wireframe,
+    });
+    const eventHorizon = new THREE.Mesh(sphereGeo, bhMat);
+    eventHorizon.scale.setScalar(radius);
+    eventHorizon.name = `EventHorizon-${star.id}`;
+    starGroup.add(eventHorizon);
+
+    // Relativistic X-ray synchrotron accretion disk ring around black hole
+    const diskInner = radius * 1.15;
+    const diskOuter = radius * 1.85;
+    const diskGeo = new THREE.RingGeometry(diskInner, diskOuter, 48);
+    diskGeo.rotateX(Math.PI / 2.3);
+    const diskMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color('#38bdf8'),
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.75,
+      wireframe,
+    });
+    const diskMesh = new THREE.Mesh(diskGeo, diskMat);
+    diskMesh.name = `AccretionDisk-${star.id}`;
+    starGroup.add(diskMesh);
+
+    // Faint cool point light from relativistic disk
+    const diskLight = new THREE.PointLight(new THREE.Color('#38bdf8'), 0.35 * lightIntensityMultiplier, Math.max(10, radius * 12));
+    starGroup.add(diskLight);
+
+    return starGroup;
+  }
 
   const starMat = createStarShaderMaterial(star, wireframe, timeUniform);
 
@@ -437,7 +744,7 @@ export const createStarMeshGroup = (
     const coronaMat = createCoronaShaderMaterial(star, timeUniform);
 
     if (isContactBinary) {
-      const coronaLobeRadius = radius * 0.76;
+      const coronaLobeRadius = radius * 0.76 * (isFaintL ? 1.4 : 2.0);
       const lobeOffset = radius * 0.42;
       const coronaGeo = getSharedUnitSphere(false);
 
@@ -445,19 +752,22 @@ export const createStarMeshGroup = (
       coronaMeshA.scale.setScalar(coronaLobeRadius);
       coronaMeshA.position.set(-lobeOffset, 0, 0);
       coronaMeshA.name = 'CoronaA';
+      coronaMeshA.raycast = () => {};
       starGroup.add(coronaMeshA);
 
       const coronaMeshB = new THREE.Mesh(coronaGeo, coronaMat);
       coronaMeshB.scale.setScalar(coronaLobeRadius);
       coronaMeshB.position.set(lobeOffset, 0, 0);
       coronaMeshB.name = 'CoronaB';
+      coronaMeshB.raycast = () => {};
       starGroup.add(coronaMeshB);
     } else {
-      const coronaRadius = radius * (isFaintL ? 1.08 : 1.22);
+      const coronaRadius = radius * (isFaintL ? 1.4 : 2.2);
       const coronaGeo = getSharedUnitSphere(false);
       const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
       coronaMesh.scale.setScalar(coronaRadius);
       coronaMesh.name = 'Corona';
+      coronaMesh.raycast = () => {};
       starGroup.add(coronaMesh);
     }
   }

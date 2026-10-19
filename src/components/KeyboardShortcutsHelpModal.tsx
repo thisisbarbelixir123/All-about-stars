@@ -30,7 +30,8 @@ export const KeyboardShortcutsHelpModal: React.FC<KeyboardShortcutsHelpModalProp
         { key: 'M', desc: 'Toggle Ambient Cosmic Space Audio' },
         { key: 'C', desc: 'Toggle Star Comparison Dock' },
         { key: '?', desc: 'Show this Keyboard Shortcuts cheat-sheet' },
-        { key: 'ESC', desc: 'Close any active modal or palette' },
+        { key: 'Alt+B / ⌘K', desc: 'Close star search features' },
+        { key: 'ESC', desc: 'Close star dossier or modal sheets' },
       ],
     },
     {

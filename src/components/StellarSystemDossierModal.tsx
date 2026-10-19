@@ -12,10 +12,9 @@ import {
   Clock, 
   Thermometer, 
   Atom, 
-  Info,
-  ChevronDown
+  Info
 } from 'lucide-react';
-import { MultipleStarSystemData, MULTIPLE_STAR_SYSTEMS, getEffectiveStarCount } from '../data/multipleStarSystemsData';
+import { MultipleStarSystemData, getEffectiveStarCount } from '../data/multipleStarSystemsData';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { StellarSystem3DStage } from './StellarSystem3DStage';
@@ -85,10 +84,10 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
         systemOverview: `Part of the ${system.name} gravitationally bound system.`,
         planets: []
       },
-      stellarStage: 'Main Sequence Dwarf',
-      lifespanEstimate: '~1 Billion Years',
-      futureFate: comp.isCompactRemnant ? 'Degenerate Cooling Remnant' : 'Red Giant / White Dwarf',
-      fusionProcess: comp.isCompactRemnant ? 'None (Degenerate Electron Core)' : 'Core Hydrogen Fusion',
+      stellarStage: comp.isBlackHole ? 'Stellar Black Hole' : comp.isCompactRemnant ? 'White Dwarf' : 'Main Sequence Dwarf',
+      lifespanEstimate: comp.isBlackHole ? '10^68 Years (Hawking Evaporation)' : '~1 Billion Years',
+      futureFate: comp.isBlackHole ? 'Hawking Evaporation' : comp.isCompactRemnant ? 'Degenerate Cooling Remnant' : 'Red Giant / White Dwarf',
+      fusionProcess: comp.isBlackHole ? 'None (Relativistic Infall & Accretion)' : comp.isCompactRemnant ? 'None (Degenerate Electron Core)' : 'Core Hydrogen Fusion',
       notableFacts: [
         `Member of the ${system.name}.`,
         comp.description
@@ -139,27 +138,6 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                 <h1 className="text-base sm:text-xl lg:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                   <span>{system.name}</span>
                 </h1>
-
-                {/* System Switcher Dropdown */}
-                {onSelectSystem && (
-                  <div className="relative inline-block">
-                    <select
-                      value={system.id}
-                      onChange={(e) => {
-                        const target = MULTIPLE_STAR_SYSTEMS.find((s) => s.id === e.target.value);
-                        if (target) onSelectSystem(target);
-                      }}
-                      className="text-xs font-mono bg-purple-950/60 hover:bg-purple-900/80 text-purple-200 border border-purple-500/40 rounded-lg px-2 py-0.5 cursor-pointer outline-none transition-colors"
-                      title="Switch to another multiple star system"
-                    >
-                      {MULTIPLE_STAR_SYSTEMS.map((s) => (
-                        <option key={s.id} value={s.id} className="bg-[#090620] text-slate-200">
-                          {s.name} ({s.components.length} stars)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
               </div>
 
               <p className="text-[10px] sm:text-xs text-purple-200/70 font-mono mt-0.5 flex flex-wrap items-center gap-x-2">
@@ -175,14 +153,17 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               </p>
             </div>
 
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="p-1.5 sm:p-2 rounded-xl bg-black/60 hover:bg-purple-900/40 text-slate-400 hover:text-white border border-purple-500/30 transition-all cursor-pointer shrink-0"
-              title="Close Stellar System Dossier"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Close Control */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={onClose}
+                className="p-1.5 sm:p-2 rounded-xl bg-black/60 hover:bg-purple-900/40 text-slate-400 hover:text-white border border-purple-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
+                title="Close Stellar System Dossier"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -282,15 +263,16 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                         {/* Glow accent */}
                         <div 
                           className="absolute -right-8 -top-8 w-28 h-28 rounded-full blur-2xl opacity-15 pointer-events-none"
-                          style={{ backgroundColor: comp.colorHex }}
+                          style={{ backgroundColor: comp.colorHex === '#000000' ? '#1e293b' : comp.colorHex }}
                         />
 
                         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <span 
-                                className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                                className="w-3 h-3 rounded-full shrink-0 shadow-sm border border-slate-500/80 ring-1 ring-slate-700/60"
                                 style={{ backgroundColor: comp.colorHex }}
+                                title={`${comp.name} (${comp.spectralType})`}
                               />
                               <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-purple-200 transition-colors">
                                 {comp.name}
@@ -302,11 +284,19 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                               )}
                               <span 
                                 className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border"
-                                style={{
-                                  backgroundColor: `${comp.colorHex}20`,
-                                  borderColor: `${comp.colorHex}60`,
-                                  color: comp.colorHex,
-                                }}
+                                style={
+                                  comp.colorHex === '#000000' || comp.isBlackHole
+                                    ? {
+                                        backgroundColor: '#000000',
+                                        borderColor: '#475569',
+                                        color: '#cbd5e1',
+                                      }
+                                    : {
+                                        backgroundColor: `${comp.colorHex}20`,
+                                        borderColor: `${comp.colorHex}60`,
+                                        color: comp.colorHex,
+                                      }
+                                }
                               >
                                 {comp.spectralType}
                               </span>

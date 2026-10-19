@@ -69,11 +69,8 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
   totalMatches,
   onOpenClassificationGuide,
 }) => {
-  // Mobile-first expandable state: collapsed by default on mobile (< 768px), expanded on desktop
-  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') return window.innerWidth >= 768;
-    return true;
-  });
+  // Advanced search/filter panel is collapsed by default across all devices
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const activeFiltersCount = 
     filterState.spectralClasses.length +

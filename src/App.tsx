@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { StarData, FilterState, SpectralClass, StellarStage, PresetComparison, StageSortKey, SortDirection } from './types';
-import { STARS_CATALOG, PRESET_COMPARISONS } from './data/stars';
+import { STARS_CATALOG, PRESET_COMPARISONS, resolveStarId } from './data/stars';
 import { MULTIPLE_STAR_SYSTEMS } from './data/multipleStarSystemsData';
 import { formatPhysicalDiameter } from './utils/formatters';
 import { DIAMETER_MIN, DIAMETER_MAX, DISTANCE_MIN, DISTANCE_MAX } from './utils/stellarCatalogFilters';
@@ -169,12 +169,8 @@ export default function App() {
       const target = e.target as HTMLElement | null;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
-      // Escape always closes topmost modal
+      // Escape closes topmost modal (star search is re-mapped away from Esc)
       if (e.key === 'Escape') {
-        if (isCommandPaletteOpen) {
-          setIsCommandPaletteOpen(false);
-          return;
-        }
         if (isShortcutsHelpOpen) {
           setIsShortcutsHelpOpen(false);
           return;
@@ -347,8 +343,6 @@ export default function App() {
 
   const [isMobile, setIsMobile] = useState<boolean>(checkIsPhone);
   const [isTablet, setIsTablet] = useState<boolean>(checkIsTablet);
-  // Expandable/contractable catalog overview panel (collapsed by default on mobile)
-  const [isCatalogOverviewExpanded, setIsCatalogOverviewExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -474,50 +468,22 @@ export default function App() {
       }
     });
 
+    // Deduplicate result by canonical ID so duplicate stars can never appear in the catalogue
+    const seenCatalogIds = new Set<string>();
+    result = result.filter((star) => {
+      const canonicalId = resolveStarId(star.id);
+      if (seenCatalogIds.has(canonicalId)) return false;
+      seenCatalogIds.add(canonicalId);
+      return true;
+    });
+
     return result;
   }, [filterState]);
 
-  // Dynamic comparison grid rows adjusted after combined star diameter count per row
-  const [isDiameterWeightedGrid, setIsDiameterWeightedGrid] = useState<boolean>(false);
-
-  // Multi-column catalog density mode: default across mobile, tablet, and desktop modes (can be more than two columns)
-  const [catalogColumnLayout, setCatalogColumnLayout] = useState<'multi' | '2-col' | '3-col' | '4-col'>('multi');
-
-  const isCompleteCatalog = filteredStars.length >= 100;
-  const isNonSizeSort = !(filterState.sortBy === 'diameter-desc' || filterState.sortBy === 'diameter-asc');
-
-  const diameterGroupedRows = useMemo(() => {
-    const rows: Array<{ stars: StarData[]; totalDiameterSolar: number }> = [];
-    let currentStars: StarData[] = [];
-    let currentTotalD = 0;
-    // In complete catalog mode outside of size sorting, when the row stars' total diameter
-    // exceeds 16,000 solar diameters, it switches into another row.
-    const MAX_DIAMETER_BUDGET = 16000;
-    const MIN_STARS_PER_ROW = 1;
-
-    filteredStars.forEach((star) => {
-      const starWeight = star.diameterSolar;
-      if (
-        currentStars.length >= MIN_STARS_PER_ROW &&
-        currentTotalD + starWeight > MAX_DIAMETER_BUDGET
-      ) {
-        rows.push({ stars: currentStars, totalDiameterSolar: currentTotalD });
-        currentStars = [star];
-        currentTotalD = starWeight;
-      } else {
-        currentStars.push(star);
-        currentTotalD += starWeight;
-      }
-    });
-    if (currentStars.length > 0) {
-      rows.push({ stars: currentStars, totalDiameterSolar: currentTotalD });
-    }
-    return rows;
-  }, [filteredStars]);
-
   // Handler to add star to comparison
   const handleAddStarToCompare = (star: StarData) => {
-    if (selectedStars.some((s) => s.id === star.id)) return;
+    const starCanonical = resolveStarId(star.id);
+    if (selectedStars.some((s) => s.id === star.id || resolveStarId(s.id) === starCanonical)) return;
     if (selectedStars.length >= 6) {
       // Replace oldest non-focused star
       const next = [...selectedStars.slice(1), star];
@@ -550,9 +516,18 @@ export default function App() {
   const handleSelectPreset = (presetId: string) => {
     const preset = allPresets.find((p) => p.id === presetId);
     if (!preset) return;
-    const stars = preset.starIds
-      .map((id) => STARS_CATALOG.find((s) => s.id === id))
-      .filter(Boolean) as StarData[];
+    const seenIds = new Set<string>();
+    const stars: StarData[] = [];
+    for (const rawId of preset.starIds) {
+      const canonicalId = resolveStarId(rawId);
+      if (seenIds.has(canonicalId)) continue;
+      const star = STARS_CATALOG.find((s) => s.id === canonicalId || s.id === rawId);
+      if (star) {
+        seenIds.add(canonicalId);
+        seenIds.add(star.id);
+        stars.push(star);
+      }
+    }
     setSelectedStars(stars);
     setActivePresetId(presetId);
     setFocusedStar(null);
@@ -830,17 +805,19 @@ export default function App() {
             {/* PWA Install */}
             <PWAInstallButton />
 
-            {/* Keyboard Shortcuts Help */}
-            <button
-              type="button"
-              id="btn-topbar-shortcuts"
-              onClick={() => setIsShortcutsHelpOpen(true)}
-              title="Keyboard Shortcuts (?)"
-              className="p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent hover:border-cyan-500/30 transition-all cursor-pointer"
-              aria-label="Keyboard Shortcuts"
-            >
-              <Keyboard className="w-4 h-4" />
-            </button>
+            {/* Keyboard Shortcuts Help - Desktop Only, Hidden on Tablet & Mobile */}
+            {!isMobile && !isTablet && (
+              <button
+                type="button"
+                id="btn-topbar-shortcuts"
+                onClick={() => setIsShortcutsHelpOpen(true)}
+                title="Keyboard Shortcuts"
+                className="hidden lg:block p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent hover:border-cyan-500/30 transition-all cursor-pointer"
+                aria-label="Keyboard Shortcuts"
+              >
+                <Keyboard className="w-4 h-4" />
+              </button>
+            )}
 
             {/* Fullscreen Page Toggle */}
             <button
@@ -1058,7 +1035,7 @@ export default function App() {
                       setActiveOverlay('catalog');
                     }}
                     className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'catalog' && catalogSubTab === 'stars'
+                      activeOverlay === 'catalog' || activeOverlay === 'stellar-systems'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
@@ -1068,36 +1045,10 @@ export default function App() {
                     <span>Stellar Catalog</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                        activeOverlay === 'catalog' && catalogSubTab === 'stars' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-800 text-cyan-300'
+                        activeOverlay === 'catalog' || activeOverlay === 'stellar-systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-800 text-cyan-300'
                       }`}
                     >
                       {STARS_CATALOG.length}
-                    </span>
-                  </button>
-
-                  <button
-                    id="overlay-tab-stellar-systems"
-                    onClick={() => {
-                      setCatalogSubTab('systems');
-                      setActiveOverlay('catalog');
-                    }}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'catalog' && catalogSubTab === 'systems'
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)]'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
-                    title="Stellar System Catalog (Multi-Star Systems Registry)"
-                  >
-                    <Share2 className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-purple-400" />
-                    <span>Stellar Systems</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                        activeOverlay === 'catalog' && catalogSubTab === 'systems'
-                          ? 'bg-purple-950 text-purple-200 font-bold'
-                          : 'bg-purple-950/60 text-purple-300'
-                      }`}
-                    >
-                      14
                     </span>
                   </button>
 
@@ -1178,7 +1129,11 @@ export default function App() {
 
             {/* Overlay Scrollable Body */}
             <div className={`flex-1 overflow-y-auto overflow-x-hidden ${
-              activeOverlay === 'hr-diagram' ? 'px-0.5 py-1 sm:p-5 lg:p-6' : 'p-4 sm:p-6 lg:p-8'
+              activeOverlay === 'hr-diagram'
+                ? 'px-0.5 py-1 sm:p-5 lg:p-6'
+                : activeOverlay === 'catalog' || activeOverlay === 'stellar-systems'
+                ? 'px-2 py-3 sm:p-5 lg:p-6'
+                : 'p-4 sm:p-6 lg:p-8'
             } scrollbar-thin`}>
               {activeOverlay === 'catalog' && (
                 <div className="flex flex-col gap-5 sm:gap-6 max-w-7xl mx-auto">
@@ -1186,21 +1141,11 @@ export default function App() {
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
                     <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-2 max-w-3xl">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[10px] font-mono font-bold uppercase tracking-wider">
-                            Comprehensive Astronomical Registry
-                          </span>
-                        </div>
+                      <div className="max-w-3xl">
                         <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
                           <Grid className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
                           <span>Stellar Catalog</span>
                         </h1>
-                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                          {catalogSubTab === 'stars'
-                            ? `Explore all ${STARS_CATALOG.length} individual cataloged stars across 88 constellations—from immediate solar neighbors to cosmic hypergiants—complete with spectral classes, physical diameters, and 3D celestial coordinates.`
-                            : `Explore ${MULTIPLE_STAR_SYSTEMS.length} gravitationally bound multiple star systems with fully solved 3D Keplerian orbits, mutual barycenters, and peer-reviewed rotational periods.`}
-                        </p>
                       </div>
 
                       {/* Sub-page Navigation Tabs inside the Stellar Catalog */}
@@ -1230,15 +1175,15 @@ export default function App() {
                           onClick={() => setCatalogSubTab('systems')}
                           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                             catalogSubTab === 'systems'
-                              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                               : 'text-slate-400 hover:text-white hover:bg-white/5'
                           }`}
                         >
-                          <Share2 className="w-3.5 h-3.5 shrink-0 text-purple-400" />
+                          <Share2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
                           <span>Stellar Systems</span>
                           <span
                             className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                              catalogSubTab === 'systems' ? 'bg-purple-950 text-purple-200 font-bold' : 'bg-slate-900 text-purple-300'
+                              catalogSubTab === 'systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-900 text-cyan-300'
                             }`}
                           >
                             {MULTIPLE_STAR_SYSTEMS.length}
@@ -1268,97 +1213,6 @@ export default function App() {
                   ) : (
                     /* SUB-PAGE 1: Individual Stars Registry */
                     <>
-                      {/* Expandable/Contractable Catalog Overview & Quick Highlights Panel */}
-                      <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all shadow-md">
-                        <button
-                          type="button"
-                          id="btn-toggle-catalog-overview"
-                          onClick={() => setIsCatalogOverviewExpanded((prev) => !prev)}
-                          className="w-full p-3.5 sm:p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-white/5 transition-colors"
-                          title={isCatalogOverviewExpanded ? 'Collapse Overview' : 'Expand Overview'}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-8 h-8 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
-                              <Grid className="w-4 h-4 text-cyan-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-mono">
-                                  Stellar Catalog Overview & Quick Stats
-                                </h3>
-                                <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30">
-                                  {STARS_CATALOG.length} Stars
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
-                            {isCatalogOverviewExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </div>
-                        </button>
-
-                        {isCatalogOverviewExpanded && (
-                          <div className="p-3.5 sm:p-5 border-t border-cyan-500/15 flex flex-col gap-4 animate-in fade-in duration-200">
-                            {/* Quick Stats Grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/20">
-                                <span className="text-slate-500 block text-[9.5px] uppercase">Hypergiants & Supergiants</span>
-                                <span className="text-amber-300 font-bold text-sm sm:text-base">
-                                  {STARS_CATALOG.filter((s) => s.stellarStage.includes('giant')).length}
-                                </span>
-                              </div>
-                              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/20">
-                                <span className="text-slate-500 block text-[9.5px] uppercase">Main Sequence</span>
-                                <span className="text-cyan-300 font-bold text-sm sm:text-base">
-                                  {STARS_CATALOG.filter((s) => s.stellarStage.includes('Dwarf') || s.stellarStage.includes('Sequence')).length}
-                                </span>
-                              </div>
-                              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/20">
-                                <span className="text-slate-500 block text-[9.5px] uppercase">Exoplanet Hosts</span>
-                                <span className="text-emerald-400 font-bold text-sm sm:text-base">
-                                  {STARS_CATALOG.filter((s) => s.exoplanetSystem?.hasExoplanets).length}
-                                </span>
-                              </div>
-                              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/20">
-                                <span className="text-slate-500 block text-[9.5px] uppercase">Naked-Eye Visible</span>
-                                <span className="text-blue-300 font-bold text-sm sm:text-base">
-                                  {STARS_CATALOG.filter((s) => s.apparentMagnitude < 6.0).length}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Extreme Record Holders Quick Jump */}
-                            <div>
-                              <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold block mb-1.5">
-                                Celestial Record Holders (Tap to View Dossier)
-                              </span>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                                {[
-                                  { label: 'Largest Titan', id: 'stephenson-2-18', name: 'Stephenson 2-18', stat: '2,150 D☉' },
-                                  { label: 'Most Massive', id: 'r136a1', name: 'R136a1', stat: '196 M☉' },
-                                  { label: 'Hottest Furnace', id: 'wr-102', name: 'WR 102', stat: '210,000 K' },
-                                  { label: 'Nearest Neighbor', id: 'proxima-centauri', name: 'Proxima Centauri', stat: '4.25 ly' },
-                                ].map((record) => {
-                                  const star = STARS_CATALOG.find((s) => s.id === record.id);
-                                  return (
-                                    <button
-                                      key={record.id}
-                                      type="button"
-                                      onClick={() => star && setDetailModalStar(star)}
-                                      className="p-2 rounded-xl bg-[#020512] hover:bg-[#070f24] border border-cyan-500/20 hover:border-cyan-400 text-left transition-all cursor-pointer group"
-                                    >
-                                      <span className="text-slate-500 text-[9px] block uppercase">{record.label}</span>
-                                      <span className="text-white group-hover:text-cyan-300 font-bold block truncate">{record.name}</span>
-                                      <span className="text-amber-400 text-[10px] block">{record.stat}</span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
                       <StarFilterPanel
                         filterState={filterState}
                         onChangeFilter={(partial) => setFilterState((prev) => ({ ...prev, ...partial }))}
@@ -1370,127 +1224,25 @@ export default function App() {
                         }}
                       />
 
-                      {/* Catalog Filter count & Layout Controls */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono text-slate-400 px-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span>
-                            Showing <strong className="text-cyan-400 font-bold">{filteredStars.length}</strong> of{' '}
-                            {STARS_CATALOG.length} Stars in Database
-                          </span>
-                          {isCompleteCatalog && isNonSizeSort ? (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1">
-                              <Layers className="w-3 h-3 text-cyan-400" />
-                              <span>Diameter-Adjusted Rows (Non-Size Sort, 20,000 D☉)</span>
-                            </span>
-                          ) : (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1">
-                              <Grid className="w-3 h-3 text-cyan-400" />
-                              <span>Multi-Column Mode (Default: 3+ Cols)</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Layout Controls: Density selector & Diameter-Balanced rows */}
-                        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-                          {/* Column Density Mode Selector */}
-                          <div className="flex items-center bg-[#030614]/90 border border-cyan-500/30 rounded-lg p-0.5">
-                            {(['multi', '2-col', '3-col', '4-col'] as const).map((mode) => (
-                              <button
-                                key={mode}
-                                type="button"
-                                onClick={() => {
-                                  setCatalogColumnLayout(mode);
-                                  if (isDiameterWeightedGrid) setIsDiameterWeightedGrid(false);
-                                }}
-                                className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
-                                  (!isCompleteCatalog || (!isNonSizeSort && !isDiameterWeightedGrid)) &&
-                                  catalogColumnLayout === mode
-                                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-400/40 shadow-sm'
-                                    : 'text-slate-400 hover:text-white'
-                                }`}
-                                title={`${
-                                  mode === 'multi'
-                                    ? 'Adaptive Multi-Column (Default: 3 col mobile, 4-6 col desktop)'
-                                    : `${mode.replace('-col', '')} Columns`
-                                }`}
-                              >
-                                {mode === 'multi' ? 'Multi (Default)' : mode.replace('-col', ' Col')}
-                              </button>
-                            ))}
-                          </div>
-
-                          {/* Comparison grid adjusted after combined star diameter count per row (Complete catalog mode only) */}
-                          {isCompleteCatalog && (
-                            <button
-                              type="button"
-                              id="btn-toggle-diameter-grid"
-                              onClick={() => setIsDiameterWeightedGrid((prev) => !prev)}
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer ${
-                                isDiameterWeightedGrid || isNonSizeSort
-                                  ? 'bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.3)] font-bold'
-                                  : 'bg-[#040816]/90 border-cyan-500/30 text-slate-400 hover:text-white'
-                              }`}
-                              title="Adjust comparison grid rows after 20,000 solar diameters per row"
-                            >
-                              <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                              <span>Diameter Rows</span>
-                              {(isDiameterWeightedGrid || isNonSizeSort) && (
-                                <span className="text-[9px] text-cyan-300">ON</span>
-                              )}
-                            </button>
-                          )}
-                        </div>
+                      {/* Catalog Filter count */}
+                      <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+                        <span>
+                          Showing <strong className="text-cyan-400 font-bold">{filteredStars.length}</strong> of{' '}
+                          {STARS_CATALOG.length} Stars in Database
+                        </span>
                       </div>
 
                       {filteredStars.length > 0 ? (
-                        (isCompleteCatalog && (isDiameterWeightedGrid || isNonSizeSort)) ? (
-                          <div className="flex flex-col gap-3">
-                            {diameterGroupedRows.map((row, rowIdx) => (
-                              <div
-                                key={`diameter-row-${rowIdx}`}
-                                className="p-2 sm:p-2.5 rounded-2xl bg-[#030614]/85 border border-cyan-500/20 flex flex-col gap-2"
-                              >
-                                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 px-1">
-                                  <span className="text-cyan-300 font-bold">
-                                    Row {rowIdx + 1}
-                                  </span>
-                                  <span className="text-slate-400">
-                                    Combined Diameter: <strong className="text-amber-400 font-bold">{row.totalDiameterSolar.toFixed(1)} D☉</strong> · {row.stars.length} stars
-                                  </span>
-                                </div>
-                                <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1.5 sm:gap-2">
-                                  {row.stars.map((star) => (
-                                    <StarCard
-                                      key={star.id}
-                                      star={star}
-                                      isCompact={true}
-                                      onViewDetails={(s) => setDetailModalStar(s)}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className={
-                            catalogColumnLayout === '2-col'
-                              ? 'grid grid-cols-2 gap-2 sm:gap-3'
-                              : catalogColumnLayout === '3-col'
-                              ? 'grid grid-cols-3 gap-1.5 sm:gap-2.5'
-                              : catalogColumnLayout === '4-col'
-                              ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-2.5'
-                              : 'grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2.5'
-                          }>
-                            {filteredStars.map((star) => (
-                              <StarCard
-                                key={star.id}
-                                star={star}
-                                isCompact={catalogColumnLayout !== '2-col' || isMobile}
-                                onViewDetails={(s) => setDetailModalStar(s)}
-                              />
-                            ))}
-                          </div>
-                        )
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+                          {filteredStars.map((star) => (
+                            <StarCard
+                              key={star.id}
+                              star={star}
+                              isCompact={true}
+                              onViewDetails={(s) => setDetailModalStar(s)}
+                            />
+                          ))}
+                        </div>
                       ) : (
                         <div className="p-12 text-center bg-[#070b18]/80 rounded-2xl border border-cyan-500/20 text-slate-400 backdrop-blur-xl">
                           <p className="text-base font-semibold text-slate-300">No stars found matching your filters.</p>
@@ -1671,6 +1423,7 @@ export default function App() {
         onSelectStar={(newStar) => setDetailModalStar(newStar)}
         onOpenStellarSystemDossier={(system) => {
           setSelectedSystemDossier(system);
+          setDetailModalStar(null);
         }}
         onOpenClassificationGuide={() => {
           setFrontpageInitialSection('spectral-classes');
@@ -1698,6 +1451,7 @@ export default function App() {
         onClose={() => setSelectedSystemDossier(null)}
         onSelectStar={(star) => {
           setDetailModalStar(star);
+          setSelectedSystemDossier(null);
         }}
         onSelectSystem={(system) => setSelectedSystemDossier(system)}
       />

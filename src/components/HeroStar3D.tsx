@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { StarData } from '../types';
+import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, getBrownDwarfType, SPECTRAL_CLASS_MAP, createCoronaShaderMaterial } from '../utils/starShaderUtils';
+import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
 
 export interface ActiveStarInfo {
   star: StarData;
@@ -142,166 +144,37 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
       star.name.toLowerCase().includes('conjoined') ||
       star.name.toLowerCase().includes('contact binary');
 
-    const baseColor = new THREE.Color(star.colorHex);
-    const coronaColor = new THREE.Color(star.coronaColorHex);
+    const d65 = computeD65StellarColor({
+      spectralType: star.spectralType,
+      spectralClass: star.spectralClass,
+      temperature: star.temperature,
+      stellarStage: star.stellarStage,
+    });
+    const baseColor = new THREE.Color(d65.colorHex);
+    const coronaColor = new THREE.Color(d65.coronaColorHex);
 
     const isPulsar = star.spectralClass === 'NS' || star.name.toLowerCase().includes('pulsar');
-    const isBrownDwarf = ['L', 'T', 'Y'].includes(star.spectralClass);
+    const bdType = getBrownDwarfType(star);
+    const { classKey, subclass } = parseSpectralType(star.spectralType, star.spectralClass);
+    const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
 
-    // High-Fidelity Ultra-Smooth Photosphere Shader
+    // High-Fidelity Ultra-Smooth Photosphere Shader with Luminous Textures & D65 Chromaticity
     const starMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         baseColor: { value: baseColor },
         coronaColor: { value: coronaColor },
+        temperature: { value: star.temperature || 5778 },
         isPulsar: { value: isPulsar ? 1.0 : 0.0 },
-        isBrownDwarf: { value: isBrownDwarf ? 1.0 : 0.0 },
         isContactBinary: { value: isContactBinary ? 1.0 : 0.0 },
+        brownDwarfType: { value: bdType },
+        densityFactor: { value: 0.0 },
+        spectralClassIndex: { value: spectralClassIndex },
+        spectralSubclass: { value: subclass },
+        hasSpectralData: { value: 1.0 },
       },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vLocalPos;
-        varying vec3 vWorldPos;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vLocalPos = normalize(position);
-          vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-          vWorldPos = worldPosition.xyz;
-          gl_Position = projectionMatrix * viewMatrix * worldPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 baseColor;
-        uniform vec3 coronaColor;
-        uniform float isPulsar;
-        uniform float isBrownDwarf;
-        uniform float isContactBinary;
-        varying vec3 vNormal;
-        varying vec3 vLocalPos;
-        varying vec3 vWorldPos;
-
-        // Smooth quintic interpolation polynomial (C2 continuity, zero grid artifacts)
-        vec3 quintic(vec3 t) {
-          return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
-        }
-
-        // Ultra-smooth 3D hash generator
-        float hash3D(vec3 p) {
-          p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
-          p *= 17.0;
-          return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-        }
-
-        // Silky smooth 3D value noise with quintic interpolation
-        float smoothNoise(vec3 x) {
-          vec3 i = floor(x);
-          vec3 f = fract(x);
-          vec3 u = quintic(f);
-
-          return mix(
-            mix(
-              mix(hash3D(i + vec3(0.0, 0.0, 0.0)), hash3D(i + vec3(1.0, 0.0, 0.0)), u.x),
-              mix(hash3D(i + vec3(0.0, 1.0, 0.0)), hash3D(i + vec3(1.0, 1.0, 0.0)), u.x),
-              u.y
-            ),
-            mix(
-              mix(hash3D(i + vec3(0.0, 0.0, 1.0)), hash3D(i + vec3(1.0, 0.0, 1.0)), u.x),
-              mix(hash3D(i + vec3(0.0, 1.0, 1.0)), hash3D(i + vec3(1.0, 1.0, 1.0)), u.x),
-              u.y
-            ),
-            u.z
-          );
-        }
-
-        // Multi-octave Fractal Brownian Motion (FBM) for smooth natural plasma flow
-        float fbm(vec3 p) {
-          float value = 0.0;
-          float amplitude = 0.5;
-          vec3 shift = vec3(23.41, 57.19, 11.83);
-          for (int i = 0; i < 4; ++i) {
-            value += amplitude * smoothNoise(p);
-            p = p * 2.02 + shift;
-            amplitude *= 0.5;
-          }
-          return value;
-        }
-
-        void main() {
-          vec3 viewDir = vec3(0.0, 0.0, 1.0);
-          float limb = clamp(dot(vNormal, viewDir), 0.0, 1.0);
-
-          // Authentic Eddington stellar limb darkening curve with soft optical roll-off
-          float limbDarkening = pow(limb, 0.46);
-
-          // Coordinates for texture generation (using unified local/world coordinates for continuous flow)
-          vec3 samplePos = (isContactBinary > 0.5) ? (vWorldPos * 1.8) : (vLocalPos * 3.2);
-
-          // Domain Warping for fluid convective plasma boiling
-          vec3 q = samplePos + vec3(time * 0.06, time * 0.045, time * 0.02);
-          float f1 = fbm(q);
-          vec3 warpedP = samplePos + vec3(f1 * 0.7, f1 * 0.5, f1 * 0.3) + vec3(time * 0.03, -time * 0.02, time * 0.015);
-          float plasma = fbm(warpedP);
-
-          // 1. NEUTRON STARS & PULSARS (Smooth relativistic core & synchrotron halo)
-          if (isPulsar > 0.5) {
-            vec3 pulsarPos = vLocalPos * 3.8 + vec3(0.0, time * 0.12, 0.0);
-            float pulsarNoise = fbm(pulsarPos);
-            vec3 core = mix(baseColor * 0.95, vec3(0.92, 0.97, 1.0), pulsarNoise * 0.55 + 0.25);
-            core *= (0.58 + 0.42 * limbDarkening);
-
-            float fresnelPulsar = pow(1.0 - limb, 2.6);
-            core += coronaColor * fresnelPulsar * 0.95;
-
-            gl_FragColor = vec4(core, 1.0);
-            return;
-          }
-
-          // 2. SUBSTELLAR BROWN DWARFS (Smooth Jovian latitudinal jet-stream bands)
-          if (isBrownDwarf > 0.5) {
-            float y = vLocalPos.y;
-            float lon = atan(vLocalPos.z, vLocalPos.x);
-            float zonal = sin(y * 7.0) * 0.35;
-            float dynamicLon = lon + time * 0.04 + zonal;
-
-            float band1 = sin(y * 16.0 + smoothNoise(vec3(dynamicLon * 2.2, y * 4.0, time * 0.02)) * 1.4);
-            float band2 = sin(y * 38.0 + smoothNoise(vec3(dynamicLon * 4.0, y * 8.0, 1.2)) * 0.9);
-            float bands = band1 * 0.6 + band2 * 0.4;
-
-            vec3 colDark = baseColor * 0.70;
-            vec3 colBright = mix(baseColor * 1.20, coronaColor, 0.35);
-            vec3 surface = mix(colDark, colBright, bands * 0.5 + 0.5);
-
-            surface *= (0.42 + 0.58 * limbDarkening);
-            surface += coronaColor * pow(1.0 - limb, 3.8) * 0.25;
-
-            gl_FragColor = vec4(surface, 1.0);
-            return;
-          }
-
-          // 3. MAIN SEQUENCE, GIANTS, HYPERGIANTS, WHITE DWARFS & CONTACT BINARIES (VFTS 352)
-          // Silky smooth incandescent photosphere with fluid convective boiling cells
-          vec3 deepCore = baseColor * 0.88;
-          vec3 brightSurface = mix(baseColor * 1.15, vec3(1.0, 0.99, 0.97), 0.48);
-          vec3 hotFaculae = mix(coronaColor * 1.25, vec3(1.0, 1.0, 1.0), 0.65);
-
-          vec3 stellarPlasma = mix(deepCore, brightSurface, plasma);
-          stellarPlasma = mix(stellarPlasma, hotFaculae, smoothstep(0.58, 0.86, plasma) * 0.42);
-
-          // For VFTS 352: enhance searing luminous O-type radiance along the conjoined bridge
-          if (isContactBinary > 0.5) {
-            stellarPlasma = mix(stellarPlasma, vec3(0.92, 0.96, 1.0), 0.18);
-          }
-
-          stellarPlasma *= (0.48 + 0.52 * limbDarkening);
-
-          // Soft volumetric corona Fresnel radiance at perimeter
-          float fresnel = pow(1.0 - limb, 3.2);
-          stellarPlasma += coronaColor * fresnel * 0.82;
-
-          gl_FragColor = vec4(stellarPlasma, 1.0);
-        }
-      `,
+      vertexShader: STAR_VERTEX_SHADER,
+      fragmentShader: STAR_FRAGMENT_SHADER,
     });
 
     // Root group to hold single or conjoined star geometry
@@ -342,6 +215,15 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
       starGroup.add(starMesh);
     }
 
+    let coronaMat: THREE.ShaderMaterial | null = null;
+    if (bdType < 1.5) {
+      coronaMat = createCoronaShaderMaterial(star);
+      const coronaGeo = new THREE.SphereGeometry(2.2, 48, 48);
+      geometriesToDispose.push(coronaGeo);
+      const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
+      starGroup.add(coronaMesh);
+    }
+
     scene.add(starGroup);
 
     let animationId: number;
@@ -365,6 +247,7 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
       cancelAnimationFrame(animationId);
       geometriesToDispose.forEach((geo) => geo.dispose());
       starMaterial.dispose();
+      if (coronaMat) coronaMat.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

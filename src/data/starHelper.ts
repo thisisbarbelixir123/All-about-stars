@@ -102,6 +102,7 @@ export function normalizeSpectralClassification(
   } else if (
     sType.toLowerCase().includes('pulsar') ||
     sType.toLowerCase().includes('neutron') ||
+    sType.toLowerCase().includes('black hole') ||
     sClass === 'NS'
   ) {
     sClass = 'NS';
@@ -110,8 +111,9 @@ export function normalizeSpectralClassification(
   } else if (firstLetter === 'S' && !sType.toLowerCase().startsWith('sd')) {
     sClass = 'S';
   } else if (sType.toLowerCase().startsWith('sd')) {
-    const sdLetter = sType.charAt(2).toUpperCase();
-    if (['O', 'B', 'A', 'F', 'G', 'K', 'M'].includes(sdLetter)) {
+    const stripped = sType.replace(/^sd[-:\s]*/i, '');
+    const sdLetter = stripped.charAt(0).toUpperCase();
+    if (['O', 'B', 'A', 'F', 'G', 'K', 'M', 'C', 'S', 'L', 'T', 'Y'].includes(sdLetter)) {
       sClass = sdLetter as SpectralClass;
     }
   } else if (['O', 'B', 'A', 'F', 'G', 'K', 'M', 'T', 'Y'].includes(firstLetter)) {

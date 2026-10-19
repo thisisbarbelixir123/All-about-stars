@@ -11,6 +11,7 @@ import {
   X,
   ChevronRight,
   Zap,
+  Share2,
 } from 'lucide-react';
 import { STARS_CATALOG } from '../data/stars';
 import { StarData } from '../types';
@@ -78,6 +79,16 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         icon: <Layers className="w-4 h-4 text-blue-400" />,
         action: () => {
           onNavigateTab('explorer');
+          onClose();
+        },
+      },
+      {
+        id: 'action-stellar-systems',
+        title: 'Open Stellar Systems Catalog (14 Multi-Star Systems)',
+        category: 'Navigation',
+        icon: <Share2 className="w-4 h-4 text-cyan-400" />,
+        action: () => {
+          onNavigateTab('stellar-systems');
           onClose();
         },
       },
@@ -198,7 +209,10 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             onClose();
           }
         }
-      } else if (e.key === 'Escape') {
+      } else if (
+        (e.key === 'k' && (e.metaKey || e.ctrlKey)) ||
+        ((e.key === 'c' || e.key === 'C') && (e.altKey || e.ctrlKey))
+      ) {
         e.preventDefault();
         onClose();
       }
@@ -241,14 +255,22 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
               type="button"
               onClick={() => setQuery('')}
               className="p-1 rounded text-slate-500 hover:text-white transition-colors cursor-pointer"
+              title="Clear search text"
+              aria-label="Clear search text"
             >
               <X className="w-4 h-4" />
             </button>
-          ) : (
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono text-[10px]">
-              ESC
-            </kbd>
-          )}
+          ) : null}
+          <button
+            type="button"
+            id="btn-close-command-palette"
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+            title="Close search"
+            aria-label="Close search"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Results List */}
@@ -350,21 +372,12 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           )}
         </div>
 
-        {/* Footer shortcuts helper */}
+        {/* Footer helper */}
         <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">↑↓</kbd>
-              Navigate
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">↵</kbd>
-              Select
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[10px]">ESC</kbd>
-              Close
-            </span>
+            <span>↑↓ Navigate</span>
+            <span>↵ Select</span>
+            <span className="text-slate-400">Click ✕ or press ⌘K to close</span>
           </div>
           <div className="text-[10px] text-cyan-400 flex items-center gap-1">
             <Zap className="w-3 h-3 text-cyan-400" />

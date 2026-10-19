@@ -710,7 +710,7 @@ export const FULL_CONSTELLATION_SHAPES_PART_2: Record<string, ConstellationShape
       { x: 56, y: 54, catalogStarId: 'phecda', name: "Phecda (Gamma UMa - Bowl Base)", mag: 2.44, isAsterismCore: true },
       { x: 58, y: 38, catalogStarId: 'megrez', name: "Megrez (Delta UMa - Bowl Rim)", mag: 3.31, isAsterismCore: true },
       { x: 70, y: 32, catalogStarId: 'alioth', name: "Alioth (Epsilon UMa - Tail)", isPrincipal: true, mag: 1.77, isAsterismCore: true },
-      { x: 80, y: 24, catalogStarId: 'mizar-a', name: "Mizar & Alcor (Zeta UMa - Tail)", mag: 2.23, isAsterismCore: true },
+      { x: 80, y: 24, catalogStarId: 'mizar-aa', name: "Mizar & Alcor (Zeta UMa - Tail)", mag: 2.23, isAsterismCore: true },
       { x: 90, y: 16, catalogStarId: 'alkaid', name: "Alkaid (Eta UMa - Tail Tip)", mag: 1.86, isAsterismCore: true },
       { x: 30, y: 28, name: "23 UMa (Bear Neck)" },
       { x: 16, y: 22, catalogStarId: 'muscida', name: "Muscida (Omicron UMa - Bear Snout)", mag: 3.35 },

@@ -700,9 +700,9 @@ export const FULL_CONSTELLATION_SHAPES: Record<string, ConstellationShape> = {
   'gemini': {
     mainAsterismName: "The Twin Pillars & Feet",
     stars: [
-      { x: 34, y: 16, catalogStarId: 'castor-a', name: "Castor (Alpha Gem - Mortal Twin Head)", mag: 1.93, isAsterismCore: true },
+      { x: 34, y: 16, catalogStarId: 'castor-aa', name: "Castor (Alpha Gem - Mortal Twin Head)", mag: 1.93, isAsterismCore: true },
       { x: 66, y: 16, catalogStarId: 'pollux', name: "Pollux (Beta Gem - Immortal Twin Head)", isPrincipal: true, mag: 1.14, isAsterismCore: true },
-      { x: 26, y: 32, catalogStarId: 'castor-b', name: "Castor B (Castor Shoulder)", mag: 2.97 },
+      { x: 26, y: 32, catalogStarId: 'castor-ba', name: "Castor B (Castor Shoulder)", mag: 2.97 },
       { x: 26, y: 52, catalogStarId: 'mebsuta', name: "Mebsuta (Epsilon Gem - Castor Waist)", isAsterismCore: true },
       { x: 20, y: 72, catalogStarId: 'tejat-posterior', name: "Tejat (Mu Gem - Castor Knee)" },
       { x: 14, y: 84, catalogStarId: 'propus', name: "Propus (Eta Gem - Castor Foot)", isAsterismCore: true },

@@ -20,7 +20,6 @@ import {
   Sparkles,
   Bookmark,
   Hash,
-  Award,
   Search,
   ChevronRight,
   ChevronLeft,
@@ -47,8 +46,7 @@ export type DiscoveryTopicId =
   | 'timeline'
   | 'telescopes'
   | 'milestones'
-  | 'nomenclature'
-  | 'quiz';
+  | 'nomenclature';
 
 interface DiscoveryTopicNav {
   id: DiscoveryTopicId;
@@ -64,7 +62,6 @@ const DISCOVERY_TOPICS: DiscoveryTopicNav[] = [
   { id: 'telescopes', title: 'Telescopes We Use to See Stars', shortTitle: 'Telescopes', icon: Telescope, tag: 'Ground & Space' },
   { id: 'nomenclature', title: 'How We Name Stars (Stellar Nomenclature)', shortTitle: 'Nomenclature', icon: Bookmark, tag: 'Bayer, Catalogs & IAU' },
   { id: 'milestones', title: 'Firsts & Milestones by Class', shortTitle: 'Milestones', icon: Sparkles, tag: 'Historic Firsts' },
-  { id: 'quiz', title: 'Discovery & Naming Quiz', shortTitle: 'Mastery Quiz', icon: Award, tag: '10 Questions' },
 ];
 
 export const PIONEER_SPOTLIGHTS = [
@@ -940,18 +937,6 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
             onCompareStar={onCompareStar}
             onJumpToCatalog={onJumpToCatalog}
             initialTab="proper-names"
-          />
-        </div>
-      )}
-
-      {/* 8. SUB-SECTION: DISCOVERY & NAMING MASTERY QUIZ */}
-      {activeTopic === 'quiz' && (
-        <div className="space-y-6">
-          <StellarNomenclatureGuide
-            onSelectStar={onSelectStar}
-            onCompareStar={onCompareStar}
-            onJumpToCatalog={onJumpToCatalog}
-            initialTab="quiz"
           />
         </div>
       )}

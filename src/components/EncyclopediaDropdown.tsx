@@ -140,17 +140,17 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
                   setIsOpen(false);
                   onOpenStellarSystems();
                 }}
-                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-purple-500/15 border border-transparent hover:border-purple-500/30 text-slate-200 hover:text-white cursor-pointer group"
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
               >
-                <div className="p-1.5 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-400 group-hover:scale-105 transition-transform shrink-0">
+                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
                   <Share2 className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-xs text-slate-200 group-hover:text-purple-300 break-words flex items-center gap-1.5">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words flex items-center gap-1.5">
                     <span>Stellar Systems</span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/40">New</span>
+                    <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40">14</span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-sans break-words">Dedicated multiple star registry</div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Multiple star systems & 3D orbits</div>
                 </div>
               </button>
             )}

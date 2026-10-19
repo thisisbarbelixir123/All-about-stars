@@ -387,50 +387,6 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
     description: 'A young solar-type star in Horologium at 56.5 light-years, hosting a giant planet in its habitable zone.'
   }),
 
-  // 8. Gamma-2 Velorum (Regor) - 1,120 ly in Vela
-  makeStar({
-    id: 'gamma-2-velorum',
-    name: 'Regor (Gamma-2 Velorum)',
-    alternateNames: ['Gamma-2 Velorum', 'γ² Vel', 'Suhail al Muhlif', 'HD 68273', 'WR 11', 'HR 3207', 'Spectral Gem of Southern Skies'],
-    bayerDesignation: 'γ² Vel',
-    constellation: 'Vela',
-    diameterSolar: 6.0,
-    temperature: 57000,
-    spectralType: 'WC8 + O7.5III',
-    spectralClass: 'WR',
-    luminositySolar: 170000,
-    massSolar: 28.5,
-    estimatedAge: '5.0 Million Years',
-    estimatedAgeMyr: 5,
-    metallicityFeH: 0.05,
-    rotationalVelocityKmS: 220.0,
-    distanceLy: 1120,
-    apparentMagnitude: 1.78,
-    absoluteMagnitude: -5.90,
-    surfaceGravityLogG: 4.1,
-    colorHex: '#66a3ff',
-    coronaColorHex: '#99c2ff',
-    solarEngulfment: 'A 6.0 solar diameter searing Wolf-Rayet star accompanied by an O-type giant, blazing in Vela.',
-    engulfsPlanets: ['Mercury'],
-    habitableZoneAU: { inner: 350.0, outer: 550.0 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      systemOverview: 'Extreme colliding-wind binary generating fierce X-rays and blistering ultraviolet radiation.',
-      planets: []
-    },
-    stellarStage: 'Wolf-Rayet',
-    lifespanEstimate: '6 Million Years',
-    futureFate: 'Type Ic Supernova or Gamma-Ray Burst leaving a Black Hole',
-    fusionProcess: 'Advanced Helium & Carbon Core Burning',
-    notableFacts: [
-      'The brightest Wolf-Rayet star in the night sky and the closest Wolf-Rayet star to Earth at ~1,120 light-years.',
-      'Unofficially nicknamed "Regor" ("Roger" spelled backwards) by Apollo 1 astronaut Gus Grissom to honor crewmate Roger Chaffee.',
-      'A colliding-wind binary with an orbital period of 78.5 days, where stellar winds smash together at over 2,000 km/s.'
-    ],
-    description: 'The brightest Wolf-Rayet star in the heavens, blazing at 57,000 K in Vela with massive companion.'
-  }),
-
   // 9. Gamma-1 Velorum - 1,120 ly in Vela
   makeStar({
     id: 'gamma-1-velorum',
@@ -474,50 +430,6 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
     description: 'A luminous blue giant in Vela at 1,120 light-years, visual companion to the Wolf-Rayet luminary Regor.'
   }),
 
-  // 10. Delta Velorum A (Koo She) - 80.6 ly in Vela
-  makeStar({
-    id: 'delta-velorum-a',
-    name: 'Delta Velorum A (Koo She)',
-    alternateNames: ['Delta Vel A', 'δ Vel A', 'Koo She', 'HD 74956', 'HR 3485', 'HIP 42913'],
-    bayerDesignation: 'δ Vel A',
-    constellation: 'Vela',
-    diameterSolar: 2.85,
-    temperature: 9440,
-    spectralType: 'A1V',
-    spectralClass: 'A',
-    luminositySolar: 67.0,
-    massSolar: 2.43,
-    estimatedAge: '300 Million Years',
-    estimatedAgeMyr: 300,
-    metallicityFeH: -0.05,
-    rotationalVelocityKmS: 145.0,
-    distanceLy: 80.6,
-    apparentMagnitude: 1.96,
-    absoluteMagnitude: 0.00,
-    surfaceGravityLogG: 4.0,
-    colorHex: '#e0ecff',
-    coronaColorHex: '#f0f5ff',
-    solarEngulfment: 'A 2.85 solar diameter white main-sequence star and eclipsing binary primary in Vela.',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 7.0, outer: 11.0 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      systemOverview: 'The brightest known eclipsing binary star visible to the naked eye after Algol.',
-      planets: []
-    },
-    stellarStage: 'Main Sequence',
-    lifespanEstimate: '800 Million Years',
-    futureFate: 'Red Giant shedding into a Carbon-Oxygen White Dwarf',
-    fusionProcess: 'Core CNO Hydrogen Fusion',
-    notableFacts: [
-      'The eclipsing nature of Delta Velorum was discovered in 1989 by the Galileo spacecraft en route to Jupiter.',
-      'Shines at magnitude 1.96, forming part of the famous False Cross asterism with Kappa Velorum and Avior.',
-      'Has an orbital period of 45.15 days, dimming noticeably during primary eclipses.'
-    ],
-    description: 'A brilliant naked-eye eclipsing binary in Vela at 80.6 light-years, key corner of the False Cross.'
-  }),
-
   // 11. Delta Velorum B - 80.6 ly in Vela
   makeStar({
     id: 'delta-velorum-b',
@@ -559,50 +471,6 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
       'Part of a complex sextuple hierarchical stellar system.'
     ],
     description: 'A yellow-white companion star in Vela at 80.6 light-years, eclipsing partner of Koo She.'
-  }),
-
-  // 12. Alpha Fornacis A (Dalim) - 45.7 ly in Fornax
-  makeStar({
-    id: 'alpha-fornacis-a',
-    name: 'Dalim (Alpha Fornacis A)',
-    alternateNames: ['Alpha Fornacis A', 'α For A', 'Dalim', '12 Fornacis A', 'HD 20010', 'HR 963', 'HIP 14879'],
-    bayerDesignation: 'α For A',
-    constellation: 'Fornax',
-    diameterSolar: 2.05,
-    temperature: 6240,
-    spectralType: 'F8V',
-    spectralClass: 'F',
-    luminositySolar: 4.98,
-    massSolar: 1.25,
-    estimatedAge: '2.9 Billion Years',
-    estimatedAgeMyr: 2900,
-    metallicityFeH: -0.19,
-    rotationalVelocityKmS: 12.0,
-    distanceLy: 45.7,
-    apparentMagnitude: 3.85,
-    absoluteMagnitude: 3.12,
-    surfaceGravityLogG: 4.0,
-    colorHex: '#fff5e6',
-    coronaColorHex: '#fffdf5',
-    solarEngulfment: 'A 2.05 solar diameter yellow-white subgiant, the brightest star in the southern constellation Fornax.',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 1.9, outer: 3.1 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      systemOverview: 'Visual binary star orbited by orange-yellow dwarf companion Alpha Fornacis B in a 269-year orbit.',
-      planets: []
-    },
-    stellarStage: 'Subgiant',
-    lifespanEstimate: '5.5 Billion Years',
-    futureFate: 'Red Giant shedding into a White Dwarf',
-    fusionProcess: 'Core Hydrogen Fusion transitioning to Shell Burning',
-    notableFacts: [
-      'The brightest star in the obscure constellation Fornax (The Chemical Furnace), shining at magnitude 3.85.',
-      'Historically named Dalim, derived from the Arabic word for the male ostrich.',
-      'Hosts a prominent circumstellar debris disk detected in the far-infrared.'
-    ],
-    description: 'The brightest star in Fornax at 45.7 light-years, a yellow-white subgiant primary of a binary.'
   }),
 
   // 13. Alpha Fornacis B - 45.7 ly in Fornax
@@ -956,6 +824,50 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
       'Completes the quadruple hierarchy of the Regulus system.'
     ],
     description: 'A dim red dwarf companion star in Leo at 79.3 light-years, companion to Regulus B.'
+  }),
+
+  // Regulus Ab (Alpha Leonis Ab) - Close White Dwarf Companion
+  makeStar({
+    id: 'regulus-ab',
+    name: 'Regulus Ab',
+    alternateNames: ['Alpha Leonis Ab', 'α Leo Ab', 'Regulus White Dwarf Companion', 'HIP 49669 Ab'],
+    bayerDesignation: 'α Leo Ab',
+    constellation: 'Leo',
+    diameterSolar: 0.028,
+    temperature: 18500,
+    spectralType: 'DA (White Dwarf)',
+    spectralClass: 'WD',
+    luminositySolar: 0.008,
+    massSolar: 0.30,
+    estimatedAge: '1.0 Billion Years',
+    estimatedAgeMyr: 1000,
+    metallicityFeH: 0.0,
+    rotationalVelocityKmS: 15.0,
+    distanceLy: 79.3,
+    apparentMagnitude: 13.5,
+    absoluteMagnitude: 11.6,
+    surfaceGravityLogG: 7.6,
+    colorHex: '#dbeafe',
+    coronaColorHex: '#93c5fd',
+    solarEngulfment: 'A compact degenerate white dwarf core with diameter roughly 1.4 Earth diameters (~19,500 km), orbiting Regulus A at 0.35 AU.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 0.08, outer: 0.12 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'In a 40.11-day close spectroscopic orbit with the fast-spinning primary Regulus A.',
+      planets: []
+    },
+    stellarStage: 'White Dwarf',
+    lifespanEstimate: 'Tens of Billions of Years (Cooling)',
+    futureFate: 'Black Dwarf',
+    fusionProcess: 'Electron Degeneracy Pressure (No Active Fusion)',
+    notableFacts: [
+      'Discovered through high-precision radial velocity variations of Regulus A in 2008.',
+      'A low-mass white dwarf (~0.30 M☉) likely stripped of its hydrogen envelope by Regulus A during past Roche-lobe overflow mass transfer.',
+      'Orbits Regulus A once every 40.11 days at a mean distance of only 0.35 AU (~52 million km).'
+    ],
+    description: 'A low-mass degenerate white dwarf companion in Leo at 79.3 light-years, locked in a 40.11-day tight orbit around Regulus A.'
   }),
 
   // 21. Polaris Ab - 433 ly in Ursa Minor
@@ -1878,63 +1790,6 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
     description: 'An orange dwarf in Cygnus at 123 light-years, host of the water-bearing warm Neptune HAT-P-11b.'
   }),
 
-  // 39. GJ 436 - 31.83 ly in Leo
-  makeStar({
-    id: 'gj-436',
-    name: 'GJ 436',
-    alternateNames: ['Gliese 436', 'HIP 57087', 'LHS 310'],
-    constellation: 'Leo',
-    diameterSolar: 0.45,
-    temperature: 3416,
-    spectralType: 'M2.5V',
-    spectralClass: 'M',
-    luminositySolar: 0.025,
-    massSolar: 0.44,
-    estimatedAge: '6.0 Billion Years',
-    estimatedAgeMyr: 6000,
-    metallicityFeH: 0.02,
-    rotationalVelocityKmS: 1.0,
-    distanceLy: 31.83,
-    apparentMagnitude: 10.68,
-    absoluteMagnitude: 10.63,
-    surfaceGravityLogG: 4.84,
-    colorHex: '#ff5c28',
-    coronaColorHex: '#ff8e5e',
-    solarEngulfment: 'A 0.45 solar diameter red dwarf star in Leo hosting the famous "burning ice" planet GJ 436 b.',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 0.13, outer: 0.24 },
-    exoplanetSystem: {
-      hasExoplanets: true,
-      confirmedCount: 1,
-      systemOverview: 'Hosts warm Neptune GJ 436 b, surrounded by a gigantic cometary cloud of escaping hydrogen dubbed "The Behemoth".',
-      planets: [
-        {
-          name: 'GJ 436 b',
-          type: 'Sub-Neptune',
-          mass: '22.1 M⊕',
-          radius: '4.17 R⊕',
-          orbitalPeriodDays: 2.64,
-          semiMajorAxisAU: 0.028,
-          habitableZoneStatus: 'Too Hot',
-          confirmed: true,
-          discoveryYear: 2004,
-          discoveryMethod: 'Radial Velocity',
-          description: 'A warm Neptune consisting largely of exotic hot ice (Ice X) under crushing pressures, enveloped in an immense hydrogen cloud.'
-        }
-      ]
-    },
-    stellarStage: 'Red Dwarf',
-    lifespanEstimate: '80 Billion Years',
-    futureFate: 'Helium White Dwarf',
-    fusionProcess: 'Core Proton-Proton Chain',
-    notableFacts: [
-      'GJ 436 b is famously nicknamed "The Burning Ice Planet" because its water is compressed by extreme gravity into hot solid ice.',
-      'Hubble Space Telescope observations revealed "The Behemoth" — a gargantuan comet-like cloud of hydrogen 9 million km long trailing behind the planet.',
-      'The evaporating hydrogen cloud blocks over 56% of the star’s ultraviolet light during transit.'
-    ],
-    description: 'A red dwarf in Leo at 31.8 light-years, host of the famous "burning ice" evaporating world GJ 436 b.'
-  }),
-
   // 40. GJ 3470 - 95.9 ly in Cancer
   makeStar({
     id: 'gj-3470',
@@ -1995,8 +1850,8 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
   // 45. Castor Aa - Primary A1V star of the Castor sextuple system
   makeStar({
     id: 'castor-aa',
-    name: 'Castor Aa',
-    alternateNames: ['Alpha Geminorum Aa', 'HD 60179 Aa', 'HIP 36850 Aa', 'Castor Primary'],
+    name: 'Castor Aa (Castor A)',
+    alternateNames: ['Castor A', 'Alpha Geminorum A', 'Alpha Geminorum Aa', 'HD 60179', 'HIP 36850', 'HR 2891', 'Castor Primary'],
     bayerDesignation: 'α Gem Aa',
     constellation: 'Gemini',
     diameterSolar: 2.40,
@@ -2085,8 +1940,8 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
   // 47. Castor Ba - Metallic-line primary of Castor B
   makeStar({
     id: 'castor-ba',
-    name: 'Castor Ba',
-    alternateNames: ['Alpha Geminorum Ba', 'HD 60178 Ba', 'HIP 36850 Ba', 'HR 2890'],
+    name: 'Castor Ba (Castor B)',
+    alternateNames: ['Castor B', 'Alpha Geminorum B', 'Alpha Geminorum Ba', 'HD 60178', 'HIP 36850 B', 'HR 2890'],
     bayerDesignation: 'α Gem Ba',
     constellation: 'Gemini',
     diameterSolar: 1.58,
@@ -2265,8 +2120,8 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
   // 51. Mizar Aa - Primary A2V star of Mizar
   makeStar({
     id: 'mizar-aa',
-    name: 'Mizar Aa',
-    alternateNames: ['Zeta Ursae Majoris Aa', 'HD 116656 Aa', 'HIP 65378 Aa', 'Mizar Primary'],
+    name: 'Mizar Aa (Mizar A)',
+    alternateNames: ['Mizar A', 'Zeta Ursae Majoris', 'Zeta Ursae Majoris Aa', 'Mirak', 'HD 116656', 'HIP 65378', 'HR 5054', 'The Horse'],
     bayerDesignation: 'ζ UMa Aa',
     constellation: 'Ursa Major',
     diameterSolar: 2.40,
@@ -2355,8 +2210,8 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
   // 53. Mizar Ba - Primary A7V star of Mizar B
   makeStar({
     id: 'mizar-ba',
-    name: 'Mizar Ba',
-    alternateNames: ['Zeta Ursae Majoris Ba', 'HD 116657 Ba', 'HIP 65378 Ba', 'Mizar B Primary'],
+    name: 'Mizar Ba (Mizar B)',
+    alternateNames: ['Mizar B', 'ζ Ursae Majoris B', 'Zeta UMa B', 'Zeta Ursae Majoris Ba', 'HD 116657', 'HIP 65378 B', 'Mizar B Primary'],
     bayerDesignation: 'ζ UMa Ba',
     constellation: 'Ursa Major',
     diameterSolar: 1.60,
@@ -2440,5 +2295,270 @@ export const STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES: StarData[] = [
       'Fourth star of the Mizar quadruple hierarchy.'
     ],
     description: 'The K-type dwarf companion in a 175-day orbit around Mizar Ba.'
+  }),
+
+  // 56. Sheliak B (Beta Lyrae B) - Accreting companion to Sheliak A
+  makeStar({
+    id: 'beta-lyrae-b',
+    name: 'Sheliak B (Beta Lyrae B)',
+    alternateNames: ['Beta Lyrae B', 'β Lyr B', 'HD 174638 B', 'Sheliak Accretor'],
+    bayerDesignation: 'β Lyr B',
+    constellation: 'Lyra',
+    diameterSolar: 6.0,
+    temperature: 30000,
+    spectralType: 'B0.5V',
+    spectralClass: 'B',
+    luminositySolar: 25000,
+    massSolar: 13.0,
+    estimatedAge: '25 Million Years',
+    estimatedAgeMyr: 25,
+    metallicityFeH: 0.0,
+    rotationalVelocityKmS: 250,
+    distanceLy: 960,
+    apparentMagnitude: 3.52,
+    absoluteMagnitude: -3.9,
+    surfaceGravityLogG: 4.1,
+    colorHex: '#93c5fd',
+    coronaColorHex: '#3b82f6',
+    solarEngulfment: 'Spans roughly 8.35 Million km (~0.056 AU) inside an optically thick 30 R☉ accretion torus.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 125, outer: 195 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Intense circumstellar accretion disk fed by the Roche-lobe-overflowing donor Sheliak A.',
+      planets: []
+    },
+    stellarStage: 'Main Sequence',
+    lifespanEstimate: '35 Million Years',
+    futureFate: 'Type II Core-Collapse Supernova creating a Neutron Star',
+    fusionProcess: 'CNO Cycle Core Hydrogen Fusion',
+    notableFacts: [
+      'The heavier component of Beta Lyrae (~13 M☉), completely concealed within a massive, opaque accretion disk.',
+      'Gains mass from Sheliak A via Roche lobe overflow at a rate of 2.2 × 10^-5 solar masses per year.',
+      'Ejects high-velocity polar plasma jets perpendicular to the accretion disk at over 1,000 km/s.'
+    ],
+    description: 'The massive B0.5V star inside Beta Lyrae, hidden within an accretion disk fed by Sheliak A.'
+  }),
+
+  // 57. Achird B (Eta Cassiopeiae B) - 480-year companion to solar analog Achird A
+  makeStar({
+    id: 'achird-b',
+    name: 'Achird B (Eta Cassiopeiae B)',
+    alternateNames: ['Eta Cassiopeiae B', 'η Cas B', 'HD 4614 B', 'HR 219 B', 'HIP 3821 B'],
+    bayerDesignation: 'η Cas B',
+    constellation: 'Cassiopeia',
+    diameterSolar: 0.66,
+    temperature: 4036,
+    spectralType: 'K7V',
+    spectralClass: 'K',
+    luminositySolar: 0.06,
+    massSolar: 0.57,
+    estimatedAge: '5.4 Billion Years',
+    estimatedAgeMyr: 5400,
+    metallicityFeH: -0.21,
+    rotationalVelocityKmS: 2.0,
+    distanceLy: 19.42,
+    apparentMagnitude: 7.51,
+    absoluteMagnitude: 8.63,
+    surfaceGravityLogG: 4.6,
+    colorHex: '#fed7aa',
+    coronaColorHex: '#f97316',
+    solarEngulfment: 'Spans roughly 919,000 km (~0.0061 AU diameter) in an eccentric 480-year orbit around Achird A.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 0.22, outer: 0.35 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Wide binary companion at 71 AU from the primary solar analog Achird A.',
+      planets: []
+    },
+    stellarStage: 'Main Sequence Dwarf',
+    lifespanEstimate: '50 Billion Years',
+    futureFate: 'Helium White Dwarf',
+    fusionProcess: 'Core Proton-Proton Chain Hydrogen Fusion',
+    notableFacts: [
+      'Orbits Achird A in an eccentric Keplerian orbit (e = 0.497) with a semi-major axis of 71 AU (480-year period).',
+      'Famous for its striking visual contrast in telescopes, often described as garnet-red or purple next to yellow Achird A.',
+      'At 19.42 light-years, one of the closest and most extensively studied visual binary systems.'
+    ],
+    description: 'The K7V dwarf companion to solar analog Achird A, completing an eccentric 480-year visual orbit.'
+  }),
+
+  // 58. Algieba B (Gamma-2 Leonis) - Radiant golden giant companion to Algieba A
+  makeStar({
+    id: 'algieba-b',
+    name: 'Algieba B (Gamma-2 Leonis)',
+    alternateNames: ['Gamma-2 Leonis', 'γ² Leo', 'HD 89485', 'HR 4058', 'HIP 50583', 'Algieba Companion'],
+    bayerDesignation: 'γ² Leo',
+    flamsteedDesignation: '41 Leonis B',
+    constellation: 'Leo',
+    diameterSolar: 12.0,
+    temperature: 4980,
+    spectralType: 'G7III',
+    spectralClass: 'G',
+    luminositySolar: 72,
+    massSolar: 1.57,
+    estimatedAge: '2.0 Billion Years',
+    estimatedAgeMyr: 2000,
+    metallicityFeH: -0.15,
+    rotationalVelocityKmS: 3.5,
+    distanceLy: 130,
+    apparentMagnitude: 3.48,
+    absoluteMagnitude: 0.38,
+    surfaceGravityLogG: 2.8,
+    colorHex: '#fef08a',
+    coronaColorHex: '#eab308',
+    solarEngulfment: 'Spans roughly 16.7 Million km (~0.11 AU diameter), shining as a radiant golden giant companion.',
+    engulfsPlanets: ['Mercury'],
+    habitableZoneAU: { inner: 7.2, outer: 11.5 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Wide binary companion to Algieba A at 170 AU average separation.',
+      planets: []
+    },
+    stellarStage: 'Red Giant',
+    lifespanEstimate: '2.5 Billion Years',
+    futureFate: 'Planetary Nebula shedding outer layers into a Carbon-Oxygen White Dwarf',
+    fusionProcess: 'Core Helium Burning (Red Clump Giant)',
+    notableFacts: [
+      'Co-orbits Algieba A in an eccentric 510-year Keplerian orbit (e = 0.845) with periastron at 26.4 AU.',
+      'Together, Algieba A and B form what amateur astronomers consider the premier double star in the northern spring sky.',
+      'Separated by 4.4 arcseconds, easily resolved in small telescopes into two gleaming golden lanterns.'
+    ],
+    description: 'A luminous G7III yellow-orange giant star in Leo at 130 light-years, companion to Algieba A in a 510-year orbit.'
+  }),
+
+  // 59. Epsilon-2 Lyrae (ADS 11635 CD) - Southern pair of The Double Double
+  makeStar({
+    id: 'epsilon-2-lyrae',
+    name: 'Epsilon-2 Lyrae (ADS 11635 CD)',
+    alternateNames: ['Epsilon-2 Lyr', 'ε² Lyr', '5 Lyrae', 'HD 173607', 'HR 7064', 'HIP 91920', 'The Double Double CD'],
+    bayerDesignation: 'ε² Lyr',
+    flamsteedDesignation: '5 Lyrae',
+    constellation: 'Lyra',
+    diameterSolar: 1.8,
+    temperature: 7800,
+    spectralType: 'A6V',
+    spectralClass: 'A',
+    luminositySolar: 12.0,
+    massSolar: 2.2,
+    estimatedAge: '450 Million Years',
+    estimatedAgeMyr: 450,
+    metallicityFeH: 0.05,
+    rotationalVelocityKmS: 65,
+    distanceLy: 162,
+    apparentMagnitude: 4.59,
+    absoluteMagnitude: 1.10,
+    surfaceGravityLogG: 4.2,
+    colorHex: '#dbeafe',
+    coronaColorHex: '#60a5fa',
+    solarEngulfment: 'Spans roughly 2.5 Million km (~0.0167 AU diameter), composing the southern pair of the Double Double.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 3.0, outer: 4.7 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Binary star pair C & D orbiting Epsilon-1 Lyrae in a grand 500,000-year sextuple/quadruple dance.',
+      planets: []
+    },
+    stellarStage: 'Main Sequence',
+    lifespanEstimate: '1.5 Billion Years',
+    futureFate: 'Red Giant / White Dwarf',
+    fusionProcess: 'Core CNO Hydrogen Fusion',
+    notableFacts: [
+      'The southern binary component of the famous "Double Double" in Lyra, separated from Epsilon-1 by 208 arcseconds.',
+      'Splits into two A-type stars (C and D) separated by 2.3 arcseconds with an orbital period of 724 years.',
+      'Both pairs are gravitationally bound, orbiting each other at ~10,500 AU (~0.16 light-years).'
+    ],
+    description: 'The southern binary of the famous Double-Double multiple star system in Lyra at 162 light-years.'
+  }),
+
+  // 60. Hadar B (Beta Centauri B) - Visual companion to Hadar Aa+Ab
+  makeStar({
+    id: 'hadar-b',
+    name: 'Hadar B (Beta Centauri B)',
+    alternateNames: ['Beta Centauri B', 'β Cen B', 'Agena B', 'HD 122451 B', 'HIP 68702 B'],
+    bayerDesignation: 'β Cen B',
+    constellation: 'Centaurus',
+    diameterSolar: 2.8,
+    temperature: 19000,
+    spectralType: 'B1V',
+    spectralClass: 'B',
+    luminositySolar: 1500,
+    massSolar: 4.7,
+    estimatedAge: '14 Million Years',
+    estimatedAgeMyr: 14,
+    metallicityFeH: 0.0,
+    rotationalVelocityKmS: 120,
+    distanceLy: 390,
+    apparentMagnitude: 4.0,
+    absoluteMagnitude: -1.5,
+    surfaceGravityLogG: 4.1,
+    colorHex: '#93c5fd',
+    coronaColorHex: '#3b82f6',
+    solarEngulfment: 'Spans roughly 3.9 Million km (~0.026 AU diameter), orbiting the central Hadar Aa+Ab pair at 120 AU.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 32, outer: 51 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Tertiary companion orbiting the brilliant spectroscopic binary Hadar Aa+Ab.',
+      planets: []
+    },
+    stellarStage: 'Main Sequence',
+    lifespanEstimate: '80 Million Years',
+    futureFate: 'Massive Oxygen-Neon White Dwarf or Electron-Capture Supernova',
+    fusionProcess: 'CNO Cycle Core Hydrogen Fusion',
+    notableFacts: [
+      'Visual companion to Hadar Aa+Ab discovered by astronomer J.G. Galle in 1847.',
+      'Orbits the primary binary pair at a projected separation of 120 AU with an estimated period of ~250 years.',
+      'Shines as a luminous B1V dwarf star contributing to the brilliant overall naked-eye magnitude 0.61 of Hadar.'
+    ],
+    description: 'The B1V dwarf companion orbiting the massive Hadar Aa+Ab pair at 390 light-years in Centaurus.'
+  }),
+
+  // 61. Gliese 105 C (HD 16160 C) - Ultracool dwarf at the hydrogen-burning limit
+  makeStar({
+    id: 'gliese-105-c',
+    name: 'Gliese 105 C (HD 16160 C)',
+    alternateNames: ['GJ 105 C', 'V436 And C', '2MASS J02361533+0652187', 'LHS 16'],
+    constellation: 'Cetus',
+    diameterSolar: 0.10,
+    temperature: 2600,
+    spectralType: 'M7V',
+    spectralClass: 'M',
+    luminositySolar: 0.00004,
+    massSolar: 0.082,
+    estimatedAge: '5.0 Billion Years',
+    estimatedAgeMyr: 5000,
+    metallicityFeH: -0.15,
+    rotationalVelocityKmS: 1.0,
+    distanceLy: 23.64,
+    apparentMagnitude: 16.9,
+    absoluteMagnitude: 17.6,
+    surfaceGravityLogG: 5.2,
+    colorHex: '#f87171',
+    coronaColorHex: '#dc2626',
+    solarEngulfment: 'Spans roughly 139,000 km (~0.00093 AU diameter), just larger than Jupiter in size.',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 0.005, outer: 0.009 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      systemOverview: 'Ultracool red dwarf right at the hydrogen-burning limit in a 61-year orbit around Gliese 105 B.',
+      planets: []
+    },
+    stellarStage: 'Red Dwarf',
+    lifespanEstimate: '10 Trillion Years',
+    futureFate: 'Helium White Dwarf',
+    fusionProcess: 'Slow Proton-Proton Chain Fusion at Stellar Limit',
+    notableFacts: [
+      'One of the lowest-mass true stars known (~82 Jupiter masses), barely above the theoretical hydrogen-burning threshold.',
+      'Directly imaged orbiting Gliese 105 B at ~15 AU in a 61.2-year orbit.',
+      'Completes a fascinating hierarchical triple system with naked-eye orange dwarf Gliese 105 A.'
+    ],
+    description: 'An ultracool M7V red dwarf at the hydrogen-burning boundary, orbiting Gliese 105 B at 23.6 light-years.'
   })
 ];

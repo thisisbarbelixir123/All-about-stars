@@ -5,14 +5,10 @@ import {
   Pause, 
   RotateCcw, 
   Orbit, 
-  Eye, 
-  Focus, 
   Sparkles, 
-  Info,
-  Maximize2,
-  Minimize2,
-  ZoomIn,
-  ZoomOut
+  ChevronUp,
+  ChevronDown,
+  Activity
 } from 'lucide-react';
 import {
   MultipleStarSystemData,
@@ -42,6 +38,27 @@ interface StellarSystem3DStageProps {
   selectedStarId?: string | null;
 }
 
+/**
+ * Calculates the exact 3D camera distance required to fit the entire multiple star system
+ * (including all star globes, orbit ribbons, apoapses, and HTML badges) comfortably within
+ * the PerspectiveCamera viewport regardless of aspect ratio (mobile portrait or desktop wide).
+ */
+export const computeFitCameraDistance = (
+  systemExtent: number,
+  viewportWidth: number,
+  viewportHeight: number
+): number => {
+  const w = Math.max(200, viewportWidth || 600);
+  const h = Math.max(200, viewportHeight || 450);
+  const aspect = w / h;
+  const fovVRad = (45 * Math.PI) / 180;
+  const tanHalfV = Math.tan(fovVRad / 2); // tan(22.5°) ≈ 0.41421356
+  const tanHalfH = tanHalfV * aspect;
+  const limitingTan = Math.min(tanHalfV, tanHalfH);
+  // 1.25 margin ensures full system and elevated projected labels fit without clipping
+  return (systemExtent / limitingTan) * 1.25;
+};
+
 export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
   system,
   onStarClick,
@@ -59,6 +76,7 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [focusedStarId, setFocusedStarId] = useState<string | null>(selectedStarId);
   const [telemetry, setTelemetry] = useState<SystemOrbitalTelemetry | null>(null);
+  const [isTelemetryExpanded, setIsTelemetryExpanded] = useState<boolean>(false);
 
   const orbitalSimTimeYearsRef = useRef<number>(0);
   const starMeshesRef = useRef<Map<string, THREE.Group | THREE.Mesh>>(new Map());
@@ -129,15 +147,20 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
     [system, auToUnits]
   );
 
-  // Set default camera distance when system changes
+  // Set default camera distance when system changes so the initial view fits the full system
   useEffect(() => {
+    const container = containerRef.current;
+    const w = container?.clientWidth || 600;
+    const h = container?.clientHeight || 450;
+    const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
+
     const cam = cameraStateRef.current;
-    cam.targetRadius = cameraDefaultRadius;
-    cam.radius = cameraDefaultRadius;
-    cam.minRadius = 1.2;
-    cam.maxRadius = Math.max(180, systemMaxExtent * 2.8);
+    cam.targetRadius = fitRadius;
+    cam.radius = fitRadius;
+    cam.minRadius = Math.max(1.2, fitRadius * 0.04);
+    cam.maxRadius = Math.max(fitRadius * 3.5, 450);
     cam.targetCenter.set(0, 0, 0);
-  }, [system.id, cameraDefaultRadius, systemMaxExtent]);
+  }, [system.id, systemMaxExtent]);
 
   // Main Three.js Scene Setup
   useEffect(() => {
@@ -301,6 +324,11 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
       // Update 2D HTML labels projecting onto screen
       updateProjectedLabels(camera, width, height);
 
+      // Keep continuous orbital plane grid responsive to camera distance
+      if (gridHandleRef.current) {
+        gridHandleRef.current.update(camera, cam.radius);
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -314,6 +342,13 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (!focusedStarId) {
+        const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
+        const cam = cameraStateRef.current;
+        cam.targetRadius = fitRadius;
+        cam.maxRadius = Math.max(fitRadius * 3.5, 450);
+      }
     };
     window.addEventListener('resize', handleResize);
 
@@ -386,10 +421,10 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
         engulfsPlanets: [],
         habitableZoneAU: { inner: 1, outer: 2 },
         exoplanetSystem: { hasExoplanets: false, confirmedCount: 0, candidateCount: 0, systemOverview: '', planets: [] },
-        stellarStage: 'Main Sequence Dwarf',
-        lifespanEstimate: '10 Billion Years',
-        futureFate: 'White Dwarf',
-        fusionProcess: 'Hydrogen Fusion',
+        stellarStage: comp.isBlackHole ? 'Stellar Black Hole' : comp.isCompactRemnant ? 'White Dwarf' : 'Main Sequence Dwarf',
+        lifespanEstimate: comp.isBlackHole ? '10^68 Years (Hawking Evaporation)' : '10 Billion Years',
+        futureFate: comp.isBlackHole ? 'Hawking Evaporation' : comp.isCompactRemnant ? 'Degenerate Cooling Remnant' : 'Red Giant / White Dwarf',
+        fusionProcess: comp.isBlackHole ? 'None (Relativistic Infall & Accretion)' : comp.isCompactRemnant ? 'None (Degenerate Electron Core)' : 'Core Hydrogen Fusion',
         notableFacts: [],
         description: comp.description,
       };
@@ -401,6 +436,9 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
       );
       if (comp.isCompactRemnant) {
         baseVisualRadius = 0.45; // White dwarf visible pip
+      }
+      if (comp.isBlackHole) {
+        baseVisualRadius = 0.50; // Black hole event horizon & accretion disk
       }
 
       const starGroup = createStarMeshGroup(pseudoStarData, baseVisualRadius, {
@@ -721,101 +759,106 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
   };
 
   const resetCamera = () => {
+    const container = containerRef.current;
+    const w = container?.clientWidth || 600;
+    const h = container?.clientHeight || 450;
+    const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
     const cam = cameraStateRef.current;
     cam.targetTheta = 0.6;
-    cam.targetPhi = 1.1;
-    cam.targetRadius = cameraDefaultRadius;
+    cam.targetPhi = 1.05;
+    cam.targetRadius = fitRadius;
     setFocusedStarId(null);
+  };
+
+  const handleFocusBarycenter = () => {
+    setFocusedStarId(null);
+    const container = containerRef.current;
+    const w = container?.clientWidth || 600;
+    const h = container?.clientHeight || 450;
+    const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
+    cameraStateRef.current.targetRadius = fitRadius;
+  };
+
+  const handleFocusStar = (starId: string) => {
+    setFocusedStarId(starId);
+    onStarClick?.(starId);
+    const container = containerRef.current;
+    const w = container?.clientWidth || 600;
+    const h = container?.clientHeight || 450;
+    const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
+    cameraStateRef.current.targetRadius = Math.max(5.0, Math.min(fitRadius * 0.35, 26.0));
   };
 
   return (
     <div className="relative w-full h-full min-h-[380px] sm:min-h-[440px] lg:min-h-[500px] rounded-2xl overflow-hidden bg-[#030616] border border-purple-500/30 shadow-2xl flex flex-col select-none">
-      {/* 3D Canvas Viewport */}
-      <div
-        ref={containerRef}
-        className="w-full flex-1 relative cursor-grab active:cursor-grabbing overflow-hidden"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-      />
-
-      {/* HTML 3D Projected Labels */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Barycenter Label */}
+      {/* 3D Canvas Viewport Container */}
+      <div className="relative w-full flex-1 min-h-0 overflow-hidden">
+        {/* 3D Canvas Viewport */}
         <div
-          ref={barycenterLabelRef}
-          className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer"
-          onClick={() => setFocusedStarId(null)}
-        >
-          <div className="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-[10px] font-mono font-bold text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.4)] whitespace-nowrap flex items-center gap-1 backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            <span>Mutual Barycenter</span>
-          </div>
-        </div>
+          ref={containerRef}
+          className="w-full h-full relative cursor-grab active:cursor-grabbing overflow-hidden"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onWheel={handleWheel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+        />
 
-        {/* Individual Star Labels */}
-        {system.components.map((comp) => (
+        {/* HTML 3D Projected Labels */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Barycenter Label */}
           <div
-            key={comp.id}
-            ref={(el) => {
-              labelsMapRef.current.set(comp.id, el);
-            }}
-            className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer group"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFocusedStarId(comp.id);
-              onStarClick?.(comp.id);
-            }}
+            ref={barycenterLabelRef}
+            className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer"
+            onClick={handleFocusBarycenter}
           >
-            <div
-              className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold shadow-md whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md transition-all ${
-                focusedStarId === comp.id
-                  ? 'bg-purple-900/90 border-purple-300 text-white ring-2 ring-purple-400/50 scale-105'
-                  : 'bg-black/75 border-slate-700/80 text-slate-200 group-hover:border-cyan-400 group-hover:text-cyan-300'
-              }`}
-            >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: comp.colorHex }}
-              />
-              <span>{comp.name}</span>
-              <span className="text-[9px] text-slate-400 font-normal">({comp.spectralType})</span>
+            <div className="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-[10px] font-mono font-bold text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.4)] whitespace-nowrap flex items-center gap-1 backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span>Mutual Barycenter</span>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Top Header Overlay: System Info & Simulation Badges */}
-      <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2 pointer-events-none">
-        <div className="flex flex-col gap-1 pointer-events-auto">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-purple-950/90 border border-purple-400/40 text-purple-300 text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
-              {system.systemType}
-            </span>
-            <span className="text-[11px] font-mono text-purple-300/80">
-              {system.distanceLy} ly • {system.constellation}
-            </span>
-          </div>
-          <h2 className="text-sm sm:text-base font-black text-white drop-shadow-md">
-            {system.name}
-          </h2>
-          <p className="text-[10px] font-mono text-purple-300/70 hidden sm:block">
-            Barycentric co-orbits centered at mutual Center of Mass (+)
-          </p>
+          {/* Individual Star Labels */}
+          {system.components.map((comp) => (
+            <div
+              key={comp.id}
+              ref={(el) => {
+                labelsMapRef.current.set(comp.id, el);
+              }}
+              className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer group"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFocusStar(comp.id);
+              }}
+            >
+              <div
+                className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold shadow-md whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md transition-all ${
+                  focusedStarId === comp.id
+                    ? 'bg-purple-900/90 border-purple-300 text-white ring-2 ring-purple-400/50 scale-105'
+                    : 'bg-black/75 border-slate-700/80 text-slate-200 group-hover:border-cyan-400 group-hover:text-cyan-300'
+                }`}
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: comp.colorHex }}
+                />
+                <span>{comp.name}</span>
+                <span className="text-[9px] text-slate-400 font-normal">({comp.spectralType})</span>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Quick Camera Reset & Grid Toggles */}
-        <div className="flex items-center gap-1.5 pointer-events-auto">
+        {/* Top Controls Overlay: Quick Camera Reset & Simulation Toggles (Redundant title removed) */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-auto z-20">
           <button
             onClick={() => setShowOrbitPaths((prev) => {
               if (orbitLinesGroupRef.current) orbitLinesGroupRef.current.visible = !prev;
               return !prev;
             })}
-            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
               showOrbitPaths
                 ? 'bg-purple-950/80 border-purple-400/60 text-purple-300'
                 : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
@@ -830,7 +873,7 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
               if (gridHandleRef.current) gridHandleRef.current.mesh.visible = !prev;
               return !prev;
             })}
-            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
               showGrid
                 ? 'bg-blue-950/80 border-blue-400/60 text-blue-300'
                 : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
@@ -842,47 +885,81 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
 
           <button
             onClick={resetCamera}
-            className="p-1.5 rounded-lg bg-black/60 border border-slate-700 text-slate-400 hover:text-white hover:border-cyan-400 text-xs font-mono transition-all cursor-pointer"
+            className="p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-slate-700 hover:border-cyan-400 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md active:scale-95"
             title="Reset 3D Camera"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
 
-      {/* Telemetry HUD (Bottom-Left) */}
-      {telemetry && (
-        <div className="absolute bottom-14 sm:bottom-16 left-3 pointer-events-none">
-          <div className="px-3 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-purple-500/30 text-xs font-mono text-slate-300 space-y-1 shadow-lg pointer-events-auto max-w-[280px]">
-            <div className="flex items-center justify-between gap-4 text-[11px] text-purple-300 font-bold border-b border-purple-500/20 pb-1">
-              <span>ORBITAL TELEMETRY</span>
-              <span className="text-cyan-400">{telemetry.orbitalPhasePercent.toFixed(0)}% Phase</span>
-            </div>
-            <div className="flex items-center justify-between gap-3 text-[10px]">
-              <span className="text-slate-400">Separation:</span>
-              <span className="text-white font-bold">{telemetry.currentSeparationAU} AU ({telemetry.currentSeparationKm.toLocaleString()} km)</span>
-            </div>
-            <div className="flex items-center justify-between gap-3 text-[10px]">
-              <span className="text-slate-400">Rel. Speed:</span>
-              <span className="text-emerald-400 font-bold">{telemetry.relativeVelocityKmS} km/s</span>
-            </div>
-            <div className="flex items-center justify-between gap-3 text-[10px]">
-              <span className="text-slate-400">True Anomaly:</span>
-              <span className="text-cyan-300 font-bold">{telemetry.trueAnomalyDeg}°</span>
-            </div>
-            {telemetry.isNearPeriastron && (
-              <div className="text-[9px] text-amber-300 font-bold text-center bg-amber-950/60 rounded px-1 py-0.5 border border-amber-500/30">
-                ⚡ AT PERIASTRON (CLOSEST APPROACH)
-              </div>
-            )}
-            {telemetry.isNearApastron && (
-              <div className="text-[9px] text-sky-300 font-bold text-center bg-sky-950/60 rounded px-1 py-0.5 border border-sky-500/30">
-                ❄️ AT APASTRON (FURTHEST APART)
+        {/* Telemetry HUD (Bottom-Left of Canvas) - Hidden on mobile, collapsed by default to prevent control overlap */}
+        {telemetry && (
+          <div className="hidden sm:block absolute bottom-3 left-3 z-20 pointer-events-auto">
+            {!isTelemetryExpanded ? (
+              /* Collapsed Pill Button (Default) */
+              <button
+                onClick={() => setIsTelemetryExpanded(true)}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-purple-950/90 backdrop-blur-md border border-purple-500/40 hover:border-purple-400/70 text-xs font-mono text-purple-200 transition-all shadow-lg cursor-pointer group active:scale-95"
+                title="Expand Real-Time Orbital Telemetry"
+              >
+                <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span className="font-bold text-[11px] text-white tracking-wide">Orbital Telemetry</span>
+                <span className="text-[10px] text-cyan-300 font-mono px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40">
+                  {telemetry.orbitalPhasePercent.toFixed(0)}%
+                </span>
+                <ChevronUp className="w-3.5 h-3.5 text-purple-400 transition-transform group-hover:text-white" />
+              </button>
+            ) : (
+              /* Expanded Card */
+              <div className="w-[280px] max-w-[calc(100vw-3rem)] rounded-xl bg-[#040618]/95 backdrop-blur-xl border border-purple-500/40 text-xs font-mono text-slate-300 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                {/* Header with Clickable Collapse */}
+                <div
+                  onClick={() => setIsTelemetryExpanded(false)}
+                  className="flex items-center justify-between px-3 py-2 bg-purple-950/50 hover:bg-purple-900/60 border-b border-purple-500/30 cursor-pointer transition-colors"
+                  title="Click to collapse telemetry"
+                >
+                  <div className="flex items-center gap-1.5 text-[11px] text-purple-200 font-bold tracking-wider">
+                    <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                    <span>ORBITAL TELEMETRY</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-400/40">
+                      {telemetry.orbitalPhasePercent.toFixed(0)}%
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-purple-400 hover:text-white transition-colors" />
+                  </div>
+                </div>
+
+                {/* Telemetry Metrics Body */}
+                <div className="p-2.5 space-y-1.5 text-[10px] bg-black/60 max-h-[190px] overflow-y-auto scrollbar-thin">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-400">Separation:</span>
+                    <span className="text-white font-bold">{telemetry.currentSeparationAU} AU ({telemetry.currentSeparationKm.toLocaleString()} km)</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-400">Rel. Speed:</span>
+                    <span className="text-emerald-400 font-bold">{telemetry.relativeVelocityKmS} km/s</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-400">True Anomaly:</span>
+                    <span className="text-cyan-300 font-bold">{telemetry.trueAnomalyDeg}°</span>
+                  </div>
+                  {telemetry.isNearPeriastron && (
+                    <div className="text-[9px] text-amber-300 font-bold text-center bg-amber-950/70 rounded px-1.5 py-0.5 border border-amber-500/40">
+                      ⚡ AT PERIASTRON (CLOSEST APPROACH)
+                    </div>
+                  )}
+                  {telemetry.isNearApastron && (
+                    <div className="text-[9px] text-sky-300 font-bold text-center bg-sky-950/70 rounded px-1.5 py-0.5 border border-sky-500/40">
+                      ❄️ AT APASTRON (FURTHEST APART)
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Bottom Control Bar: Focus Selector & Time Controls */}
       <div className="p-2 sm:p-2.5 bg-[#05091e]/95 backdrop-blur-xl border-t border-purple-500/25 flex flex-wrap items-center justify-between gap-2 z-10">
@@ -890,7 +967,7 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
         <div className="flex items-center gap-1 overflow-x-auto max-w-full scrollbar-none py-0.5">
           <span className="text-[10px] font-mono text-purple-400 font-bold px-1 shrink-0">Focus:</span>
           <button
-            onClick={() => setFocusedStarId(null)}
+            onClick={handleFocusBarycenter}
             className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
               focusedStarId === null
                 ? 'bg-cyan-500/30 border border-cyan-400 text-cyan-200'
@@ -902,10 +979,7 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
           {system.components.map((comp) => (
             <button
               key={comp.id}
-              onClick={() => {
-                setFocusedStarId(comp.id);
-                onStarClick?.(comp.id);
-              }}
+              onClick={() => handleFocusStar(comp.id)}
               className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
                 focusedStarId === comp.id
                   ? 'bg-purple-600 border border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.5)]'

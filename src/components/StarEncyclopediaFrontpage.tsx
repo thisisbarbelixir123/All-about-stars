@@ -3126,6 +3126,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           </div>
         </div>
       )}
+
       {/* Complete Stellar Classification Directory Modal */}
       <ClassificationDirectoryModal
         isOpen={isClassificationDirectoryOpen}

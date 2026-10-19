@@ -202,10 +202,10 @@ export const STARS_RED_ORANGE_GIANTS: StarData[] = [
     fusionProcess: 'Core Helium Burning (Red Clump Phase)',
     notableFacts: [
       'The sixth-brightest star in the night sky and the third-brightest in the northern celestial hemisphere.',
-      'Capella is a quadruple system consisting of two yellow giants and two distant red dwarf companions.',
+      'Capella is a quadruple system consisting of a cooler orange giant primary (Capella Aa), a hotter yellow giant secondary (Capella Ab), and two distant red dwarf companions.',
       'Emits strong X-rays originating from magnetic reconnection in its turbulent corona.'
     ],
-    description: 'The golden primary star of the Capella quadruple system in Auriga, a luminous yellow giant.'
+    description: 'The golden-orange primary star of the Capella quadruple system in Auriga, a luminous K0III orange giant undergoing core helium fusion.'
   }),
 
   // 39. Mira (Omicron Ceti)

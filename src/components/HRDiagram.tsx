@@ -41,116 +41,107 @@ export interface SpectralBandConfig {
 
 export const EXTENDED_SPECTRAL_BANDS: SpectralBandConfig[] = [
   {
-    label: 'NS',
-    name: 'Pulsar / Neutron Star',
-    startK: 4000000,
-    endK: 100000,
-    color: '#38bdf8',
-    glowColor: 'rgba(56, 189, 248, 0.45)',
-    desc: 'Ultra-dense relativistic cores (100,000 K to >3,500,000 K)',
-  },
-  {
     label: 'WR',
     name: 'Wolf-Rayet',
-    startK: 100000,
+    startK: 250000,
     endK: 35000,
-    color: '#a78bfa',
-    glowColor: 'rgba(167, 139, 250, 0.4)',
-    desc: 'Scorching stripped fusion core stars (>35,000 K to 100,000+ K)',
+    color: '#9bb0ff',
+    glowColor: 'rgba(155, 176, 255, 0.4)',
+    desc: 'Scorching stripped fusion core stars (>35,000 K to 210,000+ K)',
   },
   {
     label: 'O',
     name: 'O-Type',
     startK: 35000,
     endK: 30000,
-    color: '#90b4ff',
-    glowColor: 'rgba(144, 180, 255, 0.4)',
-    desc: 'Deep blue luminous powerhouses (30,000–35,000 K)',
+    color: '#3877ff',
+    glowColor: 'rgba(56, 119, 255, 0.45)',
+    desc: 'Electric sapphire blue luminous powerhouses (#3877ff, 30,000–50,000+ K)',
   },
   {
     label: 'B',
     name: 'B-Type',
     startK: 30000,
     endK: 10000,
-    color: '#b6d5ff',
-    glowColor: 'rgba(182, 213, 255, 0.3)',
-    desc: 'Blue-white beacons (e.g., Rigel, Spica, Alnilam)',
+    color: '#78afff',
+    glowColor: 'rgba(120, 175, 255, 0.40)',
+    desc: 'Luminous sky blue beacons (#78afff, e.g., Rigel, Spica, Alnilam)',
   },
   {
     label: 'A',
     name: 'A-Type',
     startK: 10000,
     endK: 7500,
-    color: '#e6f0ff',
-    glowColor: 'rgba(230, 240, 255, 0.3)',
-    desc: 'Pure white hydrogen-rich stars (e.g., Sirius A, Vega)',
+    color: '#e8f0ff',
+    glowColor: 'rgba(232, 240, 255, 0.40)',
+    desc: 'Diamond brilliant pure white ~10,000 K (#e8f0ff, e.g., Vega itself, Sirius A)',
   },
   {
     label: 'F',
     name: 'F-Type',
     startK: 7500,
     endK: 6000,
-    color: '#fff8ea',
-    glowColor: 'rgba(255, 248, 234, 0.3)',
-    desc: 'Yellow-white stars (e.g., Procyon A, Canopus)',
+    color: '#fff5dc',
+    glowColor: 'rgba(255, 245, 220, 0.40)',
+    desc: 'Warm creamy champagne white stars (#fff5dc, e.g., Procyon A, Canopus)',
   },
   {
     label: 'G',
     name: 'G-Type',
     startK: 6000,
     endK: 5200,
-    color: '#fff2a8',
-    glowColor: 'rgba(255, 242, 168, 0.35)',
-    desc: 'Solar yellow stars (e.g., The Sun, Alpha Centauri A)',
+    color: '#ffd000',
+    glowColor: 'rgba(255, 208, 0, 0.45)',
+    desc: 'Radiant golden solar yellow stars (#ffd000, e.g., The Sun, Alpha Centauri A)',
   },
   {
     label: 'K',
     name: 'K-Type',
     startK: 5200,
     endK: 3700,
-    color: '#ffb969',
-    glowColor: 'rgba(255, 185, 105, 0.35)',
-    desc: 'Orange dwarfs & giants (e.g., Arcturus, Aldebaran)',
+    color: '#ff851b',
+    glowColor: 'rgba(255, 133, 27, 0.40)',
+    desc: 'Luminous flame amber-orange dwarfs & giants (#ff851b, e.g., Arcturus, Aldebaran)',
   },
   {
     label: 'M',
     name: 'M-Type',
     startK: 3700,
     endK: 2400,
-    color: '#ff6242',
-    glowColor: 'rgba(255, 98, 66, 0.35)',
-    desc: 'Red dwarfs & red supergiants (e.g., Betelgeuse, Proxima Centauri)',
+    color: '#ff2b08',
+    glowColor: 'rgba(255, 43, 8, 0.45)',
+    desc: 'Fiery glowing scarlet to deep ruby red dwarfs & giants (#ff2b08, e.g., Betelgeuse, Proxima Centauri)',
   },
   {
     label: 'L',
     name: 'L-Type',
     startK: 2400,
     endK: 1300,
-    color: '#d64536',
-    glowColor: 'rgba(214, 69, 54, 0.35)',
-    desc: 'Brown dwarfs / metal hydride dust clouds (1,300–2,400 K)',
+    color: '#960718',
+    glowColor: 'rgba(150, 7, 24, 0.35)',
+    desc: 'Deep crimson brown dwarfs (1,300–2,400 K)',
   },
   {
     label: 'T',
     name: 'T-Type',
     startK: 1300,
     endK: 600,
-    color: '#993d6e',
-    glowColor: 'rgba(153, 61, 110, 0.35)',
-    desc: 'Methane brown dwarfs (600–1,300 K)',
+    color: '#52010e',
+    glowColor: 'rgba(82, 1, 14, 0.35)',
+    desc: 'Methane plum brown dwarfs (600–1,300 K)',
   },
   {
     label: 'Y',
     name: 'Y-Type',
     startK: 600,
     endK: 200,
-    color: '#552244',
-    glowColor: 'rgba(85, 34, 68, 0.35)',
-    desc: 'Ultracool brown dwarfs with ammonia/water clouds (<600 K)',
+    color: '#1a0006',
+    glowColor: 'rgba(26, 0, 6, 0.35)',
+    desc: 'Ultracool brown dwarfs (<600 K)',
   },
 ];
 
-export type HRDomainMode = 'classic' | 'extended';
+export type HRDomainMode = 'classic';
 
 interface DomainConfig {
   minTemp: number;
@@ -160,21 +151,13 @@ interface DomainConfig {
   label: string;
 }
 
-const DOMAINS: Record<HRDomainMode, DomainConfig> = {
-  classic: {
-    minTemp: 1800,
-    maxTemp: 50000,
-    minLumLog: -4.6, // 10^-4.6 L☉ (symmetrical padding below 10^-4 line)
-    maxLumLog: 6.6,  // 10^6.6 L☉ (symmetrical padding above 10^6 line)
-    label: 'Classic Stellar (O–M)',
-  },
-  extended: {
-    minTemp: 200,
-    maxTemp: 4000000,
-    minLumLog: -9.0, // 10^-9 L☉ (WISE 0855 & pulsars)
-    maxLumLog: 7.0,  // 10^7 L☉ (Eta Carinae & Supergiants)
-    label: 'Full Cosmic (NS–Y)',
-  },
+// Unified Classic Stellar & Sub-stellar domain from Wolf-Rayet (WR) to ultracool brown dwarfs (Y)
+const DOMAIN: DomainConfig = {
+  minTemp: 200,
+  maxTemp: 250000,
+  minLumLog: -9.0, // 10^-9 L☉ (WISE 0855)
+  maxLumLog: 7.0,  // 10^7 L☉ (R136a1, WR stars & Supergiants)
+  label: 'Classic Sequence (WR–Y)',
 };
 
 type EvolutionaryFilter =
@@ -183,11 +166,11 @@ type EvolutionaryFilter =
   | 'SUPERGIANTS'
   | 'LBV'
   | 'GIANTS'
+  | 'AGB'
   | 'CARBON_STARS'
   | 'SUBGIANTS'
   | 'WHITE_DWARFS'
-  | 'WOLF_RAYET'
-  | 'PULSARS';
+  | 'WOLF_RAYET';
 
 // Empirical points defining the Main Sequence (Luminosity Class V) locus: strictly O through M-class only
 const MAIN_SEQUENCE_CURVE = [
@@ -242,7 +225,17 @@ const GIANTS_TRACK = [
   { T: 3200, L: 3500 },   // M6III (T Cephei / Mira)
 ];
 
-// Empirical Carbon Stars track & AGB dredge-up corridor (C-Type & S-Type Stars)
+// Empirical Asymptotic Giant Branch (AGB) evolutionary track (double shell burning)
+const AGB_TRACK = [
+  { T: 3800, L: 500 },    // Early AGB entry
+  { T: 3500, L: 1800 },   // Core contraction, shell ignition
+  { T: 3200, L: 4500 },   // Classical AGB ascent (e.g., Mira variables)
+  { T: 2900, L: 12000 },  // Thermally pulsing AGB (TP-AGB)
+  { T: 2600, L: 28000 },  // High-luminosity AGB tip before envelope ejection
+  { T: 2400, L: 45000 },  // Super-AGB maximum envelope expansion
+];
+
+// Empirical Carbon Stars chemical locus (Class C & S stars with C/O >= 1 and ZrO)
 const CARBON_STARS_TRACK = [
   { T: 3350, L: 1400 },   // Warm carbon stars (C-R)
   { T: 3000, L: 3200 },   // TX Piscium / U Antliae
@@ -332,8 +325,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       ? isMobileProp || isMobileSize
       : isMobileSize;
 
-  // Domain range mode (Extended Cosmic covers full cosmic spectrum NS to Y; all stars present)
-  const [domainMode, setDomainMode] = useState<HRDomainMode>('extended');
+  // Unified Classic Stellar Domain (Wolf-Rayet to Class Y, without neutron stars)
+  const domainMode: HRDomainMode = 'classic';
 
   // Layer Toggles
   const [showIsoradiusLines, setShowIsoradiusLines] = useState(true);
@@ -377,18 +370,14 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
   const plotInsetTop = isMobileMode ? 8 : 32;
   const plotInsetBottom = isMobileMode ? (isLandscape ? 38 : 72) : 58;
 
-  // Active domain parameters
-  const { minTemp, maxTemp, minLumLog, maxLumLog } = DOMAINS[domainMode];
+  // Active domain parameters (WR to Y sequence)
+  const { minTemp, maxTemp, minLumLog, maxLumLog } = DOMAIN;
   const logTempMin = Math.log10(minTemp);
   const logTempMax = Math.log10(maxTemp);
 
-  // Automatic domain switch when filtering for extreme objects
   const handleGroupFilterChange = (filter: EvolutionaryFilter) => {
     setActiveGroupFilter(filter);
     setActiveSpectralFilter(null);
-    if (filter === 'PULSARS' || filter === 'WOLF_RAYET') {
-      setDomainMode('extended');
-    }
   };
 
   const handleSpectralFilterChange = (label: string) => {
@@ -396,9 +385,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
     const newFilter = isSelected ? null : label;
     setActiveSpectralFilter(newFilter);
     setActiveGroupFilter('ALL');
-    if (newFilter && ['NS', 'WR', 'W', 'L', 'T', 'Y', 'LBV'].includes(newFilter)) {
-      setDomainMode('extended');
-    }
   };
 
   // Precise coordinate mapping functions
@@ -448,10 +434,23 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         if (!matchesName) return false;
       }
 
+      // Neutron stars, pulsars, and compact remnants are strictly excluded from the HR diagram
+      if (
+        star.spectralClass === 'NS' ||
+        star.stellarStage === 'Neutron Star / Pulsar' ||
+        star.stellarStage === 'Stellar Black Hole' ||
+        star.stellarStage?.toLowerCase().includes('pulsar') ||
+        star.stellarStage?.toLowerCase().includes('neutron') ||
+        star.stellarStage?.toLowerCase().includes('magnetar') ||
+        star.stellarStage?.toLowerCase().includes('black hole') ||
+        star.spectralType?.toLowerCase().includes('pulsar') ||
+        star.spectralType?.toLowerCase().includes('magnetar')
+      ) {
+        return false;
+      }
+
       if (activeSpectralFilter) {
-        if (activeSpectralFilter === 'NS') {
-          if (star.spectralClass !== 'NS' && !star.spectralType.toLowerCase().includes('pulsar')) return false;
-        } else if (activeSpectralFilter === 'WR' || activeSpectralFilter === 'W') {
+        if (activeSpectralFilter === 'WR' || activeSpectralFilter === 'W') {
           if (star.spectralClass !== 'WR' && !star.spectralType.startsWith('W')) return false;
         } else if (activeSpectralFilter === 'LBV') {
           if (star.spectralClass !== 'LBV' && !star.spectralType.startsWith('LBV') && star.stellarStage !== 'Luminous Blue Variable') return false;
@@ -469,7 +468,11 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
           } else if (activeSpectralFilter === 'Y') {
             if (star.spectralClass !== 'Y' && !(/^Y[0-9]/.test(star.spectralType))) return false;
           } else {
-            if (star.spectralClass !== activeSpectralFilter && !star.spectralType.startsWith(activeSpectralFilter)) return false;
+            const isMatch =
+              star.spectralClass === activeSpectralFilter ||
+              star.spectralType.startsWith(activeSpectralFilter) ||
+              new RegExp(`^(sd|esd|usd)[-:\\s]*${activeSpectralFilter}`, 'i').test(star.spectralType);
+            if (!isMatch) return false;
           }
         }
       }
@@ -507,7 +510,24 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       if (activeGroupFilter === 'GIANTS') {
         return Boolean(star.spectralType && /(?<![IV])(II|III)(?![IV])/.test(star.spectralType));
       }
+      if (activeGroupFilter === 'AGB') {
+        // Asymptotic Giant Branch (AGB) evolutionary phase: double-shell burning giants
+        return Boolean(
+          star.fusionProcess?.toLowerCase().includes('agb') ||
+          star.stellarStage?.toLowerCase().includes('agb') ||
+          star.description?.toLowerCase().includes('agb') ||
+          star.notableFacts?.some((f) => f.toLowerCase().includes('agb')) ||
+          star.solarEngulfment?.toLowerCase().includes('agb') ||
+          star.id === 'mira-a' ||
+          star.id === 'rasalgethi' ||
+          star.id === 'scheat' ||
+          star.id === 'tejat-posterior' ||
+          star.id === 'chi-cygni' ||
+          star.id === 'r-horologii'
+        );
+      }
       if (activeGroupFilter === 'CARBON_STARS') {
+        // Carbon Stars (chemical classification: C/O > 1, Class C and S types)
         return (
           star.stellarStage === 'Carbon Star' ||
           star.stellarStage === 'S-Type Star' ||
@@ -531,20 +551,10 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       if (activeGroupFilter === 'WOLF_RAYET') {
         return star.stellarStage === 'Wolf-Rayet' || star.spectralClass === 'WR' || star.spectralType.startsWith('W');
       }
-      if (activeGroupFilter === 'PULSARS') {
-        return (
-          star.spectralClass === 'NS' ||
-          star.stellarStage?.toLowerCase().includes('pulsar') ||
-          star.stellarStage?.toLowerCase().includes('neutron') ||
-          star.stellarStage?.toLowerCase().includes('magnetar') ||
-          star.spectralType?.toLowerCase().includes('pulsar') ||
-          star.spectralType?.toLowerCase().includes('magnetar')
-        );
-      }
 
       return true;
     });
-  }, [stars, searchQuery, activeGroupFilter, activeSpectralFilter, domainMode, minTemp, maxTemp, minLumLog]);
+  }, [stars, searchQuery, activeGroupFilter, activeSpectralFilter, minTemp, maxTemp, minLumLog]);
 
   // Stefan-Boltzmann Isoradius lines (R = constant):
   // L/L☉ = (R/R☉)^2 * (T/5778)^4  =>  log10(L) = 2*log10(R) + 4*log10(T) - 15.0471116
@@ -559,7 +569,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       { r: 0.01, label: '0.01 R☉ (Earth / WD)', color: '#a855f7' },
       { r: 0.001, label: '0.001 R☉', color: '#d946ef' },
       { r: 0.0001, label: '0.0001 R☉', color: '#ec4899' },
-      { r: 0.000014, label: '~20 km (Pulsar / NS)', color: '#f43f5e' },
     ];
 
     const SB_CONST = 15.0471116; // 4 * log10(5778)
@@ -711,7 +720,22 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
     }, '');
   }, [minTemp, maxTemp, minLumLog, maxLumLog]);
 
-  // Carbon Stars & AGB Dredge-Up Track SVG Path
+  // Asymptotic Giant Branch (AGB) Track SVG Path
+  const agbSvgPath = useMemo(() => {
+    const validPts = AGB_TRACK.filter(
+      (pt) => pt.T >= minTemp * 0.8 && pt.T <= maxTemp * 1.2
+    ).map((pt) => ({
+      x: getTempX(pt.T),
+      y: getLumY(pt.L),
+    }));
+
+    if (validPts.length < 2) return '';
+    return validPts.reduce((acc, pt, idx) => {
+      return idx === 0 ? `M ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}` : `${acc} L ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
+    }, '');
+  }, [minTemp, maxTemp, minLumLog, maxLumLog]);
+
+  // Carbon Stars Chemical Locus SVG Path (Class C & S Stars)
   const carbonStarsSvgPath = useMemo(() => {
     const validPts = CARBON_STARS_TRACK.filter(
       (pt) => pt.T >= minTemp * 0.8 && pt.T <= maxTemp * 1.2
@@ -759,12 +783,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
   }, [minTemp, maxTemp, minLumLog, maxLumLog]);
 
   // Unified horizontal grid lines for both Luminosity and Absolute Magnitude
-  // Guarantees exact alignment across the chart in both Classic and Full Cosmic modes
   const hrGridLines = useMemo(() => {
-    const powers =
-      domainMode === 'classic'
-        ? [6, 4, 2, 0, -2, -4]
-        : [6, 4, 2, 0, -2, -4, -6, -8];
+    const powers = [6, 4, 2, 0, -2, -4, -6, -8];
 
     return powers.map((p) => {
       const solarLum = Math.pow(10, p);
@@ -778,54 +798,34 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         y,
       };
     });
-  }, [domainMode, maxLumLog, minLumLog]);
+  }, [maxLumLog, minLumLog]);
 
-  // Temperature tick indicators for X-axis
+  // Temperature tick indicators for X-axis (Classic sequence: WR to Y, 200 K to 250,000 K)
   const tempTicks = useMemo(() => {
-    if (domainMode === 'classic') {
-      if (isMobileMode && !isLandscape) {
-        return [
-          { k: 40000, label: '40k' },
-          { k: 20000, label: '20k' },
-          { k: 10000, label: '10k' },
-          { k: 6000, label: '6k' },
-          { k: 3000, label: '3k' },
-        ];
-      }
-      return [
-        { k: 40000, label: '40,000 K' },
-        { k: 30000, label: '30,000 K' },
-        { k: 20000, label: '20,000 K' },
-        { k: 10000, label: '10,000 K' },
-        { k: 7500, label: '7,500 K' },
-        { k: 6000, label: '6,000 K' },
-        { k: 5000, label: '5,000 K' },
-        { k: 4000, label: '4,000 K' },
-        { k: 3000, label: '3,000 K' },
-        { k: 2000, label: '2,000 K' },
-      ];
-    }
     if (isMobileMode && !isLandscape) {
       return [
-        { k: 1000000, label: '1M K' },
         { k: 100000, label: '100k' },
+        { k: 30000, label: '30k' },
         { k: 10000, label: '10k' },
-        { k: 2500, label: '2.5k' },
-        { k: 300, label: '300 K' },
+        { k: 6000, label: '6k' },
+        { k: 3000, label: '3k' },
+        { k: 1000, label: '1k' },
+        { k: 250, label: '250 K' },
       ];
     }
     return [
-      { k: 2000000, label: '2,000,000 K' },
-      { k: 500000, label: '500,000 K' },
+      { k: 200000, label: '200,000 K' },
       { k: 100000, label: '100,000 K' },
+      { k: 50000, label: '50,000 K' },
       { k: 30000, label: '30,000 K' },
       { k: 10000, label: '10,000 K' },
-      { k: 5000, label: '5,000 K' },
+      { k: 6000, label: '6,000 K' },
+      { k: 4000, label: '4,000 K' },
       { k: 2500, label: '2,500 K' },
       { k: 1000, label: '1,000 K' },
-      { k: 300, label: '300 K' },
+      { k: 250, label: '250 K' },
     ];
-  }, [domainMode, isMobileMode, isLandscape]);
+  }, [isMobileMode, isLandscape]);
 
   // Active bands visible in current domain
   const activeSpectralBands = useMemo(() => {
@@ -851,12 +851,12 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   id="hr-diagram-star-count"
                   className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 font-mono border border-indigo-500/40 font-bold ml-1"
                 >
-                  {filteredStars.length}
+                  {filteredStars.length} Stars (WR → Y)
                 </span>
               </h1>
               {!isMobileMode && (
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                  The foundational map of stellar astrophysics. Plots stellar luminosity against effective surface temperature, mapping the Main Sequence, giant branches, and white dwarf cooling curves according to the Stefan–Boltzmann law.
+                  The foundational map of stellar astrophysics across the classic sequence from scorching Wolf-Rayet stripped cores to ultracool Class Y brown dwarfs. Plots stellar luminosity against effective surface temperature, mapping the Main Sequence, Asymptotic Giant Branch (AGB), Carbon stars, and white dwarf cooling curves according to the Stefan–Boltzmann law.
                 </p>
               )}
             </div>
@@ -942,32 +942,15 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               )}
             </div>
 
-            {/* Related Features: Domain Scale Switcher & Diagram Filters Button */}
+            {/* Related Features: Classic Domain Indicator & Diagram Filters Button */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              {/* Domain Scale Mode Toggle */}
-              <div className="flex items-center p-0.5 bg-[#020512]/90 border border-cyan-500/30 rounded-xl">
-                <button
-                  onClick={() => setDomainMode('classic')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                    domainMode === 'classic'
-                      ? 'bg-cyan-500/25 text-cyan-200 font-bold shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Classic Domain: 2,000 K to 40,000 K (Standard Stellar Classes O-M)"
-                >
-                  Classic (O–M)
-                </button>
-                <button
-                  onClick={() => setDomainMode('extended')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                    domainMode === 'extended'
-                      ? 'bg-cyan-500/25 text-cyan-200 font-bold shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Full Cosmic Domain: 300 K to 2,000,000 K (Brown Dwarfs to Neutron Stars)"
-                >
-                  Full Cosmic (NS–Y)
-                </button>
+              {/* Unified Classic Domain Badge */}
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-[#020512]/90 border border-cyan-500/30 rounded-xl text-xs font-mono font-bold text-cyan-300 shadow-sm"
+                title="Unified Classic Sequence: 200 K to 250,000 K (Wolf-Rayet to Class Y Brown Dwarfs)"
+              >
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span>Classic (WR → Y)</span>
               </div>
 
               {/* Desktop Filter Toggle Button */}
@@ -1017,11 +1000,11 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               { id: 'SUPERGIANTS', label: 'Supergiants' },
               { id: 'LBV', label: '★ LBV (Luminous Blue Variables)' },
               { id: 'GIANTS', label: 'Giants (II & III)' },
+              { id: 'AGB', label: '★ AGB Branch' },
               { id: 'CARBON_STARS', label: '★ Carbon & S-Type (C/S)' },
               { id: 'SUBGIANTS', label: 'Subgiants (IV)' },
               { id: 'WHITE_DWARFS', label: 'White Dwarfs' },
               { id: 'WOLF_RAYET', label: 'Wolf-Rayet' },
-              { id: 'PULSARS', label: '⚡ Pulsars' },
             ].map((tab) => {
               const isSelected = activeGroupFilter === tab.id;
               return (
@@ -1264,15 +1247,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee] animate-pulse" />
                   )}
                 </button>
-
-                {/* Compact Domain Toggle */}
-                <button
-                  onClick={() => setDomainMode((m) => (m === 'classic' ? 'extended' : 'classic'))}
-                  className="px-2 py-1 rounded-full bg-[#030716]/92 backdrop-blur-xl border border-cyan-500/40 text-cyan-300 text-[10px] font-mono font-bold shadow-md hover:bg-cyan-950/60 active:scale-95 cursor-pointer shrink-0"
-                  title={`Current scale: ${domainMode === 'classic' ? 'Classic (O-M)' : 'Full Cosmic (NS-Y)'}. Tap to switch.`}
-                >
-                  {domainMode === 'classic' ? 'O–M' : 'NS–Y'}
-                </button>
               </div>
             </div>
           </div>
@@ -1362,15 +1336,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
           }}
         >
           
-          {/* Background Spectral Color Gradients aligned with exact temperature domain */}
+          {/* Background Spectral Color Gradients aligned with exact temperature domain (WR to Y) */}
           {showSpectralShading && (
             <div
               className="absolute inset-0 opacity-20 pointer-events-none"
               style={{
                 background:
-                  domainMode === 'classic'
-                    ? 'linear-gradient(to right, #90b4ff 0%, #b6d5ff 28%, #e6f0ff 48%, #fff8ea 60%, #fff2a8 68%, #ffb969 78%, #ff6242 100%)'
-                    : 'linear-gradient(to right, #38bdf8 0%, #7b57ff 12%, #90b4ff 22%, #b6d5ff 36%, #e6f0ff 48%, #fff8ea 56%, #fff2a8 64%, #ffb969 72%, #ff6242 82%, #d64536 90%, #993d6e 95%, #552244 100%)',
+                  'linear-gradient(to right, #818cf8 0%, #93b6ff 18%, #b8d5ff 32%, #e4efff 44%, #fff5ea 54%, #ffe5c4 62%, #ffc58a 72%, #ff9852 82%, #e65c1e 90%, #ba3208 95%, #5c0f02 100%)',
               }}
             />
           )}
@@ -1561,7 +1533,32 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               </g>
             )}
 
-            {/* Evolutionary Regions: Carbon Stars Track & AGB Dredge-Up Branch (C & S Types) */}
+            {/* Evolutionary Regions: Asymptotic Giant Branch (AGB) Track (Double-Shell Burning) */}
+            {showEvolutionaryZones && agbSvgPath && (
+              <g id="agb-branch-group">
+                <path
+                  d={agbSvgPath}
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth="4.5"
+                  strokeOpacity="0.16"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d={agbSvgPath}
+                  fill="none"
+                  stroke="#fbbf24"
+                  strokeWidth="0.85"
+                  strokeDasharray="3 1.5"
+                  strokeOpacity="0.85"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
+            )}
+
+            {/* Evolutionary Regions: Carbon Stars Chemical Locus (C & S Types, C/O >= 1) */}
             {showEvolutionaryZones && carbonStarsSvgPath && (
               <g id="carbon-stars-group">
                 <path
@@ -1578,7 +1575,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   fill="none"
                   stroke="#f87171"
                   strokeWidth="0.8"
-                  strokeDasharray="2.5 1.5"
+                  strokeDasharray="2 1.5"
                   strokeOpacity="0.85"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1691,15 +1688,28 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 ★ White Dwarfs (VII)
               </div>
 
-              {/* Carbon Stars & AGB Branch Badge */}
+              {/* Asymptotic Giant Branch (AGB) Badge */}
               <div
-                className="absolute pointer-events-none text-[8.5px] sm:text-[9.5px] font-mono font-bold text-red-300 bg-red-950/95 border border-red-500/60 px-2 py-0.5 rounded-full shadow-lg z-20 -translate-x-1/2 -translate-y-1/2"
+                className="absolute pointer-events-none text-[8.5px] sm:text-[9.5px] font-mono font-bold text-amber-300 bg-amber-950/95 border border-amber-500/60 px-2.5 py-0.5 rounded-full shadow-lg z-20 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5"
                 style={{
-                  left: `${getTempX(2600)}%`,
-                  top: `${getLumY(6500)}%`,
+                  left: `${getTempX(2950)}%`,
+                  top: `${getLumY(14000)}%`,
                 }}
               >
-                ★ Carbon Stars (AGB Branch)
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span>★ AGB (Asymptotic Giant Branch)</span>
+              </div>
+
+              {/* Carbon Stars (Class C & S) Badge */}
+              <div
+                className="absolute pointer-events-none text-[8.5px] sm:text-[9.5px] font-mono font-bold text-red-300 bg-red-950/95 border border-red-500/60 px-2.5 py-0.5 rounded-full shadow-lg z-20 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5"
+                style={{
+                  left: `${getTempX(2350)}%`,
+                  top: `${getLumY(4500)}%`,
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                <span>★ Carbon Stars (Class C, C/O &gt; 1)</span>
               </div>
 
               {/* Subgiants (IV) Badge */}
@@ -1713,18 +1723,16 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 ★ Subgiants (IV)
               </div>
 
-              {/* Brown Dwarfs Zone Badge (Extended Domain) */}
-              {domainMode === 'extended' && (
-                <div
-                  className="absolute pointer-events-none text-[8px] sm:text-[9px] font-mono font-bold text-fuchsia-300 bg-fuchsia-950/90 border border-fuchsia-500/50 px-2 py-0.5 rounded-full shadow-md z-20 -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    left: `${getTempX(1000)}%`,
-                    top: `${getLumY(0.000005)}%`,
-                  }}
-                >
-                  ★ Brown Dwarfs (L, T, Y)
-                </div>
-              )}
+              {/* Brown Dwarfs Zone Badge */}
+              <div
+                className="absolute pointer-events-none text-[8px] sm:text-[9px] font-mono font-bold text-fuchsia-300 bg-fuchsia-950/90 border border-fuchsia-500/50 px-2 py-0.5 rounded-full shadow-md z-20 -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${getTempX(1000)}%`,
+                  top: `${getLumY(0.000005)}%`,
+                }}
+              >
+                ★ Brown Dwarfs (L, T, Y)
+              </div>
             </>
           )}
 
@@ -1989,37 +1997,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               </button>
             </div>
 
-            {/* Domain Scale Mode */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                Domain Scale
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setDomainMode('classic')}
-                  className={`px-3 py-2 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
-                    domainMode === 'classic'
-                      ? 'bg-cyan-500/25 text-cyan-200 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                      : 'bg-[#050a1c] text-slate-400 border-cyan-500/20'
-                  }`}
-                >
-                  <Sun className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Classic (O–M)</span>
-                </button>
-                <button
-                  onClick={() => setDomainMode('extended')}
-                  className={`px-3 py-2 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
-                    domainMode === 'extended'
-                      ? 'bg-cyan-500/25 text-cyan-200 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                      : 'bg-[#050a1c] text-slate-400 border-cyan-500/20'
-                  }`}
-                >
-                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Full Cosmic (NS–Y)</span>
-                </button>
-              </div>
-            </div>
-
             {/* Evolutionary Phase Filters */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">
@@ -2028,15 +2005,15 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {[
                   { id: 'ALL', label: `All Stars (${stars.length})` },
-                  { id: 'MAIN_SEQUENCE', label: 'Main Sequence' },
+                  { id: 'MAIN_SEQUENCE', label: 'Main Sequence (V)' },
                   { id: 'SUPERGIANTS', label: 'Supergiants & Hypergiants' },
                   { id: 'LBV', label: 'Luminous Blue Variables (LBV)' },
-                  { id: 'GIANTS', label: 'Giants' },
-                  { id: 'CARBON_STARS', label: 'Carbon & S-Type Stars' },
-                  { id: 'SUBGIANTS', label: 'Subgiants' },
+                  { id: 'GIANTS', label: 'Giants (II & III)' },
+                  { id: 'AGB', label: 'Asymptotic Giant Branch (AGB)' },
+                  { id: 'CARBON_STARS', label: 'Carbon & S-Type Stars (C & S)' },
+                  { id: 'SUBGIANTS', label: 'Subgiants (IV)' },
                   { id: 'WHITE_DWARFS', label: 'White Dwarfs' },
                   { id: 'WOLF_RAYET', label: 'Wolf-Rayet' },
-                  { id: 'PULSARS', label: 'Pulsars & Neutron Stars' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -2112,7 +2089,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
               {/* Beyond OBAFGKM & Peculiar Branches */}
               <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-1">Beyond OBAFGKM & Peculiar</span>
-              <div className="grid grid-cols-3 sm:grid-cols-9 gap-1">
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-1">
                 {[
                   { label: 'C', title: 'Carbon Stars (C/O > 1)', color: '#ef4444' },
                   { label: 'S', title: 'Zirconium Stars (ZrO / ⁹⁹Tc)', color: '#ff5722' },
@@ -2122,7 +2099,6 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   { label: 'Y', title: 'Class Y Ultracool Dwarfs', color: '#552244' },
                   { label: 'WR', title: 'Wolf-Rayet Stripped Cores', color: '#38bdf8' },
                   { label: 'WD', title: 'White Dwarf Degenerate Cores', color: '#a855f7' },
-                  { label: 'NS', title: 'Neutron Stars / Pulsars', color: '#c084fc' },
                 ].map((spec) => {
                   const isSelected = activeSpectralFilter === spec.label;
                   return (

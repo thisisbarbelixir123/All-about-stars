@@ -1278,7 +1278,7 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
   makeStar({
     id: 'gliese-436',
     name: 'Gliese 436 (GJ 436)',
-    alternateNames: ['Gliese 436', 'GJ 436', 'Noquisi', 'HIP 57087', 'LHS 310'],
+    alternateNames: ['Gliese 436', 'GJ 436', 'Noquisi', 'HIP 57087', 'LHS 310', 'Ross 905'],
     constellation: 'Leo',
     diameterSolar: 0.42,
     temperature: 3416,
@@ -1302,7 +1302,7 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
     exoplanetSystem: {
       hasExoplanets: true,
       confirmedCount: 1,
-      systemOverview: 'Host star to Gliese 436 b, famous for having a gigantic comet-like evaporating hydrogen atmosphere.',
+      systemOverview: 'Host star to Gliese 436 b, famous for having a gigantic comet-like evaporating hydrogen atmosphere dubbed "The Behemoth".',
       planets: [
         {
           name: 'Gliese 436 b',
@@ -1315,7 +1315,7 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
           confirmed: true,
           discoveryYear: 2004,
           discoveryMethod: 'Radial Velocity',
-          description: 'A warm Neptune whose atmosphere is being stripped away into an immense 15-million-kilometer hydrogen tail.'
+          description: 'A warm Neptune consisting largely of exotic hot ice under crushing pressure, with an immense 15-million-kilometer escaping hydrogen tail.'
         }
       ]
     },
@@ -1324,8 +1324,9 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
     futureFate: 'Helium White Dwarf',
     fusionProcess: 'Core Proton-Proton Chain',
     notableFacts: [
-      'Host to Gliese 436 b, the famed "comet planet" that trails a gigantic cloud of escaping hydrogen 50 times the diameter of its host star.',
+      'Host to Gliese 436 b, the famed "comet planet" that trails a gigantic cloud of escaping hydrogen 50 times the diameter of its host star dubbed "The Behemoth".',
       'Officially named "Noquisi" by the IAU, meaning "star" in the Cherokee language.',
+      'GJ 436 b is famously nicknamed "The Burning Ice Planet" because its interior water is compressed by extreme gravity into hot solid ice phases.',
       'Located only 31.8 light-years away in Leo, it is one of the closest stars known to harbor an evaporating transiting exoplanet.'
     ],
     description: 'A red dwarf in Leo hosting the famous "comet planet" Gliese 436 b with a gigantic hydrogen tail.'
@@ -1929,6 +1930,100 @@ export const STARS_NEW_CATALOG_ADDITIONS: StarData[] = [
       'Despite its minuscule size and temperature of only 2,600 K, it is an active flare star (V1298 Aquilae) that undergoes powerful coronal outbursts.'
     ],
     description: 'An ultra-cool red dwarf in Aquila right at the hydrogen-burning boundary with brown dwarfs.'
+  }),
+
+  // ==========================================
+  // 16 CYGNI C (Red Dwarf Tertiary Companion)
+  // ==========================================
+  makeStar({
+    id: '16-cygni-c',
+    name: '16 Cygni C',
+    alternateNames: ['HD 186427 C', 'GJ 765.1 C', '16 Cyg C'],
+    bayerDesignation: '16 Cyg C',
+    constellation: 'Cygnus',
+    diameterSolar: 0.52,
+    temperature: 3750,
+    spectralType: 'M0V',
+    spectralClass: 'M',
+    luminositySolar: 0.045,
+    massSolar: 0.50,
+    estimatedAge: '7.0 Billion Years',
+    estimatedAgeMyr: 7000,
+    metallicityFeH: 0.08,
+    rotationalVelocityKmS: 2.1,
+    distanceLy: 69.3,
+    apparentMagnitude: 13.0,
+    absoluteMagnitude: 9.37,
+    surfaceGravityLogG: 4.65,
+    colorHex: '#ff7733',
+    coronaColorHex: '#ffaa66',
+    solarEngulfment: 'Spans approximately 723,000 km (~0.0048 AU diameter).',
+    engulfsPlanets: [],
+    habitableZoneAU: { inner: 0.18, outer: 0.32 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      candidateCount: 0,
+      systemOverview: 'Distant red dwarf tertiary companion in the 16 Cygni hierarchical triple system.',
+      planets: []
+    },
+    stellarStage: 'Red Dwarf',
+    lifespanEstimate: '80 Billion Years',
+    futureFate: 'Helium White Dwarf',
+    fusionProcess: 'Core Proton-Proton Chain',
+    notableFacts: [
+      'Discovered in 1999 as a faint, gravitationally bound companion orbiting 16 Cygni A at a projected separation of 73 AU.',
+      'Completes an orbit around 16 Cygni A every ~400 years, perturbing the outer dynamics of the system.',
+      'Helps stabilize the complex three-body Kozai-Lidov orbital oscillations that produce the extreme eccentricity of 16 Cygni Bb.'
+    ],
+    description: 'A dim red dwarf companion orbiting 16 Cygni A at 73 AU, part of the famous 16 Cygni hierarchical triple.'
+  }),
+
+  // ==========================================
+  // ALMAAZ B (Epsilon Aurigae B / Hidden Disk Companion)
+  // ==========================================
+  makeStar({
+    id: 'epsilon-aurigae-b',
+    name: 'Almaaz B (Epsilon Aurigae B)',
+    alternateNames: ['Epsilon Aurigae B', 'ε Aur B', 'Almaaz Companion', 'HD 31964 B'],
+    bayerDesignation: 'ε Aur B',
+    constellation: 'Auriga',
+    diameterSolar: 3.9,
+    temperature: 15000,
+    spectralType: 'B5V',
+    spectralClass: 'B',
+    luminositySolar: 1000,
+    massSolar: 5.9,
+    estimatedAge: '15 Million Years',
+    estimatedAgeMyr: 15,
+    metallicityFeH: 0.05,
+    rotationalVelocityKmS: 120,
+    distanceLy: 2000,
+    apparentMagnitude: 8.5,
+    absoluteMagnitude: -1.7,
+    surfaceGravityLogG: 4.0,
+    colorHex: '#aaccff',
+    coronaColorHex: '#6699ff',
+    solarEngulfment: 'Spans ~5.4 million km across its stellar surface, embedded within an opaque dust torus spanning 8 AU (1.2 billion km)!',
+    engulfsPlanets: ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'],
+    habitableZoneAU: { inner: 26.0, outer: 42.0 },
+    exoplanetSystem: {
+      hasExoplanets: false,
+      confirmedCount: 0,
+      candidateCount: 0,
+      systemOverview: 'Embedded within a colossal, opaque edge-on circumstellar disk of gas and dust that eclipses the primary supergiant.',
+      planets: []
+    },
+    stellarStage: 'Main Sequence',
+    lifespanEstimate: '75 Million Years',
+    futureFate: 'Carbon-Oxygen White Dwarf',
+    fusionProcess: 'Core CNO Hydrogen Fusion',
+    notableFacts: [
+      'Encased in an extraordinary edge-on doughnut-shaped dust disk spanning approximately 8 AU in diameter.',
+      'Every 27.1 years, this thick disk passes in front of the giant F-type primary Almaaz, causing a 2-year-long flat-bottomed eclipse.',
+      'Directly imaged during the 2009-2011 eclipse using the CHARA infrared interferometer array, confirming the disc silhouette theory.'
+    ],
+    description: 'A hot B-type star concealed within a massive opaque circumstellar dust disk that eclipses Almaaz every 27.1 years.'
   })
 ];
 

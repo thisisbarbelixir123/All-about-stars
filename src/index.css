@@ -99,3 +99,57 @@
   animation: float-slow-4 10s ease-in-out infinite;
 }
 
+/* Running title ticker for cut-out catalog titles */
+/* The text runs to the left until the last letter of the name disappears, then the first letter reappears again and stops at the left-hand side */
+/* Triggered by hovering in the cards (.group) or hovering the text */
+
+@keyframes running-title-marquee {
+  /* 0% to 8%: Initial hold at the left-hand side on hover start */
+  0%, 8% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  /* 8% to 53.9%: Runs to the left until the entire text and last letter completely disappears */
+  53.9% {
+    transform: translateX(calc(-100% - 16px));
+    opacity: 1;
+  }
+  /* 54%: Last letter has disappeared; instantaneously reposition off-screen to the right while transparent */
+  54% {
+    transform: translateX(calc(-100% - 16px));
+    opacity: 0;
+  }
+  54.001% {
+    transform: translateX(calc(var(--container-width, 180px) + 16px));
+    opacity: 0;
+  }
+  /* 54.01%: The first letter reappears from the right edge and runs to the left */
+  54.01% {
+    transform: translateX(calc(var(--container-width, 180px) + 16px));
+    opacity: 1;
+  }
+  /* 54.01% to 78%: Glides smoothly to the left until the first letter reaches the left-hand side */
+  78% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  /* 78% to 100%: STOPS when the first letter is shown at the left-hand side, holding for user reading */
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.running-title-active {
+  display: inline-block;
+  white-space: nowrap;
+  transform: translateX(0);
+  will-change: transform;
+}
+
+/* Triggered by hovering in the cards (.group) or hovering the title */
+.group:hover .running-title-active,
+.running-title-active:hover {
+  animation: running-title-marquee var(--marquee-duration, 10s) linear infinite;
+}
+

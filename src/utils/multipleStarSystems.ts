@@ -62,7 +62,6 @@ export function getSystemVisualScale(system: MultipleStarSystemData): {
 
   let auToUnits = 1.0;
   let starRadiusScale = 1.0;
-  let cameraDefaultRadius = 35;
 
   if (system.id === 'antares-system' || maxRadiusSolar > 300) {
     // Massive supergiant binaries (Antares: a = 224 AU, R = 680 R_sun)
@@ -70,50 +69,46 @@ export function getSystemVisualScale(system: MultipleStarSystemData): {
     // This gives a crisp ~3.6x physical clearance, preventing stars from appearing conjoined!
     auToUnits = 0.25;
     starRadiusScale = 0.015;
-    cameraDefaultRadius = 65;
   } else if (system.id === 'eta-carinae-system') {
     // Eta Carinae extreme colliding-wind binary (a = 15.4 AU, R = 120 R_sun, e = 0.90, periastron = 1.54 AU)
     // Scale orbits so periastron is at 4.24 units with primary radius scaled to 0.5 units, giving guaranteed 5.5x physical clearance!
     auToUnits = 2.75;
     starRadiusScale = 0.025;
-    cameraDefaultRadius = 55;
   } else if (system.id === 'polaris-system' || (maxRadiusSolar > 30 && a < 30)) {
     // Classical Cepheid/Supergiant tight binaries (Polaris: a = 18.8 AU, R = 37.5 R_sun)
     // Primary radius scaled to 1.0 units with periastron at ~10.0 units, maintaining distinct envelopes.
     auToUnits = 1.35;
     starRadiusScale = 0.08;
-    cameraDefaultRadius = 45;
   } else if (a < 0.05) {
     // Ultra-compact contact binaries (e.g. W Ursae Majoris ~0.0165 AU)
     auToUnits = 450.0;
     starRadiusScale = 0.65;
-    cameraDefaultRadius = 22;
   } else if (a < 0.2) {
     // Ultra-tight spectroscopic/contact binaries (VFTS 352 ~0.08 AU, Algol inner ~0.062 AU, Spica ~0.12 AU)
     auToUnits = 150.0;
     starRadiusScale = 0.75;
-    cameraDefaultRadius = 26;
   } else if (a < 2.0) {
     // Tight giant binaries (Capella ~0.74 AU)
     auToUnits = 25.0;
     starRadiusScale = 0.45;
-    cameraDefaultRadius = 32;
   } else if (a < 40.0) {
     // Medium visual binaries (Alpha Centauri AB: 23.5 AU, Sirius: 19.8 AU, Procyon: 14.9 AU)
     auToUnits = 1.15;
     starRadiusScale = 0.85;
-    cameraDefaultRadius = 42;
   } else if (a < 150.0) {
     // Wide visual binaries (61 Cygni: 86 AU, Castor AB: 107 AU)
     auToUnits = 0.32;
     starRadiusScale = 0.90;
-    cameraDefaultRadius = 55;
   } else {
     // Very wide systems (Mizar AB: 382 AU)
     auToUnits = 0.12;
     starRadiusScale = 0.85;
-    cameraDefaultRadius = 75;
   }
+
+  // Calculate maximum physical/visual extent to derive initial camera distance that fits the full system view
+  const extent = getSystemVisualExtent(system, auToUnits);
+  // Default camera distance ensuring full system fits comfortably in camera frustum (fov = 45°)
+  const cameraDefaultRadius = Math.max(36, (extent / 0.4142) * 1.25);
 
   return { auToUnits, starRadiusScale, cameraDefaultRadius };
 }
@@ -178,22 +173,56 @@ export function getOrbitVisualScale(
 
 /**
  * Computes the maximum bounding radial visual extent in Three.js units for the multiple star system,
- * taking into account all inner and outer orbits and their eccentricities.
- * Used to expand and dynamically scale the orbital plane grid and camera framing.
+ * taking into account all inner, sub-binary, and outer orbits and their eccentricities.
+ * Used to expand and dynamically scale the orbital plane grid and camera framing to fit the full system.
  */
 export function getSystemVisualExtent(
   system: MultipleStarSystemData,
   baseAuToUnits: number
 ): number {
   let maxExtent = 22.0;
+  const primaryOrbit = system.orbits[0];
+
   if (system.orbits && system.orbits.length > 0) {
     for (const orb of system.orbits) {
       const scale = getOrbitVisualScale(orb, system, baseAuToUnits);
-      const aposAU = orb.semiMajorAxisAU * (1 + Math.min(0.95, Math.max(0, orb.eccentricity)));
+      const e = Math.min(0.95, Math.max(0, orb.eccentricity));
+      const aposAU = orb.semiMajorAxisAU * (1 + e);
       const aposUnits = aposAU * scale;
-      maxExtent = Math.max(maxExtent, aposUnits * 1.25);
+
+      let radialUnits = aposUnits;
+      if (primaryOrbit && isSubBinaryOrbit(orb, primaryOrbit)) {
+        // Sub-binary orbits a parent star, which itself has an orbital radius from the barycenter
+        const parentOuterOrbit = system.orbits.find((o) => o.secondaryId === orb.primaryId);
+        if (parentOuterOrbit) {
+          const parentScale = getOrbitVisualScale(parentOuterOrbit, system, baseAuToUnits);
+          const parentApos = parentOuterOrbit.semiMajorAxisAU * (1 + Math.min(0.95, parentOuterOrbit.eccentricity)) * parentScale;
+          radialUnits = parentApos + aposUnits;
+        } else {
+          // Parent star in primary binary
+          const comp1 = system.components.find((c) => c.id === primaryOrbit.primaryId) || system.components[0];
+          const comp2 = system.components.find((c) => c.id === primaryOrbit.secondaryId) || system.components[1];
+          const m1 = Math.max(0.01, comp1.massSolar);
+          const m2 = Math.max(0.01, comp2 ? comp2.massSolar : 0.5);
+          const parentOffsetAU = orb.primaryId === comp1.id
+            ? primaryOrbit.semiMajorAxisAU * (m2 / (m1 + m2))
+            : primaryOrbit.semiMajorAxisAU * (m1 / (m1 + m2));
+          radialUnits = (parentOffsetAU * (1 + Math.min(0.95, primaryOrbit.eccentricity)) * baseAuToUnits) + aposUnits;
+        }
+      } else if (orb === primaryOrbit && system.components.length >= 2) {
+        // Primary binary barycentric maximum separation
+        const comp1 = system.components.find((c) => c.id === primaryOrbit.primaryId) || system.components[0];
+        const comp2 = system.components.find((c) => c.id === primaryOrbit.secondaryId) || system.components[1];
+        const m1 = Math.max(0.01, comp1.massSolar);
+        const m2 = Math.max(0.01, comp2 ? comp2.massSolar : 0.5);
+        const aTotalAU = primaryOrbit.semiMajorAxisAU;
+        const maxStarDistAU = aTotalAU * (Math.max(m1, m2) / (m1 + m2)) * (1 + e);
+        radialUnits = maxStarDistAU * baseAuToUnits;
+      }
+      maxExtent = Math.max(maxExtent, radialUnits * 1.15);
     }
   }
+
   return Math.max(22.0, maxExtent);
 }
 

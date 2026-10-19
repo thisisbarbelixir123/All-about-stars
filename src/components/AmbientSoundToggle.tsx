@@ -73,9 +73,6 @@ export const AmbientSoundToggle: React.FC = () => {
             <span className="hidden sm:inline">Muted</span>
           </>
         )}
-        <kbd className="hidden md:inline-block ml-0.5 text-[9px] px-1 py-0.2 rounded bg-slate-800/80 border border-slate-700 text-slate-400 font-mono">
-          M
-        </kbd>
       </button>
 
       {/* Volume Slider Popover */}

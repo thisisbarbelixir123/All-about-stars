@@ -1,4 +1,5 @@
 import { StarData, PresetComparison } from '../types';
+import { applyD65ChromaticityToStar } from '../utils/stellarColorsD65';
 import { STARS_HYPERGIANTS } from './starsHypergiants';
 import { STARS_SUPERGIANTS } from './starsSupergiants';
 import { STARS_MASSIVE_AND_BINARIES } from './starsMassiveAndBinaries';
@@ -59,35 +60,72 @@ const RAW_STARS_CATALOG: StarData[] = [
   ...STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES,
 ];
 
-// Deduplicate star records by unique ID
+export const STAR_ID_ALIASES: Record<string, string> = {
+  'castor-a': 'castor-aa',
+  'castor-b': 'castor-ba',
+  'mizar-a': 'mizar-aa',
+  'mizar-b': 'mizar-ba',
+  'theta1-orionis-c': 'theta-1-orionis-c',
+  'gj-436': 'gliese-436',
+  'delta-velorum-a': 'alsephina',
+  'alpha-fornacis-a': 'dalim',
+  'gamma-2-velorum': 'regor',
+};
+
+/**
+ * Resolves any legacy, component, or alias star ID to its canonical catalog ID.
+ */
+export function resolveStarId(id: string): string {
+  return STAR_ID_ALIASES[id] || id;
+}
+
+// Deduplicate star records by unique ID, canonical alias ID, and normalized identity
 const seenStarIds = new Set<string>();
+const seenCanonicalIds = new Set<string>();
+const seenNames = new Set<string>();
+
 export const STARS_CATALOG: StarData[] = RAW_STARS_CATALOG.filter((star) => {
-  if (seenStarIds.has(star.id)) return false;
+  const canonicalId = resolveStarId(star.id);
+  const normalizedKey = `${star.name.toLowerCase().trim()}::${star.constellation.toLowerCase().trim()}`;
+
+  if (seenStarIds.has(star.id) || seenCanonicalIds.has(canonicalId) || seenNames.has(normalizedKey)) {
+    return false;
+  }
   seenStarIds.add(star.id);
+  seenCanonicalIds.add(canonicalId);
+  seenNames.add(normalizedKey);
   return true;
-});
+}).map(applyD65ChromaticityToStar);
+
+/**
+ * Retrieves a star from the catalog by canonical ID or alias.
+ */
+export function getStarById(id: string): StarData | undefined {
+  const canonicalId = resolveStarId(id);
+  return STARS_CATALOG.find((s) => s.id === canonicalId || s.id === id);
+}
 
 export const CONSTELLATIONS_LIST = Array.from(
   new Set(STARS_CATALOG.map((s) => s.constellation))
 ).sort();
 
 export const SPECTRAL_CLASSES_META = [
-  { key: 'O', label: 'Class O', color: '#90b4ff', desc: 'Searing Blue (>30,000 K)' },
-  { key: 'B', label: 'Class B', color: '#b0d0ff', desc: 'Blue-White (10,000 - 30,000 K)' },
-  { key: 'A', label: 'Class A', color: '#e0ecff', desc: 'Pure White (7,500 - 10,000 K)' },
-  { key: 'F', label: 'Class F', color: '#fff5e6', desc: 'Yellow-White (6,000 - 7,500 K)' },
-  { key: 'G', label: 'Class G', color: '#fff0a6', desc: 'Yellow Solar (5,200 - 6,000 K)' },
-  { key: 'K', label: 'Class K', color: '#ffb366', desc: 'Orange (3,700 - 5,200 K)' },
-  { key: 'M', label: 'Class M', color: '#ff6633', desc: 'Red Giant / Dwarf (2,400 - 3,700 K)' },
-  { key: 'C', label: 'Class C', color: '#ef4444', desc: 'Carbon Star / Soot Photosphere (2,000 - 3,500 K)' },
-  { key: 'S', label: 'Class S', color: '#ff5722', desc: 'Zirconium Oxide Giant (2,200 - 3,600 K)' },
-  { key: 'L', label: 'Class L', color: '#d9483b', desc: 'Deep Crimson Brown Dwarf (1,300 - 2,400 K)' },
-  { key: 'T', label: 'Class T', color: '#a83279', desc: 'Methane Brown Dwarf (600 - 1,300 K)' },
-  { key: 'Y', label: 'Class Y', color: '#7a3b7a', desc: 'Ultracool Brown Dwarf (<600 K)' },
-  { key: 'WR', label: 'Wolf-Rayet', color: '#66a3ff', desc: 'Massive Stripped Core (>40,000 K)' },
-  { key: 'LBV', label: 'Luminous Blue Variable', color: '#60a5fa', desc: 'Eruptive Hypergiant near Eddington limit' },
-  { key: 'WD', label: 'White Dwarf', color: '#cce6ff', desc: 'Degenerate Electron Remnant' },
-  { key: 'NS', label: 'Neutron Star', color: '#80ffff', desc: 'Ultra-dense Pulsar Relic' },
+  { key: 'O', label: 'Class O', color: '#3877ff', desc: 'Electric Sapphire Blue (>30,000 K)' },
+  { key: 'B', label: 'Class B', color: '#78afff', desc: 'Luminous Sky Blue (10,000 - 30,000 K)' },
+  { key: 'A', label: 'Class A', color: '#e8f0ff', desc: 'Diamond Brilliant White (~10,000 K, Vega standard)' },
+  { key: 'F', label: 'Class F', color: '#fff5dc', desc: 'Warm Champagne White (6,000 - 7,500 K)' },
+  { key: 'G', label: 'Class G', color: '#ffd000', desc: 'Radiant Solar Golden Yellow (5,200 - 6,000 K, Sun standard)' },
+  { key: 'K', label: 'Class K', color: '#ff851b', desc: 'Luminous Flame Amber-Orange (3,700 - 5,200 K)' },
+  { key: 'M', label: 'Class M', color: '#ff2b08', desc: 'Fiery Scarlet to Deep Ruby Red (2,200 - 3,700 K)' },
+  { key: 'C', label: 'Class C', color: '#dc2626', desc: 'Carbon Star / Soot Photosphere (2,000 - 3,500 K)' },
+  { key: 'S', label: 'Class S', color: '#ea580c', desc: 'Zirconium Oxide Giant (2,200 - 3,600 K)' },
+  { key: 'L', label: 'Class L', color: '#960718', desc: 'Deep Crimson Brown Dwarf (1,300 - 2,200 K)' },
+  { key: 'T', label: 'Class T', color: '#52010e', desc: 'Methane Plum Brown Dwarf (600 - 1,300 K)' },
+  { key: 'Y', label: 'Class Y', color: '#1a0006', desc: 'Ultracool Brown Dwarf (<600 K)' },
+  { key: 'WR', label: 'Wolf-Rayet', color: '#3877ff', desc: 'Massive Stripped Core (>40,000 K)' },
+  { key: 'LBV', label: 'Luminous Blue Variable', color: '#609aff', desc: 'Eruptive Hypergiant near Eddington limit' },
+  { key: 'WD', label: 'White Dwarf', color: '#dbeafe', desc: 'Degenerate Electron Remnant' },
+  { key: 'NS', label: 'Neutron Star', color: '#00f0ff', desc: 'Ultra-dense Pulsar Relic' },
 ] as const;
 
 export const PRESET_COMPARISONS: PresetComparison[] = [
@@ -208,7 +246,7 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'sargas',
       'menkalinan',
       'atria',
-      'castor-a',
+      'castor-aa',
       'alhena',
       'peacock',
       'alsephina',
@@ -608,7 +646,7 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'tau-bootis-a',
       'iota-horologii',
       '55-cancri',
-      'gj-436',
+      'gliese-436',
       'gj-3470',
       'hat-p-11',
       'beta-pictoris',
@@ -655,9 +693,9 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'polaris-b',
       'acrux-a',
       'acrux-b',
-      'gamma-2-velorum',
+      'regor',
       'gamma-1-velorum',
-      'delta-velorum-a',
+      'alsephina',
       'delta-velorum-b',
       'alphecca',
       'alphecca-b',
@@ -672,7 +710,7 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'tau-bootis-b',
       'theta-1-orionis-c',
       'theta-1-orionis-a',
-      'alpha-fornacis-a',
+      'dalim',
       'alpha-fornacis-b',
       'cor-caroli',
       'alpha-1-canum-venaticorum',
@@ -691,7 +729,34 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       '61-cygni-a',
       '61-cygni-b',
       'procyon-a',
-      'procyon-b'
+      'procyon-b',
+      'vv-cephei-a',
+      'vv-cephei-b',
+      'luhman-16-a',
+      'luhman-16-b',
+      'gliese-667-a',
+      'gliese-667-b',
+      'gliese-667-c',
+      '70-ophiuchi-a',
+      '70-ophiuchi-b',
+      'stein-2051-a',
+      'stein-2051-b',
+      'kruger-60-a',
+      'kruger-60-b',
+      'ez-aquarii-a',
+      'ez-aquarii-b',
+      'ez-aquarii-c',
+      'albireo',
+      'albireo-b',
+      'zeta-1-reticuli',
+      'zeta-2-reticuli',
+      '16-cygni-a',
+      '16-cygni-b',
+      '16-cygni-c',
+      'xi-bootis-a',
+      'xi-bootis-b',
+      'almaaz',
+      'epsilon-aurigae-b'
     ],
     desc: 'Famous gravitationally bound binary, triple, and sextuple stellar systems with their complementary companion stars.'
   },

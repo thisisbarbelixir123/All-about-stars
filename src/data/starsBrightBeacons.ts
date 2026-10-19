@@ -257,51 +257,6 @@ export const STARS_BRIGHT_BEACONS: StarData[] = [
     description: 'The bright solitary jewel of the Southern Fish, renowned for its magnificent nested circumstellar debris disks.'
   }),
 
-  // 50. Castor A
-  makeStar({
-    id: 'castor-a',
-    name: 'Castor A',
-    alternateNames: ['Alpha Geminorum A', 'HD 60179', 'HIP 36850', 'HR 2891'],
-    bayerDesignation: 'α Gem A',
-    constellation: 'Gemini',
-    diameterSolar: 2.4,
-    temperature: 10286,
-    spectralType: 'A1V',
-    spectralClass: 'A',
-    luminositySolar: 33.0,
-    massSolar: 2.76,
-    estimatedAge: '~370 Million Years',
-    estimatedAgeMyr: 370,
-    metallicityFeH: 0.1,
-    rotationalVelocityKmS: 33,
-    distanceLy: 51.0,
-    apparentMagnitude: 1.93,
-    absoluteMagnitude: 0.98,
-    surfaceGravityLogG: 4.1,
-    colorHex: '#dce8ff',
-    coronaColorHex: '#f0f5ff',
-    solarEngulfment: 'Spans roughly 3.34 Million km (~0.022 AU diameter)!',
-    engulfsPlanets: [],
-    habitableZoneAU: { inner: 5.0, outer: 7.8 },
-    exoplanetSystem: {
-      hasExoplanets: false,
-      confirmedCount: 0,
-      candidateCount: 0,
-      systemOverview: 'Castor is a stunning sextuple star system: three pairs of spectroscopic binary stars (Castor A, B, and C/YY Geminorum) orbiting a common center of mass.',
-      planets: []
-    },
-    stellarStage: 'Main Sequence Dwarf',
-    lifespanEstimate: '~800 Million Years',
-    futureFate: 'Red Giant / White Dwarf',
-    fusionProcess: 'Core CNO Hydrogen Fusion',
-    notableFacts: [
-      'Castor is not just one star, but a magnificent system of six gravitationally bound stars.',
-      'The mortal twin of immortal Pollux in Greco-Roman mythology.',
-      'The Castor system is the radiant point for the spectacular annual Geminid meteor shower in December.'
-    ],
-    description: 'The primary star of the famous Castor sextuple system in Gemini, radiant of the Geminid meteor shower.'
-  }),
-
   // 51. Acrux A
   makeStar({
     id: 'acrux-a',

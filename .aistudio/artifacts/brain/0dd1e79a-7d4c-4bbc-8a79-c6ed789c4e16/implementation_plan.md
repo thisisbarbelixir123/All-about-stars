@@ -1,112 +1,112 @@
-# Mobile Catalog Optimization, Bi-Directional Spiral 3D Stage & Header Simplification
+# Expanded Stellar System Catalog & Individual Companion Registration
 
-Comprehensive update to stellar comparison visualizations across mobile and desktop: eliminate the linear mode from the 3D Stage on mobile complete catalog in favor of dedicated spiral layouts, implement bi-directional spiral modes (both size-ascending and size-descending with center-to-perimeter scaling and auto-focus), dynamically balance comparison grids by cumulative stellar diameter per row, and remove the header search feature.
+Expand the Stellar System Catalog with rich multi-star systems mapped directly from stars across the catalog (including VV Cephei, Luhman 16, Gliese 667, 40 Eridani, 70 Ophiuchi, Stein 2051, Kruger 60, Ross 614, Wolf 424, EZ Aquarii, 16 Cygni, Xi Boötis, and Acrux), ensure all double stars (such as Castor Ca + Cb) are strictly registered as two distinct stars rather than lumped single entries, and modernize the Stellar System Dossier modal header by removing the system selector dropdown in favor of a clean title bar with return navigation.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following revisions have been incorporated based on your latest guidance:
+> The following user preferences were confirmed in Phase 1 and guide this implementation:
 
-- **Elimination of Linear Mode on Mobile Complete Catalog**: On mobile devices viewing the complete catalog in the 3D Stage, the linear layout mode is completely removed. Mobile 3D browsing will operate exclusively in optimized Spiral mode to prevent excessive GPU strain and unmanageable horizontal spans.
-- **Bi-Directional Spiral Mode in 3D Stage**:
-  - **Size Ascending (`radius-asc`)**: Smallest compact remnant / dwarf at the center, expanding outward to supergiant titans at the perimeter. Initial camera view centers on the compact core.
-  - **Size Descending (`radius-desc`)**: The largest hypergiant sits at the galactic spiral center, gracefully winding outward to dwarfs and compact remnants at the outer arm. Camera focus automatically targets the **smallest star** at the perimeter, providing an immediate awe-inspiring vantage point looking inward toward the gargantuan core star.
-- **Diameter-Weighted Comparison Grid Rows**: The comparison grid dynamically wraps rows after a calibrated cumulative stellar diameter threshold is reached (rather than rigid static item counts), preventing massive supergiants from visually crushing adjacent dwarfs and avoiding lopsided rows.
-- **Header Search Clean Removal**: The search button and keyboard trigger in the application header are removed for a decluttered, high-contrast navigation bar.
+- **Confirmed Decision 1 (System Selection Scope)**: Add all catalog systems including high-profile systems like VV Cephei, Luhman 16, Gliese 667, 40 Eridani, 70 Ophiuchi, Stein 2051, Kruger 60, Ross 614, Wolf 424, EZ Aquarii, 16 Cygni, and Acrux to `MULTIPLE_STAR_SYSTEMS` with complete 3D orbital hierarchies and physical parameters.
+- **Confirmed Decision 2 (Component Registration)**: Strictly register sub-components and double stars (such as Castor Ca and Castor Cb) as two separate, distinct star entries in the catalog and system definitions rather than a single merged entry (`castor-c` is superseded by `castor-ca` and `castor-cb`).
+- **Confirmed Decision 3 (Dossier Header Navigation)**: Remove the `<select>` dropdown from the 3D Stellar System Dossier header, replacing it with a clean title header, system badge, metadata pill strip, and intuitive close/catalog return action.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Re-architects the astronomical comparison engine to treat celestial scale authentically. On mobile viewports, high-density spiral physics replace cumbersome linear queues; comparator grids balance themselves based on actual physical stellar diameters; and descending sorting offers a dramatic perspective starting from a sub-kilometer neutron star framing a hypergiant core.
-- **Target Audience**: Mobile and desktop astronomy researchers, students, and space enthusiasts exploring over a hundred real stars with accurate astrophysical scale ratios ($10^{-5}$ to $1,700\times R_\odot$).
-- **Key Value**: 60 FPS mobile WebGL rendering with zero overlap, natural visual hierarchy in comparison grids, and rapid touch inspection.
+### What It Does
+1. **Catalog Expansion**: Expands `MULTIPLE_STAR_SYSTEMS` from 14 to over 26 interactive multiple star systems, mapping binary, triple, and quadruple systems across the catalog with accurate orbital elements (semi-major axis, period, eccentricity, inclination, mass, temperature, and spectral types).
+2. **Double Star Precision**: Ensures double stars and sub-binaries (such as Castor Ca + Castor Cb) are listed as distinct individual stars with their own cards, physical attributes, and orbital trajectories, avoiding ambiguity.
+3. **Dossier Header Refinement**: Simplifies `StellarSystemDossierModal.tsx` by eliminating the dropdown switcher, focusing user attention on the active system's interactive 3D simulation and component breakdown.
+
+### Target Audience & Persona
+Stargazers, astronomy enthusiasts, educators, and students exploring celestial mechanics who expect rigorous astrophysics data, realistic orbital hierarchies, and consistent catalog navigation.
+
+### Key Value
+Seamless bidirectional discovery between individual stars in the catalog and their host multiple-star gravitational systems, without confusing merged entries or cluttered dropdowns.
 
 ---
 
 ## 2. User Experience & Visual Design
 
 ### Key User Flows
-
-1. **Mobile 3D Complete Catalog**:
-   - The user opens the 3D Stage on mobile and switches to or loads the "Complete Catalog" preset.
-   - The linear layout toggle is removed from the mobile UI. Spiral layout is active by default.
-   - Sorting by Size Ascending places neutron stars and white dwarfs at the center, spiraling out to Stephenson 2-18 and UY Scuti.
-   - Sorting by Size Descending places the giant at the center and winds outward to compact remnants. The camera automatically focuses on the smallest star, providing immediate contrast against the titan at the spiral origin.
-
-2. **Diameter-Weighted Comparison Grid (Catalog View)**:
-   - When browsing stars in comparison mode, items are distributed across rows by calculating cumulative star diameter ($\sum D_\odot$).
-   - A row with Stephenson 2-18 ($2,150\times D_\odot$) or Betelgeuse wraps after fewer items, whereas rows with main-sequence red dwarfs and white dwarfs allow more stars to sit comfortably together.
-   - On mobile, this produces balanced 2-column cards that avoid awkward empty space or extreme visual disparity.
-
-3. **Streamlined Top Bar**:
-   - The top header (`<header>`) retains the brand wordmark, catalog stats, and view switches, with the search button cleanly removed.
+1. **Browse Expanded Systems**: In Stellar Catalog > "Systems" subtab, users encounter an expanded grid of 26+ stellar systems (e.g. Luhman 16 Brown Dwarf Binary, VV Cephei Eclipsing Supergiant, Gliese 667 Habitable Triple, 40 Eridani Ancient Triple with Sirius-like white dwarf, 70 Ophiuchi, etc.).
+2. **Card Inspection**: Each system card showcases member count, distance in light-years, visual separation, and individual colored glowing dots representing each distinct star component.
+3. **Launch 3D Dossier**: Clicking any system card immediately launches `StellarSystemDossierModal`, presenting an unobstructed 3D stage with animated orbits, hierarchical barycenters, and interactive component cards.
+4. **Inspect Individual Stars**: Clicking any component star in the dossier immediately navigates to its full individual Star Dossier (`StarDossierModal`), with double stars (e.g., Castor Ca and Castor Cb) each having their own unique dossier.
 
 ### Visual Identity & Theme
-
-- **Aesthetic Direction**: Clinical astronomical observatory console with deep obsidian (`#07090E`), slate panels (`#0F172A`), and spectral phosphor accents (O-star electric cyan `#38BDF8`, M-star warm amber `#F59E0B`).
-- **Typography & Scale**: Neo-grotesque interface titles (`Plus Jakarta Sans`) with tabular monospace metrics (`tabular-nums font-mono`) for exact radii, luminosities, and distances.
-- **Touch Ergonomics**: All mobile card tap zones and button hitboxes maintain a minimum of $\ge 44\text{px}$.
+- **Dominant Palette**: Deep space obsidian (`#07090E` / `#0B0E17`) with cyan/blue accent borders (`border-cyan-500/25` and `text-cyan-400`), matching the catalog's unified design.
+- **Dossier Modal Header**:
+  - Clean title typography (`font-black text-white text-xl sm:text-2xl tracking-tight`).
+  - Badge strip showing system architecture (`Binary`, `Triple`, `Quadruple`, `Sextuple`) and star count (`2 Stars Bound`, `3 Stars Bound`).
+  - Monospace telemetry metadata (`font-mono text-xs text-cyan-200/70`) displaying constellation, distance, and angular separation.
+  - Smooth hover actions with close button (`✕`) providing immediate return to catalog grid.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Decision 1: Linear Mode Elimination on Mobile Complete Catalog**
-  - *Chosen Approach*: On viewports $<768\text{px}$, if `preset === 'all-stars-catalog'`, the linear layout option is hidden and disabled. Only Spiral layout is permitted.
-  - *Why*: In linear mode, placing 100+ stars of disparate scales along the X-axis requires panning across thousands of units, causing mobile touch jitter and severe WebGL frame drops.
-  - *Alternative Considered*: Clamping maximum linear distance; rejected because stars overlapped into an illegible ball.
+- **Decision 1: Removal of Dossier Dropdown**
+  - *Chosen Approach*: Completely remove the `<select>` switcher from `StellarSystemDossierModal.tsx`.
+  - *Why*: The dropdown created UI clutter on mobile screens and was redundant with the responsive Stellar Systems grid. Removing it creates an uncluttered header focused on the active system.
+  - *Alternatives Considered*: Retaining the dropdown or adding next/prev arrows, which was declined in Phase 1 in favor of a clean header.
 
-- **Decision 2: Bi-Directional Spiral Coordinate Math**
-  - *Chosen Approach*: Calculate spiral arm tangents ($r(\theta) = a + b\theta$) with chord-distance spacing based on adjacent stellar radii.
-    - Ascending: Center = $s_0$ (smallest), outer arm = $s_{N-1}$ (largest). Camera focuses on $s_0$.
-    - Descending: Center = $s_0$ (largest), outer arm = $s_{N-1}$ (smallest). Camera focuses on $s_{N-1}$ (smallest star), looking toward the center.
-  - *Why*: Gives users both comparative perspectives while guaranteeing zero sphere clipping or mesh collision.
+- **Decision 2: Sub-Component Resolution (Ca + Cb as Two Stars)**
+  - *Chosen Approach*: Ensure that sub-binaries and double stars are represented by two separate star entries (e.g. `castor-ca` and `castor-cb`), while removing redundant lumped entries (`castor-c`).
+  - *Why*: Astronomically, Castor C is a pair of red dwarfs (YY Geminorum A and B) mutually eclipsing each other every 19.5 hours. Listing them as two stars preserves physical fidelity and satisfies the explicit requirement.
 
-- **Decision 3: Cumulative Diameter Row Splitting**
-  - *Chosen Approach*: Compute row breaks dynamically: accumulate $\sum (\text{diameterSolar})^{0.6}$ (or calibrated visual footprint index) up to a max-per-row budget. When exceeded, the grid moves to the next row.
-  - *Why*: Linear star diameters vary by 6 orders of magnitude ($0.000015\times D_\odot$ to $2,150\times D_\odot$). Power-scaled cumulative diameter weighting prevents single giant stars from dominating an entire page while keeping dwarf groupings compact.
+- **Decision 3: Bidirectional Mapping**
+  - *Chosen Approach*: Update `STAR_TO_MULTIPLE_SYSTEM_MAP` for all new and existing member stars, so viewing any member in the catalog provides a one-click badge to launch its parent system dossier.
 
 ---
 
-## 4. Technical Architecture & Component Structure
+## 4. Technical Architecture & Data Strategy
+
+### Component & Data Hierarchy Diagram
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                              App.tsx                                   │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Header: Clean brand + View switcher (Search button removed)       │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                │                                       │
-│          ┌─────────────────────┴──────────────────────┐                │
-│          ▼                                            ▼                │
-│  ┌───────────────────────────────┐   ┌───────────────────────────────┐ │
-│  │       StarCanvas3D            │   │      Catalog Modal Overlay    │ │
-│  │  - Mobile detection (<768px)  │   │  - Diameter-weighted rows:    │ │
-│  │  - Complete Catalog logic:    │   │    Accumulate star diameters  │ │
-│  │    * Linear mode eliminated   │   │    per row with max budget    │ │
-│  │    * Spiral mode enforced     │   │  - Dense 2-col cards on mobile│ │
-│  │  - Bi-Directional Spiral:     │   │  - Compact tabular metrics    │ │
-│  │    * Asc: Smallest @ center   │   │    (temp, lum, dist, mass)    │ │
-│  │    * Desc: Largest @ center,  │   │  - Direct star selection      │ │
-│  │      camera on smallest star  │   │                               │ │
-│  └───────────────────────────────┘   └───────────────────────────────┘ │
-└────────────────────────────────────────────────────────────────────────┘
+│                        Stellar Catalog View                            │
+│  ┌─────────────────────────────┐      ┌─────────────────────────────┐  │
+│  │    "Stars" Subtab Grid      │      │   "Systems" Subtab Grid     │  │
+│  │  • Castor Ca [M0.5Ve]       │      │  • Castor Sextuple          │  │
+│  │  • Castor Cb [M0.5Ve]       │      │  • VV Cephei Binary         │  │
+│  │  • VV Cephei A [M2Iab]      │      │  • Luhman 16 Binary         │  │
+│  │  • VV Cephei B [B0-2V]      │      │  • Gliese 667 Triple        │  │
+│  │  • Luhman 16 A [L7.5]       │      │  • 40 Eridani Triple        │  │
+│  │  • Luhman 16 B [T0.5]       │      │  • 70 Ophiuchi Binary       │  │
+│  └──────────────┬──────────────┘      └──────────────┬──────────────┘  │
+└─────────────────┼────────────────────────────────────┼─────────────────┘
+                  │                                    │
+                  ▼                                    ▼
+       ┌───────────────────────┐            ┌───────────────────────┐
+       │   StarDossierModal    │◄───────────┤StellarSystemDossier   │
+       │   (Single Star 3D)    │            │(No dropdown, clean HUD│
+       └───────────────────────┘            └───────────────────────┘
 ```
 
-### Key Implementation Steps
-
-1. **Header Cleanup (`src/App.tsx`)**:
-   - Remove the search button element (`setIsCommandPaletteOpen(true)`) and search hotkey pill from the desktop header and mobile bar.
-
-2. **Mobile Layout & Bi-Directional Spiral (`src/components/StarCanvas3D.tsx`)**:
-   - In `starScales` computation, enable spiral layout on mobile (`isMob && isAllStars`).
-   - Eliminate `linear` mode option from mobile controls when complete catalog is active.
-   - Support both `isSizeAscending` and `isSizeDescending`:
-     - In ascending mode: center at radius 0, wind outward to largest. Target camera to smallest center star.
-     - In descending mode: center at radius 0 with largest star, wind outward with chord distance based on decreasing radii, ending with smallest star. Target camera focus to the smallest star at the spiral perimeter.
-   - In `resetCameraToStar`: when descending spiral activates, auto-focus onto `sortedStars[sortedStars.length - 1]` (the smallest star).
-
-3. **Cumulative Diameter-Weighted Comparison Rows (`src/App.tsx` & Catalog Components)**:
-   - Implement dynamic row grouping based on cumulative visual diameter footprint.
-   - For catalog comparison views, calculate row partitions and render responsive grids with balanced row heights and dense mobile 2-column distribution.
+### Data Files & Structures to Update
+1. `src/data/multipleStarSystemsData.ts`:
+   - Add new system definitions:
+     - `vv-cephei-system` (VV Cephei A + B)
+     - `luhman-16-system` (Luhman 16 A + B)
+     - `gliese-667-system` (Gliese 667 A + B + C)
+     - `40-eridani-system` (40 Eridani A + B + C)
+     - `70-ophiuchi-system` (70 Ophiuchi A + B)
+     - `stein-2051-system` (Stein 2051 A + B)
+     - `kruger-60-system` (Kruger 60 A + B)
+     - `ross-614-system` (Ross 614 A + B)
+     - `wolf-424-system` (Wolf 424 A + B)
+     - `ez-aquarii-system` (EZ Aquarii A + B + C)
+     - `16-cygni-system` (16 Cygni A + B + C)
+     - `xi-bootis-system` (Xi Boötis A + B)
+     - `acrux-system` (Acrux A + B)
+   - Update `STAR_TO_MULTIPLE_SYSTEM_MAP` with all new component IDs.
+2. `src/data/stars.ts`:
+   - Filter out legacy lumped double star `castor-c` so only `castor-ca` and `castor-cb` are presented in the individual star catalog.
+   - Ensure all complementary stars (`gliese-667-c`, `ez-aquarii-c`, `40-eridani-a`, `40-eridani-c`, `16-cygni-c`, etc.) are included in `STARS_CATALOG`.
+3. `src/components/StellarSystemDossierModal.tsx`:
+   - Remove `<select>` dropdown element and container.
+   - Clean up header typography and layout.

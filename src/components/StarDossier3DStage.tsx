@@ -1807,9 +1807,17 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
         onPointerUp={handlePointerUp}
         onWheel={handleWheel}
       >
+        {/* Ambient non-solid continuous starlight glow matching the hero image */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-30 transition-opacity duration-700"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, ${star.colorHex}22 0%, ${star.coronaColorHex || star.colorHex}10 35%, transparent 70%)`,
+            filter: 'blur(24px)',
+          }}
+        />
         <div 
           ref={containerRef} 
-          className={`w-full h-full pointer-events-auto transition-opacity duration-200 ${isModeSwitching ? 'opacity-30' : 'opacity-100'}`} 
+          className={`relative z-10 w-full h-full pointer-events-auto transition-opacity duration-200 ${isModeSwitching ? 'opacity-30' : 'opacity-100'}`} 
         />
 
         {/* Inspect HUD & Minimizable Controls (Moved to bottom right on mobile) */}

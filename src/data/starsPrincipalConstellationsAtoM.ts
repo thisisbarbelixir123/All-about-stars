@@ -1045,7 +1045,7 @@ export const STARS_PRINCIPAL_CONSTELLATIONS_A_TO_M: StarData[] = [
   makeStar({
     id: 'dalim',
     name: 'Dalim',
-    alternateNames: ['Alpha Fornacis', 'α For', 'HD 20010', 'HIP 14879', 'HR 963'],
+    alternateNames: ['Alpha Fornacis', 'Alpha Fornacis A', 'α For', 'α For A', '12 Fornacis', '12 Fornacis A', 'HD 20010', 'HIP 14879', 'HR 963'],
     bayerDesignation: 'α For',
     constellation: 'Fornax',
     diameterSolar: 1.9,
