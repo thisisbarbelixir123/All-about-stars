@@ -25,6 +25,7 @@ import {
   STAR_CONSTELLATION_LOCATIONS
 } from '../data/catalogStarsConstellationLocations';
 import { StarDot2D } from './StarDot2D';
+import { Constellation3DSkyDome } from './Constellation3DSkyDome';
 import {
   Sparkles,
   Compass,
@@ -75,6 +76,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   // Modal / drawer for expanded constellation info (Constellation Dossier)
   const [inspectedConstellation, setInspectedConstellation] = useState<ConstellationInfo | null>(null);
+  const [dossierViewMode, setDossierViewMode] = useState<'3d' | 'map'>('3d');
   const dossierScrollRef = useRef<HTMLDivElement>(null);
 
   // Guarantee constellation dossier scroll position resets to 0 when opened
@@ -272,13 +274,176 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return { traditional, astronomical, symbol, isOph, daysIn, desc };
   }, [calcMonth, calcDay]);
 
-  // SVG Renderer for Normal Asterism Mode (clean asterism shape for preview cards)
+  // Dynamic 2D Projection: Converts astronomical RA/Dec to true Gnomonic spherical projection coords (0-100 SVG)
+  // Fixes RA Wrap-Around: unwraps stars across the 0h/24h meridian when diff > 12h so lines take shortest path
+  const projectTo2D = (rawStars: any[]) => {
+    if (!rawStars || rawStars.length === 0) return [];
+    // If stars already have valid x and y coordinates, return them directly!
+    if (rawStars.every((s) => typeof s.x === 'number' && typeof s.y === 'number')) {
+      return rawStars;
+    }
+    if (rawStars.length === 1) {
+      return [{ ...rawStars[0], x: 50, y: 50 }];
+    }
+
+    // Fix RA Wrap-Around: Check absolute difference in Right Ascension (RA).
+    // If difference > 12 hours (or 180 degrees), constellation crosses 0h/24h meridian.
+    // Adjust coordinates by adding or subtracting 24h so the asterism takes the shortest path across the seam.
+    const refRa = rawStars[0].ra ?? 0;
+    const unwrappedStars = rawStars.map((s) => {
+      let adjRa = s.ra ?? 0;
+      const diff = adjRa - refRa;
+      if (diff > 12) {
+        adjRa -= 24;
+      } else if (diff < -12) {
+        adjRa += 24;
+      }
+      return { ...s, ra: adjRa, originalRa: s.ra, dec: s.dec ?? 0 };
+    });
+
+    // Convert unwrapped stars with RA and Dec to 3D Cartesian vectors on unit celestial sphere
+    const cartesian = unwrappedStars.map((s) => {
+      const alpha = s.ra * (Math.PI / 12.0); // 24h = 2pi
+      const delta = s.dec * (Math.PI / 180.0);
+      const cosDelta = Math.cos(delta);
+      return {
+        star: s,
+        alpha,
+        delta,
+        x: cosDelta * Math.cos(alpha),
+        y: cosDelta * Math.sin(alpha),
+        z: Math.sin(delta),
+      };
+    });
+
+    // Compute celestial center of the star group
+    let sumX = 0, sumY = 0, sumZ = 0;
+    for (const c of cartesian) {
+      sumX += c.x;
+      sumY += c.y;
+      sumZ += c.z;
+    }
+    const norm = Math.hypot(Math.hypot(sumX, sumY), sumZ);
+    const cx = norm > 1e-6 ? sumX / norm : 1;
+    const cy = norm > 1e-6 ? sumY / norm : 0;
+    const cz = norm > 1e-6 ? sumZ / norm : 0;
+
+    const centerDelta = Math.asin(Math.max(-1, Math.min(1, cz)));
+    const centerAlpha = Math.atan2(cy, cx);
+
+    const cosCenterDelta = Math.cos(centerDelta);
+    const sinCenterDelta = Math.sin(centerDelta);
+
+    // Gnomonic tangent plane projection: preserves Great Circles as straight lines and true aspect ratio
+    const projected = cartesian.map((c) => {
+      let dAlpha = c.alpha - centerAlpha;
+      while (dAlpha > Math.PI) dAlpha -= 2 * Math.PI;
+      while (dAlpha < -Math.PI) dAlpha += 2 * Math.PI;
+
+      const u = Math.cos(c.delta) * Math.sin(dAlpha);
+      const v = cosCenterDelta * Math.sin(c.delta) - sinCenterDelta * Math.cos(c.delta) * Math.cos(dAlpha);
+      const w = sinCenterDelta * Math.sin(c.delta) + cosCenterDelta * Math.cos(c.delta) * Math.cos(dAlpha);
+      const safeW = w > 0.05 ? w : 0.05;
+
+      return {
+        star: c.star,
+        u: u / safeW,
+        v: v / safeW,
+      };
+    });
+
+    let maxExtent = 0.001;
+    for (const p of projected) {
+      if (Math.abs(p.u) > maxExtent) maxExtent = Math.abs(p.u);
+      if (Math.abs(p.v) > maxExtent) maxExtent = Math.abs(p.v);
+    }
+
+    const scale = 35.0 / Math.max(maxExtent, 0.015);
+
+    // Astronomical convention: East (increasing RA, +u) is Left, North (increasing Dec, +v) is Top
+    return projected.map((p) => ({
+      ...p.star,
+      ra: p.star.originalRa ?? p.star.ra,
+      x: Math.round((50 - p.u * scale) * 10) / 10,
+      y: Math.round((50 - p.v * scale) * 10) / 10,
+    }));
+  };
+
+  /**
+   * Enforces strictly orthogonal IAU constellation boundaries.
+   * Ensures the boundary is parsed and rendered exclusively as horizontal
+   * (constant Declination) and vertical (constant Right Ascension) segments,
+   * preventing any diagonal interpolation.
+   */
+  const buildOrthogonalBoundary = (polygon: Array<{ x: number; y: number }>): {
+    pathData: string;
+    orthogonalPoints: Array<{ x: number; y: number }>;
+  } => {
+    if (!polygon || polygon.length === 0) {
+      return { pathData: '', orthogonalPoints: [] };
+    }
+
+    const orthogonalPoints: Array<{ x: number; y: number }> = [];
+    const n = polygon.length;
+
+    for (let i = 0; i < n; i++) {
+      const curr = polygon[i];
+      const next = polygon[(i + 1) % n];
+
+      // Add current vertex if not identical to the last one
+      if (
+        orthogonalPoints.length === 0 ||
+        orthogonalPoints[orthogonalPoints.length - 1].x !== curr.x ||
+        orthogonalPoints[orthogonalPoints.length - 1].y !== curr.y
+      ) {
+        orthogonalPoints.push({ x: curr.x, y: curr.y });
+      }
+
+      // If segment between curr and next is non-orthogonal (diagonal):
+      // Prevent diagonal interpolation by inserting an intermediate orthogonal step!
+      // Horizontal segment (constant Dec) to next.x, then Vertical segment (constant RA) to next.y
+      if (curr.x !== next.x && curr.y !== next.y) {
+        orthogonalPoints.push({ x: next.x, y: curr.y });
+      }
+    }
+
+    // Construct strictly orthogonal SVG path using exclusively H (horizontal) and V (vertical)
+    if (orthogonalPoints.length === 0) return { pathData: '', orthogonalPoints: [] };
+
+    let d = `M ${orthogonalPoints[0].x} ${orthogonalPoints[0].y}`;
+    for (let i = 1; i < orthogonalPoints.length; i++) {
+      const pt = orthogonalPoints[i];
+      const prev = orthogonalPoints[i - 1];
+      if (pt.y === prev.y) {
+        d += ` H ${pt.x}`;
+      } else if (pt.x === prev.x) {
+        d += ` V ${pt.y}`;
+      } else {
+        d += ` H ${pt.x} V ${pt.y}`;
+      }
+    }
+    const last = orthogonalPoints[orthogonalPoints.length - 1];
+    const start = orthogonalPoints[0];
+    if (last.x !== start.x && last.y !== start.y) {
+      d += ` H ${start.x} V ${start.y}`;
+    } else if (last.y === start.y && last.x !== start.x) {
+      d += ` H ${start.x}`;
+    } else if (last.x === start.x && last.y !== start.y) {
+      d += ` V ${start.y}`;
+    }
+    d += ' Z';
+
+    return { pathData: d, orthogonalPoints };
+  };
+
+  // SVG Renderer for Normal Asterism Mode
   const renderNormalAsterism = (
     constellation: ConstellationInfo,
     size = 110,
     className = ''
   ) => {
-    const { stars, lines } = constellation.shape;
+    const { lines } = constellation.shape;
+    const mappedStars = projectTo2D(constellation.shape.stars);
 
     return (
       <svg
@@ -287,23 +452,49 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         height={size}
         className={`overflow-visible drop-shadow-[0_0_8px_rgba(6,182,212,0.35)] ${className}`}
       >
-        {/* Subtle background coordinate circle and axes */}
         <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(56, 189, 248, 0.07)" strokeDasharray="2 3" />
         <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(56, 189, 248, 0.05)" />
         <line x1="8" y1="50" x2="92" y2="50" stroke="rgba(56, 189, 248, 0.05)" />
 
-        {/* Connecting Asterism Stick Lines */}
+        {/* Connecting Asterism Stick Lines with RA Wrap-Around Fix */}
         {lines.map(([fromIdx, toIdx], lineIdx) => {
-          const from = stars[fromIdx];
-          const to = stars[toIdx];
+          const from = mappedStars[fromIdx];
+          const to = mappedStars[toIdx];
           if (!from || !to) return null;
+
+          const fromStar = constellation.shape.stars[fromIdx];
+          const toStar = constellation.shape.stars[toIdx];
+          const ra1 = fromStar?.ra ?? from.ra ?? 0;
+          const ra2 = toStar?.ra ?? to.ra ?? 0;
+          const raDiff = Math.abs(ra1 - ra2);
+
+          let x1 = from.x;
+          let y1 = from.y;
+          let x2 = to.x;
+          let y2 = to.y;
+
+          // If stars cross 0h/24h meridian and coordinates cut backwards across map, take shortest path across seam
+          if (raDiff > 12 && Math.abs(x1 - x2) > 40) {
+            const seamX = x1 < x2 ? 0 : 100;
+            const otherSeamX = x1 < x2 ? 100 : 0;
+            const t = (seamX - x1) / ((x2 - 100 * Math.sign(x2 - x1)) - x1 || 1);
+            const midY = y1 + (y2 - y1) * Math.max(0, Math.min(1, Math.abs(t)));
+
+            return (
+              <g key={lineIdx}>
+                <line x1={x1} y1={y1} x2={seamX} y2={midY} stroke="#38bdf8" strokeWidth="0.85" strokeOpacity="0.85" strokeLinecap="round" />
+                <line x1={otherSeamX} y1={midY} x2={x2} y2={y2} stroke="#38bdf8" strokeWidth="0.85" strokeOpacity="0.85" strokeLinecap="round" />
+              </g>
+            );
+          }
+
           return (
             <line
               key={lineIdx}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               stroke="#38bdf8"
               strokeWidth="0.85"
               strokeOpacity="0.85"
@@ -313,30 +504,16 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         })}
 
         {/* Glowing Star Nodes */}
-        {stars.map((s, starIdx) => {
+        {mappedStars.map((s, starIdx) => {
           const isPrincipal = s.isPrincipal;
           const radius = isPrincipal ? 3.4 : 2.0;
           return (
             <g key={starIdx}>
               <title>{s.name || `Star ${starIdx + 1}`}</title>
               {isPrincipal && (
-                <circle
-                  cx={s.x}
-                  cy={s.y}
-                  r="6.5"
-                  fill="#06b6d4"
-                  fillOpacity="0.3"
-                  className="animate-pulse"
-                />
+                <circle cx={s.x} cy={s.y} r="6.5" fill="#06b6d4" fillOpacity="0.3" className="animate-pulse" />
               )}
-              <circle
-                cx={s.x}
-                cy={s.y}
-                r={radius}
-                fill={isPrincipal ? '#fef08a' : '#ffffff'}
-                stroke={isPrincipal ? '#06b6d4' : '#38bdf8'}
-                strokeWidth="0.7"
-              />
+              <circle cx={s.x} cy={s.y} r={radius} fill={isPrincipal ? '#fef08a' : '#ffffff'} stroke={isPrincipal ? '#06b6d4' : '#38bdf8'} strokeWidth="0.7" />
             </g>
           );
         })}
@@ -346,7 +523,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   // Helper to resolve a StarData record for any figure node
   const resolveStarForFigureNode = (
-    starNode: { x: number; y: number; name?: string; isPrincipal?: boolean; mag?: number; catalogStarId?: string },
+    starNode: { x?: number; y?: number; ra?: number; dec?: number; name?: string; isPrincipal?: boolean; mag?: number; catalogStarId?: string },
     constellation: ConstellationInfo,
     catalogStars: StarData[]
   ): StarData | null => {
@@ -456,11 +633,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     constellation: ConstellationInfo,
     catalogStars: StarData[] = STARS_CATALOG
   ): { visibleStars: VisibleFigureStar[]; catalogPlacedCount: number } => {
-    const { stars } = constellation.shape;
+    const mappedStars = projectTo2D(constellation.shape.stars);
     const extraFigureStars = EXTRA_CATALOG_FIGURE_STARS[constellation.id] || [];
 
     const candidates: VisibleFigureStar[] = [
-      ...stars.map((s, idx) => {
+      ...mappedStars.map((s, idx) => {
         const parsed = parseStarLabel(s.name || '');
         const catalogStar = resolveStarForFigureNode(s, constellation, catalogStars);
         const apparentMag = catalogStar
@@ -587,11 +764,12 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       showNeighborGuides: customOptions?.showNeighborGuides ?? (isLarge ? skyMapOptions.showNeighborGuides : true),
     };
 
-    const { stars, lines } = constellation.shape;
+    const { lines } = constellation.shape;
+    const mappedStars = projectTo2D(constellation.shape.stars);
     const { visibleStars } = getConstellationVisibleFigureStars(constellation, STARS_CATALOG);
     const border = constellation.borders;
     const polygon = border?.boundaryPolygon || [];
-    const polygonPointsString = polygon.map((p) => `${p.x},${p.y}`).join(' ');
+    const { pathData: boundaryPathData, orthogonalPoints: orthoBoundaryPoints } = buildOrthogonalBoundary(polygon);
     const neighbors = border?.borderingConstellations || [];
     const neighborCount = neighbors.length;
 
@@ -756,18 +934,18 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             {constellation.id === 'serpens' && border?.sectors ? (
               <g className="serpens-dual-sectors">
                 {border.sectors.map((sec, sIdx) => {
-                  const secPts = sec.boundaryPolygon.map((p) => `${p.x},${p.y}`).join(' ');
+                  const { pathData: secPathData, orthogonalPoints: secOrthoPoints } = buildOrthogonalBoundary(sec.boundaryPolygon);
                   const isCaput = sec.shortCode === 'Ser-Cap';
                   return (
                     <g key={`sec-${sIdx}`}>
-                      <polygon
-                        points={secPts}
+                      <path
+                        d={secPathData}
                         fill="rgba(6, 182, 212, 0.12)"
                         stroke="#06b6d4"
                         strokeWidth="0.65"
                         strokeDasharray="2.5 1.5"
                       />
-                      {sec.boundaryPolygon.map((pt, idx) => (
+                      {secOrthoPoints.map((pt, idx) => (
                         <g key={`sec-pt-${sIdx}-${idx}`}>
                           <circle cx={pt.x} cy={pt.y} r="1.0" fill="#06b6d4" stroke="#020512" strokeWidth="0.35" />
                         </g>
@@ -871,16 +1049,16 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </g>
             ) : polygon.length > 2 ? (
               <g className="delporte-stepped-boundary">
-                {/* Stepped Delporte territory fill */}
-                <polygon
-                  points={polygonPointsString}
+                {/* Stepped Delporte territory fill with strictly orthogonal boundaries */}
+                <path
+                  d={boundaryPathData}
                   fill="rgba(6, 182, 212, 0.11)"
                   stroke="#06b6d4"
                   strokeWidth="0.65"
                   strokeDasharray="2.5 1.5"
                 />
                 {/* Corner vertex nodes with coordinate dots */}
-                {polygon.map((pt, idx) => (
+                {orthoBoundaryPoints.map((pt, idx) => (
                   <g key={`bpt-${idx}`}>
                     <circle
                       cx={pt.x}
@@ -929,18 +1107,63 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </g>
         ))}
 
-        {/* 6. Connecting Asterism Stick Lines */}
+        {/* 6. Connecting Asterism Stick Lines with RA Wrap-Around Fix */}
         {lines.map(([fromIdx, toIdx], lineIdx) => {
-          const from = stars[fromIdx];
-          const to = stars[toIdx];
+          const from = mappedStars[fromIdx];
+          const to = mappedStars[toIdx];
           if (!from || !to) return null;
+
+          const fromStar = constellation.shape.stars[fromIdx];
+          const toStar = constellation.shape.stars[toIdx];
+          const ra1 = fromStar?.ra ?? from.ra ?? 0;
+          const ra2 = toStar?.ra ?? to.ra ?? 0;
+          const raDiff = Math.abs(ra1 - ra2);
+
+          let x1 = from.x;
+          let y1 = from.y;
+          let x2 = to.x;
+          let y2 = to.y;
+
+          // If stars cross 0h/24h meridian and coordinates cut backwards across map, take shortest path across seam
+          if (raDiff > 12 && Math.abs(x1 - x2) > 40) {
+            const seamX = x1 < x2 ? 0 : 100;
+            const otherSeamX = x1 < x2 ? 100 : 0;
+            const t = (seamX - x1) / ((x2 - 100 * Math.sign(x2 - x1)) - x1 || 1);
+            const midY = y1 + (y2 - y1) * Math.max(0, Math.min(1, Math.abs(t)));
+
+            return (
+              <g key={lineIdx}>
+                <line
+                  x1={x1}
+                  y1={y1}
+                  x2={seamX}
+                  y2={midY}
+                  stroke="#38bdf8"
+                  strokeWidth={isLarge ? "0.65" : "1.1"}
+                  strokeOpacity="0.82"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1={otherSeamX}
+                  y1={midY}
+                  x2={x2}
+                  y2={y2}
+                  stroke="#38bdf8"
+                  strokeWidth={isLarge ? "0.65" : "1.1"}
+                  strokeOpacity="0.82"
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          }
+
           return (
             <line
               key={lineIdx}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               stroke="#38bdf8"
               strokeWidth={isLarge ? "0.65" : "1.1"}
               strokeOpacity="0.82"
@@ -2032,111 +2255,139 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left Column: Constellation Exact Boundary & Neighbors Canvas */}
                 <div className="lg:col-span-7 flex flex-col gap-3">
-                  {/* Astrometric Sky Map Controls Toolbar - Comprised and minimized on mobile */}
+                  {/* Constellation Dossier Viewport Controls Toolbar */}
                   <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono">
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
-                      <span className="font-bold text-white uppercase tracking-wider text-[10px] sm:text-xs">
-                        <span className="sm:hidden">Sky Layers</span>
-                        <span className="hidden sm:inline">Astrometric Sky Map</span>
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-[9px] sm:text-[10px] hidden md:inline">
-                        IAU Delporte 1930
-                      </span>
-                    </div>
-
-                    {/* Interactive Layer Toggles - Compact & horizontally scrollable without breaking on mobile */}
-                    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full py-0.5">
+                    {/* View Mode Toggle: 3D Sky Dome vs Astrometric Map */}
+                    <div className="flex items-center p-0.5 rounded-lg bg-slate-950 border border-slate-800 shrink-0 shadow-inner">
                       <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showGraticule: !prev.showGraticule }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showGraticule
-                            ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                        onClick={() => setDossierViewMode('3d')}
+                        className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          dossierViewMode === '3d'
+                            ? 'bg-cyan-500 text-slate-950 shadow-sm shadow-cyan-950 font-black'
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Toggle Coordinate Graticule (RA/Dec Grid)"
+                        title="Interactive 3D Night Sky Celestial Dome with true spherical Great Circle arcs"
                       >
-                        <Grid className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Grid</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showGraticule ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                        <span>3D Sky Dome</span>
                       </button>
 
                       <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showBoundaries: !prev.showBoundaries }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showBoundaries
-                            ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                        onClick={() => setDossierViewMode('map')}
+                        className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          dossierViewMode === 'map'
+                            ? 'bg-cyan-500 text-slate-950 shadow-sm shadow-cyan-950 font-black'
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Toggle IAU Delporte Stepped Orthogonal Boundaries"
+                        title="2D Astrometric Sky Chart with Delporte boundaries, graticules & DSOs"
                       >
-                        <Layers className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Borders</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showBoundaries ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
-                      </button>
-
-                      <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showStarLabels: !prev.showStarLabels }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showStarLabels
-                            ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
-                        }`}
-                        title="Toggle Star Bayer Designations and Proper Names"
-                      >
-                        <Tag className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Stars</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showStarLabels ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
-                      </button>
-
-                      <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showEquatorEcliptic: !prev.showEquatorEcliptic }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showEquatorEcliptic
-                            ? 'bg-cyan-950/90 text-amber-300 border border-amber-500/50 shadow-sm'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
-                        }`}
-                        title="Toggle 0° Celestial Equator and Solar Ecliptic Lines"
-                      >
-                        <Orbit className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Ecliptic</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showEquatorEcliptic ? 'bg-amber-400' : 'bg-slate-600'} xs:hidden`} />
-                      </button>
-
-                      <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDeepSky: !prev.showDeepSky }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showDeepSky
-                            ? 'bg-rose-950/80 text-rose-300 border border-rose-500/50 shadow-sm'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
-                        }`}
-                        title="Toggle Iconic Messier / NGC Deep Sky Objects (Nebulae, Galaxies, Clusters)"
-                      >
-                        <Sparkles className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">DSO</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showDeepSky ? 'bg-rose-400' : 'bg-slate-600'} xs:hidden`} />
-                      </button>
-
-                      <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showNeighborGuides: !prev.showNeighborGuides }))}
-                        className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-                          skyMapOptions.showNeighborGuides
-                            ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm'
-                            : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
-                        }`}
-                        title="Toggle Adjacent Constellation Perimeter Guides"
-                      >
-                        <Navigation className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Neighbors</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showNeighborGuides ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        <Compass className="w-3.5 h-3.5 shrink-0" />
+                        <span>Astrometric Map</span>
                       </button>
                     </div>
+
+                    {/* Mode specific toolbar right section */}
+                    {dossierViewMode === 'map' ? (
+                      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full py-0.5">
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showGraticule: !prev.showGraticule }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showGraticule
+                              ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle Coordinate Graticule (RA/Dec Grid)"
+                        >
+                          <Grid className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">Grid</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showGraticule ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showBoundaries: !prev.showBoundaries }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showBoundaries
+                              ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle IAU Delporte Stepped Orthogonal Boundaries"
+                        >
+                          <Layers className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">Borders</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showBoundaries ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showStarLabels: !prev.showStarLabels }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showStarLabels
+                              ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle Star Bayer Designations and Proper Names"
+                        >
+                          <Tag className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">Stars</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showStarLabels ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showEquatorEcliptic: !prev.showEquatorEcliptic }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showEquatorEcliptic
+                              ? 'bg-cyan-950/90 text-amber-300 border border-amber-500/50 shadow-sm'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle 0° Celestial Equator and Solar Ecliptic Lines"
+                        >
+                          <Orbit className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">Ecliptic</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showEquatorEcliptic ? 'bg-amber-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDeepSky: !prev.showDeepSky }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showDeepSky
+                              ? 'bg-rose-950/80 text-rose-300 border border-rose-500/50 shadow-sm'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle Iconic Messier / NGC Deep Sky Objects"
+                        >
+                          <Sparkles className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">DSO</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showDeepSky ? 'bg-rose-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+
+                        <button
+                          onClick={() => setSkyMapOptions((prev) => ({ ...prev, showNeighborGuides: !prev.showNeighborGuides }))}
+                          className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                            skyMapOptions.showNeighborGuides
+                              ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                              : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200'
+                          }`}
+                          title="Toggle Adjacent Constellation Perimeter Guides"
+                        >
+                          <Navigation className="w-3 h-3 shrink-0" />
+                          <span className="hidden xs:inline sm:inline">Neighbors</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showNeighborGuides ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-cyan-400/90">
+                        <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="hidden sm:inline">Spherical Great Circle Geodesics</span>
+                        <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-[9px]">
+                          3D Celestial Dome
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Constellation Border Visualizer Banner - expanded viewport on mobile portrait & clickable full figure */}
+                  {/* Constellation Visualizer Banner - 3D Night Sky Dome & 2D Astrometric Map */}
                   <div className="w-full h-[410px] sm:h-[450px] md:h-[500px] lg:h-[560px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
                     {/* Astrometric Metadata Header Badge */}
-                    <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
+                    <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
                       <span className="text-cyan-300 font-semibold uppercase">{inspectedConstellation.name}</span>
                       <span className="text-slate-500">•</span>
                       <span>RA {inspectedConstellation.borders.raRange.split('|')[0].trim()}</span>
@@ -2144,16 +2395,24 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       <span className="hidden sm:inline">Dec {inspectedConstellation.borders.decRange.split('|')[0].trim()}</span>
                     </div>
 
-                    <div className="flex items-center justify-center w-full h-full p-1.5 sm:p-4">
-                      {renderConstellationShape(
-                        inspectedConstellation,
-                        520,
-                        'w-full h-full max-h-[410px] sm:max-h-[520px]',
-                        (neighbor) => setInspectedConstellation(neighbor),
-                        undefined,
-                        (star) => onSelectStar(star)
-                      )}
-                    </div>
+                    {dossierViewMode === '3d' ? (
+                      <Constellation3DSkyDome
+                        constellation={inspectedConstellation}
+                        onSelectStar={onSelectStar}
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-full h-full p-1.5 sm:p-4">
+                        {renderConstellationShape(
+                          inspectedConstellation,
+                          520,
+                          'w-full h-full max-h-[410px] sm:max-h-[520px]',
+                          (neighbor) => setInspectedConstellation(neighbor),
+                          undefined,
+                          (star) => onSelectStar(star)
+                        )}
+                      </div>
+                    )}
 
                     {/* Figure & Asterism Badge */}
                     {(() => {

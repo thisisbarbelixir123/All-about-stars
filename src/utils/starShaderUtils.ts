@@ -793,10 +793,11 @@ export const createStarMeshGroup = (
   return starGroup;
 };
 
-import { STARS_SOLAR_NEIGHBORS } from '../data/starsSolarNeighbors';
+import { STARS_CATALOG } from '../data/stars';
 
 /**
  * Standard reference data for our Sun (Sol) with 100% exact properties
  */
-export const SUN_REFERENCE_STAR: StarData = STARS_SOLAR_NEIGHBORS[0];
+export const SUN_REFERENCE_STAR: StarData = STARS_CATALOG.find((s) => s.id === 'sun') || STARS_CATALOG[0];
+
 

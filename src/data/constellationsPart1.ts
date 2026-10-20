@@ -21,12 +21,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 80, name: 'Alpheratz', isPrincipal: true, mag: 2.06 },
-        { x: 45, y: 60, name: 'Delta And' },
-        { x: 60, y: 40, name: 'Mirach' },
-        { x: 80, y: 25, name: 'Almach' },
-        { x: 65, y: 70, name: 'Mu And' },
-        { x: 50, y: 30, name: 'Pi And' }
+        { ra: 0.1398, dec: 29.0904, name: 'Alpheratz', isPrincipal: true, mag: 2.06 },
+        { ra: 0.6554, dec: 30.861, name: 'Delta And' },
+        { ra: 1.1622, dec: 35.6206, name: 'Mirach' },
+        { ra: 2.065, dec: 42.3297, name: 'Almach' },
+        { ra: 0.9459, dec: 38.4993, name: 'Mu And' },
+        { ra: 0.6147, dec: 33.7193, name: 'Pi And' }
       ],
       lines: [
         [0, 1],
@@ -60,9 +60,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 25, name: 'Alpha Ant', isPrincipal: true, mag: 4.25 },
-        { x: 40, y: 60, name: 'Epsilon Ant' },
-        { x: 65, y: 75, name: 'Iota Ant' }
+        { ra: 10.4525, dec: -31.0678, name: 'Alpha Ant', isPrincipal: true, mag: 4.25 },
+        { ra: 9.4874, dec: -35.9513, name: 'Epsilon Ant' },
+        { ra: 10.9453, dec: -37.1378, name: 'Iota Ant' }
       ],
       lines: [
         [0, 1],
@@ -93,10 +93,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 75, y: 30, name: 'Alpha Aps', isPrincipal: true, mag: 3.83 },
-        { x: 50, y: 55, name: 'Gamma Aps' },
-        { x: 30, y: 70, name: 'Beta Aps' },
-        { x: 55, y: 80, name: 'Delta Aps' }
+        { ra: 14.7977, dec: -79.0448, name: 'Alpha Aps', isPrincipal: true, mag: 3.83 },
+        { ra: 16.5575, dec: -78.8971, name: 'Gamma Aps' },
+        { ra: 16.718, dec: -77.5174, name: 'Beta Aps' },
+        { ra: 16.3391, dec: -78.6957, name: 'Delta Aps' }
       ],
       lines: [
         [0, 1],
@@ -130,12 +130,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     zodiacDates: 'Feb 16 – Mar 11 (Astro) / Jan 20 – Feb 18 (Trad)',
     shape: {
       stars: [
-        { x: 30, y: 30, name: 'Sadalsuud', isPrincipal: true, mag: 2.87 },
-        { x: 45, y: 32, name: 'Sadalmelik' },
-        { x: 60, y: 35, name: 'Eta Aqr' },
-        { x: 70, y: 40, name: 'Zeta Aqr' },
-        { x: 65, y: 65, name: 'Delta Aqr (Skat)' },
-        { x: 40, y: 75, name: 'Lambda Aqr' }
+        { ra: 21.526, dec: -5.5712, name: 'Sadalsuud', isPrincipal: true, mag: 2.87 },
+        { ra: 22.0964, dec: -0.3199, name: 'Sadalmelik' },
+        { ra: 22.5893, dec: -0.1175, name: 'Eta Aqr' },
+        { ra: 22.4805, dec: -0.0199, name: 'Zeta Aqr' },
+        { ra: 22.9108, dec: -15.8208, name: 'Delta Aqr (Skat)' },
+        { ra: 22.8769, dec: -7.5796, name: 'Lambda Aqr' }
       ],
       lines: [
         [0, 1],
@@ -169,12 +169,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 45, name: 'Altair', isPrincipal: true, mag: 0.77 },
-        { x: 45, y: 35, name: 'Tarazed' },
-        { x: 55, y: 55, name: 'Alshain' },
-        { x: 25, y: 35, name: 'Zeta Aql' },
-        { x: 75, y: 65, name: 'Theta Aql' },
-        { x: 50, y: 80, name: 'Lambda Aql' }
+        { ra: 19.8464, dec: 8.8683, name: 'Altair', isPrincipal: true, mag: 0.77 },
+        { ra: 19.771, dec: 10.6133, name: 'Tarazed' },
+        { ra: 19.9219, dec: 6.4068, name: 'Alshain' },
+        { ra: 19.0902, dec: 13.8635, name: 'Zeta Aql' },
+        { ra: 20.1884, dec: -0.8215, name: 'Theta Aql' },
+        { ra: 19.1041, dec: -4.8826, name: 'Lambda Aql' }
       ],
       lines: [
         [1, 0],
@@ -208,11 +208,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 40, y: 30, name: 'Beta Ara', isPrincipal: true, mag: 2.85 },
-        { x: 60, y: 30, name: 'Alpha Ara' },
-        { x: 45, y: 70, name: 'Gamma Ara' },
-        { x: 65, y: 65, name: 'Zeta Ara' },
-        { x: 35, y: 85, name: 'Epsilon Ara' }
+        { ra: 17.4217, dec: -55.5299, name: 'Beta Ara', isPrincipal: true, mag: 2.85 },
+        { ra: 17.5307, dec: -49.8761, name: 'Alpha Ara' },
+        { ra: 17.4232, dec: -56.3777, name: 'Gamma Ara' },
+        { ra: 16.977, dec: -55.9901, name: 'Zeta Ara' },
+        { ra: 16.9931, dec: -53.1604, name: 'Epsilon Ara' }
       ],
       lines: [
         [0, 1],
@@ -248,10 +248,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     zodiacDates: 'Apr 18 – May 13 (Astro) / Mar 21 – Apr 19 (Trad)',
     shape: {
       stars: [
-        { x: 75, y: 35, name: 'Hamal', isPrincipal: true, mag: 2.01 },
-        { x: 55, y: 48, name: 'Sheratan' },
-        { x: 40, y: 60, name: 'Mesarthim' },
-        { x: 25, y: 70, name: '41 Arietis' }
+        { ra: 2.1196, dec: 23.4624, name: 'Hamal', isPrincipal: true, mag: 2.01 },
+        { ra: 1.9107, dec: 20.808, name: 'Sheratan' },
+        { ra: 1.8922, dec: 19.2939, name: 'Mesarthim' },
+        { ra: 2.8331, dec: 27.2605, name: '41 Arietis' }
       ],
       lines: [
         [0, 1],
@@ -283,11 +283,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 20, name: 'Capella', isPrincipal: true, mag: 0.08 },
-        { x: 30, y: 40, name: 'Menkalinan' },
-        { x: 25, y: 75, name: 'Theta Aur' },
-        { x: 60, y: 85, name: 'Elnath (shared)' },
-        { x: 75, y: 55, name: 'Iota Aur' }
+        { ra: 5.2782, dec: 45.998, name: 'Capella', isPrincipal: true, mag: 0.08 },
+        { ra: 5.9921, dec: 44.9474, name: 'Menkalinan' },
+        { ra: 5.9954, dec: 37.2126, name: 'Theta Aur' },
+        { ra: 5.4382, dec: 28.6075, name: 'Elnath (shared)' },
+        { ra: 4.9499, dec: 33.1661, name: 'Iota Aur' }
       ],
       lines: [
         [0, 1],
@@ -321,12 +321,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 85, name: 'Arcturus', isPrincipal: true, mag: -0.05 },
-        { x: 35, y: 60, name: 'Epsilon Boo (Izar)' },
-        { x: 65, y: 60, name: 'Eta Boo (Muphrid)' },
-        { x: 40, y: 35, name: 'Delta Boo' },
-        { x: 60, y: 35, name: 'Beta Boo (Nekkar)' },
-        { x: 50, y: 15, name: 'Gamma Boo (Seginus)' }
+        { ra: 14.261, dec: 19.1824, name: 'Arcturus', isPrincipal: true, mag: -0.05 },
+        { ra: 14.7498, dec: 27.0742, name: 'Epsilon Boo (Izar)' },
+        { ra: 13.9114, dec: 18.3977, name: 'Eta Boo (Muphrid)' },
+        { ra: 15.2584, dec: 33.3148, name: 'Delta Boo' },
+        { ra: 15.0324, dec: 40.3906, name: 'Beta Boo (Nekkar)' },
+        { ra: 14.5346, dec: 38.3082, name: 'Gamma Boo (Seginus)' }
       ],
       lines: [
         [0, 1],
@@ -361,9 +361,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 25, name: 'Alpha Cae', isPrincipal: true, mag: 4.45 },
-        { x: 40, y: 60, name: 'Gamma Cae' },
-        { x: 65, y: 80, name: 'Beta Cae' }
+        { ra: 4.676, dec: -41.8638, name: 'Alpha Cae', isPrincipal: true, mag: 4.45 },
+        { ra: 5.0734, dec: -35.483, name: 'Gamma Cae' },
+        { ra: 4.701, dec: -37.1443, name: 'Beta Cae' }
       ],
       lines: [
         [0, 1],
@@ -394,10 +394,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 75, name: 'Beta Cam', isPrincipal: true, mag: 4.02 },
-        { x: 60, y: 50, name: 'Alpha Cam' },
-        { x: 40, y: 30, name: '7 Cam' },
-        { x: 30, y: 15, name: 'Gamma Cam' }
+        { ra: 5.057, dec: 60.4422, name: 'Beta Cam', isPrincipal: true, mag: 4.02 },
+        { ra: 4.9008, dec: 66.3427, name: 'Alpha Cam' },
+        { ra: 4.9548, dec: 53.7521, name: '7 Cam' },
+        { ra: 3.8393, dec: 71.3323, name: 'Gamma Cam' }
       ],
       lines: [
         [0, 1],
@@ -431,11 +431,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     zodiacDates: 'Jul 21 – Aug 10 (Astro) / Jun 21 – Jul 22 (Trad)',
     shape: {
       stars: [
-        { x: 50, y: 50, name: 'Praesepe / Delta Cnc' },
-        { x: 50, y: 80, name: 'Beta Cnc (Tarf)', isPrincipal: true, mag: 3.52 },
-        { x: 40, y: 30, name: 'Gamma Cnc' },
-        { x: 70, y: 25, name: 'Iota Cnc' },
-        { x: 25, y: 65, name: 'Alpha Cnc (Acubens)' }
+        { ra: 8.7447, dec: 18.1543, name: 'Praesepe / Delta Cnc' },
+        { ra: 8.2753, dec: 9.1855, name: 'Beta Cnc (Tarf)', isPrincipal: true, mag: 3.52 },
+        { ra: 8.7214, dec: 21.4685, name: 'Gamma Cnc' },
+        { ra: 8.7783, dec: 28.7599, name: 'Iota Cnc' },
+        { ra: 8.9748, dec: 11.8577, name: 'Alpha Cnc (Acubens)' }
       ],
       lines: [
         [1, 0],
@@ -468,8 +468,8 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 60, y: 60, name: 'Cor Caroli', isPrincipal: true, mag: 2.89 },
-        { x: 40, y: 35, name: 'Chara (Beta CVn)' }
+        { ra: 12.9338, dec: 38.3184, name: 'Cor Caroli', isPrincipal: true, mag: 2.89 },
+        { ra: 12.5624, dec: 41.3575, name: 'Chara (Beta CVn)' }
       ],
       lines: [[0, 1]]
     },
@@ -497,11 +497,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 25, name: 'Sirius', isPrincipal: true, mag: -1.46 },
-        { x: 30, y: 35, name: 'Murzim' },
-        { x: 55, y: 60, name: 'Wezen' },
-        { x: 40, y: 80, name: 'Adhara' },
-        { x: 70, y: 80, name: 'Aludra' }
+        { ra: 6.7525, dec: -16.7161, name: 'Sirius', isPrincipal: true, mag: -1.46 },
+        { ra: 6.3783, dec: -17.9559, name: 'Murzim' },
+        { ra: 7.1399, dec: -26.3932, name: 'Wezen' },
+        { ra: 6.9771, dec: -28.9721, name: 'Adhara' },
+        { ra: 7.4016, dec: -29.3031, name: 'Aludra' }
       ],
       lines: [
         [1, 0],
@@ -534,8 +534,8 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 60, y: 55, name: 'Procyon', isPrincipal: true, mag: 0.34 },
-        { x: 35, y: 40, name: 'Gomeisa' }
+        { ra: 7.655, dec: 5.225, name: 'Procyon', isPrincipal: true, mag: 0.34 },
+        { ra: 7.4525, dec: 8.2893, name: 'Gomeisa' }
       ],
       lines: [[0, 1]]
     },
@@ -565,12 +565,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     zodiacDates: 'Jan 19 – Feb 15 (Astro) / Dec 22 – Jan 19 (Trad)',
     shape: {
       stars: [
-        { x: 25, y: 35, name: 'Algedi' },
-        { x: 30, y: 45, name: 'Dabih' },
-        { x: 50, y: 75, name: 'Omega Cap' },
-        { x: 75, y: 65, name: 'Zeta Cap' },
-        { x: 80, y: 40, name: 'Deneb Algedi', isPrincipal: true, mag: 2.81 },
-        { x: 70, y: 35, name: 'Nashira' }
+        { ra: 20.3009, dec: -12.5449, name: 'Algedi' },
+        { ra: 20.3502, dec: -14.7814, name: 'Dabih' },
+        { ra: 20.8637, dec: -26.9191, name: 'Omega Cap' },
+        { ra: 21.4445, dec: -22.4113, name: 'Zeta Cap' },
+        { ra: 21.784, dec: -16.1273, name: 'Deneb Algedi', isPrincipal: true, mag: 2.81 },
+        { ra: 21.6682, dec: -16.6624, name: 'Nashira' }
       ],
       lines: [
         [0, 1],
@@ -605,11 +605,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 35, name: 'Canopus', isPrincipal: true, mag: -0.74 },
-        { x: 55, y: 45, name: 'Miaplacidus' },
-        { x: 75, y: 55, name: 'Avior' },
-        { x: 80, y: 75, name: 'Aspidiske' },
-        { x: 60, y: 70, name: 'Theta Car' }
+        { ra: 6.3992, dec: -52.6957, name: 'Canopus', isPrincipal: true, mag: -0.74 },
+        { ra: 9.22, dec: -69.7172, name: 'Miaplacidus' },
+        { ra: 8.3752, dec: -59.5095, name: 'Avior' },
+        { ra: 9.2848, dec: -59.2752, name: 'Aspidiske' },
+        { ra: 10.7159, dec: -64.3945, name: 'Theta Car' }
       ],
       lines: [
         [0, 1],
@@ -643,11 +643,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 20, y: 65, name: 'Caph (Beta Cas)' },
-        { x: 35, y: 35, name: 'Schedar (Alpha Cas)', isPrincipal: true, mag: 2.24 },
-        { x: 50, y: 55, name: 'Gamma Cas (Navi)' },
-        { x: 70, y: 25, name: 'Ruchbah (Delta Cas)' },
-        { x: 85, y: 50, name: 'Segin (Epsilon Cas)' }
+        { ra: 0.153, dec: 59.1498, name: 'Caph (Beta Cas)' },
+        { ra: 0.6751, dec: 56.5373, name: 'Schedar (Alpha Cas)', isPrincipal: true, mag: 2.24 },
+        { ra: 0.9451, dec: 60.7167, name: 'Gamma Cas (Navi)' },
+        { ra: 1.4303, dec: 60.2353, name: 'Ruchbah (Delta Cas)' },
+        { ra: 1.9066, dec: 63.6701, name: 'Segin (Epsilon Cas)' }
       ],
       lines: [
         [0, 1],
@@ -680,13 +680,13 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 80, y: 75, name: 'Alpha Cen', isPrincipal: true, mag: -0.01 },
-        { x: 65, y: 70, name: 'Hadar (Beta Cen)' },
-        { x: 45, y: 55, name: 'Gamma Cen' },
-        { x: 35, y: 40, name: 'Delta Cen' },
-        { x: 25, y: 25, name: 'Theta Cen (Menkent)' },
-        { x: 55, y: 35, name: 'Epsilon Cen' },
-        { x: 40, y: 75, name: 'Zeta Cen' }
+        { ra: 14.6601, dec: -60.834, name: 'Alpha Cen', isPrincipal: true, mag: -0.01 },
+        { ra: 14.0637, dec: -60.373, name: 'Hadar (Beta Cen)' },
+        { ra: 12.692, dec: -48.9599, name: 'Gamma Cen' },
+        { ra: 12.1393, dec: -50.7224, name: 'Delta Cen' },
+        { ra: 14.1114, dec: -36.37, name: 'Theta Cen (Menkent)' },
+        { ra: 13.6648, dec: -53.4664, name: 'Epsilon Cen' },
+        { ra: 13.9257, dec: -47.2884, name: 'Zeta Cen' }
       ],
       lines: [
         [0, 1],
@@ -721,12 +721,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 20, name: 'Gamma Cep (Errai)' },
-        { x: 30, y: 55, name: 'Beta Cep (Alfirk)' },
-        { x: 70, y: 55, name: 'Iota Cep' },
-        { x: 40, y: 80, name: 'Alderamin', isPrincipal: true, mag: 2.45 },
-        { x: 75, y: 75, name: 'Zeta Cep' },
-        { x: 85, y: 65, name: 'Delta Cep (prototype)' }
+        { ra: 23.6558, dec: 77.6324, name: 'Gamma Cep (Errai)' },
+        { ra: 21.4777, dec: 70.5607, name: 'Beta Cep (Alfirk)' },
+        { ra: 22.828, dec: 66.2004, name: 'Iota Cep' },
+        { ra: 21.3097, dec: 62.5856, name: 'Alderamin', isPrincipal: true, mag: 2.45 },
+        { ra: 22.1809, dec: 58.2013, name: 'Zeta Cep' },
+        { ra: 22.4862, dec: 58.4152, name: 'Delta Cep (prototype)' }
       ],
       lines: [
         [0, 1],
@@ -761,12 +761,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 25, y: 65, name: 'Diphda', isPrincipal: true, mag: 2.04 },
-        { x: 40, y: 55, name: 'Eta Cet' },
-        { x: 55, y: 50, name: 'Theta Cet' },
-        { x: 65, y: 40, name: 'Mira (pulsating)' },
-        { x: 80, y: 30, name: 'Menkar (Alpha Cet)' },
-        { x: 75, y: 20, name: 'Gamma Cet' }
+        { ra: 0.7265, dec: -17.9866, name: 'Diphda', isPrincipal: true, mag: 2.04 },
+        { ra: 1.1432, dec: -10.1823, name: 'Eta Cet' },
+        { ra: 1.4004, dec: -8.1833, name: 'Theta Cet' },
+        { ra: 2.3224, dec: -2.9776, name: 'Mira (pulsating)' },
+        { ra: 3.038, dec: 4.0897, name: 'Menkar (Alpha Cet)' },
+        { ra: 2.7217, dec: 3.2358, name: 'Gamma Cet' }
       ],
       lines: [
         [0, 1],
@@ -801,10 +801,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 40, name: 'Alpha Cha', isPrincipal: true, mag: 4.07 },
-        { x: 55, y: 35, name: 'Gamma Cha' },
-        { x: 75, y: 55, name: 'Beta Cha' },
-        { x: 45, y: 70, name: 'Delta Cha' }
+        { ra: 8.3088, dec: -76.9197, name: 'Alpha Cha', isPrincipal: true, mag: 4.07 },
+        { ra: 10.5911, dec: -78.6078, name: 'Gamma Cha' },
+        { ra: 12.3058, dec: -79.3122, name: 'Beta Cha' },
+        { ra: 10.7545, dec: -80.4696, name: 'Delta Cha' }
       ],
       lines: [
         [0, 1],
@@ -837,9 +837,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 25, name: 'Alpha Cir', isPrincipal: true, mag: 3.19 },
-        { x: 35, y: 75, name: 'Beta Cir' },
-        { x: 70, y: 70, name: 'Gamma Cir' }
+        { ra: 14.7085, dec: -64.9751, name: 'Alpha Cir', isPrincipal: true, mag: 3.19 },
+        { ra: 15.2919, dec: -58.8012, name: 'Beta Cir' },
+        { ra: 15.3896, dec: -59.3208, name: 'Gamma Cir' }
       ],
       lines: [
         [0, 1],
@@ -870,10 +870,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 35, name: 'Phact', isPrincipal: true, mag: 2.65 },
-        { x: 65, y: 45, name: 'Wazn (Beta Col)' },
-        { x: 35, y: 65, name: 'Epsilon Col' },
-        { x: 75, y: 75, name: 'Gamma Col' }
+        { ra: 5.6608, dec: -34.0741, name: 'Phact', isPrincipal: true, mag: 2.65 },
+        { ra: 5.8493, dec: -35.7683, name: 'Wazn (Beta Col)' },
+        { ra: 5.5202, dec: -35.4705, name: 'Epsilon Col' },
+        { ra: 5.9589, dec: -35.2833, name: 'Gamma Col' }
       ],
       lines: [
         [0, 1],
@@ -905,9 +905,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 40, y: 35, name: 'Beta Com', isPrincipal: true, mag: 4.26 },
-        { x: 65, y: 45, name: 'Alpha Com (Diadem)' },
-        { x: 30, y: 65, name: 'Gamma Com' }
+        { ra: 13.1979, dec: 27.8782, name: 'Beta Com', isPrincipal: true, mag: 4.26 },
+        { ra: 13.1665, dec: 17.5295, name: 'Alpha Com (Diadem)' },
+        { ra: 12.449, dec: 28.2684, name: 'Gamma Com' }
       ],
       lines: [
         [2, 0],
@@ -938,11 +938,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 25, y: 55, name: 'Meridiana', isPrincipal: true, mag: 4.10 },
-        { x: 40, y: 70, name: 'Beta CrA' },
-        { x: 60, y: 70, name: 'Gamma CrA' },
-        { x: 75, y: 55, name: 'Delta CrA' },
-        { x: 80, y: 35, name: 'Epsilon CrA' }
+        { ra: 19.1579, dec: -37.9045, name: 'Meridiana', isPrincipal: true, mag: 4.10 },
+        { ra: 19.1672, dec: -39.3408, name: 'Beta CrA' },
+        { ra: 19.107, dec: -37.0634, name: 'Gamma CrA' },
+        { ra: 19.1392, dec: -40.4967, name: 'Delta CrA' },
+        { ra: 18.9787, dec: -37.1073, name: 'Epsilon CrA' }
       ],
       lines: [
         [0, 1],
@@ -975,12 +975,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 20, y: 45, name: 'Theta CrB' },
-        { x: 35, y: 60, name: 'Beta CrB' },
-        { x: 50, y: 65, name: 'Alphecca', isPrincipal: true, mag: 2.21 },
-        { x: 65, y: 55, name: 'Gamma CrB' },
-        { x: 75, y: 40, name: 'Delta CrB' },
-        { x: 85, y: 25, name: 'Epsilon CrB' }
+        { ra: 15.5488, dec: 31.3591, name: 'Theta CrB' },
+        { ra: 15.4638, dec: 29.1057, name: 'Beta CrB' },
+        { ra: 15.5781, dec: 26.7147, name: 'Alphecca', isPrincipal: true, mag: 2.21 },
+        { ra: 15.7124, dec: 26.2956, name: 'Gamma CrB' },
+        { ra: 15.8266, dec: 26.0684, name: 'Delta CrB' },
+        { ra: 15.9598, dec: 26.8779, name: 'Epsilon CrB' }
       ],
       lines: [
         [0, 1],
@@ -1014,11 +1014,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 35, name: 'Gienah', isPrincipal: true, mag: 2.58 },
-        { x: 65, y: 30, name: 'Algorab (Delta Crv)' },
-        { x: 70, y: 70, name: 'Kraz (Beta Crv)' },
-        { x: 35, y: 65, name: 'Minkar (Epsilon Crv)' },
-        { x: 15, y: 45, name: 'Alchiba (Alpha Crv)' }
+        { ra: 12.2634, dec: -17.5419, name: 'Gienah', isPrincipal: true, mag: 2.58 },
+        { ra: 12.4977, dec: -16.5154, name: 'Algorab (Delta Crv)' },
+        { ra: 12.5731, dec: -23.3968, name: 'Kraz (Beta Crv)' },
+        { ra: 12.1687, dec: -22.6198, name: 'Minkar (Epsilon Crv)' },
+        { ra: 12.1402, dec: -24.7289, name: 'Alchiba (Alpha Crv)' }
       ],
       lines: [
         [0, 1],
@@ -1052,11 +1052,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 35, name: 'Delta Crt (Labrum)', isPrincipal: true, mag: 3.56 },
-        { x: 70, y: 35, name: 'Gamma Crt' },
-        { x: 50, y: 60, name: 'Alpha Crt (Alkes)' },
-        { x: 35, y: 80, name: 'Beta Crt' },
-        { x: 65, y: 80, name: 'Zeta Crt' }
+        { ra: 11.3223, dec: -14.7785, name: 'Delta Crt (Labrum)', isPrincipal: true, mag: 3.56 },
+        { ra: 11.4147, dec: -17.684, name: 'Gamma Crt' },
+        { ra: 10.9962, dec: -18.2988, name: 'Alpha Crt (Alkes)' },
+        { ra: 11.1943, dec: -22.8258, name: 'Beta Crt' },
+        { ra: 11.746, dec: -18.3507, name: 'Zeta Crt' }
       ],
       lines: [
         [0, 1],
@@ -1091,11 +1091,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 80, name: 'Acrux', isPrincipal: true, mag: 0.77 },
-        { x: 50, y: 20, name: 'Gacrux (Gamma Cru)' },
-        { x: 25, y: 45, name: 'Mimosa (Beta Cru)' },
-        { x: 75, y: 50, name: 'Imai (Delta Cru)' },
-        { x: 65, y: 65, name: 'Ginan (Epsilon Cru)' }
+        { ra: 12.4433, dec: -63.0991, name: 'Acrux', isPrincipal: true, mag: 0.77 },
+        { ra: 12.5194, dec: -57.1132, name: 'Gacrux (Gamma Cru)' },
+        { ra: 12.7954, dec: -59.6888, name: 'Mimosa (Beta Cru)' },
+        { ra: 12.2524, dec: -58.7489, name: 'Imai (Delta Cru)' },
+        { ra: 12.356, dec: -60.4011, name: 'Ginan (Epsilon Cru)' }
       ],
       lines: [
         [0, 1],
@@ -1126,11 +1126,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 50, y: 15, name: 'Deneb', isPrincipal: true, mag: 1.25 },
-        { x: 50, y: 45, name: 'Sadr (Gamma Cyg)' },
-        { x: 50, y: 85, name: 'Albireo (Beta Cyg)' },
-        { x: 20, y: 40, name: 'Delta Cyg' },
-        { x: 80, y: 50, name: 'Gienah (Epsilon Cyg)' }
+        { ra: 20.6905, dec: 45.2803, name: 'Deneb', isPrincipal: true, mag: 1.25 },
+        { ra: 20.3705, dec: 40.2567, name: 'Sadr (Gamma Cyg)' },
+        { ra: 19.512, dec: 27.9597, name: 'Albireo (Beta Cyg)' },
+        { ra: 19.7496, dec: 45.1308, name: 'Delta Cyg' },
+        { ra: 20.7702, dec: 33.9703, name: 'Gienah (Epsilon Cyg)' }
       ],
       lines: [
         [0, 1],
@@ -1163,11 +1163,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 35, name: 'Rotanev', isPrincipal: true, mag: 3.63 },
-        { x: 65, y: 30, name: 'Sualocin (Alpha Del)' },
-        { x: 70, y: 50, name: 'Gamma Del' },
-        { x: 50, y: 55, name: 'Delta Del' },
-        { x: 30, y: 80, name: 'Epsilon Del (Deneb Dulfim)' }
+        { ra: 20.6258, dec: 14.5951, name: 'Rotanev', isPrincipal: true, mag: 3.63 },
+        { ra: 20.6606, dec: 15.9122, name: 'Sualocin (Alpha Del)' },
+        { ra: 20.7776, dec: 16.1243, name: 'Gamma Del' },
+        { ra: 20.7243, dec: 15.0746, name: 'Delta Del' },
+        { ra: 20.5535, dec: 11.3033, name: 'Epsilon Del (Deneb Dulfim)' }
       ],
       lines: [
         [0, 1],
@@ -1201,10 +1201,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 25, name: 'Alpha Dor', isPrincipal: true, mag: 3.27 },
-        { x: 55, y: 50, name: 'Beta Dor' },
-        { x: 40, y: 75, name: 'Gamma Dor' },
-        { x: 65, y: 80, name: 'Delta Dor' }
+        { ra: 4.5666, dec: -55.045, name: 'Alpha Dor', isPrincipal: true, mag: 3.27 },
+        { ra: 5.5604, dec: -62.4898, name: 'Beta Dor' },
+        { ra: 4.2671, dec: -51.4866, name: 'Gamma Dor' },
+        { ra: 5.7462, dec: -65.7355, name: 'Delta Dor' }
       ],
       lines: [
         [0, 1],
@@ -1236,13 +1236,13 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 80, y: 25, name: 'Eltanin', isPrincipal: true, mag: 2.23 },
-        { x: 70, y: 15, name: 'Rastaban (Beta Dra)' },
-        { x: 60, y: 25, name: 'Nu Dra' },
-        { x: 70, y: 35, name: 'Xi Dra' },
-        { x: 50, y: 45, name: 'Delta Dra' },
-        { x: 35, y: 60, name: 'Thuban (ancient North Star)' },
-        { x: 20, y: 75, name: 'Edasich (Iota Dra)' }
+        { ra: 17.9434, dec: 51.4889, name: 'Eltanin', isPrincipal: true, mag: 2.23 },
+        { ra: 17.5072, dec: 52.3014, name: 'Rastaban (Beta Dra)' },
+        { ra: 17.5369, dec: 55.1783, name: 'Nu Dra' },
+        { ra: 17.8921, dec: 56.8726, name: 'Xi Dra' },
+        { ra: 19.2093, dec: 67.6615, name: 'Delta Dra' },
+        { ra: 14.0732, dec: 64.3759, name: 'Thuban (ancient North Star)' },
+        { ra: 15.4155, dec: 58.9661, name: 'Edasich (Iota Dra)' }
       ],
       lines: [
         [0, 1],
@@ -1278,10 +1278,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 40, y: 30, name: 'Kitalpha', isPrincipal: true, mag: 3.92 },
-        { x: 65, y: 45, name: 'Delta Equ' },
-        { x: 50, y: 75, name: 'Gamma Equ' },
-        { x: 25, y: 65, name: 'Beta Equ' }
+        { ra: 21.2637, dec: 5.2479, name: 'Kitalpha', isPrincipal: true, mag: 3.92 },
+        { ra: 21.2413, dec: 10.007, name: 'Delta Equ' },
+        { ra: 21.1724, dec: 10.1316, name: 'Gamma Equ' },
+        { ra: 21.3816, dec: 6.8111, name: 'Beta Equ' }
       ],
       lines: [
         [0, 1],
@@ -1314,11 +1314,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 25, y: 15, name: 'Cursa (Beta Eri)' },
-        { x: 35, y: 30, name: 'Zaurak' },
-        { x: 45, y: 45, name: 'Acamar (Theta Eri)' },
-        { x: 55, y: 65, name: 'Epsilon Eri (planet host)' },
-        { x: 75, y: 85, name: 'Achernar', isPrincipal: true, mag: 0.45 }
+        { ra: 5.1308, dec: -5.0865, name: 'Cursa (Beta Eri)' },
+        { ra: 3.9672, dec: -13.5085, name: 'Zaurak' },
+        { ra: 2.971, dec: -40.3047, name: 'Acamar (Theta Eri)' },
+        { ra: 3.5488, dec: -9.4583, name: 'Epsilon Eri (planet host)' },
+        { ra: 1.6286, dec: -57.2368, name: 'Achernar', isPrincipal: true, mag: 0.45 }
       ],
       lines: [
         [0, 1],
@@ -1351,9 +1351,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 35, name: 'Alpha For (Dalim)', isPrincipal: true, mag: 3.85 },
-        { x: 65, y: 65, name: 'Beta For' },
-        { x: 30, y: 75, name: 'Nu For' }
+        { ra: 3.2013, dec: -28.9876, name: 'Alpha For (Dalim)', isPrincipal: true, mag: 3.85 },
+        { ra: 2.8182, dec: -32.4059, name: 'Beta For' },
+        { ra: 2.0748, dec: -29.2968, name: 'Nu For' }
       ],
       lines: [
         [0, 1],
@@ -1386,12 +1386,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     zodiacDates: 'Jun 22 – Jul 20 (Astro) / May 21 – Jun 20 (Trad)',
     shape: {
       stars: [
-        { x: 35, y: 25, name: 'Castor (Alpha Gem)' },
-        { x: 55, y: 25, name: 'Pollux (Beta Gem)', isPrincipal: true, mag: 1.14 },
-        { x: 30, y: 55, name: 'Mebsuta' },
-        { x: 50, y: 55, name: 'Wasat' },
-        { x: 25, y: 80, name: 'Tejat (Mu Gem)' },
-        { x: 45, y: 85, name: 'Alhena (Gamma Gem)' }
+        { ra: 7.5766, dec: 31.8883, name: 'Castor (Alpha Gem)' },
+        { ra: 7.7553, dec: 28.0262, name: 'Pollux (Beta Gem)', isPrincipal: true, mag: 1.14 },
+        { ra: 6.7322, dec: 25.1311, name: 'Mebsuta' },
+        { ra: 7.3354, dec: 21.9823, name: 'Wasat' },
+        { ra: 6.3827, dec: 22.5136, name: 'Tejat (Mu Gem)' },
+        { ra: 6.6285, dec: 16.3993, name: 'Alhena (Gamma Gem)' }
       ],
       lines: [
         [0, 1],
@@ -1425,11 +1425,11 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 60, y: 40, name: 'Alnair', isPrincipal: true, mag: 1.74 },
-        { x: 40, y: 25, name: 'Beta Gru (Tiaki)' },
-        { x: 25, y: 45, name: 'Gamma Gru (Al Dhanab)' },
-        { x: 45, y: 70, name: 'Delta Gru' },
-        { x: 50, y: 85, name: 'Epsilon Gru' }
+        { ra: 22.1372, dec: -46.961, name: 'Alnair', isPrincipal: true, mag: 1.74 },
+        { ra: 22.7111, dec: -46.8846, name: 'Beta Gru (Tiaki)' },
+        { ra: 21.8988, dec: -37.3649, name: 'Gamma Gru (Al Dhanab)' },
+        { ra: 22.4878, dec: -43.4956, name: 'Delta Gru' },
+        { ra: 22.8092, dec: -51.3169, name: 'Epsilon Gru' }
       ],
       lines: [
         [1, 0],
@@ -1462,12 +1462,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 40, y: 40, name: 'Pi Her' },
-        { x: 60, y: 40, name: 'Eta Her' },
-        { x: 65, y: 60, name: 'Zeta Her' },
-        { x: 35, y: 60, name: 'Epsilon Her' },
-        { x: 50, y: 85, name: 'Kornephoros', isPrincipal: true, mag: 2.77 },
-        { x: 50, y: 15, name: 'Rasalgethi (Alpha Her)' }
+        { ra: 17.2508, dec: 36.8092, name: 'Pi Her' },
+        { ra: 16.7149, dec: 38.9223, name: 'Eta Her' },
+        { ra: 16.6881, dec: 31.6027, name: 'Zeta Her' },
+        { ra: 17.0048, dec: 30.9264, name: 'Epsilon Her' },
+        { ra: 16.5037, dec: 21.4896, name: 'Kornephoros', isPrincipal: true, mag: 2.77 },
+        { ra: 17.2441, dec: 14.3903, name: 'Rasalgethi (Alpha Her)' }
       ],
       lines: [
         [0, 1],
@@ -1502,10 +1502,10 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 20, name: 'Alpha Hor', isPrincipal: true, mag: 3.85 },
-        { x: 50, y: 45, name: 'Delta Hor' },
-        { x: 40, y: 70, name: 'Beta Hor' },
-        { x: 65, y: 80, name: 'Zeta Hor' }
+        { ra: 4.2334, dec: -42.2944, name: 'Alpha Hor', isPrincipal: true, mag: 3.85 },
+        { ra: 4.1807, dec: -41.9936, name: 'Delta Hor' },
+        { ra: 2.9799, dec: -64.0713, name: 'Beta Hor' },
+        { ra: 2.6777, dec: -54.5499, name: 'Zeta Hor' }
       ],
       lines: [
         [0, 1],
@@ -1537,12 +1537,12 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 15, y: 25, name: 'Head of Hydra' },
-        { x: 30, y: 40, name: 'Alphard', isPrincipal: true, mag: 1.98 },
-        { x: 45, y: 55, name: 'Zeta Hya' },
-        { x: 60, y: 65, name: 'Nu Hya' },
-        { x: 75, y: 70, name: 'Gamma Hya' },
-        { x: 90, y: 75, name: 'Pi Hya' }
+        { ra: 8.9232, dec: 5.9456, name: 'Head of Hydra' },
+        { ra: 9.4598, dec: -8.6586, name: 'Alphard', isPrincipal: true, mag: 1.98 },
+        { ra: 8.9232, dec: 5.9456, name: 'Zeta Hya' },
+        { ra: 10.8271, dec: -16.1936, name: 'Nu Hya' },
+        { ra: 13.3154, dec: -23.1715, name: 'Gamma Hya' },
+        { ra: 14.1062, dec: -26.6824, name: 'Pi Hya' }
       ],
       lines: [
         [0, 1],
@@ -1576,9 +1576,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 30, y: 25, name: 'Alpha Hyi' },
-        { x: 65, y: 45, name: 'Gamma Hyi' },
-        { x: 45, y: 80, name: 'Beta Hyi', isPrincipal: true, mag: 2.80 }
+        { ra: 1.9795, dec: -61.5698, name: 'Alpha Hyi' },
+        { ra: 3.7873, dec: -74.239, name: 'Gamma Hyi' },
+        { ra: 0.4292, dec: -77.2542, name: 'Beta Hyi', isPrincipal: true, mag: 2.80 }
       ],
       lines: [
         [0, 1],
@@ -1609,9 +1609,9 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     isZodiac: false,
     shape: {
       stars: [
-        { x: 45, y: 25, name: 'Alpha Ind (The Persian)', isPrincipal: true, mag: 3.11 },
-        { x: 65, y: 55, name: 'Beta Ind' },
-        { x: 35, y: 75, name: 'Theta Ind' }
+        { ra: 20.6261, dec: -47.2915, name: 'Alpha Ind (The Persian)', isPrincipal: true, mag: 3.11 },
+        { ra: 20.9135, dec: -58.4541, name: 'Beta Ind' },
+        { ra: 21.3311, dec: -53.4494, name: 'Theta Ind' }
       ],
       lines: [
         [0, 1],

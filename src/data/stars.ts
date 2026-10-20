@@ -1,64 +1,5 @@
 import { StarData, PresetComparison } from '../types';
-import { applyD65ChromaticityToStar } from '../utils/stellarColorsD65';
-import { STARS_HYPERGIANTS } from './starsHypergiants';
-import { STARS_SUPERGIANTS } from './starsSupergiants';
-import { STARS_MASSIVE_AND_BINARIES } from './starsMassiveAndBinaries';
-import { STARS_RED_ORANGE_GIANTS } from './starsRedOrangeGiants';
-import { STARS_LUMINOUS_GIANTS } from './starsLuminousGiants';
-import { STARS_BRIGHT_BEACONS } from './starsBrightBeacons';
-import { STARS_SOLAR_NEIGHBORS } from './starsSolarNeighbors';
-import { STARS_EXOPLANET_HOSTS_AND_REMNANTS } from './starsExoplanetHostsAndRemnants';
-import { STARS_MAIN_SEQUENCE_AND_SUBGIANTS } from './starsMainSequenceAndSubgiants';
-import { STARS_HOT_EXTREMES_AND_GIANTS } from './starsHotExtremesAndGiants';
-import { STARS_NEW_NEIGHBORS_15LY } from './starsNewNeighbors15ly';
-import { STARS_EXTREMES_AND_REMNANTS } from './starsExtremesAndRemnants';
-import { STARS_PRINCIPAL_CONSTELLATIONS_A_TO_M } from './starsPrincipalConstellationsAtoM';
-import { STARS_PRINCIPAL_CONSTELLATIONS_N_TO_Z } from './starsPrincipalConstellationsNtoZ';
-import { STARS_REMAINING_MAIN_A_TO_L } from './starsRemainingMainConstellationsAtoL';
-import { STARS_REMAINING_MAIN_M_TO_Z } from './starsRemainingMainConstellationsMtoZ';
-import { STARS_BRAZILIAN_FLAG } from './starsBrazilianFlag';
-import { STARS_NEUTRON_STARS_AND_PULSARS } from './starsNeutronStarsAndPulsars';
-import { STARS_ICONIC_CONSTELLATIONS_PART1 } from './starsIconicConstellationsPart1';
-import { STARS_ICONIC_CONSTELLATIONS_PART2 } from './starsIconicConstellationsPart2';
-import { STARS_BRIGHT_MAGNITUDE_THREE } from './starsBrightMagnitudeThree';
-import { STARS_LARGE_AND_EXOTIC } from './starsLargeAndExotic';
-import { STARS_DISTANT_EXTREMES_AND_VARIABLES } from './starsDistantExtremesAndVariables';
-import { STARS_NEW_CATALOG_ADDITIONS } from './starsNewCatalogAdditions';
-import { STARS_NEIGHBORS_30LY } from './starsNeighbors30ly';
-import { STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS } from './starsSubdwarfsAndDesignations';
-import { STARS_HOT_SUBDWARFS_BLUE_STRAGGLERS_AND_GAIA } from './starsHotSubdwarfsBlueStragglersGaia';
-import { STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES } from './starsNewAdditionsBayerExoplanetsAndMultiples';
-
-const RAW_STARS_CATALOG: StarData[] = [
-  ...STARS_HYPERGIANTS,
-  ...STARS_SUPERGIANTS,
-  ...STARS_MASSIVE_AND_BINARIES,
-  ...STARS_RED_ORANGE_GIANTS,
-  ...STARS_LUMINOUS_GIANTS,
-  ...STARS_BRIGHT_BEACONS,
-  ...STARS_SOLAR_NEIGHBORS,
-  ...STARS_EXOPLANET_HOSTS_AND_REMNANTS,
-  ...STARS_MAIN_SEQUENCE_AND_SUBGIANTS,
-  ...STARS_HOT_EXTREMES_AND_GIANTS,
-  ...STARS_NEW_NEIGHBORS_15LY,
-  ...STARS_EXTREMES_AND_REMNANTS,
-  ...STARS_PRINCIPAL_CONSTELLATIONS_A_TO_M,
-  ...STARS_PRINCIPAL_CONSTELLATIONS_N_TO_Z,
-  ...STARS_REMAINING_MAIN_A_TO_L,
-  ...STARS_REMAINING_MAIN_M_TO_Z,
-  ...STARS_BRAZILIAN_FLAG,
-  ...STARS_NEUTRON_STARS_AND_PULSARS,
-  ...STARS_ICONIC_CONSTELLATIONS_PART1,
-  ...STARS_ICONIC_CONSTELLATIONS_PART2,
-  ...STARS_BRIGHT_MAGNITUDE_THREE,
-  ...STARS_LARGE_AND_EXOTIC,
-  ...STARS_DISTANT_EXTREMES_AND_VARIABLES,
-  ...STARS_NEW_CATALOG_ADDITIONS,
-  ...STARS_NEIGHBORS_30LY,
-  ...STARS_SUBDWARFS_AND_HISTORICAL_DESIGNATIONS,
-  ...STARS_HOT_SUBDWARFS_BLUE_STRAGGLERS_AND_GAIA,
-  ...STARS_NEW_ADDITIONS_BAYER_EXOPLANETS_AND_MULTIPLES,
-];
+import starDatabaseJson from './starDatabase.json';
 
 export const STAR_ID_ALIASES: Record<string, string> = {
   'castor-a': 'castor-aa',
@@ -79,23 +20,13 @@ export function resolveStarId(id: string): string {
   return STAR_ID_ALIASES[id] || id;
 }
 
-// Deduplicate star records by unique ID, canonical alias ID, and normalized identity
-const seenStarIds = new Set<string>();
-const seenCanonicalIds = new Set<string>();
-const seenNames = new Set<string>();
+/**
+ * Unified Star Catalog
+ * Merged single source of truth containing all 736+ stars.
+ */
+export const RAW_STARS_CATALOG: StarData[] = starDatabaseJson as StarData[];
+export const STARS_CATALOG: StarData[] = RAW_STARS_CATALOG;
 
-export const STARS_CATALOG: StarData[] = RAW_STARS_CATALOG.filter((star) => {
-  const canonicalId = resolveStarId(star.id);
-  const normalizedKey = `${star.name.toLowerCase().trim()}::${star.constellation.toLowerCase().trim()}`;
-
-  if (seenStarIds.has(star.id) || seenCanonicalIds.has(canonicalId) || seenNames.has(normalizedKey)) {
-    return false;
-  }
-  seenStarIds.add(star.id);
-  seenCanonicalIds.add(canonicalId);
-  seenNames.add(normalizedKey);
-  return true;
-}).map(applyD65ChromaticityToStar);
 
 /**
  * Retrieves a star from the catalog by canonical ID or alias.

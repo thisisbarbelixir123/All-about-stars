@@ -10,19 +10,22 @@ export type ConstellationFamily =
   | 'Bayer'
   | 'La Caille';
 
+export interface ConstellationStar {
+  ra: number;  // Right Ascension in hours (0.0 to 24.0)
+  dec: number; // Declination in degrees (-90.0 to +90.0)
+  name: string;
+  catalogStarId?: string;
+  isPrincipal?: boolean;
+  mag?: number;
+  isAsterismCore?: boolean;
+  x?: number; // Optional projected coordinate for 2D SVG canvas
+  y?: number; // Optional projected coordinate for 2D SVG canvas
+}
+
 export interface ConstellationShape {
-  // Normalized coordinates (0 to 100) for drawing stick figures in an SVG viewBox="0 0 100 100"
-  stars: Array<{
-    x: number;
-    y: number;
-    name?: string;
-    isPrincipal?: boolean;
-    mag?: number;
-    isAsterismCore?: boolean;
-    catalogStarId?: string;
-  }>;
-  lines: Array<[number, number]>; // Indices in the stars array to connect with line segments
   mainAsterismName?: string;
+  stars: ConstellationStar[];
+  lines: Array<[number, number]>; // Indices in the stars array to connect with line segments
   asterismLines?: Array<[number, number]>;
 }
 
