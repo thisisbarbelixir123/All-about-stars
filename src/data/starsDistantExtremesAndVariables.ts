@@ -478,7 +478,7 @@ export const STARS_DISTANT_EXTREMES_AND_VARIABLES: StarData[] = [
     diameterKm: 20890,
     diameterAU: 0.00014,
     temperature: 30000, // Hot primary white dwarf
-    spectralType: 'UG',
+    spectralType: 'DA',
     spectralClass: 'WD',
     luminositySolar: 0.15, // Quiescent; flares to ~12 L_sun
     massSolar: 0.81,

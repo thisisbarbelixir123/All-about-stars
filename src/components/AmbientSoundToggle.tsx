@@ -55,7 +55,9 @@ export const AmbientSoundToggle: React.FC = () => {
             ? 'bg-cyan-950/70 hover:bg-cyan-900/80 border-cyan-500/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
             : 'bg-slate-900/70 hover:bg-slate-850 border-slate-700/60 text-slate-400 hover:text-slate-200'
         }`}
-        title={`Ambient Space Sound (${isSoundOn ? 'Active' : 'Muted'}) • Press [M] or Right-click for volume`}
+        title="Toggle ambient space sound • Press [M] or Right-click for volume"
+        aria-label={isSoundOn ? 'Mute ambient space sound' : 'Unmute ambient space sound'}
+        aria-pressed={isSoundOn}
       >
         {isSoundOn ? (
           <>
@@ -68,10 +70,7 @@ export const AmbientSoundToggle: React.FC = () => {
             <span className="hidden sm:inline font-semibold">Sound</span>
           </>
         ) : (
-          <>
-            <VolumeX className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Muted</span>
-          </>
+          <VolumeX className="w-3.5 h-3.5 text-slate-500" />
         )}
       </button>
 

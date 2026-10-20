@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
-import { BookOpen, Bookmark } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { StarDot2D } from './StarDot2D';
 import { RunningText } from './RunningText';
-import { isStarBookmarked, toggleStarBookmark, subscribeAstronomyData } from '../utils/bookmarks';
-import { soundEffects } from '../utils/soundEffects';
 
 interface StarCardProps {
   star: StarData;
@@ -17,22 +15,6 @@ export const StarCard: React.FC<StarCardProps> = ({
   star,
   onViewDetails,
 }) => {
-  const [bookmarked, setBookmarked] = useState<boolean>(() => isStarBookmarked(star.id));
-
-  useEffect(() => {
-    setBookmarked(isStarBookmarked(star.id));
-    return subscribeAstronomyData(() => {
-      setBookmarked(isStarBookmarked(star.id));
-    });
-  }, [star.id]);
-
-  const handleToggleBookmark = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const next = toggleStarBookmark(star.id);
-    setBookmarked(next);
-    soundEffects.play(next ? 'toggleOn' : 'toggleOff');
-  };
-
   const scaleObj = formatPhysicalDiameter(star.diameterKm, star.diameterSolar);
 
   return (
@@ -49,7 +31,7 @@ export const StarCard: React.FC<StarCardProps> = ({
       className="group relative bg-[#060a1a]/95 hover:bg-[#091129] border border-cyan-500/30 hover:border-cyan-400 rounded-xl p-2.5 sm:p-3 md:p-3.5 transition-all duration-200 shadow-sm hover:shadow-[0_6px_20px_rgba(6,182,212,0.28)] hover:-translate-y-0.5 active:translate-y-0 flex flex-col justify-between gap-2 sm:gap-2.5 backdrop-blur-xl cursor-pointer select-none overflow-hidden min-h-[125px] sm:min-h-[135px] md:min-h-[148px]"
       title={`Open ${star.name} Dossier`}
     >
-      {/* Top: Name & Bookmark */}
+      {/* Top: Star name */}
       <div className="flex items-center justify-between gap-1.5 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
           <StarDot2D star={star} sizeClassName="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 shrink-0" />
@@ -62,15 +44,6 @@ export const StarCard: React.FC<StarCardProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={handleToggleBookmark}
-          className={`p-1 rounded-lg transition-colors cursor-pointer shrink-0 hover:bg-white/5 ${
-            bookmarked ? 'text-amber-400' : 'text-slate-500 hover:text-amber-300'
-          }`}
-          title={bookmarked ? 'Remove bookmark' : 'Bookmark star'}
-        >
-          <Bookmark className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${bookmarked ? 'fill-amber-400' : ''}`} />
-        </button>
       </div>
 
       {/* Sub-header: Spectral type badge & Constellation */}

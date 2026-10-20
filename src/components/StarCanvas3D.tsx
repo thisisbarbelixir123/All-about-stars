@@ -2681,32 +2681,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               )}
             </div>
 
-            <div className="h-4 w-[1px] bg-cyan-500/20 mx-0.5" />
-
-            {/* Fullscreen Toggle */}
-            <button
-              id={isMobile ? "btn-mobile-toggle-fullscreen" : "btn-toggle-fullscreen"}
-              onClick={toggleFullscreen}
-              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                isFullscreen 
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.5)]' 
-                  : 'text-cyan-400 hover:text-white hover:bg-cyan-500/20'
-              }`}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="w-3.5 h-3.5 shrink-0" />
-              ) : (
-                <Maximize2 className="w-3.5 h-3.5 shrink-0" />
-              )}
-              <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isFullscreen ? 'Exit' : 'Full'}</span>
-            </button>
-
             {/* Sound Effects Toggle (Mute / Unmute) */}
             <button
               id={isMobile ? "btn-mobile-toggle-sound" : "btn-toggle-sound"}
               onClick={() => soundEffects.toggleSound()}
-              title={isSoundOn ? 'Sound Effects Enabled' : 'Sound Effects Muted'}
+              title="Toggle sound effects"
               aria-label={isSoundOn ? 'Mute Sound Effects' : 'Unmute Sound Effects'}
               className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 isSoundOn 
@@ -2719,7 +2698,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               ) : (
                 <VolumeX className="w-3.5 h-3.5 shrink-0 text-slate-400" />
               )}
-              <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>{isSoundOn ? 'SFX' : 'Muted'}</span>
+              {isSoundOn && <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>SFX</span>}
             </button>
 
             {/* Keyboard Shortcuts Help - Desktop Only, Hidden on Mobile and Tablet */}

@@ -182,6 +182,21 @@ const isSubdwarfStar = (star: StarData) => {
   );
 };
 
+const isWolfRayetStar = (star: StarData) => {
+  const spectralType = star.spectralType.trim();
+  const isWhiteDwarf =
+    star.spectralClass === 'WD' ||
+    star.stellarStage?.toLowerCase().includes('white dwarf') === true ||
+    /^WD\b/i.test(spectralType);
+
+  return (
+    !isWhiteDwarf &&
+    (star.stellarStage?.toLowerCase().includes('wolf-rayet') === true ||
+      star.spectralClass === 'WR' ||
+      /^(?:WN|WC|WO|WR)/i.test(spectralType))
+  );
+};
+
 // Empirical points defining the Main Sequence (Luminosity Class V) locus: strictly O through M-class only
 const MAIN_SEQUENCE_CURVE = [
   { T: 45000, L: 450000, tag: 'O3V' },
@@ -257,6 +272,14 @@ const CARBON_STARS_TRACK = [
 
 // Empirical Subgiants bridge track (Luminosity Class IV)
 const SUBGIANTS_TRACK = [
+  { T: 30000, L: 30000 },
+  { T: 26900, L: 15000 }, // Beta Cephei / B1IV
+  { T: 22550, L: 10000 }, // Imai / B2IV
+  { T: 21000, L: 7100 },  // Zeta Centauri / B2.5IV
+  { T: 16700, L: 790 },   // Alpha Telescopii / B3IV
+  { T: 15500, L: 1000 },  // Kalausi / B3IV
+  { T: 11400, L: 175 },   // Sualocin / B9IV
+  { T: 9520, L: 180 },    // Fawaris / B9.5IV
   { T: 7500, L: 14.0 },
   { T: 6800, L: 8.5 },
   { T: 6200, L: 5.2 },
@@ -461,7 +484,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
       if (activeSpectralFilter) {
         if (activeSpectralFilter === 'WR' || activeSpectralFilter === 'W') {
-          if (star.spectralClass !== 'WR' && !star.spectralType.startsWith('W')) return false;
+          if (!isWolfRayetStar(star)) return false;
         } else if (activeSpectralFilter === 'LBV') {
           if (star.spectralClass !== 'LBV' && !star.spectralType.startsWith('LBV') && star.stellarStage !== 'Luminous Blue Variable') return false;
         } else if (activeSpectralFilter === 'WD') {
@@ -488,6 +511,9 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       }
 
       if (activeGroupFilter === 'MAIN_SEQUENCE') {
+        // Subdwarfs can contain the word "dwarf" in their stage and must not
+        // leak into the ordinary Class V filter.
+        if (isSubdwarfStar(star)) return false;
         return (
           star.stellarStage === 'Main Sequence' ||
           star.stellarStage === 'Main Sequence Dwarf' ||
@@ -562,7 +588,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         return star.stellarStage === 'White Dwarf';
       }
       if (activeGroupFilter === 'WOLF_RAYET') {
-        return star.stellarStage === 'Wolf-Rayet' || star.spectralClass === 'WR' || star.spectralType.startsWith('W');
+        return isWolfRayetStar(star);
       }
 
       return true;
@@ -1728,12 +1754,12 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 ★ Giants (II & III)
               </div>
 
-              {/* Main Sequence (V) Badge: Positioned cleanly along the F/G sequence */}
+              {/* Main Sequence (V) Badge: Positioned between the subdwarf and subgiant labels */}
               <div
                 className="absolute pointer-events-none text-[9px] sm:text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/95 border border-cyan-400/60 px-2.5 py-0.5 rounded-full shadow-lg z-20 -translate-x-1/2 -translate-y-1/2"
                 style={{
-                  left: `${getTempX(7500)}%`,
-                  top: `${getLumY(10.0)}%`,
+                  left: `${getTempX(5100)}%`,
+                  top: `${getLumY(0.8)}%`,
                 }}
               >
                 ★ Main Sequence (V)

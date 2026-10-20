@@ -148,7 +148,6 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
                 <div className="min-w-0">
                   <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words flex items-center gap-1.5">
                     <span>Stellar Systems</span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40">14</span>
                   </div>
                   <div className="text-[10px] text-slate-400 font-sans break-words">Multiple star systems & 3D orbits</div>
                 </div>

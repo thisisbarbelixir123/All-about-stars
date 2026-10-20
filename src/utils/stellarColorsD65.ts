@@ -506,7 +506,7 @@ export function parseSpectralType(
   if (str.includes('LBV') || str.includes('LUMINOUS BLUE VARIABLE')) {
     return { classKey: 'LBV', subclass: 0, isSubdwarf, hasExplicitSubclass: true };
   }
-  if (str.startsWith('DA') || str.startsWith('DB') || str.startsWith('DC') || str.startsWith('DO') || str.startsWith('DQ') || str.startsWith('DZ') || str.includes('WD') || str.includes('WHITE DWARF') || str === 'UG') {
+  if (str.startsWith('DA') || str.startsWith('DB') || str.startsWith('DC') || str.startsWith('DO') || str.startsWith('DQ') || str.startsWith('DZ') || str.includes('WD') || str.includes('WHITE DWARF')) {
     const numMatch = str.match(/\d+(\.\d+)?/);
     return { classKey: 'WD', subclass: numMatch ? parseFloat(numMatch[0]) : 3, isSubdwarf, hasExplicitSubclass: !!numMatch };
   }
