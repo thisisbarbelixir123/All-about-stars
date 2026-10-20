@@ -71,13 +71,24 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
 }) => {
   // Advanced search/filter panel is collapsed by default across all devices
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [activeDiameterThumb, setActiveDiameterThumb] = useState<'min' | 'max'>('max');
+  const [activeDistanceThumb, setActiveDistanceThumb] = useState<'min' | 'max'>('max');
+
+  const minDiameter = filterState.minDiameter ?? DIAMETER_MIN;
+  const maxDiameter = filterState.maxDiameter ?? DIAMETER_MAX;
+  const minDistance = filterState.minDistance ?? DISTANCE_MIN;
+  const maxDistance = filterState.maxDistance ?? DISTANCE_MAX;
+  const minDiameterPos = diameterToSliderPos(minDiameter);
+  const maxDiameterPos = diameterToSliderPos(maxDiameter);
+  const minDistancePos = distanceToSliderPos(minDistance);
+  const maxDistancePos = distanceToSliderPos(maxDistance);
 
   const activeFiltersCount = 
     filterState.spectralClasses.length +
     filterState.stellarStages.length +
     (filterState.constellation ? 1 : 0) +
-    ((filterState.minDiameter ?? DIAMETER_MIN) > DIAMETER_MIN ? 1 : 0) +
-    ((filterState.maxDistance ?? DISTANCE_MAX) < DISTANCE_MAX ? 1 : 0) +
+    (minDiameter > DIAMETER_MIN || maxDiameter < DIAMETER_MAX ? 1 : 0) +
+    (minDistance > DISTANCE_MIN || maxDistance < DISTANCE_MAX ? 1 : 0) +
     (filterState.hasExoplanetsOnly ? 1 : 0) +
     (filterState.onlyNakedEye ? 1 : 0);
 
@@ -104,19 +115,19 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
         {/* Search Bar with Clear Button */}
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-cyan-400/80 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
           <input
             id="input-star-search"
             type="text"
-            placeholder="Search 580+ stars by name, bayer, constellation, or stage..."
+            placeholder="Search stars by name, Bayer designation, constellation, or stage..."
             value={filterState.searchQuery}
             onChange={(e) => onChangeFilter({ searchQuery: e.target.value })}
-            className="w-full bg-[#020510] border border-cyan-500/30 focus:border-cyan-400 rounded-xl pl-10 sm:pl-12 pr-14 sm:pr-16 py-2.5 sm:py-3.5 text-xs sm:text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 transition-all shadow-inner font-sans"
+            className="w-full bg-[#020510] border border-cyan-500/30 focus:border-cyan-400 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 transition-all shadow-inner font-mono"
           />
           {filterState.searchQuery && (
             <button
               onClick={() => onChangeFilter({ searchQuery: '' })}
-              className="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs font-mono font-bold text-slate-400 hover:text-white px-2 py-0.5 sm:py-1 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:border-cyan-500/40 transition-all cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 hover:text-white px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:border-cyan-500/40 transition-all cursor-pointer"
             >
               Clear
             </button>
@@ -327,88 +338,142 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
 
           {/* Quick Category & Range Sliders */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
-            {/* Min Diameter Slider: 0.00001 to 2,000 D☉ (median internally calibrated, not shown) */}
+            {/* Diameter Range Slider: 0.00001 to 2,150 D☉ */}
             <div className="p-3 bg-[#020510]/80 rounded-xl border border-cyan-500/20 shadow-inner flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-xs font-mono mb-1">
-                  <span className="text-slate-400 font-sans text-[11px] font-semibold">Min. Diameter</span>
-                  {(filterState.minDiameter ?? DIAMETER_MIN) > DIAMETER_MIN && (
+                  <span className="text-slate-400 font-sans text-[11px] font-semibold">Diameter Range</span>
+                  {(minDiameter > DIAMETER_MIN || maxDiameter < DIAMETER_MAX) && (
                     <button
                       type="button"
-                      onClick={() => onChangeFilter({ minDiameter: DIAMETER_MIN })}
+                      onClick={() => onChangeFilter({ minDiameter: DIAMETER_MIN, maxDiameter: DIAMETER_MAX })}
                       className="text-[9px] text-slate-400 hover:text-cyan-300 underline font-mono cursor-pointer"
                     >
-                      Clear
+                      Reset
                     </button>
                   )}
                 </div>
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-cyan-400 font-bold font-mono text-xs drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]">
-                    {formatDiameterSliderValue(filterState.minDiameter ?? DIAMETER_MIN)}
+                <div className="flex items-baseline justify-between gap-2 mb-2">
+                  <span className="text-cyan-400 font-bold font-mono text-[10px] drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]">
+                    {formatDiameterSliderValue(minDiameter)}
+                  </span>
+                  <span className="text-cyan-300 font-bold font-mono text-[10px] text-right drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]">
+                    {formatDiameterSliderValue(maxDiameter)}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <input
-                  type="range"
-                  min={0}
-                  max={1000}
-                  step={1}
-                  value={diameterToSliderPos(filterState.minDiameter ?? DIAMETER_MIN)}
-                  onChange={(e) => {
-                    const pos = Number(e.target.value);
-                    const diam = sliderPosToDiameter(pos);
-                    onChangeFilter({ minDiameter: diam });
-                  }}
-                  className="w-full h-1.5 bg-[#0b1328] rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                />
+                <div className="relative h-5 flex items-center">
+                  <div className="absolute left-0 right-0 h-1.5 rounded-lg bg-[#0b1328]" />
+                  <div
+                    className="absolute h-1.5 rounded-lg bg-cyan-400/70"
+                    style={{ left: `${minDiameterPos / 10}%`, width: `${(maxDiameterPos - minDiameterPos) / 10}%` }}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={minDiameterPos}
+                    onFocus={() => setActiveDiameterThumb('min')}
+                    onPointerDown={() => setActiveDiameterThumb('min')}
+                    onChange={(e) => {
+                      const pos = Math.min(Number(e.target.value), maxDiameterPos - 1);
+                      onChangeFilter({ minDiameter: sliderPosToDiameter(Math.max(0, pos)) });
+                    }}
+                    aria-label="Minimum star diameter"
+                    className={`dual-range-thumb absolute inset-0 w-full h-5 ${activeDiameterThumb === 'min' ? 'z-20' : 'z-10'}`}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={maxDiameterPos}
+                    onFocus={() => setActiveDiameterThumb('max')}
+                    onPointerDown={() => setActiveDiameterThumb('max')}
+                    onChange={(e) => {
+                      const pos = Math.max(Number(e.target.value), minDiameterPos + 1);
+                      onChangeFilter({ maxDiameter: sliderPosToDiameter(Math.min(1000, pos)) });
+                    }}
+                    aria-label="Maximum star diameter"
+                    className={`dual-range-thumb absolute inset-0 w-full h-5 ${activeDiameterThumb === 'max' ? 'z-20' : 'z-10'}`}
+                  />
+                </div>
                 <div className="flex justify-between text-[8px] font-mono text-slate-500 pt-0.5">
                   <span>0.00001 D☉</span>
-                  <span>2,000 D☉</span>
+                  <span>2,150 D☉</span>
                 </div>
               </div>
             </div>
 
-            {/* Max Distance Slider: 3 ly to 1,000,000,000 ly (median internally calibrated for 0-90%, not shown) */}
+            {/* Distance Range Slider: Solar System scale to 12,900,000,000 ly */}
             <div className="p-3 bg-[#020510]/80 rounded-xl border border-cyan-500/20 shadow-inner flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-xs font-mono mb-1">
-                  <span className="text-slate-400 font-sans text-[11px] font-semibold">Max Distance</span>
-                  {(filterState.maxDistance ?? DISTANCE_MAX) < DISTANCE_MAX && (
+                  <span className="text-slate-400 font-sans text-[11px] font-semibold">Distance Range</span>
+                  {(minDistance > DISTANCE_MIN || maxDistance < DISTANCE_MAX) && (
                     <button
                       type="button"
-                      onClick={() => onChangeFilter({ maxDistance: DISTANCE_MAX })}
+                      onClick={() => onChangeFilter({ minDistance: DISTANCE_MIN, maxDistance: DISTANCE_MAX })}
                       className="text-[9px] text-slate-400 hover:text-emerald-300 underline font-mono cursor-pointer"
                     >
-                      Clear
+                      Reset
                     </button>
                   )}
                 </div>
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-emerald-400 font-bold font-mono text-xs drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]">
-                    {formatDistanceSliderValue(filterState.maxDistance ?? DISTANCE_MAX)}
+                <div className="flex items-baseline justify-between gap-2 mb-2">
+                  <span className="text-emerald-400 font-bold font-mono text-[10px] drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]">
+                    {formatDistanceSliderValue(minDistance)}
+                  </span>
+                  <span className="text-emerald-300 font-bold font-mono text-[10px] text-right drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]">
+                    {formatDistanceSliderValue(maxDistance)}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <input
-                  type="range"
-                  min={0}
-                  max={1000}
-                  step={1}
-                  value={distanceToSliderPos(filterState.maxDistance ?? DISTANCE_MAX)}
-                  onChange={(e) => {
-                    const pos = Number(e.target.value);
-                    const dist = sliderPosToDistance(pos);
-                    onChangeFilter({ maxDistance: dist });
-                  }}
-                  className="w-full h-1.5 bg-[#0b1328] rounded-lg appearance-none cursor-pointer accent-emerald-400"
-                />
+                <div className="relative h-5 flex items-center">
+                  <div className="absolute left-0 right-0 h-1.5 rounded-lg bg-[#0b1328]" />
+                  <div
+                    className="absolute h-1.5 rounded-lg bg-emerald-400/70"
+                    style={{ left: `${minDistancePos / 10}%`, width: `${(maxDistancePos - minDistancePos) / 10}%` }}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={minDistancePos}
+                    onFocus={() => setActiveDistanceThumb('min')}
+                    onPointerDown={() => setActiveDistanceThumb('min')}
+                    onChange={(e) => {
+                      const pos = Math.min(Number(e.target.value), maxDistancePos - 1);
+                      onChangeFilter({ minDistance: sliderPosToDistance(Math.max(0, pos)) });
+                    }}
+                    aria-label="Minimum star distance"
+                    className={`dual-range-thumb absolute inset-0 w-full h-5 ${activeDistanceThumb === 'min' ? 'z-20' : 'z-10'}`}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={maxDistancePos}
+                    onFocus={() => setActiveDistanceThumb('max')}
+                    onPointerDown={() => setActiveDistanceThumb('max')}
+                    onChange={(e) => {
+                      const pos = Math.max(Number(e.target.value), minDistancePos + 1);
+                      onChangeFilter({ maxDistance: sliderPosToDistance(Math.min(1000, pos)) });
+                    }}
+                    aria-label="Maximum star distance"
+                    className={`dual-range-thumb absolute inset-0 w-full h-5 ${activeDistanceThumb === 'max' ? 'z-20' : 'z-10'}`}
+                  />
+                </div>
                 <div className="flex justify-between text-[8px] font-mono text-slate-500 pt-0.5">
-                  <span>3 ly</span>
-                  <span>1B ly</span>
+                  <span>0.00001 ly</span>
+                  <span>12.9B ly</span>
                 </div>
               </div>
             </div>

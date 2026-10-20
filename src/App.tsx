@@ -407,13 +407,15 @@ export default function App() {
         }
       }
 
-      // Min Diameter (adjusted range: 0.00001 to 2,000 D☉)
-      if ((filterState.minDiameter ?? DIAMETER_MIN) > DIAMETER_MIN && star.diameterSolar < filterState.minDiameter) {
+      // Diameter range covers the full catalog bounds (0.00001 to 2,150 D☉).
+      if (star.diameterSolar < (filterState.minDiameter ?? DIAMETER_MIN) ||
+          star.diameterSolar > (filterState.maxDiameter ?? DIAMETER_MAX)) {
         return false;
       }
 
-      // Max Distance (adjusted range: 3 ly to 1,000,000,000 ly)
-      if ((filterState.maxDistance ?? DISTANCE_MAX) < DISTANCE_MAX && star.distanceLy > filterState.maxDistance) {
+      // Distance range covers the Solar System through the catalog's most distant entry.
+      if (star.distanceLy < (filterState.minDistance ?? DISTANCE_MIN) ||
+          star.distanceLy > (filterState.maxDistance ?? DISTANCE_MAX)) {
         return false;
       }
 
@@ -1226,7 +1228,7 @@ export default function App() {
                       <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
                         <span>
                           Showing <strong className="text-cyan-400 font-bold">{filteredStars.length}</strong> of{' '}
-                          {STARS_CATALOG.length} Stars in Database
+                          {STARS_CATALOG.length} catalog stars
                         </span>
                       </div>
 
