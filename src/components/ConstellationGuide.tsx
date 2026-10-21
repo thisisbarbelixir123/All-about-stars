@@ -93,7 +93,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     starNames: Record<string, any>;
   }>({ dsos: [], lines: [], starNames: {} });
 
-// Bulletproof JSON Fetch: Safely handles both arrays and FeatureCollections from the public folder, and ignores HTML fallbacks
+  // Bulletproof JSON Fetch: Safely handles both arrays and FeatureCollections from the public folder, and ignores HTML fallbacks
   useEffect(() => {
     const safeFetch = async (url: string) => {
       try {
@@ -225,91 +225,102 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
   const parseCoordinate = (val: any): number => {
     if (typeof val === 'number') return val;
     if (!val) return 0;
-    const str = String(val).replace(/−/g, '-');
-    const match = str.match(/([+-]?\d+)[h°]\s*(\d+)[m′']\s*([\d.]+)[s″"]/);
+    const str = String(val).replace(/−/g, '-').trim();
+    const match = str.match(/^([+-]?\d+)[h°]\s*(?:(\d+)[m′'])?\s*(?:([\d.]+)[s″"])?/);
     if (match) {
       const d = Math.abs(parseInt(match[1], 10));
-      const m = parseInt(match[2], 10) / 60;
-      const s = parseFloat(match[3]) / 3600;
-      const sign = str.includes('-') ? -1 : 1;
+      const m = match[2] ? parseInt(match[2], 10) / 60 : 0;
+      const s = match[3] ? parseFloat(match[3]) / 3600 : 0;
+      const sign = match[1].startsWith('-') ? -1 : 1;
       return sign * (d + m + s);
     }
     return parseFloat(str) || 0;
   };
 
-  // Unified Dual-Projection Engine: Scales the map to Anchor stars, then safely projects all secondary items synchronously
-  const projectTo2D = (anchorStars: any[], secondaryPoints: any[] = []) => {
-    if (!anchorStars || anchorStars.length === 0) return { mappedStars: [], mappedSecondary: [] };
-
-    const refRa = anchorStars[0].ra ?? 0;
-    const unwrap = (s: any) => {
-      let adjRa = s.ra ?? 0;
-      const diff = adjRa - refRa;
-      if (diff > 12) adjRa -= 24;
-      else if (diff < -12) adjRa += 24;
-      return { ...s, ra: adjRa, originalRa: s.ra, dec: s.dec ?? 0 };
-    };
-
-    const unwrappedAnchors = anchorStars.map(unwrap);
-    const unwrappedSecondary = secondaryPoints.map(unwrap);
-
-    const toCartesian = (s: any) => {
-      const alpha = s.ra * (Math.PI / 12.0); // 24h = 2pi
-      const delta = s.dec * (Math.PI / 180.0);
-      const cosDelta = Math.cos(delta);
-      return { star: s, alpha, delta, x: cosDelta * Math.cos(alpha), y: cosDelta * Math.sin(alpha), z: Math.sin(delta) };
-    };
-
-    const cartesianAnchors = unwrappedAnchors.map(toCartesian);
-    const cartesianSecondary = unwrappedSecondary.map(toCartesian);
-
-    // Compute celestial center STRICTLY from Anchor stars
-    let sumX = 0, sumY = 0, sumZ = 0;
-    for (const c of cartesianAnchors) {
-      sumX += c.x; sumY += c.y; sumZ += c.z;
+  // Robust multi-coordinate extractor that finds ALL ranges and returns absolute min and max
+  const extractBounds = (rangeStr: string, isRa: boolean): [number, number] => {
+    const str = (rangeStr || '').replace(/−/g, '-');
+    const regex = /([+-]?\d+)[h°]\s*(?:(\d+)[m′'])?\s*(?:([\d.]+)[s″"])?/g;
+    const results: number[] = [];
+    let match;
+    
+    while ((match = regex.exec(str)) !== null) {
+      const d = Math.abs(parseFloat(match[1]));
+      const m = match[2] ? parseFloat(match[2]) / 60 : 0;
+      const s = match[3] ? parseFloat(match[3]) / 3600 : 0;
+      const sign = match[1].startsWith('-') ? -1 : 1;
+      results.push(sign * (d + m + s));
     }
-    const norm = Math.hypot(Math.hypot(sumX, sumY), sumZ);
-    const cx = norm > 1e-6 ? sumX / norm : 1;
-    const cy = norm > 1e-6 ? sumY / norm : 0;
-    const cz = norm > 1e-6 ? sumZ / norm : 0;
+    
+    if (results.length === 0) return isRa ? [0, 24] : [-90, 90];
+    return [results[0], results[results.length - 1]];
+  };
 
-    const centerDelta = Math.asin(Math.max(-1, Math.min(1, cz)));
-    const centerAlpha = Math.atan2(cy, cx);
-    const cosCenterDelta = Math.cos(centerDelta);
-    const sinCenterDelta = Math.sin(centerDelta);
+  // Pure Cartesian Equirectangular Projection Engine
+  // This maps the stars precisely to the linear SVG coordinates used to draw the boundary polygons
+  const projectTo2D = (
+    points: any[], 
+    raBounds: number[], 
+    decBounds: number[], 
+    pMinX = 15, pMaxX = 85, pMinY = 15, pMaxY = 85, 
+    preserveAspect = false
+  ) => {
+    if (!points || points.length === 0) return { mappedPoints: [] };
 
-    const applyGnomonic = (cartesianArray: any[]) => cartesianArray.map((c) => {
-      let dAlpha = c.alpha - centerAlpha;
-      while (dAlpha > Math.PI) dAlpha -= 2 * Math.PI;
-      while (dAlpha < -Math.PI) dAlpha += 2 * Math.PI;
-      const u = Math.cos(c.delta) * Math.sin(dAlpha);
-      const v = cosCenterDelta * Math.sin(c.delta) - sinCenterDelta * Math.cos(c.delta) * Math.cos(dAlpha);
-      const w = sinCenterDelta * Math.sin(c.delta) + cosCenterDelta * Math.cos(c.delta) * Math.cos(dAlpha);
-      const safeW = w > 0.05 ? w : 0.05;
-      return { star: c.star, u: u / safeW, v: v / safeW };
+    let rMin = raBounds[0];
+    let rMax = raBounds[1];
+    let dMin = Math.min(decBounds[0], decBounds[1]);
+    let dMax = Math.max(decBounds[0], decBounds[1]);
+
+    let raSpan = rMax - rMin;
+    if (raSpan < 0) {
+      raSpan += 24;
+      rMax += 24;
+    }
+
+    if (preserveAspect) {
+      let width = pMaxX - pMinX;
+      let height = pMaxY - pMinY;
+      const midDec = ((dMin + dMax) / 2) * (Math.PI / 180);
+      const raDegrees = raSpan * 15 * Math.cos(midDec);
+      const decDegrees = dMax - dMin;
+      
+      const physicalRatio = Math.abs(raDegrees / (decDegrees || 1));
+      const currentRatio = width / height;
+      
+      if (physicalRatio > currentRatio) {
+        const newHeight = width / physicalRatio;
+        const yOffset = (height - newHeight) / 2;
+        pMinY += yOffset;
+        pMaxY -= yOffset;
+      } else {
+        const newWidth = height * physicalRatio;
+        const xOffset = (width - newWidth) / 2;
+        pMinX += xOffset;
+        pMaxX -= xOffset;
+      }
+    }
+
+    const mappedPoints = points.map(s => {
+      let sRa = s.ra ?? 0;
+      if (rMax > 24 && sRa < 12) sRa += 24;
+      if (sRa < rMin && rMax > 24) sRa += 24;
+
+      const xRatio = (sRa - rMin) / (raSpan || 1);
+      const x = pMaxX - (xRatio * (pMaxX - pMinX));
+
+      const yRatio = ((s.dec ?? 0) - dMin) / ((dMax - dMin) || 1);
+      const y = pMaxY - (yRatio * (pMaxY - pMinY));
+
+      return {
+        ...s,
+        originalRa: s.ra,
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10
+      };
     });
 
-    const projectedAnchors = applyGnomonic(cartesianAnchors);
-    const projectedSecondary = applyGnomonic(cartesianSecondary);
-
-    let maxExtent = 0.001;
-    for (const p of projectedAnchors) {
-      if (Math.abs(p.u) > maxExtent) maxExtent = Math.abs(p.u);
-      if (Math.abs(p.v) > maxExtent) maxExtent = Math.abs(p.v);
-    }
-    const scale = 35.0 / Math.max(maxExtent, 0.015);
-
-    const formatPoint = (p: any) => ({
-      ...p.star,
-      ra: p.star.originalRa ?? p.star.ra,
-      x: p.star.x !== undefined ? p.star.x : Math.round((50 - p.u * scale) * 10) / 10,
-      y: p.star.y !== undefined ? p.star.y : Math.round((50 - p.v * scale) * 10) / 10,
-    });
-
-    return {
-      mappedStars: projectedAnchors.map(formatPoint),
-      mappedSecondary: projectedSecondary.map(formatPoint)
-    };
+    return { mappedPoints };
   };
 
   const buildOrthogonalBoundary = (polygon: Array<{ x: number; y: number }>): { pathData: string; orthogonalPoints: Array<{ x: number; y: number }>; } => {
@@ -380,36 +391,31 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       return { id: `json-${idx}`, ra: r / 15, dec: coord[1] };
     });
     
-    // 🌐 ROBUST MATH ANCHOR: Use the 4 corners of the official RA/Dec boundary.
-    // This guarantees the map scale NEVER collapses, even for 2-star constellations.
+    // 🌐 ROBUST MATH ANCHOR: Use the exact corners of the official RA/Dec boundary.
     const border = constellation.borders;
-    const raMatch = border?.raRange.match(/(\d+)h.*?(\d+)h/);
-    const ra1 = raMatch ? Number(raMatch[1]) : 0;
-    const ra2 = raMatch ? Number(raMatch[2]) : 24;
-    const decMatch = border?.decRange.replace(/−/g, '-').match(/([+-]?\d+)°.*?([+-]?\d+)°/);
-    const dec1 = decMatch ? Number(decMatch[1]) : -90;
-    const dec2 = decMatch ? Number(decMatch[2]) : 90;
+    const smRaBounds = extractBounds(border?.raRange || '', true);
+    const smDecBounds = extractBounds(border?.decRange || '', false);
 
-    const anchorPoints = [
-      { ra: ra1, dec: dec1 }, { ra: ra2, dec: dec1 },
-      { ra: ra1, dec: dec2 }, { ra: ra2, dec: dec2 }
-    ];
-
-    const { mappedSecondary } = projectTo2D(anchorPoints, [...jsonStars, ...cCatalogStars]);
+    // 🌐 ROBUST MATH ANCHOR: Scale using Cartesian Equirectangular, preserving true visual shape
+    const { mappedPoints } = projectTo2D([...jsonStars, ...cCatalogStars], smRaBounds, smDecBounds, 15, 85, 15, 85, true);
     
-    const mappedLineVertices = mappedSecondary.slice(0, jsonStars.length);
-    const mappedCatalog = mappedSecondary.slice(jsonStars.length);
+    const mappedLineVertices = mappedPoints.slice(0, jsonStars.length);
+    const mappedCatalog = mappedPoints.slice(jsonStars.length);
 
     // 🧲 VERTEX SNAPPING (Small Map): Snap JSON lines to the exact center of Catalog Stars
     mappedLineVertices.forEach((vertex) => {
-      let closest: any = null;
-      let minDist = 3.5; // Magnet radius
+      let bestMatch: any = null;
+      let maxBrightness = Infinity; 
       mappedCatalog.forEach((catStar: any) => {
         const dist = Math.hypot(vertex.x - catStar.x, vertex.y - catStar.y);
-        if (dist < minDist) { minDist = dist; closest = catStar; }
+        if (dist < 8.0) { // Increased magnet radius to catch distant imprecise JSON vertices (e.g. Skat)
+          if (catStar.apparentMagnitude < maxBrightness) {
+            maxBrightness = catStar.apparentMagnitude;
+            bestMatch = catStar;
+          }
+        }
       });
-      // If a star is within the radius, perfectly fuse the line vertex to it
-      if (closest) { vertex.x = closest.x; vertex.y = closest.y; }
+      if (bestMatch) { vertex.x = bestMatch.x; vertex.y = bestMatch.y; }
     });
 
     return (
@@ -456,7 +462,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         {/* Draw the geometric constellation figure nodes */}
         {mappedLineVertices.map((s: any, starIdx: number) => (
           <g key={`sm-json-star-${starIdx}`}>
-            <circle cx={s.x} cy={s.y} r="2.0" fill="#ffffff" stroke="#38bdf8" strokeWidth="0.7" className="pointer-events-none" />
+            <circle cx={s.x} cy={s.y} r="1.4" fill="#ffffff" stroke="#38bdf8" strokeWidth="0.5" className="pointer-events-none" />
           </g>
         ))}
 
@@ -465,8 +471,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           const isPrincipal = s.id === constellation.principalStarId;
           return (
             <g key={`cat-${starIdx}`}>
-              {isPrincipal && <circle cx={s.x} cy={s.y} r="6.5" fill="#06b6d4" fillOpacity="0.3" className="animate-pulse pointer-events-none" />}
-              <circle cx={s.x} cy={s.y} r={isPrincipal ? 3.4 : 1.8} fill={isPrincipal ? '#fef08a' : '#ffffff'} stroke={isPrincipal ? '#06b6d4' : '#38bdf8'} strokeWidth="0.7" className="pointer-events-none" />
+              {isPrincipal && <circle cx={s.x} cy={s.y} r="4.5" fill="#06b6d4" fillOpacity="0.3" className="animate-pulse pointer-events-none" />}
+              <circle cx={s.x} cy={s.y} r={isPrincipal ? 2.6 : 1.2} fill={isPrincipal ? '#fef08a' : '#ffffff'} stroke={isPrincipal ? '#06b6d4' : '#38bdf8'} strokeWidth="0.5" className="pointer-events-none" />
             </g>
           );
         })}
@@ -481,7 +487,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     cCatalogStars: StarData[], 
     extraFigureStars: any[]
   ): { visibleStars: any[]; catalogPlacedCount: number } => {
-    const candidates = [
+    let candidates = [
       ...mappedCatalog.map((s, idx) => {
         const catalogStar = cCatalogStars[idx];
         return {
@@ -499,25 +505,42 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       })
     ];
 
-    candidates.sort((a, b) => b.luminositySolar - a.luminositySolar);
+    // Exclude sub-stellar objects (brown dwarfs) and stellar remnants (white dwarfs, neutron stars, black holes)
+    candidates = candidates.filter(cand => {
+      if (!cand.catalogStar) return true;
+      const stType = (cand.catalogStar.spectralType || '').toUpperCase();
+      const stage = (cand.catalogStar.stellarStage || '').toLowerCase();
+      
+      const isSubStellar = stType.startsWith('L') || stType.startsWith('T') || stType.startsWith('Y') || stage.includes('brown dwarf');
+      const isRemnant = stType.startsWith('D') || stType.startsWith('WD') || stage.includes('white dwarf') || stage.includes('neutron') || stage.includes('black hole') || stage.includes('remnant');
+      
+      return !isSubStellar && !isRemnant;
+    });
+
+    // Prioritize brightest stars by sorting ascending by apparent magnitude
+    candidates.sort((a, b) => a.apparentMagnitude - b.apparentMagnitude);
+    
     const visibleStars: any[] = [];
-    const mergedCompanionMap = new Map<string, string[]>();
     const seenCatalogIds = new Set<string>();
+    const seenNames = new Set<string>(); // Global duplicate name tracker
 
     for (const cand of candidates) {
       if (cand.catalogStar && seenCatalogIds.has(cand.catalogStar.id)) continue;
-      const overlapping = visibleStars.find((acc) => Math.hypot(acc.x - cand.x, acc.y - cand.y) < 3.2);
-      if (overlapping) {
-        const list = mergedCompanionMap.get(overlapping.id) || [];
-        list.push(cand.name.replace(/\s*\([^)]+\)/g, '').trim());
-        mergedCompanionMap.set(overlapping.id, list);
-        if (cand.catalogStar) seenCatalogIds.add(cand.catalogStar.id);
-      } else {
+      
+      // Universally strip corrupted duplicates (like Muhlifain) by ensuring a star name is only placed once
+      const cleanName = cand.name.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase();
+      if (cleanName && seenNames.has(cleanName)) continue;
+      
+      // Exclude overlapping stars entirely, keeping only the brightest (first encountered due to sort)
+      const isOverlapping = visibleStars.some((acc) => Math.hypot(acc.x - cand.x, acc.y - cand.y) < 3.0);
+      
+      if (!isOverlapping) {
         visibleStars.push(cand);
         if (cand.catalogStar) seenCatalogIds.add(cand.catalogStar.id);
+        if (cleanName) seenNames.add(cleanName);
       }
     }
-    visibleStars.forEach((st) => st.mergedCompanions = mergedCompanionMap.get(st.id));
+    
     return { visibleStars, catalogPlacedCount: visibleStars.filter((s) => !!s.catalogStar).length };
   };
 
@@ -531,13 +554,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     };
     
     const border = constellation.borders;
-    const polygon = border?.boundaryPolygon || [];
-    const { pathData: boundaryPathData, orthogonalPoints: orthoBoundaryPoints } = buildOrthogonalBoundary(polygon);
+    const basePolygon = border?.boundaryPolygon || [];
     const neighbors = border?.borderingConstellations || [];
     const neighborCount = neighbors.length;
     const graticule = computeCelestialGraticule(border?.raRange || '', border?.decRange || '', constellation.isZodiac, constellation.id);
 
-    // Robust case-insensitive JSON extraction
     const lineFeature = (celestialData.lines || []).find((f: any) => 
       (f.id || '').toLowerCase() === constellation.abbreviation.toLowerCase() ||
       (f.properties?.id || '').toLowerCase() === constellation.abbreviation.toLowerCase() ||
@@ -556,10 +577,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       return { id: `json-${idx}`, ra: r / 15, dec: coord[1] };
     });
 
-    const raMatch = border?.raRange.match(/(\d+)h.*?(\d+)h/);
-    const raBounds = raMatch ? [Number(raMatch[1]), Number(raMatch[2])] : [0, 24];
-    const decMatch = border?.decRange.replace(/−/g, '-').match(/([+-]?\d+)°.*?([+-]?\d+)°/);
-    const decBounds = decMatch ? [Number(decMatch[1]), Number(decMatch[2])] : [-90, 90];
+    const raBounds = extractBounds(border?.raRange || '', true);
+    const decBounds = extractBounds(border?.decRange || '', false);
     
     const localRawDsos = (celestialData.dsos || []).filter(dso => {
       if (!dso.geometry?.coordinates) return false;
@@ -579,8 +598,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       };
     });
 
-    
-const cCatalogStars = STARS_CATALOG.filter(s => 
+    const cCatalogStars = STARS_CATALOG.filter(s => 
       s.constellation.toLowerCase() === constellation.id.toLowerCase() || 
       s.constellation.toLowerCase() === constellation.name.toLowerCase()
     ).map(s => ({
@@ -588,38 +606,53 @@ const cCatalogStars = STARS_CATALOG.filter(s =>
       ra: parseCoordinate((s as any).rightAscension || (s as any).ra),
       dec: parseCoordinate((s as any).declination || (s as any).dec)
     }));
-    const extraFigureStars = EXTRA_CATALOG_FIGURE_STARS[constellation.id] || [];
-    // 🌐 ROBUST MATH ANCHOR: Use the 4 corners of the official RA/Dec boundary.
-    // This guarantees the map scale NEVER collapses, even for 2-star constellations.
-    const anchorPoints = [
-      { ra: raBounds[0], dec: decBounds[0] },
-      { ra: raBounds[1], dec: decBounds[0] },
-      { ra: raBounds[0], dec: decBounds[1] },
-      { ra: raBounds[1], dec: decBounds[1] }
-    ];
-    const allSecondary = [...jsonStars, ...localRawDsos, ...cCatalogStars, ...extraFigureStars];
     
-    // Project EVERYTHING simultaneously to guarantee 100% perfect scale synchronization
-    const { mappedSecondary } = projectTo2D(anchorPoints, allSecondary);
+    const extraFigureStars = (EXTRA_CATALOG_FIGURE_STARS[constellation.id] || [])
+      .map((extra: any) => {
+        const catalogMatch = STARS_CATALOG.find(s => s.id === extra.catalogStarId);
+        if (!catalogMatch) return null;
+        return {
+          ...extra,
+          ra: parseCoordinate((catalogMatch as any).rightAscension || (catalogMatch as any).ra),
+          dec: parseCoordinate((catalogMatch as any).declination || (catalogMatch as any).dec)
+        };
+      })
+      .filter(Boolean);
+    
+    const pMinX = basePolygon.length > 0 ? Math.min(...basePolygon.map(p => p.x)) : 15;
+    const pMaxX = basePolygon.length > 0 ? Math.max(...basePolygon.map(p => p.x)) : 85;
+    const pMinY = basePolygon.length > 0 ? Math.min(...basePolygon.map(p => p.y)) : 15;
+    const pMaxY = basePolygon.length > 0 ? Math.max(...basePolygon.map(p => p.y)) : 85;
+
+    const allSecondary = [...jsonStars, ...localRawDsos, ...cCatalogStars, ...extraFigureStars];
+
+    // 🌐 ROBUST MATH ANCHOR: Project and perfectly scale all stars inside the Cartesian bounding box
+    const { mappedPoints } = projectTo2D(allSecondary, raBounds, decBounds, pMinX, pMaxX, pMinY, pMaxY, false);
     
     let offset = 0;
-    const mappedLineVertices = mappedSecondary.slice(offset, offset + jsonStars.length); offset += jsonStars.length;
-    const mappedDsos = mappedSecondary.slice(offset, offset + localRawDsos.length); offset += localRawDsos.length;
-    const mappedCatalog = mappedSecondary.slice(offset, offset + cCatalogStars.length); offset += cCatalogStars.length;
-    const mappedExtra = mappedSecondary.slice(offset, offset + extraFigureStars.length);
+    const mappedLineVertices = mappedPoints.slice(offset, offset + jsonStars.length); offset += jsonStars.length;
+    const mappedDsos = mappedPoints.slice(offset, offset + localRawDsos.length); offset += localRawDsos.length;
+    const mappedCatalog = mappedPoints.slice(offset, offset + cCatalogStars.length); offset += cCatalogStars.length;
+    const mappedExtra = mappedPoints.slice(offset, offset + extraFigureStars.length);
 
-    // 🧲 VERTEX SNAPPING (Large Map): Snap JSON lines to the exact center of Catalog Stars
+    // 🧲 VERTEX SNAPPING
     mappedLineVertices.forEach((vertex) => {
-      let closest: any = null;
-      let minDist = 3.5; // Magnet radius
+      let bestMatch: any = null;
+      let maxBrightness = Infinity; 
       mappedCatalog.forEach((catStar: any) => {
         const dist = Math.hypot(vertex.x - catStar.x, vertex.y - catStar.y);
-        if (dist < minDist) { minDist = dist; closest = catStar; }
+        if (dist < 8.0) { // Increased magnet radius to catch distant imprecise JSON vertices (e.g. Skat)
+          if (catStar.apparentMagnitude < maxBrightness) {
+            maxBrightness = catStar.apparentMagnitude;
+            bestMatch = catStar;
+          }
+        }
       });
-      // If a star is within the radius, perfectly fuse the line vertex to it
-      if (closest) { vertex.x = closest.x; vertex.y = closest.y; }
+      if (bestMatch) { vertex.x = bestMatch.x; vertex.y = bestMatch.y; }
     });
 
+    const activePolygon = basePolygon.map(p => ({ ...p }));
+    const { pathData: boundaryPathData, orthogonalPoints: orthoBoundaryPoints } = buildOrthogonalBoundary(activePolygon);
     const { visibleStars, catalogPlacedCount } = getConstellationVisibleFigureStars(constellation, mappedCatalog, mappedExtra, cCatalogStars, extraFigureStars);
 
     return (
@@ -731,7 +764,7 @@ const cCatalogStars = STARS_CATALOG.filter(s =>
                     );
                   })()}
                 </g>
-              ) : polygon.length > 2 ? (
+              ) : activePolygon.length > 2 ? (
                 <g className="delporte-stepped-boundary">
                   <path d={boundaryPathData} fill="rgba(6, 182, 212, 0.11)" stroke="#06b6d4" strokeWidth="0.65" strokeDasharray="2.5 1.5" />
                   {orthoBoundaryPoints.map((pt, idx) => (
@@ -812,17 +845,18 @@ const cCatalogStars = STARS_CATALOG.filter(s =>
           </g>
         ))}
 
-          {/* 7. Star Nodes with Overlap De-duplication */}
+          {/* 7. Star Nodes */}
           {visibleStars.map((s, starIdx) => {
             const isPrincipal = s.isPrincipal;
             const isClickable = !!s.catalogStar;
+            // Star dots made smaller
             const radius = isPrincipal
-              ? 3.2
+              ? 2.6
               : s.apparentMagnitude < 2.0
-              ? 2.8
+              ? 2.2
               : isClickable
-              ? (starIdx < 5 ? 2.2 : 1.8)
-              : 1.4;
+              ? (s.apparentMagnitude < 4.0 ? 1.6 : 1.2)
+              : 0.9;
 
             return (
               <g
@@ -839,36 +873,32 @@ const cCatalogStars = STARS_CATALOG.filter(s =>
                   {isClickable
                     ? `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
                         s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
-                      }${
-                        s.mergedCompanions && s.mergedCompanions.length > 0
-                          ? `\n• Overlapping Companion: ${s.mergedCompanions.join(', ')} (Fainter)`
-                          : ''
                       }\n• Click to inspect 3D Star Dossier`
                     : `${s.name}\n• Mag: ${s.apparentMagnitude}`}
                 </title>
 
-                {isClickable && <circle cx={s.x} cy={s.y} r="6.0" fill="transparent" />}
+                {isClickable && <circle cx={s.x} cy={s.y} r="5.0" fill="transparent" />}
 
                 {isPrincipal && (
                   <g className="pointer-events-none">
-                    <circle cx={s.x} cy={s.y} r={6.5} fill={`url(#star-glow-${constellation.id})`} className="animate-pulse" />
-                    <circle cx={s.x} cy={s.y} r={4.8} fill="none" stroke="#fef08a" strokeWidth="0.45" strokeDasharray="2 1.5" opacity="0.85" />
+                    <circle cx={s.x} cy={s.y} r={5.0} fill={`url(#star-glow-${constellation.id})`} className="animate-pulse" />
+                    <circle cx={s.x} cy={s.y} r={3.6} fill="none" stroke="#fef08a" strokeWidth="0.4" strokeDasharray="2 1.5" opacity="0.85" />
                   </g>
                 )}
 
                 {isClickable && (
-                  <circle cx={s.x} cy={s.y} r={radius + 1.8} fill="none" stroke="#38bdf8" strokeWidth="0.5" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
+                  <circle cx={s.x} cy={s.y} r={radius + 1.4} fill="none" stroke="#38bdf8" strokeWidth="0.4" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
                 )}
 
                 {isClickable && !isPrincipal && (
-                  <circle cx={s.x} cy={s.y} r={radius + 0.8} fill="none" stroke="#06b6d4" strokeWidth="0.3" strokeOpacity="0.5" className="pointer-events-none" />
+                  <circle cx={s.x} cy={s.y} r={radius + 0.6} fill="none" stroke="#06b6d4" strokeWidth="0.25" strokeOpacity="0.5" className="pointer-events-none" />
                 )}
 
                 <circle
                   cx={s.x} cy={s.y} r={radius}
                   fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : isClickable ? '#ffffff' : '#94a3b8'}
                   stroke={isPrincipal ? '#f59e0b' : isClickable ? '#38bdf8' : '#475569'}
-                  strokeWidth={isPrincipal ? '0.75' : isClickable ? '0.5' : '0.35'}
+                  strokeWidth={isPrincipal ? '0.6' : isClickable ? '0.4' : '0.25'}
                   className={isClickable ? 'group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors' : ''}
                 />
 
