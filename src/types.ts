@@ -58,6 +58,8 @@ export interface StarData {
   flamsteedDesignation?: string;
   gouldDesignation?: string;
   constellation: string;
+  rightAscension?: string;
+  declination?: string;
   // Size metrics
   diameterSolar: number; // in Solar Diameters (1 D_sun = 1,392,700 km)
   diameterKm: number;

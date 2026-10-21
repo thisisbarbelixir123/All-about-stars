@@ -557,8 +557,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isPnActive =
         visualType === 'planetary-nebula' ||
-        (visualType === 'giant' && nextVisualType === 'planetary-nebula') ||
-        (visualType === 'planetary-nebula' && nextVisualType === 'cooling-white-dwarf');
+        (visualType === 'giant' && nextVisualType === 'planetary-nebula');
 
       if (isPnActive) {
         let pnAlpha = 1.0;
@@ -655,8 +654,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isSnActive =
         visualType === 'supernova' ||
-        (visualType === 'giant' && nextVisualType === 'supernova') ||
-        (visualType === 'supernova' && nextVisualType === 'pulsar');
+        (visualType === 'giant' && nextVisualType === 'supernova');
 
       if (isSnActive) {
         let snAlpha = 1.0;
@@ -757,8 +755,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isHnActive =
         visualType === 'hypernova' ||
-        (visualType === 'giant' && nextVisualType === 'hypernova') ||
-        (visualType === 'hypernova' && nextVisualType === 'black-hole');
+        (visualType === 'giant' && nextVisualType === 'hypernova');
 
       if (isHnActive) {
         let hAlpha = 1.0;

@@ -28527,9 +28527,10 @@
     "name": "Muhlifain (Gamma Centauri)",
     "alternateNames": [
       "γ Cen",
-      "HD 110879",
-      "HR 4843",
-      "HIP 62322"
+      "Gamma Centauri",
+      "HD 110304",
+      "HR 4819",
+      "HIP 61932"
     ],
     "bayerDesignation": "γ Cen",
     "constellation": "Centaurus",
@@ -28574,8 +28575,8 @@
     "diameterKm": 4456640,
     "diameterAU": 0.029790798352586446,
     "distanceParsecs": 39.858227351328814,
-    "rightAscension": "12h 46m 16.80s",
-    "declination": "-68° 06′ 29.2″"
+    "rightAscension": "12h 41m 31.04s",
+    "declination": "-48° 57′ 35.5″"
   },
   {
     "id": "hadar",
@@ -30398,8 +30399,8 @@
     "diameterKm": 306394000,
     "diameterAU": 2.0481173867403184,
     "distanceParsecs": 208.48918922233534,
-    "rightAscension": "11h 31m 24.22s",
-    "declination": "+69° 19′ 51.9″"
+    "rightAscension": "11h 31m 46.07s",
+    "declination": "-59° 26′ 31.4″"
   },
   {
     "id": "stephenson-2-dfk-49",

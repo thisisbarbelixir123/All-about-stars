@@ -576,7 +576,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
       }
       if (activeGroupFilter === 'SUBGIANTS') {
         return (
-          star.luminosityClass === 'IV' ||
+          (star as any).luminosityClass === 'IV' ||
           star.spectralType.includes('IV') ||
           star.stellarStage.toLowerCase().includes('subgiant')
         );

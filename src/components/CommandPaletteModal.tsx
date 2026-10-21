@@ -344,7 +344,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: star.color }} />
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: star.colorHex }} />
                       <div className="min-w-0 truncate">
                         <div className="text-xs sm:text-sm font-bold truncate flex items-center gap-2">
                           <span>{star.name}</span>
@@ -353,7 +353,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                           </span>
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 truncate">
-                          Class {star.spectralClass} • {star.radiusSolar} R☉ • {star.temperature} K
+                          Class {star.spectralClass} • {star.diameterSolar} D☉ • {star.temperature} K
                         </div>
                       </div>
                     </div>

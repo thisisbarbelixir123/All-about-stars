@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 interface HomeScreenProps {
-  onNavigateTab: (tab: '3d-stage' | 'catalog' | 'hr-diagram' | 'guide' | 'about') => void;
+  onNavigateTab: (tab: '3d-stage' | 'catalog' | 'hr-diagram' | 'guide' | 'about' | 'constellations') => void;
   onSelectPreset?: (presetId: string) => void;
   onInspectStar: (star: StarData) => void;
   onAddStarToCompare: (star: StarData) => void;

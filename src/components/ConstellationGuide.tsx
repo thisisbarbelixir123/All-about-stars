@@ -81,17 +81,28 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
   const [skyMapOptions, setSkyMapOptions] = useState({
     showGraticule: true,
     showBoundaries: true,
-    showStarLabels: true,
+    showStarLabels: false,
     showEquatorEcliptic: true,
     showDeepSky: true,
     showNeighborGuides: true
   });
 
+  const [activeStarLabelId, setActiveStarLabelId] = useState<string | null>(null);
+  const [hoveredStarId, setHoveredStarId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setActiveStarLabelId(null);
+    setHoveredStarId(null);
+  }, [inspectedConstellation]);
+
   const [celestialData, setCelestialData] = useState<{
     dsos: any[];
     lines: any[];
     starNames: Record<string, any>;
-  }>({ dsos: [], lines: [], starNames: {} });
+    bounds: any[];
+    borders: any[];
+    dsoNames: Record<string, any>;
+  }>({ dsos: [], lines: [], starNames: {}, bounds: [], borders: [], dsoNames: {} });
 
   // Bulletproof JSON Fetch: Safely handles both arrays and FeatureCollections from the public folder, and ignores HTML fallbacks
   useEffect(() => {
@@ -109,16 +120,22 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     };
 
     const loadAll = async () => {
-      const [dsoJson, linesJson, namesJson] = await Promise.all([
-        safeFetch('/data/dsos.6_2.json'),
+      const [dsoJson, linesJson, namesJson, boundsJson, bordersJson, dsoNamesJson] = await Promise.all([
+        safeFetch('/data/dsos.6.json'),
         safeFetch('/data/constellations.lines.json'),
-        safeFetch('/data/starnames_2.json')
+        safeFetch('/data/starnames.json'),
+        safeFetch('/data/constellations.bounds.json'),
+        safeFetch('/data/constellations.borders.json'),
+        safeFetch('/data/dsonames.json')
       ]);
 
       setCelestialData({
         dsos: dsoJson ? (Array.isArray(dsoJson) ? dsoJson : (dsoJson.features || [])) : [],
         lines: linesJson ? (Array.isArray(linesJson) ? linesJson : (linesJson.features || [])) : [],
-        starNames: namesJson || {}
+        starNames: namesJson || {},
+        bounds: boundsJson ? (Array.isArray(boundsJson) ? boundsJson : (boundsJson.features || [])) : [],
+        borders: bordersJson ? (Array.isArray(bordersJson) ? bordersJson : (bordersJson.features || [])) : [],
+        dsoNames: dsoNamesJson || {}
       });
     };
 
@@ -223,9 +240,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   // Helper to convert formatted string coordinates ("22h 05m 47s" or "-00° 19′ 11″") into true decimal numbers
   const parseCoordinate = (val: any): number => {
-    if (typeof val === 'number') return val;
-    if (!val) return 0;
+    if (typeof val === 'number') return isNaN(val) ? NaN : val;
+    if (!val) return NaN;
     const str = String(val).replace(/−/g, '-').trim();
+    if (!str || str === 'undefined' || str === 'null') return NaN;
     const match = str.match(/^([+-]?\d+)[h°]\s*(?:(\d+)[m′'])?\s*(?:([\d.]+)[s″"])?/);
     if (match) {
       const d = Math.abs(parseInt(match[1], 10));
@@ -234,7 +252,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       const sign = match[1].startsWith('-') ? -1 : 1;
       return sign * (d + m + s);
     }
-    return parseFloat(str) || 0;
+    const num = parseFloat(str);
+    return isNaN(num) ? NaN : num;
   };
 
   // Robust multi-coordinate extractor that finds ALL ranges and returns absolute min and max
@@ -256,17 +275,248 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return [results[0], results[results.length - 1]];
   };
 
-  // Pure Cartesian Equirectangular Projection Engine
-  // This maps the stars precisely to the linear SVG coordinates used to draw the boundary polygons
+  const POLAR_CONSTELLATION_IDS = useMemo(() => new Set([
+    'ursa-minor', 'umi',
+    'octans', 'oct',
+    'draco', 'dra',
+    'cepheus', 'cep',
+    'camelopardalis', 'cam',
+    'apus', 'aps',
+    'chamaeleon', 'cha',
+    'mensa', 'men',
+    'hydrus', 'hyi',
+    'volans', 'vol'
+  ]), []);
+
+  const isPolarConstellation = (cId: string, decBounds: number[]): boolean => {
+    const idClean = (cId || '').toLowerCase().trim();
+    if (POLAR_CONSTELLATION_IDS.has(idClean)) return true;
+    const maxDec = Math.max(...decBounds);
+    const minDec = Math.min(...decBounds);
+    return maxDec >= 68 || minDec <= -68;
+  };
+
+  const projectPolarPoint = (lonDeg: number, latDeg: number, isNorth: boolean): { x: number; y: number } => {
+    let l = lonDeg;
+    if (l < 0) l += 360;
+    const theta = (l * Math.PI) / 180;
+    const r = isNorth ? (90 - latDeg) : (90 + latDeg);
+    return isNorth
+      ? { x: -r * Math.sin(theta), y: r * Math.cos(theta) }
+      : { x: r * Math.sin(theta), y: -r * Math.cos(theta) };
+  };
+
+  const pointInPolygonLocal = (lonDeg: number, latDeg: number, ring: number[][]): boolean => {
+    let sumX = 0, sumY = 0, sumZ = 0;
+    for (const pt of ring) {
+      const radL = (pt[0] * Math.PI) / 180;
+      const radB = (pt[1] * Math.PI) / 180;
+      sumX += Math.cos(radB) * Math.cos(radL);
+      sumY += Math.cos(radB) * Math.sin(radL);
+      sumZ += Math.sin(radB);
+    }
+    const centerLon = (Math.atan2(sumY, sumX) * 180) / Math.PI;
+    const centerLat = (Math.atan2(sumZ, Math.hypot(sumX, sumY)) * 180) / Math.PI;
+
+    const toLocal = (l: number, b: number) => {
+      let dl = l - centerLon;
+      while (dl > 180) dl -= 360;
+      while (dl < -180) dl += 360;
+      const radB = (b * Math.PI) / 180;
+      return {
+        x: dl * Math.cos(radB),
+        y: b - centerLat
+      };
+    };
+
+    const localPt = toLocal(lonDeg, latDeg);
+    const localRing = ring.map(pt => toLocal(pt[0], pt[1]));
+
+    let inside = false;
+    const n = localRing.length;
+    if (n < 3) return false;
+    let p1 = localRing[0];
+    for (let i = 0; i <= n; i++) {
+      const p2 = localRing[i % n];
+      if (localPt.y > Math.min(p1.y, p2.y) && localPt.y <= Math.max(p1.y, p2.y) && localPt.x <= Math.max(p1.x, p2.x)) {
+        if (p1.y !== p2.y) {
+          const xints = ((localPt.y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y) + p1.x;
+          if (p1.x === p2.x || localPt.x <= xints) inside = !inside;
+        }
+      }
+      p1 = p2;
+    }
+    return inside;
+  };
+
+  const pointInPolarRing = (px: number, py: number, ring: number[][], isNorth: boolean): boolean => {
+    let inside = false;
+    const n = ring.length;
+    if (n < 3) return false;
+    const polarRing = ring.map(pt => projectPolarPoint(pt[0], pt[1], isNorth));
+    let p1 = polarRing[0];
+    for (let i = 0; i <= n; i++) {
+      const p2 = polarRing[i % n];
+      if (py > Math.min(p1.y, p2.y) && py <= Math.max(p1.y, p2.y) && px <= Math.max(p1.x, p2.x)) {
+        if (p1.y !== p2.y) {
+          const xints = ((py - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y) + p1.x;
+          if (p1.x === p2.x || px <= xints) inside = !inside;
+        }
+      }
+      p1 = p2;
+    }
+    return inside;
+  };
+
+  const isInsideBoundaryGeomHelper = (
+    boundFeature: any,
+    lonDeg: number,
+    latDeg: number,
+    isPolar: boolean,
+    isNorth: boolean
+  ): boolean => {
+    if (!boundFeature?.geometry?.coordinates) return true;
+    const gtype = boundFeature.geometry.type;
+    const coords = boundFeature.geometry.coordinates;
+    const testRing = (ring: number[][]) => {
+      if (isPolar) {
+        const pt = projectPolarPoint(lonDeg, latDeg, isNorth);
+        return pointInPolarRing(pt.x, pt.y, ring, isNorth);
+      } else {
+        return pointInPolygonLocal(lonDeg, latDeg, ring);
+      }
+    };
+
+    if (gtype === 'Polygon') {
+      if (!testRing(coords[0])) return false;
+      for (let h = 1; h < coords.length; h++) {
+        if (testRing(coords[h])) return false;
+      }
+      return true;
+    } else if (gtype === 'MultiPolygon') {
+      for (const poly of coords) {
+        if (testRing(poly[0])) {
+          let inHole = false;
+          for (let h = 1; h < poly.length; h++) {
+            if (testRing(poly[h])) {
+              inHole = true;
+              break;
+            }
+          }
+          if (!inHole) return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  };
+
+  const isStarInsideConstellation = (
+    star: StarData,
+    constellation: ConstellationInfo,
+    boundFeature?: any
+  ): boolean => {
+    const rawRa = star.rightAscension || (star as any).ra;
+    const rawDec = star.declination || (star as any).dec;
+    if (!rawRa || !rawDec) return false;
+
+    const strRa = String(rawRa).trim();
+    const strDec = String(rawDec).trim();
+    if (!strRa || !strDec || strRa === 'undefined' || strDec === 'undefined') return false;
+
+    const raVal = parseCoordinate(rawRa);
+    const decVal = parseCoordinate(rawDec);
+    if (isNaN(raVal) || isNaN(decVal)) return false;
+
+    // Filter out 0,0 placeholder / unanchored stray stars
+    if (Math.abs(raVal) < 1e-4 && Math.abs(decVal) < 1e-4) return false;
+
+    const decBounds = extractBounds(constellation.borders?.decRange || '', false);
+    const isPolar = isPolarConstellation(constellation.id, decBounds);
+    const isNorth = (decBounds[0] + decBounds[1]) / 2 >= 0;
+
+    if (boundFeature) {
+      return isInsideBoundaryGeomHelper(boundFeature, raVal * 15, decVal, isPolar, isNorth);
+    }
+
+    const dMin = Math.min(decBounds[0], decBounds[1]) - 3;
+    const dMax = Math.max(decBounds[0], decBounds[1]) + 3;
+    if (decVal < dMin || decVal > dMax) return false;
+
+    return true;
+  };
+
+  // Pure Cartesian Equirectangular & Polar Azimuthal Projection Engine
+  // This maps the stars and boundaries precisely, centering polar constellations to eliminate distortion
   const projectTo2D = (
     points: any[], 
     raBounds: number[], 
     decBounds: number[], 
     pMinX = 15, pMaxX = 85, pMinY = 15, pMaxY = 85, 
-    preserveAspect = false
+    preserveAspect = false,
+    isPolar = false,
+    isNorth = true,
+    polarRingCoords: number[][] = []
   ) => {
-    if (!points || points.length === 0) return { mappedPoints: [] };
+    if (!points || points.length === 0) return { mappedPoints: [], polarRingSvg: [] as Array<{ x: number; y: number }>, poleSvg: null as { x: number; y: number } | null };
 
+    if (isPolar) {
+      // 🌐 POLAR AZIMUTHAL PROJECTION (Centered on Polar Constellation)
+      const rawPoints = points.map(s => {
+        const sRa = s.ra ?? 0;
+        const sDec = s.dec ?? (isNorth ? 90 : -90);
+        const pt = projectPolarPoint(sRa * 15, sDec, isNorth);
+        return {
+          ...s,
+          originalRa: s.ra,
+          rawX: pt.x,
+          rawY: pt.y
+        };
+      });
+
+      const rawRing = polarRingCoords.map(pt => projectPolarPoint(pt[0], pt[1], isNorth));
+
+      const allX = [...rawPoints.map(p => p.rawX), ...rawRing.map(p => p.x)];
+      const allY = [...rawPoints.map(p => p.rawY), ...rawRing.map(p => p.y)];
+
+      const minX = allX.length > 0 ? Math.min(...allX) : -10;
+      const maxX = allX.length > 0 ? Math.max(...allX) : 10;
+      const minY = allY.length > 0 ? Math.min(...allY) : -10;
+      const maxY = allY.length > 0 ? Math.max(...allY) : 10;
+
+      const midX = (minX + maxX) / 2;
+      const midY = (minY + maxY) / 2;
+      const span = Math.max(maxX - minX, maxY - minY, 1) * 1.18;
+
+      const cX = (pMinX + pMaxX) / 2;
+      const cY = (pMinY + pMaxY) / 2;
+      const boxSpan = Math.min(pMaxX - pMinX, pMaxY - pMinY);
+
+      const mappedPoints = rawPoints.map(s => {
+        const x = cX + ((s.rawX - midX) / span) * boxSpan;
+        const y = cY - ((s.rawY - midY) / span) * boxSpan;
+        return {
+          ...s,
+          x: Math.round(x * 10) / 10,
+          y: Math.round(y * 10) / 10
+        };
+      });
+
+      const polarRingSvg = rawRing.map(p => ({
+        x: Math.round((cX + ((p.x - midX) / span) * boxSpan) * 10) / 10,
+        y: Math.round((cY - ((p.y - midY) / span) * boxSpan) * 10) / 10
+      }));
+
+      // Celestial Pole position at (0, 0)
+      const poleSvg = {
+        x: Math.round((cX + ((0 - midX) / span) * boxSpan) * 10) / 10,
+        y: Math.round((cY - ((0 - midY) / span) * boxSpan) * 10) / 10
+      };
+
+      return { mappedPoints, polarRingSvg, poleSvg };
+    }
+
+    // Pure Cartesian Equirectangular Projection Engine
     let rMin = raBounds[0];
     let rMax = raBounds[1];
     let dMin = Math.min(decBounds[0], decBounds[1]);
@@ -320,7 +570,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       };
     });
 
-    return { mappedPoints };
+    return { mappedPoints, polarRingSvg: [] as Array<{ x: number; y: number }>, poleSvg: null as { x: number; y: number } | null };
   };
 
   const buildOrthogonalBoundary = (polygon: Array<{ x: number; y: number }>): { pathData: string; orthogonalPoints: Array<{ x: number; y: number }>; } => {
@@ -359,10 +609,17 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   // SVG Renderer for Normal Asterism Mode (Small Map)
   const renderNormalAsterism = (constellation: ConstellationInfo, size = 110, className = '') => {
-    const cCatalogStars = STARS_CATALOG.filter(s => 
-      s.constellation.toLowerCase() === constellation.id.toLowerCase() || 
-      s.constellation.toLowerCase() === constellation.name.toLowerCase()
-    ).map(s => ({
+    const boundFeature = (celestialData.bounds || []).find((b: any) => 
+      b.id?.toLowerCase() === constellation.abbreviation?.toLowerCase() ||
+      b.id?.toLowerCase() === constellation.id?.toLowerCase()
+    );
+
+    const cCatalogStars = STARS_CATALOG.filter(s => {
+      const matches = s.constellation.toLowerCase() === constellation.id.toLowerCase() || 
+        s.constellation.toLowerCase() === constellation.name.toLowerCase();
+      if (!matches) return false;
+      return isStarInsideConstellation(s, constellation, boundFeature);
+    }).map(s => ({
       ...s,
       ra: parseCoordinate((s as any).rightAscension || (s as any).ra),
       dec: parseCoordinate((s as any).declination || (s as any).dec)
@@ -395,9 +652,26 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     const border = constellation.borders;
     const smRaBounds = extractBounds(border?.raRange || '', true);
     const smDecBounds = extractBounds(border?.decRange || '', false);
+    const isPolar = isPolarConstellation(constellation.id, smDecBounds);
+    const isNorth = (smDecBounds[0] + smDecBounds[1]) / 2 >= 0;
 
-    // 🌐 ROBUST MATH ANCHOR: Scale using Cartesian Equirectangular, preserving true visual shape
-    const { mappedPoints } = projectTo2D([...jsonStars, ...cCatalogStars], smRaBounds, smDecBounds, 15, 85, 15, 85, true);
+    const rawRingCoords: number[][] = isPolar && boundFeature?.geometry?.coordinates
+      ? (boundFeature.geometry.type === 'Polygon'
+          ? boundFeature.geometry.coordinates[0]
+          : boundFeature.geometry.coordinates[0]?.[0] || [])
+      : [];
+
+    // 🌐 ROBUST MATH ANCHOR: Scale using Cartesian Equirectangular or Polar Centered Projection
+    const { mappedPoints, poleSvg } = projectTo2D(
+      [...jsonStars, ...cCatalogStars], 
+      smRaBounds, 
+      smDecBounds, 
+      15, 85, 15, 85, 
+      true,
+      isPolar,
+      isNorth,
+      rawRingCoords
+    );
     
     const mappedLineVertices = mappedPoints.slice(0, jsonStars.length);
     const mappedCatalog = mappedPoints.slice(jsonStars.length);
@@ -415,7 +689,13 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           }
         }
       });
-      if (bestMatch) { vertex.x = bestMatch.x; vertex.y = bestMatch.y; }
+      if (bestMatch) { 
+        vertex.x = bestMatch.x; 
+        vertex.y = bestMatch.y; 
+        vertex.isAssigned = true;
+      } else {
+        vertex.isAssigned = false;
+      }
     });
 
     return (
@@ -423,6 +703,14 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(56, 189, 248, 0.07)" strokeDasharray="2 3" />
         <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(56, 189, 248, 0.05)" />
         <line x1="8" y1="50" x2="92" y2="50" stroke="rgba(56, 189, 248, 0.05)" />
+
+        {/* Polar Celestial Pole Indicator */}
+        {isPolar && poleSvg && poleSvg.x >= 5 && poleSvg.x <= 95 && poleSvg.y >= 5 && poleSvg.y <= 95 && (
+          <g className="pointer-events-none">
+            <circle cx={poleSvg.x} cy={poleSvg.y} r="2.2" fill="none" stroke="#38bdf8" strokeWidth="0.35" strokeDasharray="1 1" />
+            <circle cx={poleSvg.x} cy={poleSvg.y} r="0.6" fill="#facc15" />
+          </g>
+        )}
 
         {/* Draw the dynamically fetched IAU lines */}
         {multiLineCoords.map((segment: number[][], segIdx: number) => {
@@ -440,7 +728,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             const raDiff = Math.abs(from.ra - to.ra);
             let x1 = from.x, y1 = from.y, x2 = to.x, y2 = to.y;
 
-            if (raDiff > 12 && Math.abs(x1 - x2) > 40) {
+            if (!isPolar && raDiff > 12 && Math.abs(x1 - x2) > 40) {
               const seamX = x1 < x2 ? 0 : 100;
               const otherSeamX = x1 < x2 ? 100 : 0;
               const t = (seamX - x1) / ((x2 - 100 * Math.sign(x2 - x1)) - x1 || 1);
@@ -459,10 +747,18 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           });
         })}
 
-        {/* Draw the geometric constellation figure nodes */}
+        {/* Draw the geometric constellation figure nodes: unassigned are greyed out */}
         {mappedLineVertices.map((s: any, starIdx: number) => (
           <g key={`sm-json-star-${starIdx}`}>
-            <circle cx={s.x} cy={s.y} r="1.4" fill="#ffffff" stroke="#38bdf8" strokeWidth="0.5" className="pointer-events-none" />
+            <circle
+              cx={s.x} cy={s.y}
+              r={s.isAssigned ? "1.4" : "1.0"}
+              fill={s.isAssigned ? "#ffffff" : "#475569"}
+              stroke={s.isAssigned ? "#38bdf8" : "#334155"}
+              strokeWidth="0.4"
+              opacity={s.isAssigned ? "1" : "0.45"}
+              className="pointer-events-none"
+            />
           </g>
         ))}
 
@@ -471,7 +767,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           const isPrincipal = s.id === constellation.principalStarId;
           return (
             <g key={`cat-${starIdx}`}>
-              {isPrincipal && <circle cx={s.x} cy={s.y} r="4.5" fill="#06b6d4" fillOpacity="0.3" className="animate-pulse pointer-events-none" />}
+              {isPrincipal && <circle cx={s.x} cy={s.y} r={4.5} fill="#06b6d4" fillOpacity="0.3" className="animate-pulse pointer-events-none" />}
               <circle cx={s.x} cy={s.y} r={isPrincipal ? 2.6 : 1.2} fill={isPrincipal ? '#fef08a' : '#ffffff'} stroke={isPrincipal ? '#06b6d4' : '#38bdf8'} strokeWidth="0.5" className="pointer-events-none" />
             </g>
           );
@@ -491,16 +787,32 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       ...mappedCatalog.map((s, idx) => {
         const catalogStar = cCatalogStars[idx];
         return {
-          id: `asterism-${idx}`, x: s.x, y: s.y, name: catalogStar.name, displayLabel: parseStarLabel(catalogStar.name).displayLabel, isPrincipal: catalogStar.id === constellation.principalStarId,
-          catalogStar, apparentMagnitude: catalogStar.apparentMagnitude, luminositySolar: catalogStar.luminositySolar, locationDescription: STAR_CONSTELLATION_LOCATIONS[catalogStar.id],
+          id: catalogStar ? `cat-${catalogStar.id}` : `asterism-${idx}`,
+          x: s.x,
+          y: s.y,
+          name: catalogStar.name,
+          displayLabel: parseStarLabel(catalogStar.name).displayLabel,
+          isPrincipal: catalogStar.id === constellation.principalStarId,
+          catalogStar,
+          apparentMagnitude: catalogStar.apparentMagnitude,
+          luminositySolar: catalogStar.luminositySolar,
+          locationDescription: STAR_CONSTELLATION_LOCATIONS[catalogStar.id],
         };
       }),
       ...mappedExtra.map((es, idx) => {
         const extraData = extraFigureStars[idx];
         const catalogStar = STARS_CATALOG.find((cs) => cs.id === extraData.catalogStarId) || null;
         return {
-          id: `extra-${idx}`, x: es.x, y: es.y, name: catalogStar?.name || extraData.name, displayLabel: (catalogStar?.name || extraData.name).replace(/\s*\([^)]+\)/g, ''),
-          isPrincipal: false, catalogStar, apparentMagnitude: catalogStar?.apparentMagnitude || extraData.mag || 5.0, luminositySolar: catalogStar?.luminositySolar || 1.0, locationDescription: extraData.locationDescription || (catalogStar ? STAR_CONSTELLATION_LOCATIONS[catalogStar.id] : undefined),
+          id: catalogStar ? `cat-${catalogStar.id}` : `extra-${idx}`,
+          x: es.x,
+          y: es.y,
+          name: catalogStar?.name || extraData.name,
+          displayLabel: (catalogStar?.name || extraData.name).replace(/\s*\([^)]+\)/g, ''),
+          isPrincipal: false,
+          catalogStar,
+          apparentMagnitude: catalogStar?.apparentMagnitude || extraData.mag || 5.0,
+          luminositySolar: catalogStar?.luminositySolar || 1.0,
+          locationDescription: extraData.locationDescription || (catalogStar ? STAR_CONSTELLATION_LOCATIONS[catalogStar.id] : undefined),
         };
       })
     ];
@@ -579,8 +891,22 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
     const raBounds = extractBounds(border?.raRange || '', true);
     const decBounds = extractBounds(border?.decRange || '', false);
+    const isPolar = isPolarConstellation(constellation.id, decBounds);
+    const isNorth = (decBounds[0] + decBounds[1]) / 2 >= 0;
     
-    const localRawDsos = (celestialData.dsos || []).filter(dso => {
+    // 🌌 PROMINENT DARK SKY OBJECTS (DSOs) SELECTION:
+    // Only display the most prominent, iconic deep-sky objects (Messier catalogue or iconic named objects like Omega Centauri).
+    // Filters out thousands of obscure catalog entries and caps to top 2 iconic objects per constellation so the chart stays crisp.
+    const boundFeature = (celestialData.bounds || []).find((b: any) => 
+      b.id?.toLowerCase() === constellation.abbreviation?.toLowerCase() ||
+      b.id?.toLowerCase() === constellation.id?.toLowerCase()
+    );
+
+    const isInsideBoundaryGeom = (lonDeg: number, latDeg: number): boolean => {
+      return isInsideBoundaryGeomHelper(boundFeature, lonDeg, latDeg, isPolar, isNorth);
+    };
+
+    const prominentCandidates = (celestialData.dsos || []).filter(dso => {
       if (!dso.geometry?.coordinates) return false;
       let r = dso.geometry.coordinates[0]; if (r < 0) r += 360;
       const dsoRaHours = r / 15; 
@@ -589,19 +915,100 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       let inRa = false;
       if (raBounds[0] > raBounds[1]) inRa = dsoRaHours >= raBounds[0] || dsoRaHours <= raBounds[1];
       else inRa = dsoRaHours >= raBounds[0] && dsoRaHours <= raBounds[1];
-      return inRa && inDec;
+      if (!inRa || !inDec) return false;
+
+      // Verify exact polygon boundary containment if boundary geometry is available
+      if (!isInsideBoundaryGeom(dso.geometry.coordinates[0], dsoDec)) return false;
+
+      const props = dso.properties || {};
+      const desig = (props.desig || '').trim();
+      const dsoId = String(dso.id || '').trim();
+      const dsoType = (props.type || '').trim().toLowerCase();
+
+      // Check for common name in dsonames
+      const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
+      const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
+
+      // Check for Messier designation
+      const isMessier = /^M\s*\d+$/i.test(desig);
+
+      // Exclude obscure catalog items without common names or obscure tags
+      const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
+      if (isObscure) return false;
+      if (dsoType === 'dn' && !commonName) return false;
+
+      // Only allow Messier objects or objects with recognized iconic common names (mag <= 6.5 or notable emission nebula)
+      const mag = parseFloat(props.mag);
+      const hasValidMag = !isNaN(mag) && mag < 90;
+
+      if (isMessier) return true;
+      if (commonName && (hasValidMag ? mag <= 6.5 : true)) return true;
+
+      return false;
     }).map(dso => {
       let r = dso.geometry.coordinates[0]; if (r < 0) r += 360;
+      const props = dso.properties || {};
+      const desig = (props.desig || '').trim();
+      const dsoId = String(dso.id || '').trim();
+      const dsoType = (props.type || '').trim().toLowerCase();
+      const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
+      const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
+      const isMessier = /^M\s*\d+$/i.test(desig);
+      const mag = parseFloat(props.mag);
+      const magVal = !isNaN(mag) ? mag : 99;
+
+      const isSuperIconic = (commonName && /ω\s*cen|omega\s*centauri|pleiades|hyades|praesepe/i.test(commonName)) || isMessier;
+
+      // Priority score: lower = higher priority
+      // Messier & iconic showstoppers first (10-12), followed by named objects (20+)
+      const score = isMessier
+        ? 10.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
+        : isSuperIconic
+        ? 12.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
+        : commonName
+        ? 20.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
+        : 35.0 + magVal;
+
+      let displayName = desig;
+      if (isMessier && commonName && !commonName.toLowerCase().includes(desig.toLowerCase())) {
+        displayName = `${desig} (${commonName})`;
+      } else if (commonName) {
+        displayName = commonName;
+      }
+
+      const typeLabel = 
+        dsoType === 'gc' ? 'Globular Cluster' :
+        dsoType === 'oc' ? 'Open Cluster' :
+        dsoType === 'bn' || dsoType === 'sfr' ? 'Bright Emission Nebula' :
+        dsoType === 'pn' ? 'Planetary Nebula' :
+        dsoType === 'snr' ? 'Supernova Remnant' :
+        dsoType === 'dn' ? 'Dark Nebula' :
+        dsoType === 's' || dsoType === 'e' || dsoType === 'i' ? 'Galaxy' : 'Deep-Sky Object';
+
       return {
-        id: dso.id, name: dso.properties.desig, type: dso.properties.type, mag: dso.properties.mag,
-        ra: r / 15, dec: dso.geometry.coordinates[1], description: `Mag: ${dso.properties.mag} | Type: ${dso.properties.type}`
+        id: dso.id,
+        name: displayName,
+        desig,
+        commonName,
+        type: dsoType,
+        mag: magVal < 90 ? magVal : undefined,
+        ra: r / 15,
+        dec: dso.geometry.coordinates[1],
+        score,
+        description: `${displayName}${commonName && commonName !== displayName ? ` [${desig}]` : ''} • ${typeLabel}${magVal < 90 ? ` | Mag: ${magVal.toFixed(1)}` : ''}`
       };
     });
 
-    const cCatalogStars = STARS_CATALOG.filter(s => 
-      s.constellation.toLowerCase() === constellation.id.toLowerCase() || 
-      s.constellation.toLowerCase() === constellation.name.toLowerCase()
-    ).map(s => ({
+    // Sort by prominence priority score and cap to top 2 prominent DSOs per constellation
+    prominentCandidates.sort((a, b) => a.score - b.score);
+    const localRawDsos = prominentCandidates.slice(0, 2);
+
+    const cCatalogStars = STARS_CATALOG.filter(s => {
+      const matches = s.constellation.toLowerCase() === constellation.id.toLowerCase() || 
+        s.constellation.toLowerCase() === constellation.name.toLowerCase();
+      if (!matches) return false;
+      return isStarInsideConstellation(s, constellation, boundFeature);
+    }).map(s => ({
       ...s,
       ra: parseCoordinate((s as any).rightAscension || (s as any).ra),
       dec: parseCoordinate((s as any).declination || (s as any).dec)
@@ -611,6 +1018,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       .map((extra: any) => {
         const catalogMatch = STARS_CATALOG.find(s => s.id === extra.catalogStarId);
         if (!catalogMatch) return null;
+        if (!isStarInsideConstellation(catalogMatch, constellation, boundFeature)) return null;
         return {
           ...extra,
           ra: parseCoordinate((catalogMatch as any).rightAscension || (catalogMatch as any).ra),
@@ -626,8 +1034,23 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
     const allSecondary = [...jsonStars, ...localRawDsos, ...cCatalogStars, ...extraFigureStars];
 
-    // 🌐 ROBUST MATH ANCHOR: Project and perfectly scale all stars inside the Cartesian bounding box
-    const { mappedPoints } = projectTo2D(allSecondary, raBounds, decBounds, pMinX, pMaxX, pMinY, pMaxY, false);
+    const rawRingCoords: number[][] = isPolar && boundFeature?.geometry?.coordinates
+      ? (boundFeature.geometry.type === 'Polygon'
+          ? boundFeature.geometry.coordinates[0]
+          : boundFeature.geometry.coordinates[0]?.[0] || [])
+      : [];
+
+    // 🌐 ROBUST MATH ANCHOR: Project and perfectly scale all stars inside Cartesian or Polar space
+    const { mappedPoints, polarRingSvg, poleSvg } = projectTo2D(
+      allSecondary, 
+      raBounds, 
+      decBounds, 
+      pMinX, pMaxX, pMinY, pMaxY, 
+      false,
+      isPolar,
+      isNorth,
+      rawRingCoords
+    );
     
     let offset = 0;
     const mappedLineVertices = mappedPoints.slice(offset, offset + jsonStars.length); offset += jsonStars.length;
@@ -648,16 +1071,41 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           }
         }
       });
-      if (bestMatch) { vertex.x = bestMatch.x; vertex.y = bestMatch.y; }
+      if (bestMatch) { 
+        vertex.x = bestMatch.x; 
+        vertex.y = bestMatch.y; 
+        vertex.isAssigned = true;
+      } else {
+        vertex.isAssigned = false;
+      }
     });
 
+    let boundaryPathData = '';
+    let orthoBoundaryPoints: Array<{ x: number; y: number }> = [];
     const activePolygon = basePolygon.map(p => ({ ...p }));
-    const { pathData: boundaryPathData, orthogonalPoints: orthoBoundaryPoints } = buildOrthogonalBoundary(activePolygon);
+    if (isPolar && polarRingSvg.length > 2) {
+      orthoBoundaryPoints = polarRingSvg;
+      boundaryPathData = 'M ' + orthoBoundaryPoints.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z';
+    } else {
+      const res = buildOrthogonalBoundary(activePolygon);
+      boundaryPathData = res.pathData;
+      orthoBoundaryPoints = res.orthogonalPoints;
+    }
+
     const { visibleStars, catalogPlacedCount } = getConstellationVisibleFigureStars(constellation, mappedCatalog, mappedExtra, cCatalogStars, extraFigureStars);
 
     return (
-      <div className="w-full h-full flex items-center justify-center relative">
-        <svg viewBox="-16 -12 132 124" width={size} height={size} className={`overflow-visible drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}>
+      <div 
+        className="w-full h-full flex items-center justify-center relative select-none"
+        onClick={() => setActiveStarLabelId(null)}
+      >
+        <svg 
+          viewBox="-16 -12 132 124" 
+          width={size} 
+          height={size} 
+          className={`overflow-visible drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}
+          onClick={() => setActiveStarLabelId(null)}
+        >
           <defs>
             <radialGradient id={`star-glow-${constellation.id}`} cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#fef08a" stopOpacity="0.85" />
@@ -686,35 +1134,97 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </g>
               ))}
 
-              {[20, 40, 60, 80].map((c) => (
-                <g key={`grat-${c}`}>
-                  <line x1={c} y1="0" x2={c} y2="100" stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
-                  <line x1="0" y1={c} x2="100" y2={c} stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
+              {isPolar ? (
+                // 🌀 Polar Celestial Grid & Orientation
+                <g className="polar-graticule-rings">
+                  {/* Concentric Polar Declination Circles */}
+                  {[18, 36, 54, 72].map((rVal) => (
+                    <circle
+                      key={`polar-ring-${rVal}`}
+                      cx={poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50}
+                      cy={poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50}
+                      r={rVal}
+                      fill="none"
+                      stroke="#0ea5e9"
+                      strokeOpacity="0.09"
+                      strokeDasharray="2 3"
+                      strokeWidth="0.35"
+                    />
+                  ))}
+                  {/* Radial Hour Angle Spokes */}
+                  {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+                    const rad = (deg * Math.PI) / 180;
+                    const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
+                    const pcY = poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50;
+                    const px = pcX + 80 * Math.sin(rad);
+                    const py = pcY - 80 * Math.cos(rad);
+                    return (
+                      <line
+                        key={`spoke-${deg}`}
+                        x1={pcX}
+                        y1={pcY}
+                        x2={px}
+                        y2={py}
+                        stroke="#0ea5e9"
+                        strokeOpacity="0.07"
+                        strokeDasharray="2 3"
+                        strokeWidth="0.35"
+                      />
+                    );
+                  })}
+                  {/* Celestial Pole Marker */}
+                  {poleSvg && poleSvg.x >= -5 && poleSvg.x <= 105 && poleSvg.y >= -5 && poleSvg.y <= 105 && (
+                    <g className="celestial-pole-marker pointer-events-none">
+                      <circle cx={poleSvg.x} cy={poleSvg.y} r="3.2" fill="none" stroke="#38bdf8" strokeWidth="0.5" strokeDasharray="1.5 1.5" />
+                      <line x1={poleSvg.x - 4.5} y1={poleSvg.y} x2={poleSvg.x + 4.5} y2={poleSvg.y} stroke="#38bdf8" strokeWidth="0.45" />
+                      <line x1={poleSvg.x} y1={poleSvg.y - 4.5} x2={poleSvg.x} y2={poleSvg.y + 4.5} stroke="#38bdf8" strokeWidth="0.45" />
+                      <circle cx={poleSvg.x} cy={poleSvg.y} r="0.8" fill="#facc15" />
+                      <text x={poleSvg.x + 4.5} y={poleSvg.y + 1.2} fill="#38bdf8" fontSize="2.2" fontFamily="monospace" fontWeight="bold">
+                        {isNorth ? '+90° NCP' : '-90° SCP'}
+                      </text>
+                    </g>
+                  )}
+                  <text x="50" y="-7.5" textAnchor="middle" fill="#64748b" fontSize="2.4" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                    CIRCUMPOLAR POLAR PROJECTION • {isNorth ? 'NORTH' : 'SOUTH'} CELESTIAL REALM
+                  </text>
+                  <text x="-12" y="50" textAnchor="middle" transform="rotate(-90 -12 50)" fill="#64748b" fontSize="2.3" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                    ▲ {isNorth ? 'NORTH (+90° DEC)' : 'SOUTH (-90° DEC)'} POLAR REGION ▲
+                  </text>
                 </g>
-              ))}
+              ) : (
+                // Rectangular Equatorial Graticule
+                <>
+                  {[20, 40, 60, 80].map((c) => (
+                    <g key={`grat-${c}`}>
+                      <line x1={c} y1="0" x2={c} y2="100" stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
+                      <line x1="0" y1={c} x2="100" y2={c} stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
+                    </g>
+                  ))}
 
-              <text x="50" y="-7.5" textAnchor="middle" fill="#64748b" fontSize="2.4" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-                ◄ EAST (INCREASING RA) • RIGHT ASCENSION • WEST ►
-              </text>
-              {graticule.raLabels.map((ra, idx) => (
-                <text key={`ra-lbl-${idx}`} x={ra.x} y="-2" textAnchor="middle" fill="#38bdf8" fontSize="2.5" fontFamily="monospace" opacity="0.85">
-                  {ra.label}
-                </text>
-              ))}
+                  <text x="50" y="-7.5" textAnchor="middle" fill="#64748b" fontSize="2.4" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                    ◄ EAST (INCREASING RA) • RIGHT ASCENSION • WEST ►
+                  </text>
+                  {graticule.raLabels.map((ra, idx) => (
+                    <text key={`ra-lbl-${idx}`} x={ra.x} y="-2" textAnchor="middle" fill="#38bdf8" fontSize="2.5" fontFamily="monospace" opacity="0.85">
+                      {ra.label}
+                    </text>
+                  ))}
 
-              <text x="-12" y="50" textAnchor="middle" transform="rotate(-90 -12 50)" fill="#64748b" fontSize="2.3" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-                ▲ +N (NORTH) • DECLINATION • -S ▼
-              </text>
-              {graticule.decLabels.map((dec, idx) => (
-                <text key={`dec-lbl-${idx}`} x="-2" y={dec.y + 0.9} textAnchor="end" fill="#38bdf8" fontSize="2.4" fontFamily="monospace" opacity="0.85">
-                  {dec.label}
-                </text>
-              ))}
+                  <text x="-12" y="50" textAnchor="middle" transform="rotate(-90 -12 50)" fill="#64748b" fontSize="2.3" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                    ▲ +N (NORTH) • DECLINATION • -S ▼
+                  </text>
+                  {graticule.decLabels.map((dec, idx) => (
+                    <text key={`dec-lbl-${idx}`} x="-2" y={dec.y + 0.9} textAnchor="end" fill="#38bdf8" fontSize="2.4" fontFamily="monospace" opacity="0.85">
+                      {dec.label}
+                    </text>
+                  ))}
+                </>
+              )}
             </g>
           )}
 
           {/* 2. Celestial Equator Line (0° Dec) */}
-          {opts.showEquatorEcliptic && graticule.hasEquator && (
+          {!isPolar && opts.showEquatorEcliptic && graticule.hasEquator && (
             <g className="celestial-equator-overlay">
               <line x1="0" y1={graticule.equatorY} x2="100" y2={graticule.equatorY} stroke="#06b6d4" strokeWidth="0.55" strokeDasharray="4 2" strokeOpacity="0.75" />
               <rect x="2" y={graticule.equatorY - 3.2} width="36" height="4.8" rx="1.2" fill="#030712" stroke="#06b6d4" strokeWidth="0.4" strokeOpacity="0.8" />
@@ -723,7 +1233,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           )}
 
           {/* 3. Ecliptic Line (Path of the Sun across Zodiac constellations) */}
-          {opts.showEquatorEcliptic && graticule.hasEcliptic && (
+          {!isPolar && opts.showEquatorEcliptic && graticule.hasEcliptic && (
             <g className="ecliptic-overlay">
               <line x1="0" y1={graticule.eclipticY1} x2="100" y2={graticule.eclipticY2} stroke="#eab308" strokeWidth="0.55" strokeDasharray="5 2.5" strokeOpacity="0.85" />
               <rect x="62" y={(graticule.eclipticY1 + graticule.eclipticY2) / 2 - 2.8} width="34" height="4.8" rx="1.2" fill="#030712" stroke="#eab308" strokeWidth="0.4" strokeOpacity="0.9" />
@@ -764,7 +1274,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     );
                   })()}
                 </g>
-              ) : activePolygon.length > 2 ? (
+              ) : (activePolygon.length > 2 || (isPolar && orthoBoundaryPoints.length > 2)) ? (
                 <g className="delporte-stepped-boundary">
                   <path d={boundaryPathData} fill="rgba(6, 182, 212, 0.11)" stroke="#06b6d4" strokeWidth="0.65" strokeDasharray="2.5 1.5" />
                   {orthoBoundaryPoints.map((pt, idx) => (
@@ -775,27 +1285,27 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </>
           )}
 
-          {/* 5. Dynamically Loaded Deep-Sky Objects from dsos.6_2.json */}
+          {/* 5. Dynamically Loaded Deep-Sky Objects from dsos.6.json */}
           {opts.showDeepSky && mappedDsos.map((dso: any) => (
             <g key={dso.id} className="cursor-pointer group/dso">
               <title>{`${dso.name}\n${dso.description}`}</title>
               {dso.type === 'sfr' || dso.type === 'snr' || dso.type === 'bn' ? (
                 <g>
-                  <circle cx={dso.x} cy={dso.y} r="4.2" fill={`url(#nebula-glow-${constellation.id})`} />
-                  <circle cx={dso.x} cy={dso.y} r="2.4" fill="none" stroke="#f43f5e" strokeWidth="0.5" strokeDasharray="1.5 1.5" />
-                  <text x={dso.x + 3.8} y={dso.y - 1.5} fill="#fb7185" fontSize="2.3" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
+                  <circle cx={dso.x} cy={dso.y} r="3.4" fill={`url(#nebula-glow-${constellation.id})`} />
+                  <circle cx={dso.x} cy={dso.y} r="1.8" fill="none" stroke="#f43f5e" strokeWidth="0.45" strokeDasharray="1.2 1.2" />
+                  <text x={dso.x + 3.2} y={dso.y - 1.2} fill="#fb7185" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
                 </g>
               ) : dso.type === 's' || dso.type === 'i' ? (
                 <g>
-                  <ellipse cx={dso.x} cy={dso.y} rx="3.6" ry="1.8" transform={`rotate(-25 ${dso.x} ${dso.y})`} fill="none" stroke="#c084fc" strokeWidth="0.5" strokeDasharray="1.5 1" />
-                  <circle cx={dso.x} cy={dso.y} r="0.8" fill="#e9d5ff" />
-                  <text x={dso.x + 4.2} y={dso.y - 1.2} fill="#d8b4fe" fontSize="2.3" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
+                  <ellipse cx={dso.x} cy={dso.y} rx="2.8" ry="1.4" transform={`rotate(-25 ${dso.x} ${dso.y})`} fill="none" stroke="#c084fc" strokeWidth="0.45" strokeDasharray="1.2 0.8" />
+                  <circle cx={dso.x} cy={dso.y} r="0.7" fill="#e9d5ff" />
+                  <text x={dso.x + 3.4} y={dso.y - 1.0} fill="#d8b4fe" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
                 </g>
               ) : (
                 <g>
-                  <circle cx={dso.x} cy={dso.y} r="2.8" fill="none" stroke="#34d399" strokeWidth="0.5" strokeDasharray="1 1" />
-                  <circle cx={dso.x} cy={dso.y} r="0.7" fill="#6ee7b7" />
-                  <text x={dso.x + 3.6} y={dso.y - 1.2} fill="#6ee7b7" fontSize="2.3" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
+                  <circle cx={dso.x} cy={dso.y} r="2.2" fill="none" stroke="#34d399" strokeWidth="0.45" strokeDasharray="0.8 0.8" />
+                  <circle cx={dso.x} cy={dso.y} r="0.6" fill="#6ee7b7" />
+                  <text x={dso.x + 3.0} y={dso.y - 1.0} fill="#6ee7b7" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
                 </g>
               )}
             </g>
@@ -818,7 +1328,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               const raDiff = Math.abs(from.ra - to.ra);
               let x1 = from.x, y1 = from.y, x2 = to.x, y2 = to.y;
 
-              if (raDiff > 12 && Math.abs(x1 - x2) > 40) {
+              if (!isPolar && raDiff > 12 && Math.abs(x1 - x2) > 40) {
                 const seamX = x1 < x2 ? 0 : 100;
                 const otherSeamX = x1 < x2 ? 100 : 0;
                 const t = (seamX - x1) / ((x2 - 100 * Math.sign(x2 - x1)) - x1 || 1);
@@ -838,87 +1348,172 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             });
           })}
 
-        {/* Draw the geometric constellation figure nodes */}
-        {mappedLineVertices.map((s: any, starIdx: number) => (
-          <g key={`lg-json-star-${starIdx}`}>
-            <circle cx={s.x} cy={s.y} r="2.0" fill="#ffffff" stroke="#38bdf8" strokeWidth="0.7" className="pointer-events-none" />
-          </g>
-        ))}
+        {/* Draw the geometric constellation figure nodes: unassigned figure vertices are greyed out */}
+        {mappedLineVertices.map((s: any, starIdx: number) => {
+          if (s.isAssigned) return null; // Assigned vertices are rendered interactively by visibleStars
+          return (
+            <g
+              key={`lg-json-star-${starIdx}`}
+              className="cursor-default"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveStarLabelId(null);
+              }}
+            >
+              <title>Unassigned Asterism Vertex</title>
+              <circle cx={s.x} cy={s.y} r="1.3" fill="#475569" stroke="#334155" strokeWidth="0.4" opacity="0.45" />
+            </g>
+          );
+        })}
 
-          {/* 7. Star Nodes */}
-          {visibleStars.map((s, starIdx) => {
-            const isPrincipal = s.isPrincipal;
-            const isClickable = !!s.catalogStar;
-            // Star dots made smaller
-            const radius = isPrincipal
-              ? 2.6
-              : s.apparentMagnitude < 2.0
-              ? 2.2
-              : isClickable
-              ? (s.apparentMagnitude < 4.0 ? 1.6 : 1.2)
-              : 0.9;
+        {/* 7. Star Nodes with Interactive Hover / Click Selection */}
+        {visibleStars.map((s) => {
+          const isPrincipal = s.isPrincipal;
+          const isClickable = !!s.catalogStar;
+          const isAssigned = isClickable;
+          const isHovered = hoveredStarId === s.id;
+          const isClicked = activeStarLabelId === s.id;
+          const showLabel = isAssigned && (isHovered || isClicked || opts.showStarLabels);
 
+          // Unassigned star dots are greyed out; assigned star dots are sized by brightness
+          const radius = isPrincipal
+            ? 2.6
+            : s.apparentMagnitude < 2.0
+            ? 2.2
+            : isClickable
+            ? (s.apparentMagnitude < 4.0 ? 1.6 : 1.2)
+            : 1.0;
+
+          if (!isAssigned) {
             return (
               <g
                 key={s.id}
-                className={isClickable ? 'cursor-pointer group/star' : 'cursor-default opacity-40'}
+                className="cursor-default"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!isClickable || !s.catalogStar) return;
-                  if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
-                  else if (onSelectStar) onSelectStar(s.catalogStar);
+                  setActiveStarLabelId(null);
                 }}
               >
-                <title>
-                  {isClickable
-                    ? `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
-                        s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
-                      }\n• Click to inspect 3D Star Dossier`
-                    : `${s.name}\n• Mag: ${s.apparentMagnitude}`}
-                </title>
+                <title>{s.name} (Unassigned)</title>
+                <circle cx={s.x} cy={s.y} r={radius} fill="#475569" stroke="#334155" strokeWidth="0.35" opacity="0.4" />
+              </g>
+            );
+          }
 
-                {isClickable && <circle cx={s.x} cy={s.y} r="5.0" fill="transparent" />}
+          return (
+            <g
+              key={s.id}
+              className="cursor-pointer group/star"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isClickable || !s.catalogStar) {
+                  setActiveStarLabelId(null);
+                  return;
+                }
+                if (activeStarLabelId === s.id) {
+                  // Clicked again when active: open 3D star dossier!
+                  if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
+                  else if (onSelectStar) onSelectStar(s.catalogStar);
+                } else {
+                  // First click: display the star name label!
+                  setActiveStarLabelId(s.id);
+                }
+              }}
+              onMouseEnter={() => {
+                if (isClickable) setHoveredStarId(s.id);
+              }}
+              onMouseLeave={() => {
+                setHoveredStarId((curr) => (curr === s.id ? null : curr));
+              }}
+            >
+              <title>
+                {isClicked
+                  ? `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Label Active\n• CLICK AGAIN to open 3D Star Dossier`
+                  : `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
+                      s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
+                    }\n• Click once to view label • Click again to open 3D Star Dossier`}
+              </title>
 
-                {isPrincipal && (
-                  <g className="pointer-events-none">
-                    <circle cx={s.x} cy={s.y} r={5.0} fill={`url(#star-glow-${constellation.id})`} className="animate-pulse" />
-                    <circle cx={s.x} cy={s.y} r={3.6} fill="none" stroke="#fef08a" strokeWidth="0.4" strokeDasharray="2 1.5" opacity="0.85" />
-                  </g>
-                )}
+              {/* Click target hit area */}
+              <circle cx={s.x} cy={s.y} r="5.5" fill="transparent" />
 
-                {isClickable && (
-                  <circle cx={s.x} cy={s.y} r={radius + 1.4} fill="none" stroke="#38bdf8" strokeWidth="0.4" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
-                )}
+              {/* Active / Clicked Selection Target Ring */}
+              {isClicked && (
+                <g className="pointer-events-none">
+                  <circle
+                    cx={s.x}
+                    cy={s.y}
+                    r={radius + 2.8}
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="0.6"
+                    strokeDasharray="2 1.5"
+                    className="animate-spin"
+                    style={{ transformOrigin: `${s.x}px ${s.y}px`, animationDuration: '6s' }}
+                  />
+                  <circle cx={s.x} cy={s.y} r={radius + 1.2} fill="none" stroke="#22d3ee" strokeWidth="0.35" opacity="0.8" />
+                </g>
+              )}
 
-                {isClickable && !isPrincipal && (
-                  <circle cx={s.x} cy={s.y} r={radius + 0.6} fill="none" stroke="#06b6d4" strokeWidth="0.25" strokeOpacity="0.5" className="pointer-events-none" />
-                )}
+              {/* Principal Star Golden Radiant Halo */}
+              {isPrincipal && (
+                <g className="pointer-events-none">
+                  <circle cx={s.x} cy={s.y} r={5.0} fill={`url(#star-glow-${constellation.id})`} className="animate-pulse" />
+                  <circle cx={s.x} cy={s.y} r={3.6} fill="none" stroke="#fef08a" strokeWidth="0.4" strokeDasharray="2 1.5" opacity="0.85" />
+                </g>
+              )}
 
-                <circle
-                  cx={s.x} cy={s.y} r={radius}
-                  fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : isClickable ? '#ffffff' : '#94a3b8'}
-                  stroke={isPrincipal ? '#f59e0b' : isClickable ? '#38bdf8' : '#475569'}
-                  strokeWidth={isPrincipal ? '0.6' : isClickable ? '0.4' : '0.25'}
-                  className={isClickable ? 'group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors' : ''}
-                />
+              {/* Hover highlight circle */}
+              {!isClicked && (
+                <circle cx={s.x} cy={s.y} r={radius + 1.4} fill="none" stroke="#38bdf8" strokeWidth="0.4" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
+              )}
 
-                {opts.showStarLabels && s.displayLabel && (
+              {/* Star dot node */}
+              <circle
+                cx={s.x} cy={s.y} r={radius}
+                fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : '#ffffff'}
+                stroke={isPrincipal ? '#f59e0b' : isClicked ? '#38bdf8' : '#38bdf8'}
+                strokeWidth={isPrincipal ? '0.6' : isClicked ? '0.6' : '0.4'}
+                className="group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors"
+              />
+
+              {/* Star Name Label: Hidden by default, shown when hovered in or clicked */}
+              {showLabel && s.displayLabel && (
+                <g className="pointer-events-none select-none">
+                  <rect
+                    x={s.x > 75 ? s.x - (s.displayLabel.length * 2.1 + 8) : s.x + 3.5}
+                    y={s.y > 85 ? s.y - 7.0 : s.y - 2.5}
+                    width={s.displayLabel.length * 2.1 + 7}
+                    height={6.0}
+                    rx={1.5}
+                    fill="#020617"
+                    fillOpacity="0.95"
+                    stroke={isClicked ? '#38bdf8' : '#0ea5e9'}
+                    strokeWidth={isClicked ? '0.6' : '0.35'}
+                    className="drop-shadow-lg"
+                  />
                   <text
-                    x={s.x + (s.x > 80 ? -3.5 : 3.5)}
-                    y={s.y + (s.y > 85 ? -3.0 : 3.0)}
-                    textAnchor={s.x > 80 ? 'end' : 'start'}
-                    fill={isPrincipal ? '#fef08a' : isClickable ? '#e2e8f0' : '#64748b'}
-                    fontSize={isPrincipal ? '2.8' : isClickable ? '2.3' : '1.9'}
+                    x={s.x > 75 ? s.x - 4.5 : s.x + 5.5}
+                    y={s.y > 85 ? s.y - 3.0 : s.y + 1.5}
+                    textAnchor={s.x > 75 ? 'end' : 'start'}
+                    fill={isClicked ? '#38bdf8' : isPrincipal ? '#fef08a' : '#f8fafc'}
+                    fontSize={isPrincipal ? '2.7' : '2.3'}
                     fontFamily="sans-serif"
-                    fontWeight={isPrincipal ? 'bold' : isClickable ? '600' : 'normal'}
-                    className={`pointer-events-none select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${isClickable ? 'group-hover/star:fill-cyan-300' : ''}`}
+                    fontWeight="bold"
+                    className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
                   >
                     {s.displayLabel}
                   </text>
-                )}
-              </g>
-            );
-          })}
+                  {isClicked && (
+                    <g className="pointer-events-none">
+                      {/* Sub-label removed per request */}
+                    </g>
+                  )}
+                </g>
+              )}
+            </g>
+          );
+        })}
 
           {/* 8. Bordering Constellations along Perimeter */}
           {neighborCount > 0 && opts.showNeighborGuides && (
@@ -1802,7 +2397,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           <div
             ref={dossierScrollRef}
             className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveStarLabelId(null);
+            }}
           >
             {/* Header Bar matching Encyclopedia mode */}
             <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
@@ -1885,7 +2483,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </button>
 
                       <button
-                        onClick={() => setSkyMapOptions((prev) => ({ ...prev, showStarLabels: !prev.showStarLabels }))}
+                        onClick={() => {
+                          setActiveStarLabelId(null);
+                          setSkyMapOptions((prev) => ({ ...prev, showStarLabels: !prev.showStarLabels }));
+                        }}
                         className={`px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
                           skyMapOptions.showStarLabels
                             ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-950'
@@ -1894,7 +2495,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         title="Toggle Star Bayer Designations and Proper Names"
                       >
                         <Tag className="w-3 h-3 shrink-0" />
-                        <span className="hidden xs:inline sm:inline">Stars</span>
+                        <span className="hidden xs:inline sm:inline">Labels</span>
                         <span className={`w-1.5 h-1.5 rounded-full ${skyMapOptions.showStarLabels ? 'bg-cyan-400' : 'bg-slate-600'} xs:hidden`} />
                       </button>
 
@@ -1943,10 +2544,18 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   </div>
 
                   {/* Constellation Visualizer Banner - 2D Astrometric Map */}
-                  <div className="w-full h-[410px] sm:h-[450px] md:h-[500px] lg:h-[560px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
+                  <div 
+                    className="w-full h-[410px] sm:h-[450px] md:h-[500px] lg:h-[560px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+                    onClick={() => setActiveStarLabelId(null)}
+                  >
                     {/* Astrometric Metadata Header Badge */}
                     <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
                       <span className="text-cyan-300 font-semibold uppercase">{inspectedConstellation.name}</span>
+                      {isPolarConstellation(inspectedConstellation.id, extractBounds(inspectedConstellation.borders.decRange || '', false)) && (
+                        <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
+                          Polar Centered
+                        </span>
+                      )}
                       <span className="text-slate-500">•</span>
                       <span>RA {inspectedConstellation.borders.raRange.split('|')[0].trim()}</span>
                       <span className="text-slate-500 hidden sm:inline">•</span>
@@ -2176,11 +2785,16 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   {/* Cataloged Constellation Stars List with Known Locations */}
                   {(() => {
                     const seenIds = new Set<string>();
+                    const boundFeature = (celestialData.bounds || []).find((b: any) => 
+                      b.id?.toLowerCase() === inspectedConstellation.abbreviation?.toLowerCase() ||
+                      b.id?.toLowerCase() === inspectedConstellation.id?.toLowerCase()
+                    );
                     const cCatalogStars = STARS_CATALOG.filter(
                       (s) => {
                         const matches = s.constellation.toLowerCase() === inspectedConstellation.name.toLowerCase() ||
                           s.constellation.toLowerCase() === inspectedConstellation.id.toLowerCase();
                         if (!matches || seenIds.has(s.id)) return false;
+                        if (!isStarInsideConstellation(s, inspectedConstellation, boundFeature)) return false;
                         seenIds.add(s.id);
                         return true;
                       }
