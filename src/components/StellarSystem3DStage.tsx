@@ -451,6 +451,34 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
         baseVisualRadius = 0.50; // Black hole event horizon & accretion disk
       }
 
+      // --- NEW CLAMPING LOGIC ---
+      // Prevent detached spectroscopic binaries from visually merging
+      if (!comp.isContactBinaryPair) {
+        let minPeriastronUnits = Infinity;
+        
+        system.orbits.forEach((orb) => {
+          if (orb.primaryId === comp.id || orb.secondaryId === comp.id) {
+            // Calculate closest physical approach
+            const periastronAU = orb.periastronAU !== undefined 
+              ? orb.periastronAU 
+              : orb.semiMajorAxisAU * (1 - orb.eccentricity);
+              
+            const periUnits = periastronAU * auToUnits;
+            if (periUnits < minPeriastronUnits) {
+              minPeriastronUnits = periUnits;
+            }
+          }
+        });
+
+        if (minPeriastronUnits < Infinity) {
+          // Cap visual radius to 40% of the closest orbital approach to guarantee a gap
+          baseVisualRadius = Math.min(baseVisualRadius, minPeriastronUnits * 0.40);
+          // Enforce a hard minimum to prevent the mesh from vanishing
+          baseVisualRadius = Math.max(0.08, baseVisualRadius);
+        }
+      }
+      // --------------------------
+
       const starGroup = createStarMeshGroup(pseudoStarData, baseVisualRadius, {
         wireframe,
         showCorona: true,

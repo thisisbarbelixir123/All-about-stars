@@ -330,9 +330,9 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                                 <span className="text-slate-400 block text-[9px]">Temp:</span>
                                 <span className="text-amber-300 font-bold">{comp.temperature.toLocaleString()} K</span>
                               </div>
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800">
+                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800 min-w-0">
                                 <span className="text-slate-400 block text-[9px]">Rotation:</span>
-                                <span className="text-cyan-300 font-bold truncate">
+                                <span className="text-cyan-300 font-bold block truncate" title={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}>
                                   {comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
                                 </span>
                               </div>
