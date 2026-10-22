@@ -314,12 +314,20 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
       }
       cam.currentCenter.lerp(cam.targetCenter, 0.08);
 
+      // Inside the animate loop, below cam.currentCenter.lerp()
       const x = cam.radius * Math.sin(cam.phi) * Math.sin(cam.theta);
       const y = cam.radius * Math.cos(cam.phi);
       const z = cam.radius * Math.sin(cam.phi) * Math.cos(cam.theta);
 
       camera.position.set(x + cam.currentCenter.x, y + cam.currentCenter.y, z + cam.currentCenter.z);
       camera.lookAt(cam.currentCenter);
+
+      // Dynamic Frustum Scaling
+      // Scales the near plane relative to current zoom to prevent micro-clipping
+      camera.near = Math.max(0.001, cam.radius * 0.005);
+      // Scales the far plane to guarantee the entire system extent remains visible
+      camera.far = Math.max(4000, systemMaxExtent * 2.5, cam.radius * 15);
+      camera.updateProjectionMatrix();
 
       // Update 2D HTML labels projecting onto screen
       updateProjectedLabels(camera, width, height);
@@ -339,12 +347,14 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
       if (!container || !renderer || !camera) return;
       const w = container.clientWidth || 600;
       const h = container.clientHeight || 450;
+      
+      const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
+      
       renderer.setSize(w, h);
 
       if (!focusedStarId) {
-        const fitRadius = computeFitCameraDistance(systemMaxExtent, w, h);
         const cam = cameraStateRef.current;
         cam.targetRadius = fitRadius;
         cam.maxRadius = Math.max(fitRadius * 3.5, 450);

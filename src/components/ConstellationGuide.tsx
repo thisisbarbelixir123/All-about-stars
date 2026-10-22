@@ -104,7 +104,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     dsoNames: Record<string, any>;
   }>({ dsos: [], lines: [], starNames: {}, bounds: [], borders: [], dsoNames: {} });
 
-  // Bulletproof JSON Fetch: Safely handles both arrays and FeatureCollections from the public folder, and ignores HTML fallbacks
   useEffect(() => {
     const safeFetch = async (url: string) => {
       try {
@@ -238,7 +237,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return { traditional, astronomical, symbol, isOph, daysIn, desc };
   }, [calcMonth, calcDay]);
 
-  // Helper to convert formatted string coordinates ("22h 05m 47s" or "-00° 19′ 11″") into true decimal numbers
   const parseCoordinate = (val: any): number => {
     if (typeof val === 'number') return isNaN(val) ? NaN : val;
     if (!val) return NaN;
@@ -256,7 +254,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return isNaN(num) ? NaN : num;
   };
 
-  // Robust multi-coordinate extractor that finds ALL ranges and returns absolute min and max
   const extractBounds = (rangeStr: string, isRa: boolean): [number, number] => {
     const str = (rangeStr || '').replace(/−/g, '-');
     const regex = /([+-]?\d+)[h°]\s*(?:(\d+)[m′'])?\s*(?:([\d.]+)[s″"])?/g;
@@ -428,7 +425,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     const decVal = parseCoordinate(rawDec);
     if (isNaN(raVal) || isNaN(decVal)) return false;
 
-    // Filter out 0,0 placeholder / unanchored stray stars
     if (Math.abs(raVal) < 1e-4 && Math.abs(decVal) < 1e-4) return false;
 
     const decBounds = extractBounds(constellation.borders?.decRange || '', false);
@@ -446,8 +442,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return true;
   };
 
-  // Pure Cartesian Equirectangular & Polar Azimuthal Projection Engine
-  // This maps the stars and boundaries precisely, centering polar constellations to eliminate distortion
   const projectTo2D = (
     points: any[], 
     raBounds: number[], 
@@ -461,7 +455,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     if (!points || points.length === 0) return { mappedPoints: [], polarRingSvg: [] as Array<{ x: number; y: number }>, poleSvg: null as { x: number; y: number } | null };
 
     if (isPolar) {
-      // 🌐 POLAR AZIMUTHAL PROJECTION (Centered on Polar Constellation)
       const rawPoints = points.map(s => {
         const sRa = s.ra ?? 0;
         const sDec = s.dec ?? (isNorth ? 90 : -90);
@@ -507,7 +500,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         y: Math.round((cY - ((p.y - midY) / span) * boxSpan) * 10) / 10
       }));
 
-      // Celestial Pole position at (0, 0)
       const poleSvg = {
         x: Math.round((cX + ((0 - midX) / span) * boxSpan) * 10) / 10,
         y: Math.round((cY - ((0 - midY) / span) * boxSpan) * 10) / 10
@@ -516,7 +508,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       return { mappedPoints, polarRingSvg, poleSvg };
     }
 
-    // Pure Cartesian Equirectangular Projection Engine
     let rMin = raBounds[0];
     let rMax = raBounds[1];
     let dMin = Math.min(decBounds[0], decBounds[1]);
@@ -607,7 +598,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return { pathData: d, orthogonalPoints };
   };
 
-  // SVG Renderer for Normal Asterism Mode (Small Map)
   const renderNormalAsterism = (constellation: ConstellationInfo, size = 110, className = '') => {
     const boundFeature = (celestialData.bounds || []).find((b: any) => 
       b.id?.toLowerCase() === constellation.abbreviation?.toLowerCase() ||
@@ -625,7 +615,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       dec: parseCoordinate((s as any).declination || (s as any).dec)
     }));
     
-    // Robust, crash-proof case-insensitive JSON extraction
     const lineFeature = (celestialData.lines || []).find((f: any) => {
       const abbr = constellation.abbreviation.toLowerCase();
       const name = constellation.name.toLowerCase();
@@ -642,13 +631,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       multiLineCoords = [lineFeature.geometry.coordinates];
     }
 
-    // JSON RA is typically provided in degrees (0-360) and sometimes negated in D3.
     const jsonStars = multiLineCoords.reduce((acc, val) => acc.concat(val), []).map((coord, idx) => {
       let r = coord[0]; if (r < 0) r += 360;
       return { id: `json-${idx}`, ra: r / 15, dec: coord[1] };
     });
     
-    // 🌐 ROBUST MATH ANCHOR: Use the exact corners of the official RA/Dec boundary.
     const border = constellation.borders;
     const smRaBounds = extractBounds(border?.raRange || '', true);
     const smDecBounds = extractBounds(border?.decRange || '', false);
@@ -661,7 +648,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           : boundFeature.geometry.coordinates[0]?.[0] || [])
       : [];
 
-    // 🌐 ROBUST MATH ANCHOR: Scale using Cartesian Equirectangular or Polar Centered Projection
     const { mappedPoints, poleSvg } = projectTo2D(
       [...jsonStars, ...cCatalogStars], 
       smRaBounds, 
@@ -676,13 +662,12 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     const mappedLineVertices = mappedPoints.slice(0, jsonStars.length);
     const mappedCatalog = mappedPoints.slice(jsonStars.length);
 
-    // 🧲 VERTEX SNAPPING (Small Map): Snap JSON lines to the exact center of Catalog Stars
     mappedLineVertices.forEach((vertex) => {
       let bestMatch: any = null;
       let maxBrightness = Infinity; 
       mappedCatalog.forEach((catStar: any) => {
         const dist = Math.hypot(vertex.x - catStar.x, vertex.y - catStar.y);
-        if (dist < 8.0) { // Increased magnet radius to catch distant imprecise JSON vertices (e.g. Skat)
+        if (dist < 8.0) { 
           if (catStar.apparentMagnitude < maxBrightness) {
             maxBrightness = catStar.apparentMagnitude;
             bestMatch = catStar;
@@ -704,7 +689,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(56, 189, 248, 0.05)" />
         <line x1="8" y1="50" x2="92" y2="50" stroke="rgba(56, 189, 248, 0.05)" />
 
-        {/* Polar Celestial Pole Indicator */}
         {isPolar && poleSvg && poleSvg.x >= 5 && poleSvg.x <= 95 && poleSvg.y >= 5 && poleSvg.y <= 95 && (
           <g className="pointer-events-none">
             <circle cx={poleSvg.x} cy={poleSvg.y} r="2.2" fill="none" stroke="#38bdf8" strokeWidth="0.35" strokeDasharray="1 1" />
@@ -712,7 +696,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </g>
         )}
 
-        {/* Draw the dynamically fetched IAU lines */}
         {multiLineCoords.map((segment: number[][], segIdx: number) => {
           return segment.map((point: number[], ptIdx: number) => {
             if (ptIdx === segment.length - 1) return null; 
@@ -747,22 +730,21 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           });
         })}
 
-        {/* Draw the geometric constellation figure nodes: unassigned are greyed out */}
+        {/* Un-greyed standard vertices in the preview */}
         {mappedLineVertices.map((s: any, starIdx: number) => (
           <g key={`sm-json-star-${starIdx}`}>
             <circle
               cx={s.x} cy={s.y}
               r={s.isAssigned ? "1.4" : "1.0"}
-              fill={s.isAssigned ? "#ffffff" : "#475569"}
-              stroke={s.isAssigned ? "#38bdf8" : "#334155"}
+              fill="#ffffff"
+              stroke="#38bdf8"
               strokeWidth="0.4"
-              opacity={s.isAssigned ? "1" : "0.45"}
+              opacity="1"
               className="pointer-events-none"
             />
           </g>
         ))}
 
-        {/* Draw the brilliant primary catalog stars over the top */}
         {mappedCatalog.map((s: any, starIdx: number) => {
           const isPrincipal = s.id === constellation.principalStarId;
           return (
@@ -817,7 +799,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       })
     ];
 
-    // Exclude sub-stellar objects (brown dwarfs) and stellar remnants (white dwarfs, neutron stars, black holes)
     candidates = candidates.filter(cand => {
       if (!cand.catalogStar) return true;
       const stType = (cand.catalogStar.spectralType || '').toUpperCase();
@@ -829,21 +810,18 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       return !isSubStellar && !isRemnant;
     });
 
-    // Prioritize brightest stars by sorting ascending by apparent magnitude
     candidates.sort((a, b) => a.apparentMagnitude - b.apparentMagnitude);
     
     const visibleStars: any[] = [];
     const seenCatalogIds = new Set<string>();
-    const seenNames = new Set<string>(); // Global duplicate name tracker
+    const seenNames = new Set<string>();
 
     for (const cand of candidates) {
       if (cand.catalogStar && seenCatalogIds.has(cand.catalogStar.id)) continue;
       
-      // Universally strip corrupted duplicates (like Muhlifain) by ensuring a star name is only placed once
       const cleanName = cand.name.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase();
       if (cleanName && seenNames.has(cleanName)) continue;
       
-      // Exclude overlapping stars entirely, keeping only the brightest (first encountered due to sort)
       const isOverlapping = visibleStars.some((acc) => Math.hypot(acc.x - cand.x, acc.y - cand.y) < 3.0);
       
       if (!isOverlapping) {
@@ -856,7 +834,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     return { visibleStars, catalogPlacedCount: visibleStars.filter((s) => !!s.catalogStar).length };
   };
 
-  // SVG Renderer for Main Map Panel (Large Dossier View)
   const renderConstellationShape = (constellation: ConstellationInfo, size = 120, className = '', onSelectNeighbor?: (neighbor: ConstellationInfo) => void, customOptions?: Partial<typeof skyMapOptions>, onSelectFigureStar?: (starData: StarData) => void) => {
     const isLarge = size >= 260;
     const opts = {
@@ -894,9 +871,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     const isPolar = isPolarConstellation(constellation.id, decBounds);
     const isNorth = (decBounds[0] + decBounds[1]) / 2 >= 0;
     
-    // 🌌 PROMINENT DARK SKY OBJECTS (DSOs) SELECTION:
-    // Only display the most prominent, iconic deep-sky objects (Messier catalogue or iconic named objects like Omega Centauri).
-    // Filters out thousands of obscure catalog entries and caps to top 2 iconic objects per constellation so the chart stays crisp.
     const boundFeature = (celestialData.bounds || []).find((b: any) => 
       b.id?.toLowerCase() === constellation.abbreviation?.toLowerCase() ||
       b.id?.toLowerCase() === constellation.id?.toLowerCase()
@@ -917,7 +891,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       else inRa = dsoRaHours >= raBounds[0] && dsoRaHours <= raBounds[1];
       if (!inRa || !inDec) return false;
 
-      // Verify exact polygon boundary containment if boundary geometry is available
       if (!isInsideBoundaryGeom(dso.geometry.coordinates[0], dsoDec)) return false;
 
       const props = dso.properties || {};
@@ -925,19 +898,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       const dsoId = String(dso.id || '').trim();
       const dsoType = (props.type || '').trim().toLowerCase();
 
-      // Check for common name in dsonames
       const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
       const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
 
-      // Check for Messier designation
       const isMessier = /^M\s*\d+$/i.test(desig);
 
-      // Exclude obscure catalog items without common names or obscure tags
       const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
       if (isObscure) return false;
       if (dsoType === 'dn' && !commonName) return false;
 
-      // Only allow Messier objects or objects with recognized iconic common names (mag <= 6.5 or notable emission nebula)
       const mag = parseFloat(props.mag);
       const hasValidMag = !isNaN(mag) && mag < 90;
 
@@ -959,8 +928,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
       const isSuperIconic = (commonName && /ω\s*cen|omega\s*centauri|pleiades|hyades|praesepe/i.test(commonName)) || isMessier;
 
-      // Priority score: lower = higher priority
-      // Messier & iconic showstoppers first (10-12), followed by named objects (20+)
       const score = isMessier
         ? 10.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
         : isSuperIconic
@@ -999,7 +966,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       };
     });
 
-    // Sort by prominence priority score and cap to top 2 prominent DSOs per constellation
     prominentCandidates.sort((a, b) => a.score - b.score);
     const localRawDsos = prominentCandidates.slice(0, 2);
 
@@ -1040,7 +1006,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           : boundFeature.geometry.coordinates[0]?.[0] || [])
       : [];
 
-    // 🌐 ROBUST MATH ANCHOR: Project and perfectly scale all stars inside Cartesian or Polar space
     const { mappedPoints, polarRingSvg, poleSvg } = projectTo2D(
       allSecondary, 
       raBounds, 
@@ -1058,13 +1023,12 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     const mappedCatalog = mappedPoints.slice(offset, offset + cCatalogStars.length); offset += cCatalogStars.length;
     const mappedExtra = mappedPoints.slice(offset, offset + extraFigureStars.length);
 
-    // 🧲 VERTEX SNAPPING
     mappedLineVertices.forEach((vertex) => {
       let bestMatch: any = null;
       let maxBrightness = Infinity; 
       mappedCatalog.forEach((catStar: any) => {
         const dist = Math.hypot(vertex.x - catStar.x, vertex.y - catStar.y);
-        if (dist < 8.0) { // Increased magnet radius to catch distant imprecise JSON vertices (e.g. Skat)
+        if (dist < 8.0) {
           if (catStar.apparentMagnitude < maxBrightness) {
             maxBrightness = catStar.apparentMagnitude;
             bestMatch = catStar;
@@ -1137,7 +1101,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               {isPolar ? (
                 // 🌀 Polar Celestial Grid & Orientation
                 <g className="polar-graticule-rings">
-                  {/* Concentric Polar Declination Circles */}
                   {[18, 36, 54, 72].map((rVal) => (
                     <circle
                       key={`polar-ring-${rVal}`}
@@ -1151,7 +1114,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       strokeWidth="0.35"
                     />
                   ))}
-                  {/* Radial Hour Angle Spokes */}
                   {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
                     const rad = (deg * Math.PI) / 180;
                     const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
@@ -1172,7 +1134,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       />
                     );
                   })}
-                  {/* Celestial Pole Marker */}
                   {poleSvg && poleSvg.x >= -5 && poleSvg.x <= 105 && poleSvg.y >= -5 && poleSvg.y <= 105 && (
                     <g className="celestial-pole-marker pointer-events-none">
                       <circle cx={poleSvg.x} cy={poleSvg.y} r="3.2" fill="none" stroke="#38bdf8" strokeWidth="0.5" strokeDasharray="1.5 1.5" />
@@ -1371,11 +1332,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           const isPrincipal = s.isPrincipal;
           const isClickable = !!s.catalogStar;
           const isAssigned = isClickable;
-          const isHovered = hoveredStarId === s.id;
           const isClicked = activeStarLabelId === s.id;
-          const showLabel = isAssigned && (isHovered || isClicked || opts.showStarLabels);
 
-          // Unassigned star dots are greyed out; assigned star dots are sized by brightness
           const radius = isPrincipal
             ? 2.6
             : s.apparentMagnitude < 2.0
@@ -1411,11 +1369,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   return;
                 }
                 if (activeStarLabelId === s.id) {
-                  // Clicked again when active: open 3D star dossier!
                   if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
                   else if (onSelectStar) onSelectStar(s.catalogStar);
                 } else {
-                  // First click: display the star name label!
                   setActiveStarLabelId(s.id);
                 }
               }}
@@ -1428,47 +1384,29 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             >
               <title>
                 {isClicked
-                  ? `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Label Active\n• CLICK AGAIN to open 3D Star Dossier`
-                  : `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
-                      s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
-                    }\n• Click once to view label • Click again to open 3D Star Dossier`}
+                  ? `${s.catalogStar!.name} • Label Active (Click again for 3D Dossier)`
+                  : `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType}) • Mag ${s.apparentMagnitude}`}
               </title>
 
-              {/* Click target hit area */}
-              <circle cx={s.x} cy={s.y} r="5.5" fill="transparent" />
+              {/* Tighter hit area to prevent hover confusion on adjacent stars */}
+              <circle cx={s.x} cy={s.y} r="3.5" fill="transparent" />
 
-              {/* Active / Clicked Selection Target Ring */}
               {isClicked && (
                 <g className="pointer-events-none">
-                  <circle
-                    cx={s.x}
-                    cy={s.y}
-                    r={radius + 2.8}
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 1.5"
-                    className="animate-spin"
-                    style={{ transformOrigin: `${s.x}px ${s.y}px`, animationDuration: '6s' }}
-                  />
                   <circle cx={s.x} cy={s.y} r={radius + 1.2} fill="none" stroke="#22d3ee" strokeWidth="0.35" opacity="0.8" />
                 </g>
               )}
 
-              {/* Principal Star Golden Radiant Halo */}
               {isPrincipal && (
                 <g className="pointer-events-none">
                   <circle cx={s.x} cy={s.y} r={5.0} fill={`url(#star-glow-${constellation.id})`} className="animate-pulse" />
-                  <circle cx={s.x} cy={s.y} r={3.6} fill="none" stroke="#fef08a" strokeWidth="0.4" strokeDasharray="2 1.5" opacity="0.85" />
                 </g>
               )}
 
-              {/* Hover highlight circle */}
               {!isClicked && (
                 <circle cx={s.x} cy={s.y} r={radius + 1.4} fill="none" stroke="#38bdf8" strokeWidth="0.4" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
               )}
 
-              {/* Star dot node */}
               <circle
                 cx={s.x} cy={s.y} r={radius}
                 fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : '#ffffff'}
@@ -1476,81 +1414,99 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 strokeWidth={isPrincipal ? '0.6' : isClicked ? '0.6' : '0.4'}
                 className="group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors"
               />
-
-              {/* Star Name Label: Hidden by default, shown when hovered in or clicked */}
-              {showLabel && s.displayLabel && (
-                <g className="pointer-events-none select-none">
-                  <rect
-                    x={s.x > 75 ? s.x - (s.displayLabel.length * 2.1 + 8) : s.x + 3.5}
-                    y={s.y > 85 ? s.y - 7.0 : s.y - 2.5}
-                    width={s.displayLabel.length * 2.1 + 7}
-                    height={6.0}
-                    rx={1.5}
-                    fill="#020617"
-                    fillOpacity="0.95"
-                    stroke={isClicked ? '#38bdf8' : '#0ea5e9'}
-                    strokeWidth={isClicked ? '0.6' : '0.35'}
-                    className="drop-shadow-lg"
-                  />
-                  <text
-                    x={s.x > 75 ? s.x - 4.5 : s.x + 5.5}
-                    y={s.y > 85 ? s.y - 3.0 : s.y + 1.5}
-                    textAnchor={s.x > 75 ? 'end' : 'start'}
-                    fill={isClicked ? '#38bdf8' : isPrincipal ? '#fef08a' : '#f8fafc'}
-                    fontSize={isPrincipal ? '2.7' : '2.3'}
-                    fontFamily="sans-serif"
-                    fontWeight="bold"
-                    className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
-                  >
-                    {s.displayLabel}
-                  </text>
-                  {isClicked && (
-                    <g className="pointer-events-none">
-                      {/* Sub-label removed per request */}
-                    </g>
-                  )}
-                </g>
-              )}
             </g>
           );
         })}
 
-          {/* 8. Bordering Constellations along Perimeter */}
-          {neighborCount > 0 && opts.showNeighborGuides && (
-            <g className="bordering-constellations-perimeter">
-              {neighbors.map((neighborName, nIdx) => {
-                const neighborObj = resolveConstellationByName(neighborName);
-                const abbr = getNeighborAbbr(neighborName, neighborObj);
-                const angle = (2 * Math.PI * nIdx) / neighborCount - Math.PI / 2;
-                const nX = 50 + 56 * Math.cos(angle);
-                const nY = 50 + 50 * Math.sin(angle);
-                const tickStartX = 50 + 44 * Math.cos(angle);
-                const tickStartY = 50 + 40 * Math.sin(angle);
-                const rectWidth = Math.max(16, abbr.length * 3.4 + 4);
+        {/* 8. Bordering Constellations along Perimeter */}
+        {neighborCount > 0 && opts.showNeighborGuides && (
+          <g className="bordering-constellations-perimeter">
+            {neighbors.map((neighborName, nIdx) => {
+              const neighborObj = resolveConstellationByName(neighborName);
+              const abbr = getNeighborAbbr(neighborName, neighborObj);
+              const angle = (2 * Math.PI * nIdx) / neighborCount - Math.PI / 2;
+              const nX = 50 + 56 * Math.cos(angle);
+              const nY = 50 + 50 * Math.sin(angle);
+              const tickStartX = 50 + 44 * Math.cos(angle);
+              const tickStartY = 50 + 40 * Math.sin(angle);
+              const rectWidth = Math.max(16, abbr.length * 3.4 + 4);
 
-                return (
-                  <g
-                    key={`neighbor-svg-${nIdx}`}
-                    className="cursor-pointer group/neighbor transition-all"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (neighborObj && onSelectNeighbor) onSelectNeighbor(neighborObj);
-                    }}
-                  >
-                    <title>{neighborName} (Click to open {neighborObj?.name || neighborName} dossier)</title>
-                    <line x1={tickStartX} y1={tickStartY} x2={nX} y2={nY} stroke="#334155" strokeWidth="0.45" strokeDasharray="1.5 1.5" />
-                    <rect x={nX - rectWidth / 2} y={nY - 3.8} width={rectWidth} height="7.6" rx="2" fill="#070c1d" stroke="#334155" strokeWidth="0.5" className="transition-colors group-hover/neighbor:stroke-cyan-400 group-hover/neighbor:fill-slate-800" />
-                    <text x={nX} y={nY + 1.1} textAnchor="middle" fill="#94a3b8" fontSize="2.7" fontFamily="monospace" fontWeight="bold" className="select-none pointer-events-none group-hover/neighbor:fill-cyan-300">
-                      {abbr}
-                    </text>
-                  </g>
-                );
-              })}
+              return (
+                <g
+                  key={`neighbor-svg-${nIdx}`}
+                  className="cursor-pointer group/neighbor transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (neighborObj && onSelectNeighbor) onSelectNeighbor(neighborObj);
+                  }}
+                >
+                  <title>{neighborName} (Click to open {neighborObj?.name || neighborName} dossier)</title>
+                  <line x1={tickStartX} y1={tickStartY} x2={nX} y2={nY} stroke="#334155" strokeWidth="0.45" strokeDasharray="1.5 1.5" />
+                  <rect x={nX - rectWidth / 2} y={nY - 3.8} width={rectWidth} height="7.6" rx="2" fill="#070c1d" stroke="#334155" strokeWidth="0.5" className="transition-colors group-hover/neighbor:stroke-cyan-400 group-hover/neighbor:fill-slate-800" />
+                  <text x={nX} y={nY + 1.1} textAnchor="middle" fill="#94a3b8" fontSize="2.7" fontFamily="monospace" fontWeight="bold" className="select-none pointer-events-none group-hover/neighbor:fill-cyan-300">
+                    {abbr}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        )}
+
+        {/* 9. Star Labels - Placed at the absolute bottom for top Z-index rendering */}
+        {visibleStars.map((s) => {
+          const isClicked = activeStarLabelId === s.id;
+          const isHovered = hoveredStarId === s.id;
+          const isAssigned = !!s.catalogStar;
+          const showLabel = isAssigned && (isHovered || isClicked || opts.showStarLabels);
+
+          if (!showLabel || !s.catalogStar || !s.catalogStar.name) return null;
+          
+          const labelText = s.catalogStar.name;
+          
+          // Calculate dimensions and positions
+          const boxWidth = labelText.length * 1.5 + 4.0; // Base width + padding
+          const isRightSide = s.x <= 75;
+          const isTopSide = s.y > 85;
+
+          const rectX = isRightSide ? s.x + 3.5 : s.x - 3.5 - boxWidth;
+          const rectY = isTopSide ? s.y - 7.0 : s.y - 3.0;
+          
+          // Perfect mathematical center of the rectangle
+          const textX = rectX + (boxWidth / 2);
+          const textY = rectY + 3.0; // 3.0 is exactly half of the 6.0 height
+
+          return (
+            <g key={`label-${s.id}`} className="pointer-events-none select-none">
+              <rect
+                x={rectX}
+                y={rectY}
+                width={boxWidth}
+                height={6.0}
+                rx={1.5}
+                fill="#020617"
+                fillOpacity="0.95"
+                stroke={isClicked ? '#38bdf8' : '#0ea5e9'}
+                strokeWidth={isClicked ? '0.6' : '0.35'}
+                className="drop-shadow-lg"
+              />
+              <text
+                x={textX}
+                y={textY}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={isClicked ? '#38bdf8' : s.isPrincipal ? '#fef08a' : '#f8fafc'}
+                fontSize={s.isPrincipal ? '2.7' : '2.3'}
+                fontFamily="sans-serif"
+                fontWeight="bold"
+                className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+              >
+                {labelText}
+              </text>
             </g>
-          )}
-        </svg>
+          );
+        })}
+      </svg>
 
-        {/* Floating Figure & Asterism Badge rendered over the SVG */}
         <div className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-300 bg-slate-950/95 px-2.5 py-1 rounded-lg border border-slate-800 pointer-events-none flex items-center gap-1.5 shadow-md">
           <span className="text-cyan-400 font-bold">
             {catalogPlacedCount} Catalog Stars Visible
@@ -1563,7 +1519,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto text-slate-200">
-      {/* Top Banner (Uniform Hero Section) */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1584,7 +1539,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       </div>
 
-        {/* Sub-Tabs Switcher - Separate Buttons (No Sliding Panel) */}
         <div className="flex flex-wrap items-center gap-2 p-1.5 bg-[#020512] rounded-2xl border border-cyan-500/25 max-w-full">
           <button
             id="tab-what-are-constellations"
@@ -1645,12 +1599,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </button>
         </div>
 
-      {/* ========================================================================= */}
-      {/* SUB-TAB 1: WHAT ARE CONSTELLATIONS? */}
-      {/* ========================================================================= */}
       {activeTab === 'what-are' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Sub-tab Hero Banner: What Are Constellations? */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
@@ -1670,13 +1620,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </div>
               </div>
 
-              {/* Graphical Visual Diagram: 2D vs 3D */}
               <div className="w-full md:w-80 p-5 rounded-xl bg-[#020512] border border-slate-700/60 flex flex-col items-center text-center shrink-0">
                 <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2 font-bold">
                   The Depth Illusion
                 </div>
                 <div className="relative w-64 h-36 bg-[#040818] rounded-lg border border-cyan-500/20 overflow-hidden flex items-center justify-center p-2 mb-3">
-                  {/* Left: Earth Observer */}
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col items-center">
                     <div className="w-6 h-6 rounded-full bg-blue-500 border border-white flex items-center justify-center text-[9px] font-bold text-white shadow-[0_0_10px_#3b82f6]">
                       🌍
@@ -1684,24 +1632,19 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     <span className="text-[9px] font-mono text-slate-400 mt-1">Earth</span>
                   </div>
 
-                  {/* Lines of sight */}
                   <svg className="absolute inset-0 w-full h-full" viewBox="0 0 250 140">
                     <line x1="30" y1="70" x2="100" y2="35" stroke="#38bdf8" strokeWidth="1" strokeDasharray="2 2" />
                     <line x1="30" y1="70" x2="170" y2="70" stroke="#38bdf8" strokeWidth="1" strokeDasharray="2 2" />
                     <line x1="30" y1="70" x2="230" y2="105" stroke="#38bdf8" strokeWidth="1" strokeDasharray="2 2" />
 
-                    {/* 2D Projection Screen on Earth's Dome */}
                     <path d="M 75 15 Q 85 70 75 125" fill="none" stroke="rgba(244, 63, 94, 0.4)" strokeWidth="1.5" />
 
-                    {/* Star 1: Close (e.g. 25 ly) */}
                     <circle cx="100" cy="35" r="4" fill="#67e8f9" />
                     <text x="100" y="24" fill="#94a3b8" fontSize="8" textAnchor="middle">25 ly</text>
 
-                    {/* Star 2: Medium (e.g. 250 ly) */}
                     <circle cx="170" cy="70" r="5" fill="#fef08a" />
                     <text x="170" y="58" fill="#94a3b8" fontSize="8" textAnchor="middle">250 ly</text>
 
-                    {/* Star 3: Deep Supergiant (e.g. 2,000 ly) */}
                     <circle cx="230" cy="105" r="6" fill="#f87171" />
                     <text x="230" y="93" fill="#94a3b8" fontSize="8" textAnchor="middle">2,000 ly</text>
                   </svg>
@@ -1714,7 +1657,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* 4 Pillars of Constellation Knowledge */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {WHAT_ARE_CONSTELLATIONS_INFO.keyPrinciples.map((principle, idx) => (
               <div
@@ -1733,7 +1675,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             ))}
           </div>
 
-          {/* Interactive Asterism vs Constellation Callout */}
           <div className="p-5 sm:p-6 rounded-2xl bg-[#08122a] border border-cyan-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h4 className="text-base font-bold text-white flex items-center gap-2">
@@ -1758,12 +1699,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* SUB-TAB 2: ALL 88 CONSTELLATIONS */}
-      {/* ========================================================================= */}
       {activeTab === 'all-88' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Sub-tab Hero Banner: All 88 Constellations */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1779,9 +1716,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Search, Filters & Sorters */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#050c20] border border-cyan-500/25 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-            {/* Search input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -1802,9 +1737,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               )}
             </div>
 
-            {/* Filter controls */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Hemisphere filter */}
               <select
                 id="select-constellation-hemisphere"
                 value={selectedHemisphere}
@@ -1817,7 +1750,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 <option value="Equatorial">Equatorial Sky</option>
               </select>
 
-              {/* Family filter */}
               <select
                 id="select-constellation-family"
                 value={selectedFamily}
@@ -1835,7 +1767,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 <option value="La Caille">Lacaille Group (Instruments)</option>
               </select>
 
-              {/* Sort by */}
               <select
                 id="select-constellation-sort"
                 value={sortBy}
@@ -1849,7 +1780,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Active Filter Metrics Banner */}
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
             <span>
               Showing <strong className="text-cyan-400 font-bold">{filteredConstellations.length}</strong> of{' '}
@@ -1870,7 +1800,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             )}
           </div>
 
-          {/* 88 Constellations Bento Grid */}
           <div className={`grid ${
             cardDensity === 'compact'
               ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5'
@@ -1888,7 +1817,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     title={`Click to open Constellation Dossier for ${constellation.name}`}
                   >
                     <div>
-                      {/* Compact Header */}
                       <div className="flex items-start justify-between gap-1 mb-1">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1">
@@ -1911,31 +1839,27 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         </span>
                       </div>
 
-                      {/* Smaller SVG Preview */}
                       <div
-                        className="relative w-full h-16 sm:h-20 bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1"
+                        className="relative w-full aspect-square bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1"
                         title={`Click to open Constellation Dossier for ${constellation.name}`}
                       >
                         {renderNormalAsterism(
                           constellation,
                           100,
-                          'w-full h-full max-h-14 sm:max-h-18'
+                          'w-full h-full p-1 sm:p-2'
                         )}
                       </div>
 
-                      {/* Resemblance Snippet */}
                       <p className="line-clamp-1 italic text-[9px] text-slate-300/80 my-0.5 truncate" title={constellation.resemblance}>
                         "{constellation.resemblance}"
                       </p>
 
-                      {/* Quick Specs Compact Row */}
                       <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 py-0.5 border-t border-slate-800/80">
                         <span className="truncate">{constellation.hemisphere}</span>
                         <span className="text-cyan-300 shrink-0">{constellation.areaSqDeg} sq°</span>
                       </div>
                     </div>
 
-                    {/* Principal Star & Action */}
                     <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[9px]">
                       <span className="text-slate-400 truncate flex items-center gap-1">
                         <StarDot2D star={principalStar} colorHex={principalStar?.colorHex || '#fef08a'} sizeClassName="w-2 h-2" />
@@ -1964,7 +1888,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   className="group p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#040a1c] border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] transition-all flex flex-col justify-between shadow-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] cursor-pointer"
                   title={`Click to open Constellation Dossier for ${constellation.name}`}
                 >
-                  {/* Top Header */}
                   <div>
                     <div className="flex items-start justify-between gap-1 sm:gap-2 mb-1.5 sm:mb-2">
                       <div className="min-w-0">
@@ -1989,22 +1912,20 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </span>
                     </div>
 
-                    {/* SVG Constellation Normal Asterism Preview */}
                     <div
-                      className="relative w-full h-24 sm:h-36 bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2.5 p-1 sm:p-2"
+                      className="relative w-full aspect-square bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2.5 p-1 sm:p-2"
                       title={`Click card to open Constellation Dossier for ${constellation.name}`}
                     >
                       {renderNormalAsterism(
                         constellation,
                         100,
-                        'w-full h-full max-h-20 sm:max-h-32'
+                        'w-full h-full p-1 sm:p-2'
                       )}
                       <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
                         Figure
                       </div>
                     </div>
 
-                    {/* Resemblance snippet */}
                     <div className="my-1 sm:my-2 p-1.5 sm:p-2 rounded-lg bg-[#020512] border border-cyan-500/15 text-[10px] sm:text-[11px] leading-tight sm:leading-snug">
                       <div className="flex items-center gap-1 text-[8.5px] sm:text-[9px] font-mono uppercase text-cyan-400 font-semibold mb-0.5">
                         <Sparkles className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-cyan-400 shrink-0" />
@@ -2013,7 +1934,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       <p className="line-clamp-1 sm:line-clamp-2 italic text-slate-300/90">"{constellation.resemblance}"</p>
                     </div>
 
-                    {/* Quick Specs */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5 text-[9.5px] sm:text-[11px] font-mono mb-2 sm:mb-3">
                       <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 truncate">
                         <span className="text-slate-500 block text-[8px] sm:text-[9px] uppercase">Sky Region</span>
@@ -2028,7 +1948,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Principal Star Bar & Action */}
                   <div className="pt-1.5 sm:pt-2.5 border-t border-slate-800 flex flex-col gap-1.5 sm:gap-2">
                     <div className="flex items-center justify-between text-[10px] sm:text-xs">
                       <span className="text-slate-400 text-[9px] sm:text-[11px] flex items-center gap-1 shrink-0">
@@ -2074,12 +1993,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* SUB-TAB 3: THE 13 ZODIAC SIGNS */}
-      {/* ========================================================================= */}
       {activeTab === 'zodiac-13' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Sub-tab Hero Banner: 13 Zodiac Signs */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -2095,7 +2010,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Explainer Details & Ophiuchus Callout */}
           <div className="p-5 sm:p-6 rounded-2xl bg-[#040816] border border-cyan-500/20">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="max-w-3xl space-y-3">
@@ -2110,7 +2024,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </div>
               </div>
 
-              {/* Ophiuchus Big Callout Card */}
               <div className="w-full lg:w-80 p-5 rounded-xl bg-[#020512] border-2 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.25)] flex flex-col gap-2 shrink-0">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl">⛎</span>
@@ -2131,7 +2044,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* The 13 Zodiac Signs Side-by-Side Timeline */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ZODIAC_13_SIGNS.map((sign) => {
               const star = starMap.get(sign.principalStarId);
@@ -2167,14 +2079,12 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </span>
                     </div>
 
-                    {/* SVG Shape if available */}
                     {constellation && (
-                      <div className="w-full h-24 bg-[#020512] rounded-xl border border-slate-800 flex items-center justify-center my-2">
+                      <div className="w-full aspect-square bg-[#020512] rounded-xl border border-slate-800 flex items-center justify-center my-2">
                         {renderConstellationShape(constellation, 80)}
                       </div>
                     )}
 
-                    {/* Date Comparison: Astronomical vs Traditional */}
                     <div className="space-y-1.5 text-xs font-mono mt-3">
                       <div className="p-2 rounded-lg bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between">
                         <span className="text-cyan-300 font-semibold">Real Sun Dates:</span>
@@ -2195,7 +2105,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </p>
                   </div>
 
-                  {/* Principal Star Link */}
                   {star && (
                     <button
                       onClick={() => onSelectStar(star)}
@@ -2212,12 +2121,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* SUB-TAB 4: MYTHBUSTER: PERSONALITY & ASTROLOGY */}
-      {/* ========================================================================= */}
       {activeTab === 'mythbuster' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Sub-tab Hero Banner: Personality Mythbuster */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -2233,7 +2138,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Big Mythbuster Verdict Card */}
           <div className="p-5 sm:p-6 rounded-2xl bg-[#140608] border border-rose-500/40 relative overflow-hidden shadow-lg">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
@@ -2248,7 +2152,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </p>
               </div>
 
-              {/* Astrophysics Perspective Callout */}
               <div className="w-full md:w-72 p-4 rounded-2xl bg-[#091530] border border-cyan-500/40 text-center flex flex-col items-center gap-2 shrink-0">
                 <div className="w-10 h-10 rounded-full bg-cyan-950/80 border border-cyan-400 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(6,182,212,0.4)]">
                   🔭
@@ -2262,7 +2165,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Interactive Birthday Real Zodiac Finder Widget */}
           <div className="p-6 rounded-2xl bg-[#061026] border border-cyan-500/30">
             <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase mb-2">
               <Calendar className="w-4 h-4 text-cyan-400" />
@@ -2276,7 +2178,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               almost certainly NOT where the Sun was in space when you were born!
             </p>
 
-            {/* Select Date Controls */}
             <div className="flex flex-wrap items-end gap-3 mb-5">
               <div>
                 <label className="block text-[10px] font-mono text-slate-400 mb-1">Birth Month</label>
@@ -2332,7 +2233,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </div>
             </div>
 
-            {/* Calculated Result Banner */}
             <div className="p-4 sm:p-5 rounded-xl bg-[#020512] border border-cyan-500/40 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-cyan-950 border border-cyan-500 flex items-center justify-center text-2xl shrink-0">
@@ -2362,7 +2262,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* Scientific Mythbuster Deep-Dive Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {MYTHBUSTER_INFO.sections.map((sec, idx) => (
               <div
@@ -2382,18 +2281,13 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* INSPECTED CONSTELLATION MODAL / DRAWER (CONSTELLATION DOSSIER) */}
-      {/* ========================================================================= */}
       {inspectedConstellation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
             onClick={() => setInspectedConstellation(null)}
           />
 
-          {/* Modal Container: Constellation Dossier */}
           <div
             ref={dossierScrollRef}
             className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
@@ -2402,9 +2296,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               setActiveStarLabelId(null);
             }}
           >
-            {/* Header Bar matching Encyclopedia mode */}
             <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
-              {/* Left: Constellation Identifier & Information */}
               <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-xl font-black text-white tracking-tight shrink-0">
@@ -2424,7 +2316,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </div>
               </div>
 
-              {/* Right: Close Button with Esc shortcut */}
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setInspectedConstellation(null)}
@@ -2439,13 +2330,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </div>
             </div>
 
-            {/* Scrollable Body */}
             <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 scrollbar-thin flex flex-col gap-4 sm:gap-6">
-              {/* Top Section: Visualizer & Astronomical Boundaries */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column: Constellation Exact Boundary & Neighbors Canvas */}
                 <div className="lg:col-span-7 flex flex-col gap-3">
-                  {/* Constellation Dossier Viewport Controls Toolbar */}
                   <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono">
                     
                     <div className="flex items-center gap-1.5 px-2 text-cyan-400 font-bold">
@@ -2543,12 +2430,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Constellation Visualizer Banner - 2D Astrometric Map */}
                   <div 
                     className="w-full h-[410px] sm:h-[450px] md:h-[500px] lg:h-[560px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
                     onClick={() => setActiveStarLabelId(null)}
                   >
-                    {/* Astrometric Metadata Header Badge */}
                     <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
                       <span className="text-cyan-300 font-semibold uppercase">{inspectedConstellation.name}</span>
                       {isPolarConstellation(inspectedConstellation.id, extractBounds(inspectedConstellation.borders.decRange || '', false)) && (
@@ -2574,7 +2459,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Bordering Constellations Bar: Clickable, unhighlighted adjacent constellations */}
                   {inspectedConstellation.borders.borderingConstellations.length > 0 && (
                     <div className="p-3.5 rounded-xl bg-[#04091c] border border-slate-800 flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2">
@@ -2584,7 +2468,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         <span className="text-[10px] text-slate-500 font-mono">Click to jump to neighboring boundary</span>
                       </div>
 
-                      {/* If Serpens, display the sectors (Caput and Cauda) grouped clearly */}
                       {inspectedConstellation.id === 'serpens' && inspectedConstellation.borders.sectors ? (
                         <div className="flex flex-col gap-2.5">
                           {inspectedConstellation.borders.sectors.map((sec) => (
@@ -2654,7 +2537,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   )}
 
-                  {/* Celestial Resemblance Callout */}
                   <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-3">
                     <div className="p-2 rounded-lg bg-cyan-900/60 border border-cyan-400/30 text-cyan-300 shrink-0 mt-0.5">
                       <Sparkles className="w-4 h-4 text-cyan-300" />
@@ -2671,9 +2553,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   </div>
                 </div>
 
-                {/* Right Column: Sky Borders, Metrics & Principal Star */}
                 <div className="lg:col-span-5 flex flex-col gap-4">
-                  {/* Sky Borders Section */}
                   <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/25 flex flex-col gap-3">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-cyan-900/40">
                       <div className="flex items-center gap-2">
@@ -2687,7 +2567,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </span>
                     </div>
 
-                    {/* RA and Dec Ranges */}
                     {inspectedConstellation.borders.sectors ? (
                       <div className="flex flex-col gap-2 text-xs font-mono">
                         {inspectedConstellation.borders.sectors.map((sec) => (
@@ -2732,7 +2611,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </p>
                   </div>
 
-                  {/* Metrics Grid */}
                   <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                     <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
                       <span className="text-slate-500 block text-[10px]">Hemisphere</span>
@@ -2754,7 +2632,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Principal Star Action */}
                   {starMap.get(inspectedConstellation.principalStarId) && (() => {
                     const pStar = starMap.get(inspectedConstellation.principalStarId)!;
                     return (
@@ -2782,7 +2659,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     );
                   })()}
 
-                  {/* Cataloged Constellation Stars List with Known Locations */}
                   {(() => {
                     const seenIds = new Set<string>();
                     const boundFeature = (celestialData.bounds || []).find((b: any) => 
@@ -2850,13 +2726,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                                     )}
                                   </div>
 
-                                  {/* Known Celestial Location */}
                                   <div className="flex items-start sm:items-center gap-1.5 text-[11px] font-mono text-cyan-300/90 leading-tight">
                                     <Compass className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5 sm:mt-0" />
                                     <span className="break-words">{locationDesc}</span>
                                   </div>
 
-                                  {/* Astro Specs Badges */}
                                   <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono text-slate-400">
                                     <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300">
                                       {st.spectralType}
@@ -2901,7 +2775,6 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 </div>
               </div>
 
-              {/* Bottom Section: Description & Mythology */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
                   <strong className="text-cyan-300 block mb-1.5 font-bold flex items-center gap-1.5">
