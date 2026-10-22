@@ -615,16 +615,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           });
         })}
 
-        {/* Draw the geometric constellation figure nodes: ONLY asterism figure stars, unassigned are greyed out */}
+        {/* Draw the geometric constellation figure nodes: All figure stars are bright (not greyed out in preview) */}
         {mappedLineVertices.map((s: any, starIdx: number) => (
           <g key={`sm-json-star-${starIdx}`}>
             <circle
               cx={s.x} cy={s.y}
-              r={s.isAssigned ? "1.6" : "1.0"}
-              fill={s.isAssigned ? "#ffffff" : "#475569"}
-              stroke={s.isAssigned ? "#38bdf8" : "#334155"}
-              strokeWidth="0.4"
-              opacity={s.isAssigned ? "1" : "0.45"}
+              r="1.5"
+              fill="#ffffff"
+              stroke="#38bdf8"
+              strokeWidth="0.45"
               className="pointer-events-none"
             />
           </g>
@@ -998,10 +997,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         onClick={() => setActiveStarLabelId(null)}
       >
         <svg 
-          viewBox="-16 -12 132 124" 
+          viewBox="0 0 100 100" 
           width={size} 
           height={size} 
-          className={`overflow-visible drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}
+          className={`w-full h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}
           onClick={() => setActiveStarLabelId(null)}
         >
           <defs>
@@ -1077,7 +1076,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </text>
                     </g>
                   )}
-                  <text x="50" y="-7.5" textAnchor="middle" fill="#64748b" fontSize="2.4" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                  <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="2.0" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
                     CIRCUMPOLAR PROJECTION • {isNorth ? 'NORTH' : 'SOUTH'} CELESTIAL REALM
                   </text>
                 </g>
@@ -1090,19 +1089,19 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       <line x1="0" y1={c} x2="100" y2={c} stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
                     </g>
                   ))}
-                  <text x="50" y="-7.5" textAnchor="middle" fill="#64748b" fontSize="2.4" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+                  <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
                     ◄ EAST • CONFORMAL STEREOGRAPHIC SKY MAP • WEST ►
                   </text>
                   {graticule.raLabels.map((ra, idx) => (
-                    <text key={`ra-lbl-${idx}`} x={ra.x} y="-2" textAnchor="middle" fill="#38bdf8" fontSize="2.5" fontFamily="monospace" opacity="0.85">
+                    <text key={`ra-lbl-${idx}`} x={ra.x} y="7.2" textAnchor="middle" fill="#38bdf8" fontSize="2.1" fontFamily="monospace" opacity="0.85">
                       {ra.label}
                     </text>
                   ))}
-                  <text x="-12" y="50" textAnchor="middle" transform="rotate(-90 -12 50)" fill="#64748b" fontSize="2.3" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-                    ▲ +NORTH • DECLINATION • -SOUTH ▼
+                  <text x="2.5" y="96.5" textAnchor="start" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold">
+                    DEC
                   </text>
                   {graticule.decLabels.map((dec, idx) => (
-                    <text key={`dec-lbl-${idx}`} x="-2" y={dec.y + 0.9} textAnchor="end" fill="#38bdf8" fontSize="2.4" fontFamily="monospace" opacity="0.85">
+                    <text key={`dec-lbl-${idx}`} x="2.5" y={dec.y + 0.9} textAnchor="start" fill="#38bdf8" fontSize="2.0" fontFamily="monospace" opacity="0.85">
                       {dec.label}
                     </text>
                   ))}
@@ -1129,25 +1128,42 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </g>
           )}
 
-          {/* 4. Bordering Constellations on Sky Map (Highlightable & Clickable Areas) */}
+          {/* 4. Bordering Constellations on Sky Map (Clickable Areas with Clean Typography Labels, No Buttons) */}
           {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
             <g className="bordering-constellations-areas" clipPath={`url(#map-frame-clip-${constellation.id})`}>
               {borderingConstellationsSvg.map((neighbor, nIdx) => (
-                <path
-                  key={`neighbor-area-${nIdx}`}
-                  d={neighbor.pathData}
-                  fill="rgba(30, 41, 59, 0.45)"
-                  stroke="#475569"
-                  strokeWidth="0.5"
-                  strokeDasharray="2 1.5"
-                  className="cursor-pointer transition-colors hover:fill-cyan-950/70 hover:stroke-cyan-400 group/neighbor"
+                <g
+                  key={`neighbor-group-${nIdx}`}
+                  className="cursor-pointer group/neighbor"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (neighbor.neighborObj && onSelectNeighbor) onSelectNeighbor(neighbor.neighborObj);
                   }}
                 >
                   <title>{`${neighbor.name} (Bordering Constellation • Click to switch to ${neighbor.name} dossier)`}</title>
-                </path>
+                  <path
+                    d={neighbor.pathData}
+                    fill="rgba(30, 41, 59, 0.45)"
+                    stroke="#475569"
+                    strokeWidth="0.5"
+                    strokeDasharray="1.5 1"
+                    className="transition-colors group-hover/neighbor:fill-cyan-950/70 group-hover/neighbor:stroke-cyan-400"
+                  />
+                  {/* Clean typographic label directly on the bordering constellation area (not a button) */}
+                  <text
+                    x={neighbor.badgePos.x}
+                    y={neighbor.badgePos.y + 0.7}
+                    textAnchor="middle"
+                    fill="#94a3b8"
+                    fontSize="2.2"
+                    fontFamily="sans-serif"
+                    fontWeight="bold"
+                    letterSpacing="0.04em"
+                    className="pointer-events-none select-none uppercase tracking-wider group-hover/neighbor:fill-cyan-300 transition-colors drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]"
+                  >
+                    {neighbor.name}
+                  </text>
+                </g>
               ))}
             </g>
           )}
@@ -1160,7 +1176,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 fill="rgba(6, 182, 212, 0.12)"
                 stroke="#06b6d4"
                 strokeWidth="0.75"
-                strokeDasharray="2.5 1.5"
+                strokeDasharray="1.5 1"
               />
               {boundaryCornerPoints.map((pt, idx) => (
                 <circle key={`bpt-${idx}`} cx={pt.x} cy={pt.y} r="0.9" fill="#38bdf8" stroke="#020512" strokeWidth="0.3" />
@@ -1304,14 +1320,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     setActiveStarLabelId(null);
                     return;
                   }
-                  if (activeStarLabelId === s.id) {
-                    // Clicked again when active: open 3D star dossier!
-                    if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
-                    else if (onSelectStar) onSelectStar(s.catalogStar);
-                  } else {
-                    // First click: display the star name label!
-                    setActiveStarLabelId(s.id);
-                  }
+                  if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
+                  else if (onSelectStar) onSelectStar(s.catalogStar);
                 }}
                 onMouseEnter={() => {
                   if (isClickable) setHoveredStarId(s.id);
@@ -1321,11 +1331,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 }}
               >
                 <title>
-                  {isClicked
-                    ? `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Label Active\n• CLICK AGAIN to open 3D Star Dossier`
-                    : `${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
-                        s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
-                      }\n• Click once to view label • Click again to open 3D Star Dossier`}
+                  {`${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
+                    s.locationDescription ? `\n• Known Location: ${s.locationDescription}` : ''
+                  }`}
                 </title>
 
                 {/* Click target hit area */}
@@ -1358,87 +1366,46 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             );
           })}
 
-          {/* 10. Bordering Constellation Badges directly on the Sky Map */}
-          {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
-            <g className="bordering-constellation-badges">
-              {borderingConstellationsSvg.map((neighbor, nIdx) => {
-                const rectW = Math.max(16, neighbor.abbr.length * 3.2 + 5);
-                return (
-                  <g
-                    key={`neighbor-badge-${nIdx}`}
-                    className="cursor-pointer group/n-badge"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (neighbor.neighborObj && onSelectNeighbor) onSelectNeighbor(neighbor.neighborObj);
-                    }}
-                  >
-                    <title>{`Switch to ${neighbor.name} dossier`}</title>
-                    <rect
-                      x={neighbor.badgePos.x - rectW / 2}
-                      y={neighbor.badgePos.y - 3.2}
-                      width={rectW}
-                      height="6.4"
-                      rx="1.6"
-                      fill="#030816"
-                      fillOpacity="0.92"
-                      stroke="#475569"
-                      strokeWidth="0.45"
-                      className="group-hover/n-badge:fill-cyan-950 group-hover/n-badge:stroke-cyan-400 transition-colors shadow-md"
-                    />
-                    <text
-                      x={neighbor.badgePos.x}
-                      y={neighbor.badgePos.y + 1.1}
-                      textAnchor="middle"
-                      fill="#94a3b8"
-                      fontSize="2.4"
-                      fontFamily="monospace"
-                      fontWeight="bold"
-                      className="group-hover/n-badge:fill-cyan-200 pointer-events-none select-none transition-colors"
-                    >
-                      {neighbor.abbr} ↗
-                    </text>
-                  </g>
-                );
-              })}
-            </g>
-          )}
-
-          {/* 11. Top-most SVG Layer: Star Name Label (Centered above dot, matching catalog) */}
-          {visibleStars.map((s) => {
+          {/* 10. Star Name Labels (when showStarLabels toggle is on, for non-hovered stars) */}
+          {opts.showStarLabels && visibleStars.map((s) => {
             const isAssigned = !!s.catalogStar;
             const isHovered = hoveredStarId === s.id;
             const isClicked = activeStarLabelId === s.id;
-            const showLabel = isAssigned && (isHovered || isClicked || opts.showStarLabels);
-            if (!showLabel || !s.displayLabel) return null;
+            // The hovered / active star label will be rendered on the very front layer
+            if (!isAssigned || isHovered || isClicked || !s.displayLabel) return null;
 
             const isPrincipal = s.isPrincipal;
             const radius = isPrincipal ? 2.6 : s.apparentMagnitude < 2.0 ? 2.2 : (s.apparentMagnitude < 4.0 ? 1.6 : 1.2);
-            const labelWidth = Math.max(16, s.displayLabel.length * 2.3 + 6);
-            const labelX = Math.max(14, Math.min(86, s.x));
-            const labelY = s.y > 11 ? s.y - radius - 2.8 : s.y + radius + 5.5;
+            const charWidth = 1.05;
+            const padX = 1.4;
+            const labelWidth = Math.max(5.0, s.displayLabel.length * charWidth + padX * 2);
+            const labelX = Math.max(labelWidth / 2 + 1, Math.min(100 - labelWidth / 2 - 1, s.x));
+            const isAbove = s.y > 6.5;
+            const labelY = isAbove ? s.y - radius - 1.5 : s.y + radius + 3.5;
+            const rectH = 3.0;
 
             return (
-              <g key={`top-lbl-${s.id}`} className="pointer-events-none select-none">
+              <g key={`static-lbl-${s.id}`} className="pointer-events-none select-none opacity-80">
                 <rect
                   x={labelX - labelWidth / 2}
-                  y={labelY - 4.2}
+                  y={labelY - (rectH - 0.8)}
                   width={labelWidth}
-                  height="5.8"
-                  rx="1.5"
+                  height={rectH}
+                  rx="0.8"
                   fill="#020617"
-                  fillOpacity="0.96"
-                  stroke={isClicked ? '#38bdf8' : isPrincipal ? '#facc15' : '#0ea5e9'}
-                  strokeWidth={isClicked ? '0.6' : '0.35'}
-                  className="drop-shadow-lg"
+                  fillOpacity="0.92"
+                  stroke={isPrincipal ? '#facc15' : '#0ea5e9'}
+                  strokeWidth="0.3"
+                  className="drop-shadow-sm"
                 />
                 <text
                   x={labelX}
-                  y={labelY - 0.5}
+                  y={labelY}
                   textAnchor="middle"
-                  fill={isClicked ? '#38bdf8' : isPrincipal ? '#fef08a' : '#f8fafc'}
-                  fontSize={isPrincipal ? '2.7' : '2.3'}
+                  fill={isPrincipal ? '#fef08a' : '#f8fafc'}
+                  fontSize={isPrincipal ? '1.9' : '1.6'}
                   fontFamily="sans-serif"
-                  fontWeight="bold"
+                  fontWeight="600"
                   className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
                 >
                   {s.displayLabel}
@@ -1446,15 +1413,68 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </g>
             );
           })}
+
+          {/* 11. VERY FRONT SVG LAYER: Active or Hovered Star Label (Always on top of all elements) */}
+          {(() => {
+            const frontStar = visibleStars.find((s) => s.id === hoveredStarId) || 
+                              visibleStars.find((s) => s.id === activeStarLabelId);
+            if (!frontStar || !frontStar.catalogStar || !frontStar.displayLabel) return null;
+
+            const isPrincipal = frontStar.isPrincipal;
+            const isClicked = activeStarLabelId === frontStar.id;
+            const radius = isPrincipal ? 2.6 : frontStar.apparentMagnitude < 2.0 ? 2.2 : (frontStar.apparentMagnitude < 4.0 ? 1.6 : 1.2);
+            const charWidth = 1.05;
+            const padX = 1.4;
+            const labelWidth = Math.max(5.0, frontStar.displayLabel.length * charWidth + padX * 2);
+            const labelX = Math.max(labelWidth / 2 + 1, Math.min(100 - labelWidth / 2 - 1, frontStar.x));
+            const isAbove = frontStar.y > 6.5;
+            const labelY = isAbove ? frontStar.y - radius - 1.5 : frontStar.y + radius + 3.5;
+            const rectH = 3.2;
+
+            return (
+              <g key={`front-lbl-${frontStar.id}`} className="pointer-events-none select-none z-50">
+                {/* Pointer notch to unambiguously indicate which star this label belongs to */}
+                {isAbove ? (
+                  <polygon
+                    points={`${frontStar.x - 0.7},${labelY + 0.2} ${frontStar.x + 0.7},${labelY + 0.2} ${frontStar.x},${labelY + 1.0}`}
+                    fill={isClicked ? '#38bdf8' : isPrincipal ? '#facc15' : '#0ea5e9'}
+                  />
+                ) : (
+                  <polygon
+                    points={`${frontStar.x - 0.7},${labelY - rectH - 0.2} ${frontStar.x + 0.7},${labelY - rectH - 0.2} ${frontStar.x},${labelY - rectH - 1.0}`}
+                    fill={isClicked ? '#38bdf8' : isPrincipal ? '#facc15' : '#0ea5e9'}
+                  />
+                )}
+                <rect
+                  x={labelX - labelWidth / 2}
+                  y={labelY - (rectH - 0.8)}
+                  width={labelWidth}
+                  height={rectH}
+                  rx="0.9"
+                  fill="#020617"
+                  fillOpacity="0.98"
+                  stroke={isClicked ? '#38bdf8' : isPrincipal ? '#facc15' : '#38bdf8'}
+                  strokeWidth="0.45"
+                  className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]"
+                />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  textAnchor="middle"
+                  fill={isClicked ? '#38bdf8' : isPrincipal ? '#fef08a' : '#ffffff'}
+                  fontSize={isPrincipal ? '2.0' : '1.7'}
+                  fontFamily="sans-serif"
+                  fontWeight="bold"
+                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                >
+                  {frontStar.displayLabel}
+                </text>
+              </g>
+            );
+          })()}
         </svg>
 
-        {/* Floating Figure & Asterism Badge rendered over the SVG */}
-        <div className="absolute bottom-2 right-2 sm:bottom-2.5 sm:right-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-300 bg-slate-950/95 px-2.5 py-1 rounded-lg border border-slate-800 pointer-events-none flex items-center gap-1.5 shadow-md">
-          <span className="text-cyan-400 font-bold">
-            {catalogPlacedCount} Catalog Stars Visible
-          </span>
-          <span className="text-emerald-400 font-medium">• All Clickable in 3D</span>
-        </div>
+
       </div>
     );
   };
@@ -1809,15 +1829,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         </span>
                       </div>
 
-                      {/* Smaller SVG Preview */}
+                      {/* Smaller SVG Preview (Consistent 1:1 Square) */}
                       <div
-                        className="relative w-full h-16 sm:h-20 bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1"
+                        className="relative w-full aspect-square bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1.5"
                         title={`Click to open Constellation Dossier for ${constellation.name}`}
                       >
                         {renderNormalAsterism(
                           constellation,
                           100,
-                          'w-full h-full max-h-14 sm:max-h-18'
+                          'w-full h-full'
                         )}
                       </div>
 
@@ -1887,15 +1907,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </span>
                     </div>
 
-                    {/* SVG Constellation Normal Asterism Preview */}
+                    {/* SVG Constellation Normal Asterism Preview (Consistent 1:1 Square) */}
                     <div
-                      className="relative w-full h-24 sm:h-36 bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2.5 p-1 sm:p-2"
+                      className="relative w-full aspect-square bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2.5 p-2"
                       title={`Click card to open Constellation Dossier for ${constellation.name}`}
                     >
                       {renderNormalAsterism(
                         constellation,
-                        100,
-                        'w-full h-full max-h-20 sm:max-h-32'
+                        140,
+                        'w-full h-full'
                       )}
                       <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
                         Figure
@@ -2065,10 +2085,21 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </span>
                     </div>
 
-                    {/* SVG Shape if available */}
+                    {/* SVG Constellation Normal Asterism Preview (Consistent 1:1 Square) */}
                     {constellation && (
-                      <div className="w-full h-24 bg-[#020512] rounded-xl border border-slate-800 flex items-center justify-center my-2">
-                        {renderConstellationShape(constellation, 80)}
+                      <div
+                        onClick={() => setInspectedConstellation(constellation)}
+                        className="relative w-full aspect-square bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden hover:border-cyan-500/40 transition-colors my-2 p-2 cursor-pointer"
+                        title={`Click to open Constellation Dossier for ${constellation.name}`}
+                      >
+                        {renderNormalAsterism(
+                          constellation,
+                          140,
+                          'w-full h-full'
+                        )}
+                        <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
+                          Figure
+                        </div>
                       </div>
                     )}
 
@@ -2441,9 +2472,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Constellation Visualizer Banner - 2D Astrometric Map */}
+                  {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport) */}
                   <div 
-                    className="w-full h-[410px] sm:h-[450px] md:h-[500px] lg:h-[560px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+                    className="w-full aspect-square max-h-[460px] sm:max-h-[560px] md:max-h-[620px] lg:max-h-[680px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
                     onClick={() => setActiveStarLabelId(null)}
                   >
                     {/* Astrometric Metadata Header Badge */}
@@ -2460,11 +2491,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       <span className="hidden sm:inline">Dec {inspectedConstellation.borders.decRange.split('|')[0].trim()}</span>
                     </div>
 
-                    <div className="flex items-center justify-center w-full h-full p-1.5 sm:p-4">
+                    <div className="flex items-center justify-center w-full h-full p-1 sm:p-2">
                       {renderConstellationShape(
                         inspectedConstellation,
-                        520,
-                        'w-full h-full max-h-[410px] sm:max-h-[520px]',
+                        600,
+                        'w-full h-full',
                         (neighbor) => setInspectedConstellation(neighbor),
                         undefined,
                         (star) => onSelectStar(star)
@@ -2472,85 +2503,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     </div>
                   </div>
 
-                  {/* Bordering Constellations Bar: Clickable, unhighlighted adjacent constellations */}
-                  {inspectedConstellation.borders.borderingConstellations.length > 0 && (
-                    <div className="p-3.5 rounded-xl bg-[#04091c] border border-slate-800 flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-mono uppercase text-slate-400 font-bold tracking-wider">
-                          Bordering Constellations ({inspectedConstellation.borders.borderingConstellations.length})
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">Click to jump to neighboring boundary</span>
-                      </div>
 
-                      {/* If Serpens, display the sectors (Caput and Cauda) grouped clearly */}
-                      {inspectedConstellation.id === 'serpens' && inspectedConstellation.borders.sectors ? (
-                        <div className="flex flex-col gap-2.5">
-                          {inspectedConstellation.borders.sectors.map((sec) => (
-                            <div
-                              key={sec.shortCode}
-                              className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5"
-                            >
-                              <div className="flex items-center justify-between text-[11px] font-mono">
-                                <span className="font-bold text-cyan-300">
-                                  {sec.name} ({sec.shortCode})
-                                </span>
-                                <span className="text-slate-400 text-[10px]">{sec.englishName}</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                {sec.borderingConstellations.map((neighborName) => {
-                                  const neighborObj = resolveConstellationByName(neighborName);
-                                  return (
-                                    <button
-                                      key={neighborName}
-                                      onClick={() => {
-                                        if (neighborObj) {
-                                          setInspectedConstellation(neighborObj);
-                                        }
-                                      }}
-                                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 font-mono ${
-                                        neighborObj
-                                          ? 'bg-slate-900/90 text-slate-300 border-slate-700/60 hover:border-slate-500 hover:text-white cursor-pointer active:scale-95'
-                                          : 'bg-slate-900/40 text-slate-500 border-slate-800/40 cursor-default'
-                                      }`}
-                                      title={neighborObj ? `Inspect ${neighborObj.name} boundary in dossier` : neighborName}
-                                    >
-                                      <span>{neighborName}</span>
-                                      {neighborObj && <ChevronRight className="w-3 h-3 text-slate-400" />}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          {inspectedConstellation.borders.borderingConstellations.map((neighborName) => {
-                            const neighborObj = resolveConstellationByName(neighborName);
-                            return (
-                              <button
-                                key={neighborName}
-                                onClick={() => {
-                                  if (neighborObj) {
-                                    setInspectedConstellation(neighborObj);
-                                  }
-                                }}
-                                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 font-mono ${
-                                  neighborObj
-                                    ? 'bg-slate-900/90 text-slate-300 border-slate-700/60 hover:border-slate-500 hover:text-white cursor-pointer active:scale-95'
-                                    : 'bg-slate-900/40 text-slate-500 border-slate-800/40 cursor-default'
-                                }`}
-                                title={neighborObj ? `Inspect ${neighborObj.name} boundary in dossier` : neighborName}
-                              >
-                                <span>{neighborName}</span>
-                                {neighborObj && <ChevronRight className="w-3 h-3 text-slate-400" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* Celestial Resemblance Callout */}
                   <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-3">

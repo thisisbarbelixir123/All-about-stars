@@ -99,10 +99,14 @@ export function getSystemVisualScale(system: MultipleStarSystemData): {
     // Wide visual binaries (61 Cygni: 86 AU, Castor AB: 107 AU)
     auToUnits = 0.32;
     starRadiusScale = 0.90;
-  } else {
+  } else if (a < 1200.0) {
     // Very wide systems (Mizar AB: 382 AU)
     auToUnits = 0.12;
     starRadiusScale = 0.85;
+  } else {
+    // Ultra-wide systems (e.g. Epsilon Lyrae: 10,500 AU, Albireo: 4,400 AU, Zeta Reticuli: 3,750 AU, Gliese 105 A-BC: 1,200 AU)
+    auToUnits = 42.0 / a;
+    starRadiusScale = 0.90;
   }
 
   // Calculate maximum physical/visual extent to derive initial camera distance that fits the full system view
@@ -124,14 +128,18 @@ export function isSubBinaryOrbit(
   if (!primaryOrbit || orbit === primaryOrbit) return false;
   if (orbit.orbitsBarycenter) return false;
 
-  // If primaryId is not the central pair's primaryId, it is a sub-binary
-  // (e.g. Castor Ba -> Bb, Castor Ca -> Cb, Capella H -> L, Alcor -> Alcor B)
-  if (orbit.primaryId !== primaryOrbit.primaryId && orbit.primaryId !== primaryOrbit.secondaryId) {
+  // Orbit around the secondary star of the primary pair (e.g. Castor Ba -> Bb, Epsilon-2 Lyrae A -> B)
+  if (orbit.primaryId === primaryOrbit.secondaryId) {
+    return true;
+  }
+
+  // Orbit around an outer hierarchical component (e.g. Castor Ca -> Cb, Capella H -> L, Alcor -> Alcor B, Regulus B -> C, Gliese 570 B -> C)
+  if (orbit.primaryId !== primaryOrbit.primaryId) {
     return true;
   }
 
   // If primaryId is the main primary, but semiMajorAxis is much smaller than primary orbit
-  // (e.g. Castor Aa -> Ab with a = 0.11 AU vs 107 AU; Mizar Aa -> Ab with a = 0.32 AU vs 382 AU)
+  // (e.g. Castor Aa -> Ab with a = 0.11 AU vs 107 AU; Mizar Aa -> Ab with a = 0.32 AU vs 382 AU; Epsilon-1 Lyrae A -> B with a = 114 AU vs 10500 AU)
   if (orbit.semiMajorAxisAU < (primaryOrbit.semiMajorAxisAU || 1) * 0.25) {
     return true;
   }
@@ -384,51 +392,103 @@ export function calculateMultipleSystemStates(
     });
   }
 
-  // Handle hierarchical third/fourth components if present (e.g. Proxima Centauri, Castor C, Polaris B, Capella H & L)
+  // Handle hierarchical third/fourth components if present (e.g. Proxima Centauri, Castor C, Polaris B, Capella H & L, Epsilon-2, Regulus C)
   if (system.components.length > 2 && system.orbits.length > 1) {
-    for (let i = 1; i < system.orbits.length; i++) {
-      const outerOrbit = system.orbits[i];
-      const outerComp = system.components.find((c) => c.id === outerOrbit.secondaryId);
-      if (outerComp) {
-        // Distinguish sub-binaries (orbiting parent star) from wide hierarchical orbits (orbiting system barycenter)
-        const isSubBinary = isSubBinaryOrbit(outerOrbit, primaryOrbit) && Boolean(
-          outerOrbit.primaryId && states.has(outerOrbit.primaryId)
-        );
+    const unplacedOrbits = [...system.orbits.slice(1)];
+    let maxLoops = unplacedOrbits.length * 3;
 
-        // Harmonically tuned visual periods:
-        // Sub-binaries: 4 graceful revolutions per main binary cycle
-        // Wide outer companions: slow, majestic 2.2x main binary cycle
-        const visualPeriod = isSubBinary ? period / 4.0 : period * 2.2;
-        const outerM = ((simTimeYears / visualPeriod) * TWO_PI) % TWO_PI;
-        const outerE = solveKepler(outerM, outerOrbit.eccentricity);
+    while (unplacedOrbits.length > 0 && maxLoops > 0) {
+      maxLoops--;
+      let placedAny = false;
 
-        const outerA = outerOrbit.semiMajorAxisAU;
-        const outerScale = getOrbitVisualScale(outerOrbit, system, auToUnits);
-        const xOuter = outerA * (Math.cos(outerE) - outerOrbit.eccentricity);
-        const zOuter = outerA * Math.sqrt(1 - outerOrbit.eccentricity * outerOrbit.eccentricity) * Math.sin(outerE);
+      for (let i = 0; i < unplacedOrbits.length; i++) {
+        const outerOrbit = unplacedOrbits[i];
+        const isSubBinary = isSubBinaryOrbit(outerOrbit, primaryOrbit);
 
-        const relPos = rotatePerifocalTo3D(
-          xOuter * outerScale,
-          zOuter * outerScale,
-          outerOrbit.inclinationDeg,
-          outerOrbit.ascendingNodeDeg,
-          outerOrbit.argPeriastronDeg
-        );
+        // If it is a sub-binary that needs a parent star, wait until parent star is already placed in states!
+        if (isSubBinary && outerOrbit.primaryId && !states.has(outerOrbit.primaryId)) {
+          continue; // Defer until parent is placed
+        }
 
-        const parentState = isSubBinary ? states.get(outerOrbit.primaryId) : null;
-        const finalPos = parentState
-          ? parentState.position.clone().add(relPos)
-          : relPos;
+        const outerComp = system.components.find((c) => c.id === outerOrbit.secondaryId);
+        if (outerComp) {
+          // Harmonically tuned visual periods:
+          // Sub-binaries: 4 graceful revolutions per main binary cycle
+          // Wide outer companions: slow, majestic 2.2x main binary cycle
+          const visualPeriod = isSubBinary ? period / 4.0 : period * 2.2;
+          const outerM = ((simTimeYears / visualPeriod) * TWO_PI) % TWO_PI;
+          const outerE = solveKepler(outerM, outerOrbit.eccentricity);
 
-        states.set(outerComp.id, {
-          componentId: outerComp.id,
-          position: finalPos,
-          velocityKmS: isSubBinary ? 24.0 : 3.5,
-          distanceToBarycenterAU: finalPos.length() / Math.max(0.0001, outerScale),
-        });
+          const outerA = outerOrbit.semiMajorAxisAU;
+          const outerScale = getOrbitVisualScale(outerOrbit, system, auToUnits);
+          const xOuter = outerA * (Math.cos(outerE) - outerOrbit.eccentricity);
+          const zOuter = outerA * Math.sqrt(1 - outerOrbit.eccentricity * outerOrbit.eccentricity) * Math.sin(outerE);
+
+          const relPos = rotatePerifocalTo3D(
+            xOuter * outerScale,
+            zOuter * outerScale,
+            outerOrbit.inclinationDeg,
+            outerOrbit.ascendingNodeDeg,
+            outerOrbit.argPeriastronDeg
+          );
+
+          const parentState = (isSubBinary && outerOrbit.primaryId) ? states.get(outerOrbit.primaryId) : null;
+          const finalPos = parentState
+            ? parentState.position.clone().add(relPos)
+            : relPos;
+
+          states.set(outerComp.id, {
+            componentId: outerComp.id,
+            position: finalPos,
+            velocityKmS: isSubBinary ? 24.0 : 3.5,
+            distanceToBarycenterAU: finalPos.length() / Math.max(0.0001, outerScale),
+          });
+        }
+
+        unplacedOrbits.splice(i, 1);
+        placedAny = true;
+        break; // Restart loop over remaining
+      }
+
+      // Fallback if an orphaned orbit cannot find its parent
+      if (!placedAny && unplacedOrbits.length > 0) {
+        const fallbackOrbit = unplacedOrbits.shift()!;
+        const outerComp = system.components.find((c) => c.id === fallbackOrbit.secondaryId);
+        if (outerComp) {
+          const outerScale = getOrbitVisualScale(fallbackOrbit, system, auToUnits);
+          const outerA = fallbackOrbit.semiMajorAxisAU;
+          const relPos = rotatePerifocalTo3D(
+            outerA * outerScale,
+            0,
+            fallbackOrbit.inclinationDeg,
+            fallbackOrbit.ascendingNodeDeg,
+            fallbackOrbit.argPeriastronDeg
+          );
+          const parentState = fallbackOrbit.primaryId ? states.get(fallbackOrbit.primaryId) : null;
+          const finalPos = parentState ? parentState.position.clone().add(relPos) : relPos;
+          states.set(outerComp.id, {
+            componentId: outerComp.id,
+            position: finalPos,
+            velocityKmS: 12.0,
+            distanceToBarycenterAU: finalPos.length() / Math.max(0.0001, outerScale),
+          });
+        }
       }
     }
   }
+
+  // Safety fallback: ensure all stars in system.components have a valid entry in states
+  system.components.forEach((comp, idx) => {
+    if (!states.has(comp.id)) {
+      const fallbackOffset = (idx + 1) * 8.0;
+      states.set(comp.id, {
+        componentId: comp.id,
+        position: new THREE.Vector3(fallbackOffset, 0, 0),
+        velocityKmS: 10.0,
+        distanceToBarycenterAU: fallbackOffset / auToUnits,
+      });
+    }
+  });
 
   const phasePercent = ((M / TWO_PI) * 100);
   const periastronDistAU = aTotalAU * (1 - e);

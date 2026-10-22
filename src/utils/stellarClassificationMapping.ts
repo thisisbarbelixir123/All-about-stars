@@ -281,7 +281,7 @@ export function getStarSystemType(star: StarData): string {
     return 'X-Ray Binary';
   }
   if (
-    ['castor', 'castor-a', 'castor-aa', 'polaris', 'mizar', 'mizar-a', 'mizar-aa', 'alpha-centauri-a', 'alpha-centauri-b', 'proxima-centauri', 'alcyone', 'electra', 'maia', 'theta-1-orionis-c', 'theta1-orionis-c'].includes(star.id) ||
+    ['castor', 'castor-a', 'castor-aa', 'polaris', 'mizar', 'mizar-a', 'mizar-aa', 'alpha-centauri-a', 'alpha-centauri-b', 'proxima-centauri', 'alcyone', 'electra', 'maia', 'theta-1-orionis-c', 'theta-1-orionis-c1', 'theta-1-orionis-c2', 'theta-1-orionis-a', 'theta-1-orionis-a1', 'theta-1-orionis-a2', 'theta-1-orionis-a3', 'theta1-orionis-c'].includes(star.id) ||
     combined.includes('triple') ||
     combined.includes('quadruple') ||
     combined.includes('sextuple') ||
@@ -290,7 +290,7 @@ export function getStarSystemType(star: StarData): string {
     return 'Multiple Star System';
   }
   if (
-    ['alcyone', 'electra', 'maia', 'r136a1', 'melnick-42', 'bat99-98', 'vfts-682', 'vfts-352', 'theta-1-orionis-c', 'theta1-orionis-c'].includes(star.id) ||
+    ['alcyone', 'electra', 'maia', 'r136a1', 'melnick-42', 'bat99-98', 'vfts-682', 'vfts-352', 'theta-1-orionis-c', 'theta-1-orionis-c1', 'theta-1-orionis-a1', 'theta1-orionis-c'].includes(star.id) ||
     combined.includes('pleiades') ||
     combined.includes('star cluster') ||
     combined.includes('open cluster') ||
