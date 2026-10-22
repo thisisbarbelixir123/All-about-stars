@@ -29,6 +29,7 @@ import { KeyboardShortcutsHelpModal } from './components/KeyboardShortcutsHelpMo
 import { StellarSystemCatalog } from './components/StellarSystemCatalog';
 import { StellarSystemDossierModal } from './components/StellarSystemDossierModal';
 import { MultipleStarSystemData } from './data/multipleStarSystemsData';
+import { LoadingSprite } from './components/LoadingSprite';
 
 import { 
   Sparkles, 
@@ -65,6 +66,25 @@ import {
 export default function App() {
   // Homepage Overlay State - Open on startup by default
   const [isHomeOpen, setIsHomeOpen] = useState<boolean>(true);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
+
+  useEffect(() => {
+    const handleLoad = () => setAssetsLoaded(true);
+
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
+    // Safety fallback timeout
+    const timeout = setTimeout(handleLoad, 2000);
+
+    return () => {
+      window.removeEventListener('load', handleLoad);
+      clearTimeout(timeout);
+    };
+  }, []);
 
   // Integrated 3D Mode Overlays: Frontpage (What is a star?), Catalog, H-R Diagram, Classification Guide, Constellation Guide, Discovery
   const [activeOverlay, setActiveOverlay] = useState<'frontpage' | 'catalog' | 'stellar-systems' | 'hr-diagram' | 'guide' | 'constellations' | 'discovery' | 'nomenclature' | null>(null);
@@ -715,6 +735,9 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-[#02040a] text-slate-100 flex flex-col relative overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      {!assetsLoaded && <LoadingSprite />}
+      
+      <div className={`flex flex-col h-full w-full transition-opacity duration-700 ${assetsLoaded ? 'opacity-100' : 'opacity-0'}`}>
       {/* Deep Space Ambient Nebulae & Radial Glows */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-40 left-1/4 w-[650px] h-[650px] bg-cyan-900/10 rounded-full blur-[140px]" />
@@ -1487,6 +1510,7 @@ export default function App() {
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
       />
+    </div>
     </div>
   );
 }
