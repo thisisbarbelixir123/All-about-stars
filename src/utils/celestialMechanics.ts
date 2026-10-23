@@ -53,16 +53,17 @@ export const POLAR_CONSTELLATION_IDS = new Set([
   'apus', 'aps',
   'chamaeleon', 'cha',
   'mensa', 'men',
-  'hydrus', 'hyi',
-  'volans', 'vol'
+  'hydrus', 'hyi'
 ]);
 
 export const isPolarConstellation = (cId: string, decBounds: number[]): boolean => {
   const idClean = (cId || '').toLowerCase().trim();
+  // Ensure Ursa Major and other mid-latitude constellations never trigger polar mode
+  if (idClean === 'ursa-major' || idClean === 'uma') return false;
   if (POLAR_CONSTELLATION_IDS.has(idClean)) return true;
-  const maxDec = Math.max(...decBounds);
-  const minDec = Math.min(...decBounds);
-  return maxDec >= 68 || minDec <= -68;
+  if (!decBounds || decBounds.length === 0) return false;
+  const decCenter = (decBounds[0] + decBounds[1]) / 2;
+  return Math.abs(decCenter) >= 65;
 };
 
 /**
@@ -197,6 +198,47 @@ export const isStarInsideConstellation = (
   return false;
 };
 
+/**
+ * Robustly matches an IAU constellation against features in constellations.lines.json
+ */
+export const findConstellationLineFeature = (
+  lines: any[],
+  constellation: ConstellationInfo
+): any => {
+  if (!lines || !constellation) return null;
+  const abbr = (constellation.abbreviation || '').toLowerCase();
+  const name = (constellation.name || '').toLowerCase();
+  const cid = (constellation.id || '').toLowerCase();
+
+  return lines.find((f: any) => {
+    const fid = (f.id || '').toLowerCase();
+    const pid = (f.properties?.id || '').toLowerCase();
+    const pname = (f.properties?.name || '').toLowerCase();
+    return (
+      fid === abbr ||
+      pid === abbr ||
+      pname === name ||
+      pname === abbr ||
+      fid === cid ||
+      pid === cid
+    );
+  }) || null;
+};
+
+/**
+ * Extracts coordinate segments from a GeoJSON feature supporting both MultiLineString and LineString
+ */
+export const getConstellationLineSegments = (lineFeature: any): number[][][] => {
+  if (!lineFeature?.geometry) return [];
+  if (lineFeature.geometry.type === 'MultiLineString' && Array.isArray(lineFeature.geometry.coordinates)) {
+    return lineFeature.geometry.coordinates;
+  }
+  if (lineFeature.geometry.type === 'LineString' && Array.isArray(lineFeature.geometry.coordinates)) {
+    return [lineFeature.geometry.coordinates];
+  }
+  return [];
+};
+
 export const projectUniversalStereo = (
   constellation: ConstellationInfo,
   points: any[],
@@ -273,31 +315,70 @@ export const projectUniversalStereo = (
 
 /**
  * Snaps IAU line vertices to the exact center of catalog stars.
- * PRESERVED RULE: Exact 8.0 magnet radius to correctly snap stars like Skat in Aquarius.
+ * Uses a tight 3.2 magnet radius and collision prevention so distinct celestial coordinates
+ * cannot collapse into the exact same catalog star (restoring multi-star features like the Big Dipper bowl and Orion belt).
  */
 export const snapLineVerticesToCatalog = (
   mappedLineVertices: any[],
   mappedCatalog: any[],
-  magnetRadius = 8.0
+  magnetRadius = 3.2
 ): void => {
+  // Preserve original projection positions
   mappedLineVertices.forEach((vertex) => {
-    let bestMatch: any = null;
-    let maxBrightness = Infinity;
-    mappedCatalog.forEach((catStar: any) => {
-      const dist = Math.hypot(vertex.x - catStar.x, vertex.y - catStar.y);
-      if (dist < magnetRadius) {
-        if (catStar.apparentMagnitude < maxBrightness) {
-          maxBrightness = catStar.apparentMagnitude;
-          bestMatch = catStar;
-        }
+    if (vertex.origX === undefined) vertex.origX = vertex.x;
+    if (vertex.origY === undefined) vertex.origY = vertex.y;
+  });
+
+  // Build candidate pairs sorted by distance
+  const candidatePairs: Array<{ vIdx: number; catStar: any; dist: number }> = [];
+  mappedLineVertices.forEach((v, vIdx) => {
+    mappedCatalog.forEach((cs: any) => {
+      const d = Math.hypot(v.origX - cs.x, v.origY - cs.y);
+      if (d <= magnetRadius) {
+        candidatePairs.push({ vIdx, catStar: cs, dist: d });
       }
     });
-    if (bestMatch) {
-      vertex.x = bestMatch.x;
-      vertex.y = bestMatch.y;
-      vertex.isAssigned = true;
-    } else {
-      vertex.isAssigned = false;
+  });
+
+  candidatePairs.sort((a, b) => a.dist - b.dist);
+
+  const assignedVertices = new Set<number>();
+  const claimedStars = new Map<string, { rawLon?: number; rawLat?: number; origX: number; origY: number }>();
+
+  for (const pair of candidatePairs) {
+    if (assignedVertices.has(pair.vIdx)) continue;
+    const v = mappedLineVertices[pair.vIdx];
+    const existing = claimedStars.get(pair.catStar.id);
+
+    if (existing) {
+      // Allow only if the vertex represents the exact same coordinate (e.g. a closed polygon loop)
+      const isSameCoord =
+        v.rawLon !== undefined && existing.rawLon !== undefined
+          ? Math.hypot(existing.rawLon - v.rawLon, (existing.rawLat ?? 0) - (v.rawLat ?? 0)) < 1e-4
+          : Math.hypot(existing.origX - v.origX, existing.origY - v.origY) < 1e-3;
+
+      if (!isSameCoord) {
+        // Disallow two different JSON coordinates from snapping to the same star
+        continue;
+      }
+    }
+
+    v.x = pair.catStar.x;
+    v.y = pair.catStar.y;
+    v.isAssigned = true;
+    assignedVertices.add(pair.vIdx);
+    claimedStars.set(pair.catStar.id, {
+      rawLon: v.rawLon,
+      rawLat: v.rawLat,
+      origX: v.origX,
+      origY: v.origY
+    });
+  }
+
+  // Ensure unassigned vertices keep their original coordinates
+  mappedLineVertices.forEach((v, idx) => {
+    if (!assignedVertices.has(idx)) {
+      v.isAssigned = false;
     }
   });
 };

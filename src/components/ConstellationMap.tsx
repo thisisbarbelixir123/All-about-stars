@@ -19,7 +19,9 @@ import {
   isStarInsideConstellation,
   projectUniversalStereo,
   snapLineVerticesToCatalog,
-  getConstellationVisibleFigureStars
+  getConstellationVisibleFigureStars,
+  findConstellationLineFeature,
+  getConstellationLineSegments
 } from '../utils/celestialMechanics';
 
 export interface SkyMapOptions {
@@ -78,25 +80,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     }));
 
     // Robust, crash-proof case-insensitive JSON extraction
-    const lineFeature = (celestialData.lines || []).find((f: any) => {
-      const abbr = constellation.abbreviation.toLowerCase();
-      const name = constellation.name.toLowerCase();
-      const fid = (f.id || '').toLowerCase();
-      const pid = (f.properties?.id || '').toLowerCase();
-      const pname = (f.properties?.name || '').toLowerCase();
-      return fid === abbr || pid === abbr || pname === name || pname === abbr;
-    });
-
-    let multiLineCoords: number[][][] = [];
-    if (lineFeature?.geometry?.type === 'MultiLineString') {
-      multiLineCoords = lineFeature.geometry.coordinates;
-    } else if (lineFeature?.geometry?.type === 'LineString') {
-      multiLineCoords = [lineFeature.geometry.coordinates];
-    }
+    const lineFeature = findConstellationLineFeature(celestialData.lines, constellation);
+    const multiLineCoords = getConstellationLineSegments(lineFeature);
 
     const jsonStars = multiLineCoords.reduce((acc, val) => acc.concat(val), []).map((coord, idx) => {
       let r = coord[0]; if (r < 0) r += 360;
-      return { id: `json-${idx}`, ra: r / 15, dec: coord[1] };
+      return { id: `json-${idx}`, ra: r / 15, dec: coord[1], rawLon: coord[0], rawLat: coord[1] };
     });
 
     const { mappedPoints, poleSvg } = projectUniversalStereo(
@@ -111,8 +100,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const mappedLineVertices = mappedPoints.slice(0, jsonStars.length);
     const mappedCatalog = mappedPoints.slice(jsonStars.length);
 
-    // Snap JSON lines to the exact center of Catalog Stars (8.0 magnet radius)
-    snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 8.0);
+    // Snap JSON lines to the exact center of Catalog Stars (tight 3.2 magnet radius, anti-collision)
+    snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 3.2);
 
     const decBounds = extractBounds(constellation.borders?.decRange || '', false);
     const isPolar = isPolarConstellation(constellation.id, decBounds);
@@ -201,22 +190,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
   const { cLon, cLat, boundaryRings } = getConstellationSphericalCenter(constellation, celestialData.bounds);
 
-  const lineFeature = (celestialData.lines || []).find((f: any) =>
-    (f.id || '').toLowerCase() === constellation.abbreviation.toLowerCase() ||
-    (f.properties?.id || '').toLowerCase() === constellation.abbreviation.toLowerCase() ||
-    (f.properties?.name || '').toLowerCase() === constellation.name.toLowerCase()
-  );
-
-  let multiLineCoords: number[][][] = [];
-  if (lineFeature?.geometry?.type === 'MultiLineString') {
-    multiLineCoords = lineFeature.geometry.coordinates;
-  } else if (lineFeature?.geometry?.type === 'LineString') {
-    multiLineCoords = [lineFeature.geometry.coordinates];
-  }
+  const lineFeature = findConstellationLineFeature(celestialData.lines, constellation);
+  const multiLineCoords = getConstellationLineSegments(lineFeature);
 
   const jsonStars = multiLineCoords.reduce((acc, val) => acc.concat(val), []).map((coord, idx) => {
     let r = coord[0]; if (r < 0) r += 360;
-    return { id: `json-${idx}`, ra: r / 15, dec: coord[1] };
+    return { id: `json-${idx}`, ra: r / 15, dec: coord[1], rawLon: coord[0], rawLat: coord[1] };
   });
 
   const decBounds = extractBounds(border?.decRange || '', false);
@@ -351,8 +330,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   const mappedCatalog = mappedPoints.slice(offset, offset + cCatalogStars.length); offset += cCatalogStars.length;
   const mappedExtra = mappedPoints.slice(offset, offset + extraFigureStars.length);
 
-  // 🧲 VERTEX SNAPPING (Exact 8.0 magnet radius)
-  snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 8.0);
+  // 🧲 VERTEX SNAPPING (Tight 3.2 magnet radius, anti-collision)
+  snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 3.2);
 
   const mainBoundaryPathData = boundaryRingsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
   const boundaryCornerPoints = boundaryRingsSvg.flat();
@@ -656,25 +635,6 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           </g>
         )}
 
-        {/* Special Serpens Caput & Cauda divider if Serpens */}
-        {constellation.id === 'serpens' && (() => {
-          const ophObj = resolveConstellationByName('Ophiuchus');
-          return (
-            <g
-              className={onSelectNeighbor && ophObj ? 'cursor-pointer group/oph' : 'cursor-default group/oph'}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onSelectNeighbor && ophObj) onSelectNeighbor(ophObj);
-              }}
-            >
-              <title>Ophiuchus (Constellation dividing Serpens into Caput and Cauda) • Click to open Ophiuchus</title>
-              <rect x="37" y="42" width="26" height="16" rx="3.5" fill="#04091c" stroke="#38bdf8" strokeWidth="0.6" className="group-hover/oph:fill-cyan-950/90 group-hover/oph:stroke-cyan-300 transition-colors shadow-lg" />
-              <rect x="38.5" y="43.5" width="23" height="13" rx="2.5" fill="none" stroke="rgba(56, 189, 248, 0.25)" strokeWidth="0.3" className="pointer-events-none" />
-              <text x="50" y="49.2" textAnchor="middle" fill="#38bdf8" fontSize="3.4" fontFamily="monospace" fontWeight="bold" className="group-hover/oph:fill-cyan-200 transition-colors pointer-events-none select-none">Oph</text>
-              <text x="50" y="54.6" textAnchor="middle" fill="#94a3b8" fontSize="1.9" fontFamily="sans-serif" fontWeight="600" className="group-hover/oph:fill-white transition-colors pointer-events-none select-none">Ophiuchus ↗</text>
-            </g>
-          );
-        })()}
 
         {/* 6. Deep-Sky Objects from dsos.6.json */}
         {opts.showDeepSky && mappedDsos.map((dso: any) => (
