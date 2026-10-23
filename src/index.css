@@ -204,3 +204,8 @@
   animation: running-title-marquee var(--marquee-duration, 10s) linear infinite;
 }
 
+/* Safe area padding for mobile landscape */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
+}
+

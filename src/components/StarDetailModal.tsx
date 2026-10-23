@@ -293,7 +293,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none animate-in fade-in duration-200"
     >
       {/* Backdrop */}
       <div 
@@ -303,7 +303,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
       {/* Modal Container: Star Dossier (matching Constellation Dossier window size) */}
       <div 
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / Title Section */}
@@ -396,28 +396,26 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Content Body */}
-        <div className="flex-1 overflow-x-hidden overflow-y-auto p-2.5 sm:p-4 md:p-6 scrollbar-thin bg-transparent">
-          {/* Responsive Desktop 2-Column Split: 3D Stage occupies 1/2 of view on desktop, and wraps other components (info panels) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 items-start">
-            {/* Left Column / 1st Half: 3D Comparison Stage (occupies 1/2 view on desktop) + Desktop Superimposition Scale & Description */}
-            <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:sticky lg:top-0">
-              {/* Interactive 3D Dossier Stage: Size vs. Sun, Size vs. Earth & Solar System Architecture */}
-              <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} initialMode={initialMode} />
+        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
+        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
+          {/* Left Column: 3D dossier canvas container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
+          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-1/2 lg:h-auto overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 shrink-0">
+            {/* Interactive 3D Dossier Stage: Size vs. Sun, Size vs. Earth & Solar System Architecture */}
+            <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} initialMode={initialMode} />
 
-              {/* On desktop: Superimposition Scale sits directly under the 3D Stage in the 1/2 column */}
-              <div className="hidden lg:block">
-                {renderSuperimpositionScale()}
-              </div>
-
-              {/* On desktop: Scientific Description sits directly under Superimposition */}
-              <div className="hidden lg:block">
-                {renderDescription()}
-              </div>
+            {/* On landscape and desktop: Superimposition Scale sits directly under the 3D Stage in the 1/2 column */}
+            <div className="hidden landscape:block lg:block">
+              {renderSuperimpositionScale()}
             </div>
 
-            {/* Right Column / 2nd Half: Info Panels (Key Metrics, Exoplanets, Conjoined Binary, Fusion, Evolution, Facts) */}
-            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+            {/* On landscape and desktop: Scientific Description sits directly under Superimposition */}
+            <div className="hidden landscape:block lg:block">
+              {renderDescription()}
+            </div>
+          </div>
+
+          {/* Right Column: Data/Telemetry panel with independent scrolling */}
+          <div className="w-full landscape:w-1/2 lg:w-1/2 landscape:overflow-y-auto pb-safe overflow-y-auto p-2.5 sm:p-4 md:p-6 scrollbar-thin space-y-3 sm:space-y-4 md:space-y-5 flex-1">
               {/* Key Metrics Grid: 5 Core Astrophysical Properties */}
               <div 
                 ref={gridRef}
@@ -816,8 +814,8 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             )}
           </div>
 
-              {/* On mobile: Solar System Superimposition Scale appears right after Key Metrics */}
-              <div className="block lg:hidden">
+              {/* On mobile portrait: Solar System Superimposition Scale appears right after Key Metrics */}
+              <div className="block landscape:hidden lg:hidden">
                 {renderSuperimpositionScale()}
               </div>
 
@@ -1153,13 +1151,13 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             </ul>
           </div>
 
-              {/* On mobile: Description appears at the bottom of the dossier */}
-              <div className="block lg:hidden">
+              {/* On mobile portrait: Description appears at the bottom of the dossier */}
+              <div className="block landscape:hidden lg:hidden">
                 {renderDescription()}
               </div>
 
-              {/* Mobile Bottom Close Action */}
-              <div className="pt-2 pb-1 sm:hidden flex justify-center">
+              {/* Mobile Portrait Bottom Close Action */}
+              <div className="pt-2 pb-1 sm:hidden landscape:hidden flex justify-center">
                 <button
                   onClick={onClose}
                   className="w-full py-2.5 px-4 rounded-xl bg-[#081026] hover:bg-[#0e1b3d] text-cyan-300 border border-cyan-500/30 text-xs font-mono font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
@@ -1169,7 +1167,6 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                 </button>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>

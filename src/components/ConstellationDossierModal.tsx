@@ -81,7 +81,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
   const isPolar = isPolarConstellation(constellation.id, decBounds);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
@@ -91,7 +91,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
       {/* Modal Container: Constellation Dossier */}
       <div
         ref={dossierScrollRef}
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => {
           e.stopPropagation();
           setActiveStarLabelId(null);
@@ -134,12 +134,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
           </div>
         </div>
 
-        {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 scrollbar-thin flex flex-col gap-4 sm:gap-6">
-          {/* Top Section: Visualizer & Astronomical Boundaries */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Constellation Exact Boundary & Neighbors Canvas */}
-            <div className="lg:col-span-7 flex flex-col gap-3">
+        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
+        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
+          {/* Left Column: Astrometric Map Container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
+          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-7/12 lg:h-auto overflow-y-auto scrollbar-thin p-3 sm:p-5 flex flex-col gap-3 shrink-0">
               {/* Constellation Dossier Viewport Controls Toolbar */}
               <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono">
                 <div className="flex items-center gap-1.5 px-2 text-cyan-400 font-bold">
@@ -205,7 +203,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
               {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport) */}
               <div
-                className="w-full aspect-square max-h-[460px] sm:max-h-[560px] md:max-h-[620px] lg:max-h-[680px] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+                className="w-full aspect-square max-h-[460px] sm:max-h-[560px] md:max-h-[620px] lg:max-h-[680px] landscape:max-h-[calc(100vh-140px)] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
                 onClick={() => setActiveStarLabelId(null)}
               >
                 {/* Astrometric Metadata Header Badge */}
@@ -257,8 +255,8 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               </div>
             </div>
 
-            {/* Right Column: Sky Borders, Metrics & Principal Star */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
+            {/* Right Column: Data/Telemetry panel with independent scrolling */}
+            <div className="w-full landscape:w-1/2 lg:w-5/12 flex-1 overflow-y-auto landscape:overflow-y-auto pb-safe p-3 sm:p-6 lg:p-8 scrollbar-thin flex flex-col gap-4 sm:gap-6">
               {/* Sky Borders Section */}
               <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/25 flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-2 pb-2 border-b border-cyan-900/40">
@@ -479,27 +477,26 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                   </div>
                 );
               })()}
-            </div>
-          </div>
 
-          {/* Bottom Section: Description & Mythology */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-            <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
-              <strong className="text-cyan-300 block mb-1.5 font-bold flex items-center gap-1.5">
-                <Info className="w-4 h-4 text-cyan-400" />
-                <span>Astronomical Overview:</span>
-              </strong>
-              <p className="text-slate-300 leading-relaxed">{constellation.description}</p>
-            </div>
+              {/* Bottom Section: Description & Mythology */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
+                  <strong className="text-cyan-300 block mb-1.5 font-bold flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-cyan-400" />
+                    <span>Astronomical Overview:</span>
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed">{constellation.description}</p>
+                </div>
 
-            <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
-              <strong className="text-amber-300 block mb-1.5 font-bold flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>Mythology & Classical Lore:</span>
-              </strong>
-              <p className="text-slate-300 leading-relaxed">{constellation.mythology}</p>
+                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
+                  <strong className="text-amber-300 block mb-1.5 font-bold flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Mythology & Classical Lore:</span>
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed">{constellation.mythology}</p>
+                </div>
+              </div>
             </div>
-          </div>
         </div>
       </div>
     </div>

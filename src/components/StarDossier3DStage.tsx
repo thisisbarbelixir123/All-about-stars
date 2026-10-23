@@ -1801,7 +1801,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
       <div 
         className={`order-1 md:order-2 relative w-full overflow-hidden select-none cursor-grab active:cursor-grabbing ${
           isExpanded ? 'h-[360px] sm:h-[440px] md:h-[480px] lg:h-[460px]' : 'h-[240px] xs:h-[270px] sm:h-[310px] md:h-[340px] lg:h-[340px] xl:h-[360px]'
-        }`}
+        } landscape:h-[calc(100vh-140px)]`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

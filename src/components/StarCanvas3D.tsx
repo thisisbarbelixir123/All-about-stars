@@ -38,6 +38,7 @@ import {
   Sun,
   Search,
   Orbit,
+  MoveHorizontal,
   Volume2,
   VolumeX,
   Trash2
@@ -50,10 +51,12 @@ import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
 import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
 
+export type AllStarsLayoutMode = 'spiral' | 'grid' | 'linear';
+
 const TOUR_DURATION_MAP: Record<TourLength, number> = {
-  short: 2500,
-  medium: 5000,
-  long: 8000,
+  short: 1000,
+  medium: 2000,
+  long: 4000,
 };
 
 interface StarCanvas3DProps {
@@ -265,6 +268,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const [isTourPaceMenuOpen, setIsTourPaceMenuOpen] = useState(false);
   const tourPaceMenuRef = useRef<HTMLDivElement>(null);
   const mobileTourPaceRef = useRef<HTMLDivElement>(null);
+  const [isLayoutMenuOpen, setIsLayoutMenuOpen] = useState(false);
+  const layoutMenuRef = useRef<HTMLDivElement>(null);
+  const mobileLayoutMenuRef = useRef<HTMLDivElement>(null);
   const [isTogglesMenuOpen, setIsTogglesMenuOpen] = useState(false);
   const togglesMenuRef = useRef<HTMLDivElement>(null);
   const mobileTogglesMenuRef = useRef<HTMLDivElement>(null);
@@ -284,39 +290,56 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   // Complete Catalog identification: exclusive to the complete catalog preset or 500+ stars database
   const isAllStarsPreset = activePresetId === 'all-stars-catalog' || (stars && stars.length >= 500);
 
-  // Complete Catalog (All Stars Preset): default spiral layout on all devices (mobile, tablet, desktop) when sorted by size; grid mode for non-size or toggled
-  const [allStarsLayoutMode, setAllStarsLayoutMode] = useState<'normal' | 'spiral'>(() => {
+  // Complete Catalog (All Stars Preset): default spiral layout on all devices when sorted by size; grid mode for non-size or toggled; linear mode available as selection
+  const [allStarsLayoutMode, setAllStarsLayoutMode] = useState<AllStarsLayoutMode>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('cosmic_all_stars_layout_mode');
-      if (saved === 'normal' || saved === 'spiral') return saved;
+      if (saved === 'spiral' || saved === 'grid' || saved === 'linear') return saved as AllStarsLayoutMode;
+      if (saved === 'normal') return 'grid';
     }
     return 'spiral';
   });
 
-  const handleToggleLayoutMode = useCallback(() => {
+  // Effective layout mode: when sortKey !== 'size', spiral is not allowed, so default to grid (or linear if user explicitly chose linear)
+  const effectiveLayoutMode: AllStarsLayoutMode = useMemo(() => {
     if (sortKey !== 'size') {
-      // Non-size sorting cannot be displayed in spirals (prevents star models merging).
-      // Toggling layout will switch sort to 'size' so spiral mode can be engaged!
-      if (onSortChange) {
-        onSortChange('size');
-        setAllStarsLayoutMode('spiral');
-        soundEffects.play('toggleOn');
-      }
-      return;
+      return allStarsLayoutMode === 'linear' ? 'linear' : 'grid';
     }
-    setAllStarsLayoutMode((prev) => {
-      const next = prev === 'spiral' ? 'normal' : 'spiral';
-      soundEffects.play(next === 'spiral' ? 'toggleOn' : 'toggleOff');
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('cosmic_all_stars_layout_mode', next);
-        } catch {
-          // ignore
-        }
+    return allStarsLayoutMode;
+  }, [sortKey, allStarsLayoutMode]);
+
+  const availableLayoutModes: AllStarsLayoutMode[] = useMemo(() => {
+    return sortKey === 'size' ? ['spiral', 'grid', 'linear'] : ['grid', 'linear'];
+  }, [sortKey]);
+
+  const handleToggleLayoutMode = useCallback(() => {
+    const modes = availableLayoutModes;
+    const currentIdx = modes.indexOf(effectiveLayoutMode);
+    const nextMode = modes[(currentIdx + 1) % modes.length];
+
+    setAllStarsLayoutMode(nextMode);
+    soundEffects.play('toggleOn');
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('cosmic_all_stars_layout_mode', nextMode);
+      } catch {
+        // ignore
       }
-      return next;
-    });
-  }, [sortKey, onSortChange]);
+    }
+  }, [availableLayoutModes, effectiveLayoutMode]);
+
+  const handleSelectLayoutMode = useCallback((mode: AllStarsLayoutMode) => {
+    setAllStarsLayoutMode(mode);
+    setIsLayoutMenuOpen(false);
+    soundEffects.play('toggleOn');
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('cosmic_all_stars_layout_mode', mode);
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (isEncyclopediaMenuOpen && encyclopediaMenuRef.current) {
@@ -353,6 +376,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         (!mobileTourPaceRef.current || !mobileTourPaceRef.current.contains(target))
       ) {
         setIsTourPaceMenuOpen(false);
+      }
+      if (
+        layoutMenuRef.current && !layoutMenuRef.current.contains(target) &&
+        (!mobileLayoutMenuRef.current || !mobileLayoutMenuRef.current.contains(target))
+      ) {
+        setIsLayoutMenuOpen(false);
       }
       if (
         togglesMenuRef.current && !togglesMenuRef.current.contains(target) &&
@@ -523,16 +552,19 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     return list;
   }, [stars, sortKey, sortDirection]);
 
-  // Spiral mode is the default layout across all devices (mobile, tablet, desktop) for the complete catalog.
-  // Mobile size restrictions are no longer in place: users on all platforms can sort by any metric freely.
-  // Spiral mode is the default layout across all devices (mobile, tablet, desktop) for the complete catalog when sorted by size.
+  const prevSortKeyForLayoutRef = useRef(sortKey);
   useEffect(() => {
-    if (isAllStarsPreset && sortKey === 'size') {
-      if (allStarsLayoutMode !== 'spiral') {
-        setAllStarsLayoutMode('spiral');
+    if (prevSortKeyForLayoutRef.current !== sortKey) {
+      const prevKey = prevSortKeyForLayoutRef.current;
+      prevSortKeyForLayoutRef.current = sortKey;
+      // Default to spiral when entering size sort if not previously linear or grid
+      if (isAllStarsPreset && sortKey === 'size' && prevKey !== 'size') {
+        if (allStarsLayoutMode === 'grid') {
+          setAllStarsLayoutMode('spiral');
+        }
       }
     }
-  }, [isAllStarsPreset, sortKey]);
+  }, [isAllStarsPreset, sortKey, allStarsLayoutMode]);
 
   // Formatted metric string based on current sortKey
   const getStarMetricFormatted = useCallback((star: StarData) => {
@@ -622,9 +654,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const isSizeSort = sortKey === 'size';
 
     // Spiral mode is default on all devices (mobile, tablet, desktop) for complete catalog ONLY when sorted by size.
-    // On other sorting methods (other than size) in the complete catalog, it is NOT displayed in spirals
-    // (which would cause star models sitting very close and merged); instead, use the multi-row grids adjusted by total star diameter in each grid.
-    const useSpiral = isAllStarsPreset && isSizeSort && allStarsLayoutMode === 'spiral';
+    // On other sorting methods (other than size) in the complete catalog, it is NOT displayed in spirals;
+    // instead, grid is defaulted, and linear is available across all comparison modes.
+    const useSpiral = isAllStarsPreset && isSizeSort && effectiveLayoutMode === 'spiral';
+    const useGrid = isAllStarsPreset && effectiveLayoutMode === 'grid';
 
     if (useSpiral) {
       if (isDescending) {
@@ -721,7 +754,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           };
         });
       }
-    } else if (isAllStarsPreset) {
+    } else if (useGrid) {
       // Multi-row grids adjusted by total star diameter in each grid
       // Exclusively active in Complete Catalog mode outside of size sorting (or when toggled to grid).
       // All stars are lined-up linearly; when the accumulated diameter exceeds 20,000 solar diameters, it switches into a brand new row.
@@ -854,7 +887,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       let minD = Infinity;
 
       // In spiral or multi-row grid mode, check neighboring stars across spatial coordinates
-      const searchRadius = useSpiral ? Math.min(sortedStars.length, 120) : (isAllStarsPreset ? Math.min(sortedStars.length, 60) : 5);
+      const searchRadius = useSpiral ? Math.min(sortedStars.length, 120) : (useGrid ? Math.min(sortedStars.length, 60) : 5);
       const startIdx = Math.max(0, idx - searchRadius);
       const endIdx = Math.min(sortedStars.length - 1, idx + searchRadius);
 
@@ -871,7 +904,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     });
 
     return scales;
-  }, [sortedStars, getTruePhysicalSolar, activePresetId, allStarsLayoutMode, checkIsMobile, sortKey, sortDirection]);
+  }, [sortedStars, getTruePhysicalSolar, activePresetId, effectiveLayoutMode, checkIsMobile, sortKey, sortDirection]);
 
   // Main Three.js Initialization & Scene Setup
   useEffect(() => {
@@ -996,10 +1029,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   // A calibrated exposure prevents over-saturation/whitening while preserving rich colors and dark space contrast.
   useEffect(() => {
     if (rendererRef.current) {
-      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && effectiveLayoutMode === 'spiral';
       rendererRef.current.toneMappingExposure = isSpiral ? 1.15 : 1.25;
     }
-  }, [isAllStarsPreset, sortKey, allStarsLayoutMode]);
+  }, [isAllStarsPreset, sortKey, effectiveLayoutMode]);
 
   // Clear hovered star when preset or stars change to ensure zero stale hover state
   useEffect(() => {
@@ -1180,7 +1213,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
       const spectralSubclass = subclass;
 
-      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && effectiveLayoutMode === 'spiral';
       // Compute visual density factor based on count of rendered stars and layout mode:
       // In spiral mode, stars are packed tightly in curved logarithmic arms, so densityFactor is 1.0.
       // In standard grid / comparison modes, density factor smoothly scales with star count.
@@ -1373,7 +1406,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const portraitFactor = aspect < 1.0 ? Math.max(1.0, 0.95 / aspect) : 1.0;
 
     const isSizeSort = sortKey === 'size';
-    const isSpiralMode = isAllStarsPreset && isSizeSort && allStarsLayoutMode === 'spiral';
+    const isSpiralMode = isAllStarsPreset && isSizeSort && effectiveLayoutMode === 'spiral';
 
     // In spiral mode, selecting a star only zooms in to focus on the star without changing the POV (camera angle)
     const framingAngle = isSpiralMode
@@ -1394,7 +1427,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       distance: dist,
       angle: framingAngle,
     };
-  }, [starScales, checkIsMobile, getDefaultCameraAngle, activePresetId, sortedStars, allStarsLayoutMode, sortKey, sortDirection]);
+  }, [starScales, checkIsMobile, getDefaultCameraAngle, activePresetId, sortedStars, effectiveLayoutMode, sortKey, sortDirection]);
 
   // Check if a transition between two stars represents a row change:
   // - In Complete Catalog grid mode: switching across distinct diameter-budget rows
@@ -1412,7 +1445,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         (prevId === firstId && nextId === lastId) ||
         (prevId === lastId && nextId === firstId);
 
-      const isSpiral = isAllStarsPreset && sortKey === 'size' && allStarsLayoutMode === 'spiral';
+      const isSpiral = isAllStarsPreset && sortKey === 'size' && effectiveLayoutMode === 'spiral';
       if (isSpiral) {
         return isFirstLastSwitch;
       }
@@ -1535,7 +1568,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
       const isSizeSort = sortKey === 'size';
       const isDescending = sortDirection === 'desc';
-      const isSpiralActive = isAllStarsPreset && isSizeSort && allStarsLayoutMode === 'spiral';
+      const isSpiralActive = isAllStarsPreset && isSizeSort && effectiveLayoutMode === 'spiral';
 
       if (isSpiralActive && sortedStars.length > 0) {
         // In descending spiral mode: largest is at center, but camera focus is directed to the smallest star in the catalog
@@ -2224,7 +2257,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
     const isSizeSort = sortKey === 'size';
     const isDescending = sortDirection === 'desc';
-    const isSpiralActive = isAllStarsPreset && isSizeSort && allStarsLayoutMode === 'spiral';
+    const isSpiralActive = isAllStarsPreset && isSizeSort && effectiveLayoutMode === 'spiral';
 
     if (isSpiralActive && sortedStars.length > 0) {
       // In descending spiral mode: largest is at center, but camera is focused to the smallest star in the catalog
@@ -2255,7 +2288,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     cameraAngleRef.current = { theta: 0, phi: Math.PI / 3.4 };
     const isSizeSort = sortKey === 'size';
     const isDescending = sortDirection === 'desc';
-    const isSpiralActive = isAllStarsPreset && isSizeSort && allStarsLayoutMode === 'spiral';
+    const isSpiralActive = isAllStarsPreset && isSizeSort && effectiveLayoutMode === 'spiral';
 
     if (isSpiralActive && sortedStars.length > 0) {
       const smallestStar = isDescending ? sortedStars[sortedStars.length - 1] : sortedStars[0];
@@ -2536,44 +2569,111 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>Fit All</span>
             </button>
 
-            {/* All-Stars Layout Mode Toggle (Spiral vs Normal) - Available on all devices */}
+            {/* All-Stars Layout Mode Selection Menu doubling as a Toggle */}
             {isAllStarsPreset && (
-              <button
-                id="btn-toggle-spiral-normal"
-                onClick={handleToggleLayoutMode}
-                title={
-                  sortKey !== 'size'
-                    ? `Non-size sort (${sortKey}): Displayed in Multi-Row Grid adjusted by total star diameter to prevent models merging. Click to switch to Size sort & Spiral mode (L)`
-                    : `All Stars Preset: ${allStarsLayoutMode === 'spiral' ? 'Spiral Mode (Default/Active)' : 'Multi-Row Grid (Active)'}. Click to toggle layout mode (L)`
-                }
-                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95 ${
-                  sortKey !== 'size'
-                    ? 'bg-cyan-950/80 border-cyan-400/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                    : allStarsLayoutMode === 'spiral'
+              <div className="relative pointer-events-auto" ref={layoutMenuRef}>
+                <div className={`flex items-center rounded-lg border text-xs font-mono font-semibold transition-all shadow-sm ${
+                  effectiveLayoutMode === 'spiral'
                     ? 'bg-purple-950/80 border-purple-500/50 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
-                    : 'bg-slate-800/80 border-slate-600 text-slate-200 hover:text-white'
-                }`}
-              >
-                {sortKey !== 'size' ? (
-                  <Grid className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                ) : (
-                  <Orbit className={`w-3.5 h-3.5 shrink-0 ${allStarsLayoutMode === 'spiral' ? 'text-purple-400 animate-spin-slow' : 'text-slate-400'}`} />
+                    : effectiveLayoutMode === 'grid'
+                    ? 'bg-cyan-950/80 border-cyan-400/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                    : 'bg-emerald-950/80 border-emerald-400/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                }`}>
+                  {/* Primary Toggle Action (clicking advances to next layout mode) */}
+                  <button
+                    id="btn-toggle-spiral-normal"
+                    onClick={handleToggleLayoutMode}
+                    title={
+                      sortKey !== 'size'
+                        ? `Catalog Layout: ${effectiveLayoutMode === 'grid' ? 'Diameter Grid' : 'Linear Row'}. Click to toggle layout mode (L)`
+                        : `Catalog Layout: ${effectiveLayoutMode === 'spiral' ? 'Spiral Mode (Default)' : effectiveLayoutMode === 'grid' ? 'Diameter Grid' : 'Linear Row'}. Click to toggle layout mode (L)`
+                    }
+                    className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-l-lg select-none"
+                  >
+                    {effectiveLayoutMode === 'spiral' ? (
+                      <Orbit className="w-3.5 h-3.5 shrink-0 text-purple-400 animate-spin-slow" />
+                    ) : effectiveLayoutMode === 'grid' ? (
+                      <Grid className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                    ) : (
+                      <MoveHorizontal className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                    )}
+                    <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>
+                      {effectiveLayoutMode === 'spiral'
+                        ? 'Spiral Mode'
+                        : effectiveLayoutMode === 'grid'
+                        ? 'Diameter Grid'
+                        : 'Linear Row'}
+                    </span>
+                    <span className={isTabletDevice ? 'inline' : 'inline lg:hidden'}>
+                      {effectiveLayoutMode === 'spiral'
+                        ? 'Spiral'
+                        : effectiveLayoutMode === 'grid'
+                        ? 'Grid'
+                        : 'Linear'}
+                    </span>
+                  </button>
+
+                  <div className="w-[1px] h-4 bg-white/20" />
+
+                  {/* Dropdown Menu Trigger */}
+                  <button
+                    id="btn-layout-menu-trigger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsLayoutMenuOpen((prev) => !prev);
+                    }}
+                    title="Select Layout Mode (Spiral / Grid / Linear)"
+                    className="px-1.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-r-lg"
+                  >
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isLayoutMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+
+                {/* Selection Dropdown */}
+                {isLayoutMenuOpen && (
+                  <div
+                    id="menu-layout-mode-dropdown"
+                    className="absolute left-0 top-full mt-2 w-48 bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl font-mono text-xs flex flex-col gap-1"
+                  >
+                    <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1 mb-1">
+                      Catalog Layout
+                    </div>
+                    {availableLayoutModes.map((mode) => {
+                      const isActive = effectiveLayoutMode === mode;
+                      return (
+                        <button
+                          key={mode}
+                          id={`btn-layout-option-${mode}`}
+                          onClick={() => handleSelectLayoutMode(mode)}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                            isActive
+                              ? mode === 'spiral'
+                                ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
+                                : mode === 'grid'
+                                ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30'
+                                : 'bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-500/30'
+                              : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            {mode === 'spiral' ? (
+                              <Orbit className={`w-3.5 h-3.5 ${isActive ? 'text-purple-400' : 'text-slate-400'}`} />
+                            ) : mode === 'grid' ? (
+                              <Grid className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                            ) : (
+                              <MoveHorizontal className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
+                            )}
+                            <span>
+                              {mode === 'spiral' ? 'Spiral Mode' : mode === 'grid' ? 'Diameter Grid' : 'Linear Mode'}
+                            </span>
+                          </span>
+                          {isActive && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
-                <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>
-                  {sortKey !== 'size'
-                    ? 'Diameter Grid'
-                    : allStarsLayoutMode === 'spiral'
-                    ? 'Spiral Mode'
-                    : 'Multi-Row Grid'}
-                </span>
-                <span className={isTabletDevice ? 'inline' : 'inline lg:hidden'}>
-                  {sortKey !== 'size'
-                    ? 'Grid'
-                    : allStarsLayoutMode === 'spiral'
-                    ? 'Spiral'
-                    : 'Grid'}
-                </span>
-              </button>
+              </div>
             )}
 
             <div className="h-4 w-[1px] bg-cyan-500/20 mx-0.5" />
@@ -2651,31 +2751,49 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   </button>
 
                   {isAllStarsPreset && (
-                    <button
-                      id="btn-overlay-toggle-layout"
-                      onClick={handleToggleLayoutMode}
-                      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                        sortKey !== 'size'
-                          ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30'
-                          : allStarsLayoutMode === 'spiral'
-                          ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {sortKey !== 'size' ? (
-                          <Grid className="w-3.5 h-3.5 text-cyan-400" />
-                        ) : (
-                          <Orbit className={`w-3.5 h-3.5 ${allStarsLayoutMode === 'spiral' ? 'text-purple-400' : 'text-slate-400'}`} />
-                        )}
-                        <span>{sortKey !== 'size' ? 'Diameter Grid' : 'Spiral Layout'}</span>
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-slate-400">
-                          {sortKey !== 'size' ? 'Grid' : allStarsLayoutMode === 'spiral' ? 'Spiral' : 'Grid'}
-                        </span>
+                    <div className="border-t border-cyan-500/20 pt-1 mt-1">
+                      <div className="px-2 py-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Catalog Layout
                       </div>
-                    </button>
+                      <div className="flex flex-col gap-1 mt-1">
+                        {availableLayoutModes.map((mode) => {
+                          const isActive = effectiveLayoutMode === mode;
+                          return (
+                            <button
+                              key={mode}
+                              id={`btn-overlay-layout-${mode}`}
+                              onClick={() => {
+                                handleSelectLayoutMode(mode);
+                                setIsTogglesMenuOpen(false);
+                              }}
+                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                                isActive
+                                  ? mode === 'spiral'
+                                    ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
+                                    : mode === 'grid'
+                                    ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30'
+                                    : 'bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-500/30'
+                                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                {mode === 'spiral' ? (
+                                  <Orbit className={`w-3.5 h-3.5 ${isActive ? 'text-purple-400' : 'text-slate-400'}`} />
+                                ) : mode === 'grid' ? (
+                                  <Grid className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                                ) : (
+                                  <MoveHorizontal className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
+                                )}
+                                <span>
+                                  {mode === 'spiral' ? 'Spiral Mode' : mode === 'grid' ? 'Diameter Grid' : 'Linear Mode'}
+                                </span>
+                              </span>
+                              {isActive && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -3320,33 +3438,83 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                           {sortDirection === 'asc' ? '↑' : '↓'}
                         </button>
 
-                        {/* Mobile Layout Mode Toggle in Complete Catalog */}
+                        {/* Mobile Layout Mode Selection Menu doubling as Toggle */}
                         {isAllStarsPreset && (
-                          <button
-                            id="btn-mobile-toggle-spiral"
-                            onClick={handleToggleLayoutMode}
-                            title={
-                              sortKey !== 'size'
-                                ? `Non-size sort: Multi-Row Grid adjusted by total star diameter. Tap to switch to Size sort & Spiral.`
-                                : `Layout Mode: ${allStarsLayoutMode === 'spiral' ? 'Spiral (Default)' : 'Multi-Row Grid'}`
-                            }
-                            className={`flex items-center gap-1 px-2 py-1.5 rounded-xl backdrop-blur-xl border text-xs font-mono font-semibold active:scale-95 cursor-pointer ${
-                              sortKey !== 'size'
-                                ? 'bg-cyan-950/90 border-cyan-400/50 text-cyan-300'
-                                : allStarsLayoutMode === 'spiral'
+                          <div className="relative" ref={mobileLayoutMenuRef}>
+                            <div className={`flex items-center rounded-xl backdrop-blur-xl border text-xs font-mono font-semibold active:scale-95 cursor-pointer shadow-sm ${
+                              effectiveLayoutMode === 'spiral'
                                 ? 'bg-purple-950/90 border-purple-500/50 text-purple-300'
-                                : 'bg-[#040816]/95 border-cyan-500/35 text-slate-300'
-                            }`}
-                          >
-                            {sortKey !== 'size' ? (
-                              <Grid className="w-3.5 h-3.5 text-cyan-400" />
-                            ) : (
-                              <Orbit className={`w-3.5 h-3.5 ${allStarsLayoutMode === 'spiral' ? 'text-purple-400 animate-spin-slow' : 'text-slate-400'}`} />
+                                : effectiveLayoutMode === 'grid'
+                                ? 'bg-cyan-950/90 border-cyan-400/50 text-cyan-300'
+                                : 'bg-emerald-950/90 border-emerald-400/50 text-emerald-300'
+                            }`}>
+                              <button
+                                id="btn-mobile-toggle-spiral"
+                                onClick={handleToggleLayoutMode}
+                                title={`Tap to cycle layout mode (${availableLayoutModes.join(' → ')})`}
+                                className="flex items-center gap-1 px-2 py-1.5 rounded-l-xl"
+                              >
+                                {effectiveLayoutMode === 'spiral' ? (
+                                  <Orbit className="w-3.5 h-3.5 text-purple-400 animate-spin-slow" />
+                                ) : effectiveLayoutMode === 'grid' ? (
+                                  <Grid className="w-3.5 h-3.5 text-cyan-400" />
+                                ) : (
+                                  <MoveHorizontal className="w-3.5 h-3.5 text-emerald-400" />
+                                )}
+                                <span className="text-[10px] capitalize">
+                                  {effectiveLayoutMode}
+                                </span>
+                              </button>
+                              <button
+                                id="btn-mobile-layout-menu-arrow"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsLayoutMenuOpen((prev) => !prev);
+                                }}
+                                className="px-1 py-1.5 rounded-r-xl border-l border-white/10 hover:bg-white/10 transition-colors"
+                              >
+                                <ChevronDown className={`w-3 h-3 transition-transform ${isLayoutMenuOpen ? 'rotate-180' : ''}`} />
+                              </button>
+                            </div>
+
+                            {isLayoutMenuOpen && (
+                              <div className="absolute right-0 top-full mt-2 w-44 bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-2xl p-1.5 z-50 backdrop-blur-2xl font-mono text-xs flex flex-col gap-1">
+                                <div className="text-[10px] text-slate-400 uppercase font-bold px-2 py-0.5 border-b border-cyan-500/20">
+                                  Catalog Layout
+                                </div>
+                                {availableLayoutModes.map((mode) => {
+                                  const isActive = effectiveLayoutMode === mode;
+                                  return (
+                                    <button
+                                      key={mode}
+                                      onClick={() => handleSelectLayoutMode(mode)}
+                                      className={`flex items-center justify-between px-2 py-1.5 rounded text-left capitalize cursor-pointer transition-colors ${
+                                        isActive
+                                          ? mode === 'spiral'
+                                            ? 'text-purple-300 font-bold bg-purple-950/80 border border-purple-500/30'
+                                            : mode === 'grid'
+                                            ? 'text-cyan-300 font-bold bg-cyan-950/80 border border-cyan-500/30'
+                                            : 'text-emerald-300 font-bold bg-emerald-950/80 border border-emerald-500/30'
+                                          : 'text-slate-300 hover:bg-white/5'
+                                      }`}
+                                    >
+                                      <span className="flex items-center gap-1.5">
+                                        {mode === 'spiral' ? (
+                                          <Orbit className="w-3 h-3 text-purple-400" />
+                                        ) : mode === 'grid' ? (
+                                          <Grid className="w-3 h-3 text-cyan-400" />
+                                        ) : (
+                                          <MoveHorizontal className="w-3 h-3 text-emerald-400" />
+                                        )}
+                                        <span>{mode}</span>
+                                      </span>
+                                      {isActive && <Check className="w-3 h-3 text-cyan-400 shrink-0" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             )}
-                            <span className="text-[10px]">
-                              {sortKey !== 'size' ? 'Grid' : allStarsLayoutMode === 'spiral' ? 'Spiral' : 'Grid'}
-                            </span>
-                          </button>
+                          </div>
                         )}
                       </div>
                     )}

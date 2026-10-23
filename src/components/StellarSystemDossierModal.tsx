@@ -103,7 +103,7 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 pointer-events-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none animate-in fade-in duration-200">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/85 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
@@ -112,11 +112,11 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
 
       {/* Modal Container: Stellar System Dossier Window */}
       <div 
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-purple-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-purple-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Section */}
-        <div className="relative px-3 sm:px-6 py-3 shrink-0 border-b border-purple-500/25 bg-[#08051c]/95 backdrop-blur-xl">
+        <div className="relative px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 border-b border-purple-500/25 bg-[#08051c]/95 backdrop-blur-xl">
           <div className="relative z-10 flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -167,19 +167,17 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
           </div>
         </div>
 
-        {/* Content Body: Split Screen on Desktop */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 scrollbar-thin bg-transparent">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
-            
-            {/* Left Column: 3D Interactive Simulation Stage & Solved Orbits */}
-            <div className="space-y-4 lg:sticky lg:top-0">
-              <div className="h-[380px] sm:h-[460px] lg:h-[520px] w-full">
-                <StellarSystem3DStage
-                  system={system}
-                  onStarClick={(starId) => setSelectedStarId(starId)}
-                  selectedStarId={selectedStarId}
-                />
-              </div>
+        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
+        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
+          {/* Left Column: 3D dossier canvas container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
+          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-1/2 lg:h-auto overflow-y-auto scrollbar-thin p-3 sm:p-5 space-y-4 shrink-0">
+            <div className="h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[500px] landscape:h-[calc(100vh-140px)] w-full">
+              <StellarSystem3DStage
+                system={system}
+                onStarClick={(starId) => setSelectedStarId(starId)}
+                selectedStarId={selectedStarId}
+              />
+            </div>
 
               {/* Solved Orbits Hierarchy Reference */}
               <div className="p-4 rounded-2xl bg-[#030617]/90 border border-purple-500/25 shadow-md">
@@ -214,8 +212,8 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               </div>
             </div>
 
-            {/* Right Column: System Astrophysics & Individual Star Dossier Cards */}
-            <div className="space-y-4">
+            {/* Right Column: Data/Telemetry panel with independent scrolling */}
+            <div className="w-full landscape:w-1/2 lg:w-1/2 flex-1 overflow-y-auto landscape:overflow-y-auto pb-safe p-3 sm:p-5 lg:p-6 scrollbar-thin space-y-4">
               
               {/* System Overview & Barycenter Physics */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#0c0628]/90 via-[#07041c]/90 to-[#02020f]/90 border border-purple-500/30 shadow-lg space-y-3">
@@ -360,7 +358,6 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               </div>
 
             </div>
-          </div>
         </div>
       </div>
     </div>
