@@ -246,8 +246,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
     if (!str || str === 'undefined' || str === 'null') return NaN;
     const match = str.match(/^([+-]?\d+)[h°]\s*(?:(\d+)[m′'])?\s*(?:([\d.]+)[s″"])?/);
     if (match) {
-      const d = Math.abs(parseInt(match[1], 10));
-      const m = match[2] ? parseInt(match[2], 10) / 60 : 0;
+      const d = Math.abs(parseFloat(match[1]));
+      const m = match[2] ? parseFloat(match[2]) / 60 : 0;
       const s = match[3] ? parseFloat(match[3]) / 3600 : 0;
       const sign = match[1].startsWith('-') ? -1 : 1;
       return sign * (d + m + s);
@@ -701,8 +701,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       const cleanName = cand.name.replace(/\s*\([^)]+\)/g, '').trim().toLowerCase();
       if (cleanName && seenNames.has(cleanName)) continue;
       
-      // Exclude overlapping stars entirely, keeping only the brightest (first encountered due to sort)
-      const isOverlapping = visibleStars.some((acc) => Math.hypot(acc.x - cand.x, acc.y - cand.y) < 3.0);
+      // Exclude overlapping stars entirely, keeping only the brightest
+      const isOverlapping = visibleStars.some((acc) => Math.hypot(acc.x - cand.x, acc.y - cand.y) < 1.5);
       
       if (!isOverlapping) {
         visibleStars.push(cand);
@@ -1122,9 +1122,39 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           {/* 3. Ecliptic Line */}
           {!isPolar && opts.showEquatorEcliptic && graticule.hasEcliptic && (
             <g className="ecliptic-overlay">
-              <line x1="0" y1={graticule.eclipticY1} x2="100" y2={graticule.eclipticY2} stroke="#eab308" strokeWidth="0.55" strokeDasharray="5 2.5" strokeOpacity="0.85" />
-              <rect x="62" y={(graticule.eclipticY1 + graticule.eclipticY2) / 2 - 2.8} width="34" height="4.8" rx="1.2" fill="#030712" stroke="#eab308" strokeWidth="0.4" strokeOpacity="0.9" />
-              <text x="79" y={(graticule.eclipticY1 + graticule.eclipticY2) / 2 + 0.6} textAnchor="middle" fill="#facc15" fontSize="2.2" fontFamily="monospace" fontWeight="bold">☀️ ECLIPTIC (SOLAR PATH)</text>
+              {(() => {
+                const eclipticPoints: string[] = [];
+                const raB = extractBounds(border?.raRange || '', true);
+                let startRa = raB[0];
+                let endRa = raB[1];
+                if (startRa > endRa) endRa += 24; 
+                startRa -= 1;
+                endRa += 1;
+                
+                const steps = 24;
+                for (let i = 0; i <= steps; i++) {
+                  const currentRa = startRa + (endRa - startRa) * (i / steps);
+                  const raDecimal = currentRa % 24;
+                  const raRadians = (raDecimal / 24) * 2 * Math.PI;
+                  const eclipticDec = 23.439 * Math.sin(raRadians);
+                  
+                  const pt = projectStereoPoint(raDecimal * 15, eclipticDec, cLon, cLat);
+                  const svgPt = toSvg(pt.x, pt.y);
+                  eclipticPoints.push(`${svgPt.x},${svgPt.y}`);
+                }
+                
+                const midPt = eclipticPoints[Math.floor(steps / 2)].split(',');
+                const midX = Math.max(17, Math.min(83, parseFloat(midPt[0])));
+                const midY = parseFloat(midPt[1]);
+
+                return (
+                  <>
+                    <polyline points={eclipticPoints.join(' ')} fill="none" stroke="#eab308" strokeWidth="0.55" strokeDasharray="5 2.5" strokeOpacity="0.85" />
+                    <rect x={midX - 17} y={midY - 2.8} width="34" height="4.8" rx="1.2" fill="#030712" stroke="#eab308" strokeWidth="0.4" strokeOpacity="0.9" />
+                    <text x={midX} y={midY + 0.6} textAnchor="middle" fill="#facc15" fontSize="2.2" fontFamily="monospace" fontWeight="bold">☀️ ECLIPTIC (SOLAR PATH)</text>
+                  </>
+                );
+              })()}
             </g>
           )}
 
@@ -1286,13 +1316,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             const isHovered = hoveredStarId === s.id;
             const isClicked = activeStarLabelId === s.id;
 
-            const radius = isPrincipal
-              ? 2.6
+            const baseRadius = isPrincipal
+              ? 1.4
               : s.apparentMagnitude < 2.0
-              ? 2.2
+              ? 1.1
               : isClickable
-              ? (s.apparentMagnitude < 4.0 ? 1.6 : 1.2)
-              : 1.0;
+              ? (s.apparentMagnitude < 4.0 ? 0.8 : 0.6)
+              : 0.5;
+            
+            const radius = Math.min(baseRadius, 1.4);
 
             if (!isAssigned) {
               return (
@@ -1305,7 +1337,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   }}
                 >
                   <title>{`${s.name} (Unassigned)`}</title>
-                  <circle cx={s.x} cy={s.y} r={radius} fill="#475569" stroke="#334155" strokeWidth="0.35" opacity="0.4" />
+                  <circle cx={s.x} cy={s.y} r={radius} fill="#475569" stroke="#334155" strokeWidth="0.3" opacity="0.4" />
                 </g>
               );
             }
@@ -1339,19 +1371,19 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 {/* Click target hit area */}
                 <circle cx={s.x} cy={s.y} r="5.5" fill="transparent" />
 
-                {/* Active / Clicked Selection Target Ring (Clean solid ring; larger dashed spinning circle removed) */}
+                {/* Active / Clicked Selection Target Ring */}
                 {isClicked && (
-                  <circle cx={s.x} cy={s.y} r={radius + 1.2} fill="none" stroke="#22d3ee" strokeWidth="0.45" className="pointer-events-none" />
+                  <circle cx={s.x} cy={s.y} r={radius + 0.8} fill="none" stroke="#22d3ee" strokeWidth="0.35" className="pointer-events-none" />
                 )}
 
-                {/* Principal Star Golden Radiant Ring (Pulsing halo and dashed ring removed) */}
+                {/* Principal Star Golden Radiant Ring */}
                 {isPrincipal && (
-                  <circle cx={s.x} cy={s.y} r={radius + 0.9} fill="none" stroke="#fef08a" strokeWidth="0.35" className="pointer-events-none" />
+                  <circle cx={s.x} cy={s.y} r={radius + 0.6} fill="none" stroke="#fef08a" strokeWidth="0.3" className="pointer-events-none" />
                 )}
 
                 {/* Hover highlight circle */}
                 {!isClicked && (
-                  <circle cx={s.x} cy={s.y} r={radius + 1.2} fill="none" stroke="#38bdf8" strokeWidth="0.4" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
+                  <circle cx={s.x} cy={s.y} r={radius + 0.8} fill="none" stroke="#38bdf8" strokeWidth="0.3" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
                 )}
 
                 {/* Star dot node */}
@@ -1359,7 +1391,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   cx={s.x} cy={s.y} r={radius}
                   fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : '#ffffff'}
                   stroke={isPrincipal ? '#f59e0b' : isClicked ? '#38bdf8' : '#38bdf8'}
-                  strokeWidth={isPrincipal ? '0.6' : isClicked ? '0.6' : '0.4'}
+                  strokeWidth={isPrincipal ? '0.4' : isClicked ? '0.4' : '0.25'}
                   className="group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors"
                 />
               </g>
@@ -1375,7 +1407,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             if (!isAssigned || isHovered || isClicked || !s.displayLabel) return null;
 
             const isPrincipal = s.isPrincipal;
-            const radius = isPrincipal ? 2.6 : s.apparentMagnitude < 2.0 ? 2.2 : (s.apparentMagnitude < 4.0 ? 1.6 : 1.2);
+            const radius = isPrincipal ? 1.4 : s.apparentMagnitude < 2.0 ? 1.1 : (s.apparentMagnitude < 4.0 ? 0.8 : 0.6);
             const charWidth = 1.05;
             const padX = 1.4;
             const labelWidth = Math.max(5.0, s.displayLabel.length * charWidth + padX * 2);
@@ -1422,7 +1454,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
             const isPrincipal = frontStar.isPrincipal;
             const isClicked = activeStarLabelId === frontStar.id;
-            const radius = isPrincipal ? 2.6 : frontStar.apparentMagnitude < 2.0 ? 2.2 : (frontStar.apparentMagnitude < 4.0 ? 1.6 : 1.2);
+            const radius = isPrincipal ? 1.4 : frontStar.apparentMagnitude < 2.0 ? 1.1 : (frontStar.apparentMagnitude < 4.0 ? 0.8 : 0.6);
             const charWidth = 1.05;
             const padX = 1.4;
             const labelWidth = Math.max(5.0, frontStar.displayLabel.length * charWidth + padX * 2);
