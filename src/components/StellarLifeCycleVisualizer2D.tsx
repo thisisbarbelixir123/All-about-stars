@@ -4,6 +4,8 @@ import {
   StellarTrack,
   LifeCycleCheckpoint,
   interpolateCheckpoint,
+  timelineToSlider,
+  sliderToTimeline,
 } from '../data/stellarLifeCycleData';
 import { STARS_CATALOG } from '../data/stars';
 import { StarData } from '../types';
@@ -20,6 +22,7 @@ import {
   Thermometer,
   Zap,
   Info,
+  ChevronLeft,
   ChevronRight,
   Maximize2,
   Minimize2,
@@ -62,7 +65,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
   onSelectStar,
 }) => {
   const [selectedTrackId, setSelectedTrackId] = useState<string>('solar');
-  const [progress, setProgress] = useState<number>(0.25); // Default to Main Sequence
+  const [progress, setProgress] = useState<number>(0.25); // Default to Present-Day Main Sequence (25% on timeline)
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0); // 0.5x, 1x, 2x, 5x
   const [isFullscreenStage, setIsFullscreenStage] = useState<boolean>(false);
@@ -78,40 +81,46 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
   }, [selectedTrackId]);
 
   // Clean, non-overcomplicated evolutionary stage name for simulator header
+  // Timeline scale: -1.0 (-100%) to 0.0 (0% Star Birth) to 1.0 (100% Star Death/Remnant) to 2.0 (200% Remnant Extinction)
   const simpleStageName = useMemo(() => {
     if (selectedTrackId === 'solar') {
-      if (progress < 0.05) return 'Giant Molecular Cloud';
-      if (progress < 0.20) return 'Protostar phase';
-      if (progress < 0.40) return 'Main-sequence phase';
-      if (progress < 0.60) return 'Red Giant';
-      if (progress < 0.70) return 'Planetary Nebula';
-      if (progress < 0.96) return 'White Dwarf';
+      if (progress < -0.65) return 'Giant Molecular Cloud';
+      if (progress < 0.0) return 'Protostar phase';
+      if (progress < 0.38) return 'Main-sequence phase';
+      if (progress < 0.56) return 'Post-main sequence (Yellow Subgiant)';
+      if (progress < 0.67) return 'First Red Giant phase';
+      if (progress < 0.77) return 'Red Clump phase';
+      if (progress < 0.92) return 'AGB phase';
+      if (progress <= 1.05) return 'Planetary Nebula';
+      if (progress < 1.96) return 'White Dwarf';
       return 'Black Dwarf';
     }
     if (selectedTrackId === 'low-mass') {
-      if (progress < 0.08) return 'Giant Molecular Cloud';
-      if (progress < 0.30) return 'Protostar phase';
-      if (progress < 0.65) return 'Main-sequence phase';
-      if (progress < 0.80) return 'Blue Dwarf phase';
-      if (progress < 0.97) return 'White Dwarf';
+      if (progress < -0.65) return 'Giant Molecular Cloud';
+      if (progress < 0.0) return 'Protostar phase';
+      if (progress < 0.72) return 'Main-sequence phase';
+      if (progress < 0.98) return 'Blue Dwarf phase';
+      if (progress < 1.96) return 'White Dwarf';
       return 'Black Dwarf';
     }
     if (selectedTrackId === 'massive') {
-      if (progress < 0.06) return 'Giant Molecular Cloud';
-      if (progress < 0.20) return 'Protostar phase';
-      if (progress < 0.45) return 'Main-sequence phase';
-      if (progress < 0.74) return 'Red Supergiant';
-      if (progress < 0.82) return 'Supernova';
-      if (progress < 0.97) return 'Neutron Star / Pulsar';
+      if (progress < -0.65) return 'Giant Molecular Cloud';
+      if (progress < 0.0) return 'Protostar phase';
+      if (progress < 0.52) return 'Main-sequence phase';
+      if (progress < 0.68) return 'Blue / Yellow Supergiant';
+      if (progress < 0.88) return 'Red Supergiant';
+      if (progress <= 1.05) return 'Supernova';
+      if (progress < 1.96) return 'Neutron Star / Pulsar';
       return 'Cold Neutron Star';
     }
     if (selectedTrackId === 'hyper-massive') {
-      if (progress < 0.06) return 'Giant Molecular Cloud';
-      if (progress < 0.18) return 'Protostar phase';
-      if (progress < 0.35) return 'Main-sequence phase';
-      if (progress < 0.55) return 'Hypergiant';
-      if (progress < 0.75) return 'Hypernova';
-      return 'Black Hole';
+      if (progress < -0.65) return 'Giant Molecular Cloud';
+      if (progress < 0.0) return 'Protostar phase';
+      if (progress < 0.55) return 'Main-sequence phase';
+      if (progress < 0.85) return 'Hypergiant (LBV)';
+      if (progress <= 1.05) return 'Hypernova';
+      if (progress < 1.96) return 'Black Hole (Accreting)';
+      return 'Isolated Black Hole';
     }
     return 'Main-sequence phase';
   }, [selectedTrackId, progress]);
@@ -121,18 +130,24 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
     return interpolateCheckpoint(currentTrack, progress);
   }, [currentTrack, progress]);
 
-  // When track changes, reset progress to main sequence (usually ~0.25–0.3)
+  // When track changes, reset progress to mature main sequence (~45%–50% of active life)
   const handleTrackChange = (trackId: string) => {
     setSelectedTrackId(trackId);
     const targetTrack = STELLAR_TRACKS.find((t) => t.id === trackId) || STELLAR_TRACKS[0];
-    const msPoint = targetTrack.checkpoints.find((c) => c.category === 'main-sequence');
-    setProgress(msPoint ? msPoint.progress : 0.25);
+    const msPoint =
+      targetTrack.checkpoints.find((c) => c.category === 'main-sequence' && c.progress > 0) ||
+      targetTrack.checkpoints.find((c) => c.category === 'main-sequence');
+    setProgress(msPoint ? msPoint.progress : 0.45);
     setIsPlaying(false);
   };
 
-  // Step controls
-  const handleStep = (delta: number) => {
-    setProgress((prev) => Math.max(0, Math.min(1, prev + delta)));
+  // Step controls (delta applied across physical slider 0.0 to 1.0)
+  const handleStep = (sliderDelta: number) => {
+    setProgress((prev) => {
+      const currentSlider = timelineToSlider(prev);
+      const nextSlider = Math.max(0, Math.min(1.0, currentSlider + sliderDelta));
+      return sliderToTimeline(nextSlider);
+    });
   };
 
   // Jump to specific checkpoint
@@ -156,17 +171,18 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         setIsPlaying((prev) => !prev);
       } else if (e.code === 'ArrowRight') {
         e.preventDefault();
-        handleStep(0.01);
+        handleStep(0.015);
       } else if (e.code === 'ArrowLeft') {
         e.preventDefault();
-        handleStep(-0.01);
+        handleStep(-0.015);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Animation playback loop
+  // Animation playback loop across slider (0.0 to 1.0)
+  // Protostar occupies first 20%, Active Life occupies middle 60%, Remnant occupies final 20%
   useEffect(() => {
     if (!isPlaying) {
       if (animationFrameRef.current) {
@@ -181,15 +197,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       const dt = (time - lastTimeRef.current) / 1000;
       lastTimeRef.current = time;
 
-      // Complete cycle in 24 seconds at 1x speed
-      const rate = (1 / 24) * playbackSpeed;
+      // Complete full slider cycle (0.0 to 1.0) in 30 seconds at 1x speed
+      const rate = (1.0 / 30) * playbackSpeed;
       setProgress((prev) => {
-        const next = prev + dt * rate;
-        if (next >= 1.0) {
+        const currentSlider = timelineToSlider(prev);
+        const nextSlider = currentSlider + dt * rate;
+        if (nextSlider >= 1.0) {
           setIsPlaying(false);
-          return 1.0;
+          return 2.0;
         }
-        return next;
+        return sliderToTimeline(nextSlider);
       });
 
       animationFrameRef.current = requestAnimationFrame(loop);
@@ -1075,9 +1092,10 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         ctx.save();
         ctx.globalAlpha = bhAlpha;
 
-        // In the isolated final black hole phase (progress near 1.0), accretion disk is exhausted
-        const isIsolated = visualType === 'black-hole' && telemetry.current.progress >= 0.95;
-        const diskFade = isIsolated ? Math.max(0, 1 - (progress - 0.95) / 0.05) : 1.0;
+        // In the isolated final black hole phase (progress from 1.0 to 2.0), accretion disk is gradually exhausted
+        const isIsolated = visualType === 'black-hole' && telemetry.current.progress >= 1.98;
+        const isFadingDisk = visualType === 'black-hole' && nextVisualType === 'black-hole' && telemetry.current.progress < 1.98;
+        const diskFade = isIsolated ? 0.0 : isFadingDisk ? Math.max(0, 1 - alpha) : 1.0;
 
         // -------------------------------------------------------------
         // 1. RELATIVISTIC BIPOLAR JETS (Blandford-Znajek Outflow)
@@ -1450,38 +1468,254 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
     return () => cancelAnimationFrame(animId);
   }, [renderCanvas]);
 
-  // Resize canvas to match container DPI
+  // Resize canvas to match container DPI with ResizeObserver
   useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    const updateSize = () => {
+      const rect = parent.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.floor(rect.width * dpr);
       canvas.height = Math.floor(rect.height * dpr);
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(parent);
+    window.addEventListener('resize', updateSize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
   }, [isFullscreenStage]);
 
-  // Catalog star examples for current checkpoint
+  // Active stage index in the carousel (tracks the active checkpoint)
+  const currentStageIndex = useMemo(() => {
+    const pts = currentTrack.checkpoints;
+    for (let i = pts.length - 1; i >= 0; i--) {
+      if (progress >= pts[i].progress - 0.001) {
+        return i;
+      }
+    }
+    return 0;
+  }, [currentTrack, progress]);
+
+  const activeStage = currentTrack.checkpoints[currentStageIndex] || telemetry.current;
+
+  // Catalog star examples for active stage
   const exampleStars = useMemo(() => {
-    const ids = telemetry.current.analogousStarIds || [];
+    const ids = activeStage.analogousStarIds || [];
     return STARS_CATALOG.filter((s) => ids.includes(s.id));
-  }, [telemetry]);
+  }, [activeStage]);
+
+  const stageRibbonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = stageRibbonRef.current;
+    if (!container) return;
+    const activeButton = container.children[currentStageIndex] as HTMLElement | undefined;
+    if (activeButton) {
+      const targetLeft =
+        activeButton.offsetLeft - container.offsetWidth / 2 + activeButton.offsetWidth / 2;
+      container.scrollTo({
+        left: Math.max(0, targetLeft),
+        behavior: 'smooth',
+      });
+    }
+  }, [currentStageIndex]);
+
+  const handlePrevStage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const pts = currentTrack.checkpoints;
+    const prevIdx = (currentStageIndex - 1 + pts.length) % pts.length;
+    setProgress(pts[prevIdx].progress);
+    setIsPlaying(false);
+  };
+
+  const handleNextStage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const pts = currentTrack.checkpoints;
+    const nextIdx = (currentStageIndex + 1) % pts.length;
+    setProgress(pts[nextIdx].progress);
+    setIsPlaying(false);
+  };
+
+  // Reusable Scrubber for both standard left-panel layout and mobile-landscape top-of-right-panel layout
+  const renderScrubber = (isMobileLandscapeTop: boolean = false) => (
+    <div
+      className={`p-3 sm:p-4 bg-[#020512] flex flex-col gap-2.5 sm:gap-3 shrink-0 ${
+        isMobileLandscapeTop
+          ? 'rounded-2xl border border-cyan-500/25 shadow-lg mb-1'
+          : 'border-t border-cyan-500/20'
+      }`}
+    >
+      {/* Clean Timeline Info */}
+      <div className="flex items-center justify-between text-xs font-mono text-slate-300">
+        <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Stellar Evolution Timeline</span>
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-cyan-300 font-bold">{telemetry.interpolatedAgeLabel}</span>
+          <span className="text-slate-500">•</span>
+          <span className="text-amber-300 font-bold">{(progress * 100).toFixed(0)}%</span>
+        </div>
+      </div>
+
+      {/* Range Input Slider (Mapped to internal timeline -100% to 200%) */}
+      <div className="relative flex items-center py-1">
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.001"
+          value={timelineToSlider(progress)}
+          onChange={(e) => {
+            setProgress(sliderToTimeline(parseFloat(e.target.value)));
+            setIsPlaying(false);
+          }}
+          aria-label="Timeline progress slider"
+          className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-lg appearance-none cursor-ew-resize accent-cyan-400 focus:outline-none border border-cyan-500/30"
+        />
+      </div>
+
+      {/* Milestone Dots positioned along slider span */}
+      <div className="relative w-full h-3 select-none">
+        {currentTrack.checkpoints.map((cp, idx) => {
+          const sliderPos = timelineToSlider(cp.progress);
+          const currentSlider = timelineToSlider(progress);
+          const isPassed = currentSlider >= sliderPos;
+          const isNear = Math.abs(currentSlider - sliderPos) < 0.02;
+          const leftPercent = sliderPos * 100;
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handleJumpToCheckpoint(cp)}
+              title={`${cp.stageName} (${(cp.progress * 100).toFixed(0)}%)`}
+              style={{ left: `${leftPercent}%` }}
+              className="absolute top-0 -translate-x-1/2 flex flex-col items-center cursor-pointer"
+            >
+              <span
+                className={`w-2 h-2 rounded-full border transition-transform ${
+                  isNear
+                    ? 'bg-cyan-400 border-white scale-125 shadow-[0_0_8px_rgba(6,182,212,0.8)]'
+                    : isPassed
+                    ? 'bg-cyan-600 border-cyan-400'
+                    : 'bg-slate-800 border-slate-700'
+                }`}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Key Stellar Evolution Anchor Markers (-100%, 0%, 100%, 200%) */}
+      <div className="grid grid-cols-4 gap-1 sm:gap-2 pt-0.5 text-[9px] sm:text-[10px] font-mono">
+        {[
+          { val: -1.0, pct: '-100%', label: 'Pre-Birth Cloud' },
+          { val: 0.0, pct: '0%', label: 'Star Born (ZAMS)' },
+          { val: 1.0, pct: '100%', label: 'Star Death' },
+          { val: 2.0, pct: '200%', label: 'Remnant Dies Out' },
+        ].map((anchor) => {
+          const isActiveAnchor = Math.abs(progress - anchor.val) < 0.05;
+          return (
+            <button
+              key={anchor.pct}
+              type="button"
+              onClick={() => {
+                setProgress(anchor.val);
+                setIsPlaying(false);
+              }}
+              className={`px-1.5 py-1 rounded-lg border text-center transition-all cursor-pointer truncate ${
+                isActiveAnchor
+                  ? 'bg-cyan-950/90 border-cyan-400 text-cyan-200 font-bold'
+                  : 'bg-[#040816]/80 border-cyan-500/15 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/35'
+              }`}
+              title={`Jump to ${anchor.pct}: ${anchor.label}`}
+            >
+              <span className="text-cyan-400 font-bold">{anchor.pct}</span>{' '}
+              <span className="hidden sm:inline">{anchor.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Compact Playback Controls & Speeds */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-cyan-500/10">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (!isPlaying && progress >= 1.99) {
+                setProgress(-1.0);
+              }
+              setIsPlaying((prev) => !prev);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs font-mono shadow hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-3.5 h-3.5 fill-current" />
+                <span>PAUSE</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>PLAY</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setProgress(-1.0);
+              setIsPlaying(false);
+            }}
+            title="Reset to start (-100% Pre-Birth Cloud)"
+            className="p-1.5 rounded-lg bg-[#040816] hover:bg-cyan-950/60 border border-cyan-500/25 text-slate-400 hover:text-white transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Right: Speed Multiplier */}
+        <div className="flex items-center gap-1 p-0.5 bg-[#040816] rounded-lg border border-cyan-500/20 text-xs font-mono">
+          {[0.5, 1.0, 2.0].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setPlaybackSpeed(s)}
+              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
+                playbackSpeed === s
+                  ? 'bg-cyan-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+    <div className="w-full flex flex-col gap-4 sm:gap-5 animate-in fade-in duration-200">
       {/* ------------------------------------------------------------- */}
-      {/* 1. TOP HEADER (UNIFORM HERO BANNER)                           */}
+      {/* 1. TOP HEADER (HERO BANNER)                                   */}
       {/* ------------------------------------------------------------- */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-4 sm:p-5 shadow-xl backdrop-blur-md shrink-0">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-3xl">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-              <Activity className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400 shrink-0" />
+          <div className="space-y-1.5 max-w-3xl">
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 shrink-0" />
               <span>Stellar Life Cycles</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
@@ -1491,183 +1725,81 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         </div>
       </div>
 
-      <div className="flex flex-col gap-5 sm:gap-6">
-        {/* ------------------------------------------------------------- */}
-        {/* 2. 2D STAGE & ASTROPHYSICS HUD (Adjusted for mobile screens) */}
-        {/* ------------------------------------------------------------- */}
-          <div
-            ref={stageContainerRef}
-            className={`rounded-2xl bg-[#030612] border border-cyan-500/30 overflow-hidden relative shadow-[0_12px_40px_rgba(0,0,0,0.8)] ${
-              isFullscreenStage ? 'fixed inset-4 z-50 flex flex-col' : 'flex flex-col'
-            }`}
-          >
-            {/* Top HUD Overlay within Stage - Shows ONLY their evolutionary stage */}
-            <div className="p-3 sm:p-4 bg-gradient-to-b from-[#040816]/95 via-[#040816]/70 to-transparent flex items-center justify-between gap-3 z-10">
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse shadow-sm"
-                  style={{ backgroundColor: telemetry.interpolatedColor }}
-                />
-                <h4 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-wide">
-                  {simpleStageName}
-                </h4>
-              </div>
-
-              <button
-                onClick={() => setIsFullscreenStage((prev) => !prev)}
-                title={isFullscreenStage ? 'Exit Fullscreen' : 'Expand Stage'}
-                className="p-1.5 rounded-lg bg-[#020512]/90 hover:bg-cyan-950 border border-cyan-500/25 text-slate-300 hover:text-white transition-colors cursor-pointer"
-              >
-                {isFullscreenStage ? (
-                  <Minimize2 className="w-4 h-4" />
-                ) : (
-                  <Maximize2 className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-
-            {/* Canvas 2D Viewport - Adjusted for mobile screens */}
-            <div className="w-full h-56 sm:h-80 md:h-[400px] relative">
-              <canvas
-                ref={canvasRef}
-                className="w-full h-full block cursor-grab active:cursor-grabbing"
+      {/* ------------------------------------------------------------- */}
+      {/* 2. DOUBLE PANEL (DOSSIER STYLE): VIEW/SLIDER (LEFT) + INFO (RIGHT) */}
+      {/* ------------------------------------------------------------- */}
+      <div className="w-full flex flex-col mobile-landscape:flex-row lg:flex-row gap-4 sm:gap-5 mobile-landscape:h-[calc(100vh-100px)] lg:h-[calc(100vh-140px)] mobile-landscape:min-h-0 lg:min-h-[640px] overflow-hidden min-h-0">
+        {/* Left Panel: The View and Slider (scrollable on portrait, NOT on landscape) */}
+        <div
+          ref={stageContainerRef}
+          className={`w-full mobile-landscape:w-auto lg:w-auto mobile-landscape:flex-1 lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto mobile-landscape:overflow-hidden lg:overflow-hidden rounded-2xl bg-[#030612] border border-cyan-500/30 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex flex-col justify-between ${
+            isFullscreenStage ? 'fixed inset-4 z-50' : 'relative'
+          }`}
+        >
+          {/* Top HUD Overlay within Stage - Shows current evolutionary stage */}
+          <div className="p-3 sm:p-3.5 bg-gradient-to-b from-[#040816]/95 via-[#040816]/70 to-transparent flex items-center justify-between gap-3 z-10 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse shadow-sm"
+                style={{ backgroundColor: telemetry.interpolatedColor }}
               />
-
-              {/* Bottom Visual Subtitles / Physical Dynamics Tag */}
-              <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none text-[10px] sm:text-[11px] font-mono">
-                <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 max-w-xs sm:max-w-md pointer-events-auto truncate">
-                  <span className="text-cyan-400 font-bold">Core: </span>
-                  <span>{telemetry.current.coreEngine}</span>
-                </div>
-
-                <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 pointer-events-auto hidden md:block">
-                  <span className="text-amber-400 font-bold">Radius: </span>
-                  <span>
-                    {telemetry.interpolatedRadius >= 1
-                      ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
-                      : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
-                  </span>
-                </div>
-              </div>
+              <h4 className="text-sm sm:text-base font-bold text-white tracking-wide truncate">
+                {simpleStageName}
+              </h4>
             </div>
 
-            {/* ------------------------------------------------------------- */}
-            {/* 4. SIMPLIFIED SCRUBBER                                        */}
-            {/* ------------------------------------------------------------- */}
-            <div className="p-3 sm:p-4 bg-[#020512] border-t border-cyan-500/20 flex flex-col gap-2.5 sm:gap-3">
-              {/* Clean Timeline Info */}
-              <div className="flex items-center justify-between text-xs font-mono text-slate-300">
-                <span className="text-cyan-400 font-bold flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5" />
-                  <span>Timeline</span>
+            <button
+              onClick={() => setIsFullscreenStage((prev) => !prev)}
+              title={isFullscreenStage ? 'Exit Fullscreen' : 'Expand Stage'}
+              className="p-1.5 rounded-lg bg-[#020512]/90 hover:bg-cyan-950 border border-cyan-500/25 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
+            >
+              {isFullscreenStage ? (
+                <Minimize2 className="w-4 h-4" />
+              ) : (
+                <Maximize2 className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+
+          {/* Canvas 2D Viewport */}
+          <div className="w-full flex-1 min-h-[240px] sm:min-h-[300px] mobile-landscape:min-h-0 relative">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full block cursor-grab active:cursor-grabbing"
+            />
+
+            {/* Bottom Visual Subtitles / Physical Dynamics Tag */}
+            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none text-[10px] sm:text-[11px] font-mono gap-2">
+              <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 max-w-[65%] pointer-events-auto truncate">
+                <span className="text-cyan-400 font-bold">Core: </span>
+                <span>{telemetry.current.coreEngine}</span>
+              </div>
+
+              <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 pointer-events-auto shrink-0">
+                <span className="text-amber-400 font-bold">Radius: </span>
+                <span>
+                  {telemetry.interpolatedRadius >= 1
+                    ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
+                    : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-cyan-300 font-bold">{telemetry.interpolatedAgeLabel}</span>
-                  <span className="text-slate-500">•</span>
-                  <span className="text-slate-400 font-medium">{(progress * 100).toFixed(0)}%</span>
-                </div>
-              </div>
-
-              {/* Range Input Slider with custom style */}
-              <div className="relative flex items-center py-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.001"
-                  value={progress}
-                  onChange={(e) => {
-                    setProgress(parseFloat(e.target.value));
-                    setIsPlaying(false);
-                  }}
-                  aria-label="Timeline progress slider"
-                  className="w-full h-2.5 sm:h-3 bg-slate-900 rounded-lg appearance-none cursor-ew-resize accent-cyan-400 focus:outline-none border border-cyan-500/30"
-                />
-              </div>
-
-              {/* Milestone Dots (clean, without overlapping text on mobile) */}
-              <div className="relative w-full h-3 select-none">
-                {currentTrack.checkpoints.map((cp, idx) => {
-                  const isPassed = progress >= cp.progress;
-                  const isNear = Math.abs(progress - cp.progress) < 0.04;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleJumpToCheckpoint(cp)}
-                      title={`${cp.stageName} (${(cp.progress * 100).toFixed(0)}%)`}
-                      style={{ left: `${cp.progress * 100}%` }}
-                      className="absolute top-0 -translate-x-1/2 flex flex-col items-center cursor-pointer"
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full border transition-transform ${
-                          isNear
-                            ? 'bg-cyan-400 border-white scale-125 shadow-[0_0_8px_rgba(6,182,212,0.8)]'
-                            : isPassed
-                            ? 'bg-cyan-600 border-cyan-400'
-                            : 'bg-slate-800 border-slate-700'
-                        }`}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Compact Playback Controls & Speeds */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-cyan-500/10">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <button
-                    onClick={() => setIsPlaying((prev) => !prev)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs font-mono shadow hover:brightness-110 active:scale-95 transition-all cursor-pointer"
-                  >
-                    {isPlaying ? (
-                      <>
-                        <Pause className="w-3.5 h-3.5 fill-current" />
-                        <span>PAUSE</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        <span>PLAY</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setProgress(0);
-                      setIsPlaying(false);
-                    }}
-                    title="Reset to start"
-                    className="p-1.5 rounded-lg bg-[#040816] hover:bg-cyan-950/60 border border-cyan-500/25 text-slate-400 hover:text-white transition-all cursor-pointer"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Right: Speed Multiplier */}
-                <div className="flex items-center gap-1 p-0.5 bg-[#040816] rounded-lg border border-cyan-500/20 text-xs font-mono">
-                  {[0.5, 1.0, 2.0].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setPlaybackSpeed(s)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
-                        playbackSpeed === s
-                          ? 'bg-cyan-500 text-slate-950 font-bold'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {s}x
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
 
-          {/* ------------------------------------------------------------- */}
-          {/* 4. EVOLUTIONARY TRACKS TOGGLES - FOUR SMALL BUTTONS ABOVE DESCRIPTION */}
-          {/* ------------------------------------------------------------- */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+          {/* Scrubber in Left Panel (hidden on mobile landscape via responsive utility) */}
+          <div className="stellar-slider-left-panel">
+            {renderScrubber(false)}
+          </div>
+        </div>
+
+        {/* Right Panel: Everything else (scrollable on portrait and landscape) */}
+        <div className="w-full mobile-landscape:w-auto lg:w-auto mobile-landscape:flex-1 lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto mobile-landscape:overflow-y-auto lg:overflow-y-auto scrollbar-thin flex flex-col gap-4 pb-safe pr-0.5">
+          {/* On mobile landscape, slider relocated to top of right panel */}
+          <div className="stellar-slider-mobile-landscape-only">
+            {renderScrubber(true)}
+          </div>
+          {/* 1. Evolutionary Tracks Toggles */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 shrink-0">
             {[
               { id: 'low-mass', label: 'Red Dwarf', color: '#f43f5e' },
               { id: 'solar', label: 'Sun-like Stars', color: '#f59e0b' },
@@ -1679,7 +1811,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
                 <button
                   key={t.id}
                   onClick={() => handleTrackChange(t.id)}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center shadow-sm ${
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center shadow-xs ${
                     isSelected
                       ? 'bg-[#091535] border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400 font-bold'
                       : 'bg-[#040816]/90 border-cyan-500/20 text-slate-300 hover:text-white hover:border-cyan-500/40 hover:bg-[#070f24]'
@@ -1695,274 +1827,251 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
             })}
           </div>
 
-          {/* ------------------------------------------------------------- */}
-          {/* 5. DETAILED ASTROPHYSICAL TELEMETRY PROFILE                   */}
-          {/* ------------------------------------------------------------- */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left 7 cols: Plain-English Astrophysics & Key Phenomena */}
-            <div className="lg:col-span-7 p-5 sm:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col justify-between gap-4 shadow-sm">
-              <div>
-                <div className="flex items-center justify-between gap-2 border-b border-cyan-500/15 pb-3 mb-3">
-                  <div>
-                    <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold block">
-                      CURRENT EVOLUTIONARY PHASE
-                    </span>
-                    <h4 className="text-base sm:text-lg font-bold text-white">
-                      {simpleStageName}
-                    </h4>
-                  </div>
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#020512] border border-cyan-500/20 text-cyan-300 shrink-0">
-                    {telemetry.current.timeElapsedLabel}
-                  </span>
-                </div>
+          {/* 2. Track Summary Banner */}
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#060e2a] border border-cyan-500/30 shadow-md flex flex-col gap-2 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-cyan-500/15 pb-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: currentTrack.accentColor }}
+                />
+                <h4 className="text-sm sm:text-base font-bold text-white">{currentTrack.name}</h4>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                  Active Track
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-cyan-400">{currentTrack.massLabel}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono text-slate-400">
+              <span>Lifespan: {currentTrack.typicalLifespan}</span>
+              <span className="text-cyan-300 font-semibold">Fate: {currentTrack.fateSummary}</span>
+            </div>
+          </div>
 
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                  {telemetry.current.shortDescription}
-                </p>
+          {/* 3. Stage Selector Carousel */}
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-md flex flex-col gap-3 shrink-0">
+            {/* Quick Stage Horizontal Ribbon (Scrollable) */}
+            <div
+              ref={stageRibbonRef}
+              className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 -mx-0.5 px-0.5"
+            >
+              {currentTrack.checkpoints.map((cp, idx) => {
+                const isSelected = idx === currentStageIndex;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setProgress(cp.progress);
+                      setIsPlaying(false);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-cyan-950 border-cyan-400 text-cyan-200 font-bold shadow-[0_0_10px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400'
+                        : 'bg-[#020512] border-cyan-500/20 text-slate-400 hover:text-white hover:border-cyan-500/40'
+                    }`}
+                    title={`${cp.stageName} (${(cp.progress * 100).toFixed(0)}%)`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: cp.colorHex }}
+                    />
+                    <span className="whitespace-nowrap">Stage {idx + 1}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-                <div className="mt-3 p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs text-slate-300 leading-relaxed">
-                  <strong className="text-cyan-300 block font-mono mb-1">
-                    Astrophysical Mechanics:
-                  </strong>
-                  {telemetry.current.detailedPhysics}
-                </div>
+            {/* Carousel Navigation Header */}
+            <div className="flex items-center justify-between gap-2 border-t border-b border-cyan-500/15 py-2.5">
+              <button
+                type="button"
+                onClick={handlePrevStage}
+                className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                title="Previous evolutionary stage"
+                aria-label="Previous stage"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
+              <div
+                className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 aspect-square rounded-xl flex items-center justify-center font-black font-mono text-xs sm:text-sm shadow-md border border-white/20"
+                style={{
+                  backgroundColor: activeStage.colorHex,
+                  color: '#02040a',
+                  boxShadow: `0 0 16px ${activeStage.colorHex}66`,
+                }}
+              >
+                {currentStageIndex + 1}
               </div>
 
-              {/* Key Observable Phenomena */}
-              <div>
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-2 font-bold">
-                  Key Physical Signatures & Phenomena:
+              <div className="min-w-0 flex-1 px-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="text-xs sm:text-sm md:text-base font-bold text-white break-words">
+                    {activeStage.stageName}
+                  </h3>
+                  <span className="text-[10px] font-mono text-cyan-400 font-semibold shrink-0">
+                    ({currentStageIndex + 1}/{currentTrack.checkpoints.length})
+                  </span>
+                </div>
+                <p className="text-[10.5px] sm:text-[11px] text-slate-400 mt-0.5 truncate font-mono">
+                  {activeStage.timeElapsedLabel} • {(activeStage.progress * 100).toFixed(0)}% Lifespan
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNextStage}
+                className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                title="Next evolutionary stage"
+                aria-label="Next stage"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
+            {/* Stage Body */}
+            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              {activeStage.shortDescription}
+            </p>
+
+            <div className="p-3 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs text-slate-300 leading-relaxed">
+              <strong className="text-cyan-300 block font-mono mb-1 text-[11px]">
+                Astrophysical Mechanics:
+              </strong>
+              {activeStage.detailedPhysics}
+            </div>
+
+            {/* Key Observable Phenomena */}
+            <div>
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1.5 font-bold">
+                Key Physical Signatures & Phenomena:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {activeStage.keyPhenomena.map((ph, idx) => (
+                  <div
+                    key={idx}
+                    className="p-1.5 sm:p-2 rounded-lg bg-[#020512] border border-cyan-500/15 text-[11px] font-mono text-slate-300 flex items-center gap-1.5"
+                  >
+                    <span className="text-cyan-400 font-bold">•</span>
+                    <span className="truncate">{ph}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Database Real Star Examples */}
+            {exampleStars.length > 0 && (
+              <div className="pt-2 border-t border-cyan-500/15 flex flex-col gap-1.5">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
+                  Catalog Real-World Analogues in this Stage:
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {telemetry.current.keyPhenomena.map((ph, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 rounded-lg bg-[#020512] border border-cyan-500/15 text-[11px] font-mono text-slate-300 flex items-center gap-1.5"
+                <div className="flex flex-wrap gap-1.5">
+                  {exampleStars.map((star) => (
+                    <button
+                      key={star.id}
+                      onClick={() => onSelectStar?.(star)}
+                      className="px-2.5 py-1 rounded-lg bg-[#020512] hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-xs text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 font-mono group"
+                      title={`Inspect ${star.name} (${star.spectralClass}) in 3D Dossier`}
                     >
-                      <span className="text-cyan-400 font-bold">•</span>
-                      <span className="truncate">{ph}</span>
-                    </div>
+                      <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
+                      <span className="font-semibold">{star.name}</span>
+                      <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-300" />
+                    </button>
                   ))}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Right 5 cols: Physics Specs Grid & Real Database Star Analogues */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
-              <div className="p-5 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col gap-3 shadow-sm">
-                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
-                  Astrophysical Parameters
-                </span>
+          {/* 4. Detailed Physical Parameters Grid */}
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col gap-3 shadow-md shrink-0">
+            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
+              Continuous Astrophysical Parameters
+            </span>
 
-                {/* Continuous Object Age & Cosmic Epoch Card */}
-                <div className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/30 flex items-center justify-between gap-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-inner">
-                      <Clock className="w-4 h-4 text-cyan-400" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-mono text-slate-400 block font-semibold">
-                        Object Age (Continuous)
-                      </span>
-                      <span className="text-sm font-bold text-white font-mono tracking-wide">
-                        {telemetry.interpolatedAgeLabel}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right font-mono text-[10px]">
-                    <span className="text-cyan-300 font-bold block">
-                      {(progress * 100).toFixed(1)}% Lifespan
-                    </span>
-                    <span className="text-slate-400">
-                      {telemetry.interpolatedAgeYears > 0
-                        ? `${Math.round(telemetry.interpolatedAgeYears).toLocaleString()} yr`
-                        : 'Pre-Stellar Infall'}
-                    </span>
-                  </div>
+            {/* Object Age & Epoch Card */}
+            <div className="p-3 rounded-xl bg-[#020512] border border-cyan-500/30 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-inner">
+                  <Clock className="w-4 h-4 text-cyan-400" />
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
-                    <span className="text-slate-500 block text-[10px] uppercase">
-                      Surface Temperature
-                    </span>
-                    <span className="text-white font-bold">
-                      {telemetry.interpolatedTemp.toLocaleString()} K
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
-                    <span className="text-slate-500 block text-[10px] uppercase">Core Temp</span>
-                    <span className="text-amber-300 font-bold">
-                      {telemetry.current.coreTempKelvin > 0
-                        ? `${telemetry.current.coreTempKelvin.toLocaleString()} K`
-                        : 'Cold Degenerate'}
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
-                    <span className="text-slate-500 block text-[10px] uppercase">
-                      Physical Radius
-                    </span>
-                    <span className="text-cyan-300 font-bold">
-                      {telemetry.interpolatedRadius >= 1
-                        ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
-                        : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
-                    </span>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
-                    <span className="text-slate-500 block text-[10px] uppercase">Luminosity</span>
-                    <span className="text-slate-200">
-                      {telemetry.interpolatedLuminosity >= 1
-                        ? `${telemetry.interpolatedLuminosity.toLocaleString()} L☉`
-                        : `${telemetry.interpolatedLuminosity.toFixed(5)} L☉`}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs font-mono space-y-1.5">
-                  <div>
-                    <span className="text-slate-500 block text-[10px] uppercase">
-                      Dominant Supporting Pressure:
-                    </span>
-                    <span className="text-cyan-300 font-semibold leading-tight block">
-                      {telemetry.current.dominantPressure}
-                    </span>
-                  </div>
+                <div className="min-w-0">
+                  <span className="text-[9px] uppercase font-mono text-slate-400 block font-semibold truncate">
+                    Object Age (Relative to ZAMS Birth)
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-white font-mono tracking-wide truncate block">
+                    {telemetry.interpolatedAgeLabel}
+                  </span>
                 </div>
               </div>
-
-              {/* Database Real Star Examples */}
-              {exampleStars.length > 0 && (
-                <div className="p-4 rounded-2xl bg-[#040816]/95 border border-cyan-500/25 flex flex-col gap-2 shadow-sm">
-                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
-                    Catalog Real-World Analogues in this Stage:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {exampleStars.map((star) => (
-                      <button
-                        key={star.id}
-                        onClick={() => onSelectStar?.(star)}
-                        className="px-2.5 py-1.5 rounded-lg bg-[#020512] hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-xs text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 font-mono group"
-                        title={`Inspect ${star.name} (${star.spectralClass}) in 3D Dossier`}
-                      >
-                        <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
-                        <span className="font-semibold">{star.name}</span>
-                        <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-cyan-300" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="text-right font-mono text-[10px] shrink-0">
+                <span className="text-cyan-300 font-bold block">
+                  {(progress * 100).toFixed(1)}% Lifespan
+                </span>
+                <span className="text-slate-400">
+                  {progress < 0
+                    ? 'Pre-Birth Protostar'
+                    : progress <= 1.0
+                    ? 'Active Stellar Life'
+                    : 'Post-Death Remnant'}
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* ------------------------------------------------------------- */}
-        {/* 5. ALL EVOLUTIONARY TRACKS (MERGED DIRECTLY INTO SIMULATOR)   */}
-        {/* ------------------------------------------------------------- */}
-        <div className="flex flex-col gap-5 pt-4 border-t border-cyan-500/20">
-          <div className="p-4 rounded-2xl bg-[#030612]/90 border border-cyan-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h4 className="text-sm font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
-                <Layers className="w-4 h-4 text-cyan-400" />
-                <span>Comparative Matrix of All Stellar Evolutionary Tracks</span>
-              </h4>
-              <p className="text-xs text-slate-400 mt-1">
-                Click any stage checkpoint or track to simulate its lifecycle and inspect physical conditions above.
-              </p>
+            {/* 4-Parameter Grid */}
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                <span className="text-slate-500 block text-[10px] uppercase">
+                  Surface Temperature
+                </span>
+                <span className="text-white font-bold text-xs sm:text-sm">
+                  {telemetry.interpolatedTemp.toLocaleString()} K
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                <span className="text-slate-500 block text-[10px] uppercase">Core Temp</span>
+                <span className="text-amber-300 font-bold text-xs sm:text-sm">
+                  {telemetry.current.coreTempKelvin > 0
+                    ? `${telemetry.current.coreTempKelvin.toLocaleString()} K`
+                    : 'Cold Degenerate'}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                <span className="text-slate-500 block text-[10px] uppercase">
+                  Physical Radius
+                </span>
+                <span className="text-cyan-300 font-bold text-xs sm:text-sm">
+                  {telemetry.interpolatedRadius >= 1
+                    ? `${telemetry.interpolatedRadius.toFixed(1)} R☉`
+                    : `${telemetry.interpolatedRadius.toFixed(4)} R☉`}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15">
+                <span className="text-slate-500 block text-[10px] uppercase">Luminosity</span>
+                <span className="text-slate-200 font-bold text-xs sm:text-sm">
+                  {telemetry.interpolatedLuminosity >= 1
+                    ? `${telemetry.interpolatedLuminosity.toLocaleString()} L☉`
+                    : `${telemetry.interpolatedLuminosity.toFixed(5)} L☉`}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-6">
-            {STELLAR_TRACKS.map((track) => {
-              const isTrackSelected = track.id === selectedTrackId;
-              return (
-                <div
-                  key={track.id}
-                  className={`p-5 sm:p-6 rounded-2xl transition-all flex flex-col gap-4 shadow-sm ${
-                    isTrackSelected
-                      ? 'bg-[#060e2a] border-2 border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
-                      : 'bg-[#040816]/90 border border-cyan-500/25 hover:border-cyan-500/50'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/15 pb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-3 h-3 rounded-full shrink-0"
-                          style={{ backgroundColor: track.accentColor }}
-                        />
-                        <h4 className="text-base sm:text-lg font-bold text-white">{track.name}</h4>
-                        {isTrackSelected && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                            Active in Simulator
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-mono text-cyan-400">{track.massLabel}</span>
-                    </div>
-                    <div className="text-xs text-slate-400 max-w-md sm:text-right font-mono">
-                      <span className="text-slate-500 block">Lifespan: {track.typicalLifespan}</span>
-                      <span className="text-cyan-300 font-semibold">Fate: {track.fateSummary}</span>
-                    </div>
-                  </div>
-
-                  {/* Steps Timeline Horizontal Ribbon */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {track.checkpoints.map((cp, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => {
-                          setSelectedTrackId(track.id);
-                          setProgress(cp.progress);
-                          stageContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 hover:border-cyan-400/60 hover:bg-[#071333] transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer group shadow-xs"
-                        title={`Click to simulate ${cp.stageName} above`}
-                      >
-                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
-                          <span className="group-hover:text-cyan-400 font-bold">STAGE {idx + 1}</span>
-                          <span className="text-cyan-400/80">{cp.timeElapsedLabel}</span>
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors mb-1">
-                            {cp.stageName}
-                          </div>
-                          <p className="text-[11px] text-slate-300 leading-relaxed line-clamp-3">
-                            {cp.shortDescription}
-                          </p>
-                        </div>
-
-                        <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 flex items-center justify-between">
-                          <span>{cp.surfaceTempKelvin.toLocaleString()} K</span>
-                          <span className="text-cyan-400 font-semibold">
-                            {cp.spectralClassEquivalent}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-end pt-2">
-                    <button
-                      onClick={() => {
-                        setSelectedTrackId(track.id);
-                        setProgress(0);
-                        stageContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm hover:border-cyan-400"
-                    >
-                      <span>Simulate {track.name}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {/* Dominant Supporting Pressure */}
+            <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/15 text-xs font-mono">
+              <span className="text-slate-500 block text-[10px] uppercase">
+                Dominant Supporting Pressure:
+              </span>
+              <span className="text-cyan-300 font-semibold leading-tight block mt-0.5">
+                {telemetry.current.dominantPressure}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };

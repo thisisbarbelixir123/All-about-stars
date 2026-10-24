@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StarData } from '../types';
+import { RunningText } from './RunningText';
 
-interface VariableStarGraphicProps {
+export interface VariableStarGraphicProps {
   variableId: string;
   archetypeStar?: StarData | null;
   colorHex?: string;
   className?: string;
+  hideHUD?: boolean;
 }
 
 interface RGB {
@@ -46,6 +48,7 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
   archetypeStar,
   colorHex = '#facc15',
   className = '',
+  hideHUD = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -86,7 +89,7 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
       const width = 380;
       const height = 380;
       const cx = width / 2;
-      const cy = 158; // Center star slightly above light curve HUD
+      const cy = hideHUD ? height / 2 : 158; // Center star vertically when HUD is detached
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
@@ -1109,6 +1112,7 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
 
 /**
  * Universal astrophysical light curve HUD overlay with real-time phase cursor
+ * Note: When detached to the right panel, this is disabled on the 2D star canvas.
  */
 function renderVariableHUD(
   ctx: CanvasRenderingContext2D,
@@ -1118,8 +1122,10 @@ function renderVariableHUD(
   currentVal: number,
   curveTitle: string,
   statusLabel: string,
-  curveFunc: (p: number) => number
+  curveFunc: (p: number) => number,
+  disabled: boolean = true
 ) {
+  if (disabled) return;
   const hudH = 54;
   const hudY = height - hudH - 12;
   const hudX = 14;
@@ -1196,3 +1202,402 @@ function renderVariableHUD(
   ctx.fill();
   ctx.shadowBlur = 0;
 }
+
+export interface VariableStarActivityMonitorProps {
+  variableId: string;
+  colorHex?: string;
+  className?: string;
+}
+
+/**
+ * Detached real-time Activity Monitor & Light Curve Telemetry HUD
+ * Placed at the top of the right panel for optimal readability on mobile and desktop
+ */
+export const VariableStarActivityMonitor: React.FC<VariableStarActivityMonitorProps> = ({
+  variableId,
+  colorHex = '#38bdf8',
+  className = '',
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [telemetry, setTelemetry] = useState<{
+    title: string;
+    statusLabel: string;
+    statusColor?: string;
+    isHighlighted: boolean;
+    phasePercent: number;
+  }>({
+    title: 'Variable Star Telemetry',
+    statusLabel: 'Active Dynamic Monitoring',
+    isHighlighted: false,
+    phasePercent: 0,
+  });
+
+  useEffect(() => {
+    let animationFrameId: number;
+    let intervalId: any;
+    const startTime = performance.now();
+
+    const getTelemetryData = (elapsed: number) => {
+      switch (variableId) {
+        case 'cepheid-variables': {
+          const period = 2.8;
+          const phase = (elapsed / period) % 1.0;
+          const isRise = phase < 0.22;
+          return {
+            title: 'Cepheid Asymmetric Pulsation (Leavitt Law)',
+            period,
+            phase,
+            statusLabel: isRise
+              ? '⚡ Steep Asymmetric Rise (Max Luminosity & Expanding Core)'
+              : '📉 Gradual Cooling & Opacity Recombination (Helium Valve)',
+            statusColor: isRise ? '#38bdf8' : '#94a3b8',
+            isHighlighted: isRise,
+            curve: (p: number) =>
+              p < 0.22
+                ? Math.sin((p / 0.22) * Math.PI * 0.5)
+                : Math.cos(((p - 0.22) / 0.78) * Math.PI * 0.5),
+            val:
+              phase < 0.22
+                ? Math.sin((phase / 0.22) * Math.PI * 0.5)
+                : Math.cos(((phase - 0.22) / 0.78) * Math.PI * 0.5),
+          };
+        }
+        case 'rr-lyrae-variables': {
+          const period = 1.1;
+          const phase = (elapsed / period) % 1.0;
+          const blazhko = 0.7 + 0.3 * Math.sin(elapsed * 0.95);
+          const rawPulse =
+            phase < 0.3
+              ? Math.sin((phase / 0.3) * Math.PI * 0.5)
+              : Math.cos(((phase - 0.3) / 0.7) * Math.PI * 0.5);
+          return {
+            title: 'RR Lyrae Rapid Pulse + Blazhko Effect',
+            period,
+            phase,
+            statusLabel: `Blazhko Amplitude Modulation: ${(blazhko * 100).toFixed(0)}% • Horizontal Branch Standard Candle`,
+            statusColor: '#c084fc',
+            isHighlighted: blazhko > 0.85,
+            curve: (p: number) =>
+              (p < 0.3
+                ? Math.sin((p / 0.3) * Math.PI * 0.5)
+                : Math.cos(((p - 0.3) / 0.7) * Math.PI * 0.5)) * blazhko,
+            val: rawPulse * blazhko,
+          };
+        }
+        case 'mira-variables': {
+          const period = 3.6;
+          const phase = (elapsed / period) % 1.0;
+          const pulse = (Math.sin(phase * Math.PI * 2 - Math.PI / 2) + 1) / 2;
+          const isMax = pulse > 0.5;
+          return {
+            title: 'Mira Extreme Envelope Swing & Dust Shroud',
+            period,
+            phase,
+            statusLabel: isMax
+              ? '🔥 Maximum Luminosity & Transparent Photosphere (~3,000 K)'
+              : '🌑 Minimum Temperature & Silicate/Carbon Dust Condensation (~2,000 K)',
+            statusColor: isMax ? '#fb923c' : '#94a3b8',
+            isHighlighted: isMax,
+            curve: (p: number) => (Math.sin(p * Math.PI * 2 - Math.PI / 2) + 1) / 2,
+            val: pulse,
+          };
+        }
+        case 'semiregular-variables': {
+          const period = 3.2;
+          const phase = (elapsed / period) % 1.0;
+          const f1 = elapsed * 0.95;
+          const f2 = elapsed * 1.58 + 1.3;
+          const f3 = elapsed * 0.38 + 2.1;
+          const combined =
+            (Math.sin(f1) + 0.42 * Math.sin(f2) + 0.28 * Math.sin(f3)) / 1.7;
+          return {
+            title: 'Semiregular Multi-Periodic Wave Pulsation',
+            period,
+            phase,
+            statusLabel: '🌊 Multi-Harmonic Mode Interference & Acoustic Radial Breathing',
+            statusColor: '#38bdf8',
+            isHighlighted: true,
+            curve: (p: number) =>
+              Math.sin(p * Math.PI * 2) * 0.45 +
+              Math.sin(p * Math.PI * 4 + 1.3) * 0.2 +
+              Math.sin(p * Math.PI * 6 + 2.1) * 0.12 +
+              0.5,
+            val: (combined + 1) / 2,
+          };
+        }
+        case 'cataclysmic-variables': {
+          const period = 5.8;
+          const phase = (elapsed / period) % 1.0;
+          const isDetonation = phase > 0.72;
+          const novaPhase = isDetonation ? (phase - 0.72) / 0.28 : 0;
+          const novaFlash = isDetonation
+            ? novaPhase < 0.12
+              ? novaPhase / 0.12
+              : Math.exp(-(novaPhase - 0.12) * 5.2)
+            : 0;
+          return {
+            title: 'Cataclysmic Dwarf Nova Accretion Outburst',
+            period,
+            phase,
+            statusLabel: isDetonation
+              ? '💥 THERMAL-VISCOUS DISC COLLAPSE OUTBURST (100x Optical Flux)'
+              : '⏳ Quiescent Mass Accumulation from Red Secondary via L1 Stream',
+            statusColor: isDetonation ? '#f87171' : '#38bdf8',
+            isHighlighted: isDetonation,
+            curve: (p: number) =>
+              p > 0.72
+                ? p - 0.72 < 0.04
+                  ? (p - 0.72) / 0.04
+                  : Math.exp(-((p - 0.76) / 0.24) * 4.8)
+                : 0.08 + 0.03 * Math.sin(p * 24),
+            val: isDetonation ? novaFlash : 0.08,
+          };
+        }
+        case 'eruptive-variables': {
+          const period = 3.6;
+          const phase = (elapsed / period) % 1.0;
+          const isFlaring = phase > 0.58;
+          const flareProgress = isFlaring ? (phase - 0.58) / 0.42 : 0;
+          const flarePower = isFlaring
+            ? flareProgress < 0.08
+              ? flareProgress / 0.08
+              : Math.exp(-(flareProgress - 0.08) * 4.2)
+            : 0;
+          return {
+            title: 'Eruptive Chromospheric Flare Activity',
+            period,
+            phase,
+            statusLabel: isFlaring
+              ? '⚡ MAGNETIC RECONNECTION SUPERFLARE (FRED Spike + CME Ejection)'
+              : '🧲 Active Coronal Magnetic Loops & Flux Tube Shearing',
+            statusColor: isFlaring ? '#fbbf24' : '#38bdf8',
+            isHighlighted: isFlaring,
+            curve: (p: number) =>
+              p > 0.58 ? Math.exp(-((p - 0.58) / 0.42) * 3.6) : 0.07 + 0.02 * Math.sin(p * 30),
+            val: flarePower > 0 ? flarePower : 0.08,
+          };
+        }
+        case 'rotational-variables': {
+          const period = 3.0;
+          const phase = (elapsed / period) % 1.0;
+          return {
+            title: 'Rotational Variability (Alpha² CVn / Plages)',
+            period,
+            phase,
+            statusLabel: '🌐 Photospheric Flux Modulation from Chemical Silicon Plages & Starspots',
+            statusColor: '#38bdf8',
+            isHighlighted: false,
+            curve: (p: number) => 0.5 + 0.38 * Math.sin(p * Math.PI * 2),
+            val: 0.5 + 0.38 * Math.sin(phase * Math.PI * 2),
+          };
+        }
+        case 'eclipsing-binaries': {
+          const period = 3.5;
+          const phase = (elapsed / period) % 1.0;
+          const dist1 = Math.min(Math.abs(phase - 0.25), 1 - Math.abs(phase - 0.25));
+          const dist2 = Math.min(Math.abs(phase - 0.75), 1 - Math.abs(phase - 0.75));
+          let statusText = '☀️ Out-of-Eclipse Combined Flux (Quadrature Maximum)';
+          let statusColor = '#38bdf8';
+          let isHighlighted = false;
+          let light = 1.0;
+          if (dist1 < 0.1) {
+            statusText = '🌑 Primary Minimum: Cooler Secondary Eclipses Searing Primary Star';
+            statusColor = '#f87171';
+            isHighlighted = true;
+            light = 1.0 - (1 - dist1 / 0.1) * 0.75;
+          } else if (dist2 < 0.1) {
+            statusText = '🌘 Secondary Minimum: Primary Star Transit in Front of Secondary';
+            statusColor = '#fbbf24';
+            isHighlighted = true;
+            light = 1.0 - (1 - dist2 / 0.1) * 0.42;
+          }
+          return {
+            title: 'Eclipsing Binary Primary & Secondary Minima',
+            period,
+            phase,
+            statusLabel: statusText,
+            statusColor,
+            isHighlighted,
+            curve: (p: number) => {
+              const d1 = Math.min(Math.abs(p - 0.25), 1 - Math.abs(p - 0.25));
+              const d2 = Math.min(Math.abs(p - 0.75), 1 - Math.abs(p - 0.75));
+              if (d1 < 0.1) return 1.0 - (1 - d1 / 0.1) * 0.75;
+              if (d2 < 0.1) return 1.0 - (1 - d2 / 0.1) * 0.42;
+              return 1.0;
+            },
+            val: light,
+          };
+        }
+        default: {
+          const period = 2.0;
+          const phase = (elapsed / period) % 1.0;
+          const pulse = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
+          const isExp = pulse > 0.5;
+          return {
+            title: 'Acoustic Hydrodynamic Pulsation',
+            period,
+            phase,
+            statusLabel: isExp
+              ? '🔊 Acoustic Radial Expansion Wave (Kappa Opacity Throttle)'
+              : '⚖️ Gravitational Inward Compression (Core Reheating)',
+            statusColor: isExp ? '#38bdf8' : '#94a3b8',
+            isHighlighted: isExp,
+            curve: (p: number) => Math.sin(p * Math.PI * 2) * 0.5 + 0.5,
+            val: pulse,
+          };
+        }
+      }
+    };
+
+    intervalId = setInterval(() => {
+      const now = performance.now();
+      const elapsed = (now - startTime) * 0.001;
+      const data = getTelemetryData(elapsed);
+      setTelemetry({
+        title: data.title,
+        statusLabel: data.statusLabel,
+        statusColor: data.statusColor,
+        isHighlighted: data.isHighlighted,
+        phasePercent: Math.round(data.phase * 100),
+      });
+    }, 100);
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const renderWave = (now: number) => {
+      const elapsed = (now - startTime) * 0.001;
+      const data = getTelemetryData(elapsed);
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(rect.width, 240);
+      const h = Math.max(rect.height, 42);
+
+      if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+      }
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      const padX = 14;
+      const padY = 6;
+      const graphW = w - padX * 2;
+      const graphH = h - padY * 2;
+
+      // Subtle midline
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+      ctx.lineWidth = 0.8;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padX, padY + graphH * 0.5);
+      ctx.lineTo(padX + graphW, padY + graphH * 0.5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw light curve
+      const steps = 80;
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const p = i / steps;
+        const normV = Math.max(0, Math.min(1, data.curve(p)));
+        const x = padX + p * graphW;
+        const y = padY + graphH - normV * graphH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = colorHex || '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = colorHex || '#22d3ee';
+      ctx.shadowBlur = 6;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Area fill under curve
+      ctx.lineTo(padX + graphW, padY + graphH);
+      ctx.lineTo(padX, padY + graphH);
+      ctx.closePath();
+      const fillGrad = ctx.createLinearGradient(0, padY, 0, padY + graphH);
+      fillGrad.addColorStop(0, 'rgba(34, 211, 238, 0.22)');
+      fillGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+
+      // Real-time cursor
+      const cursorX = padX + data.phase * graphW;
+      const cursorY = padY + graphH - Math.max(0, Math.min(1, data.val)) * graphH;
+
+      // Vertical tracking line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(cursorX, padY);
+      ctx.lineTo(cursorX, padY + graphH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Glowing tracking head
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(cursorX, cursorY, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      animationFrameId = requestAnimationFrame(renderWave);
+    };
+
+    animationFrameId = requestAnimationFrame(renderWave);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      clearInterval(intervalId);
+    };
+  }, [variableId, colorHex]);
+
+  return (
+    <div
+      className={`p-2.5 sm:p-3.5 rounded-xl bg-[#020512] border border-cyan-500/25 shadow-[0_4px_20px_rgba(6,182,212,0.12)] min-w-0 w-full flex flex-col gap-1.5 sm:gap-2 ${className}`}
+    >
+      {/* Header with Title and Real-Time Tag */}
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+          <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider shrink-0">
+            Activity Telemetry:
+          </span>
+          <RunningText
+            text={telemetry.title}
+            className="text-xs sm:text-sm font-bold font-mono text-white"
+          />
+        </div>
+        <span className="text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
+          Φ = {telemetry.phasePercent}%
+        </span>
+      </div>
+
+      {/* Real-time status */}
+      <div className="min-w-0">
+        <RunningText
+          text={telemetry.statusLabel}
+          className={`text-[11px] sm:text-xs font-mono font-semibold ${
+            telemetry.statusColor ? '' : telemetry.isHighlighted ? 'text-amber-300' : 'text-slate-300'
+          }`}
+          style={telemetry.statusColor ? { color: telemetry.statusColor } : undefined}
+        />
+      </div>
+
+      {/* Live Waveform Canvas */}
+      <div className="w-full h-11 sm:h-12 rounded-lg overflow-hidden border border-cyan-500/15 bg-[#01030a] relative">
+        <canvas ref={canvasRef} className="w-full h-full block" />
+      </div>
+    </div>
+  );
+};

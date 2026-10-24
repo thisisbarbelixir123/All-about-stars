@@ -6,6 +6,7 @@ interface RunningTextProps {
   containerClassName?: string;
   speed?: number; // Pixels per second for smooth reading speed
   title?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -20,6 +21,7 @@ export const RunningText: React.FC<RunningTextProps> = ({
   containerClassName = '',
   speed = 36, // px per second for natural reading
   title,
+  style,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -89,24 +91,25 @@ export const RunningText: React.FC<RunningTextProps> = ({
         className={`inline-block whitespace-nowrap ${
           isOverflowing ? 'running-title-active' : 'max-w-full truncate'
         } ${className}`}
-        style={
-          isOverflowing
+        style={{
+          ...style,
+          ...(isOverflowing
             ? ({
                 '--container-width': `${containerWidth || 180}px`,
                 '--text-width': `${textWidth || 200}px`,
                 '--marquee-duration': `${duration}s`,
               } as React.CSSProperties)
-            : undefined
-        }
+            : {}),
+        }}
       >
         {text}
       </span>
 
-      {/* Subtle right fade gradient indicator only visible when running and overflowing */}
+      {/* Subtle right fade gradient indicator */}
       {isOverflowing && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-[#060a1a] group-hover:from-[#091129] to-transparent z-10 transition-colors"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-black/30 to-transparent z-10"
         />
       )}
     </div>

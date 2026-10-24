@@ -66,9 +66,9 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Playback & simulation state - default to calm, gentle speed (0.75x) for clarity
+  // Playback & simulation state - default to 1x speed
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [simSpeed, setSimSpeed] = useState<number>(0.75);
+  const [simSpeed, setSimSpeed] = useState<number>(1.0);
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
   const [autoAdvanceSteps, setAutoAdvanceSteps] = useState<boolean>(true);
   const [coreTempMK, setCoreTempMK] = useState<number>(() => {
@@ -1239,6 +1239,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
     coreTempMK,
     selectedFusionId,
     showParticleLabels,
+    activeSubTab,
     initSimulation,
   ]);
 
@@ -1253,405 +1254,541 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
   };
 
   return (
-    <div className="flex flex-col gap-3.5 sm:gap-4 w-full overflow-x-hidden">
-      {/* Visualizer Header Bar & Subtab Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#030718] border border-cyan-500/25 shadow-md">
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <Atom className="w-4 h-4 animate-spin" style={{ animationDuration: '10s' }} />
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-xs sm:text-sm font-mono font-bold text-white uppercase tracking-wider truncate">
-              Thermonuclear Engine Simulation
-            </h4>
-            <p className="text-[10px] sm:text-xs text-slate-400 truncate">
-              Quantum tunneling, Coulomb penetration & nucleosynthesis
-            </p>
-          </div>
-        </div>
+    <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 items-stretch w-full min-w-0 overflow-hidden mobile-landscape:h-[calc(100vh-80px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[calc(100vh-140px)] lg:min-h-[600px] lg:max-h-[800px]">
+      {/* Left / Top Panel: Graphics ONLY (Animations alone on mobile landscape, with zero scrolling) */}
+      <div className="w-full mobile-landscape:w-5/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full mobile-landscape:overflow-hidden lg:overflow-hidden flex flex-col items-center justify-center">
+        {activeSubTab === 'simulation' && (
+          <>
+            {/* Interactive Particle Canvas */}
+            <div className="relative w-full mobile-landscape:w-auto h-full max-h-full aspect-[4/3] max-w-[500px] rounded-xl sm:rounded-2xl bg-[#020512] border border-cyan-500/30 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+              <canvas
+                ref={canvasRef}
+                onClick={handleInjectProton}
+                className="w-full h-full block cursor-pointer"
+                title="Click or tap anywhere on the core canvas to inject a high-energy proton!"
+              />
 
-        {/* View Mode Switcher - Responsive horizontal scrollable tabs on mobile */}
-        <div className="flex items-center gap-1 p-1 bg-[#020512] rounded-lg border border-cyan-500/20 text-[11px] sm:text-xs font-mono w-full sm:w-auto overflow-x-auto scrollbar-none shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('simulation')}
-            className={`px-2.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'simulation'
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Particle Reaction
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('tunneling')}
-            className={`px-2.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'tunneling'
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Quantum Tunneling
-          </button>
-          {selectedFusionId === 'triple-alpha' && (
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('onion')}
-              className={`px-2.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                activeSubTab === 'onion'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Onion Core Shells
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('binding')}
-            className={`px-2.5 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'binding'
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Binding Curve
-          </button>
-        </div>
-      </div>
+              {/* Tap to inject prompt on mobile */}
+              <div className="absolute top-2.5 right-2.5 text-[9px] sm:text-[10px] font-mono text-cyan-400/80 bg-[#040816]/80 px-2 py-0.5 rounded border border-cyan-500/20 pointer-events-none">
+                Tap core to inject
+              </div>
 
-      {/* Main Interactive Screen */}
-      {activeSubTab === 'simulation' && (
-        <div className="flex flex-col gap-3">
-          {/* Dedicated Clean Mobile-Optimized Controls Toolbar */}
-          <div className="p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
-            {/* Left Controls: Play, Reset, Speed */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <button
-                type="button"
-                id="btn-fusion-toggle-play"
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-mono font-bold active:scale-95 min-h-[38px] sm:min-h-[40px]"
-                title={isPlaying ? 'Pause animation' : 'Play animation'}
-              >
-                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 text-emerald-400 fill-current" />}
-                <span>{isPlaying ? 'Pause' : 'Play'}</span>
-              </button>
-
-              <button
-                type="button"
-                id="btn-fusion-reset"
-                onClick={handleReset}
-                className="p-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer active:scale-95 min-h-[38px] sm:min-h-[40px] min-w-[38px] flex items-center justify-center"
-                title="Reset animation step"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-
-              {/* Speed Choices */}
-              <div className="flex items-center p-0.5 bg-[#020512] rounded-lg border border-slate-800 text-[11px] font-mono">
-                {[
-                  { val: 0.5, label: '0.5x Slow' },
-                  { val: 0.75, label: '0.75x Calm' },
-                  { val: 1.25, label: '1.25x' },
-                ].map((s) => (
-                  <button
-                    key={s.val}
-                    type="button"
-                    onClick={() => setSimSpeed(s.val)}
-                    className={`px-2 py-1 rounded font-semibold transition-all cursor-pointer ${
-                      simSpeed === s.val
-                        ? 'bg-amber-500 text-slate-950 font-bold'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+              {/* Live In-Canvas Minimal Status HUD (non-overlapping) */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none px-2.5 py-1 rounded-lg bg-[#040816]/85 border border-cyan-500/20 text-[10px] sm:text-[11px] font-mono">
+                <span className="text-cyan-300 font-bold">
+                  Energy: <span className="text-amber-300">+{totalEnergyMeV.toFixed(2)} MeV</span>
+                </span>
+                <span className="text-slate-300">
+                  Events: <span className="text-emerald-400 font-bold">{reactionsCompleted}</span>
+                </span>
+                <span className="text-slate-400 hidden xs:inline">
+                  T: <span className="text-amber-300">{coreTempMK}M K</span>
+                </span>
               </div>
             </div>
 
-            {/* Right Controls: Auto-Advance & Inject Proton */}
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            {/* Particle Legend Row - Clean, accessible (Hidden on left in mobile landscape) */}
+            <div className="mobile-landscape:hidden flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/15 text-[10px] sm:text-xs font-mono text-slate-300">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
+                  <span>p⁺ (Proton)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
+                  <span>n⁰ (Neutron)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_5px_#06b6d4]" />
+                  <span>e⁺ (Positron)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-indigo-200 shadow-[0_0_5px_#e0e7ff]" />
+                  <span>νe (Neutrino)</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_5px_#fbbf24]" />
+                  <span>γ (Gamma)</span>
+                </span>
+              </div>
               <button
                 type="button"
-                onClick={() => setAutoAdvanceSteps(!autoAdvanceSteps)}
-                className={`text-[10px] sm:text-xs font-mono px-2 py-1 rounded border transition-all cursor-pointer ${
-                  autoAdvanceSteps
-                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
-                    : 'bg-slate-900 text-slate-400 border-slate-800'
-                }`}
+                onClick={() => setShowParticleLabels(!showParticleLabels)}
+                className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px] sm:text-xs ml-auto"
               >
-                {autoAdvanceSteps ? 'Auto-Cycle: ON' : 'Auto-Cycle: OFF'}
-              </button>
-
-              <button
-                type="button"
-                id="btn-fusion-inject-proton"
-                onClick={handleInjectProton}
-                className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-mono text-xs font-bold transition-all shadow-[0_0_12px_rgba(239,68,68,0.35)] flex items-center gap-1.5 cursor-pointer active:scale-95 min-h-[38px]"
-              >
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                <span>Inject Proton</span>
+                {showParticleLabels ? 'Hide Labels' : 'Show Labels'}
               </button>
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Interactive Particle Canvas */}
-          <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[440px] rounded-xl sm:rounded-2xl bg-[#020512] border border-cyan-500/30 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
-            <canvas
-              ref={canvasRef}
-              onClick={handleInjectProton}
-              className="w-full h-full block cursor-pointer"
-              title="Click or tap anywhere on the core canvas to inject a high-energy proton!"
-            />
+        {activeSubTab === 'tunneling' && (
+          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
+            <span className="text-xs font-mono uppercase text-cyan-400 font-bold">
+              Coulomb Potential Hill vs. Wave Penetration
+            </span>
 
-            {/* Tap to inject prompt on mobile */}
-            <div className="absolute top-2.5 right-2.5 text-[9px] sm:text-[10px] font-mono text-cyan-400/80 bg-[#040816]/80 px-2 py-0.5 rounded border border-cyan-500/20 pointer-events-none">
-              Tap core to inject
+            <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
+              <svg viewBox="0 0 400 240" className="w-full h-full">
+                <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
+                <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
+
+                <text x="210" y="225" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                  Distance (r) →
+                </text>
+                <text x="25" y="30" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 25 30)">
+                  Potential Energy (V)
+                </text>
+
+                <rect x="50" y="140" width="40" height="60" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" strokeWidth="1.5" />
+                <text x="70" y="175" fill="#38bdf8" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                  Nuclear Well
+                </text>
+
+                <path d="M 90 40 Q 140 180 370 195" fill="none" stroke="#ef4444" strokeWidth="2.5" />
+                <text x="160" y="65" fill="#f87171" fontSize="10" fontFamily="monospace">
+                  Coulomb Barrier (~1,000 keV)
+                </text>
+
+                <line x1="40" y1="185" x2="370" y2="185" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 4" />
+                <text x="260" y="178" fill="#fbbf24" fontSize="9" fontFamily="monospace">
+                  Kinetic Energy (~1.3 keV)
+                </text>
+
+                <path
+                  d="M 280 185 Q 260 175 240 185 T 200 185 T 160 185 T 120 185 Q 100 185 90 150 Q 80 145 60 155"
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="2"
+                  strokeDasharray="2 2"
+                />
+                <text x="140" y="145" fill="#38bdf8" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                  ψ(r) Wave Tunneling
+                </text>
+              </svg>
             </div>
 
-            {/* Live In-Canvas Minimal Status HUD (non-overlapping) */}
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none px-2.5 py-1 rounded-lg bg-[#040816]/85 border border-cyan-500/20 text-[10px] sm:text-[11px] font-mono">
-              <span className="text-cyan-300 font-bold">
-                Energy: <span className="text-amber-300">+{totalEnergyMeV.toFixed(2)} MeV</span>
-              </span>
-              <span className="text-slate-300">
-                Events: <span className="text-emerald-400 font-bold">{reactionsCompleted}</span>
-              </span>
-              <span className="text-slate-400 hidden xs:inline">
-                T: <span className="text-amber-300">{coreTempMK}M K</span>
-              </span>
+            <div className="text-[11px] font-mono text-slate-400">
+              <span className="text-amber-300 font-bold">The Astonishing Ratio:</span> Classical protons need ~1,000 keV to touch. Solar protons only have ~1.3 keV. The quantum tunneling probability is roughly <span className="text-cyan-300 font-bold">1 in 10²⁸</span> per collision!
             </div>
           </div>
+        )}
 
-          {/* Particle Legend Row - Clean, accessible, and not overlapping canvas */}
-          <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/15 text-[10px] sm:text-xs font-mono text-slate-300">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {activeSubTab === 'onion' && (
+          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col items-center justify-center">
+            <svg viewBox="0 0 320 320" className="w-full max-w-[300px] aspect-square">
+              <circle cx="160" cy="160" r="140" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="115" fill="#0369a1" stroke="#0284c7" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="90" fill="#047857" stroke="#10b981" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="70" fill="#b45309" stroke="#f59e0b" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="50" fill="#c2410c" stroke="#ea580c" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="32" fill="#b91c1c" stroke="#ef4444" strokeWidth="1.5" />
+              <circle cx="160" cy="160" r="16" fill="#475569" stroke="#94a3b8" strokeWidth="1.5" />
+
+              <text x="160" y="38" fill="#e2e8f0" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                Hydrogen Shell (40M K)
+              </text>
+              <text x="160" y="62" fill="#7dd3fc" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                Helium (150M K)
+              </text>
+              <text x="160" y="85" fill="#6ee7b7" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                Carbon (600M K)
+              </text>
+              <text x="160" y="105" fill="#fde68a" fontSize="8" fontFamily="monospace" textAnchor="middle">
+                Neon (1.2B K)
+              </text>
+              <text x="160" y="122" fill="#fdba74" fontSize="8" fontFamily="monospace" textAnchor="middle">
+                Oxygen (1.5B K)
+              </text>
+              <text x="160" y="140" fill="#fca5a5" fontSize="7" fontFamily="monospace" textAnchor="middle">
+                Silicon (3B K)
+              </text>
+              <text x="160" y="163" fill="#ffffff" fontSize="7" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
+                Fe Core
+              </text>
+            </svg>
+          </div>
+        )}
+
+        {activeSubTab === 'binding' && (
+          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
+            <span className="text-xs font-mono uppercase text-emerald-400 font-bold">
+              Binding Energy / Nucleon (MeV) vs. Mass (A)
+            </span>
+
+            <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
+              <svg viewBox="0 0 400 240" className="w-full h-full">
+                <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
+                <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
+
+                <text x="210" y="225" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                  Mass Number (A) →
+                </text>
+                <text x="25" y="40" fill="#94a3b8" fontSize="9" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 25 40)">
+                  MeV / Nucleon
+                </text>
+
+                <path d="M 50 190 Q 70 80 100 65 Q 140 45 180 40 Q 260 55 370 75" fill="none" stroke="#10b981" strokeWidth="3" />
+
+                <circle cx="180" cy="40" r="5" fill="#fbbf24" stroke="#ffffff" strokeWidth="2" />
+                <text x="180" y="25" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
+                  ★ ⁵⁶Fe Peak (8.79 MeV)
+                </text>
+
+                <circle cx="50" cy="190" r="3.5" fill="#ef4444" />
+                <text x="50" y="205" fill="#f87171" fontSize="9" fontFamily="monospace">
+                  ¹H (0)
+                </text>
+
+                <circle cx="70" cy="80" r="3.5" fill="#38bdf8" />
+                <text x="75" y="80" fill="#38bdf8" fontSize="9" fontFamily="monospace">
+                  ⁴He (7.1)
+                </text>
+
+                <circle cx="100" cy="65" r="3.5" fill="#38bdf8" />
+                <text x="105" y="65" fill="#38bdf8" fontSize="9" fontFamily="monospace">
+                  ¹²C (7.7)
+                </text>
+
+                <rect x="42" y="110" width="136" height="85" fill="rgba(16, 185, 129, 0.08)" stroke="rgba(16, 185, 129, 0.3)" />
+                <text x="110" y="150" fill="#34d399" fontSize="9" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
+                  EXOTHERMIC (Releases Energy)
+                </text>
+
+                <rect x="182" y="110" width="194" height="85" fill="rgba(239, 68, 68, 0.08)" stroke="rgba(239, 68, 68, 0.3)" />
+                <text x="280" y="150" fill="#f87171" fontSize="9" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
+                  ENDOTHERMIC (Absorbs Energy)
+                </text>
+              </svg>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Right / Bottom Panel: Everything Else (Scrollable with bounded container) */}
+      <div className="w-full mobile-landscape:w-7/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-3.5 sm:gap-4 pr-1">
+        {/* Particle Legend on mobile landscape */}
+        {activeSubTab === 'simulation' && (
+          <div className="hidden mobile-landscape:flex flex-wrap items-center justify-between gap-1.5 p-1.5 rounded-xl bg-[#030616] border border-cyan-500/20 text-[10px] font-mono text-slate-300">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
-                <span>p⁺ (Proton)</span>
+                <span>p⁺</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
-                <span>n⁰ (Neutron)</span>
+                <span>n⁰</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_5px_#06b6d4]" />
-                <span>e⁺ (Positron)</span>
+                <span>e⁺</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-indigo-200 shadow-[0_0_5px_#e0e7ff]" />
-                <span>νe (Neutrino)</span>
+                <span>νe</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_5px_#fbbf24]" />
-                <span>γ (Gamma)</span>
+                <span>γ</span>
               </span>
             </div>
             <button
               type="button"
               onClick={() => setShowParticleLabels(!showParticleLabels)}
-              className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px] sm:text-xs ml-auto"
+              className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px] ml-auto"
             >
               {showParticleLabels ? 'Hide Labels' : 'Show Labels'}
             </button>
           </div>
+        )}
 
-          {/* Reaction Step Sequence Selector (for p-p chain) */}
-          {selectedFusionId === 'pp-chain' && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {[
-                {
-                  step: 0,
-                  title: 'Step 1: Deuteron Formation',
-                  eq: 'p⁺ + p⁺ → ²H + e⁺ + νe',
-                  energy: '+0.42 MeV',
-                },
-                {
-                  step: 1,
-                  title: 'Step 2: Helium-3 Formation',
-                  eq: '²H + p⁺ → ³He + γ',
-                  energy: '+5.49 MeV',
-                },
-                {
-                  step: 2,
-                  title: 'Step 3: Alpha Synthesis',
-                  eq: '³He + ³He → ⁴He + 2 p⁺',
-                  energy: '+12.86 MeV',
-                },
-              ].map((s) => (
+        {/* Fusion Mechanism Switcher & Subtab Switcher */}
+        <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#030718] border border-cyan-500/25 shadow-md flex flex-col gap-2.5">
+          {onSelectFusionId && (
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono w-full">
+              {FUSION_MECHANISMS.map((mechanism) => (
                 <button
-                  key={s.step}
+                  key={mechanism.id}
                   type="button"
-                  onClick={() => {
-                    setActiveStepIndex(s.step);
-                    initSimulation();
-                  }}
-                  className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    activeStepIndex === s.step
-                      ? 'bg-amber-950/40 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400'
-                      : 'bg-[#040816] border-slate-800 hover:border-slate-700'
+                  onClick={() => onSelectFusionId(mechanism.id)}
+                  className={`flex-1 px-2 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs text-center ${
+                    selectedFusionId === mechanism.id
+                      ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold shadow'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-mono font-bold text-white">{s.title}</span>
-                      <span className="text-[10px] font-mono text-amber-300 font-bold">{s.energy}</span>
-                    </div>
-                    <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300 mt-1">{s.eq}</div>
-                  </div>
+                  {mechanism.id === 'pp-chain' ? 'p-p Chain (≤ 1.3 M☉)' : mechanism.id === 'cno-cycle' ? 'CNO Cycle (> 1.3 M☉)' : 'Advanced Shells'}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Bottom Grid: Core Temperature & Reaction Diagnostics */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-1">
-            {/* Core Temperature Controller */}
-            <div className="md:col-span-6 p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                    Core Temperature
+          {/* View Mode Switcher */}
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-[#020512] rounded-lg border border-cyan-500/20 text-[11px] sm:text-xs font-mono w-full">
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('simulation')}
+              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+                activeSubTab === 'simulation'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Particle Reaction
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('tunneling')}
+              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+                activeSubTab === 'tunneling'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Quantum Tunneling
+            </button>
+            {selectedFusionId === 'triple-alpha' && (
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('onion')}
+                className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+                  activeSubTab === 'onion'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Onion Core Shells
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('binding')}
+              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+                activeSubTab === 'binding'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Binding Curve
+            </button>
+          </div>
+        </div>
+
+        {/* Mode 1 Controls & Telemetry: Particle Reaction Simulation */}
+        {activeSubTab === 'simulation' && (
+          <div className="flex flex-col gap-3">
+            {/* Dedicated Clean Mobile-Optimized Controls Toolbar */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  id="btn-fusion-toggle-play"
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-mono font-bold active:scale-95 min-h-[38px] sm:min-h-[40px]"
+                  title={isPlaying ? 'Pause animation' : 'Play animation'}
+                >
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 text-emerald-400 fill-current" />}
+                  <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="btn-fusion-reset"
+                  onClick={handleReset}
+                  className="p-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer active:scale-95 min-h-[38px] sm:min-h-[40px] min-w-[38px] flex items-center justify-center"
+                  title="Reset animation step"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+
+                {/* Speed Choices */}
+                <div className="flex items-center p-0.5 bg-[#020512] rounded-lg border border-slate-800 text-[11px] font-mono">
+                  {[
+                    { val: 1.0, label: '1x' },
+                    { val: 2.0, label: '2x' },
+                    { val: 4.0, label: '4x' },
+                  ].map((s) => (
+                    <button
+                      key={s.val}
+                      type="button"
+                      onClick={() => setSimSpeed(s.val)}
+                      className={`px-2 py-1 rounded font-semibold transition-all cursor-pointer ${
+                        simSpeed === s.val
+                          ? 'bg-amber-500 text-slate-950 font-bold'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setAutoAdvanceSteps(!autoAdvanceSteps)}
+                  className={`text-[10px] sm:text-xs font-mono px-2 py-1 rounded border transition-all cursor-pointer ${
+                    autoAdvanceSteps
+                      ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
+                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                  }`}
+                >
+                  {autoAdvanceSteps ? 'Auto-Cycle: ON' : 'Auto-Cycle: OFF'}
+                </button>
+
+                <button
+                  type="button"
+                  id="btn-fusion-inject-proton"
+                  onClick={handleInjectProton}
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-mono text-xs font-bold transition-all shadow-[0_0_12px_rgba(239,68,68,0.35)] flex items-center gap-1.5 cursor-pointer active:scale-95 min-h-[38px]"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Inject Proton</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Reaction Step Sequence Selector (for p-p chain) */}
+            {selectedFusionId === 'pp-chain' && (
+              <div className="grid grid-cols-1 mobile-landscape:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2">
+                {[
+                  {
+                    step: 0,
+                    title: 'Step 1: Deuteron Formation',
+                    eq: 'p⁺ + p⁺ → ²H + e⁺ + νe',
+                    energy: '+0.42 MeV',
+                  },
+                  {
+                    step: 1,
+                    title: 'Step 2: Helium-3 Formation',
+                    eq: '²H + p⁺ → ³He + γ',
+                    energy: '+5.49 MeV',
+                  },
+                  {
+                    step: 2,
+                    title: 'Step 3: Alpha Synthesis',
+                    eq: '³He + ³He → ⁴He + 2 p⁺',
+                    energy: '+12.86 MeV',
+                  },
+                ].map((s) => (
+                  <button
+                    key={s.step}
+                    type="button"
+                    onClick={() => {
+                      setActiveStepIndex(s.step);
+                      initSimulation();
+                    }}
+                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      activeStepIndex === s.step
+                        ? 'bg-amber-950/40 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400'
+                        : 'bg-[#040816] border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono font-bold text-white">{s.title}</span>
+                        <span className="text-[10px] font-mono text-amber-300 font-bold">{s.energy}</span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300 mt-1">{s.eq}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Core Temperature & Reaction Diagnostics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Core Temperature Controller */}
+              <div className="p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Flame className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                      Core Temperature
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-amber-300 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/30">
+                    {coreTempMK} Million K
                   </span>
                 </div>
-                <span className="text-xs font-mono font-bold text-amber-300 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/30">
-                  {coreTempMK} Million K
-                </span>
+
+                <input
+                  type="range"
+                  min={selectedFusionId === 'pp-chain' ? 8 : selectedFusionId === 'cno-cycle' ? 14 : 80}
+                  max={selectedFusionId === 'pp-chain' ? 25 : selectedFusionId === 'cno-cycle' ? 60 : 3000}
+                  value={coreTempMK}
+                  onChange={(e) => setCoreTempMK(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 my-1"
+                />
+
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <span>{selectedFusionId === 'pp-chain' ? '8M K' : selectedFusionId === 'cno-cycle' ? '14M K' : '80M K'}</span>
+                  <span className="text-amber-300 font-bold">
+                    {selectedFusionId === 'pp-chain' ? '15M K (Solar Core)' : selectedFusionId === 'cno-cycle' ? '25M K (High-Mass)' : '200M K'}
+                  </span>
+                  <span>{selectedFusionId === 'pp-chain' ? '25M K' : selectedFusionId === 'cno-cycle' ? '60M K' : '3,000M K'}</span>
+                </div>
+
+                <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                  {selectedFusionId === 'pp-chain'
+                    ? 'Energy production scales as ε ∝ T⁴. At 15 million K, a proton in the Sun collides billions of times per second but waits ~9 billion years before a successful fusion event!'
+                    : selectedFusionId === 'cno-cycle'
+                    ? 'The CNO cycle is extraordinarily temperature sensitive: ε ∝ T¹⁶ to T²⁰. A modest 10% rise in core temperature increases fusion power output by over 500%!'
+                    : 'Advanced shells require colossal temperatures up to 3 billion K to overcome the ferocious Coulomb repulsion of 14-proton silicon nuclei.'}
+                </p>
               </div>
 
-              <input
-                type="range"
-                min={selectedFusionId === 'pp-chain' ? 8 : selectedFusionId === 'cno-cycle' ? 14 : 80}
-                max={selectedFusionId === 'pp-chain' ? 25 : selectedFusionId === 'cno-cycle' ? 60 : 3000}
-                value={coreTempMK}
-                onChange={(e) => setCoreTempMK(Number(e.target.value))}
-                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 my-1"
-              />
-
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                <span>{selectedFusionId === 'pp-chain' ? '8M K' : selectedFusionId === 'cno-cycle' ? '14M K' : '80M K'}</span>
-                <span className="text-amber-300 font-bold">
-                  {selectedFusionId === 'pp-chain' ? '15M K (Solar Core)' : selectedFusionId === 'cno-cycle' ? '25M K (High-Mass)' : '200M K'}
+              {/* Subatomic Output Metrics */}
+              <div className="p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5 justify-between">
+                <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5" />
+                  Reaction Output Ticker
                 </span>
-                <span>{selectedFusionId === 'pp-chain' ? '25M K' : selectedFusionId === 'cno-cycle' ? '60M K' : '3,000M K'}</span>
-              </div>
 
-              <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
-                {selectedFusionId === 'pp-chain'
-                  ? 'Energy production scales as ε ∝ T⁴. At 15 million K, a proton in the Sun collides billions of times per second but waits ~9 billion years before a successful fusion event!'
-                  : selectedFusionId === 'cno-cycle'
-                  ? 'The CNO cycle is extraordinarily temperature sensitive: ε ∝ T¹⁶ to T²⁰. A modest 10% rise in core temperature increases fusion power output by over 500%!'
-                  : 'Advanced shells require colossal temperatures up to 3 billion K to overcome the ferocious Coulomb repulsion of 14-proton silicon nuclei.'}
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                    <span className="text-slate-400 text-[10px] block">Total Energy</span>
+                    <span className="text-amber-300 font-bold text-sm">+{totalEnergyMeV.toFixed(2)} MeV</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                    <span className="text-slate-400 text-[10px] block">Fusion Events</span>
+                    <span className="text-emerald-400 font-bold text-sm">{reactionsCompleted}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                    <span className="text-slate-400 text-[10px] block">Positrons (e⁺)</span>
+                    <span className="text-cyan-400 font-bold text-sm">{positronsEmitted}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                    <span className="text-slate-400 text-[10px] block">Neutrinos (νe)</span>
+                    <span className="text-indigo-300 font-bold text-sm">{neutrinosEmitted}</span>
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800 text-[10px] sm:text-[11px] font-mono text-slate-300 flex items-center justify-between">
+                  <span>Mass Defect (Δm = ΔE/c²):</span>
+                  <span className="text-amber-300 font-bold">
+                    {((totalEnergyMeV * 1.78e-30) / 1e-30).toFixed(2)} × 10⁻³⁰ kg
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mode 2 Explanation: Quantum Mechanical Tunneling */}
+        {activeSubTab === 'tunneling' && (
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
+            <div className="border-b border-cyan-500/15 pb-2.5">
+              <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
+                <Zap className="w-4 h-4 text-cyan-400 shrink-0" />
+                Quantum Mechanical Tunneling: The Key to Stellar Life
+              </h4>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                Classical mechanics predicted that the Sun should not shine at 15 million Kelvin. Quantum mechanics solved the paradox.
               </p>
             </div>
 
-            {/* Subatomic Output Metrics */}
-            <div className="md:col-span-6 p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5">
-              <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5" />
-                Reaction Output Ticker
-              </span>
-
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
-                  <span className="text-slate-400 text-[10px] block">Total Energy</span>
-                  <span className="text-amber-300 font-bold text-sm">+{totalEnergyMeV.toFixed(2)} MeV</span>
-                </div>
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
-                  <span className="text-slate-400 text-[10px] block">Fusion Events</span>
-                  <span className="text-emerald-400 font-bold text-sm">{reactionsCompleted}</span>
-                </div>
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
-                  <span className="text-slate-400 text-[10px] block">Positrons (e⁺)</span>
-                  <span className="text-cyan-400 font-bold text-sm">{positronsEmitted}</span>
-                </div>
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
-                  <span className="text-slate-400 text-[10px] block">Neutrinos (νe)</span>
-                  <span className="text-indigo-300 font-bold text-sm">{neutrinosEmitted}</span>
-                </div>
-              </div>
-
-              <div className="p-2 rounded-lg bg-[#020512] border border-slate-800 text-[10px] sm:text-[11px] font-mono text-slate-300 flex items-center justify-between">
-                <span>Mass Defect (Δm = ΔE/c²):</span>
-                <span className="text-amber-300 font-bold">
-                  {((totalEnergyMeV * 1.78e-30) / 1e-30).toFixed(2)} × 10⁻³⁰ kg
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* View Mode 2: Quantum Mechanical Tunneling Deep-Dive */}
-      {activeSubTab === 'tunneling' && (
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-4">
-          <div className="border-b border-cyan-500/15 pb-3">
-            <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
-              <Zap className="w-4 h-4 text-cyan-400 shrink-0" />
-              Quantum Mechanical Tunneling: The Key to Stellar Life
-            </h4>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-              Classical mechanics predicted that the Sun should not shine at 15 million Kelvin. Quantum mechanics solved the paradox.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* SVG Coulomb Barrier Graph */}
-            <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
-              <span className="text-xs font-mono uppercase text-cyan-400 font-bold">
-                Coulomb Potential Hill vs. Wave Penetration
-              </span>
-
-              <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
-                <svg viewBox="0 0 400 240" className="w-full h-full">
-                  <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
-                  <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
-
-                  <text x="210" y="225" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle">
-                    Distance (r) →
-                  </text>
-                  <text x="25" y="30" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 25 30)">
-                    Potential Energy (V)
-                  </text>
-
-                  <rect x="50" y="140" width="40" height="60" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" strokeWidth="1.5" />
-                  <text x="70" y="175" fill="#38bdf8" fontSize="9" fontFamily="monospace" textAnchor="middle">
-                    Nuclear Well
-                  </text>
-
-                  <path d="M 90 40 Q 140 180 370 195" fill="none" stroke="#ef4444" strokeWidth="2.5" />
-                  <text x="160" y="65" fill="#f87171" fontSize="10" fontFamily="monospace">
-                    Coulomb Barrier (~1,000 keV)
-                  </text>
-
-                  <line x1="40" y1="185" x2="370" y2="185" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 4" />
-                  <text x="260" y="178" fill="#fbbf24" fontSize="9" fontFamily="monospace">
-                    Kinetic Energy (~1.3 keV)
-                  </text>
-
-                  <path
-                    d="M 280 185 Q 260 175 240 185 T 200 185 T 160 185 T 120 185 Q 100 185 90 150 Q 80 145 60 155"
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="2"
-                    strokeDasharray="2 2"
-                  />
-                  <text x="140" y="145" fill="#38bdf8" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                    ψ(r) Wave Tunneling
-                  </text>
-                </svg>
-              </div>
-
-              <div className="text-[11px] font-mono text-slate-400">
-                <span className="text-amber-300 font-bold">The Astonishing Ratio:</span> Classical protons need ~1,000 keV to touch. Solar protons only have ~1.3 keV. The quantum tunneling probability is roughly <span className="text-cyan-300 font-bold">1 in 10²⁸</span> per collision!
-              </div>
-            </div>
-
-            {/* Explanation Breakdown */}
             <div className="space-y-2.5">
               <div className="p-3 rounded-lg bg-[#020512] border border-slate-800">
                 <h5 className="text-xs font-mono font-bold text-amber-300 uppercase">1. The Electrostatic Coulomb Wall</h5>
@@ -1675,55 +1812,19 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* View Mode 3: Advanced Massive Star Onion Core */}
-      {activeSubTab === 'onion' && (
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-4">
-          <div className="border-b border-cyan-500/15 pb-3">
-            <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
-              <Layers className="w-4 h-4 text-amber-400 shrink-0" />
-              The Onion-Skin Core of Massive Stars (Pre-Supernova)
-            </h4>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-              Stars over 8 solar masses synthesize elements through successive concentric burning shells, culminating in an inert iron core.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col items-center justify-center">
-              <svg viewBox="0 0 320 320" className="w-full max-w-[260px] aspect-square">
-                <circle cx="160" cy="160" r="140" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="115" fill="#0369a1" stroke="#0284c7" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="90" fill="#047857" stroke="#10b981" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="70" fill="#b45309" stroke="#f59e0b" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="50" fill="#c2410c" stroke="#ea580c" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="32" fill="#b91c1c" stroke="#ef4444" strokeWidth="1.5" />
-                <circle cx="160" cy="160" r="16" fill="#475569" stroke="#94a3b8" strokeWidth="1.5" />
-
-                <text x="160" y="38" fill="#e2e8f0" fontSize="9" fontFamily="monospace" textAnchor="middle">
-                  Hydrogen Shell (40M K)
-                </text>
-                <text x="160" y="62" fill="#7dd3fc" fontSize="9" fontFamily="monospace" textAnchor="middle">
-                  Helium (150M K)
-                </text>
-                <text x="160" y="85" fill="#6ee7b7" fontSize="9" fontFamily="monospace" textAnchor="middle">
-                  Carbon (600M K)
-                </text>
-                <text x="160" y="105" fill="#fde68a" fontSize="8" fontFamily="monospace" textAnchor="middle">
-                  Neon (1.2B K)
-                </text>
-                <text x="160" y="122" fill="#fdba74" fontSize="8" fontFamily="monospace" textAnchor="middle">
-                  Oxygen (1.5B K)
-                </text>
-                <text x="160" y="140" fill="#fca5a5" fontSize="7" fontFamily="monospace" textAnchor="middle">
-                  Silicon (3B K)
-                </text>
-                <text x="160" y="163" fill="#ffffff" fontSize="7" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
-                  Fe Core
-                </text>
-              </svg>
+        {/* Mode 3 Explanation: Advanced Massive Star Onion Core */}
+        {activeSubTab === 'onion' && (
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
+            <div className="border-b border-cyan-500/15 pb-2.5">
+              <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
+                <Layers className="w-4 h-4 text-amber-400 shrink-0" />
+                The Onion-Skin Core of Massive Stars (Pre-Supernova)
+              </h4>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                Stars over 8 solar masses synthesize elements through successive concentric burning shells, culminating in an inert iron core.
+              </p>
             </div>
 
             <div className="space-y-1.5 text-xs font-mono">
@@ -1756,73 +1857,19 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* View Mode 4: Nuclear Binding Energy Curve */}
-      {activeSubTab === 'binding' && (
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-4">
-          <div className="border-b border-cyan-500/15 pb-3">
-            <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-emerald-400 shrink-0" />
-              The Nuclear Binding Energy Curve: Why Fusion Stops at Iron
-            </h4>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
-              Binding energy per nucleon reaches a cosmic peak at Iron-56 (8.8 MeV/nucleon). Fusing beyond iron absorbs energy.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
-              <span className="text-xs font-mono uppercase text-emerald-400 font-bold">
-                Binding Energy / Nucleon (MeV) vs. Mass (A)
-              </span>
-
-              <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
-                <svg viewBox="0 0 400 240" className="w-full h-full">
-                  <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
-                  <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
-
-                  <text x="210" y="225" fill="#94a3b8" fontSize="10" fontFamily="monospace" textAnchor="middle">
-                    Mass Number (A) →
-                  </text>
-                  <text x="25" y="40" fill="#94a3b8" fontSize="9" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 25 40)">
-                    MeV / Nucleon
-                  </text>
-
-                  <path d="M 50 190 Q 70 80 100 65 Q 140 45 180 40 Q 260 55 370 75" fill="none" stroke="#10b981" strokeWidth="3" />
-
-                  <circle cx="180" cy="40" r="5" fill="#fbbf24" stroke="#ffffff" strokeWidth="2" />
-                  <text x="180" y="25" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
-                    ★ ⁵⁶Fe Peak (8.79 MeV)
-                  </text>
-
-                  <circle cx="50" cy="190" r="3.5" fill="#ef4444" />
-                  <text x="50" y="205" fill="#f87171" fontSize="9" fontFamily="monospace">
-                    ¹H (0)
-                  </text>
-
-                  <circle cx="70" cy="80" r="3.5" fill="#38bdf8" />
-                  <text x="75" y="80" fill="#38bdf8" fontSize="9" fontFamily="monospace">
-                    ⁴He (7.1)
-                  </text>
-
-                  <circle cx="100" cy="65" r="3.5" fill="#38bdf8" />
-                  <text x="105" y="65" fill="#38bdf8" fontSize="9" fontFamily="monospace">
-                    ¹²C (7.7)
-                  </text>
-
-                  <rect x="42" y="110" width="136" height="85" fill="rgba(16, 185, 129, 0.08)" stroke="rgba(16, 185, 129, 0.3)" />
-                  <text x="110" y="150" fill="#34d399" fontSize="9" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
-                    EXOTHERMIC (Releases Energy)
-                  </text>
-
-                  <rect x="182" y="110" width="194" height="85" fill="rgba(239, 68, 68, 0.08)" stroke="rgba(239, 68, 68, 0.3)" />
-                  <text x="280" y="150" fill="#f87171" fontSize="9" fontFamily="monospace" fontWeight="bold" textAnchor="middle">
-                    ENDOTHERMIC (Absorbs Energy)
-                  </text>
-                </svg>
-              </div>
+        {/* Mode 4 Explanation: Nuclear Binding Energy Curve */}
+        {activeSubTab === 'binding' && (
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
+            <div className="border-b border-cyan-500/15 pb-2.5">
+              <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
+                <Gauge className="w-4 h-4 text-emerald-400 shrink-0" />
+                The Nuclear Binding Energy Curve: Why Fusion Stops at Iron
+              </h4>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                Binding energy per nucleon reaches a cosmic peak at Iron-56 (8.8 MeV/nucleon). Fusing beyond iron absorbs energy.
+              </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#020512] border border-slate-800 space-y-2 text-xs text-slate-300 leading-relaxed font-sans">
@@ -1837,8 +1884,51 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               </p>
             </div>
           </div>
+        )}
+
+        {/* Active Fusion Mechanism Details */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div>
+              <h4 className="text-sm sm:text-base font-bold text-white font-mono">{activeFusion.title}</h4>
+              <p className="text-xs text-cyan-400 font-mono mt-0.5">{activeFusion.primaryMassRange}</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-slate-400">Core Temp Needed:</span>
+              <span className="px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-500/30 font-bold">
+                {activeFusion.coreTemperatureRequired}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-2.5 sm:p-3 rounded-lg bg-[#040816] border border-amber-500/20 font-mono text-xs text-amber-200">
+            <span className="text-slate-400 block text-[10px] uppercase">Net Nuclear Reaction Equation:</span>
+            <span className="text-amber-300 font-bold text-xs sm:text-sm break-words">{activeFusion.fuelAndProduct}</span>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed break-words">
+            {activeFusion.description}
+          </p>
+
+          {/* Reaction Step Sequence */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono uppercase text-cyan-400 font-bold">Sequential Reaction Stages</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {activeFusion.stepSequence.map((step, idx) => (
+                <div key={idx} className="p-2.5 rounded-lg bg-[#040816] border border-slate-800 text-xs text-slate-300 break-words">
+                  <span className="text-cyan-400 font-bold font-mono mr-1.5">{idx + 1}.</span>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-xs font-mono text-slate-400 border-t border-slate-800 pt-2 flex items-center gap-1.5 break-words">
+            <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span>{activeFusion.keyCharacteristic}</span>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

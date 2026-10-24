@@ -1040,9 +1040,7 @@ export default function App() {
       {activeOverlay && (
         <div className="fixed inset-0 z-50 w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200">
           {/* Encyclopedia Header Bar with Navigation Tabs & Close Button */}
-          <div className={`flex flex-row items-center justify-between ${
-            activeOverlay === 'hr-diagram' ? 'px-2 sm:px-6 py-2 sm:py-3' : 'px-3 sm:px-6 py-2.5 sm:py-3'
-          } border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3`}>
+          <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2 sm:py-3 mobile-landscape:py-1.5 mobile-landscape:px-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
               {/* Left: Encyclopedia Brand Badge & Functionalities */}
               <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
                 <button
@@ -1177,32 +1175,26 @@ export default function App() {
             </div>
 
             {/* Overlay Scrollable Body */}
-            <div className={`flex-1 overflow-y-auto overflow-x-hidden ${
-              activeOverlay === 'hr-diagram'
-                ? 'px-0.5 py-1 sm:p-5 lg:p-6'
-                : activeOverlay === 'catalog' || activeOverlay === 'stellar-systems'
-                ? 'px-2 py-3 sm:p-5 lg:p-6'
-                : 'p-4 sm:p-6 lg:p-8'
-            } scrollbar-thin`}>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 lg:p-10 xl:p-12 mobile-landscape:px-3 mobile-landscape:py-2 scrollbar-thin">
               {activeOverlay === 'catalog' && (
-                <div className="flex flex-col gap-5 sm:gap-6 max-w-7xl mx-auto">
+                <div className="flex flex-col gap-5 sm:gap-6 max-w-7xl mx-auto w-full min-w-0">
                   {/* Hero Banner: Stellar Catalog with Integrated Sub-Pages */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md w-full min-w-0">
                     <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="max-w-3xl">
-                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                          <Grid className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2 min-w-0 w-full">
+                      <div className="max-w-3xl min-w-0">
+                        <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                          <Grid className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
                           <span>Stellar Catalog</span>
                         </h1>
                       </div>
 
                       {/* Sub-page Navigation Tabs inside the Stellar Catalog */}
-                      <div className="flex items-center p-1 rounded-2xl bg-[#020512]/90 border border-cyan-500/30 shrink-0 shadow-lg">
+                      <div className="flex items-center p-1 rounded-xl sm:rounded-2xl bg-[#020512]/90 border border-cyan-500/30 shrink-0 shadow-lg overflow-x-auto no-scrollbar max-w-full">
                         <button
                           id="catalog-subtab-stars"
                           onClick={() => setCatalogSubTab('stars')}
-                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
                             catalogSubTab === 'stars'
                               ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                               : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -1211,7 +1203,7 @@ export default function App() {
                           <Grid className="w-3.5 h-3.5 shrink-0" />
                           <span>Individual Stars</span>
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                            className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded font-mono ${
                               catalogSubTab === 'stars' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-900 text-cyan-300'
                             }`}
                           >
@@ -1222,7 +1214,7 @@ export default function App() {
                         <button
                           id="catalog-subtab-systems"
                           onClick={() => setCatalogSubTab('systems')}
-                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
                             catalogSubTab === 'systems'
                               ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                               : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -1231,7 +1223,7 @@ export default function App() {
                           <Share2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
                           <span>Stellar Systems</span>
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                            className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded font-mono ${
                               catalogSubTab === 'systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-900 text-cyan-300'
                             }`}
                           >
@@ -1282,7 +1274,7 @@ export default function App() {
                       </div>
 
                       {filteredStars.length > 0 ? (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+                        <div className="grid grid-cols-2 min-[380px]:grid-cols-3 mobile-landscape:grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
                           {filteredStars.map((star) => (
                             <StarCard
                               key={star.id}

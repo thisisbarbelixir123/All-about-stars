@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StellarAnatomyLayer, STELLAR_ANATOMY_LAYERS } from '../data/whatIsAStarData';
+import { RunningText } from './RunningText';
 import {
   Layers,
   Thermometer,
@@ -50,120 +51,14 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
   const isLayerActive = (id: string) => displayedLayerId === id;
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[#040816] border border-cyan-500/25 flex flex-col gap-5">
-      {/* Section Header with exact required title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-500/15 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              Stellar Anatomy
-            </h3>
-          </div>
-        </div>
+    <div className="p-2.5 sm:p-5 mobile-landscape:p-2 rounded-2xl bg-[#040816] border border-cyan-500/25 flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 items-stretch min-w-0 mobile-landscape:h-[calc(100vh-80px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[calc(100vh-140px)] lg:min-h-[600px] lg:max-h-[780px] overflow-hidden">
+      {/* Left / Top Panel: Graphics ONLY (Animations alone on mobile landscape, with zero scrolling) */}
+      <div className="w-full mobile-landscape:w-5/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full mobile-landscape:overflow-hidden lg:overflow-hidden flex flex-col items-center justify-center p-2 sm:p-5 mobile-landscape:p-1.5 rounded-2xl bg-[#020512] border border-cyan-500/25 relative overflow-hidden select-none">
+        {/* Subtle starfield/nebular background ambience */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/20 via-cyan-900/10 to-transparent" />
 
-        {/* View & Overlay Mode Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono">
-            <button
-              onClick={() => setViewMode('concentric')}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
-                viewMode === 'concentric'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Full concentric circular cross-section"
-            >
-              Full Cross-Section
-            </button>
-            <button
-              onClick={() => setViewMode('cutaway')}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
-                viewMode === 'cutaway'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="3D spherical cutaway showing exterior surface and internal cross-section"
-            >
-              Cutaway Sphere
-            </button>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-xs font-mono">
-            <button
-              onClick={() => setShowProcesses(!showProcesses)}
-              className={`px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                showProcesses
-                  ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                  : 'bg-[#020512] border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
-              title="Toggle convection currents, photon random walk, and magnetic loops"
-            >
-              <Activity className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Physics Processes</span>
-            </button>
-
-            <button
-              onClick={() => setShowDepthRuler(!showDepthRuler)}
-              className={`px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                showDepthRuler
-                  ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
-                  : 'bg-[#020512] border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
-              title="Toggle radial depth scale calipers"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Depth Scale</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Layer Navigation Tabs / Chips */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-        {STELLAR_ANATOMY_LAYERS.map((layer) => {
-          const isSelected = selectedLayerId === layer.id;
-          const isHovered = hoveredLayerId === layer.id;
-          return (
-            <button
-              key={layer.id}
-              onClick={() => onSelectLayer(layer.id)}
-              onMouseEnter={() => setHoveredLayerId(layer.id)}
-              onMouseLeave={() => setHoveredLayerId(null)}
-              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
-                isSelected
-                  ? 'bg-[#081530] border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400'
-                  : isHovered
-                  ? 'bg-[#061025] border-cyan-500/50 text-slate-200'
-                  : 'bg-[#020512] border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] font-mono font-bold text-cyan-400 truncate">
-                  {layer.depthFraction.split(' ')[0]}
-                </span>
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: layer.accentHex }}
-                />
-              </div>
-              <span className="text-xs font-bold truncate mt-1 text-slate-100 group-hover:text-cyan-200">
-                {layer.name.split('(')[0].replace('The ', '')}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Main Interactive Stage: Cross-Section Visualizer & Detailed Info Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left Column: The Cross-Section of a Star Visual Canvas */}
-        <div className="lg:col-span-6 flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 relative overflow-hidden select-none">
-          {/* Subtle starfield/nebular background ambience */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/20 via-cyan-900/10 to-transparent" />
-
-          {/* Interactive SVG Cross-Section */}
-          <div className="relative w-full max-w-[440px] aspect-square flex items-center justify-center">
+        {/* Interactive SVG Cross-Section */}
+        <div className="relative w-full mobile-landscape:w-auto h-full max-h-full max-w-[440px] aspect-square flex items-center justify-center">
             <svg
               viewBox="0 0 500 500"
               className="w-full h-full drop-shadow-[0_0_30px_rgba(0,0,0,0.8)]"
@@ -770,105 +665,231 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
             </div>
           </div>
 
-          {/* Interactive Hint */}
-          <div className="mt-3 flex items-center justify-between w-full text-[11px] font-mono text-slate-400 px-2">
-            <span>Click or hover any layer in the cross-section</span>
-            <span className="text-cyan-400 font-semibold">{displayedLayer.temperature.split(' ')[0]} K</span>
+          {/* Interactive Hint (Hidden on left in mobile landscape) */}
+          <div className="mt-2.5 mobile-landscape:hidden flex items-center justify-between w-full text-[10px] sm:text-[11px] font-mono text-slate-400 px-1 gap-2 min-w-0">
+            <span className="truncate">Click or hover any layer in cross-section</span>
+            <span className="text-cyan-400 font-semibold shrink-0">{displayedLayer.temperature.split(' ')[0]} K</span>
           </div>
         </div>
 
-        {/* Right Column: Detailed Scientific Information Card (Preserves All Data) */}
-        <div className="lg:col-span-6 flex flex-col gap-4">
-          {/* Header Card with Layer Identity */}
-          <div className="p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 flex flex-col gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-full shrink-0 shadow-sm"
-                  style={{ backgroundColor: activeLayer.accentHex }}
+      {/* Right / Bottom Panel: Everything Else (Scrollable with bounded container) */}
+      <div className="w-full mobile-landscape:w-7/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-3.5 sm:gap-4 pr-1">
+        {/* Interactive Hint at top of right panel in mobile landscape */}
+        <div className="hidden mobile-landscape:flex items-center justify-between w-full text-[10px] font-mono text-slate-400 px-2.5 py-1 rounded-xl bg-[#020512] border border-cyan-500/20">
+          <span className="truncate">Click or hover any layer in cross-section</span>
+          <span className="text-cyan-400 font-semibold shrink-0">{displayedLayer.temperature.split(' ')[0]} K</span>
+        </div>
+
+        {/* View & Overlay Mode Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 rounded-2xl bg-[#020512] border border-cyan-500/20">
+          <div className="flex items-center gap-1 p-1 bg-[#040816] rounded-xl border border-cyan-500/20 text-xs font-mono">
+            <button
+              onClick={() => setViewMode('concentric')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                viewMode === 'concentric'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Full concentric circular cross-section"
+            >
+              Full Cross-Section
+            </button>
+            <button
+              onClick={() => setViewMode('cutaway')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                viewMode === 'cutaway'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="3D spherical cutaway showing exterior surface and internal cross-section"
+            >
+              Cutaway Sphere
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-mono">
+            <button
+              onClick={() => setShowProcesses(!showProcesses)}
+              className={`px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                showProcesses
+                  ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                  : 'bg-[#040816] border-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+              title="Toggle convection currents, photon random walk, and magnetic loops"
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Physics Processes</span>
+            </button>
+
+            <button
+              onClick={() => setShowDepthRuler(!showDepthRuler)}
+              className={`px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                showDepthRuler
+                  ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
+                  : 'bg-[#040816] border-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+              title="Toggle radial depth scale calipers"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Depth Scale</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Layer Navigation Tabs / Chips with RunningText */}
+        <div className="grid grid-cols-2 mobile-landscape:grid-cols-4 sm:grid-cols-4 gap-1.5 sm:gap-2">
+          {STELLAR_ANATOMY_LAYERS.map((layer) => {
+            const isSelected = selectedLayerId === layer.id;
+            const isHovered = hoveredLayerId === layer.id;
+            const shortDepth =
+              layer.id === 'core'
+                ? '0.00'
+                : layer.id === 'radiative'
+                ? '0.25'
+                : layer.id === 'tachocline'
+                ? '~0.70'
+                : layer.id === 'convective'
+                ? '0.70'
+                : layer.id === 'photosphere'
+                ? '1.00'
+                : layer.id === 'chromosphere'
+                ? '1.00+'
+                : layer.id === 'corona'
+                ? 'Outer'
+                : layer.depthFraction.split(' ')[0];
+
+            return (
+              <button
+                key={layer.id}
+                onClick={() => onSelectLayer(layer.id)}
+                onMouseEnter={() => setHoveredLayerId(layer.id)}
+                onMouseLeave={() => setHoveredLayerId(null)}
+                className={`px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between group relative min-w-0 min-h-[58px] sm:min-h-[64px] h-auto ${
+                  isSelected
+                    ? 'bg-[#081530] border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400'
+                    : isHovered
+                    ? 'bg-[#061025] border-cyan-500/50 text-slate-200'
+                    : 'bg-[#020512] border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                  <span className="text-[10px] font-mono font-bold text-cyan-400 shrink-0">
+                    {shortDepth}
+                  </span>
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0 ml-1 shadow-sm"
+                    style={{ backgroundColor: layer.accentHex }}
+                  />
+                </div>
+                <div className="w-full min-w-0 mt-1">
+                  <RunningText
+                    text={layer.name.split('(')[0].replace('The ', '')}
+                    className="text-xs font-bold text-slate-100 group-hover:text-cyan-200 leading-tight"
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Header Card with Layer Identity */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 flex flex-col gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span
+                className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                style={{ backgroundColor: activeLayer.accentHex }}
+              />
+              <span className="text-[11px] font-mono uppercase text-cyan-400 font-bold tracking-wider">
+                Layer Profile
+              </span>
+            </div>
+            <h4 className="text-xl font-black text-white mt-1">{activeLayer.name}</h4>
+            <p className="text-xs font-mono text-slate-300 mt-0.5">{activeLayer.depthFraction}</p>
+          </div>
+
+          {/* Core Physical Metric Grid: Horizontal format on mobile landscape */}
+          <div className="grid grid-cols-1 mobile-landscape:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-2.5 mt-1">
+            <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col mobile-landscape:flex-row md:flex-col lg:flex-col justify-between mobile-landscape:items-center md:items-start lg:items-start gap-1 mobile-landscape:gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold shrink-0">
+                <Thermometer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>Temperature</span>
+              </div>
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
+                <RunningText
+                  text={activeLayer.temperature}
+                  className="text-amber-300 font-mono font-bold text-xs"
                 />
-                <span className="text-[11px] font-mono uppercase text-cyan-400 font-bold tracking-wider">
-                  Layer Profile
-                </span>
               </div>
-              <h4 className="text-xl font-black text-white mt-1">{activeLayer.name}</h4>
-              <p className="text-xs font-mono text-slate-300 mt-0.5">{activeLayer.depthFraction}</p>
             </div>
 
-            {/* Core Physical Metric Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-1">
-              <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold">
-                  <Thermometer className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Temperature</span>
-                </div>
-                <span className="text-amber-300 font-mono font-bold text-xs mt-1">
-                  {activeLayer.temperature}
-                </span>
+            <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col mobile-landscape:flex-row md:flex-col lg:flex-col justify-between mobile-landscape:items-center md:items-start lg:items-start gap-1 mobile-landscape:gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold shrink-0">
+                <Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Density Range</span>
               </div>
-
-              <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold">
-                  <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Density Range</span>
-                </div>
-                <span className="text-cyan-300 font-mono font-bold text-xs mt-1">
-                  {activeLayer.density}
-                </span>
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
+                <RunningText
+                  text={activeLayer.density}
+                  className="text-cyan-300 font-mono font-bold text-xs"
+                />
               </div>
+            </div>
 
-              <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold">
-                  <Atom className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Physical State</span>
-                </div>
-                <span className="text-slate-200 font-sans text-[11px] leading-tight mt-1">
-                  {activeLayer.physicalState}
-                </span>
+            <div className="p-2.5 rounded-xl bg-[#040816] border border-slate-800 flex flex-col mobile-landscape:flex-row md:flex-col lg:flex-col justify-between mobile-landscape:items-center md:items-start lg:items-start gap-1 mobile-landscape:gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-mono uppercase font-bold shrink-0">
+                <Atom className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span>Physical State</span>
+              </div>
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
+                <RunningText
+                  text={activeLayer.physicalState}
+                  className="text-slate-200 font-sans text-[11px] leading-tight"
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Astrophysical Role & Summary */}
-          <div className="p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 space-y-2">
-            <h5 className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Astrophysical Role</span>
-            </h5>
-            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-              {activeLayer.summary}
-            </p>
-          </div>
+        {/* Astrophysical Role & Summary */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 space-y-2">
+          <h5 className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Astrophysical Role</span>
+          </h5>
+          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+            {activeLayer.summary}
+          </p>
+        </div>
 
-          {/* Key Characteristics & Physics Bullet Points */}
-          <div className="p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 space-y-3">
-            <h5 className="text-xs font-mono uppercase text-amber-400 font-bold tracking-wider flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-amber-400" />
-              <span>Key Characteristics & Physics</span>
-            </h5>
-            <ul className="space-y-2">
-              {activeLayer.details.map((detail, idx) => (
-                <li key={idx} className="text-xs text-slate-300 flex items-start gap-2.5 leading-relaxed">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-                  <span>{detail}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Key Characteristics & Physics Bullet Points */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#020512] border border-cyan-500/25 space-y-3">
+          <h5 className="text-xs font-mono uppercase text-amber-400 font-bold tracking-wider flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-amber-400" />
+            <span>Key Characteristics & Physics</span>
+          </h5>
+          <ul className="space-y-2">
+            {activeLayer.details.map((detail, idx) => (
+              <li key={idx} className="text-xs text-slate-300 flex items-start gap-2.5 leading-relaxed">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
+                <span>{detail}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          {/* Energy Transport & Physical Gradient Footnote */}
-          <div className="p-3.5 rounded-xl bg-[#040816] border border-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-            <span>Energy Transport Mode:</span>
-            <span className="text-white font-bold">
-              {activeLayer.id === 'core' && 'Thermonuclear Fusion (p-p & CNO)'}
-              {activeLayer.id === 'radiative' && 'Radiative Diffusion (Photon Random Walk)'}
-              {activeLayer.id === 'tachocline' && 'Magnetic Dynamo Shear Interface'}
-              {activeLayer.id === 'convective' && 'Buoyant Thermal Plasma Convection'}
-              {activeLayer.id === 'photosphere' && 'Optical Blackbody Radiation (Visible Light)'}
-              {activeLayer.id === 'chromosphere' && 'Acoustic & Alfvén Wave Dissipation'}
-              {activeLayer.id === 'corona' && 'Magnetic Reconnection & Solar Wind'}
-            </span>
-          </div>
+        {/* Energy Transport & Physical Gradient Footnote */}
+        <div className="p-3.5 rounded-xl bg-[#040816] border border-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+          <span>Energy Transport Mode:</span>
+          <span className="text-white font-bold">
+            {activeLayer.id === 'core' && 'Thermonuclear Fusion (p-p & CNO)'}
+            {activeLayer.id === 'radiative' && 'Radiative Diffusion (Photon Random Walk)'}
+            {activeLayer.id === 'tachocline' && 'Magnetic Dynamo Shear Interface'}
+            {activeLayer.id === 'convective' && 'Buoyant Thermal Plasma Convection'}
+            {activeLayer.id === 'photosphere' && 'Optical Blackbody Radiation (Visible Light)'}
+            {activeLayer.id === 'chromosphere' && 'Acoustic & Alfvén Wave Dissipation'}
+            {activeLayer.id === 'corona' && 'Magnetic Reconnection & Solar Wind'}
+          </span>
         </div>
       </div>
     </div>

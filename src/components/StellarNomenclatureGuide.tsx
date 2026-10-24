@@ -130,17 +130,17 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 text-slate-200">
+    <div className="space-y-4 sm:space-y-6 md:space-y-6 lg:space-y-8 text-slate-200">
       {/* HEADER SECTION - Uniform Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-8 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-4xl">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-              <Bookmark className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-1 sm:space-y-1.5 md:space-y-2 max-w-4xl">
+            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+              <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
               <span>Stellar Nomenclature &amp; Designations</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
               From ancient Arabic and Greek proper names to multi-tier Bayer systems, numbered coordinate catalogs (Flamsteed &amp; Gould), variable star lettering, modern deep surveys (Gaia, SDSS, 2MASS, HD), star cluster designations, and multi-tier binary hierarchies.
             </p>
           </div>
@@ -148,14 +148,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       </div>
 
       {/* TOP NAVIGATION TABS - Clean typographic tabs without badges */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25">
+      <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar pb-1 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25">
         {NOMENCLATURE_TOPICS.map((topic) => {
           const isActive = activeTab === topic.id;
           return (
             <button
               key={topic.id}
               onClick={() => setActiveTab(topic.id)}
-              className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3.5 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isActive
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -171,16 +171,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 2. TRADITIONAL PROPER NAMES TAB */}
       {activeTab === 'proper-names' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>How Stars Received Their Proper Names</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy—such as Betelgeuse, Vega, and Aldebaran—formally standardized by the IAU Working Group on Star Names (WGSN).
               </p>
             </div>
@@ -353,16 +353,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 3. BAYER DESIGNATIONS TAB - Multi-Tier System */}
       {activeTab === 'bayer' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner: Bayer Designations */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Bookmark className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>The Multi-Tier Bayer System</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Introduced in Johann Bayer’s landmark 1603 celestial atlas Uranometria, this hierarchical system combines Greek letters, lowercase Latin, and uppercase Latin with constellation genitives, systematically mapping stars where Greek letters were exhausted.
               </p>
             </div>
@@ -653,16 +653,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 4. NUMBERED DESIGNATIONS TAB - Flamsteed & Gould Systems */}
       {activeTab === 'numbered' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <List className="w-6 h-6 sm:w-7 sm:h-7 text-sky-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <List className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                 <span>Numbered Designations: Flamsteed &amp; Gould Systems</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Unlike Greek letters, numbered stellar designations are ordered sequentially from West to East across constellations by Right Ascension rather than visual brightness.
               </p>
             </div>
@@ -770,16 +770,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 5. VARIABLE STAR NOMENCLATURE (ARGELANDER) TAB */}
       {activeTab === 'variable' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Activity className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-rose-400 shrink-0" />
                 <span>The 4-Phase Argelander Variable System</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 As astronomers discovered pulsating and eruptive stars, Friedrich Wilhelm Argelander devised a standardized 4-phase sequence starting at letter R to guarantee zero collisions with Bayer designations.
               </p>
             </div>
@@ -963,16 +963,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 6. MODERN CATALOGS TAB - Expanded with Luyten, Durchmusterung, Wolf, Ross, Tycho, SAO, WDS */}
       {activeTab === 'catalogs' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Database className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Database className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
                 <span>Major Astronomical Catalogs</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 From foundational 19th-century visual surveys to modern spaceborne astrometry (Gaia, Hipparcos), exoplanet hunters (TESS, Kepler), and infrared sky surveys (WISE, 2MASS), explore the standardized numbering schemes that index the cosmos.
               </p>
             </div>
@@ -1094,16 +1094,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 7. CLUSTERS & EXTRAGALACTIC NOMENCLATURE TAB - Brand New Section */}
       {activeTab === 'clusters-extragalactic' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Globe className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-emerald-400 shrink-0" />
                 <span>Star Clusters &amp; Extragalactic Nomenclature</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 When stars reside in dense super star clusters or neighboring galaxies (the Magellanic Clouds, Andromeda, and distant lensed arcs), astronomers use specialized cluster and extragalactic designation systems. Click on any showcased star to open its interactive 3D dossier.
               </p>
             </div>
@@ -1198,16 +1198,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 8. MISCELLANEOUS NAMES TAB - Expanded to NML Cygni and Unconventional Lore */}
       {activeTab === 'misc-names' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Tag className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Tag className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>Miscellaneous Astronomical Names</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Throughout history, astronomers have bestowed evocative astronomer-initial acronyms (like NML Cygni), discoverer eponyms, color descriptions, and celestial epithets that have become universally famous.
               </p>
             </div>
@@ -1263,16 +1263,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 9. NON-STARS WITH STELLAR DESIGNATIONS TAB */}
       {activeTab === 'non-stars' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-rose-400 shrink-0" />
                 <span>Non-Stars with Stellar Designations</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Before modern high-resolution telescopes and spectroscopy, astronomers frequently mistook star clusters, nebulae, and supernovae for single stars—leaving celestial wonders bearing Bayer Greek letters or Flamsteed numbers today.
               </p>
             </div>
@@ -1336,16 +1336,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 10. COMPONENTS & EXOPLANETS TAB - Expanded with Two Tiers of Stellar Components */}
       {activeTab === 'components-planets' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <Binary className="w-6 h-6 sm:w-7 sm:h-7 text-purple-400 shrink-0" />
+            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                <Binary className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-purple-400 shrink-0" />
                 <span>Stellar Components vs. Exoplanet Lettering</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                 Learn how uppercase letters denote major physical stellar components, lowercase suffixes split spectroscopic binaries, and lowercase planet designations track exoplanetary discoveries.
               </p>
             </div>
@@ -1449,24 +1449,24 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
       {/* 11. MASTERY QUIZ TAB */}
       {activeTab === 'quiz' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-2 max-w-2xl">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                  <Award className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 shrink-0" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
+              <div className="space-y-1 sm:space-y-1.5 md:space-y-2 max-w-2xl">
+                <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                   <span>Stellar Nomenclature Mastery Quiz</span>
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
+                <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                   Test your mastery across proper names, Bayer tiers, Flamsteed numbering, Argelander variable phases, catalog acronyms, and exoplanet lettering.
                 </p>
               </div>
 
               {isQuizSubmitted && (
                 <div className="flex items-center gap-3 shrink-0">
-                  <div className="px-3 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400 text-cyan-300 font-mono text-xs font-bold">
+                  <div className="px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-xl bg-cyan-950/80 border border-cyan-400 text-cyan-300 font-mono text-[11px] sm:text-xs font-bold">
                     Score: {quizScore} / {NOMENCLATURE_QUIZ_QUESTIONS.length}
                   </div>
                   <button

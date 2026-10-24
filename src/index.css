@@ -194,18 +194,35 @@
 .running-title-active {
   display: inline-block;
   white-space: nowrap;
-  transform: translateX(0);
+  animation: running-title-marquee var(--marquee-duration, 8s) linear infinite;
   will-change: transform;
 }
 
-/* Triggered by hovering in the cards (.group) or hovering the title */
-.group:hover .running-title-active,
+/* Pause running marquee on hover so the user can easily read or click */
 .running-title-active:hover {
-  animation: running-title-marquee var(--marquee-duration, 10s) linear infinite;
+  animation-play-state: paused;
 }
 
 /* Safe area padding for mobile landscape */
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
 }
+
+/* Stellar Life Cycle Visualizer: Relocate slider to top of right panel on mobile landscape */
+.stellar-slider-mobile-landscape-only {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .stellar-slider-left-panel {
+    display: none !important;
+  }
+  .stellar-slider-mobile-landscape-only {
+    display: block !important;
+  }
+}
+
+@custom-variant mobile-landscape (@media (orientation: landscape) and (max-height: 500px));
+
+
 

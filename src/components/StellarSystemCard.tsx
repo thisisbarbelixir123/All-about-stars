@@ -50,7 +50,7 @@ export const StellarSystemCard: React.FC<StellarSystemCardProps> = ({
           onViewDetails(system);
         }
       }}
-      className="group relative bg-[#060a1a]/95 hover:bg-[#091129] border border-cyan-500/30 hover:border-cyan-400 rounded-xl p-2.5 sm:p-3 md:p-3.5 transition-all duration-200 shadow-sm hover:shadow-[0_6px_20px_rgba(6,182,212,0.28)] hover:-translate-y-0.5 active:translate-y-0 flex flex-col justify-between gap-2 sm:gap-2.5 backdrop-blur-xl cursor-pointer select-none overflow-hidden min-h-[125px] sm:min-h-[135px] md:min-h-[148px]"
+      className="group relative bg-[#060a1a]/95 hover:bg-[#091129] border border-cyan-500/30 hover:border-cyan-400 rounded-xl p-2.5 sm:p-3 md:p-3.5 transition-all duration-200 shadow-sm hover:shadow-[0_6px_20px_rgba(6,182,212,0.28)] hover:-translate-y-0.5 active:translate-y-0 flex flex-col justify-between gap-2 sm:gap-2.5 backdrop-blur-xl cursor-pointer select-none overflow-hidden min-h-[125px] sm:min-h-[135px] md:min-h-[148px] w-full min-w-0"
       title={`Open ${system.name} 3D Dossier`}
     >
       {/* Top Section: System Name & Spectral Dots */}
@@ -102,7 +102,7 @@ export const StellarSystemCard: React.FC<StellarSystemCardProps> = ({
       </div>
 
       {/* 3-Column Astronomical Metrics Strip */}
-      <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-cyan-500/20 text-center font-mono">
+      <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-cyan-500/20 text-center font-mono w-full min-w-0">
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Stars</span>
           <span className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate">
