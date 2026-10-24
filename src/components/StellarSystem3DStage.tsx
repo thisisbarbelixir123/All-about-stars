@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import * as THREE from 'three';
 import { 
   Play, 
@@ -77,6 +78,7 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
   const [focusedStarId, setFocusedStarId] = useState<string | null>(selectedStarId);
   const [telemetry, setTelemetry] = useState<SystemOrbitalTelemetry | null>(null);
   const [isTelemetryExpanded, setIsTelemetryExpanded] = useState<boolean>(false);
+  const [isMobileFocusOpen, setIsMobileFocusOpen] = useState<boolean>(false);
 
   const orbitalSimTimeYearsRef = useRef<number>(0);
   const starMeshesRef = useRef<Map<string, THREE.Group | THREE.Mesh>>(new Map());
@@ -827,240 +829,310 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
     cameraStateRef.current.targetRadius = Math.max(5.0, Math.min(fitRadius * 0.35, 26.0));
   };
 
-  return (
-    <div className="relative w-full h-full min-h-[380px] sm:min-h-[440px] lg:min-h-[500px] rounded-2xl overflow-hidden bg-[#030616] border border-purple-500/30 shadow-2xl flex flex-col select-none">
-      {/* 3D Canvas Viewport Container */}
-      <div className="relative w-full flex-1 min-h-0 overflow-hidden">
-        {/* 3D Canvas Viewport */}
-        <div
-          ref={containerRef}
-          className="w-full h-full relative cursor-grab active:cursor-grabbing overflow-hidden"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-        />
+  const [toolbarPortalEl, setToolbarPortalEl] = useState<HTMLElement | null>(null);
 
-        {/* HTML 3D Projected Labels */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Barycenter Label */}
-          <div
-            ref={barycenterLabelRef}
-            className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer"
-            onClick={handleFocusBarycenter}
-          >
-            <div className="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-[10px] font-mono font-bold text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.4)] whitespace-nowrap flex items-center gap-1 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              <span>Mutual Barycenter</span>
-            </div>
-          </div>
+  useEffect(() => {
+    const findSlot = () => {
+      const el = document.getElementById('stellar-system-toolbar-slot');
+      if (el) setToolbarPortalEl(el);
+    };
+    findSlot();
+    const timer = setTimeout(findSlot, 60);
+    return () => clearTimeout(timer);
+  }, []);
 
-          {/* Individual Star Labels */}
-          {system.components.map((comp) => (
-            <div
-              key={comp.id}
-              ref={(el) => {
-                labelsMapRef.current.set(comp.id, el);
+  const bottomControlBar = (
+    <div
+      className={`p-2 sm:p-2.5 bg-[#05091e]/95 backdrop-blur-xl border border-purple-500/25 rounded-xl flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 z-10 shadow-lg ${
+        toolbarPortalEl ? 'w-full mb-3' : 'border-t'
+      }`}
+    >
+      {/* Mobile Focus Selector (Collapsed by default to eliminate overflow) */}
+      <div className="relative sm:hidden">
+        <button
+          onClick={() => setIsMobileFocusOpen((prev) => !prev)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-purple-950/80 border border-purple-500/40 text-[11px] font-mono text-purple-200 active:scale-95 cursor-pointer"
+          title="Choose target to center camera"
+        >
+          <span className="text-[10px] text-purple-400 font-bold">Focus:</span>
+          <span className="text-white font-bold max-w-[85px] truncate">
+            {focusedStarId === null
+              ? 'Barycenter'
+              : system.components.find((c) => c.id === focusedStarId)?.name.replace(/Pair|\(.*\)/g, '').trim() || 'Star'}
+          </span>
+          <ChevronUp className={`w-3 h-3 text-purple-400 transition-transform ${isMobileFocusOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isMobileFocusOpen && (
+          <div className="absolute top-full mt-1.5 left-0 w-44 bg-[#05091e]/98 border border-purple-500/50 rounded-xl p-1.5 shadow-2xl backdrop-blur-xl z-50 flex flex-col gap-1 max-h-48 overflow-y-auto scrollbar-thin">
+            <button
+              onClick={() => {
+                handleFocusBarycenter();
+                setIsMobileFocusOpen(false);
               }}
-              className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer group"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFocusStar(comp.id);
-              }}
+              className={`px-2 py-1.5 rounded text-left text-xs font-mono font-bold transition-all cursor-pointer ${
+                focusedStarId === null
+                  ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400'
+                  : 'text-slate-300 hover:bg-white/10'
+              }`}
             >
-              <div
-                className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold shadow-md whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md transition-all ${
+              Mutual Barycenter
+            </button>
+            {system.components.map((comp) => (
+              <button
+                key={comp.id}
+                onClick={() => {
+                  handleFocusStar(comp.id);
+                  setIsMobileFocusOpen(false);
+                }}
+                className={`px-2 py-1.5 rounded text-left text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   focusedStarId === comp.id
-                    ? 'bg-purple-900/90 border-purple-300 text-white ring-2 ring-purple-400/50 scale-105'
-                    : 'bg-black/75 border-slate-700/80 text-slate-200 group-hover:border-cyan-400 group-hover:text-cyan-300'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-slate-300 hover:bg-white/10'
                 }`}
               >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: comp.colorHex }}
-                />
-                <span>{comp.name}</span>
-                <span className="text-[9px] text-slate-400 font-normal">({comp.spectralType})</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Top Controls Overlay: Quick Camera Reset & Simulation Toggles (Redundant title removed) */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-auto z-20">
-          <button
-            onClick={() => setShowOrbitPaths((prev) => {
-              if (orbitLinesGroupRef.current) orbitLinesGroupRef.current.visible = !prev;
-              return !prev;
-            })}
-            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
-              showOrbitPaths
-                ? 'bg-purple-950/80 border-purple-400/60 text-purple-300'
-                : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
-            }`}
-            title="Toggle Keplerian Orbit Paths"
-          >
-            <Orbit className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={() => setShowGrid((prev) => {
-              if (gridHandleRef.current) gridHandleRef.current.mesh.visible = !prev;
-              return !prev;
-            })}
-            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
-              showGrid
-                ? 'bg-blue-950/80 border-blue-400/60 text-blue-300'
-                : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
-            }`}
-            title="Toggle Continuous Orbital Plane Grid"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={resetCamera}
-            className="p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-slate-700 hover:border-cyan-400 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md active:scale-95"
-            title="Reset 3D Camera"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Telemetry HUD (Bottom-Left of Canvas) - Hidden on mobile, collapsed by default to prevent control overlap */}
-        {telemetry && (
-          <div className="hidden sm:block absolute bottom-3 left-3 z-20 pointer-events-auto">
-            {!isTelemetryExpanded ? (
-              /* Collapsed Pill Button (Default) */
-              <button
-                onClick={() => setIsTelemetryExpanded(true)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-purple-950/90 backdrop-blur-md border border-purple-500/40 hover:border-purple-400/70 text-xs font-mono text-purple-200 transition-all shadow-lg cursor-pointer group active:scale-95"
-                title="Expand Real-Time Orbital Telemetry"
-              >
-                <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                <span className="font-bold text-[11px] text-white tracking-wide">Orbital Telemetry</span>
-                <span className="text-[10px] text-cyan-300 font-mono px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40">
-                  {telemetry.orbitalPhasePercent.toFixed(0)}%
-                </span>
-                <ChevronUp className="w-3.5 h-3.5 text-purple-400 transition-transform group-hover:text-white" />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: comp.colorHex }} />
+                <span className="truncate">{comp.name.replace(/Pair|\(.*\)/g, '').trim()}</span>
               </button>
-            ) : (
-              /* Expanded Card */
-              <div className="w-[280px] max-w-[calc(100vw-3rem)] rounded-xl bg-[#040618]/95 backdrop-blur-xl border border-purple-500/40 text-xs font-mono text-slate-300 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                {/* Header with Clickable Collapse */}
-                <div
-                  onClick={() => setIsTelemetryExpanded(false)}
-                  className="flex items-center justify-between px-3 py-2 bg-purple-950/50 hover:bg-purple-900/60 border-b border-purple-500/30 cursor-pointer transition-colors"
-                  title="Click to collapse telemetry"
-                >
-                  <div className="flex items-center gap-1.5 text-[11px] text-purple-200 font-bold tracking-wider">
-                    <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                    <span>ORBITAL TELEMETRY</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-400/40">
-                      {telemetry.orbitalPhasePercent.toFixed(0)}%
-                    </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-purple-400 hover:text-white transition-colors" />
-                  </div>
-                </div>
-
-                {/* Telemetry Metrics Body */}
-                <div className="p-2.5 space-y-1.5 text-[10px] bg-black/60 max-h-[190px] overflow-y-auto scrollbar-thin">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Separation:</span>
-                    <span className="text-white font-bold">{telemetry.currentSeparationAU} AU ({telemetry.currentSeparationKm.toLocaleString()} km)</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Rel. Speed:</span>
-                    <span className="text-emerald-400 font-bold">{telemetry.relativeVelocityKmS} km/s</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">True Anomaly:</span>
-                    <span className="text-cyan-300 font-bold">{telemetry.trueAnomalyDeg}°</span>
-                  </div>
-                  {telemetry.isNearPeriastron && (
-                    <div className="text-[9px] text-amber-300 font-bold text-center bg-amber-950/70 rounded px-1.5 py-0.5 border border-amber-500/40">
-                      ⚡ AT PERIASTRON (CLOSEST APPROACH)
-                    </div>
-                  )}
-                  {telemetry.isNearApastron && (
-                    <div className="text-[9px] text-sky-300 font-bold text-center bg-sky-950/70 rounded px-1.5 py-0.5 border border-sky-500/40">
-                      ❄️ AT APASTRON (FURTHEST APART)
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         )}
       </div>
 
-      {/* Bottom Control Bar: Focus Selector & Time Controls */}
-      <div className="p-2 sm:p-2.5 bg-[#05091e]/95 backdrop-blur-xl border-t border-purple-500/25 flex flex-wrap items-center justify-between gap-2 z-10">
-        {/* Star Focus Buttons */}
-        <div className="flex items-center gap-1 overflow-x-auto max-w-full scrollbar-none py-0.5">
-          <span className="text-[10px] font-mono text-purple-400 font-bold px-1 shrink-0">Focus:</span>
+      {/* Desktop/Tablet Star Focus Buttons (Horizontal Row) */}
+      <div className="hidden sm:flex items-center gap-1 overflow-x-auto max-w-full scrollbar-none py-0.5">
+        <span className="text-[10px] font-mono text-purple-400 font-bold px-1 shrink-0">Focus:</span>
+        <button
+          onClick={handleFocusBarycenter}
+          className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
+            focusedStarId === null
+              ? 'bg-cyan-500/30 border border-cyan-400 text-cyan-200'
+              : 'bg-black/40 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-white/10'
+          }`}
+        >
+          Barycenter
+        </button>
+        {system.components.map((comp) => (
           <button
-            onClick={handleFocusBarycenter}
-            className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
-              focusedStarId === null
-                ? 'bg-cyan-500/30 border border-cyan-400 text-cyan-200'
+            key={comp.id}
+            onClick={() => handleFocusStar(comp.id)}
+            className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
+              focusedStarId === comp.id
+                ? 'bg-purple-600 border border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.5)]'
                 : 'bg-black/40 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            Barycenter
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: comp.colorHex }} />
+            <span>{comp.name.replace(/Pair|\(.*\)/g, '').trim()}</span>
           </button>
-          {system.components.map((comp) => (
-            <button
-              key={comp.id}
-              onClick={() => handleFocusStar(comp.id)}
-              className={`px-2 py-1 rounded text-xs font-mono font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
-                focusedStarId === comp.id
-                  ? 'bg-purple-600 border border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.5)]'
-                  : 'bg-black/40 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: comp.colorHex }} />
-              <span>{comp.name.replace(/Pair|\(.*\)/g, '').trim()}</span>
-            </button>
-          ))}
-        </div>
+        ))}
+      </div>
 
-        {/* Time Playback & Speed Controls */}
-        <div className="flex items-center gap-1.5 shrink-0">
+      {/* Time Playback & Speed Controls */}
+      <div className="flex items-center gap-1 sm:gap-1.5 ml-auto">
+        <button
+          onClick={() => setIsOrbitPlaying((prev) => !prev)}
+          className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+            isOrbitPlaying
+              ? 'bg-emerald-950/80 border-emerald-500/60 text-emerald-300 hover:bg-emerald-900/90'
+              : 'bg-amber-950/80 border-amber-500/60 text-amber-300 hover:bg-amber-900/90'
+          }`}
+          title={isOrbitPlaying ? 'Pause Orbital Motion' : 'Resume Orbital Motion'}
+        >
+          {isOrbitPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+        </button>
+
+        {[0.5, 1.0, 2.0, 5.0].map((speed) => (
           <button
-            onClick={() => setIsOrbitPlaying((p) => !p)}
-            className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
-              isOrbitPlaying
-                ? 'bg-emerald-950/80 border-emerald-400 text-emerald-300'
-                : 'bg-amber-950/80 border-amber-400 text-amber-300'
+            key={speed}
+            onClick={() => setOrbitSpeedMultiplier(speed)}
+            className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer ${
+              orbitSpeedMultiplier === speed
+                ? 'bg-purple-600 border border-purple-300 text-white shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+                : 'bg-black/40 border border-slate-700/60 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
-            title={isOrbitPlaying ? 'Pause Simulation' : 'Resume Simulation'}
           >
-            {isOrbitPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            {speed}x
           </button>
-
-          <div className="flex items-center bg-black/60 border border-slate-700 rounded-lg p-0.5 text-[10px] font-mono text-slate-300">
-            {[0.5, 1.0, 2.0, 5.0].map((speed) => (
-              <button
-                key={speed}
-                onClick={() => setOrbitSpeedMultiplier(speed)}
-                className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
-                  orbitSpeedMultiplier === speed
-                    ? 'bg-purple-600 text-white font-bold'
-                    : 'hover:text-white text-slate-400'
-                }`}
-              >
-                {speed}x
-              </button>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {toolbarPortalEl && createPortal(bottomControlBar, toolbarPortalEl)}
+      <div className="relative w-full h-[320px] xs:h-[360px] sm:h-[420px] landscape:h-full lg:h-[480px] rounded-2xl overflow-hidden bg-[#030616] border border-purple-500/30 shadow-2xl flex flex-col select-none">
+        {/* 3D Canvas Viewport Container */}
+        <div className="relative w-full flex-1 min-h-0 overflow-hidden">
+          {/* 3D Canvas Viewport */}
+          <div
+            ref={containerRef}
+            className="w-full h-full relative cursor-grab active:cursor-grabbing overflow-hidden"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+          />
+
+          {/* HTML 3D Projected Labels */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {/* Barycenter Label */}
+            <div
+              ref={barycenterLabelRef}
+              className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer"
+              onClick={handleFocusBarycenter}
+            >
+              <div className="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-[10px] font-mono font-bold text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.4)] whitespace-nowrap flex items-center gap-1 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span>Mutual Barycenter</span>
+              </div>
+            </div>
+
+            {/* Individual Star Labels */}
+            {system.components.map((comp) => (
+              <div
+                key={comp.id}
+                ref={(el) => {
+                  labelsMapRef.current.set(comp.id, el);
+                }}
+                className="absolute top-0 left-0 transition-opacity duration-150 pointer-events-auto cursor-pointer group"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFocusStar(comp.id);
+                }}
+              >
+                <div
+                  className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono font-bold shadow-md whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md transition-all ${
+                    focusedStarId === comp.id
+                      ? 'bg-purple-900/90 border-purple-300 text-white ring-2 ring-purple-400/50 scale-105'
+                      : 'bg-black/75 border-slate-700/80 text-slate-200 group-hover:border-cyan-400 group-hover:text-cyan-300'
+                  }`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: comp.colorHex }}
+                  />
+                  <span>{comp.name}</span>
+                  <span className="text-[9px] text-slate-400 font-normal">({comp.spectralType})</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Top Controls Overlay: Quick Camera Reset & Simulation Toggles */}
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 pointer-events-auto z-20">
+            <button
+              onClick={() => setShowOrbitPaths((prev) => {
+                if (orbitLinesGroupRef.current) orbitLinesGroupRef.current.visible = !prev;
+                return !prev;
+              })}
+              className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
+                showOrbitPaths
+                  ? 'bg-purple-950/80 border-purple-400/60 text-purple-300'
+                  : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
+              }`}
+              title="Toggle Keplerian Orbit Paths"
+            >
+              <Orbit className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={() => setShowGrid((prev) => {
+                if (gridHandleRef.current) gridHandleRef.current.mesh.visible = !prev;
+                return !prev;
+              })}
+              className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
+                showGrid
+                  ? 'bg-blue-950/80 border-blue-400/60 text-blue-300'
+                  : 'bg-black/60 border-slate-700 text-slate-400 hover:text-white'
+              }`}
+              title="Toggle Continuous Orbital Plane Grid"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={resetCamera}
+              className="p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-slate-700 hover:border-cyan-400 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md active:scale-95"
+              title="Reset 3D Camera"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Telemetry HUD (Bottom-Left of Canvas) */}
+          {telemetry && (
+            <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-20 pointer-events-auto">
+              {!isTelemetryExpanded ? (
+                <button
+                  onClick={() => setIsTelemetryExpanded(true)}
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/85 hover:bg-purple-950/90 backdrop-blur-md border border-purple-500/40 hover:border-purple-400/70 text-[10px] sm:text-xs font-mono text-purple-200 transition-all shadow-lg cursor-pointer group active:scale-95"
+                  title="Expand Real-Time Orbital Telemetry"
+                >
+                  <Activity className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400 animate-pulse" />
+                  <span className="font-bold text-[10px] sm:text-[11px] text-white tracking-wide">
+                    <span className="hidden xs:inline">Orbital </span>Telemetry
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-cyan-300 font-mono px-1 sm:px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40">
+                    {telemetry.orbitalPhasePercent.toFixed(0)}%
+                  </span>
+                  <ChevronUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-purple-400 transition-transform group-hover:text-white" />
+                </button>
+              ) : (
+                <div className="w-[260px] sm:w-[280px] max-w-[calc(100vw-2rem)] rounded-xl bg-[#040618]/95 backdrop-blur-xl border border-purple-500/40 text-xs font-mono text-slate-300 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                  <div
+                    onClick={() => setIsTelemetryExpanded(false)}
+                    className="flex items-center justify-between px-3 py-2 bg-purple-950/50 hover:bg-purple-900/60 border-b border-purple-500/30 cursor-pointer transition-colors"
+                    title="Click to collapse telemetry"
+                  >
+                    <div className="flex items-center gap-1.5 text-[11px] text-purple-200 font-bold tracking-wider">
+                      <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                      <span>ORBITAL TELEMETRY</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-400/40">
+                        {telemetry.orbitalPhasePercent.toFixed(0)}%
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-purple-400 hover:text-white transition-colors" />
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 space-y-1.5 text-[10px] bg-black/60 max-h-[190px] overflow-y-auto scrollbar-thin">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-slate-400">Separation:</span>
+                      <span className="text-white font-bold">{telemetry.currentSeparationAU} AU ({telemetry.currentSeparationKm.toLocaleString()} km)</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-slate-400">Rel. Speed:</span>
+                      <span className="text-emerald-400 font-bold">{telemetry.relativeVelocityKmS} km/s</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-slate-400">True Anomaly:</span>
+                      <span className="text-cyan-300 font-bold">{telemetry.trueAnomalyDeg}°</span>
+                    </div>
+                    {telemetry.isNearPeriastron && (
+                      <div className="text-[9px] text-amber-300 font-bold text-center bg-amber-950/70 rounded px-1.5 py-0.5 border border-amber-500/40">
+                        ⚡ AT PERIASTRON (CLOSEST APPROACH)
+                      </div>
+                    )}
+                    {telemetry.isNearApastron && (
+                      <div className="text-[9px] text-sky-300 font-bold text-center bg-sky-950/70 rounded px-1.5 py-0.5 border border-sky-500/40">
+                        ❄️ AT APASTRON (FURTHEST APART)
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {!toolbarPortalEl && bottomControlBar}
+      </div>
+    </>
   );
 };

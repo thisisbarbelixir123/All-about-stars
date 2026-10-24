@@ -97,6 +97,9 @@ export default function App() {
   // Dedicated Independent Stellar System Dossier Modal State
   const [selectedSystemDossier, setSelectedSystemDossier] = useState<MultipleStarSystemData | null>(null);
 
+  // Mutual exclusivity state for top bar dropdowns (cannot be open or overlap at the same time)
+  const [activeTopbarMenu, setActiveTopbarMenu] = useState<'encyclopedia' | 'preset' | null>(null);
+
   // Dedicated Separate Overlay for About App
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
 
@@ -770,34 +773,43 @@ export default function App() {
             <EncyclopediaDropdown
               buttonId="btn-stage-canvas-encyclopedia"
               activeOverlay={activeOverlay}
+              isOpen={activeTopbarMenu === 'encyclopedia'}
+              onOpenChange={(open) => setActiveTopbarMenu(open ? 'encyclopedia' : null)}
               onOpenFrontpage={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setFrontpageInitialSection('what-is-a-star');
                 setActiveOverlay('frontpage');
               }}
               onOpenCatalog={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setCatalogSubTab('stars');
                 setActiveOverlay('catalog');
               }}
               onOpenStellarSystems={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setCatalogSubTab('systems');
                 setActiveOverlay('catalog');
               }}
               onOpenHRDiagram={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setActiveOverlay('hr-diagram');
               }}
               onOpenConstellations={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setActiveOverlay('constellations');
               }}
               onOpenDiscovery={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setActiveOverlay('discovery');
               }}
               onOpenNomenclature={() => {
+                setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
                 setActiveOverlay('discovery');
               }}
@@ -809,12 +821,21 @@ export default function App() {
             <PresetSlider
               presets={allPresets}
               activePresetId={activePresetId}
+              isOpen={activeTopbarMenu === 'preset'}
+              onOpenChange={(open) => setActiveTopbarMenu(open ? 'preset' : null)}
               onSelectPreset={(presetId) => {
+                setActiveTopbarMenu(null);
                 handleSelectPreset(presetId);
                 if (isHomeOpen) setIsHomeOpen(false);
               }}
-              onOpenCreatePreset={handleOpenCreatePreset}
-              onEditPreset={handleOpenEditPreset}
+              onOpenCreatePreset={() => {
+                setActiveTopbarMenu(null);
+                handleOpenCreatePreset();
+              }}
+              onEditPreset={(preset) => {
+                setActiveTopbarMenu(null);
+                handleOpenEditPreset(preset);
+              }}
               onDeletePreset={handleDeleteCustomPreset}
             />
           </div>
@@ -919,6 +940,11 @@ export default function App() {
             setActiveOverlay('frontpage');
           }}
           onOpenCatalog={() => setActiveOverlay('catalog')}
+          onOpenStellarSystems={() => {
+            setIsHomeOpen(false);
+            setCatalogSubTab('systems');
+            setActiveOverlay('catalog');
+          }}
           onOpenHRDiagram={() => setActiveOverlay('hr-diagram')}
           onOpenGuide={() => {
             setFrontpageInitialSection('spectral-classes');

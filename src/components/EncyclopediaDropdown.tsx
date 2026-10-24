@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { 
   BookOpen, 
   ChevronDown, 
@@ -22,6 +22,8 @@ interface EncyclopediaDropdownProps {
   buttonId?: string;
   menuId?: string;
   isMobile?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
@@ -36,25 +38,41 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
   buttonId = 'btn-stage-canvas-encyclopedia',
   menuId = 'menu-stage-canvas-encyclopedia',
   isMobile = false,
+  isOpen: controlledIsOpen,
+  onOpenChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+
+  const setIsOpen = useCallback((valueOrFn: boolean | ((prev: boolean) => boolean)) => {
+    const nextVal = typeof valueOrFn === 'function' ? valueOrFn(isOpen) : valueOrFn;
+    if (isControlled) {
+      onOpenChange?.(nextVal);
+    } else {
+      setInternalIsOpen(nextVal);
+    }
+  }, [isControlled, isOpen, onOpenChange]);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const handleOpenDiscovery = onOpenDiscovery || onOpenNomenclature;
 
-  // Close popover on outside click
+  // Close popover on outside click or touch
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   const isAnyActive = !!activeOverlay;
 
@@ -66,19 +84,21 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
         title="Star Encyclopedia: Browse cosmic modules (E)"
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shadow-md ${
+        className={`flex items-center ${isMobile ? 'p-2 justify-center' : 'gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5'} rounded-xl border text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shadow-md ${
           isOpen || isAnyActive
             ? 'bg-gradient-to-r from-cyan-950/90 to-blue-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_16px_rgba(6,182,212,0.35)]'
             : 'bg-[#040816]/90 text-slate-300 hover:text-white hover:bg-cyan-950/60 border-cyan-500/30 backdrop-blur-md'
         }`}
       >
         <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-        <span className={isMobile ? 'hidden' : 'hidden sm:inline font-mono'}>Encyclopedia</span>
-        <ChevronDown
-          className={`w-3.5 h-3.5 text-cyan-400 transition-transform duration-200 shrink-0 ${
-            isOpen ? 'rotate-180 text-cyan-300' : ''
-          }`}
-        />
+        {!isMobile && <span className="hidden sm:inline font-mono">Encyclopedia</span>}
+        {!isMobile && (
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-cyan-400 transition-transform duration-200 shrink-0 ${
+              isOpen ? 'rotate-180 text-cyan-300' : ''
+            }`}
+          />
+        )}
       </button>
 
       {/* Encyclopedia Sections Popover Dropdown */}

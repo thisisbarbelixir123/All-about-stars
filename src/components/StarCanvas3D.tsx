@@ -50,6 +50,7 @@ import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continu
 import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
 import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
+import { EncyclopediaDropdown } from './EncyclopediaDropdown';
 
 export type AllStarsLayoutMode = 'spiral' | 'grid' | 'linear';
 
@@ -87,6 +88,7 @@ interface StarCanvas3DProps {
   onOpenAbout?: () => void;
   onOpenFrontpage?: () => void;
   onOpenCatalog?: () => void;
+  onOpenStellarSystems?: () => void;
   onOpenHRDiagram?: () => void;
   onOpenGuide?: () => void;
   onOpenConstellations?: () => void;
@@ -168,6 +170,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   onOpenAbout,
   onOpenFrontpage,
   onOpenCatalog,
+  onOpenStellarSystems,
   onOpenHRDiagram,
   onOpenGuide,
   onOpenConstellations,
@@ -356,51 +359,140 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     }
   }, [isEncyclopediaMenuOpen]);
 
+  const closeAllMenus = useCallback(() => {
+    setIsPresetMenuOpen(false);
+    setIsSortMenuOpen(false);
+    setIsTourPaceMenuOpen(false);
+    setIsLayoutMenuOpen(false);
+    setIsTogglesMenuOpen(false);
+    setIsMobileCompactMenuOpen(false);
+    setIsEncyclopediaMenuOpen(false);
+  }, []);
+
+  const togglePresetMenu = useCallback(() => {
+    setIsPresetMenuOpen((prev) => {
+      const willOpen = !prev;
+      if (willOpen) {
+        setIsSortMenuOpen(false);
+        setIsTourPaceMenuOpen(false);
+        setIsLayoutMenuOpen(false);
+        setIsTogglesMenuOpen(false);
+        setIsMobileCompactMenuOpen(false);
+        setIsEncyclopediaMenuOpen(false);
+      }
+      return willOpen;
+    });
+  }, []);
+
+  const toggleSortMenu = useCallback(() => {
+    setIsSortMenuOpen((prev) => {
+      const willOpen = !prev;
+      if (willOpen) {
+        setIsPresetMenuOpen(false);
+        setIsTourPaceMenuOpen(false);
+        setIsLayoutMenuOpen(false);
+        setIsTogglesMenuOpen(false);
+        setIsMobileCompactMenuOpen(false);
+        setIsEncyclopediaMenuOpen(false);
+      }
+      return willOpen;
+    });
+  }, []);
+
+  const toggleTourPaceMenu = useCallback(() => {
+    setIsTourPaceMenuOpen((prev) => {
+      const willOpen = !prev;
+      if (willOpen) {
+        setIsPresetMenuOpen(false);
+        setIsSortMenuOpen(false);
+        setIsLayoutMenuOpen(false);
+        setIsTogglesMenuOpen(false);
+        setIsMobileCompactMenuOpen(false);
+        setIsEncyclopediaMenuOpen(false);
+      }
+      return willOpen;
+    });
+  }, []);
+
+  const toggleLayoutMenu = useCallback(() => {
+    setIsLayoutMenuOpen((prev) => {
+      const willOpen = !prev;
+      if (willOpen) {
+        setIsPresetMenuOpen(false);
+        setIsSortMenuOpen(false);
+        setIsTourPaceMenuOpen(false);
+        setIsTogglesMenuOpen(false);
+        setIsMobileCompactMenuOpen(false);
+        setIsEncyclopediaMenuOpen(false);
+      }
+      return willOpen;
+    });
+  }, []);
+
+  const toggleTogglesMenu = useCallback(() => {
+    setIsTogglesMenuOpen((prev) => {
+      const willOpen = !prev;
+      if (willOpen) {
+        setIsPresetMenuOpen(false);
+        setIsSortMenuOpen(false);
+        setIsTourPaceMenuOpen(false);
+        setIsLayoutMenuOpen(false);
+        setIsMobileCompactMenuOpen(false);
+        setIsEncyclopediaMenuOpen(false);
+      }
+      return willOpen;
+    });
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node;
-      if (
-        presetMenuRef.current && !presetMenuRef.current.contains(target) &&
-        (!mobilePresetMenuRef.current || !mobilePresetMenuRef.current.contains(target))
-      ) {
+      
+      const isInsidePreset = 
+        Boolean(presetMenuRef.current && presetMenuRef.current.contains(target)) ||
+        Boolean(mobilePresetMenuRef.current && mobilePresetMenuRef.current.contains(target));
+      if (!isInsidePreset) {
         setIsPresetMenuOpen(false);
       }
-      if (
-        sortMenuRef.current && !sortMenuRef.current.contains(target) &&
-        (!mobileSortMenuRef.current || !mobileSortMenuRef.current.contains(target))
-      ) {
+
+      const isInsideSort = 
+        Boolean(sortMenuRef.current && sortMenuRef.current.contains(target)) ||
+        Boolean(mobileSortMenuRef.current && mobileSortMenuRef.current.contains(target));
+      if (!isInsideSort) {
         setIsSortMenuOpen(false);
       }
-      if (
-        tourPaceMenuRef.current && !tourPaceMenuRef.current.contains(target) &&
-        (!mobileTourPaceRef.current || !mobileTourPaceRef.current.contains(target))
-      ) {
+
+      const isInsideTourPace = 
+        Boolean(tourPaceMenuRef.current && tourPaceMenuRef.current.contains(target)) ||
+        Boolean(mobileTourPaceRef.current && mobileTourPaceRef.current.contains(target));
+      if (!isInsideTourPace) {
         setIsTourPaceMenuOpen(false);
       }
-      if (
-        layoutMenuRef.current && !layoutMenuRef.current.contains(target) &&
-        (!mobileLayoutMenuRef.current || !mobileLayoutMenuRef.current.contains(target))
-      ) {
+
+      const isInsideLayout = 
+        Boolean(layoutMenuRef.current && layoutMenuRef.current.contains(target)) ||
+        Boolean(mobileLayoutMenuRef.current && mobileLayoutMenuRef.current.contains(target));
+      if (!isInsideLayout) {
         setIsLayoutMenuOpen(false);
       }
-      if (
-        togglesMenuRef.current && !togglesMenuRef.current.contains(target) &&
-        (!mobileTogglesMenuRef.current || !mobileTogglesMenuRef.current.contains(target))
-      ) {
+
+      const isInsideToggles = 
+        Boolean(togglesMenuRef.current && togglesMenuRef.current.contains(target)) ||
+        Boolean(mobileTogglesMenuRef.current && mobileTogglesMenuRef.current.contains(target));
+      if (!isInsideToggles) {
         setIsTogglesMenuOpen(false);
       }
+
       if (mobileCompactMenuRef.current && !mobileCompactMenuRef.current.contains(target)) {
         setIsMobileCompactMenuOpen(false);
       }
-      if (
-        encyclopediaMenuRef.current && !encyclopediaMenuRef.current.contains(target) &&
-        (!mobileEncyclopediaMenuRef.current || !mobileEncyclopediaMenuRef.current.contains(target))
-      ) {
-        setIsEncyclopediaMenuOpen(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   const handleCycleSortMetric = useCallback(() => {
@@ -2381,7 +2473,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       // 5. Encyclopedia toggle
       else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
-        setIsEncyclopediaMenuOpen((prev) => !prev);
+        setIsEncyclopediaMenuOpen((prev) => {
+          if (!prev) closeAllMenus();
+          return !prev;
+        });
       }
       // 6. Auto Tour toggle
       else if (e.key === 't' || e.key === 'T') {
@@ -2620,7 +2715,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     id="btn-layout-menu-trigger"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setIsLayoutMenuOpen((prev) => !prev);
+                      toggleLayoutMenu();
                     }}
                     title="Select Layout Mode (Spiral / Grid / Linear)"
                     className="px-1.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-r-lg"
@@ -2682,7 +2777,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <div className="relative" ref={isMobile ? mobileTogglesMenuRef : togglesMenuRef}>
               <button
                 id={isMobile ? "btn-mobile-stage-toggles-more" : "btn-stage-toggles-more"}
-                onClick={() => setIsTogglesMenuOpen((prev) => !prev)}
+                onClick={toggleTogglesMenu}
                 title="More Scene Options (Spin, Wireframe, Grid, Layout)"
                 className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer select-none active:scale-95 ${
                   (isAutoRotating || wireframe || showGrid)
@@ -2988,131 +3083,51 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <Home className="w-5 h-5 text-cyan-400" />
                 </button>
 
-                {/* Encyclopedia button next to Home button on mobile */}
-                {(onOpenFrontpage || onOpenCatalog || onOpenHRDiagram || onOpenConstellations) && (
-                  <div className="relative shrink-0" ref={mobileEncyclopediaMenuRef}>
-                    <button
-                      id="btn-mobile-top-encyclopedia"
-                      onClick={() => setIsEncyclopediaMenuOpen((prev) => !prev)}
-                      title="Star Encyclopedia: Browse all 4 cosmic modules (E)"
-                      aria-label="Star Encyclopedia"
-                      className={`p-2 rounded-xl backdrop-blur-xl border ${
-                        isEncyclopediaMenuOpen
-                          ? 'bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_16px_rgba(6,182,212,0.35)]'
-                          : 'border-cyan-500/35 hover:border-cyan-400 bg-[#040816]/95 text-cyan-300 hover:text-white shadow-lg'
-                      } active:scale-95 cursor-pointer flex items-center justify-center shrink-0`}
-                    >
-                      <BookOpen className="w-4 h-4 text-cyan-400" />
-                    </button>
-
-                    {isEncyclopediaMenuOpen && (
-                      <div
-                        id="menu-mobile-top-encyclopedia"
-                        className="absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] max-h-[75vh] overflow-y-auto scrollbar-thin bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl font-mono text-xs"
-                      >
-                        <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1.5 mb-1.5">
-                          <span>Star Encyclopedia</span>
-                          <span className="text-cyan-400 font-normal">4 modules</span>
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          {onOpenFrontpage && (
-                            <button
-                              id="btn-mobile-encyclopedia-menu-frontpage"
-                              onClick={() => {
-                                setIsEncyclopediaMenuOpen(false);
-                                onOpenFrontpage();
-                              }}
-                              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-                            >
-                              <div className="p-1.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
-                                <Sun className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300">What is a Star?</div>
-                                <div className="text-[10px] text-slate-400 font-sans">Anatomy, fusion & life cycles</div>
-                              </div>
-                            </button>
-                          )}
-
-                          {onOpenCatalog && (
-                            <button
-                              id="btn-mobile-encyclopedia-menu-catalog"
-                              onClick={() => {
-                                setIsEncyclopediaMenuOpen(false);
-                                onOpenCatalog();
-                              }}
-                              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-                            >
-                              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
-                                <Grid className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300">Stellar Catalog</div>
-                                <div className="text-[10px] text-slate-400 font-sans">Filter & explore cataloged stars</div>
-                              </div>
-                            </button>
-                          )}
-
-                          {onOpenHRDiagram && (
-                            <button
-                              id="btn-mobile-encyclopedia-menu-hr"
-                              onClick={() => {
-                                setIsEncyclopediaMenuOpen(false);
-                                onOpenHRDiagram();
-                              }}
-                              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-                            >
-                              <div className="p-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
-                                <BarChart2 className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300">H-R Diagram</div>
-                                <div className="text-[10px] text-slate-400 font-sans">Luminosity vs Temperature plot</div>
-                              </div>
-                            </button>
-                          )}
-
-                          {onOpenConstellations && (
-                            <button
-                              id="btn-mobile-encyclopedia-menu-constellations"
-                              onClick={() => {
-                                setIsEncyclopediaMenuOpen(false);
-                                onOpenConstellations();
-                              }}
-                              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-                            >
-                              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
-                                <Compass className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300">Constellation Guide</div>
-                                <div className="text-[10px] text-slate-400 font-sans">All 88 IAU constellations & lore</div>
-                              </div>
-                            </button>
-                          )}
-
-                          {handleOpenDiscovery && (
-                            <button
-                              id="btn-mobile-encyclopedia-menu-discovery"
-                              onClick={() => {
-                                setIsEncyclopediaMenuOpen(false);
-                                handleOpenDiscovery();
-                              }}
-                              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-                            >
-                              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
-                                <Telescope className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300">Stellar Discovery</div>
-                                <div className="text-[10px] text-slate-400 font-sans">Methods, telescopes, timeline &amp; naming</div>
-                              </div>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                {/* Encyclopedia button next to Home button on mobile (Unified EncyclopediaDropdown) */}
+                {(onOpenFrontpage || onOpenCatalog || onOpenStellarSystems || onOpenHRDiagram || onOpenConstellations) && (
+                  <div className="shrink-0">
+                    <EncyclopediaDropdown
+                      buttonId="btn-mobile-top-encyclopedia"
+                      menuId="menu-mobile-top-encyclopedia"
+                      isMobile={true}
+                      isOpen={isEncyclopediaMenuOpen}
+                      onOpenChange={(open) => {
+                        if (open) {
+                          closeAllMenus();
+                          setIsEncyclopediaMenuOpen(true);
+                        } else {
+                          setIsEncyclopediaMenuOpen(false);
+                        }
+                      }}
+                      onOpenFrontpage={() => {
+                        closeAllMenus();
+                        (onOpenFrontpage || (() => {}))();
+                      }}
+                      onOpenCatalog={() => {
+                        closeAllMenus();
+                        (onOpenCatalog || (() => {}))();
+                      }}
+                      onOpenStellarSystems={onOpenStellarSystems ? () => {
+                        closeAllMenus();
+                        onOpenStellarSystems();
+                      } : undefined}
+                      onOpenHRDiagram={() => {
+                        closeAllMenus();
+                        (onOpenHRDiagram || (() => {}))();
+                      }}
+                      onOpenConstellations={() => {
+                        closeAllMenus();
+                        (onOpenConstellations || (() => {}))();
+                      }}
+                      onOpenDiscovery={handleOpenDiscovery ? () => {
+                        closeAllMenus();
+                        handleOpenDiscovery();
+                      } : undefined}
+                      onOpenNomenclature={onOpenNomenclature ? () => {
+                        closeAllMenus();
+                        onOpenNomenclature();
+                      } : undefined}
+                    />
                   </div>
                 )}
               </div>
@@ -3133,7 +3148,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     <>
                       <button
                         id="btn-mobile-preset-dropdown"
-                        onClick={() => setIsPresetMenuOpen(!isPresetMenuOpen)}
+                        onClick={togglePresetMenu}
                         title="Select comparison preset or browse astronomical catalog"
                         className={`w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl border font-mono text-xs shadow-lg backdrop-blur-xl transition-all cursor-pointer select-none ${
                           isPresetMenuOpen
@@ -3158,7 +3173,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                       {isPresetMenuOpen && (
                         <div
                           id="menu-mobile-preset-dropdown"
-                          className="fixed left-2 right-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:w-96 sm:right-auto top-[52px] sm:top-full mt-1 sm:mt-2 max-h-[75vh] overflow-y-auto bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl font-mono text-xs scrollbar-thin"
+                          className="fixed left-2 right-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:w-96 sm:right-auto top-[52px] sm:top-full mt-1 sm:mt-2 max-h-[75vh] overflow-y-auto bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl font-mono text-xs scrollbar-thin pointer-events-auto"
                         >
                           {/* The Complete Catalog - Placed on the very top, not a preset, not editable, separated from presets */}
                           {completeCatalogItem && (
@@ -3346,7 +3361,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     <div className="relative" ref={mobileTourPaceRef}>
                       <button
                         id="btn-mobile-tour-pace"
-                        onClick={() => setIsTourPaceMenuOpen(!isTourPaceMenuOpen)}
+                        onClick={toggleTourPaceMenu}
                         title="Tour pace per star"
                         className="flex items-center gap-1 px-2 py-1.5 rounded-xl backdrop-blur-xl border border-cyan-500/35 bg-[#040816]/95 text-slate-300 text-xs font-mono active:scale-95 cursor-pointer"
                       >
@@ -3384,7 +3399,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                         <div className="relative">
                           <button
                             id="btn-mobile-sort-metric"
-                            onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                            onClick={toggleSortMenu}
                             title="Sort Metric"
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl backdrop-blur-xl border border-cyan-500/35 bg-[#040816]/95 text-slate-200 text-xs font-mono active:scale-95 cursor-pointer"
                           >
@@ -3469,7 +3484,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                                 id="btn-mobile-layout-menu-arrow"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setIsLayoutMenuOpen((prev) => !prev);
+                                  toggleLayoutMenu();
                                 }}
                                 className="px-1 py-1.5 rounded-r-xl border-l border-white/10 hover:bg-white/10 transition-colors"
                               >
@@ -3566,7 +3581,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 {/* Dropdown Options Toggle */}
                 <button
                   id="btn-stage-canvas-sort-dropdown"
-                  onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                  onClick={toggleSortMenu}
                   title="Open Sort Metric & Order Menu"
                   className={`px-1.5 py-1.5 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer ${
                     isSortMenuOpen ? 'text-cyan-300 bg-cyan-500/20' : ''
@@ -3678,7 +3693,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             <div className="relative pointer-events-auto" ref={tourPaceMenuRef}>
               <button
                 id="btn-tour-pace-dropdown"
-                onClick={() => setIsTourPaceMenuOpen((prev) => !prev)}
+                onClick={toggleTourPaceMenu}
                 title="Tour pace per star: Short, Medium, Long"
                 className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl backdrop-blur-xl border text-xs font-mono transition-all cursor-pointer shadow-lg active:scale-95 ${
                   isTourPaceMenuOpen

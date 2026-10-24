@@ -103,117 +103,79 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none animate-in fade-in duration-200">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/85 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
-        onClick={onClose}
-      />
+    <div 
+      className="fixed inset-0 z-[60] w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header Section */}
+      <div className="relative px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 border-b border-purple-500/25 bg-[#08051c]/95 backdrop-blur-xl">
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 font-mono text-[10px] sm:text-xs font-bold border border-purple-400/40 uppercase tracking-wider shadow-sm">
+                <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                <span>Stellar System Dossier</span>
+              </span>
 
-      {/* Modal Container: Stellar System Dossier Window */}
-      <div 
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-purple-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header Section */}
-        <div className="relative px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 border-b border-purple-500/25 bg-[#08051c]/95 backdrop-blur-xl">
-          <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 font-mono text-[10px] sm:text-xs font-bold border border-purple-400/40 uppercase tracking-wider shadow-sm">
-                  <Share2 className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Stellar System Dossier</span>
-                </span>
+              <span className="px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 font-mono text-[10px] sm:text-xs border border-cyan-500/30">
+                {system.systemType}
+              </span>
 
-                <span className="px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 font-mono text-[10px] sm:text-xs border border-cyan-500/30">
-                  {system.systemType}
-                </span>
-
-                <span className="px-2 py-0.5 rounded-full bg-black/60 text-slate-300 font-mono text-[10px] sm:text-xs border border-slate-700">
-                  {system.components.length} Stars Bound
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h1 className="text-base sm:text-xl lg:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                  <span>{system.name}</span>
-                </h1>
-              </div>
-
-              <p className="text-[10px] sm:text-xs text-purple-200/70 font-mono mt-0.5 flex flex-wrap items-center gap-x-2">
-                <span>Constellation: <strong className="text-slate-200">{system.constellation}</strong></span>
-                <span>•</span>
-                <span>Distance: <strong className="text-slate-200">{system.distanceLy.toLocaleString()} ly</strong></span>
-                {system.visualSeparationArcsec && (
-                  <>
-                    <span>•</span>
-                    <span>Separation: <strong className="text-slate-200">{system.visualSeparationArcsec}″</strong></span>
-                  </>
-                )}
-              </p>
+              <span className="px-2 py-0.5 rounded-full bg-black/60 text-slate-300 font-mono text-[10px] sm:text-xs border border-slate-700">
+                {system.components.length} Stars Bound
+              </span>
             </div>
 
-            {/* Close Control */}
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={onClose}
-                className="p-1.5 sm:p-2 rounded-xl bg-black/60 hover:bg-purple-900/40 text-slate-400 hover:text-white border border-purple-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
-                title="Close Stellar System Dossier"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 className="text-sm sm:text-base md:text-xl font-black text-white tracking-tight flex items-center gap-2">
+                <span>{system.name}</span>
+              </h1>
             </div>
+
+            <p className="text-[10px] sm:text-xs text-purple-200/70 font-mono mt-0.5 flex flex-wrap items-center gap-x-2">
+              <span>Constellation: <strong className="text-slate-200">{system.constellation}</strong></span>
+              <span>•</span>
+              <span>Distance: <strong className="text-slate-200">{system.distanceLy.toLocaleString()} ly</strong></span>
+              {system.visualSeparationArcsec && (
+                <>
+                  <span>•</span>
+                  <span>Separation: <strong className="text-slate-200">{system.visualSeparationArcsec}″</strong></span>
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Close Control */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={onClose}
+              className="p-1.5 sm:p-2 rounded-xl bg-black/60 hover:bg-purple-900/40 text-slate-400 hover:text-white border border-purple-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
+              title="Close Stellar System Dossier"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Body: Continuous vertical page scroll on mobile portrait, fixed split-screen on landscape & lg */}
+      <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-y-auto landscape:overflow-hidden lg:overflow-hidden bg-transparent">
+        {/* Left Column: 3D dossier canvas without scrolling in landscape */}
+        <div className="w-full shrink-0 landscape:w-1/2 lg:w-1/2 landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 flex flex-col justify-center">
+          <div className="w-full h-auto landscape:h-full lg:h-auto">
+            <StellarSystem3DStage
+              system={system}
+              onStarClick={(starId) => setSelectedStarId(starId)}
+              selectedStarId={selectedStarId}
+            />
           </div>
         </div>
 
-        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
-        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
-          {/* Left Column: 3D dossier canvas container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
-          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-1/2 lg:h-auto overflow-y-auto scrollbar-thin p-3 sm:p-5 space-y-4 shrink-0">
-            <div className="h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[500px] landscape:h-[calc(100vh-140px)] w-full">
-              <StellarSystem3DStage
-                system={system}
-                onStarClick={(starId) => setSelectedStarId(starId)}
-                selectedStarId={selectedStarId}
-              />
-            </div>
-
-              {/* Solved Orbits Hierarchy Reference */}
-              <div className="p-4 rounded-2xl bg-[#030617]/90 border border-purple-500/25 shadow-md">
-                <div className="flex items-center gap-2 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider mb-2.5">
-                  <Orbit className="w-4 h-4 text-purple-400" />
-                  <span>Solved Keplerian Orbital Architecture</span>
-                </div>
-
-                <div className="space-y-2">
-                  {system.orbits.map((orb, idx) => (
-                    <div 
-                      key={idx}
-                      className="p-2.5 rounded-xl bg-black/60 border border-purple-500/20 text-xs font-mono space-y-1 hover:border-purple-400/40 transition-colors"
-                    >
-                      <div className="flex items-center justify-between text-white font-bold">
-                        <span className="text-purple-300">{orb.label}</span>
-                        <span className="text-cyan-300 text-[11px]">
-                          P = {orb.orbitalPeriodDays ? `${orb.orbitalPeriodDays.toFixed(2)} d` : `${orb.orbitalPeriodYears} yr`}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-300">
-                        <div>Semi-Major: <span className="text-white font-bold">{orb.semiMajorAxisAU} AU</span></div>
-                        <div>Eccentricity: <span className="text-white font-bold">{orb.eccentricity.toFixed(3)}</span></div>
-                        <div>Inclination: <span className="text-white font-bold">{orb.inclinationDeg.toFixed(1)}°</span></div>
-                      </div>
-                      <p className="text-[10px] text-slate-400 leading-relaxed font-sans pt-0.5">
-                        {orb.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Data/Telemetry panel with independent scrolling */}
-            <div className="w-full landscape:w-1/2 lg:w-1/2 flex-1 overflow-y-auto landscape:overflow-y-auto pb-safe p-3 sm:p-5 lg:p-6 scrollbar-thin space-y-4">
+            {/* Right Column: Data/Telemetry panel */}
+            <div className="w-full shrink-0 landscape:w-1/2 lg:w-1/2 landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin space-y-3 sm:space-y-4 md:space-y-5">
+              {/* 3D System Controls Toolbar Slot (Moved to top of right panel) */}
+              <div id="stellar-system-toolbar-slot" className="w-full min-h-0" />
               
               {/* System Overview & Barycenter Physics */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#0c0628]/90 via-[#07041c]/90 to-[#02020f]/90 border border-purple-500/30 shadow-lg space-y-3">
@@ -357,9 +319,50 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                 </div>
               </div>
 
+              {/* Solved Orbits Hierarchy Reference (relocated below bound stars) */}
+              <div className="p-4 rounded-2xl bg-[#030617]/90 border border-purple-500/25 shadow-md">
+                <div className="flex items-center gap-2 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider mb-2.5">
+                  <Orbit className="w-4 h-4 text-purple-400" />
+                  <span>Solved Keplerian Orbital Architecture</span>
+                </div>
+
+                <div className="space-y-2">
+                  {system.orbits.map((orb, idx) => (
+                    <div 
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-black/60 border border-purple-500/20 text-xs font-mono space-y-1 hover:border-purple-400/40 transition-colors"
+                    >
+                      <div className="flex items-center justify-between text-white font-bold">
+                        <span className="text-purple-300">{orb.label}</span>
+                        <span className="text-cyan-300 text-[11px]">
+                          P = {orb.orbitalPeriodDays ? `${orb.orbitalPeriodDays.toFixed(2)} d` : `${orb.orbitalPeriodYears} yr`}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-300">
+                        <div>Semi-Major: <span className="text-white font-bold">{orb.semiMajorAxisAU} AU</span></div>
+                        <div>Eccentricity: <span className="text-white font-bold">{orb.eccentricity.toFixed(3)}</span></div>
+                        <div>Inclination: <span className="text-white font-bold">{orb.inclinationDeg.toFixed(1)}°</span></div>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed font-sans pt-0.5">
+                        {orb.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footnote / Astrophysical System Summary at the very bottom right */}
+              <div className="p-3.5 sm:p-4 rounded-xl bg-[#030614]/85 border border-purple-500/20 text-xs text-slate-400 font-mono leading-relaxed space-y-1 shadow-sm">
+                <div className="text-purple-300 font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                  Astrophysical System Footnote
+                </div>
+                <p className="text-[11px] sm:text-xs text-slate-300">
+                  {system.astrophysicalSignificance}
+                </p>
+              </div>
+
             </div>
         </div>
       </div>
-    </div>
   );
 };

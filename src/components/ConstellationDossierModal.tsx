@@ -81,67 +81,99 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
   const isPolar = isPolarConstellation(constellation.id, decBounds);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
-        onClick={onClose}
-      />
-
-      {/* Modal Container: Constellation Dossier */}
-      <div
-        ref={dossierScrollRef}
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveStarLabelId(null);
-        }}
-      >
-        {/* Header Bar matching Encyclopedia mode */}
-        <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
-          {/* Left: Constellation Identifier & Information */}
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-xl font-black text-white tracking-tight shrink-0">
-                {constellation.name}
-              </h3>
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
-                {constellation.abbreviation}
+    <div
+      ref={dossierScrollRef}
+      className="fixed inset-0 z-50 w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveStarLabelId(null);
+      }}
+    >
+      {/* Header Bar matching Encyclopedia mode */}
+      <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
+        {/* Left: Constellation Identifier & Information */}
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm sm:text-base md:text-xl font-black text-white tracking-tight shrink-0">
+              {constellation.name}
+            </h3>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
+              {constellation.abbreviation}
+            </span>
+            <span className="text-xs text-slate-400 italic hidden md:inline truncate">
+              "{constellation.englishName}" • {constellation.genitive}
+            </span>
+            {constellation.isZodiac && (
+              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-500/40 shrink-0">
+                {constellation.zodiacSymbol} Zodiac Sign
               </span>
-              <span className="text-xs text-slate-400 italic hidden md:inline truncate">
-                "{constellation.englishName}" • {constellation.genitive}
-              </span>
-              {constellation.isZodiac && (
-                <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-500/40 shrink-0">
-                  {constellation.zodiacSymbol} Zodiac Sign
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Right: Close Button with Esc shortcut */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={onClose}
-              className="flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-500/40 text-xs font-semibold transition-all cursor-pointer active:scale-95 shrink-0"
-              title="Close Constellation Dossier (Esc)"
-              aria-label="Close Constellation Dossier"
-            >
-              <X className="w-4 h-4" />
-              <span className="hidden md:inline">Close</span>
-              <span className="text-[10px] font-mono text-slate-400 hidden md:inline">[Esc]</span>
-            </button>
+            )}
           </div>
         </div>
 
-        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
-        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
-          {/* Left Column: Astrometric Map Container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
-          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-7/12 lg:h-auto overflow-y-auto scrollbar-thin p-3 sm:p-5 flex flex-col gap-3 shrink-0">
-              {/* Constellation Dossier Viewport Controls Toolbar */}
-              <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono">
-                <div className="flex items-center gap-1.5 px-2 text-cyan-400 font-bold">
-                  <Compass className="w-4 h-4" />
+        {/* Right: Close Button with Esc shortcut */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-500/40 text-xs font-semibold transition-all cursor-pointer active:scale-95 shrink-0"
+            title="Close Constellation Dossier (Esc)"
+            aria-label="Close Constellation Dossier"
+          >
+            <X className="w-4 h-4" />
+            <span className="hidden md:inline">Close</span>
+            <span className="text-[10px] font-mono text-slate-400 hidden md:inline">[Esc]</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Content Body: Continuous vertical page scroll on mobile portrait, fixed split-screen on landscape & lg */}
+      <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-y-auto landscape:overflow-hidden lg:overflow-hidden bg-transparent">
+        {/* Left Column: Astrometric Map Container without scrolling in landscape */}
+        <div className="w-full shrink-0 landscape:w-1/2 lg:w-7/12 landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 flex flex-col justify-center">
+          {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport) */}
+          <div
+            className="w-full aspect-square max-h-[460px] xs:max-h-[500px] sm:max-h-[580px] md:max-h-[640px] lg:max-h-[720px] landscape:max-h-[calc(100vh-80px)] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+            onClick={() => setActiveStarLabelId(null)}
+          >
+                {/* Astrometric Metadata Header Badge */}
+                <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
+                  <span className="text-cyan-300 font-semibold uppercase">{constellation.name}</span>
+                  {isPolar && (
+                    <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
+                      Polar Centered
+                    </span>
+                  )}
+                  <span className="text-slate-500">•</span>
+                  <span>RA {constellation.borders.raRange.split('|')[0].trim()}</span>
+                  <span className="text-slate-500 hidden sm:inline">•</span>
+                  <span className="hidden sm:inline">Dec {constellation.borders.decRange.split('|')[0].trim()}</span>
+                </div>
+
+                <div className="flex items-center justify-center w-full h-full p-1 sm:p-2">
+                  <ConstellationMap
+                    constellation={constellation}
+                    celestialData={celestialData}
+                    mode="dossier"
+                    size={600}
+                    className="w-full h-full"
+                    options={skyMapOptions}
+                    onSelectNeighbor={onSelectNeighbor}
+                    onSelectFigureStar={onSelectStar}
+                    activeStarLabelId={activeStarLabelId}
+                    setActiveStarLabelId={setActiveStarLabelId}
+                    hoveredStarId={hoveredStarId}
+                    setHoveredStarId={setHoveredStarId}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Data/Telemetry panel */}
+            <div className="w-full shrink-0 landscape:w-1/2 lg:w-5/12 landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
+              {/* Astrometric Map Viewport Controls Toolbar (Top of Right Panel) */}
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono shadow-sm">
+                <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-cyan-400 font-bold shrink-0">
+                  <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Astrometric Map</span>
                 </div>
 
@@ -201,62 +233,21 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 </div>
               </div>
 
-              {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport) */}
-              <div
-                className="w-full aspect-square max-h-[460px] sm:max-h-[560px] md:max-h-[620px] lg:max-h-[680px] landscape:max-h-[calc(100vh-140px)] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
-                onClick={() => setActiveStarLabelId(null)}
-              >
-                {/* Astrometric Metadata Header Badge */}
-                <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
-                  <span className="text-cyan-300 font-semibold uppercase">{constellation.name}</span>
-                  {isPolar && (
-                    <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
-                      Polar Centered
-                    </span>
-                  )}
-                  <span className="text-slate-500">•</span>
-                  <span>RA {constellation.borders.raRange.split('|')[0].trim()}</span>
-                  <span className="text-slate-500 hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">Dec {constellation.borders.decRange.split('|')[0].trim()}</span>
-                </div>
-
-                <div className="flex items-center justify-center w-full h-full p-1 sm:p-2">
-                  <ConstellationMap
-                    constellation={constellation}
-                    celestialData={celestialData}
-                    mode="dossier"
-                    size={600}
-                    className="w-full h-full"
-                    options={skyMapOptions}
-                    onSelectNeighbor={onSelectNeighbor}
-                    onSelectFigureStar={onSelectStar}
-                    activeStarLabelId={activeStarLabelId}
-                    setActiveStarLabelId={setActiveStarLabelId}
-                    hoveredStarId={hoveredStarId}
-                    setHoveredStarId={setHoveredStarId}
-                  />
-                </div>
-              </div>
-
-              {/* Celestial Resemblance Callout */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-cyan-900/60 border border-cyan-400/30 text-cyan-300 shrink-0 mt-0.5">
-                  <Sparkles className="w-4 h-4 text-cyan-300" />
+              {/* Celestial Resemblance & Shape Callout (Compact font and padding on mobile) */}
+              <div className="p-2.5 sm:p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-2.5 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-cyan-900/60 border border-cyan-400/30 text-cyan-300 shrink-0 mt-0.5">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-mono uppercase text-cyan-400 font-bold tracking-wider mb-1 flex items-center justify-between">
+                  <div className="text-[9.5px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold tracking-wider mb-0.5 sm:mb-1">
                     <span>Celestial Resemblance & Shape</span>
-                    <span className="text-[10px] text-slate-400 font-normal lowercase italic">silhouette in the night sky</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+                  <p className="text-[11px] sm:text-xs md:text-sm text-slate-200 leading-snug sm:leading-relaxed font-normal">
                     {constellation.resemblance}
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* Right Column: Data/Telemetry panel with independent scrolling */}
-            <div className="w-full landscape:w-1/2 lg:w-5/12 flex-1 overflow-y-auto landscape:overflow-y-auto pb-safe p-3 sm:p-6 lg:p-8 scrollbar-thin flex flex-col gap-4 sm:gap-6">
               {/* Sky Borders Section */}
               <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/25 flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-2 pb-2 border-b border-cyan-900/40">
@@ -499,6 +490,5 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
             </div>
         </div>
       </div>
-    </div>
   );
 };

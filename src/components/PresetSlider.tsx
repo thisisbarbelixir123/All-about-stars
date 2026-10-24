@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { PresetComparison } from '../types';
 import { 
   ChevronDown, 
@@ -15,6 +15,8 @@ interface PresetSliderProps {
   onOpenCreatePreset?: () => void;
   onEditPreset?: (preset: PresetComparison) => void;
   onDeletePreset?: (presetId: string) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const PresetSlider: React.FC<PresetSliderProps> = ({
@@ -24,24 +26,39 @@ export const PresetSlider: React.FC<PresetSliderProps> = ({
   onOpenCreatePreset,
   onEditPreset,
   onDeletePreset,
+  isOpen: controlledIsOpen,
+  onOpenChange,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
 
-  // Close dropdown on click outside
+  const setIsOpen = useCallback((valueOrFn: boolean | ((prev: boolean) => boolean)) => {
+    const nextVal = typeof valueOrFn === 'function' ? valueOrFn(isOpen) : valueOrFn;
+    if (isControlled) {
+      onOpenChange?.(nextVal);
+    } else {
+      setInternalIsOpen(nextVal);
+    }
+  }, [isControlled, isOpen, onOpenChange]);
+
+  // Close dropdown on click or touch outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   // Active preset details
   const activePreset = presets.find((p) => p.id === activePresetId);

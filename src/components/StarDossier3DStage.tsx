@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import * as THREE from 'three';
 import { 
   Sun, 
@@ -1613,12 +1614,22 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
     sph.targetRadius = Math.max(0.00003, Math.min(maxZoomDistance, sph.targetRadius + zoomFactor));
   };
 
-  return (
-    <div className="rounded-2xl border border-cyan-500/30 bg-[#020512]/90 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col transition-all">
-      {/* 3D Stage Navigation / Controls Bar (Moved below 3D preview on mobile via order-2 md:order-1) */}
-      <div className="order-2 md:order-1 p-2.5 sm:p-3.5 border-t md:border-t-0 md:border-b border-cyan-500/20 bg-[#04081c]/80 flex flex-wrap items-center justify-between gap-2 sm:gap-2.5">
-        {/* Toggle Mode Segmented Buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-cyan-500/25">
+  const [toolbarPortalEl, setToolbarPortalEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const findSlot = () => {
+      const el = document.getElementById('star-dossier-toolbar-slot');
+      if (el) setToolbarPortalEl(el);
+    };
+    findSlot();
+    const timer = setTimeout(findSlot, 60);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toolbarNode = (
+    <div className={`p-2 sm:p-2.5 rounded-xl border border-cyan-500/25 bg-[#04081c]/90 backdrop-blur-xl shadow-lg flex flex-wrap items-center justify-between gap-1.5 sm:gap-2.5 ${toolbarPortalEl ? 'w-full' : 'order-2 md:order-1'}`}>
+      {/* Toggle Mode Segmented Buttons */}
+      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-cyan-500/25">
           <button
             id="btn-stage-toggle-sun"
             onClick={() => handleSwitchMode('compare-sun')}
@@ -1796,12 +1807,18 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
           </button>
         </div>
       </div>
+  );
 
-      {/* 3D Canvas Stage Viewport (Compact responsive height on desktop to occupy 1/2 of view) */}
+  return (
+    <>
+      {toolbarPortalEl && createPortal(toolbarNode, toolbarPortalEl)}
+      <div className="rounded-2xl border border-cyan-500/30 bg-[#020512]/90 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col transition-all landscape:h-full">
+        {!toolbarPortalEl && toolbarNode}
+        {/* 3D Canvas Stage Viewport (Compact responsive height on desktop to occupy 1/2 of view, height-adjusted in landscape) */}
       <div 
         className={`order-1 md:order-2 relative w-full overflow-hidden select-none cursor-grab active:cursor-grabbing ${
-          isExpanded ? 'h-[360px] sm:h-[440px] md:h-[480px] lg:h-[460px]' : 'h-[240px] xs:h-[270px] sm:h-[310px] md:h-[340px] lg:h-[340px] xl:h-[360px]'
-        } landscape:h-[calc(100vh-140px)]`}
+          isExpanded ? 'h-[360px] sm:h-[440px] md:h-[480px] lg:h-[460px]' : 'h-[250px] xs:h-[280px] sm:h-[320px] md:h-[340px] lg:h-[340px] xl:h-[360px]'
+        } landscape:flex-1 landscape:min-h-0 landscape:h-[calc(100vh-100px)]`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -2258,5 +2275,6 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
         </div>
       )}
     </div>
+    </>
   );
 };

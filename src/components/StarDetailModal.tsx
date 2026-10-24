@@ -293,130 +293,115 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 landscape:p-0 pointer-events-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-[70] w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      onClick={(e) => e.stopPropagation()}
     >
-      {/* Backdrop */}
+      {/* Header / Title Section */}
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-200"
-        onClick={onClose}
-      />
-
-      {/* Modal Container: Star Dossier (matching Constellation Dossier window size) */}
-      <div 
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[95vh] sm:h-[94vh] landscape:h-screen landscape:max-h-screen landscape:w-screen landscape:max-w-none landscape:rounded-none landscape:border-0 rounded-2xl sm:rounded-3xl bg-[#040816]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
+        className="relative px-3 sm:px-6 py-2 sm:py-3 shrink-0 border-b border-cyan-500/20 bg-[#060b20]/95 backdrop-blur-xl transition-all"
       >
-        {/* Header / Title Section */}
+        {/* Subtle radial glow background */}
         <div 
-          className="relative px-3 sm:px-6 py-2.5 sm:py-3.5 shrink-0 border-b border-cyan-500/20 bg-[#060b20]/95 backdrop-blur-xl transition-all"
-        >
-          {/* Subtle radial glow background */}
-          <div 
-            className="absolute inset-0 pointer-events-none hidden md:block"
-            style={{
-              background: `radial-gradient(circle at top right, ${star.colorHex}25 0%, transparent 65%), rgba(3, 6, 22, 0.75)`,
-            }}
-          />
+          className="absolute inset-0 pointer-events-none hidden md:block"
+          style={{
+            background: `radial-gradient(circle at top right, ${star.colorHex}25 0%, transparent 65%), rgba(3, 6, 22, 0.75)`,
+          }}
+        />
 
-          {/* Top Row: Star Info & Close Button */}
-          <div className="relative z-10 flex items-center justify-between gap-2 md:gap-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
-                <h1
-                  onClick={handleDossierStarClick}
-                  className="text-base sm:text-xl font-black text-white tracking-tight shrink-0 select-none cursor-pointer"
-                >
-                  {star.name}
-                </h1>
-                {star.bayerDesignation && (
-                  <span
-                    onClick={handleDossierStarClick}
-                    className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/30 whitespace-nowrap cursor-pointer select-none"
-                    title={`Bayer Designation: ${star.bayerDesignation}`}
-                  >
-                    {star.bayerDesignation}
-                  </span>
-                )}
-                {star.flamsteedDesignation && (
-                  <span
-                    onClick={handleDossierStarClick}
-                    className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091429] text-sky-300 font-mono border border-sky-500/30 whitespace-nowrap cursor-pointer select-none"
-                    title={`Flamsteed Number: ${star.flamsteedDesignation}`}
-                  >
-                    {star.flamsteedDesignation}
-                  </span>
-                )}
-                {star.gouldDesignation && (
-                  <span
-                    onClick={handleDossierStarClick}
-                    className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#081a1c] text-emerald-300 font-mono border border-emerald-500/30 whitespace-nowrap cursor-pointer select-none"
-                    title={`Gould Designation: ${star.gouldDesignation}`}
-                  >
-                    {star.gouldDesignation}
-                  </span>
-                )}
-                <button
-                  onClick={() => {
-                    if (onOpenClassificationGuide) {
-                      onClose();
-                      onOpenClassificationGuide();
-                    }
-                  }}
-                  title="Learn about this spectral classification"
-                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 font-semibold font-mono shadow-[0_0_10px_rgba(6,182,212,0.25)] whitespace-nowrap cursor-pointer transition-all hover:border-cyan-400"
-                >
-                  Spectral {star.spectralType} ℹ️
-                </button>
-              </div>
-
-              <p className="text-[9px] md:text-xs text-slate-400 flex flex-wrap items-center gap-x-1.5 md:gap-x-2 gap-y-0.5 font-mono">
-                <span>Constellation: <strong className="text-slate-200">{star.constellation}</strong></span>
-                <span className="hidden md:inline">•</span>
-                <span>Stage: <strong className="text-slate-200">{star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage}</strong></span>
-                {star.alternateNames.length > 0 && (
-                  <span className="hidden lg:inline">
-                    • Aliases: {star.alternateNames.slice(0, 2).join(', ')}
-                  </span>
-                )}
-              </p>
-            </div>
-
-            {/* Top Right Action Group */}
-            <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-              {/* Close Button */}
-              <button
-                id="btn-close-modal"
-                onClick={onClose}
-                className="shrink-0 p-1.5 md:p-2 rounded-lg md:rounded-xl bg-[#030612]/90 hover:bg-[#0c1630] text-slate-400 hover:text-cyan-300 transition-colors border border-cyan-500/25 cursor-pointer shadow-sm"
-                title="Close star information"
+        {/* Top Row: Star Info & Close Button */}
+        <div className="relative z-10 flex items-center justify-between gap-2 md:gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
+              <h1
+                onClick={handleDossierStarClick}
+                className="text-sm sm:text-base md:text-xl font-black text-white tracking-tight shrink-0 select-none cursor-pointer"
               >
-                <X className="w-4 h-4 md:w-5 md:h-5" />
+                {star.name}
+              </h1>
+              {star.bayerDesignation && (
+                <span
+                  onClick={handleDossierStarClick}
+                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/30 whitespace-nowrap cursor-pointer select-none"
+                  title={`Bayer Designation: ${star.bayerDesignation}`}
+                >
+                  {star.bayerDesignation}
+                </span>
+              )}
+              {star.flamsteedDesignation && (
+                <span
+                  onClick={handleDossierStarClick}
+                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091429] text-sky-300 font-mono border border-sky-500/30 whitespace-nowrap cursor-pointer select-none"
+                  title={`Flamsteed Number: ${star.flamsteedDesignation}`}
+                >
+                  {star.flamsteedDesignation}
+                </span>
+              )}
+              {star.gouldDesignation && (
+                <span
+                  onClick={handleDossierStarClick}
+                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#081a1c] text-emerald-300 font-mono border border-emerald-500/30 whitespace-nowrap cursor-pointer select-none"
+                  title={`Gould Designation: ${star.gouldDesignation}`}
+                >
+                  {star.gouldDesignation}
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  if (onOpenClassificationGuide) {
+                    onClose();
+                    onOpenClassificationGuide();
+                  }
+                }}
+                title="Learn about this spectral classification"
+                className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 font-semibold font-mono shadow-[0_0_10px_rgba(6,182,212,0.25)] whitespace-nowrap cursor-pointer transition-all hover:border-cyan-400"
+              >
+                Spectral {star.spectralType} ℹ️
               </button>
             </div>
+
+            <p className="text-[9px] md:text-xs text-slate-400 flex flex-wrap items-center gap-x-1.5 md:gap-x-2 gap-y-0.5 font-mono">
+              <span>Constellation: <strong className="text-slate-200">{star.constellation}</strong></span>
+              <span className="hidden md:inline">•</span>
+              <span>Stage: <strong className="text-slate-200">{star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage}</strong></span>
+              {star.alternateNames.length > 0 && (
+                <span className="hidden lg:inline">
+                  • Aliases: {star.alternateNames.slice(0, 2).join(', ')}
+                </span>
+              )}
+            </p>
+          </div>
+
+          {/* Top Right Action Group */}
+          <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+            {/* Close Button */}
+            <button
+              id="btn-close-modal"
+              onClick={onClose}
+              className="shrink-0 p-1.5 md:p-2 rounded-lg md:rounded-xl bg-[#030612]/90 hover:bg-[#0c1630] text-slate-400 hover:text-cyan-300 transition-colors border border-cyan-500/25 cursor-pointer shadow-sm"
+              title="Close star information"
+            >
+              <X className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Body: Single continuous scroll on mobile portrait; side-by-side split screen with fixed 3D stage on mobile landscape / desktop */}
+      <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-y-auto landscape:overflow-hidden lg:overflow-hidden bg-transparent">
+        {/* Left Column: 3D stage in continuous flow on portrait, fixed 1/2 column without scrolling on landscape */}
+        <div className="w-full shrink-0 landscape:w-1/2 lg:w-1/2 landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 flex flex-col justify-center">
+          {/* Interactive 3D Dossier Stage */}
+          <div className="w-full h-auto landscape:h-full lg:h-auto">
+            <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} initialMode={initialMode} />
           </div>
         </div>
 
-        {/* Content Body: Side-by-side flex layout on landscape, vertical stack on portrait */}
-        <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-hidden bg-transparent">
-          {/* Left Column: 3D dossier canvas container clamped to 50vh on mobile portrait, 1/2 screen on landscape */}
-          <div className="w-full h-[50vh] landscape:w-1/2 landscape:h-screen lg:w-1/2 lg:h-auto overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 shrink-0">
-            {/* Interactive 3D Dossier Stage: Size vs. Sun, Size vs. Earth & Solar System Architecture */}
-            <StarDossier3DStage star={star} onStarClick={handleDossierStarClick} initialMode={initialMode} />
+        {/* Right Column: Data/Telemetry panel (scrolls with whole page on portrait, independently on landscape/desktop) */}
+        <div className="w-full shrink-0 landscape:w-1/2 lg:w-1/2 landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin space-y-3 sm:space-y-4 md:space-y-5">
+          {/* 3D Stage Controls Toolbar Slot (Moved to top of right panel) */}
+          <div id="star-dossier-toolbar-slot" className="w-full min-h-0" />
 
-            {/* On landscape and desktop: Superimposition Scale sits directly under the 3D Stage in the 1/2 column */}
-            <div className="hidden landscape:block lg:block">
-              {renderSuperimpositionScale()}
-            </div>
-
-            {/* On landscape and desktop: Scientific Description sits directly under Superimposition */}
-            <div className="hidden landscape:block lg:block">
-              {renderDescription()}
-            </div>
-          </div>
-
-          {/* Right Column: Data/Telemetry panel with independent scrolling */}
-          <div className="w-full landscape:w-1/2 lg:w-1/2 landscape:overflow-y-auto pb-safe overflow-y-auto p-2.5 sm:p-4 md:p-6 scrollbar-thin space-y-3 sm:space-y-4 md:space-y-5 flex-1">
-              {/* Key Metrics Grid: 5 Core Astrophysical Properties */}
+          {/* Key Metrics Grid: 5 Core Astrophysical Properties */}
               <div 
                 ref={gridRef}
                 className="relative"
@@ -814,18 +799,13 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             )}
           </div>
 
-              {/* On mobile portrait: Solar System Superimposition Scale appears right after Key Metrics */}
-              <div className="block landscape:hidden lg:hidden">
-                {renderSuperimpositionScale()}
-              </div>
-
-              {/* Exoplanetary System & Known Worlds Section */}
+              {/* Exoplanetary System Section */}
           <div className="p-5 rounded-2xl bg-[#020514]/75 backdrop-blur-md border border-cyan-500/25 shadow-[0_0_30px_rgba(6,182,212,0.12)]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-cyan-500/15 pb-3">
               <div className="flex items-center gap-2.5 text-cyan-300">
                 <Globe className="w-5 h-5 text-cyan-400" />
                 <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
-                  Exoplanetary System & Known Worlds
+                  Exoplanetary System
                 </h3>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -954,6 +934,9 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               </div>
             )}
           </div>
+
+          {/* Solar System Superimposition Scale (relocated below Exoplanetary System) */}
+          {renderSuperimpositionScale()}
 
           {/* Dedicated Link to Stellar System Dossier */}
           {knownMultipleSystem && (
@@ -1151,8 +1134,8 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             </ul>
           </div>
 
-              {/* On mobile portrait: Description appears at the bottom of the dossier */}
-              <div className="block landscape:hidden lg:hidden">
+              {/* Footnote / Scientific Description at the very bottom of the right panel */}
+              <div>
                 {renderDescription()}
               </div>
 
@@ -1169,6 +1152,5 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             </div>
         </div>
       </div>
-    </div>
   );
 };
