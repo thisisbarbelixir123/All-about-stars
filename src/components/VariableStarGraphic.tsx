@@ -418,21 +418,26 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
           ? (novaPhase < 0.12 ? novaPhase / 0.12 : Math.exp(-(novaPhase - 0.12) * 5.2))
           : 0;
 
-        // Binary System Geometry (Enlarged Scale)
-        const wdX = cx - 56;
-        const donorX = cx + 76;
+        // Binary System Geometry (Enlarged Scale, Donor star sticking directly to disk)
+        const wdX = cx - 50;
+        const donorX = cx + 70;
         const sepY = cy;
+        const diskRx = 56;
+        const diskRy = 22;
+        const diskAngle = -0.14;
+
+        // L1 apex touches and sticks directly to the outer boundary of the accretion disk
+        const l1X = wdX + diskRx - 2; // seamlessly attached to the disk edge
 
         // --- 1. SECONDARY MASS DONOR STAR (Roche-Lobe filling K/M red subgiant) ---
-        // Asymmetric Roche-lobe teardrop geometry tapering towards the L1 point
-        const l1X = cx + 10;
+        // Asymmetric Roche-lobe teardrop geometry tapering directly into the accretion disk
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(l1X, sepY);
         // Top lobe curve
-        ctx.bezierCurveTo(donorX - 26, sepY - 33, donorX + 34, sepY - 31, donorX + 38, sepY);
+        ctx.bezierCurveTo(donorX - 28, sepY - 34, donorX + 32, sepY - 32, donorX + 36, sepY);
         // Bottom lobe curve
-        ctx.bezierCurveTo(donorX + 34, sepY + 31, donorX - 26, sepY + 33, l1X, sepY);
+        ctx.bezierCurveTo(donorX + 32, sepY + 32, donorX - 28, sepY + 34, l1X, sepY);
         ctx.closePath();
 
         // Gravity-darkened radial gradient (poles & L1 apex cooler, flanks illuminated)
@@ -444,31 +449,40 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         ctx.fillStyle = donorGrad;
         ctx.fill();
 
-        // Magnetic active region / starspots on donor
-        ctx.fillStyle = 'rgba(67, 20, 7, 0.7)';
-        ctx.beginPath();
-        ctx.ellipse(donorX + 10, sepY - 11, 8, 5, 0.2, 0, Math.PI * 2);
-        ctx.ellipse(donorX + 16, sepY + 10, 7, 4, -0.3, 0, Math.PI * 2);
+        // Smooth convective atmospheric limb glow (NO dark/black spots)
+        const donorLimbGrad = ctx.createRadialGradient(donorX, sepY, 12, donorX, sepY, 38);
+        donorLimbGrad.addColorStop(0, 'rgba(254, 215, 170, 0)');
+        donorLimbGrad.addColorStop(0.75, 'rgba(249, 115, 22, 0.2)');
+        donorLimbGrad.addColorStop(1, 'rgba(124, 45, 18, 0.4)');
+        ctx.fillStyle = donorLimbGrad;
         ctx.fill();
         ctx.restore();
 
         // --- 2. L1 INNER LAGRANGE ACCRETION STREAM ---
-        // High-velocity curved gas stream flowing along Coriolis trajectory towards the disk edge
-        const spotX = wdX + 34;
+        // High-velocity curved gas stream flowing directly from the donor apex along Coriolis trajectory
+        const spotX = wdX + 32;
         const spotY = sepY - 14;
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(l1X, sepY);
-        ctx.quadraticCurveTo((l1X + spotX) / 2 + 8, sepY - 24, spotX, spotY);
-        ctx.strokeStyle = 'rgba(251, 146, 60, 0.78)';
-        ctx.lineWidth = 4;
+        ctx.quadraticCurveTo((l1X + spotX) / 2 + 4, sepY - 20, spotX, spotY);
+        ctx.strokeStyle = 'rgba(251, 146, 60, 0.85)';
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+
+        // Luminous core of the gas stream
+        ctx.beginPath();
+        ctx.moveTo(l1X, sepY);
+        ctx.quadraticCurveTo((l1X + spotX) / 2 + 4, sepY - 20, spotX, spotY);
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.9)';
+        ctx.lineWidth = 1.8;
         ctx.stroke();
 
         // Animated streaming plasma clumps along the stream trajectory
         for (let p = 0; p < 6; p++) {
           const tClump = ((elapsed * 1.7 + p * (1 / 6)) % 1.0);
-          const clumpX = (1 - tClump) * (1 - tClump) * l1X + 2 * (1 - tClump) * tClump * ((l1X + spotX) / 2 + 8) + tClump * tClump * spotX;
-          const clumpY = (1 - tClump) * (1 - tClump) * sepY + 2 * (1 - tClump) * tClump * (sepY - 24) + tClump * tClump * spotY;
+          const clumpX = (1 - tClump) * (1 - tClump) * l1X + 2 * (1 - tClump) * tClump * ((l1X + spotX) / 2 + 4) + tClump * tClump * spotX;
+          const clumpY = (1 - tClump) * (1 - tClump) * sepY + 2 * (1 - tClump) * tClump * (sepY - 20) + tClump * tClump * spotY;
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
           ctx.arc(clumpX, clumpY, 2.4, 0, Math.PI * 2);
@@ -477,10 +491,6 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         ctx.restore();
 
         // --- 3. MULTI-ZONE SILKY KEPLERIAN ACCRETION DISK (Enlarged & Smoothed) ---
-        const diskRx = 58;
-        const diskRy = 22;
-        const diskAngle = -0.16;
-
         ctx.save();
         ctx.translate(wdX, sepY);
         ctx.rotate(diskAngle);
@@ -650,25 +660,33 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Bipolar Starspot Active Regions (footpoints of magnetic flux tubes)
+        // Chromospheric Active Region & Magnetic Footpoints (Luminous plages, NO harsh black dots)
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.clip();
 
-        // Magnetic spot pairs
-        ctx.fillStyle = 'rgba(30, 5, 5, 0.88)';
-        ctx.beginPath();
-        ctx.ellipse(flareX - 12, flareY + 8, 7, 5, 0.3, 0, Math.PI * 2);
-        ctx.ellipse(flareX + 14, flareY - 4, 8, 6, -0.2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bright magnetic plage surrounding the footpoints
-        ctx.fillStyle = `rgba(254, 202, 202, ${0.35 + flarePower * 0.4})`;
+        // Magnetic footpoint 1 (warm golden plage in quiescence, dazzling white-cyan flare kernel in eruption)
+        const fp1Grad = ctx.createRadialGradient(flareX - 12, flareY + 8, 1, flareX - 12, flareY + 8, 12);
+        fp1Grad.addColorStop(0, flarePower > 0.05 ? '#ffffff' : 'rgba(254, 240, 138, 0.95)');
+        fp1Grad.addColorStop(0.35, flarePower > 0.05 ? 'rgba(56, 189, 248, 0.85)' : 'rgba(251, 146, 60, 0.7)');
+        fp1Grad.addColorStop(0.75, 'rgba(239, 68, 68, 0.3)');
+        fp1Grad.addColorStop(1, 'rgba(69, 10, 10, 0)');
+        ctx.fillStyle = fp1Grad;
         ctx.beginPath();
         ctx.ellipse(flareX - 12, flareY + 8, 11, 8, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Magnetic footpoint 2
+        const fp2Grad = ctx.createRadialGradient(flareX + 14, flareY - 4, 1, flareX + 14, flareY - 4, 13);
+        fp2Grad.addColorStop(0, flarePower > 0.05 ? '#ffffff' : 'rgba(254, 240, 138, 0.95)');
+        fp2Grad.addColorStop(0.35, flarePower > 0.05 ? 'rgba(56, 189, 248, 0.85)' : 'rgba(251, 146, 60, 0.7)');
+        fp2Grad.addColorStop(0.75, 'rgba(239, 68, 68, 0.3)');
+        fp2Grad.addColorStop(1, 'rgba(69, 10, 10, 0)');
+        ctx.fillStyle = fp2Grad;
+        ctx.beginPath();
         ctx.ellipse(flareX + 14, flareY - 4, 12, 9, -0.2, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.fill();
 
         // Concentric Moreton Shockwave rippling across photosphere during flare
         if (flarePower > 0.1) {
@@ -765,16 +783,26 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
       }
 
       // =========================================================================
-      // 7. ROTATIONAL VARIABLES (BY Draconis / FK Comae / Alpha² Canum Venaticorum)
-      // True 3D rotating sphere with Eddington quadratic limb-darkening,
-      // giant multi-latitude starspot complexes with umbra & penumbra,
-      // bright limb-enhanced magnetic facular networks, and tilted rotation axis
+      // 7. ROTATIONAL VARIABLES (Alpha² Canum Venaticorum / Cor Caroli Archetype)
+      // True 3D rotating white A-type star matching Cor Caroli example,
+      // with Eddington limb darkening, chemically peculiar silicon/chromium patches,
+      // magnetic facular plages, and tilted rotational axis
       // =========================================================================
       else if (variableId === 'rotational-variables') {
         const rotSpeed = 1.05;
         const rotAngle = elapsed * rotSpeed;
         const radius = cx * 0.37;
         const axisTilt = 0.26; // ~15 degree axial tilt
+
+        // Luminous stellar halo / corona for white A0Vp star (Cor Caroli)
+        const haloGrad = ctx.createRadialGradient(cx, cy, radius * 0.7, cx, cy, radius * 1.55);
+        haloGrad.addColorStop(0, 'rgba(192, 209, 255, 0.42)');
+        haloGrad.addColorStop(0.45, 'rgba(147, 197, 253, 0.16)');
+        haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = haloGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 1.55, 0, Math.PI * 2);
+        ctx.fill();
 
         // Tilted Coordinate Grid & Spin Axis (before drawing star)
         ctx.save();
@@ -800,13 +828,13 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 3D Spherical Photosphere with Eddington Quadratic Limb Darkening
+        // 3D Spherical Photosphere with Eddington Quadratic Limb Darkening (A0Vp Pure White / Blue-White Star)
         const photoGrad = ctx.createRadialGradient(-radius * 0.22, -radius * 0.22, 0, 0, 0, radius);
-        photoGrad.addColorStop(0, '#ffffff'); // Sub-observer specular intensity
-        photoGrad.addColorStop(0.2, '#fef08a');
-        photoGrad.addColorStop(0.55, '#f59e0b');
-        photoGrad.addColorStop(0.82, '#b45309');
-        photoGrad.addColorStop(1, '#451a03'); // Severe limb darkening towards the horizon
+        photoGrad.addColorStop(0, '#ffffff'); // Searing sub-observer specular core
+        photoGrad.addColorStop(0.3, '#f8faff'); // Brilliant crystalline white
+        photoGrad.addColorStop(0.65, '#dbeafe'); // Pale celestial sapphire white
+        photoGrad.addColorStop(0.86, '#93c5fd'); // Cool diamond blue horizon
+        photoGrad.addColorStop(1, '#1e3a8a'); // Crisp interstellar limb darkening
         ctx.fillStyle = photoGrad;
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -818,7 +846,7 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         ctx.clip();
 
         // Latitude coordinate lines projected on sphere
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
         ctx.lineWidth = 1;
         [-0.5, 0, 0.5].forEach((latFrac) => {
           const latY = latFrac * radius;
@@ -828,13 +856,13 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
           ctx.stroke();
         });
 
-        // 4 Multi-Latitude Starspot Complexes & Magnetic Faculae
-        // Each spot has true 2-component structure: dark central umbra + lighter textured penumbra
+        // 4 Multi-Latitude Magnetic & Chemical Abundance Anomaly Patches (Alpha-2 Canum Venaticorum Archetype)
+        // Rotating with the star: Chemically peculiar Silicon, Chromium, and magnetic facular regions
         const spotGroups = [
-          { lat: -0.22, lonOffset: 0.0, radX: 18, radY: 13, isApPatch: false },
-          { lat: 0.26, lonOffset: 1.15, radX: 22, radY: 16, isApPatch: false },
-          { lat: -0.42, lonOffset: 2.8, radX: 15, radY: 11, isApPatch: true }, // Chemically peculiar silicon patch
-          { lat: 0.12, lonOffset: 4.2, radX: 24, radY: 17, isApPatch: false },
+          { lat: -0.22, lonOffset: 0.0, radX: 20, radY: 14, type: 'silicon' },
+          { lat: 0.26, lonOffset: 1.15, radX: 24, radY: 17, type: 'magnetic' },
+          { lat: -0.42, lonOffset: 2.8, radX: 18, radY: 12, type: 'chromium' },
+          { lat: 0.12, lonOffset: 4.2, radX: 22, radY: 15, type: 'silicon' },
         ];
 
         let totalSpottedFluxLoss = 0;
@@ -851,42 +879,52 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
             const spotX = sinLon * parallelRadius;
             const spotY = latY + cosLon * parallelRadius * 0.12; // 3D perspective slant
 
-            // Foreshortening factor: spots thin out near the limb
+            // Foreshortening factor: features compress near the stellar limb
             const foreshortenX = Math.max(0.12, cosLon);
             const distFromCenter = Math.sqrt(spotX * spotX + spotY * spotY) / radius;
 
-            if (sg.isApPatch) {
-              // Ap/Bp Chemically Peculiar Magnetic Patch (Silicon/Chromium enhancement)
+            if (sg.type === 'silicon') {
+              // Ap/Bp Chemically Peculiar Silicon Abundance Patch (Opalescent lavender/cyan)
               const apGrad = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, sg.radX);
-              apGrad.addColorStop(0, 'rgba(192, 132, 252, 0.65)');
-              apGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.45)');
+              apGrad.addColorStop(0, 'rgba(192, 132, 252, 0.7)');
+              apGrad.addColorStop(0.45, 'rgba(56, 189, 248, 0.45)');
               apGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
               ctx.fillStyle = apGrad;
               ctx.beginPath();
               ctx.ellipse(spotX, spotY, sg.radX * foreshortenX, sg.radY, 0, 0, Math.PI * 2);
               ctx.fill();
-            } else {
-              // 1. Bright Magnetic Faculae / Plage Network (Brightest near the limb!)
-              const faculaLimbBoost = 0.25 + 0.65 * distFromCenter;
-              ctx.fillStyle = `rgba(255, 255, 255, ${0.42 * cosLon * faculaLimbBoost})`;
+            } else if (sg.type === 'chromium') {
+              // Chromium / Rare-Earth Element Patch (Emerald-cyan & iridescent indigo)
+              const crGrad = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, sg.radX);
+              crGrad.addColorStop(0, 'rgba(45, 212, 191, 0.7)');
+              crGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.45)');
+              crGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+              ctx.fillStyle = crGrad;
               ctx.beginPath();
-              ctx.ellipse(spotX, spotY, (sg.radX + 9) * foreshortenX, sg.radY + 7, 0, 0, Math.PI * 2);
+              ctx.ellipse(spotX, spotY, sg.radX * foreshortenX, sg.radY, 0, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              // Magnetic Plage & Cool Magnetic Depression (Harmonized with white A-type star)
+              const faculaLimbBoost = 0.25 + 0.65 * distFromCenter;
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.48 * cosLon * faculaLimbBoost})`;
+              ctx.beginPath();
+              ctx.ellipse(spotX, spotY, (sg.radX + 8) * foreshortenX, sg.radY + 6, 0, 0, Math.PI * 2);
               ctx.fill();
 
-              // 2. Starspot Penumbra (cooler convective filament zone)
+              // Magnetic spot penumbra (cool slate/indigo tone, never muddy brown)
               const penumbraGrad = ctx.createRadialGradient(spotX, spotY, sg.radX * 0.35, spotX, spotY, sg.radX);
-              penumbraGrad.addColorStop(0, '#451a03');
-              penumbraGrad.addColorStop(0.65, '#78350f');
-              penumbraGrad.addColorStop(1, 'rgba(120, 53, 15, 0.2)');
+              penumbraGrad.addColorStop(0, 'rgba(30, 41, 59, 0.65)');
+              penumbraGrad.addColorStop(0.7, 'rgba(51, 65, 85, 0.4)');
+              penumbraGrad.addColorStop(1, 'rgba(30, 58, 138, 0)');
               ctx.fillStyle = penumbraGrad;
               ctx.beginPath();
               ctx.ellipse(spotX, spotY, sg.radX * foreshortenX, sg.radY, 0, 0, Math.PI * 2);
               ctx.fill();
 
-              // 3. Starspot Umbra (deep dark magnetic core)
+              // Magnetic core umbra (deep midnight slate)
               const umbraGrad = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, sg.radX * 0.55);
-              umbraGrad.addColorStop(0, '#0a0402');
-              umbraGrad.addColorStop(1, '#240a02');
+              umbraGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
+              umbraGrad.addColorStop(1, 'rgba(30, 41, 59, 0.5)');
               ctx.fillStyle = umbraGrad;
               ctx.beginPath();
               ctx.ellipse(spotX, spotY, sg.radX * 0.55 * foreshortenX, sg.radY * 0.55, 0, 0, Math.PI * 2);
@@ -902,11 +940,11 @@ export const VariableStarGraphic: React.FC<VariableStarGraphicProps> = ({
         // Exact phase-locked rotational modulation light curve
         const normPhase = (rotAngle / (Math.PI * 2)) % 1.0;
         const currentLightVal = Math.max(0.65, 1.0 - totalSpottedFluxLoss * 0.85);
-        const statusText = `Rotational Phase Φ=${normPhase.toFixed(2)} • Active Spot Coverage ${(totalSpottedFluxLoss * 100).toFixed(1)}%`;
+        const statusText = `Rotational Phase Φ=${normPhase.toFixed(2)} • Active Feature Coverage ${(totalSpottedFluxLoss * 100).toFixed(1)}%`;
 
         renderVariableHUD(
           ctx, width, height, normPhase, currentLightVal,
-          'Rotational Starspot & Facula Modulation',
+          'Rotational Magnetic & Chemical Patch Modulation',
           statusText,
           (p) => {
             const th = p * Math.PI * 2;

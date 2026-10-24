@@ -1080,12 +1080,12 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           {classificationSystemIndex === 0 && (
             <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
               {/* Mnemonic Banner: Placed above the buttons */}
-              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#030612]/90 border border-cyan-500/20 flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4 overflow-hidden shadow-sm">
-                <div className="min-w-0 w-full md:w-auto">
-                  <span className="text-[9px] sm:text-[11px] font-mono text-cyan-400 uppercase tracking-widest font-bold block">
+              <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-[#030612]/90 border border-cyan-500/20 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5 sm:gap-3.5 overflow-hidden shadow-sm">
+                <div className="min-w-0 w-full lg:w-auto">
+                  <span className="text-[9px] sm:text-[10px] md:text-[11px] font-mono text-cyan-400 uppercase tracking-widest font-bold block">
                     The Universal Astronomy Mnemonic
                   </span>
-                  <div className="text-[11px] sm:text-sm md:text-base font-black text-white mt-0.5 sm:mt-1 flex flex-wrap gap-1 sm:gap-2 items-center font-mono">
+                  <div className="text-[11px] sm:text-xs md:text-sm lg:text-[15px] font-black text-white mt-0.5 sm:mt-1 flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 items-center font-mono leading-relaxed">
                     <span className="text-[#4d88ff]">O (Oh)</span>
                     <span className="text-slate-600">•</span>
                     <span className="text-[#8cb5ff]">B (Be)</span>
@@ -1104,7 +1104,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
                 {/* Rainbow Spectrum Visual Bar */}
                 <div
-                  className="w-full md:w-72 lg:w-80 h-2 sm:h-3 shrink-0 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.3)] border border-white/20"
+                  className="w-full lg:w-64 xl:w-80 h-2 sm:h-2.5 shrink-0 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.3)] border border-white/20 mt-1 lg:mt-0"
                   style={{
                     background: 'linear-gradient(90deg, #4d88ff 0%, #8cb5ff 16.6%, #d8e5ff 33.3%, #fff2db 50%, #ffefa6 66.6%, #ffb366 83.3%, #ff5533 100%)',
                   }}
@@ -1112,53 +1112,65 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               </div>
 
               {/* Spectral Class Quick Selector Buttons with Mnemonics */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2.5 w-full py-2 sm:py-2.5">
-                {SPECTRAL_CLASSES_GUIDE.map((item) => {
-                  const isSelected = item.id === selectedSpectralClassId;
-                  return (
-                    <button
-                      key={item.id}
-                      id={`btn-spectral-select-${item.code}`}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setSelectedSpectralClassId(item.id);
-                      }}
-                      className={`p-1 sm:p-3 rounded-xl sm:rounded-2xl border text-center sm:text-left transition-colors duration-150 cursor-pointer flex flex-col items-center sm:items-stretch justify-center sm:justify-between relative group min-w-0 sm:aspect-[3/2] min-h-[52px] sm:min-h-[96px] h-auto ${
-                        isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-cyan-400'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24]'
-                      }`}
-                      title={`Spectral Class ${item.code} (${item.mnemonicWord})`}
-                    >
-                      {/* Mnemonic word placed above the spectral code: HIDDEN ON MOBILE (no titles/subtitles on mobile) */}
-                      <div className="hidden sm:block text-xs font-bold text-cyan-300/90 group-hover:text-cyan-200 transition-colors truncate w-full text-left leading-tight mb-1">
-                        {item.mnemonicWord}
-                      </div>
-
-                      <div className="flex items-center justify-center sm:justify-between w-full gap-1 my-auto sm:my-0">
-                        <span
-                          className="text-base sm:text-2xl font-black font-mono leading-none drop-shadow-[0_0_8px_currentColor]"
-                          style={{ color: item.colorHex }}
-                        >
-                          {item.code}
-                        </span>
-                        <span
-                          className="w-1.5 h-1.5 sm:w-3 sm:h-3 shrink-0 rounded-full border border-white/40 shadow-sm"
-                          style={{ backgroundColor: item.colorHex }}
-                        />
-                      </div>
-
-                      {/* Subtitle (temperature): HIDDEN ON MOBILE, shown on tablet/desktop */}
-                      <div className="hidden sm:block mt-1 min-w-0">
-                        <div className="text-[10px] text-slate-400 font-mono truncate" title={item.temperatureKelvin}>
-                          {item.code === 'O'
-                            ? '≥ 30,000 K'
-                            : `${item.tempMin.toLocaleString()} – ${item.tempMax.toLocaleString()} K`}
+              <div className="w-full overflow-x-auto pb-1 -mb-1 scrollbar-thin">
+                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 lg:gap-2.5 w-full min-w-[540px] sm:min-w-0 py-1.5 sm:py-2">
+                  {SPECTRAL_CLASSES_GUIDE.map((item) => {
+                    const isSelected = item.id === selectedSpectralClassId;
+                    return (
+                      <button
+                        key={item.id}
+                        id={`btn-spectral-select-${item.code}`}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setSelectedSpectralClassId(item.id);
+                        }}
+                        className={`px-1.5 py-1.5 sm:px-2 sm:py-2 md:px-2.5 md:py-2.5 lg:px-3 lg:py-3 rounded-xl sm:rounded-2xl border text-center sm:text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group min-w-0 min-h-[56px] sm:min-h-[74px] md:min-h-[82px] lg:min-h-[92px] ${
+                          isSelected
+                            ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
+                            : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                        }`}
+                        title={`Spectral Class ${item.code} (${item.mnemonicWord}) • ${item.temperatureKelvin}`}
+                      >
+                        {/* Mnemonic word placed above the spectral code: HIDDEN ON MOBILE (no titles/subtitles on mobile) */}
+                        <div className="hidden sm:block text-[9.5px] md:text-[10.5px] lg:text-xs font-bold text-cyan-300/90 group-hover:text-cyan-200 transition-colors truncate w-full text-left leading-tight">
+                          {item.mnemonicWord}
                         </div>
-                      </div>
-                    </button>
-                  );
-                })}
+
+                        <div className="flex items-center justify-between w-full gap-1 my-auto sm:my-1">
+                          <span
+                            className="text-base sm:text-lg md:text-xl lg:text-2xl font-black font-mono leading-none drop-shadow-[0_0_8px_currentColor]"
+                            style={{ color: item.colorHex }}
+                          >
+                            {item.code}
+                          </span>
+                          <span
+                            className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 shrink-0 rounded-full border border-white/40 shadow-sm"
+                            style={{ backgroundColor: item.colorHex }}
+                          />
+                        </div>
+
+                        {/* Subtitle (temperature): compact on smaller desktop/tablet, full on xl */}
+                        <div className="hidden sm:block min-w-0 w-full text-left">
+                          <div
+                            className="text-[8px] sm:text-[8.5px] md:text-[9px] lg:text-[10px] text-slate-400 font-mono truncate tracking-tight"
+                            title={item.temperatureKelvin}
+                          >
+                            <span className="xl:hidden">
+                              {item.code === 'O'
+                                ? '≥ 30k K'
+                                : `${item.tempMin >= 1000 ? (item.tempMin / 1000).toLocaleString() : item.tempMin}k–${(item.tempMax / 1000).toLocaleString()}k K`}
+                            </span>
+                            <span className="hidden xl:inline">
+                              {item.code === 'O'
+                                ? '≥ 30,000 K'
+                                : `${item.tempMin.toLocaleString()} – ${item.tempMax.toLocaleString()} K`}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Stellar Classification Card - Carousel UI (Left & Right Buttons, Fits Mobile Screen Vertically & Horizontally) */}
