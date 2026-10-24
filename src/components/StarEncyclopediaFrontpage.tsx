@@ -135,8 +135,6 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
   // Variable Stars Carousel state
   const [activeVariableIndex, setActiveVariableIndex] = useState<number>(0);
-  // Contracted by default on mobiles
-  const [isMobileVariableGraphicOpen, setIsMobileVariableGraphicOpen] = useState<boolean>(false);
 
   const handlePrevVariable = () => {
     isNavigatedByArrowRef.current = true;
@@ -1672,52 +1670,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
                     {/* Visual Graphic & Content Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 min-w-0 items-start">
-                      {/* Left Column: Variable Star Visual Graphic (Normal Square Aspect Ratio, Animation Only) + Profile Stats */}
-                      <div className="lg:col-span-5 flex flex-col gap-3 sm:gap-4 items-center min-w-0">
-                        {/* Mobile Collapsible Header / Toggle (Contracted by Default on Mobile) */}
-                        <div className="w-full block lg:hidden">
-                          <button
-                            type="button"
-                            onClick={() => setIsMobileVariableGraphicOpen((prev) => !prev)}
-                            className="w-full p-2.5 rounded-xl bg-[#030718] hover:bg-[#071333] border border-cyan-500/35 flex items-center justify-between gap-2.5 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
-                            aria-expanded={isMobileVariableGraphicOpen}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              {archetypeStar && <StarDot2D star={archetypeStar} sizeClassName="w-3.5 h-3.5" />}
-                              <div className="min-w-0 text-left">
-                                <span className="text-xs font-mono font-bold text-white truncate block">
-                                  {archetypeStar ? archetypeStar.name : activeVariableItem.name}
-                                </span>
-                                <span className="text-[10px] text-cyan-400/90 font-mono block">
-                                  1:1 Square Stellar Graphic
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 text-xs font-mono text-cyan-400 font-semibold shrink-0 bg-cyan-950/80 px-2 py-1 rounded-lg border border-cyan-500/30">
-                              <span>{isMobileVariableGraphicOpen ? 'Hide' : 'Expand Simulation'}</span>
-                              {isMobileVariableGraphicOpen ? (
-                                <ChevronUp className="w-4 h-4 text-cyan-300" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4 text-cyan-300" />
-                              )}
-                            </div>
-                          </button>
-
-                          {/* Contractable on mobile (collapsed by default) */}
-                          {isMobileVariableGraphicOpen && (
-                            <div className="mt-3 w-full max-w-[340px] sm:max-w-[380px] mx-auto aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative animate-in fade-in zoom-in-95 duration-200">
-                              <VariableStarGraphic
-                                variableId={activeVariableItem.id}
-                                archetypeStar={archetypeStar}
-                                colorHex={activeVariableItem.colorHex}
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Desktop Graphic (Always Visible Alongside Content in 1:1 Square Aspect Ratio) */}
-                        <div className="hidden lg:block w-full aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative">
+                      {/* Left Column: Variable Star Visual Graphic (Normal Square Aspect Ratio, Direct Display - Not Collapsible) + Profile Stats */}
+                      <div className="lg:col-span-5 flex flex-col gap-3 sm:gap-4 items-center min-w-0 w-full">
+                        {/* 1:1 Square Stellar Visual Simulation (Directly Visible on Mobile and Desktop) */}
+                        <div className="w-full max-w-[360px] sm:max-w-[420px] lg:max-w-none aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative">
                           <VariableStarGraphic
                             variableId={activeVariableItem.id}
                             archetypeStar={archetypeStar}
