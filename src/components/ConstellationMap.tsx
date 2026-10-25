@@ -21,7 +21,8 @@ import {
   snapLineVerticesToCatalog,
   getConstellationVisibleFigureStars,
   findConstellationLineFeature,
-  getConstellationLineSegments
+  getConstellationLineSegments,
+  findOptimalNeighborBadgePos
 } from '../utils/celestialMechanics';
 
 export type DsoCategory = 'nebula' | 'galaxy' | 'cluster';
@@ -105,10 +106,14 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredDsoId, setHoveredDsoId] = useState<string | null>(null);
   const [activeDsoId, setActiveDsoId] = useState<string | null>(null);
+  const [hoveredNeighborName, setHoveredNeighborName] = useState<string | null>(null);
+  const [selectedNeighborName, setSelectedNeighborName] = useState<string | null>(null);
 
   useEffect(() => {
     setHoveredDsoId(null);
     setActiveDsoId(null);
+    setHoveredNeighborName(null);
+    setSelectedNeighborName(null);
   }, [constellation.id]);
   // -------------------------------------------------------------
   // MODE 1: ASTERISM PREVIEW (Small Map for Constellation Cards)
@@ -411,7 +416,6 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 3.2);
 
   const mainBoundaryPathData = boundaryRingsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
-  const boundaryCornerPoints = boundaryRingsSvg.flat();
 
   // Project and place Bordering Constellations on the Sky Map
   const borderingConstellationsSvg = neighbors.map(neighborName => {
@@ -447,73 +451,20 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
 
-    // Filter points to reasonable range to exclude antipodal projection extremes
-    const allPts = ringsSvg.flat().filter(p => Math.abs(p.x) < 400 && Math.abs(p.y) < 400);
-    if (allPts.length === 0) return null;
+    const bw = Math.max(9.0, Math.min(26.0, neighborName.length * 1.15 + 4.0));
+    const bh = 3.8;
 
-    // Find the border contact front closest to the map center (50, 50)
-    let minDist = Infinity;
-    allPts.forEach(p => {
-      const d = Math.hypot(p.x - 50, p.y - 50);
-      if (d < minDist) minDist = d;
-    });
-
-    const contactPts = allPts.filter(p => Math.hypot(p.x - 50, p.y - 50) <= minDist + 10);
-    let avgContactX = 0, avgContactY = 0;
-    contactPts.forEach(p => {
-      avgContactX += p.x;
-      avgContactY += p.y;
-    });
-    avgContactX /= (contactPts.length || 1);
-    avgContactY /= (contactPts.length || 1);
-
-    let dx = avgContactX - 50;
-    let dy = avgContactY - 50;
-    let distFromCenter = Math.hypot(dx, dy);
-    if (distFromCenter < 1e-3) {
-      dx = 0;
-      dy = 1;
-      distFromCenter = 1;
-    }
-    const ux = dx / distFromCenter;
-    const uy = dy / distFromCenter;
-
-    // Step outward into neighbor territory
-    let badgeDist = Math.max(34, distFromCenter + 6.5);
-    let bx = 50 + ux * badgeDist;
-    let by = 50 + uy * badgeDist;
-
-    // Ensure badge position is strictly outside the current constellation boundary
-    let steps = 0;
-    while (boundaryRingsSvg.some(ring => pointInPolygon(bx, by, ring)) && steps < 25) {
-      badgeDist += 2.5;
-      bx = 50 + ux * badgeDist;
-      by = 50 + uy * badgeDist;
-      steps++;
-    }
-    if (steps > 0) {
-      badgeDist += 3.5;
-      bx = 50 + ux * badgeDist;
-      by = 50 + uy * badgeDist;
-    }
-
-    const badgeWidth = Math.max(14, neighborName.length * 1.35 + 5.5);
-    const badgeHeight = 4.4;
-
-    const hw = badgeWidth / 2;
-    bx = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, bx));
-    by = Math.max(3.8, Math.min(96.2, by));
+    const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
+    if (!badgePos) return null;
 
     return {
       name: neighborName,
       abbr,
       neighborObj,
       pathData,
-      badgePos: { x: bx, y: by },
-      badgeWidth,
-      badgeHeight,
-      ux,
-      uy
+      badgePos,
+      badgeWidth: bw,
+      badgeHeight: bh
     };
   }).filter(Boolean) as Array<{
     name: string;
@@ -523,12 +474,10 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     badgePos: { x: number; y: number };
     badgeWidth: number;
     badgeHeight: number;
-    ux: number;
-    uy: number;
   }>;
 
-  // Relaxation step for collision avoidance among adjacent neighbor badges
-  for (let iter = 0; iter < 25; iter++) {
+  // Gentle relaxation pass to prevent neighboring badges from overlapping
+  for (let iter = 0; iter < 15; iter++) {
     for (let i = 0; i < borderingConstellationsSvg.length; i++) {
       for (let j = i + 1; j < borderingConstellationsSvg.length; j++) {
         const bi = borderingConstellationsSvg[i];
@@ -536,20 +485,20 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
         const cdx = bj.badgePos.x - bi.badgePos.x;
         const cdy = bj.badgePos.y - bi.badgePos.y;
-        const minGapX = (bi.badgeWidth + bj.badgeWidth) / 2 + 1.5;
-        const minGapY = 4.8;
+        const minGapX = (bi.badgeWidth + bj.badgeWidth) / 2 + 1.2;
+        const minGapY = 4.2;
 
         if (Math.abs(cdx) < minGapX && Math.abs(cdy) < minGapY) {
           const overlapX = minGapX - Math.abs(cdx);
           const overlapY = minGapY - Math.abs(cdy);
 
           if (overlapX / minGapX < overlapY / minGapY) {
-            const push = overlapX * 0.52;
+            const push = overlapX * 0.45;
             const sign = cdx >= 0 ? 1 : -1;
             bj.badgePos.x += push * sign;
             bi.badgePos.x -= push * sign;
           } else {
-            const push = overlapY * 0.52;
+            const push = overlapY * 0.45;
             const sign = cdy >= 0 ? 1 : -1;
             bj.badgePos.y += push * sign;
             bi.badgePos.y -= push * sign;
@@ -558,18 +507,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       }
     }
 
-    // Clamp after each relaxation pass and keep outside boundary
+    // Clamp within visible screen margins
     for (const b of borderingConstellationsSvg) {
       const hw = b.badgeWidth / 2;
-      b.badgePos.x = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, b.badgePos.x));
-      b.badgePos.y = Math.max(3.8, Math.min(96.2, b.badgePos.y));
-
-      if (boundaryRingsSvg.some(ring => pointInPolygon(b.badgePos.x, b.badgePos.y, ring))) {
-        b.badgePos.x += b.ux * 3.5;
-        b.badgePos.y += b.uy * 3.5;
-        b.badgePos.x = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, b.badgePos.x));
-        b.badgePos.y = Math.max(3.8, Math.min(96.2, b.badgePos.y));
-      }
+      const hh = b.badgeHeight / 2;
+      b.badgePos.x = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, b.badgePos.x));
+      b.badgePos.y = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, b.badgePos.y));
     }
   }
 
@@ -678,12 +621,14 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     } else {
       setActiveStarLabelId?.(null);
       setActiveDsoId(null);
+      setSelectedNeighborName(null);
     }
   };
 
   const isInteractiveHovered = Boolean(
     (hoveredStarId && visibleStars.some(s => s.id === hoveredStarId)) ||
-    (hoveredDsoId && mappedDsos.some((d: any) => d.id === hoveredDsoId))
+    (hoveredDsoId && mappedDsos.some((d: any) => d.id === hoveredDsoId)) ||
+    hoveredNeighborName
   );
 
   return (
@@ -692,6 +637,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       onClick={() => {
         setActiveStarLabelId?.(null);
         setActiveDsoId(null);
+        setSelectedNeighborName(null);
       }}
     >
       {/* Astrometric DSO Color Legend Indicator on Map Viewport */}
@@ -892,26 +838,35 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {/* 4. Bordering Constellations on Sky Map (Territory Polygons) */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
           <g className="bordering-constellations-areas" clipPath={`url(#map-frame-clip-${constellation.id})`}>
-            {borderingConstellationsSvg.map((neighbor, nIdx) => (
-              <path
-                key={`neighbor-path-${nIdx}`}
-                d={neighbor.pathData}
-                fill="rgba(30, 41, 59, 0.45)"
-                stroke="#475569"
-                strokeWidth="0.5"
-                strokeDasharray="1.5 1"
-                className="cursor-pointer transition-colors hover:fill-cyan-950/70 hover:stroke-cyan-400"
-                onClick={(e) => {
-                  const coords = getSvgCoords(e.clientX, e.clientY);
-                  const nearest = getNearestInteractiveTarget(coords, 4.0);
-                  if (nearest) return; // Prioritize stars or DSOs near boundary
-                  e.stopPropagation();
-                  if (neighbor.neighborObj && onSelectNeighbor) onSelectNeighbor(neighbor.neighborObj);
-                }}
-              >
-                <title>{`${neighbor.name} (Bordering Constellation • Click to switch to ${neighbor.name} dossier)`}</title>
-              </path>
-            ))}
+            {borderingConstellationsSvg.map((neighbor, nIdx) => {
+              const isHovered = hoveredNeighborName === neighbor.name;
+              const isSelected = selectedNeighborName === neighbor.name;
+              const isHighlighted = isHovered || isSelected;
+
+              return (
+                <path
+                  key={`neighbor-path-${nIdx}`}
+                  d={neighbor.pathData}
+                  fill={isHighlighted ? "rgba(6, 182, 212, 0.32)" : "rgba(30, 41, 59, 0.45)"}
+                  stroke={isHighlighted ? "#38bdf8" : "#475569"}
+                  strokeWidth={isHighlighted ? "0.6" : "0.32"}
+                  strokeDasharray={isHighlighted ? "none" : "1.5 1"}
+                  className="cursor-pointer transition-all duration-150"
+                  onPointerEnter={() => setHoveredNeighborName(neighbor.name)}
+                  onPointerLeave={() => setHoveredNeighborName(null)}
+                  onClick={(e) => {
+                    const coords = getSvgCoords(e.clientX, e.clientY);
+                    const nearest = getNearestInteractiveTarget(coords, 4.0);
+                    if (nearest) return; // Prioritize stars or DSOs near boundary
+                    e.stopPropagation();
+                    setSelectedNeighborName(neighbor.name);
+                    if (neighbor.neighborObj && onSelectNeighbor) onSelectNeighbor(neighbor.neighborObj);
+                  }}
+                >
+                  <title>{`${neighbor.name} (Bordering Constellation • Click to switch to ${neighbor.name} dossier)`}</title>
+                </path>
+              );
+            })}
           </g>
         )}
 
@@ -922,12 +877,9 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
               d={mainBoundaryPathData}
               fill="rgba(6, 182, 212, 0.12)"
               stroke="#06b6d4"
-              strokeWidth="0.75"
+              strokeWidth="0.38"
               strokeDasharray="1.5 1"
             />
-            {boundaryCornerPoints.map((pt, idx) => (
-              <circle key={`bpt-${idx}`} cx={pt.x} cy={pt.y} r="0.9" fill="#38bdf8" stroke="#020512" strokeWidth="0.3" />
-            ))}
           </g>
         )}
 
@@ -1133,16 +1085,22 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
               const by = neighbor.badgePos.y;
               const bw = neighbor.badgeWidth;
               const bh = neighbor.badgeHeight;
+              const isHovered = hoveredNeighborName === neighbor.name;
+              const isSelected = selectedNeighborName === neighbor.name;
+              const isHighlighted = isHovered || isSelected;
 
               return (
                 <g
                   key={`neighbor-badge-${nIdx}`}
                   className="cursor-pointer group/neighbor select-none"
+                  onPointerEnter={() => setHoveredNeighborName(neighbor.name)}
+                  onPointerLeave={() => setHoveredNeighborName(null)}
                   onClick={(e) => {
                     const coords = getSvgCoords(e.clientX, e.clientY);
                     const nearest = getNearestInteractiveTarget(coords, 4.0);
                     if (nearest) return; // Prioritize stars or DSOs near badge
                     e.stopPropagation();
+                    setSelectedNeighborName(neighbor.name);
                     if (neighbor.neighborObj && onSelectNeighbor) {
                       onSelectNeighbor(neighbor.neighborObj);
                     }
@@ -1156,31 +1114,31 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                     width={bw}
                     height={bh}
                     rx="1.1"
-                    fill="#030816"
-                    fillOpacity="0.94"
-                    stroke="#334155"
-                    strokeWidth="0.38"
-                    className="transition-colors group-hover/neighbor:fill-cyan-950/90 group-hover/neighbor:stroke-cyan-400 drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]"
+                    fill={isHighlighted ? "#082f49" : "#030816"}
+                    fillOpacity={isHighlighted ? 0.98 : 0.94}
+                    stroke={isHighlighted ? "#38bdf8" : "#334155"}
+                    strokeWidth={isHighlighted ? "0.55" : "0.35"}
+                    className="transition-all duration-150 drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]"
                   />
                   {/* Guide Accent Indicator Dot */}
                   <circle
-                    cx={bx - bw / 2 + 2.0}
+                    cx={bx - bw / 2 + 1.8}
                     cy={by}
-                    r="0.7"
+                    r={isHighlighted ? "0.75" : "0.55"}
                     fill="#38bdf8"
-                    className="transition-colors group-hover/neighbor:fill-cyan-300 drop-shadow-[0_0_3px_rgba(56,189,248,0.7)]"
+                    className="transition-all duration-150"
                   />
                   {/* Constellation Name Text */}
                   <text
-                    x={bx + 0.8}
-                    y={by + 0.65}
+                    x={bx + 0.7}
+                    y={by + 0.6}
                     textAnchor="middle"
-                    fill="#94a3b8"
-                    fontSize="1.95"
+                    fill={isHighlighted ? "#e0f2fe" : "#94a3b8"}
+                    fontSize="1.75"
                     fontFamily="sans-serif"
                     fontWeight="bold"
-                    letterSpacing="0.04em"
-                    className="uppercase transition-colors group-hover/neighbor:fill-cyan-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                    letterSpacing="0.035em"
+                    className="uppercase transition-colors duration-150 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
                   >
                     {neighbor.name}
                   </text>

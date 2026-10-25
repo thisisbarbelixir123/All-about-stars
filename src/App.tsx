@@ -387,13 +387,15 @@ export default function App() {
         const q = filterState.searchQuery.toLowerCase().trim();
         const matchesSearch =
           star.name.toLowerCase().includes(q) ||
+          (star.primaryDesignation && star.primaryDesignation.toLowerCase().includes(q)) ||
           (star.bayerDesignation && star.bayerDesignation.toLowerCase().includes(q)) ||
           (star.flamsteedDesignation && star.flamsteedDesignation.toLowerCase().includes(q)) ||
           (star.gouldDesignation && star.gouldDesignation.toLowerCase().includes(q)) ||
           (star.constellation && star.constellation.toLowerCase().includes(q)) ||
           (star.spectralType && star.spectralType.toLowerCase().includes(q)) ||
           (star.stellarStage && star.stellarStage.toLowerCase().includes(q)) ||
-          (star.alternateNames && star.alternateNames.some((alt) => alt.toLowerCase().includes(q)));
+          (star.alternateNames && star.alternateNames.some((alt) => alt.toLowerCase().includes(q))) ||
+          (star.designations && star.designations.some((d) => d.toLowerCase().includes(q)));
         if (!matchesSearch) {
           return false;
         }

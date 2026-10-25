@@ -18,7 +18,12 @@ import {
   Zap,
   Orbit,
   Share2,
-  ExternalLink
+  ExternalLink,
+  Tag,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface StarDetailModalProps {
@@ -61,6 +66,86 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
   initialMode,
 }) => {
   const [hoveredMetric, setHoveredMetric] = useState<'diameter' | 'mass' | 'temperature' | 'luminosity' | 'distance' | null>(null);
+
+  const [showDesignationsPopover, setShowDesignationsPopover] = useState<boolean>(false);
+  const [copiedDesignations, setCopiedDesignations] = useState<boolean>(false);
+  const [designationsPage, setDesignationsPage] = useState<number>(1);
+  const designationsRef = useRef<HTMLDivElement>(null);
+  const popoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const primaryDesignation = useMemo(() => {
+    if (!star) return '';
+    return star.primaryDesignation || star.bayerDesignation || star.flamsteedDesignation || star.alternateNames?.[0] || star.name;
+  }, [star]);
+
+  const allDesignations = useMemo(() => {
+    if (!star) return [];
+    const primary = (star.primaryDesignation || star.bayerDesignation || star.flamsteedDesignation || '').trim();
+    const sourceList = (star.designations && star.designations.length > 0)
+      ? star.designations
+      : [
+          star.primaryDesignation,
+          star.bayerDesignation,
+          star.flamsteedDesignation,
+          star.gouldDesignation,
+          ...(star.alternateNames || [])
+        ].filter(Boolean) as string[];
+
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    // 1. Primary designation named first
+    if (primary) {
+      seen.add(primary.toLowerCase());
+      result.push(primary);
+    }
+
+    // 2. Add remaining entries preserving order (proper names, then other catalog designations)
+    for (const item of sourceList) {
+      const trimmed = item.trim();
+      const key = trimmed.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(trimmed);
+      }
+    }
+
+    return result;
+  }, [star]);
+
+  const DESIGNATIONS_PER_PAGE = 10;
+  const totalDesignationsPages = Math.max(1, Math.ceil(allDesignations.length / DESIGNATIONS_PER_PAGE));
+  const currentPageDesignations = useMemo(() => {
+    const start = (designationsPage - 1) * DESIGNATIONS_PER_PAGE;
+    return allDesignations.slice(start, start + DESIGNATIONS_PER_PAGE);
+  }, [allDesignations, designationsPage]);
+
+  const cleanStarName = useMemo(() => {
+    if (!star) return '';
+    return star.name.replace(/\s*\([^)]*\)/g, '').trim();
+  }, [star]);
+
+  // Click outside listener for the designations popover
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (designationsRef.current && !designationsRef.current.contains(e.target as Node)) {
+        setShowDesignationsPopover(false);
+      }
+    };
+    if (showDesignationsPopover) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [showDesignationsPopover]);
+
+  // Reset designations popover state when star changes
+  useEffect(() => {
+    setShowDesignationsPopover(false);
+    setCopiedDesignations(false);
+    setDesignationsPage(1);
+  }, [star?.id]);
 
   const knownMultipleSystem = useMemo(() => (star ? getMultipleStarSystemForStar(star.id) : undefined), [star]);
 
@@ -298,7 +383,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
     >
       {/* Header / Title Section */}
       <div 
-        className="relative px-3 sm:px-6 py-2 sm:py-3 shrink-0 border-b border-cyan-500/20 bg-[#060b20]/95 backdrop-blur-xl transition-all"
+        className="relative z-40 px-3 sm:px-6 py-2 sm:py-3 shrink-0 border-b border-cyan-500/20 bg-[#060b20]/95 backdrop-blur-xl transition-all"
       >
         {/* Subtle radial glow background */}
         <div 
@@ -318,33 +403,156 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               >
                 {star.name}
               </h1>
-              {star.bayerDesignation && (
-                <span
-                  onClick={handleDossierStarClick}
-                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/30 whitespace-nowrap cursor-pointer select-none"
-                  title={`Bayer Designation: ${star.bayerDesignation}`}
+
+              {/* Primary Designation Interactive Pill with Hover & Click Popover */}
+              <div 
+                ref={designationsRef}
+                className="relative inline-flex items-center"
+                onMouseEnter={() => {
+                  if (popoverTimerRef.current) clearTimeout(popoverTimerRef.current);
+                  setShowDesignationsPopover(true);
+                }}
+                onMouseLeave={() => {
+                  popoverTimerRef.current = setTimeout(() => {
+                    setShowDesignationsPopover(false);
+                  }, 250);
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDesignationsPopover((prev) => !prev);
+                  }}
+                  aria-expanded={showDesignationsPopover}
+                  aria-label={`View catalog designations for ${star.name}`}
+                  className={`group inline-flex items-center gap-1.5 text-[9px] md:text-xs px-2 md:px-2.5 py-0.5 rounded-full font-mono border transition-all cursor-pointer select-none ${
+                    showDesignationsPopover
+                      ? 'bg-cyan-900/90 text-cyan-200 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+                      : 'bg-[#091129]/95 hover:bg-[#0e1d3e] text-cyan-300 border-cyan-500/35 hover:border-cyan-400/80 shadow-sm'
+                  }`}
+                  title="Hover or click to display all designations & catalog identifiers"
                 >
-                  {star.bayerDesignation}
-                </span>
-              )}
-              {star.flamsteedDesignation && (
-                <span
-                  onClick={handleDossierStarClick}
-                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#091429] text-sky-300 font-mono border border-sky-500/30 whitespace-nowrap cursor-pointer select-none"
-                  title={`Flamsteed Number: ${star.flamsteedDesignation}`}
-                >
-                  {star.flamsteedDesignation}
-                </span>
-              )}
-              {star.gouldDesignation && (
-                <span
-                  onClick={handleDossierStarClick}
-                  className="text-[9px] md:text-xs px-1.5 md:px-2.5 py-0.5 rounded-full bg-[#081a1c] text-emerald-300 font-mono border border-emerald-500/30 whitespace-nowrap cursor-pointer select-none"
-                  title={`Gould Designation: ${star.gouldDesignation}`}
-                >
-                  {star.gouldDesignation}
-                </span>
-              )}
+                  <span className="font-semibold">{primaryDesignation}</span>
+                  <Tag className="w-2.5 h-2.5 md:w-3 md:h-3 text-cyan-400/80 group-hover:text-cyan-300 shrink-0" />
+                </button>
+
+                {/* Popover Listing Designations (Paginated: 10 per page with < and > controls) */}
+                {showDesignationsPopover && (
+                  <div
+                    className="absolute left-0 top-full mt-2 z-50 w-72 sm:w-80 md:w-96 max-w-[calc(100vw-2rem)] rounded-xl bg-[#060b1c]/98 border border-cyan-500/40 p-3 sm:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.95)] backdrop-blur-2xl text-left animate-in fade-in zoom-in-95 duration-150"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-cyan-500/20">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Tag className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="text-[11px] md:text-xs font-bold text-cyan-200 uppercase tracking-wider font-mono truncate">
+                          Catalog Designations
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 font-mono border border-cyan-500/30">
+                          {allDesignations.length} total
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${cleanStarName}: ${allDesignations.join(', ')}`);
+                            setCopiedDesignations(true);
+                            setTimeout(() => setCopiedDesignations(false), 2000);
+                          }}
+                          className="p-1 rounded-md bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-500/30 transition-colors"
+                          title="Copy all designations to clipboard"
+                        >
+                          {copiedDesignations ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Example Format Summary */}
+                    <div className="p-2 mb-2 rounded-lg bg-black/50 border border-cyan-500/20 text-[10px] md:text-[11px] font-mono text-slate-300 leading-relaxed break-words select-text">
+                      <strong className="text-cyan-300">{cleanStarName}:</strong>{' '}
+                      {allDesignations.slice(0, 7).join(', ')}
+                      {allDesignations.length > 7 && (
+                        <span className="text-cyan-400/80 italic"> (and {allDesignations.length - 7} more...)</span>
+                      )}
+                    </div>
+
+                    {/* 10 Designations per page */}
+                    <div className="space-y-1 my-2">
+                      {currentPageDesignations.map((desig, idx) => {
+                        const itemNumber = (designationsPage - 1) * DESIGNATIONS_PER_PAGE + idx + 1;
+                        return (
+                          <div
+                            key={itemNumber}
+                            className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0b1736]/90 hover:bg-[#10224d] border border-cyan-500/25 hover:border-cyan-400/60 text-slate-200 text-[11px] font-mono transition-colors select-text"
+                          >
+                            <span className="truncate text-cyan-100 font-medium">
+                              {desig}
+                            </span>
+                            <span className="text-[9px] text-cyan-400/60 font-mono ml-2 shrink-0">
+                              #{itemNumber}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Pagination Controls with < and > buttons */}
+                    <div className="mt-2.5 pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-slate-400 text-[10px]">
+                        Page <strong className="text-cyan-300 font-bold">{designationsPage}</strong> of{' '}
+                        <strong className="text-cyan-300 font-bold">{totalDesignationsPages}</strong>
+                        <span className="text-slate-500 ml-1">
+                          ({allDesignations.length} total)
+                        </span>
+                      </span>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDesignationsPage((p) => Math.max(1, p - 1));
+                          }}
+                          disabled={designationsPage === 1}
+                          className="px-2 py-1 rounded bg-cyan-950/80 hover:bg-cyan-900 disabled:opacity-30 disabled:hover:bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center font-bold text-xs"
+                          title="Previous 10 designations"
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDesignationsPage((p) => Math.min(totalDesignationsPages, p + 1));
+                          }}
+                          disabled={designationsPage === totalDesignationsPages}
+                          className="px-2 py-1 rounded bg-cyan-950/80 hover:bg-cyan-900 disabled:opacity-30 disabled:hover:bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center font-bold text-xs"
+                          title="Next 10 designations"
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Footer attribution */}
+                    <div className="mt-1.5 flex items-center justify-between text-[9px] text-slate-500 font-mono">
+                      <span>Cross-referenced via CDS / SIMBAD</span>
+                      {copiedDesignations && <span className="text-emerald-400 font-medium">Copied to clipboard!</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={() => {
                   if (onOpenClassificationGuide) {
@@ -363,11 +571,6 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               <span>Constellation: <strong className="text-slate-200">{star.constellation}</strong></span>
               <span className="hidden md:inline">•</span>
               <span>Stage: <strong className="text-slate-200">{star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage}</strong></span>
-              {star.alternateNames.length > 0 && (
-                <span className="hidden lg:inline">
-                  • Aliases: {star.alternateNames.slice(0, 2).join(', ')}
-                </span>
-              )}
             </p>
           </div>
 

@@ -110,6 +110,126 @@ export const pointInPolygon = (px: number, py: number, ring: Array<{ x: number; 
   return inside;
 };
 
+export const distToSegment = (
+  x: number,
+  y: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): number => {
+  const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+  if (l2 === 0) return Math.hypot(x - x1, y - y1);
+  let t = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(x - (x1 + t * (x2 - x1)), y - (y1 + t * (y2 - y1)));
+};
+
+export const minDistanceToPolygonEdges = (
+  x: number,
+  y: number,
+  ring: Array<{ x: number; y: number }>
+): number => {
+  let minD = Infinity;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const d = distToSegment(x, y, ring[i].x, ring[i].y, ring[j].x, ring[j].y);
+    if (d < minD) minD = d;
+  }
+  return minD;
+};
+
+/**
+ * Finds the optimal interior point (Pole of Inaccessibility) inside a neighbor's visible polygon
+ * that is strictly outside the central constellation boundary.
+ */
+export const findOptimalNeighborBadgePos = (
+  ringsSvg: Array<Array<{ x: number; y: number }>>,
+  boundaryRingsSvg: Array<Array<{ x: number; y: number }>>,
+  badgeWidth: number,
+  badgeHeight: number
+): { x: number; y: number } | null => {
+  const hw = badgeWidth / 2;
+  const hh = badgeHeight / 2;
+
+  const allPts = ringsSvg.flat();
+  const visPts = allPts.filter(p => p.x >= -15 && p.x <= 115 && p.y >= -15 && p.y <= 115);
+  if (visPts.length === 0) return null;
+
+  const bMinX = Math.max(hw + 1.0, Math.min(...visPts.map(p => p.x)));
+  const bMaxX = Math.min(100 - hw - 1.0, Math.max(...visPts.map(p => p.x)));
+  const bMinY = Math.max(hh + 1.5, Math.min(...visPts.map(p => p.y)));
+  const bMaxY = Math.min(100 - hh - 1.5, Math.max(...visPts.map(p => p.y)));
+
+  let bestX = (bMinX + bMaxX) / 2;
+  let bestY = (bMinY + bMaxY) / 2;
+  let bestScore = -Infinity;
+
+  if (bMinX <= bMaxX && bMinY <= bMaxY) {
+    const stepX = Math.max(0.7, (bMaxX - bMinX) / 22);
+    const stepY = Math.max(0.7, (bMaxY - bMinY) / 22);
+
+    for (let gx = bMinX; gx <= bMaxX; gx += stepX) {
+      for (let gy = bMinY; gy <= bMaxY; gy += stepY) {
+        const isInsideNeighbor = ringsSvg.some(ring => pointInPolygon(gx, gy, ring));
+        if (!isInsideNeighbor) continue;
+
+        const isInsideCentral = boundaryRingsSvg.some(ring => pointInPolygon(gx, gy, ring));
+        if (isInsideCentral) continue;
+
+        let clearance = Infinity;
+        ringsSvg.forEach(ring => {
+          const d = minDistanceToPolygonEdges(gx, gy, ring);
+          if (d < clearance) clearance = d;
+        });
+
+        let distToCentral = Infinity;
+        boundaryRingsSvg.forEach(ring => {
+          const d = minDistanceToPolygonEdges(gx, gy, ring);
+          if (d < distToCentral) distToCentral = d;
+        });
+
+        const dCenter = Math.hypot(gx - 50, gy - 50);
+        const score = clearance * 2.0 + Math.min(distToCentral, 10) * 0.5 - (dCenter > 48 ? (dCenter - 48) * 0.3 : 0);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestX = gx;
+          bestY = gy;
+        }
+      }
+    }
+  }
+
+  if (bestScore === -Infinity) {
+    const validPts = visPts.filter(p => !boundaryRingsSvg.some(ring => pointInPolygon(p.x, p.y, ring)));
+    if (validPts.length > 0) {
+      let maxDist = -1;
+      validPts.forEach(p => {
+        let d = Infinity;
+        boundaryRingsSvg.forEach(ring => {
+          const cd = minDistanceToPolygonEdges(p.x, p.y, ring);
+          if (cd < d) d = cd;
+        });
+        if (d > maxDist) {
+          maxDist = d;
+          bestX = p.x;
+          bestY = p.y;
+        }
+      });
+    } else {
+      return null;
+    }
+  }
+
+  bestX = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, bestX));
+  bestY = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, bestY));
+
+  return {
+    x: Math.round(bestX * 10) / 10,
+    y: Math.round(bestY * 10) / 10
+  };
+};
+
 export const getConstellationSphericalCenter = (
   constellation: ConstellationInfo,
   boundsList: any[]
@@ -199,18 +319,19 @@ export const isStarInsideConstellation = (
 };
 
 /**
- * Robustly matches an IAU constellation against features in constellations.lines.json
+ * Robustly matches an IAU constellation against all features in constellations.lines.json.
+ * Supports multi-sector constellations like Serpens (Serpens Caput & Serpens Cauda).
  */
-export const findConstellationLineFeature = (
+export const findConstellationLineFeatures = (
   lines: any[],
   constellation: ConstellationInfo
-): any => {
-  if (!lines || !constellation) return null;
+): any[] => {
+  if (!lines || !constellation) return [];
   const abbr = (constellation.abbreviation || '').toLowerCase();
   const name = (constellation.name || '').toLowerCase();
   const cid = (constellation.id || '').toLowerCase();
 
-  return lines.find((f: any) => {
+  return lines.filter((f: any) => {
     const fid = (f.id || '').toLowerCase();
     const pid = (f.properties?.id || '').toLowerCase();
     const pname = (f.properties?.name || '').toLowerCase();
@@ -222,21 +343,44 @@ export const findConstellationLineFeature = (
       fid === cid ||
       pid === cid
     );
-  }) || null;
+  });
 };
 
 /**
- * Extracts coordinate segments from a GeoJSON feature supporting both MultiLineString and LineString
+ * Robustly matches an IAU constellation against features in constellations.lines.json.
+ * If multiple features exist (e.g. Serpens Caput & Cauda), returns an array of features,
+ * or a single feature if only one exists.
  */
-export const getConstellationLineSegments = (lineFeature: any): number[][][] => {
-  if (!lineFeature?.geometry) return [];
-  if (lineFeature.geometry.type === 'MultiLineString' && Array.isArray(lineFeature.geometry.coordinates)) {
-    return lineFeature.geometry.coordinates;
+export const findConstellationLineFeature = (
+  lines: any[],
+  constellation: ConstellationInfo
+): any => {
+  const feats = findConstellationLineFeatures(lines, constellation);
+  if (feats.length === 0) return null;
+  if (feats.length === 1) return feats[0];
+  return feats;
+};
+
+/**
+ * Extracts coordinate segments from a GeoJSON feature or array of features,
+ * supporting MultiLineString, LineString, and multiple features (e.g. Serpens Caput & Cauda).
+ */
+export const getConstellationLineSegments = (lineFeatureOrFeatures: any): number[][][] => {
+  if (!lineFeatureOrFeatures) return [];
+  const features = Array.isArray(lineFeatureOrFeatures)
+    ? lineFeatureOrFeatures
+    : [lineFeatureOrFeatures];
+
+  const allSegments: number[][][] = [];
+  for (const feat of features) {
+    if (!feat?.geometry) continue;
+    if (feat.geometry.type === 'MultiLineString' && Array.isArray(feat.geometry.coordinates)) {
+      allSegments.push(...feat.geometry.coordinates);
+    } else if (feat.geometry.type === 'LineString' && Array.isArray(feat.geometry.coordinates)) {
+      allSegments.push(feat.geometry.coordinates);
+    }
   }
-  if (lineFeature.geometry.type === 'LineString' && Array.isArray(lineFeature.geometry.coordinates)) {
-    return [lineFeature.geometry.coordinates];
-  }
-  return [];
+  return allSegments;
 };
 
 export const projectUniversalStereo = (

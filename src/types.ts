@@ -57,6 +57,8 @@ export interface StarData {
   bayerDesignation?: string;
   flamsteedDesignation?: string;
   gouldDesignation?: string;
+  primaryDesignation?: string;
+  designations?: string[];
   constellation: string;
   rightAscension?: string;
   declination?: string;
