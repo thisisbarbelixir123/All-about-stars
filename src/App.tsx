@@ -1190,11 +1190,11 @@ export default function App() {
                       </div>
 
                       {/* Sub-page Navigation Tabs inside the Stellar Catalog */}
-                      <div className="flex items-center p-1 rounded-xl sm:rounded-2xl bg-[#020512]/90 border border-cyan-500/30 shrink-0 shadow-lg overflow-x-auto no-scrollbar max-w-full">
+                      <div className="flex items-center p-0.5 sm:p-1 rounded-xl sm:rounded-2xl bg-[#020512]/90 border border-cyan-500/30 shrink-0 shadow-lg overflow-x-auto no-scrollbar max-w-full min-w-0 w-full sm:w-auto">
                         <button
                           id="catalog-subtab-stars"
                           onClick={() => setCatalogSubTab('stars')}
-                          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
+                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
                             catalogSubTab === 'stars'
                               ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                               : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -1214,7 +1214,7 @@ export default function App() {
                         <button
                           id="catalog-subtab-systems"
                           onClick={() => setCatalogSubTab('systems')}
-                          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
+                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
                             catalogSubTab === 'systems'
                               ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                               : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -1303,7 +1303,7 @@ export default function App() {
 
               {/* Standalone Route for Stellar Systems (redirects/maps directly to catalog systems subtab) */}
               {activeOverlay === 'stellar-systems' && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <StellarSystemCatalog
                     embedded={false}
                     onInspectSystemInDossier={(system) => {

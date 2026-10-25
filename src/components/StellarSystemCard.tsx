@@ -54,7 +54,7 @@ export const StellarSystemCard: React.FC<StellarSystemCardProps> = ({
       title={`Open ${system.name} 3D Dossier`}
     >
       {/* Top Section: System Name & Spectral Dots */}
-      <div className="flex items-center justify-between gap-1.5 min-w-0">
+      <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
         <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
           {/* Spectral Dots cluster for member stars */}
           <div className="flex items-center -space-x-1 shrink-0 py-0.5">
@@ -94,7 +94,7 @@ export const StellarSystemCard: React.FC<StellarSystemCardProps> = ({
       </div>
 
       {/* Sub-header: Member star names preview */}
-      <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] md:text-xs font-mono text-slate-400 leading-none min-w-0 overflow-hidden">
+      <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] md:text-xs font-mono text-slate-400 leading-none min-w-0 w-full overflow-hidden">
         <span className="text-slate-500 shrink-0 font-sans">Stars:</span>
         <span className="text-slate-300 truncate font-sans min-w-0 flex-1" title={system.components.map((c) => c.name).join(' + ')}>
           {system.components.map((c) => c.name.split(' (')[0]).join(' + ')}

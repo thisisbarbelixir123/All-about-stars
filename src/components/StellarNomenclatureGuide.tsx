@@ -9,7 +9,6 @@ import {
   MISCELLANEOUS_NAMES,
   NON_STAR_STELLAR_DESIGNATIONS,
   GREEK_ALPHABET_REFERENCE,
-  calculateArgelanderCode,
   NOMENCLATURE_QUIZ_QUESTIONS,
   ProperNameRecord,
   BAYER_SHARED_DESIGNATIONS_LORE,
@@ -39,7 +38,6 @@ import {
   RotateCcw,
   ChevronRight,
   Info,
-  Sliders,
   Tag,
   AlertCircle,
   Globe,
@@ -71,13 +69,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
   // Proper Names Filter & Search
   const [properNameSearch, setProperNameSearch] = useState<string>('');
   const [languageFilter, setLanguageFilter] = useState<string>('all');
-
-  // Argelander Interactive Calculator State
-  const [argelanderInput, setArgelanderInput] = useState<number>(10);
-  const argelanderResult = useMemo(
-    () => calculateArgelanderCode(argelanderInput),
-    [argelanderInput]
-  );
 
   // Quiz State
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
@@ -830,63 +821,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   <p className="text-xs text-slate-300">
                     Once all 334 lettered slots are exhausted, stars are simply designated V335, V336... (e.g. <em>V838 Monocerotis</em> in our catalog!).
                   </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Argelander Calculator */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-cyan-400" />
-              <span>Interactive Argelander Calculator</span>
-            </h3>
-            <p className="text-xs text-slate-400 font-sans">
-              Enter any discovery order number for a variable star in a constellation to see its official Argelander designation and the mathematical phase it belongs to!
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-[#020512] border border-cyan-500/30">
-              <div className="w-full sm:w-64 space-y-1.5">
-                <label className="text-xs font-mono text-slate-300 flex justify-between">
-                  <span>Variable Star Number:</span>
-                  <span className="text-cyan-300 font-bold">#{argelanderInput}</span>
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="1000"
-                  value={argelanderInput}
-                  onChange={(e) => setArgelanderInput(parseInt(e.target.value) || 1)}
-                  className="w-full accent-cyan-400 cursor-pointer"
-                />
-                <div className="flex items-center gap-1.5 pt-1">
-                  {[1, 9, 10, 63, 64, 334, 335, 838].map((presetVal) => (
-                    <button
-                      key={presetVal}
-                      onClick={() => setArgelanderInput(presetVal)}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono cursor-pointer transition-all ${
-                        argelanderInput === presetVal
-                          ? 'bg-cyan-500 text-slate-950 font-bold'
-                          : 'bg-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {presetVal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Result output display */}
-              <div className="flex-1 p-3.5 rounded-xl bg-slate-900/80 border border-cyan-500/40 space-y-1 text-center sm:text-left">
-                <div className="text-[11px] font-mono text-slate-400">Computed Argelander Designation:</div>
-                <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-300 tracking-wider">
-                  {argelanderResult.code} <span className="text-slate-500 text-base font-normal">[Constellation Genitive]</span>
-                </div>
-                <div className="text-xs font-semibold text-amber-300 font-mono">
-                  {argelanderResult.phase}
-                </div>
-                <div className="text-xs text-slate-300 font-sans pt-1">
-                  {argelanderResult.explanation}
                 </div>
               </div>
             </div>

@@ -117,7 +117,7 @@ export const StellarSystemCatalog: React.FC<StellarSystemCatalogProps> = ({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full w-full md:w-auto shrink-0 py-0.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full w-full md:w-auto shrink-0 py-0.5 min-w-0">
           {[
             { id: 'all', label: 'All Systems', count: MULTIPLE_STAR_SYSTEMS.length },
             { id: 'binary', label: 'Binaries', count: MULTIPLE_STAR_SYSTEMS.filter((s) => s.components.length === 2).length },
@@ -147,17 +147,15 @@ export const StellarSystemCatalog: React.FC<StellarSystemCatalogProps> = ({
       </div>
 
       {/* Quick Summary Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-400 px-1 w-full min-w-0">
-        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 w-full">
-          <span className="truncate">
-            Showing <strong className="text-cyan-400 font-bold">{filteredSystems.length}</strong> of{' '}
-            {MULTIPLE_STAR_SYSTEMS.length} Systems in Registry
-          </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1 shrink-0">
-            <Orbit className="w-3 h-3 text-cyan-400" />
-            <span>Click card to launch 3D Dossier</span>
-          </span>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-xs font-mono text-slate-400 px-1 w-full min-w-0">
+        <span className="truncate">
+          Showing <strong className="text-cyan-400 font-bold">{filteredSystems.length}</strong> of{' '}
+          {MULTIPLE_STAR_SYSTEMS.length} Systems in Registry
+        </span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1 shrink-0 self-start sm:self-auto">
+          <Orbit className="w-3 h-3 text-cyan-400" />
+          <span>Click card to launch 3D Dossier</span>
+        </span>
       </div>
 
       {/* Main Responsive Grid Layout (4 per row on desktop, 4-3 on tablet, 1-2 on mobile portrait, max 3 on mobile landscape) */}
