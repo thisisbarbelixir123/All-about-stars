@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import {
@@ -23,6 +23,46 @@ import {
   findConstellationLineFeature,
   getConstellationLineSegments
 } from '../utils/celestialMechanics';
+
+export type DsoCategory = 'nebula' | 'galaxy' | 'cluster';
+
+export const getDsoCategory = (dsoType: string): DsoCategory => {
+  const t = (dsoType || '').toLowerCase();
+  if (t === 'sfr' || t === 'snr' || t === 'bn' || t === 'pn' || t === 'dn') {
+    return 'nebula';
+  }
+  if (t === 's' || t === 'e' || t === 'i' || t === 'g' || t === 'gal') {
+    return 'galaxy';
+  }
+  return 'cluster';
+};
+
+export const DSO_LEGEND_CONFIG = {
+  nebula: {
+    label: 'Nebulae',
+    singular: 'Nebula',
+    colorHex: '#f43f5e',
+    glowHex: '#fb7185',
+    strokeHex: '#e11d48',
+    symbol: '✦'
+  },
+  galaxy: {
+    label: 'Galaxies',
+    singular: 'Galaxy',
+    colorHex: '#a855f7',
+    glowHex: '#c084fc',
+    strokeHex: '#9333ea',
+    symbol: '🌌'
+  },
+  cluster: {
+    label: 'Star Clusters',
+    singular: 'Star Cluster',
+    colorHex: '#10b981',
+    glowHex: '#34d399',
+    strokeHex: '#059669',
+    symbol: '❇️'
+  }
+} as const;
 
 export interface SkyMapOptions {
   showGraticule: boolean;
@@ -62,6 +102,14 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   hoveredStarId,
   setHoveredStarId
 }) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [hoveredDsoId, setHoveredDsoId] = useState<string | null>(null);
+  const [activeDsoId, setActiveDsoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setHoveredDsoId(null);
+    setActiveDsoId(null);
+  }, [constellation.id]);
   // -------------------------------------------------------------
   // MODE 1: ASTERISM PREVIEW (Small Map for Constellation Cards)
   // -------------------------------------------------------------
@@ -225,6 +273,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
     const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
     const isMessier = /^M\s*\d+$/i.test(desig);
+    const isCaldwell = /^C\s*\d+$/i.test(desig);
     const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
     if (isObscure) return false;
     if (dsoType === 'dn' && !commonName) return false;
@@ -233,7 +282,9 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const hasValidMag = !isNaN(mag) && mag < 90;
 
     if (isMessier) return true;
-    if (commonName && (hasValidMag ? mag <= 6.5 : true)) return true;
+    if (isCaldwell) return true;
+    if (commonName && (hasValidMag ? mag <= 9.0 : true)) return true;
+    if (hasValidMag && mag <= 8.0 && (desig.startsWith('NGC') || desig.startsWith('IC'))) return true;
     return false;
   }).map(dso => {
     let r = dso.geometry.coordinates[0]; if (r < 0) r += 360;
@@ -244,23 +295,26 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
     const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
     const isMessier = /^M\s*\d+$/i.test(desig);
+    const isCaldwell = /^C\s*\d+$/i.test(desig);
     const mag = parseFloat(props.mag);
     const magVal = !isNaN(mag) ? mag : 99;
 
     const isSuperIconic = (commonName && /ω\s*cen|omega\s*centauri|pleiades|hyades|praesepe/i.test(commonName)) || isMessier;
     const score = isMessier
       ? 10.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
-      : isSuperIconic
+      : isCaldwell
       ? 12.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
+      : isSuperIconic
+      ? 14.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
       : commonName
-      ? 20.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
-      : 35.0 + magVal;
+      ? 18.0 + (magVal < 90 ? Math.min(magVal, 10.0) : 5.0)
+      : 25.0 + magVal;
 
     let displayName = desig;
     if (isMessier && commonName && !commonName.toLowerCase().includes(desig.toLowerCase())) {
       displayName = `${desig} (${commonName})`;
     } else if (commonName) {
-      displayName = commonName;
+      displayName = `${commonName} (${desig})`;
     }
 
     const typeLabel =
@@ -272,12 +326,23 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       dsoType === 'dn' ? 'Dark Nebula' :
       dsoType === 's' || dsoType === 'e' || dsoType === 'i' ? 'Galaxy' : 'Deep-Sky Object';
 
+    const dsoCat = getDsoCategory(dsoType);
+    const catConfig = DSO_LEGEND_CONFIG[dsoCat];
+
     return {
-      id: dso.id,
+      id: String(dso.id || desig),
       name: displayName,
       desig,
       commonName,
       type: dsoType,
+      category: dsoCat,
+      categoryLabel: catConfig.label,
+      categorySingular: catConfig.singular,
+      colorHex: catConfig.colorHex,
+      glowHex: catConfig.glowHex,
+      strokeHex: catConfig.strokeHex,
+      symbol: catConfig.symbol,
+      typeLabel,
       mag: magVal < 90 ? magVal : undefined,
       ra: r / 15,
       dec: dso.geometry.coordinates[1],
@@ -287,7 +352,19 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   });
 
   prominentCandidates.sort((a, b) => a.score - b.score);
-  const localRawDsos = prominentCandidates.slice(0, 2);
+
+  // Maximum of 6 notable deep sky objects, deduplicated by coordinates and name
+  const localRawDsos: typeof prominentCandidates = [];
+  const seenDsoKeys = new Set<string>();
+  for (const cand of prominentCandidates) {
+    const key = (cand.commonName || cand.desig).toLowerCase().replace(/\s+/g, '');
+    if (seenDsoKeys.has(key)) continue;
+    const isTooClose = localRawDsos.some(prev => Math.hypot(prev.ra * 15 - cand.ra * 15, prev.dec - cand.dec) < 0.25);
+    if (isTooClose) continue;
+    seenDsoKeys.add(key);
+    localRawDsos.push(cand);
+    if (localRawDsos.length >= 6) break;
+  }
 
   const cCatalogStars = STARS_CATALOG.filter(s => {
     const matches = s.constellation.toLowerCase() === constellation.id.toLowerCase() ||
@@ -354,6 +431,15 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
           return toSvg(p.x, p.y);
         }));
+      } else if (feat.geometry?.type === 'MultiPolygon' && feat.geometry.coordinates) {
+        feat.geometry.coordinates.forEach((poly: any) => {
+          if (poly[0]) {
+            ringsSvg.push(poly[0].map((pt: number[]) => {
+              const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
+              return toSvg(p.x, p.y);
+            }));
+          }
+        });
       }
     });
 
@@ -361,41 +447,73 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
 
-    const allPts = ringsSvg.flat();
-    let closestPt = allPts[0];
-    let minDist = Infinity;
-    let avgX = 0, avgY = 0;
-    allPts.forEach(p => {
-      avgX += p.x;
-      avgY += p.y;
-      const d = Math.hypot(p.x - 50, p.y - 50);
-      if (d < minDist) {
-        minDist = d;
-        closestPt = p;
-      }
-    });
-    avgX /= allPts.length || 1;
-    avgY /= allPts.length || 1;
+    // Filter points to reasonable range to exclude antipodal projection extremes
+    const allPts = ringsSvg.flat().filter(p => Math.abs(p.x) < 400 && Math.abs(p.y) < 400);
+    if (allPts.length === 0) return null;
 
-    let rawBadgeX = closestPt.x * 0.60 + avgX * 0.40;
-    let rawBadgeY = closestPt.y * 0.60 + avgY * 0.40;
-    let bx = rawBadgeX - 50;
-    let by = rawBadgeY - 50;
-    const dist = Math.hypot(bx, by);
-    if (dist < 22) {
-      const scale = 24 / (dist || 1);
-      bx *= scale;
-      by *= scale;
+    // Find the border contact front closest to the map center (50, 50)
+    let minDist = Infinity;
+    allPts.forEach(p => {
+      const d = Math.hypot(p.x - 50, p.y - 50);
+      if (d < minDist) minDist = d;
+    });
+
+    const contactPts = allPts.filter(p => Math.hypot(p.x - 50, p.y - 50) <= minDist + 10);
+    let avgContactX = 0, avgContactY = 0;
+    contactPts.forEach(p => {
+      avgContactX += p.x;
+      avgContactY += p.y;
+    });
+    avgContactX /= (contactPts.length || 1);
+    avgContactY /= (contactPts.length || 1);
+
+    let dx = avgContactX - 50;
+    let dy = avgContactY - 50;
+    let distFromCenter = Math.hypot(dx, dy);
+    if (distFromCenter < 1e-3) {
+      dx = 0;
+      dy = 1;
+      distFromCenter = 1;
     }
-    const badgeX = Math.round(Math.max(8, Math.min(92, 50 + bx)) * 10) / 10;
-    const badgeY = Math.round(Math.max(8, Math.min(92, 50 + by)) * 10) / 10;
+    const ux = dx / distFromCenter;
+    const uy = dy / distFromCenter;
+
+    // Step outward into neighbor territory
+    let badgeDist = Math.max(34, distFromCenter + 6.5);
+    let bx = 50 + ux * badgeDist;
+    let by = 50 + uy * badgeDist;
+
+    // Ensure badge position is strictly outside the current constellation boundary
+    let steps = 0;
+    while (boundaryRingsSvg.some(ring => pointInPolygon(bx, by, ring)) && steps < 25) {
+      badgeDist += 2.5;
+      bx = 50 + ux * badgeDist;
+      by = 50 + uy * badgeDist;
+      steps++;
+    }
+    if (steps > 0) {
+      badgeDist += 3.5;
+      bx = 50 + ux * badgeDist;
+      by = 50 + uy * badgeDist;
+    }
+
+    const badgeWidth = Math.max(14, neighborName.length * 1.35 + 5.5);
+    const badgeHeight = 4.4;
+
+    const hw = badgeWidth / 2;
+    bx = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, bx));
+    by = Math.max(3.8, Math.min(96.2, by));
 
     return {
       name: neighborName,
       abbr,
       neighborObj,
       pathData,
-      badgePos: { x: badgeX, y: badgeY }
+      badgePos: { x: bx, y: by },
+      badgeWidth,
+      badgeHeight,
+      ux,
+      uy
     };
   }).filter(Boolean) as Array<{
     name: string;
@@ -403,7 +521,63 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     neighborObj: ConstellationInfo | null;
     pathData: string;
     badgePos: { x: number; y: number };
+    badgeWidth: number;
+    badgeHeight: number;
+    ux: number;
+    uy: number;
   }>;
+
+  // Relaxation step for collision avoidance among adjacent neighbor badges
+  for (let iter = 0; iter < 25; iter++) {
+    for (let i = 0; i < borderingConstellationsSvg.length; i++) {
+      for (let j = i + 1; j < borderingConstellationsSvg.length; j++) {
+        const bi = borderingConstellationsSvg[i];
+        const bj = borderingConstellationsSvg[j];
+
+        const cdx = bj.badgePos.x - bi.badgePos.x;
+        const cdy = bj.badgePos.y - bi.badgePos.y;
+        const minGapX = (bi.badgeWidth + bj.badgeWidth) / 2 + 1.5;
+        const minGapY = 4.8;
+
+        if (Math.abs(cdx) < minGapX && Math.abs(cdy) < minGapY) {
+          const overlapX = minGapX - Math.abs(cdx);
+          const overlapY = minGapY - Math.abs(cdy);
+
+          if (overlapX / minGapX < overlapY / minGapY) {
+            const push = overlapX * 0.52;
+            const sign = cdx >= 0 ? 1 : -1;
+            bj.badgePos.x += push * sign;
+            bi.badgePos.x -= push * sign;
+          } else {
+            const push = overlapY * 0.52;
+            const sign = cdy >= 0 ? 1 : -1;
+            bj.badgePos.y += push * sign;
+            bi.badgePos.y -= push * sign;
+          }
+        }
+      }
+    }
+
+    // Clamp after each relaxation pass and keep outside boundary
+    for (const b of borderingConstellationsSvg) {
+      const hw = b.badgeWidth / 2;
+      b.badgePos.x = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, b.badgePos.x));
+      b.badgePos.y = Math.max(3.8, Math.min(96.2, b.badgePos.y));
+
+      if (boundaryRingsSvg.some(ring => pointInPolygon(b.badgePos.x, b.badgePos.y, ring))) {
+        b.badgePos.x += b.ux * 3.5;
+        b.badgePos.y += b.uy * 3.5;
+        b.badgePos.x = Math.max(hw + 1.2, Math.min(100 - hw - 1.2, b.badgePos.x));
+        b.badgePos.y = Math.max(3.8, Math.min(96.2, b.badgePos.y));
+      }
+    }
+  }
+
+  // Round badge positions
+  borderingConstellationsSvg.forEach(b => {
+    b.badgePos.x = Math.round(b.badgePos.x * 10) / 10;
+    b.badgePos.y = Math.round(b.badgePos.y * 10) / 10;
+  });
 
   const { visibleStars } = getConstellationVisibleFigureStars(
     constellation,
@@ -413,26 +587,161 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     extraFigureStars
   );
 
+  const getSvgCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
+    if (!svgRef.current) return null;
+    const svg = svgRef.current;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+      const pt = svg.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      return { x: svgPt.x, y: svgPt.y };
+    }
+    const rect = svg.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+    return {
+      x: ((clientX - rect.left) / rect.width) * 100,
+      y: ((clientY - rect.top) / rect.height) * 100
+    };
+  };
+
+  const getNearestInteractiveTarget = (coords: { x: number; y: number } | null, threshold: number) => {
+    if (!coords) return null;
+    let closest: { type: 'star' | 'dso'; id: string; target: any; dist: number } | null = null;
+    let minD = Infinity;
+
+    // Check visible assigned stars
+    for (const s of visibleStars) {
+      if (!s.catalogStar) continue;
+      const d = Math.hypot(s.x - coords.x, s.y - coords.y);
+      if (d < minD) {
+        minD = d;
+        closest = { type: 'star', id: s.id, target: s, dist: d };
+      }
+    }
+
+    // Check mapped DSOs if deep sky objects are enabled
+    if (opts.showDeepSky) {
+      for (const dso of mappedDsos) {
+        const d = Math.hypot(dso.x - coords.x, dso.y - coords.y);
+        if (d < minD) {
+          minD = d;
+          closest = { type: 'dso', id: dso.id, target: dso, dist: d };
+        }
+      }
+    }
+
+    return (closest && minD <= threshold) ? closest : null;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const coords = getSvgCoords(e.clientX, e.clientY);
+    const nearest = getNearestInteractiveTarget(coords, 3.8);
+
+    if (nearest) {
+      if (nearest.type === 'star') {
+        if (hoveredStarId !== nearest.id) setHoveredStarId?.(nearest.id);
+        if (hoveredDsoId !== null) setHoveredDsoId(null);
+      } else {
+        if (hoveredStarId !== null) setHoveredStarId?.(null);
+        if (hoveredDsoId !== nearest.id) setHoveredDsoId(nearest.id);
+      }
+    } else {
+      if (hoveredStarId !== null) setHoveredStarId?.(null);
+      if (hoveredDsoId !== null) setHoveredDsoId(null);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    setHoveredStarId?.(null);
+    setHoveredDsoId(null);
+  };
+
+  const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    const coords = getSvgCoords(e.clientX, e.clientY);
+    const nearest = getNearestInteractiveTarget(coords, 4.0);
+
+    if (nearest) {
+      e.stopPropagation();
+      if (nearest.type === 'star') {
+        setActiveDsoId(null);
+        setActiveStarLabelId?.(nearest.id);
+        if (onSelectFigureStar && nearest.target.catalogStar) {
+          onSelectFigureStar(nearest.target.catalogStar);
+        }
+      } else {
+        // Deep Sky Object: Toggle active label/selection, but do NOT open star dossier (not a star)
+        setActiveStarLabelId?.(null);
+        setActiveDsoId(prev => (prev === nearest.id ? null : nearest.id));
+      }
+    } else {
+      setActiveStarLabelId?.(null);
+      setActiveDsoId(null);
+    }
+  };
+
+  const isInteractiveHovered = Boolean(
+    (hoveredStarId && visibleStars.some(s => s.id === hoveredStarId)) ||
+    (hoveredDsoId && mappedDsos.some((d: any) => d.id === hoveredDsoId))
+  );
+
   return (
     <div
       className="w-full h-full flex items-center justify-center relative select-none"
-      onClick={() => setActiveStarLabelId?.(null)}
+      onClick={() => {
+        setActiveStarLabelId?.(null);
+        setActiveDsoId(null);
+      }}
     >
+      {/* Astrometric DSO Color Legend Indicator on Map Viewport */}
+      {opts.showDeepSky && (
+        <div className="absolute bottom-2 left-2 z-10 flex items-center gap-2 sm:gap-2.5 px-2 py-1 rounded-lg bg-slate-950/90 border border-slate-800 text-[9px] sm:text-[10px] font-mono text-slate-300 backdrop-blur pointer-events-none shadow-md">
+          <span className="text-slate-400 font-bold uppercase tracking-wider text-[8px] sm:text-[9px]">DSO:</span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+            <span className="text-rose-200 font-medium">Nebulae</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+            <span className="text-purple-200 font-medium">Galaxies</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+            <span className="text-emerald-200 font-medium">Clusters</span>
+          </span>
+        </div>
+      )}
+
       <svg
+        ref={svgRef}
         viewBox="0 0 100 100"
         width={size}
         height={size}
         className={`w-full h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}
-        onClick={() => setActiveStarLabelId?.(null)}
+        style={{ cursor: isInteractiveHovered ? 'pointer' : undefined }}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onClick={handleSvgClick}
       >
         <defs>
           <clipPath id={`map-frame-clip-${constellation.id}`}>
             <rect x="0" y="0" width="100" height="100" rx="1.5" />
           </clipPath>
           <radialGradient id={`nebula-glow-${constellation.id}`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.45" />
-            <stop offset="60%" stopColor="#8b5cf6" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+            <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.55" />
+            <stop offset="60%" stopColor="#fb7185" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#f43f5e" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id={`galaxy-glow-${constellation.id}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#a855f7" stopOpacity="0.55" />
+            <stop offset="60%" stopColor="#c084fc" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id={`cluster-glow-${constellation.id}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.55" />
+            <stop offset="60%" stopColor="#34d399" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -580,41 +889,28 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           </g>
         )}
 
-        {/* 4. Bordering Constellations on Sky Map */}
+        {/* 4. Bordering Constellations on Sky Map (Territory Polygons) */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
           <g className="bordering-constellations-areas" clipPath={`url(#map-frame-clip-${constellation.id})`}>
             {borderingConstellationsSvg.map((neighbor, nIdx) => (
-              <g
-                key={`neighbor-group-${nIdx}`}
-                className="cursor-pointer group/neighbor"
+              <path
+                key={`neighbor-path-${nIdx}`}
+                d={neighbor.pathData}
+                fill="rgba(30, 41, 59, 0.45)"
+                stroke="#475569"
+                strokeWidth="0.5"
+                strokeDasharray="1.5 1"
+                className="cursor-pointer transition-colors hover:fill-cyan-950/70 hover:stroke-cyan-400"
                 onClick={(e) => {
+                  const coords = getSvgCoords(e.clientX, e.clientY);
+                  const nearest = getNearestInteractiveTarget(coords, 4.0);
+                  if (nearest) return; // Prioritize stars or DSOs near boundary
                   e.stopPropagation();
                   if (neighbor.neighborObj && onSelectNeighbor) onSelectNeighbor(neighbor.neighborObj);
                 }}
               >
                 <title>{`${neighbor.name} (Bordering Constellation • Click to switch to ${neighbor.name} dossier)`}</title>
-                <path
-                  d={neighbor.pathData}
-                  fill="rgba(30, 41, 59, 0.45)"
-                  stroke="#475569"
-                  strokeWidth="0.5"
-                  strokeDasharray="1.5 1"
-                  className="transition-colors group-hover/neighbor:fill-cyan-950/70 group-hover/neighbor:stroke-cyan-400"
-                />
-                <text
-                  x={neighbor.badgePos.x}
-                  y={neighbor.badgePos.y + 0.7}
-                  textAnchor="middle"
-                  fill="#94a3b8"
-                  fontSize="2.2"
-                  fontFamily="sans-serif"
-                  fontWeight="bold"
-                  letterSpacing="0.04em"
-                  className="pointer-events-none select-none uppercase tracking-wider group-hover/neighbor:fill-cyan-300 transition-colors drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]"
-                >
-                  {neighbor.name}
-                </text>
-              </g>
+              </path>
             ))}
           </g>
         )}
@@ -636,31 +932,85 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         )}
 
 
-        {/* 6. Deep-Sky Objects from dsos.6.json */}
-        {opts.showDeepSky && mappedDsos.map((dso: any) => (
-          <g key={dso.id} className="cursor-pointer group/dso">
-            <title>{`${dso.name}\n${dso.description}`}</title>
-            {dso.type === 'sfr' || dso.type === 'snr' || dso.type === 'bn' ? (
-              <g>
-                <circle cx={dso.x} cy={dso.y} r="3.4" fill={`url(#nebula-glow-${constellation.id})`} />
-                <circle cx={dso.x} cy={dso.y} r="1.8" fill="none" stroke="#f43f5e" strokeWidth="0.45" strokeDasharray="1.2 1.2" />
-                <text x={dso.x + 3.2} y={dso.y - 1.2} fill="#fb7185" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
-              </g>
-            ) : dso.type === 's' || dso.type === 'i' ? (
-              <g>
-                <ellipse cx={dso.x} cy={dso.y} rx="2.8" ry="1.4" transform={`rotate(-25 ${dso.x} ${dso.y})`} fill="none" stroke="#c084fc" strokeWidth="0.45" strokeDasharray="1.2 0.8" />
-                <circle cx={dso.x} cy={dso.y} r="0.7" fill="#e9d5ff" />
-                <text x={dso.x + 3.4} y={dso.y - 1.0} fill="#d8b4fe" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
-              </g>
-            ) : (
-              <g>
-                <circle cx={dso.x} cy={dso.y} r="2.2" fill="none" stroke="#34d399" strokeWidth="0.45" strokeDasharray="0.8 0.8" />
-                <circle cx={dso.x} cy={dso.y} r="0.6" fill="#6ee7b7" />
-                <text x={dso.x + 3.0} y={dso.y - 1.0} fill="#6ee7b7" fontSize="2.0" fontFamily="monospace" fontWeight="bold">{dso.name}</text>
-              </g>
-            )}
-          </g>
-        ))}
+        {/* 6. Deep-Sky Objects (Represented as clickable/hoverable dots like stars with color legends) */}
+        {opts.showDeepSky && mappedDsos.map((dso: any) => {
+          const isHovered = hoveredDsoId === dso.id;
+          const isClicked = activeDsoId === dso.id;
+          const cat: DsoCategory = dso.category || 'cluster';
+          const color = dso.colorHex || '#10b981';
+          const glow = dso.glowHex || '#34d399';
+
+          return (
+            <g key={dso.id} className="cursor-pointer group/dso pointer-events-none">
+              <title>{`${dso.name}\n${dso.description}`}</title>
+              
+              {/* Outer Glow Halo for Nebula */}
+              {cat === 'nebula' && (
+                <circle
+                  cx={dso.x}
+                  cy={dso.y}
+                  r={isHovered || isClicked ? 3.8 : 2.5}
+                  fill={`url(#nebula-glow-${constellation.id})`}
+                  opacity={isHovered || isClicked ? 0.75 : 0.4}
+                />
+              )}
+
+              {/* Orbit / Ellipse ring for Galaxy */}
+              {cat === 'galaxy' && (
+                <ellipse
+                  cx={dso.x}
+                  cy={dso.y}
+                  rx={isHovered || isClicked ? 3.4 : 2.4}
+                  ry={isHovered || isClicked ? 1.8 : 1.2}
+                  transform={`rotate(-28 ${dso.x} ${dso.y})`}
+                  fill="none"
+                  stroke={glow}
+                  strokeWidth={isHovered || isClicked ? 0.45 : 0.3}
+                  strokeDasharray="1.2 0.8"
+                  opacity={isHovered || isClicked ? 1 : 0.7}
+                />
+              )}
+
+              {/* Cluster Ring for Star Clusters */}
+              {cat === 'cluster' && (
+                <circle
+                  cx={dso.x}
+                  cy={dso.y}
+                  r={isHovered || isClicked ? 3.0 : 2.1}
+                  fill="none"
+                  stroke={glow}
+                  strokeWidth={isHovered || isClicked ? 0.45 : 0.3}
+                  strokeDasharray="0.8 0.8"
+                  opacity={isHovered || isClicked ? 1 : 0.7}
+                />
+              )}
+
+              {/* Active or Hovered Selection Ring */}
+              {(isHovered || isClicked) && (
+                <circle
+                  cx={dso.x}
+                  cy={dso.y}
+                  r={2.5}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="0.4"
+                  className="animate-pulse"
+                />
+              )}
+
+              {/* Central DSO Dot Node (represented like a star dot with legend colors) */}
+              <circle
+                cx={dso.x}
+                cy={dso.y}
+                r={isHovered || isClicked ? 1.3 : 1.0}
+                fill={color}
+                stroke="#ffffff"
+                strokeWidth={isHovered || isClicked ? 0.35 : 0.25}
+                className="transition-colors"
+              />
+            </g>
+          );
+        })}
 
         {/* 7. Connecting Asterism Stick Lines from JSON */}
         {multiLineCoords.map((segment: number[][], segIdx: number) => {
@@ -730,14 +1080,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
           if (!isAssigned) {
             return (
-              <g
-                key={s.id}
-                className="cursor-default"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveStarLabelId?.(null);
-                }}
-              >
+              <g key={s.id} className="cursor-default pointer-events-none">
                 <title>{`${s.name} (Unassigned)`}</title>
                 <circle cx={s.x} cy={s.y} r={radius} fill="#475569" stroke="#334155" strokeWidth="0.3" opacity="0.4" />
               </g>
@@ -747,21 +1090,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           return (
             <g
               key={s.id}
-              className="cursor-pointer group/star"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isClickable || !s.catalogStar) {
-                  setActiveStarLabelId?.(null);
-                  return;
-                }
-                if (onSelectFigureStar) onSelectFigureStar(s.catalogStar);
-              }}
-              onMouseEnter={() => {
-                if (isClickable) setHoveredStarId?.(s.id);
-              }}
-              onMouseLeave={() => {
-                setHoveredStarId?.(null);
-              }}
+              className="cursor-pointer group/star pointer-events-none"
             >
               <title>
                 {`${s.catalogStar!.name} (${s.catalogStar!.bayerDesignation || s.catalogStar!.spectralType})\n• Luminosity: ${s.luminositySolar.toLocaleString()} L☉ | Mag: ${s.apparentMagnitude}${
@@ -769,12 +1098,9 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                 }`}
               </title>
 
-              {/* Click target hit area */}
-              <circle cx={s.x} cy={s.y} r="5.5" fill="transparent" />
-
               {/* Active / Clicked Selection Target Ring */}
               {isClicked && (
-                <circle cx={s.x} cy={s.y} r={radius + 0.8} fill="none" stroke="#22d3ee" strokeWidth="0.35" className="pointer-events-none" />
+                <circle cx={s.x} cy={s.y} r={radius + 0.9} fill="none" stroke="#22d3ee" strokeWidth="0.35" className="pointer-events-none" />
               )}
 
               {/* Principal Star Golden Radiant Ring */}
@@ -782,22 +1108,87 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                 <circle cx={s.x} cy={s.y} r={radius + 0.6} fill="none" stroke="#fef08a" strokeWidth="0.3" className="pointer-events-none" />
               )}
 
-              {/* Hover highlight circle */}
-              {!isClicked && (
-                <circle cx={s.x} cy={s.y} r={radius + 0.8} fill="none" stroke="#38bdf8" strokeWidth="0.3" className="opacity-0 group-hover/star:opacity-100 transition-opacity pointer-events-none" />
+              {/* Hover highlight circle (instant, pixel-perfect via nearest-neighbor) */}
+              {isHovered && !isClicked && (
+                <circle cx={s.x} cy={s.y} r={radius + 0.9} fill="none" stroke="#38bdf8" strokeWidth="0.35" className="pointer-events-none animate-pulse" />
               )}
 
               {/* Star dot node */}
               <circle
-                cx={s.x} cy={s.y} r={radius}
+                cx={s.x} cy={s.y} r={isHovered ? radius + 0.25 : radius}
                 fill={isPrincipal ? '#fef08a' : s.catalogStar?.colorHex ? s.catalogStar.colorHex : '#ffffff'}
-                stroke={isPrincipal ? '#f59e0b' : isClicked ? '#38bdf8' : '#38bdf8'}
+                stroke={isPrincipal ? '#f59e0b' : isClicked ? '#38bdf8' : isHovered ? '#67e8f9' : '#38bdf8'}
                 strokeWidth={isPrincipal ? '0.4' : isClicked ? '0.4' : '0.25'}
-                className="group-hover/star:stroke-cyan-300 group-hover/star:fill-cyan-100 transition-colors"
+                className="transition-all"
               />
             </g>
           );
         })}
+
+        {/* 9.5. Elevated Interactive Bordering Constellation Badges */}
+        {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
+          <g className="bordering-constellation-badges">
+            {borderingConstellationsSvg.map((neighbor, nIdx) => {
+              const bx = neighbor.badgePos.x;
+              const by = neighbor.badgePos.y;
+              const bw = neighbor.badgeWidth;
+              const bh = neighbor.badgeHeight;
+
+              return (
+                <g
+                  key={`neighbor-badge-${nIdx}`}
+                  className="cursor-pointer group/neighbor select-none"
+                  onClick={(e) => {
+                    const coords = getSvgCoords(e.clientX, e.clientY);
+                    const nearest = getNearestInteractiveTarget(coords, 4.0);
+                    if (nearest) return; // Prioritize stars or DSOs near badge
+                    e.stopPropagation();
+                    if (neighbor.neighborObj && onSelectNeighbor) {
+                      onSelectNeighbor(neighbor.neighborObj);
+                    }
+                  }}
+                >
+                  <title>{`${neighbor.name} (Bordering Constellation • Click to open ${neighbor.name} dossier)`}</title>
+                  {/* Badge pill background */}
+                  <rect
+                    x={bx - bw / 2}
+                    y={by - bh / 2}
+                    width={bw}
+                    height={bh}
+                    rx="1.1"
+                    fill="#030816"
+                    fillOpacity="0.94"
+                    stroke="#334155"
+                    strokeWidth="0.38"
+                    className="transition-colors group-hover/neighbor:fill-cyan-950/90 group-hover/neighbor:stroke-cyan-400 drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]"
+                  />
+                  {/* Guide Accent Indicator Dot */}
+                  <circle
+                    cx={bx - bw / 2 + 2.0}
+                    cy={by}
+                    r="0.7"
+                    fill="#38bdf8"
+                    className="transition-colors group-hover/neighbor:fill-cyan-300 drop-shadow-[0_0_3px_rgba(56,189,248,0.7)]"
+                  />
+                  {/* Constellation Name Text */}
+                  <text
+                    x={bx + 0.8}
+                    y={by + 0.65}
+                    textAnchor="middle"
+                    fill="#94a3b8"
+                    fontSize="1.95"
+                    fontFamily="sans-serif"
+                    fontWeight="bold"
+                    letterSpacing="0.04em"
+                    className="uppercase transition-colors group-hover/neighbor:fill-cyan-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                  >
+                    {neighbor.name}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        )}
 
         {/* 10. Star Name Labels (when showStarLabels toggle is on, for non-hovered stars) */}
         {opts.showStarLabels && visibleStars.map((s) => {
@@ -846,8 +1237,96 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           );
         })}
 
-        {/* 11. VERY FRONT SVG LAYER: Active or Hovered Star Label */}
+        {/* 11. VERY FRONT SVG LAYER: Active or Hovered Star or DSO Label */}
         {(() => {
+          // Check if a DSO is active or hovered
+          const frontDso = opts.showDeepSky ? (
+            (hoveredDsoId ? mappedDsos.find((d: any) => d.id === hoveredDsoId) : null) ||
+            (!hoveredStarId && activeDsoId ? mappedDsos.find((d: any) => d.id === activeDsoId) : null)
+          ) : null;
+
+          if (frontDso) {
+            const dsoColor = frontDso.colorHex || '#f43f5e';
+            const glowColor = frontDso.glowHex || '#fb7185';
+            
+            const titleText = frontDso.name;
+            const typeText = `${frontDso.typeLabel}${frontDso.mag !== undefined ? ` • mag ${frontDso.mag.toFixed(1)}` : ''}`;
+            const noticeText = 'Deep-Sky Object (No Stellar Dossier)';
+            
+            const charWidth = 1.05;
+            const padX = 2.0;
+            const maxChars = Math.max(titleText.length, typeText.length, 24);
+            const labelWidth = Math.max(22, Math.min(68, maxChars * charWidth + padX * 2));
+            const labelX = Math.max(labelWidth / 2 + 1.5, Math.min(100 - labelWidth / 2 - 1.5, frontDso.x));
+            
+            const rectH = 6.4;
+            const isAbove = frontDso.y > 11;
+            const labelY = isAbove ? frontDso.y - 2.8 : frontDso.y + 2.8;
+            const topY = isAbove ? labelY - rectH : labelY;
+
+            return (
+              <g key={`front-dso-lbl-${frontDso.id}`} className="pointer-events-none select-none z-50">
+                {isAbove ? (
+                  <polygon
+                    points={`${frontDso.x - 0.9},${labelY - 0.2} ${frontDso.x + 0.9},${labelY - 0.2} ${frontDso.x},${labelY + 0.9}`}
+                    fill={dsoColor}
+                  />
+                ) : (
+                  <polygon
+                    points={`${frontDso.x - 0.9},${labelY + 0.2} ${frontDso.x + 0.9},${labelY + 0.2} ${frontDso.x},${labelY - 0.9}`}
+                    fill={dsoColor}
+                  />
+                )}
+                <rect
+                  x={labelX - labelWidth / 2}
+                  y={topY}
+                  width={labelWidth}
+                  height={rectH}
+                  rx="1.0"
+                  fill="#030712"
+                  fillOpacity="0.96"
+                  stroke={dsoColor}
+                  strokeWidth="0.45"
+                  className="drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
+                />
+                <text
+                  x={labelX}
+                  y={topY + 2.3}
+                  textAnchor="middle"
+                  fill="#ffffff"
+                  fontSize="1.9"
+                  fontFamily="sans-serif"
+                  fontWeight="bold"
+                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                >
+                  {titleText}
+                </text>
+                <text
+                  x={labelX}
+                  y={topY + 4.2}
+                  textAnchor="middle"
+                  fill={glowColor}
+                  fontSize="1.45"
+                  fontFamily="monospace"
+                  fontWeight="600"
+                >
+                  {typeText}
+                </text>
+                <text
+                  x={labelX}
+                  y={topY + 5.6}
+                  textAnchor="middle"
+                  fill="#94a3b8"
+                  fontSize="1.2"
+                  fontFamily="monospace"
+                  fontStyle="italic"
+                >
+                  {noticeText}
+                </text>
+              </g>
+            );
+          }
+
           const frontStar = visibleStars.find((s) => s.id === hoveredStarId) ||
                             visibleStars.find((s) => s.id === activeStarLabelId);
           if (!frontStar || !frontStar.catalogStar || !frontStar.displayLabel) return null;

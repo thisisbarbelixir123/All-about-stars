@@ -219,7 +219,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                     icon={<Sparkles className="w-3 h-3" />}
                     active={skyMapOptions.showDeepSky}
                     onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDeepSky: !prev.showDeepSky }))}
-                    title="Toggle Iconic Messier / NGC Deep Sky Objects"
+                    title="Toggle Iconic Messier / NGC Deep Sky Objects (Max 6)"
                     activeColorClass="bg-rose-950/80 text-rose-300 border-rose-500/50"
                   />
 
@@ -232,6 +232,31 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                   />
                 </div>
               </div>
+
+              {/* DSO Category Color Legends Indicator when DSO Toggle is ON */}
+              {skyMapOptions.showDeepSky && (
+                <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[10px] sm:text-[11px] font-mono shadow-sm">
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <Sparkles className="w-3 h-3 text-rose-400" />
+                    <span className="font-bold text-slate-300 uppercase tracking-wider text-[9px] sm:text-[10px]">DSO Legend:</span>
+                  </div>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className="flex items-center gap-1 text-slate-300">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+                      <span className="text-rose-300 font-medium">Nebulae</span>
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-300">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                      <span className="text-purple-300 font-medium">Galaxies</span>
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-300">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+                      <span className="text-emerald-300 font-medium">Star Clusters</span>
+                    </span>
+                  </div>
+                  <span className="text-slate-500 text-[9px] hidden md:inline">Max 6 notable</span>
+                </div>
+              )}
 
               {/* Celestial Resemblance & Shape Callout (Compact font and padding on mobile) */}
               <div className="p-2.5 sm:p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-2.5 sm:gap-3">
