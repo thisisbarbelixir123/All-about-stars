@@ -46,7 +46,7 @@ export interface KeplerianOrbitData {
 export interface MultipleStarSystemData {
   id: string;
   name: string;
-  systemType: 'Visual Binary' | 'Astrometric Binary' | 'Spectroscopic Binary' | 'Hierarchical Triple' | 'Quadruple Hierarchy' | 'Sextuple Hierarchy' | 'Overcontact Binary' | 'High-Mass X-Ray Binary' | 'Colliding-Wind Binary';
+  systemType: 'Visual Binary' | 'Astrometric Binary' | 'Spectroscopic Binary' | 'Hierarchical Triple' | 'Quadruple Hierarchy' | 'Sextuple Hierarchy' | 'Septuple Hierarchy' | 'Overcontact Binary' | 'High-Mass X-Ray Binary' | 'Colliding-Wind Binary';
   constellation: string;
   distanceLy: number;
   starIds: string[]; // IDs in the stellar catalog
@@ -2163,23 +2163,23 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
     ],
   },
 
-  // 28. Acrux Binary System (Alpha Crucis)
+  // 28. Acrux Septuple System (Alpha Crucis)
   {
     id: 'acrux-system',
-    name: 'Acrux System (Alpha Crucis)',
-    systemType: 'Visual Binary',
+    name: 'Acrux System (Alpha Crucis Septuple Hierarchy)',
+    systemType: 'Septuple Hierarchy',
     constellation: 'Crux',
     distanceLy: 320,
     visualSeparationArcsec: 4.0,
-    starIds: ['acrux-a', 'acrux-b', 'acrux'],
-    barycenterDescription: 'Mutual center of mass between two blazing blue-white B-type subgiants separated by ~430 AU.',
-    astrophysicalSignificance: 'The brightest star in the iconic Southern Cross constellation and the 13th brightest star in the night sky. A brilliant multiple system anchored on five national flags.',
+    starIds: ['acrux-aa', 'acrux-ab', 'acrux-ba', 'acrux-bb', 'acrux-ca', 'acrux-cb', 'acrux-d'],
+    barycenterDescription: 'Mutual barycenter of a majestic septuple hierarchical system anchored by two massive blue subgiant pairs Alpha-1 and Alpha-2 Crucis, accompanied by distant hierarchical triple component C (HD 108250) and faint red dwarf companion D.',
+    astrophysicalSignificance: 'The brightest star system in the iconic Southern Cross constellation and the 13th brightest stellar beacon in the night sky. A septuple stellar hierarchy composed of seven unaggregated stars featuring two massive spectroscopic binaries (Aa+Ab, Ba+Bb) orbiting mutually at ~430 AU, with distant triple system C (HD 108250 Aa+Ab + D) orbiting at ~8,700 AU.',
     components: [
       {
-        id: 'acrux-a',
-        catalogStarId: 'acrux-a',
-        name: 'Acrux A (Alpha-1 Crucis)',
-        bayerDesignation: 'α¹ Cru',
+        id: 'acrux-aa',
+        catalogStarId: 'acrux-aa',
+        name: 'Acrux Aa (Alpha-1 Crucis Aa)',
+        bayerDesignation: 'α¹ Cru Aa',
         spectralType: 'B0.5IV',
         massSolar: 17.8,
         radiusSolar: 7.8,
@@ -2188,13 +2188,27 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
         isPrimary: true,
         colorHex: '#9ecbff',
         coronaColorHex: '#c4e1ff',
-        description: 'Searing blue-white subgiant and visual primary of the Southern Cross.',
+        description: 'Searing blue-white subgiant and visual anchor of the Southern Cross.',
       },
       {
-        id: 'acrux-b',
-        catalogStarId: 'acrux-b',
-        name: 'Acrux B (Alpha-2 Crucis)',
-        bayerDesignation: 'α² Cru',
+        id: 'acrux-ab',
+        catalogStarId: 'acrux-ab',
+        name: 'Acrux Ab (Alpha-1 Crucis Ab)',
+        bayerDesignation: 'α¹ Cru Ab',
+        spectralType: 'B0.5V',
+        massSolar: 5.5,
+        radiusSolar: 3.8,
+        temperature: 24000,
+        luminositySolar: 5200,
+        colorHex: '#a8d2ff',
+        coronaColorHex: '#cee6ff',
+        description: 'Spectroscopic companion to Alpha-1 Crucis Aa orbiting every 75.77 days at 1.0 AU.',
+      },
+      {
+        id: 'acrux-ba',
+        catalogStarId: 'acrux-ba',
+        name: 'Acrux Ba (Alpha-2 Crucis Ba)',
+        bayerDesignation: 'α² Cru Ba',
         spectralType: 'B1V',
         massSolar: 15.5,
         radiusSolar: 5.4,
@@ -2202,13 +2216,97 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
         luminositySolar: 16000,
         colorHex: '#a8d2ff',
         coronaColorHex: '#cee6ff',
-        description: 'Brilliant blue companion orbiting in a stately ~1,500-year cycle.',
+        description: 'Brilliant blue main-sequence primary of the Alpha-2 Crucis visual subcomponent.',
+      },
+      {
+        id: 'acrux-bb',
+        catalogStarId: 'acrux-bb',
+        name: 'Acrux Bb (Alpha-2 Crucis Bb)',
+        bayerDesignation: 'α² Cru Bb',
+        spectralType: 'B3V',
+        massSolar: 3.0,
+        radiusSolar: 2.5,
+        temperature: 18700,
+        luminositySolar: 800,
+        colorHex: '#b8dcff',
+        coronaColorHex: '#d8ecff',
+        description: 'Spectroscopic companion to Alpha-2 Crucis Ba orbiting every 3.8 years.',
+      },
+      {
+        id: 'acrux-ca',
+        catalogStarId: 'acrux-ca',
+        name: 'Acrux Ca (HD 108250 A)',
+        bayerDesignation: 'α Cru C A',
+        spectralType: 'B4V',
+        massSolar: 6.0,
+        radiusSolar: 3.6,
+        temperature: 16500,
+        luminositySolar: 1200,
+        colorHex: '#c2e2ff',
+        coronaColorHex: '#def0ff',
+        description: 'Primary star of the outer HD 108250 visual component at 90 arcseconds separation.',
+      },
+      {
+        id: 'acrux-cb',
+        catalogStarId: 'acrux-cb',
+        name: 'Acrux Cb (HD 108250 B)',
+        bayerDesignation: 'α Cru C B',
+        spectralType: 'B6V',
+        massSolar: 4.0,
+        radiusSolar: 2.8,
+        temperature: 14000,
+        luminositySolar: 450,
+        colorHex: '#cce6ff',
+        coronaColorHex: '#e5f3ff',
+        description: 'Spectroscopic companion orbiting Acrux Ca every 3.32 years.',
+      },
+      {
+        id: 'acrux-d',
+        catalogStarId: 'acrux-d',
+        name: 'Acrux D (CPD-62 2744 D)',
+        bayerDesignation: 'α Cru D',
+        spectralType: 'M3V',
+        massSolar: 0.35,
+        radiusSolar: 0.38,
+        temperature: 3400,
+        luminositySolar: 0.015,
+        colorHex: '#ff8a50',
+        coronaColorHex: '#ffb380',
+        description: 'Faint 15th-magnitude red dwarf companion orbiting component C at 2.4 arcseconds.',
       },
     ],
     orbits: [
       {
-        primaryId: 'acrux-a',
-        secondaryId: 'acrux-b',
+        primaryId: 'acrux-aa',
+        secondaryId: 'acrux-ab',
+        label: 'Acrux Aa-Ab 75.8-Day Inner Spectroscopic Orbit',
+        semiMajorAxisAU: 1.0,
+        orbitalPeriodYears: 0.207,
+        eccentricity: 0.47,
+        inclinationDeg: 65.0,
+        ascendingNodeDeg: 35.0,
+        argPeriastronDeg: 120.0,
+        periastronAU: 0.53,
+        apastronAU: 1.47,
+        description: 'Tight eccentric spectroscopic binary orbit between Alpha-1 Crucis Aa and Ab.',
+      },
+      {
+        primaryId: 'acrux-ba',
+        secondaryId: 'acrux-bb',
+        label: 'Acrux Ba-Bb 3.8-Year Spectroscopic Orbit',
+        semiMajorAxisAU: 4.2,
+        orbitalPeriodYears: 3.8,
+        eccentricity: 0.20,
+        inclinationDeg: 55.0,
+        ascendingNodeDeg: 80.0,
+        argPeriastronDeg: 45.0,
+        periastronAU: 3.36,
+        apastronAU: 5.04,
+        description: 'Close spectroscopic binary orbit of the Alpha-2 Crucis pair.',
+      },
+      {
+        primaryId: 'acrux-aa',
+        secondaryId: 'acrux-ba',
         label: 'Acrux A-B ~1,500-Year Visual Orbit',
         semiMajorAxisAU: 430.0,
         orbitalPeriodYears: 1500,
@@ -2218,7 +2316,51 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
         argPeriastronDeg: 0.0,
         periastronAU: 387.0,
         apastronAU: 473.0,
+        orbitsBarycenter: true,
         description: 'Wide mutual visual orbit at ~430 AU projecting a pristine 4.0 arcsecond split in telescopes.',
+      },
+      {
+        primaryId: 'acrux-ca',
+        secondaryId: 'acrux-cb',
+        label: 'Acrux Ca-Cb 3.32-Year Orbit',
+        semiMajorAxisAU: 3.7,
+        orbitalPeriodYears: 3.32,
+        eccentricity: 0.15,
+        inclinationDeg: 60.0,
+        ascendingNodeDeg: 45.0,
+        argPeriastronDeg: 30.0,
+        periastronAU: 3.15,
+        apastronAU: 4.26,
+        description: 'Inner orbit between HD 108250 components Ca and Cb.',
+      },
+      {
+        primaryId: 'acrux-ca',
+        secondaryId: 'acrux-d',
+        label: 'Acrux C-D Orbit',
+        semiMajorAxisAU: 230.0,
+        orbitalPeriodYears: 2400,
+        eccentricity: 0.25,
+        inclinationDeg: 68.0,
+        ascendingNodeDeg: 110.0,
+        argPeriastronDeg: 15.0,
+        periastronAU: 172.5,
+        apastronAU: 287.5,
+        description: 'Wide companion orbit of red dwarf D around HD 108250 (Component C).',
+      },
+      {
+        primaryId: 'acrux-aa',
+        secondaryId: 'acrux-ca',
+        label: 'Acrux AB-CD Outer Orbit',
+        semiMajorAxisAU: 8700.0,
+        orbitalPeriodYears: 250000,
+        eccentricity: 0.35,
+        inclinationDeg: 72.0,
+        ascendingNodeDeg: 95.0,
+        argPeriastronDeg: 60.0,
+        periastronAU: 5655.0,
+        apastronAU: 11745.0,
+        orbitsBarycenter: true,
+        description: 'Distant hierarchical outer orbit connecting the Acrux AB quadruple with the Acrux CD triple system at ~90 arcseconds.',
       },
     ],
   },
@@ -3262,8 +3404,8 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
   // 14. Delta Velorum Quadruple Hierarchy (Alsephina)
     {
     id: 'delta-velorum-system',
-    name: 'Delta Velorum System (Alsephina Quadruple Hierarchy)',
-    systemType: 'Quadruple Hierarchy',
+    name: 'Delta Velorum System (Alsephina Hierarchical Triple)',
+    systemType: 'Hierarchical Triple',
     constellation: 'Vela',
     distanceLy: 80.6,
     visualSeparationArcsec: 1.92,
@@ -4010,6 +4152,312 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
     ],
   },
+
+  // 49. Lambda Tauri System
+  {
+    id: 'lambda-tauri-system',
+    name: 'Lambda Tauri System (El-Thaur Eclipsing Binary)',
+    systemType: 'Spectroscopic Binary',
+    constellation: 'Taurus',
+    distanceLy: 480,
+    starIds: ['lambda-tauri-a', 'lambda-tauri-b'],
+    barycenterDescription: 'Mutual center of mass between the massive B3V primary star and its subgiant A4IV eclipsing secondary companion.',
+    astrophysicalSignificance: 'A prominent Algol-type eclipsing binary system discovered in 1848 by John Russell Hind. The system undergoes partial eclipses every 3.95 days as the cooler subgiant passes in front of the brilliant B-type primary.',
+    components: [
+      {
+        id: 'lambda-tauri-a',
+        catalogStarId: 'lambda-tauri-a',
+        name: 'Lambda Tauri A',
+        bayerDesignation: 'λ Tau A',
+        spectralType: 'B3V',
+        massSolar: 7.18,
+        radiusSolar: 6.4,
+        temperature: 18700,
+        luminositySolar: 5800,
+        colorHex: '#A2C2FF',
+        coronaColorHex: '#D1E2FF',
+        isPrimary: true,
+        rotationalPeriodDays: 3.95,
+        rotationalPeriodFormatted: '3.95 Days (Synchronized)',
+        isTidallyLocked: true,
+        description: 'Luminous B3V main-sequence primary star undergoing periodic mutual eclipses.',
+      },
+      {
+        id: 'lambda-tauri-b',
+        catalogStarId: 'lambda-tauri-b',
+        name: 'Lambda Tauri B',
+        bayerDesignation: 'λ Tau B',
+        spectralType: 'A4IV',
+        massSolar: 1.89,
+        radiusSolar: 4.0,
+        temperature: 8300,
+        luminositySolar: 120,
+        colorHex: '#C5D8FF',
+        coronaColorHex: '#E5EEFF',
+        rotationalPeriodDays: 3.95,
+        rotationalPeriodFormatted: '3.95 Days (Synchronized)',
+        isTidallyLocked: true,
+        description: 'Subgiant A4IV secondary star causing 0.54-magnitude primary eclipses.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'lambda-tauri-a',
+        secondaryId: 'lambda-tauri-b',
+        label: 'Lambda Tauri A - B Close Eclipsing Orbit',
+        semiMajorAxisAU: 0.103,
+        orbitalPeriodYears: 0.0108,
+        orbitalPeriodDays: 3.9529,
+        eccentricity: 0.055,
+        inclinationDeg: 78.0,
+        ascendingNodeDeg: 0.0,
+        argPeriastronDeg: 70.0,
+        periastronAU: 0.097,
+        apastronAU: 0.109,
+        description: 'Tight 3.95-day circularized orbit between the massive primary and distorted subgiant companion.',
+      },
+    ],
+  },
+
+  // 50. Gamma Delphini System
+  {
+    id: 'gamma-delphini-system',
+    name: 'Gamma Delphini System (The Dolphin Showpiece Binary)',
+    systemType: 'Visual Binary',
+    constellation: 'Delphinus',
+    distanceLy: 101,
+    visualSeparationArcsec: 9.6,
+    starIds: ['gamma-delphini-a', 'gamma-delphini-b'],
+    barycenterDescription: 'Common barycenter between the golden-orange K1IV subgiant and the warm yellowish-white F7V main-sequence dwarf companion.',
+    astrophysicalSignificance: 'One of the most celebrated and aesthetic double stars in the northern autumn sky, forming the nose of the celestial Dolphin. Discovered in the 18th century, the system displays brilliant contrasting golden and white colors in modest telescopes.',
+    components: [
+      {
+        id: 'gamma-delphini-a',
+        catalogStarId: 'gamma-delphini-a',
+        name: 'Gamma Delphini A (Gamma2 Delphini)',
+        bayerDesignation: 'γ² Del',
+        spectralType: 'K1IV',
+        massSolar: 1.7,
+        radiusSolar: 7.5,
+        temperature: 4740,
+        luminositySolar: 21,
+        colorHex: '#FFC87A',
+        coronaColorHex: '#FFE0A0',
+        isPrimary: true,
+        description: 'Evolved golden-orange K1IV subgiant star in the celestial Dolphin.',
+      },
+      {
+        id: 'gamma-delphini-b',
+        catalogStarId: 'gamma-delphini-b',
+        name: 'Gamma Delphini B (Gamma1 Delphini)',
+        bayerDesignation: 'γ¹ Del',
+        spectralType: 'F7V',
+        massSolar: 1.4,
+        radiusSolar: 2.1,
+        temperature: 6300,
+        luminositySolar: 7.0,
+        colorHex: '#F6F5E8',
+        coronaColorHex: '#FFFFF0',
+        description: 'Yellowish-white F7V companion star orbiting at 9.6 arcseconds.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'gamma-delphini-a',
+        secondaryId: 'gamma-delphini-b',
+        label: 'Gamma Delphini A - B Visual Orbit',
+        semiMajorAxisAU: 300.0,
+        orbitalPeriodYears: 3249.0,
+        eccentricity: 0.45,
+        inclinationDeg: 55.0,
+        ascendingNodeDeg: 72.0,
+        argPeriastronDeg: 145.0,
+        periastronAU: 165.0,
+        apastronAU: 435.0,
+        description: 'Wide 3,249-year mutual visual orbit spanning 300 AU.',
+      },
+    ],
+  },
+
+  // 51. Delta Serpentis System
+  {
+    id: 'delta-serpentis-system',
+    name: 'Delta Serpentis System (Serpens Caput Visual Binary)',
+    systemType: 'Visual Binary',
+    constellation: 'Serpens',
+    distanceLy: 210,
+    visualSeparationArcsec: 4.0,
+    starIds: ['delta-serpentis-a', 'delta-serpentis-b'],
+    barycenterDescription: 'Barycenter shared between the two evolving F0IV subgiant stars separated by 4.0 arcseconds.',
+    astrophysicalSignificance: 'A classic visual binary in Serpens Caput where both components have simultaneously evolved off the main sequence into subgiants of nearly identical spectral classifications.',
+    components: [
+      {
+        id: 'delta-serpentis-a',
+        catalogStarId: 'delta-serpentis-a',
+        name: 'Delta Serpentis A',
+        bayerDesignation: 'δ Ser A',
+        spectralType: 'F0IV',
+        massSolar: 2.1,
+        radiusSolar: 2.3,
+        temperature: 7550,
+        luminositySolar: 22,
+        colorHex: '#EAEFFF',
+        coronaColorHex: '#F8FAFF',
+        isPrimary: true,
+        description: 'Primary white subgiant star in Serpens Caput.',
+      },
+      {
+        id: 'delta-serpentis-b',
+        catalogStarId: 'delta-serpentis-b',
+        name: 'Delta Serpentis B',
+        bayerDesignation: 'δ Ser B',
+        spectralType: 'F0IV',
+        massSolar: 1.6,
+        radiusSolar: 1.8,
+        temperature: 7400,
+        luminositySolar: 12,
+        colorHex: '#EFF2FF',
+        coronaColorHex: '#FAFBFF',
+        description: 'Secondary subgiant companion orbiting Delta Serpentis A at 4.0 arcseconds.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'delta-serpentis-a',
+        secondaryId: 'delta-serpentis-b',
+        label: 'Delta Serpentis A - B Visual Orbit',
+        semiMajorAxisAU: 260.0,
+        orbitalPeriodYears: 3200.0,
+        eccentricity: 0.35,
+        inclinationDeg: 62.0,
+        ascendingNodeDeg: 120.0,
+        argPeriastronDeg: 90.0,
+        periastronAU: 169.0,
+        apastronAU: 351.0,
+        description: 'Long-period visual orbit spanning ~260 AU between the two subgiants.',
+      },
+    ],
+  },
+
+  // 52. Mesarthim System
+  {
+    id: 'mesarthim-system',
+    name: 'Mesarthim System (Gamma Arietis Historic Binary)',
+    systemType: 'Visual Binary',
+    constellation: 'Aries',
+    distanceLy: 164,
+    visualSeparationArcsec: 7.5,
+    starIds: ['mesarthim-a', 'mesarthim-b'],
+    barycenterDescription: 'Center of mass between the magnetic Ap peculiar star Mesarthim A and its B9V companion Mesarthim B.',
+    astrophysicalSignificance: 'One of the very first double stars discovered with a telescope, observed by Robert Hooke in 1664 while following a comet. Component A is an archetype magnetic chemically peculiar silicon star possessing an intense surface magnetic field.',
+    components: [
+      {
+        id: 'mesarthim-a',
+        catalogStarId: 'mesarthim-a',
+        name: 'Mesarthim A (Gamma2 Arietis)',
+        bayerDesignation: 'γ² Ari',
+        spectralType: 'A1pSi',
+        massSolar: 2.8,
+        radiusSolar: 2.4,
+        temperature: 9900,
+        luminositySolar: 45,
+        colorHex: '#D6E4FF',
+        coronaColorHex: '#EEF4FF',
+        isPrimary: true,
+        description: 'Magnetic chemically peculiar silicon star discovered by Hooke in 1664.',
+      },
+      {
+        id: 'mesarthim-b',
+        catalogStarId: 'mesarthim-b',
+        name: 'Mesarthim B (Gamma1 Arietis)',
+        bayerDesignation: 'γ¹ Ari',
+        spectralType: 'B9V',
+        massSolar: 2.4,
+        radiusSolar: 2.1,
+        temperature: 10700,
+        luminositySolar: 40,
+        colorHex: '#C5D8FF',
+        coronaColorHex: '#E5EEFF',
+        description: 'Late B-type main-sequence companion orbiting at 7.5 arcseconds.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'mesarthim-a',
+        secondaryId: 'mesarthim-b',
+        label: 'Mesarthim A - B Visual Orbit',
+        semiMajorAxisAU: 380.0,
+        orbitalPeriodYears: 5000.0,
+        eccentricity: 0.20,
+        inclinationDeg: 48.0,
+        ascendingNodeDeg: 35.0,
+        argPeriastronDeg: 110.0,
+        periastronAU: 304.0,
+        apastronAU: 456.0,
+        description: 'Wide visual orbit taking roughly five millennia to complete.',
+      },
+    ],
+  },
+
+  // 53. Alula Australis System
+  {
+    id: 'alula-australis-system',
+    name: 'Alula Australis System (Xi Ursae Majoris Historic Binary)',
+    systemType: 'Visual Binary',
+    constellation: 'Ursa Major',
+    distanceLy: 27.3,
+    visualSeparationArcsec: 1.80,
+    starIds: ['alula-australis-a', 'alula-australis-b'],
+    barycenterDescription: 'Gravitational barycenter between the two solar-analogue dwarf stars orbiting each other every 59.8 years.',
+    astrophysicalSignificance: 'A monumental system in celestial mechanics: in 1828, Félix Savary proved for the first time that Newton’s law of gravitation governs binary star orbits beyond our Solar System. Located just 27.3 light-years away.',
+    components: [
+      {
+        id: 'alula-australis-a',
+        catalogStarId: 'alula-australis-a',
+        name: 'Alula Australis A (Xi Ursae Majoris A)',
+        bayerDesignation: 'ξ UMa A',
+        spectralType: 'G0V',
+        massSolar: 1.05,
+        radiusSolar: 1.04,
+        temperature: 5900,
+        luminositySolar: 1.15,
+        colorHex: '#FFF0B0',
+        coronaColorHex: '#FFF8D0',
+        isPrimary: true,
+        description: 'Primary solar-analogue dwarf star in the first binary orbit ever computed.',
+      },
+      {
+        id: 'alula-australis-b',
+        catalogStarId: 'alula-australis-b',
+        name: 'Alula Australis B (Xi Ursae Majoris B)',
+        bayerDesignation: 'ξ UMa B',
+        spectralType: 'G0V',
+        massSolar: 0.90,
+        radiusSolar: 0.98,
+        temperature: 5850,
+        luminositySolar: 0.85,
+        colorHex: '#FFF2C2',
+        coronaColorHex: '#FFF8DC',
+        description: 'Secondary solar-twin companion in the historic 59.84-year orbit.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'alula-australis-a',
+        secondaryId: 'alula-australis-b',
+        label: 'Alula Australis A - B Savary Orbit',
+        semiMajorAxisAU: 21.3,
+        orbitalPeriodYears: 59.84,
+        eccentricity: 0.398,
+        inclinationDeg: 128.5,
+        ascendingNodeDeg: 101.6,
+        argPeriastronDeg: 127.5,
+        periastronAU: 12.8,
+        apastronAU: 29.8,
+        description: 'The celebrated 59.84-year orbit first calculated by Félix Savary in 1828.',
+      },
+    ],
+  },
 ];
 
 /**
@@ -4071,6 +4519,15 @@ STAR_TO_MULTIPLE_SYSTEM_MAP['almaaz'] = 'almaaz-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['epsilon-aurigae'] = 'almaaz-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['acrux'] = 'acrux-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['alpha-crucis'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-a'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-b'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-aa'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-ab'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-ba'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-bb'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-ca'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-cb'] = 'acrux-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['acrux-d'] = 'acrux-system';
 
 // New system alias mappings
 STAR_TO_MULTIPLE_SYSTEM_MAP['rigel'] = 'rigel-system';
@@ -4178,6 +4635,33 @@ STAR_TO_MULTIPLE_SYSTEM_MAP['trapezium-c'] = 'theta-1-orionis-c-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['hd-93129a'] = 'hd-93129a-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['hd-93129aa'] = 'hd-93129a-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['hd-93129ab'] = 'hd-93129a-system';
+
+// Lambda Tauri System
+STAR_TO_MULTIPLE_SYSTEM_MAP['lambda-tauri'] = 'lambda-tauri-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['lambda-tauri-a'] = 'lambda-tauri-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['lambda-tauri-b'] = 'lambda-tauri-system';
+
+// Gamma Delphini System
+STAR_TO_MULTIPLE_SYSTEM_MAP['gamma-delphini'] = 'gamma-delphini-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['gamma-delphini-a'] = 'gamma-delphini-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['gamma-delphini-b'] = 'gamma-delphini-system';
+
+// Delta Serpentis System
+STAR_TO_MULTIPLE_SYSTEM_MAP['delta-serpentis'] = 'delta-serpentis-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['delta-serpentis-a'] = 'delta-serpentis-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['delta-serpentis-b'] = 'delta-serpentis-system';
+
+// Mesarthim System
+STAR_TO_MULTIPLE_SYSTEM_MAP['mesarthim'] = 'mesarthim-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['mesarthim-a'] = 'mesarthim-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['mesarthim-b'] = 'mesarthim-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['gamma-arietis'] = 'mesarthim-system';
+
+// Alula Australis System
+STAR_TO_MULTIPLE_SYSTEM_MAP['alula-australis'] = 'alula-australis-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['alula-australis-a'] = 'alula-australis-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['alula-australis-b'] = 'alula-australis-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['xi-ursae-majoris'] = 'alula-australis-system';
 
 // Automatically calibrate all star components in multiple systems to realistic D65 chromaticity
 // preserving black holes and compact dark remnants as pure black #000000

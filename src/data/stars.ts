@@ -27,6 +27,17 @@ export const STAR_ID_ALIASES: Record<string, string> = {
   'hd-93129aa': 'hd-93129aa',
   'alpha-fornacis-a': 'dalim',
   'gamma-2-velorum': 'regor',
+  'lambda-tauri': 'lambda-tauri-a',
+  'gamma-delphini': 'gamma-delphini-a',
+  'delta-serpentis': 'delta-serpentis-a',
+  'mesarthim': 'mesarthim-a',
+  'alula-australis': 'alula-australis-a',
+  'acrux': 'acrux-aa',
+  'acrux-a': 'acrux-aa',
+  'acrux-b': 'acrux-ba',
+  'alpha-crucis': 'acrux-aa',
+  'alpha-1-crucis': 'acrux-aa',
+  'alpha-2-crucis': 'acrux-ba',
 };
 
 /**

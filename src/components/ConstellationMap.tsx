@@ -451,8 +451,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
 
-    const bw = Math.max(9.0, Math.min(26.0, neighborName.length * 1.15 + 4.0));
-    const bh = 3.8;
+    const bw = Math.max(8.0, Math.min(24.0, neighborName.length * 1.15 + 3.2));
+    const bh = 3.6;
 
     const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
     if (!badgePos) return null;
@@ -838,20 +838,20 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {/* 4. Bordering Constellations on Sky Map (Territory Polygons) */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
           <g className="bordering-constellations-areas" clipPath={`url(#map-frame-clip-${constellation.id})`}>
-            {borderingConstellationsSvg.map((neighbor, nIdx) => {
+            {borderingConstellationsSvg.map((neighbor) => {
               const isHovered = hoveredNeighborName === neighbor.name;
               const isSelected = selectedNeighborName === neighbor.name;
               const isHighlighted = isHovered || isSelected;
 
               return (
                 <path
-                  key={`neighbor-path-${nIdx}`}
+                  key={`neighbor-path-${constellation.id}-${neighbor.name}`}
                   d={neighbor.pathData}
                   fill={isHighlighted ? "rgba(6, 182, 212, 0.32)" : "rgba(30, 41, 59, 0.45)"}
                   stroke={isHighlighted ? "#38bdf8" : "#475569"}
                   strokeWidth={isHighlighted ? "0.6" : "0.32"}
                   strokeDasharray={isHighlighted ? "none" : "1.5 1"}
-                  className="cursor-pointer transition-all duration-150"
+                  className="cursor-pointer transition-colors duration-150"
                   onPointerEnter={() => setHoveredNeighborName(neighbor.name)}
                   onPointerLeave={() => setHoveredNeighborName(null)}
                   onClick={(e) => {
@@ -1080,7 +1080,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {/* 9.5. Elevated Interactive Bordering Constellation Badges */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
           <g className="bordering-constellation-badges">
-            {borderingConstellationsSvg.map((neighbor, nIdx) => {
+            {borderingConstellationsSvg.map((neighbor) => {
               const bx = neighbor.badgePos.x;
               const by = neighbor.badgePos.y;
               const bw = neighbor.badgeWidth;
@@ -1091,7 +1091,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
               return (
                 <g
-                  key={`neighbor-badge-${nIdx}`}
+                  key={`neighbor-badge-${constellation.id}-${neighbor.name}`}
                   className="cursor-pointer group/neighbor select-none"
                   onPointerEnter={() => setHoveredNeighborName(neighbor.name)}
                   onPointerLeave={() => setHoveredNeighborName(null)}
@@ -1118,23 +1118,15 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                     fillOpacity={isHighlighted ? 0.98 : 0.94}
                     stroke={isHighlighted ? "#38bdf8" : "#334155"}
                     strokeWidth={isHighlighted ? "0.55" : "0.35"}
-                    className="transition-all duration-150 drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]"
+                    className="transition-colors duration-150 drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]"
                   />
-                  {/* Guide Accent Indicator Dot */}
-                  <circle
-                    cx={bx - bw / 2 + 1.8}
-                    cy={by}
-                    r={isHighlighted ? "0.75" : "0.55"}
-                    fill="#38bdf8"
-                    className="transition-all duration-150"
-                  />
-                  {/* Constellation Name Text */}
+                  {/* Constellation Name Text - Symmetrically centered inside pill */}
                   <text
-                    x={bx + 0.7}
-                    y={by + 0.6}
+                    x={bx}
+                    y={by + 0.55}
                     textAnchor="middle"
                     fill={isHighlighted ? "#e0f2fe" : "#94a3b8"}
-                    fontSize="1.75"
+                    fontSize="1.7"
                     fontFamily="sans-serif"
                     fontWeight="bold"
                     letterSpacing="0.035em"

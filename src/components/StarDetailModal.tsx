@@ -350,26 +350,6 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const isSun = star.id === 'sun' || star.distanceLy < 0.0001;
 
-  const renderSuperimpositionScale = () => (
-    <div className="p-4 sm:p-5 rounded-2xl bg-[#030718]/75 backdrop-blur-md border border-amber-500/25 shadow-[0_0_25px_rgba(245,158,11,0.1)]">
-      <div className="flex items-center gap-2.5 text-amber-400 mb-2">
-        <Orbit className="w-5 h-5" />
-        <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
-          Solar System Superimposition Scale
-        </h3>
-      </div>
-      <p className="text-sm text-slate-200 mb-3">
-        If placed at the center of our Solar System where the Sun resides:
-      </p>
-      <div className="p-3.5 rounded-xl bg-[#02040c]/90 border border-amber-500/25 flex items-center justify-between gap-4 font-mono text-xs shadow-inner">
-        <span className="text-amber-300 font-bold">{star.solarEngulfment}</span>
-        <span className="text-slate-400 text-[11px]">
-          Diameter: {star.diameterAU.toFixed(3)} AU
-        </span>
-      </div>
-    </div>
-  );
-
   const renderDescription = () => (
     <div className="p-4 rounded-xl bg-[#02040c]/75 backdrop-blur-md border border-cyan-500/15 text-xs text-slate-400 leading-relaxed font-mono">
       {star.description}
@@ -1137,9 +1117,6 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               </div>
             )}
           </div>
-
-          {/* Solar System Superimposition Scale (relocated below Exoplanetary System) */}
-          {renderSuperimpositionScale()}
 
           {/* Dedicated Link to Stellar System Dossier */}
           {knownMultipleSystem && (
