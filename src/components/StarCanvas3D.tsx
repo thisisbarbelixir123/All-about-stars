@@ -92,6 +92,7 @@ interface StarCanvas3DProps {
   onOpenCatalog?: () => void;
   onOpenStellarSystems?: () => void;
   onOpenHRDiagram?: () => void;
+  onOpenClassification?: () => void;
   onOpenGuide?: () => void;
   onOpenConstellations?: () => void;
   onOpenDiscovery?: () => void;
@@ -174,6 +175,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   onOpenCatalog,
   onOpenStellarSystems,
   onOpenHRDiagram,
+  onOpenClassification,
   onOpenGuide,
   onOpenConstellations,
   onOpenDiscovery,
@@ -3079,6 +3081,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                         closeAllMenus();
                         (onOpenFrontpage || (() => {}))();
                       }}
+                      onOpenClassification={(onOpenClassification || onOpenGuide) ? () => {
+                        closeAllMenus();
+                        (onOpenClassification || onOpenGuide || (() => {}))();
+                      } : undefined}
                       onOpenCatalog={() => {
                         closeAllMenus();
                         (onOpenCatalog || (() => {}))();

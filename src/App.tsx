@@ -18,6 +18,8 @@ import { StellarSuikaGame } from './components/StellarSuikaGame';
 import { PresetSlider } from './components/PresetSlider';
 import { EncyclopediaDropdown } from './components/EncyclopediaDropdown';
 import { StellarDiscoveryGuide } from './components/StellarDiscoveryGuide';
+import { StellarClassificationGuide } from './components/StellarClassificationGuide';
+import { StellarNomenclatureGuide } from './components/StellarNomenclatureGuide';
 import { StarDot2D } from './components/StarDot2D';
 import { soundEffects } from './utils/soundEffects';
 import { spaceAudio } from './utils/spaceAudioEngine';
@@ -88,7 +90,7 @@ export default function App() {
   }, []);
 
   // Integrated 3D Mode Overlays: Frontpage (What is a star?), Catalog, H-R Diagram, Classification Guide, Constellation Guide, Discovery
-  const [activeOverlay, setActiveOverlay] = useState<'frontpage' | 'catalog' | 'stellar-systems' | 'hr-diagram' | 'guide' | 'constellations' | 'discovery' | 'nomenclature' | null>(null);
+  const [activeOverlay, setActiveOverlay] = useState<'frontpage' | 'what-is-a-star' | 'classification' | 'guide' | 'discovery' | 'nomenclature' | 'constellations' | 'hr-diagram' | 'catalog' | 'stellar-systems' | null>(null);
   const [catalogSubTab, setCatalogSubTab] = useState<'stars' | 'systems'>('stars');
   const [frontpageInitialSection, setFrontpageInitialSection] = useState<'what-is-a-star' | 'spectral-classes' | 'luminosity-stages' | 'life-cycles' | 'myths' | 'quiz'>('what-is-a-star');
 
@@ -264,8 +266,7 @@ export default function App() {
         setActiveOverlay('frontpage');
       } else if (e.key === '5') {
         setIsHomeOpen(false);
-        setFrontpageInitialSection('spectral-classes');
-        setActiveOverlay('guide');
+        setActiveOverlay('classification');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -286,8 +287,7 @@ export default function App() {
       setActiveOverlay(null);
     } else if (tabId === 'stellar-systems') {
       setIsHomeOpen(false);
-      setCatalogSubTab('systems');
-      setActiveOverlay('catalog');
+      setActiveOverlay('stellar-systems');
     } else if (tabId === 'explorer' || tabId === 'catalog') {
       setIsHomeOpen(false);
       setCatalogSubTab('stars');
@@ -299,9 +299,9 @@ export default function App() {
       setIsHomeOpen(false);
       setFrontpageInitialSection('life-cycles');
       setActiveOverlay('frontpage');
-    } else if (tabId === 'remnants') {
+    } else if (tabId === 'remnants' || tabId === 'classification') {
       setIsHomeOpen(false);
-      setActiveOverlay('guide');
+      setActiveOverlay('classification');
     } else if (tabId === 'game') {
       setIsSuikaOpen(true);
     }
@@ -784,6 +784,26 @@ export default function App() {
                 setFrontpageInitialSection('what-is-a-star');
                 setActiveOverlay('frontpage');
               }}
+              onOpenClassification={() => {
+                setActiveTopbarMenu(null);
+                setIsHomeOpen(false);
+                setActiveOverlay('classification');
+              }}
+              onOpenDiscovery={() => {
+                setActiveTopbarMenu(null);
+                setIsHomeOpen(false);
+                setActiveOverlay('discovery');
+              }}
+              onOpenConstellations={() => {
+                setActiveTopbarMenu(null);
+                setIsHomeOpen(false);
+                setActiveOverlay('constellations');
+              }}
+              onOpenHRDiagram={() => {
+                setActiveTopbarMenu(null);
+                setIsHomeOpen(false);
+                setActiveOverlay('hr-diagram');
+              }}
               onOpenCatalog={() => {
                 setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
@@ -793,28 +813,12 @@ export default function App() {
               onOpenStellarSystems={() => {
                 setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
-                setCatalogSubTab('systems');
-                setActiveOverlay('catalog');
-              }}
-              onOpenHRDiagram={() => {
-                setActiveTopbarMenu(null);
-                setIsHomeOpen(false);
-                setActiveOverlay('hr-diagram');
-              }}
-              onOpenConstellations={() => {
-                setActiveTopbarMenu(null);
-                setIsHomeOpen(false);
-                setActiveOverlay('constellations');
-              }}
-              onOpenDiscovery={() => {
-                setActiveTopbarMenu(null);
-                setIsHomeOpen(false);
-                setActiveOverlay('discovery');
+                setActiveOverlay('stellar-systems');
               }}
               onOpenNomenclature={() => {
                 setActiveTopbarMenu(null);
                 setIsHomeOpen(false);
-                setActiveOverlay('discovery');
+                setActiveOverlay('nomenclature');
               }}
             />
           </div>
@@ -936,17 +940,14 @@ export default function App() {
           onOpenCatalog={() => setActiveOverlay('catalog')}
           onOpenStellarSystems={() => {
             setIsHomeOpen(false);
-            setCatalogSubTab('systems');
-            setActiveOverlay('catalog');
+            setActiveOverlay('stellar-systems');
           }}
           onOpenHRDiagram={() => setActiveOverlay('hr-diagram')}
-          onOpenGuide={() => {
-            setFrontpageInitialSection('spectral-classes');
-            setActiveOverlay('frontpage');
-          }}
+          onOpenClassification={() => setActiveOverlay('classification')}
+          onOpenGuide={() => setActiveOverlay('classification')}
           onOpenConstellations={() => setActiveOverlay('constellations')}
           onOpenDiscovery={() => setActiveOverlay('discovery')}
-          onOpenNomenclature={() => setActiveOverlay('discovery')}
+          onOpenNomenclature={() => setActiveOverlay('nomenclature')}
           isMobile={isMobile}
           isTablet={isTablet}
         >
@@ -961,8 +962,7 @@ export default function App() {
                   onNavigateTab={(tab) => {
                     setIsHomeOpen(false);
                     if (tab === 'guide') {
-                      setFrontpageInitialSection('what-is-a-star');
-                      setActiveOverlay('frontpage');
+                      setActiveOverlay('classification');
                     } else if (tab === 'catalog' || tab === 'hr-diagram' || tab === 'constellations') {
                       setActiveOverlay(tab);
                     } else if (tab === 'about') {
@@ -1050,63 +1050,58 @@ export default function App() {
                   <span>Starpedia 3D</span>
                 </button>
 
-                {/* Module Switcher Tabs: Frontpage (What is a star?), Stellar Catalog, H-R Diagram, Constellation Guide */}
+                {/* Module Switcher Tabs: In exact requested order:
+                    What is a Star - Classification - Discovery - Constellation Guide - H-R Diagram - Star Catalog - System Catalog */}
                 <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512] rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
+                  {/* 1. What is a Star */}
                   <button
-                    id="overlay-tab-frontpage"
+                    id="overlay-tab-what-is-a-star"
                     onClick={() => {
                       setFrontpageInitialSection('what-is-a-star');
                       setActiveOverlay('frontpage');
                     }}
                     className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'frontpage' || activeOverlay === 'guide'
+                      activeOverlay === 'frontpage' || activeOverlay === 'what-is-a-star'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
-                    title="Encyclopedia Frontpage: What is a Star? (Merged with Classification Guide)"
+                    title="What is a Star? (Anatomy, Fusion, Life Cycles & Myths)"
                   >
                     <Sun className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-amber-400" />
-                    <span>What is a Star?</span>
+                    <span>What is a Star</span>
                   </button>
 
+                  {/* 2. Classification */}
                   <button
-                    id="overlay-tab-catalog"
-                    onClick={() => {
-                      setCatalogSubTab('stars');
-                      setActiveOverlay('catalog');
-                    }}
+                    id="overlay-tab-classification"
+                    onClick={() => setActiveOverlay('classification')}
                     className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'catalog' || activeOverlay === 'stellar-systems'
+                      activeOverlay === 'classification' || activeOverlay === 'guide'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
-                    title={`Stellar Catalog (${STARS_CATALOG.length} stars)`}
+                    title="Stellar Classification Systems (Harvard, Yerkes, Variables, Remnants)"
                   >
-                    <Grid className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
-                    <span>Stellar Catalog</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                        activeOverlay === 'catalog' || activeOverlay === 'stellar-systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-800 text-cyan-300'
-                      }`}
-                    >
-                      {STARS_CATALOG.length}
-                    </span>
+                    <Flame className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-orange-400" />
+                    <span>Classification</span>
                   </button>
 
+                  {/* 3. Discovery */}
                   <button
-                    id="overlay-tab-hr"
-                    onClick={() => setActiveOverlay('hr-diagram')}
+                    id="overlay-tab-discovery"
+                    onClick={() => setActiveOverlay('discovery')}
                     className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'hr-diagram'
+                      activeOverlay === 'discovery'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
-                    title="Hertzsprung–Russell Diagram"
+                    title="Stellar Discovery, Methods, Timeline & Telescopes"
                   >
-                    <BarChart2 className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
-                    <span>H-R Diagram</span>
+                    <Telescope className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-cyan-400" />
+                    <span>Discovery</span>
                   </button>
 
+                  {/* 4. Constellation Guide */}
                   <button
                     id="overlay-tab-constellations"
                     onClick={() => setActiveOverlay('constellations')}
@@ -1130,18 +1125,66 @@ export default function App() {
                     </span>
                   </button>
 
+                  {/* 5. H-R Diagram */}
                   <button
-                    id="overlay-tab-discovery"
-                    onClick={() => setActiveOverlay('discovery')}
+                    id="overlay-tab-hr"
+                    onClick={() => setActiveOverlay('hr-diagram')}
                     className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
-                      activeOverlay === 'discovery' || activeOverlay === 'nomenclature'
+                      activeOverlay === 'hr-diagram'
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
-                    title="Stellar Discovery, Telescopes & Nomenclature"
+                    title="Hertzsprung–Russell Diagram"
                   >
-                    <Telescope className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-cyan-400" />
-                    <span>Discovery</span>
+                    <BarChart2 className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
+                    <span>H-R Diagram</span>
+                  </button>
+
+                  {/* 6. Star Catalog */}
+                  <button
+                    id="overlay-tab-catalog"
+                    onClick={() => {
+                      setCatalogSubTab('stars');
+                      setActiveOverlay('catalog');
+                    }}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                      activeOverlay === 'catalog'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                    title={`Star Catalog (${STARS_CATALOG.length} stars)`}
+                  >
+                    <Grid className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
+                    <span>Star Catalog</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                        activeOverlay === 'catalog' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-800 text-cyan-300'
+                      }`}
+                    >
+                      {STARS_CATALOG.length}
+                    </span>
+                  </button>
+
+                  {/* 7. System Catalog */}
+                  <button
+                    id="overlay-tab-system-catalog"
+                    onClick={() => setActiveOverlay('stellar-systems')}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                      activeOverlay === 'stellar-systems'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                    title={`System Catalog (${MULTIPLE_STAR_SYSTEMS.length} multi-star systems)`}
+                  >
+                    <Share2 className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-cyan-400" />
+                    <span>System Catalog</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                        activeOverlay === 'stellar-systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-800 text-cyan-300'
+                      }`}
+                    >
+                      {MULTIPLE_STAR_SYSTEMS.length}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1185,81 +1228,33 @@ export default function App() {
                         </h1>
                       </div>
 
-                      {/* Sub-page Navigation Tabs inside the Stellar Catalog */}
-                      <div className="flex items-center p-0.5 sm:p-1 rounded-xl sm:rounded-2xl bg-[#020512]/90 border border-cyan-500/30 shrink-0 shadow-lg overflow-x-auto no-scrollbar max-w-full min-w-0 w-full sm:w-auto">
+                      {/* Catalog info and shortcut to System Catalog */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-3 py-1.5 rounded-xl font-bold">
+                          {STARS_CATALOG.length} Stars Cataloged
+                        </span>
                         <button
-                          id="catalog-subtab-stars"
-                          onClick={() => setCatalogSubTab('stars')}
-                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
-                            catalogSubTab === 'stars'
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                              : 'text-slate-400 hover:text-white hover:bg-white/5'
-                          }`}
+                          onClick={() => setActiveOverlay('stellar-systems')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#020512]/90 border border-cyan-500/30 hover:border-cyan-400 text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
+                          title="Open Multiple Star Systems Catalog"
                         >
-                          <Grid className="w-3.5 h-3.5 shrink-0" />
-                          <span>Individual Stars</span>
-                          <span
-                            className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded font-mono ${
-                              catalogSubTab === 'stars' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-900 text-cyan-300'
-                            }`}
-                          >
-                            {STARS_CATALOG.length}
-                          </span>
-                        </button>
-
-                        <button
-                          id="catalog-subtab-systems"
-                          onClick={() => setCatalogSubTab('systems')}
-                          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 ${
-                            catalogSubTab === 'systems'
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                              : 'text-slate-400 hover:text-white hover:bg-white/5'
-                          }`}
-                        >
-                          <Share2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                          <span>Stellar Systems</span>
-                          <span
-                            className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded font-mono ${
-                              catalogSubTab === 'systems' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-slate-900 text-cyan-300'
-                            }`}
-                          >
-                            {MULTIPLE_STAR_SYSTEMS.length}
-                          </span>
+                          <Share2 className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>System Catalog ({MULTIPLE_STAR_SYSTEMS.length}) →</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {catalogSubTab === 'systems' ? (
-                    /* SUB-PAGE 2: Multiple Star Systems Registry */
-                    <StellarSystemCatalog
-                      embedded={true}
-                      onInspectSystemInDossier={(system) => {
-                        setSelectedSystemDossier(system);
-                      }}
-                      onInspectStar={(s) => {
-                        setDetailModalInitialMode(undefined);
-                        setDetailModalStar(s);
-                      }}
-                      onCompareStar={(s) => {
-                        handleAddStarToCompare(s);
-                        setFocusedStar(s);
-                        setActiveOverlay(null);
-                      }}
-                    />
-                  ) : (
-                    /* SUB-PAGE 1: Individual Stars Registry */
-                    <>
-                      <StarFilterPanel
-                        filterState={filterState}
-                        onChangeFilter={(partial) => setFilterState((prev) => ({ ...prev, ...partial }))}
-                        onResetFilters={() => setFilterState(initialFilterState)}
-                        totalMatches={filteredStars.length}
-                        onOpenClassificationGuide={() => {
-                          setFrontpageInitialSection('spectral-classes');
-                          setActiveOverlay('frontpage');
-                        }}
-                      />
+                  {/* Individual Stars Registry */}
+                  <StarFilterPanel
+                    filterState={filterState}
+                    onChangeFilter={(partial) => setFilterState((prev) => ({ ...prev, ...partial }))}
+                    onResetFilters={() => setFilterState(initialFilterState)}
+                    totalMatches={filteredStars.length}
+                    onOpenClassificationGuide={() => {
+                      setActiveOverlay('classification');
+                    }}
+                  />
 
                       {/* Catalog Filter count */}
                       <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
@@ -1292,8 +1287,6 @@ export default function App() {
                           </button>
                         </div>
                       )}
-                    </>
-                  )}
                 </div>
               )}
 
@@ -1326,18 +1319,43 @@ export default function App() {
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onToggleCompare={handleToggleCompare}
                     onOpenClassificationGuide={() => {
-                      setFrontpageInitialSection('spectral-classes');
-                      setActiveOverlay('frontpage');
+                      setActiveOverlay('classification');
                     }}
                     isMobile={isMobile}
                   />
                 </div>
               )}
 
-              {(activeOverlay === 'frontpage' || activeOverlay === 'guide') && (
+              {(activeOverlay === 'frontpage' || activeOverlay === 'what-is-a-star') && (
                 <div className="max-w-7xl mx-auto">
                   <StarEncyclopediaFrontpage
                     initialSection={frontpageInitialSection}
+                    onOpenClassification={() => setActiveOverlay('classification')}
+                    onSelectStar={(s) => setDetailModalStar(s)}
+                    onCompareStar={(s) => {
+                      handleAddStarToCompare(s);
+                      setFocusedStar(s);
+                      setActiveOverlay(null);
+                    }}
+                    onJumpToCatalog={() => setActiveOverlay('catalog')}
+                    onJumpToHRDiagram={() => setActiveOverlay('hr-diagram')}
+                    onJumpToConstellations={() => setActiveOverlay('constellations')}
+                    onJumpToCatalogFilter={(sc) => {
+                      if (sc) {
+                        setFilterState((prev) => ({
+                          ...prev,
+                          spectralClasses: [sc as SpectralClass],
+                        }));
+                      }
+                      setActiveOverlay('catalog');
+                    }}
+                  />
+                </div>
+              )}
+
+              {(activeOverlay === 'classification' || activeOverlay === 'guide') && (
+                <div className="max-w-7xl mx-auto">
+                  <StellarClassificationGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {
                       handleAddStarToCompare(s);
@@ -1373,9 +1391,32 @@ export default function App() {
                 </div>
               )}
 
-              {(activeOverlay === 'discovery' || activeOverlay === 'nomenclature') && (
+              {activeOverlay === 'discovery' && (
                 <div className="max-w-7xl mx-auto">
                   <StellarDiscoveryGuide
+                    onSelectStar={(s) => setDetailModalStar(s)}
+                    onCompareStar={(s) => {
+                      handleAddStarToCompare(s);
+                      setFocusedStar(s);
+                      setActiveOverlay(null);
+                    }}
+                    onOpenNomenclature={() => setActiveOverlay('nomenclature')}
+                    onJumpToCatalog={(searchQuery) => {
+                      if (searchQuery) {
+                        setFilterState((prev) => ({
+                          ...prev,
+                          searchQuery,
+                        }));
+                      }
+                      setActiveOverlay('catalog');
+                    }}
+                  />
+                </div>
+              )}
+
+              {activeOverlay === 'nomenclature' && (
+                <div className="max-w-7xl mx-auto">
+                  <StellarNomenclatureGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {
                       handleAddStarToCompare(s);

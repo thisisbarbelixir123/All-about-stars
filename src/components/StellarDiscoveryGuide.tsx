@@ -10,7 +10,6 @@ import {
   TelescopeRecord,
   DiscoveryMethodRecord,
 } from '../data/stellarDiscoveryData';
-import { StellarNomenclatureGuide } from './StellarNomenclatureGuide';
 import { MethodScienceGraphic } from './MethodScienceGraphic';
 import { StarDot2D } from './StarDot2D';
 import { RunningText } from './RunningText';
@@ -39,6 +38,7 @@ interface StellarDiscoveryGuideProps {
   onSelectStar?: (star: StarData) => void;
   onCompareStar?: (star: StarData) => void;
   onJumpToCatalog?: (searchQuery?: string) => void;
+  onOpenNomenclature?: () => void;
   initialTopic?: DiscoveryTopicId;
 }
 
@@ -46,8 +46,7 @@ export type DiscoveryTopicId =
   | 'how-discovered'
   | 'timeline'
   | 'telescopes'
-  | 'milestones'
-  | 'nomenclature';
+  | 'milestones';
 
 interface DiscoveryTopicNav {
   id: DiscoveryTopicId;
@@ -61,7 +60,6 @@ const DISCOVERY_TOPICS: DiscoveryTopicNav[] = [
   { id: 'how-discovered', title: 'How Stars are Discovered', shortTitle: 'Methods', icon: Eye, tag: 'Observational Physics' },
   { id: 'timeline', title: 'Timeline of Stellar Discovery', shortTitle: 'Timeline', icon: History, tag: '1609 → Present' },
   { id: 'telescopes', title: 'Telescopes We Use to See Stars', shortTitle: 'Telescopes', icon: Telescope, tag: 'Ground & Space' },
-  { id: 'nomenclature', title: 'How We Name Stars (Stellar Nomenclature)', shortTitle: 'Nomenclature', icon: Bookmark, tag: 'Bayer, Catalogs & IAU' },
   { id: 'milestones', title: 'Firsts & Milestones by Class', shortTitle: 'Milestones', icon: Sparkles, tag: 'Historic Firsts' },
 ];
 
@@ -117,6 +115,7 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
   onSelectStar,
   onCompareStar,
   onJumpToCatalog,
+  onOpenNomenclature,
   initialTopic = 'how-discovered',
 }) => {
   const [activeTopic, setActiveTopic] = useState<DiscoveryTopicId>(initialTopic);
@@ -931,15 +930,24 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
         </div>
       )}
 
-      {/* 7. SUB-SECTION: HOW WE NAME STARS (NOMENCLATURE - INTEGRATED) */}
-      {activeTopic === 'nomenclature' && (
-        <div className="space-y-6">
-          <StellarNomenclatureGuide
-            onSelectStar={onSelectStar}
-            onCompareStar={onCompareStar}
-            onJumpToCatalog={onJumpToCatalog}
-            initialTab="proper-names"
-          />
+      {/* Detached Stellar Nomenclature Quick Link Banner */}
+      {onOpenNomenclature && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#030d2a] via-[#051445] to-[#03091e] border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 shrink-0">
+              <Bookmark className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">How We Name Stars (Stellar Nomenclature)</div>
+              <div className="text-xs text-slate-300">Explore Bayer Greek letters, Flamsteed numbers, variable systems, and IAU catalogs on its dedicated page.</div>
+            </div>
+          </div>
+          <button
+            onClick={onOpenNomenclature}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap active:scale-95 shrink-0"
+          >
+            Open Nomenclature Guide →
+          </button>
         </div>
       )}
     </div>
