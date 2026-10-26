@@ -45,6 +45,7 @@
   - [3.9 Stellar Suika: Cosmic Star Merge Minigame](#39-stellar-suika-cosmic-star-merge-minigame)
   - [3.10 Unified Procedural Web Audio Engine & Audio Popover Menu](#310-unified-procedural-web-audio-engine--audio-popover-menu)
   - [3.11 Ergonomics, Dynamic Marquee Engine (RunningText) & Fullscreen Mode](#311-ergonomics-dynamic-marquee-engine-runningtext--fullscreen-mode)
+  - [3.12 Official About, Scientific Credits & Provenance System](#312-official-about-scientific-credits--provenance-system)
 - [4. Software Architecture & Implementation Details](#4-software-architecture--implementation-details)
 - [5. Empirical Data Sources & Reduction Pipeline](#5-empirical-data-sources--reduction-pipeline)
 - [6. Installation & Local Development](#6-installation--local-development)
@@ -63,6 +64,8 @@ Unlike conventional static astronomy applications, Starpedia 3D synthesizes:
 2. **First-Principles Theoretical Modeling:** Real-time computation of bolometric luminosities, effective surface temperatures, surface gravity ($\log g$), habitable zone radiative boundaries, and Keplerian orbital state vectors.
 3. **Hardware-Accelerated WebGL/Three.js Rendering:** Custom GLSL shaders modeling limb darkening, photospheric convective granulation noise, translucent coronal plasma halos, relativistic pulsar synchrotron beams, and Roche-lobe-overflow contact binary geometries.
 4. **Interactive Educational Visualizers:** Deep dives into thermonuclear fusion networks ($p\text{--}p$ chains, CNO cycle, $3\alpha$, silicon burning), stellar cross-sectional interior cutaways, mass-dependent evolutionary pathways, and the 88 International Astronomical Union (IAU) constellations.
+
+> 💖 **Origin & Inspiration:** Starpedia 3D is born out of a lifelong childhood passion for stars, astronomy, and universe size comparison videos on YouTube. Inspired by pioneering works like Cary & Michael Huang's *Scale of the Universe 2* and astronomical comparison animations, this project turns the cosmic scale comparisons of youth into a living, fully interactive, research-grade 3D environment.
 
 ---
 
@@ -396,7 +399,7 @@ Detached from the single-star catalog into an independent exploration route (`St
 An interactive celestial sphere (`ConstellationMap.tsx` & `ConstellationGuide.tsx`) maps the night sky based on official astronomical coordinate standards:
 - **Equatorial Coordinate Grid:** Displays lines of Right Ascension ($\alpha$, in hours $0^{\text{h}} - 24^{\text{h}}$) and Declination ($\delta$, in degrees $-90^\circ \to +90^\circ$).
 - **Great Circles:** Highlights the Celestial Equator ($\delta = 0^\circ$) and the Ecliptic Plane (Earth's orbital plane inclined at $\epsilon \approx 23.44^\circ$).
-- **Delporte (1930) Boundary Polygons:** Implements exact borders for all 88 official constellations approved by the International Astronomical Union.
+- **Delporte (1930) Boundary Polygons & Shapes:** Constellation line geometries, stick figures, and Delporte boundary coordinates are rendered from Olaf Frohn's [D3-Celestial Starmap](https://github.com/ofrohn/d3-celestial) dataset covering all 88 IAU constellations.
 - **Historical Asterisms:** Visual stick-figure overlays identifying famous asterisms (e.g., the *Summer Triangle, Winter Hexagon, Great Square of Pegasus, Big Dipper, Teapot*).
 - **Comprehensive Dossiers:** Detailed historical lore, mythological origins, brightest constituent stars, cataloged deep sky objects (Messier, Caldwell, NGC), and seasonal visibility windows.
 
@@ -491,6 +494,17 @@ Starpedia 3D eliminates bulky audio downloads with a procedural synthesis engine
 
 ---
 
+### 3.12 Official About, Scientific Credits & Provenance System (`AboutPage.tsx`)
+
+A dedicated comprehensive scientific documentation and attribution view (`AboutPage.tsx`):
+- **Childhood Inspiration & YouTube Roots:** Documents the author's lifelong childhood passion for astronomy, stellar physics, and universe size comparison videos on YouTube (including the author's comparison video animations and Cary & Michael Huang's seminal *Scale of the Universe 2*).
+- **Olaf Frohn's D3 Celestial Starmap Attribution:** Formally credits and directly links to the [D3-Celestial Starmap repository](https://github.com/ofrohn/d3-celestial), which supplies vector coordinates for all 88 official constellation shapes, stick figures, and Delporte boundary coordinates.
+- **Cross-Validated Primary Catalogs:** Summarizes empirical data verification across ESA Gaia DR3, CDS SIMBAD, NASA Exoplanet Archive, and IAU WGSN.
+- **Academic References & Literature Citations:** In-depth bibliography of fundamental papers in astrophysics (Gaia DR3, Kopparapu habitable zone models, Chandrasekhar white dwarf limit, Oppenheimer–Volkoff neutron star cores, Delporte constellation boundaries).
+- **Interactive In-App Navigation Matrix:** Instant deep-links into all 9 major modules (3D Stage, Catalog, Multiple Systems, H–R Diagram, Constellations, Classification Guide, Nomenclature Guide, Discovery Guide, and Suika Minigame).
+
+---
+
 ## 4. Software Architecture & Implementation Details
 
 ```
@@ -500,6 +514,7 @@ All-about-stars/
 │   └── *.svg, *.jpg, *.png     # High-resolution vector diagrams, banners, textures
 ├── src/
 │   ├── components/             # React 19 UI & Visualization Components
+│   │   ├── AboutPage.tsx       # Scientific credits, documentation & provenance view
 │   │   ├── StarCanvas3D.tsx    # Core Three.js WebGL multi-star comparative stage
 │   │   ├── HRDiagram.tsx       # Interactive Hertzsprung–Russell diagram
 │   │   ├── ConstellationMap.tsx# 88 IAU Constellations interactive sky atlas
@@ -551,6 +566,7 @@ All observational metrics in Starpedia 3D are curated and calibrated against pee
 3. **NASA Exoplanet Archive (Caltech/IPAC):** Confirmed exoplanet orbital semi-major axes ($a$), eccentricities ($e$), planetary radii ($R_p$), masses ($M_p$), and equilibrium temperatures.
 4. **IAU Division C Working Group on Star Names (WGSN):** Formally recognized canonical stellar proper names and historical designations.
 5. **Kopparapu et al. Habitable Zone Models:** Theoretical effective insolation flux grids for stellar temperatures between $2{,}600\text{ K}$ and $7{,}200\text{ K}$.
+6. **D3-Celestial Starmap (Olaf Frohn):** Spherical GeoJSON vector geometries for all 88 official constellation shapes, asterism line networks, and Eugène Delporte's 1930 boundary paths ([GitHub](https://github.com/ofrohn/d3-celestial)).
 
 ---
 
@@ -678,8 +694,9 @@ Starpedia 3D includes a comprehensive tactile keyboard navigation engine enablin
 4. **Chandrasekhar, S. (1931):** *The Maximum Mass of Ideal White Dwarfs.* The Astrophysical Journal, 74, 81.
 5. **Oppenheimer, J. R., & Volkoff, G. M. (1939):** *On Massive Neutron Cores.* Physical Review, 55(4), 374.
 6. **Delporte, E. (1930):** *Délimitation scientifique des constellations (tables et cartes).* International Astronomical Union, Cambridge University Press.
-7. **Hansen, C. J., Kawaler, S. D., & Trimble, V. (2004):** *Stellar Interiors: Physical Principles, Structure, and Evolution.* Springer-Verlag, New York.
-8. **Carroll, B. W., & Ostlie, D. A. (2017):** *An Introduction to Modern Astrophysics (2nd ed.).* Cambridge University Press.
+7. **Frohn, O. (2015–present):** *D3-Celestial: Interactive celestial starmap with GeoJSON constellation and boundary datasets.* [https://github.com/ofrohn/d3-celestial](https://github.com/ofrohn/d3-celestial).
+8. **Hansen, C. J., Kawaler, S. D., & Trimble, V. (2004):** *Stellar Interiors: Physical Principles, Structure, and Evolution.* Springer-Verlag, New York.
+9. **Carroll, B. W., & Ostlie, D. A. (2017):** *An Introduction to Modern Astrophysics (2nd ed.).* Cambridge University Press.
 
 ---
 
@@ -691,9 +708,10 @@ Starpedia 3D includes a comprehensive tactile keyboard navigation engine enablin
 - **Support the Project:** [Buy Me A Coffee on Ko-fi](https://ko-fi.com/b123entertainment)
 
 ### Creative & Conceptual Inspirations
+- **Childhood Passion for Astronomy & Stars:** Starpedia 3D is the realization of a lifelong childhood fascination with astronomy, stellar physics, and stargazing.
+- **Universe Size Comparison Videos on YouTube:** Heavily inspired by early YouTube cosmic scale videos, including Cary & Michael Huang's legendary *Scale of the Universe 2* and the creator's own astronomy comparison video series (e.g., *The Size of the Universe 6: "The Ultimate"* on channel `comparisonfarts`).
 - **Universe Sandbox (Giant Army):** The physical space simulator whose real-time thermodynamic modeling, orbital gravity, and stellar luminosity equations inspired Starpedia's coronal rendering and physics modeling.
-- **Scale of the Universe 2 (Cary & Michael Huang):** The pioneering interactive scale visualization spanning logarithmic orders of magnitude from Planck length to the observable cosmos.
-- **Creator YouTube Channel (`comparisonfarts`):** The astronomical comparison video series created on the author's YouTube channel, notably *The Size of the Universe 6: "The Ultimate"*, which directly motivated translating viral scale comparisons into an interactive, real-time web application.
+- **D3 Celestial Starmap (Olaf Frohn):** Providing the astronomical boundary coordinates and constellation asterism line paths for the interactive celestial sky atlas.
 
 ### License
 This project is open-source and distributed under the terms of the **[MIT License](LICENSE)**.

@@ -90,6 +90,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
               An interactive 3D WebGL astrophysical comparator, comprehensive stellar catalog, dynamic Hertzsprung–Russell phase-space simulator, and 88-constellation celestial atlas spanning nine orders of spatial magnitude—from compact relativistic neutron stars to colossal red hypergiants.
             </p>
+
+            {/* Personal Childhood Passion Note */}
+            <div className="p-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs sm:text-sm leading-relaxed max-w-2xl flex items-start gap-3 shadow-inner backdrop-blur-sm">
+              <Heart className="w-4 h-4 text-rose-400 shrink-0 mt-0.5 fill-rose-400/30" />
+              <span>
+                This project is inspired by my childhood passion for stars, astronomy, and universe size comparison videos on YouTube—created to turn the celestial wonders I grew up admiring into an interactive, real-time 3D universe for everyone.
+              </span>
+            </div>
           </div>
 
           {/* Author & Studio Card */}
@@ -455,7 +463,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           Physical values (diameters in kilometers, solar units D☉, effective surface temperatures T_eff in Kelvin, luminosities L☉, masses M☉, surface gravity log g, and trigonometric distances in light-years and parsecs) are compiled and cross-validated from:
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 text-xs font-mono">
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300 flex flex-col gap-1">
             <span className="text-cyan-400 font-bold">ESA Gaia DR3</span>
             <span className="text-[11px] text-slate-400">High-precision 5-parameter astrometry, parallax (p), and broadband photometry (G, G_BP, G_RP).</span>
@@ -471,6 +479,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300 flex flex-col gap-1">
             <span className="text-cyan-400 font-bold">IAU WGSN</span>
             <span className="text-[11px] text-slate-400">Division C Working Group on Star Names: canonical nomenclature and official constellation borders (Delporte 1930).</span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300 flex flex-col gap-1">
+            <a 
+              href="https://github.com/ofrohn/d3-celestial" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-cyan-400 font-bold hover:underline inline-flex items-center gap-1"
+            >
+              D3 Celestial Starmap <ExternalLink className="w-3 h-3 inline" />
+            </a>
+            <span className="text-[11px] text-slate-400">Olaf Frohn's D3-Celestial starmap library supplying vector geometry for constellation lines, asterisms, and Delporte boundary coordinates.</span>
           </div>
         </div>
       </section>
@@ -511,6 +530,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             <span className="text-slate-400">Délimitation scientifique des constellations. <em>International Astronomical Union</em>, Cambridge University Press.</span>
           </div>
           <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-1">
+            <a 
+              href="https://github.com/ofrohn/d3-celestial" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-cyan-300 font-bold hover:underline inline-flex items-center gap-1"
+            >
+              Frohn, O. (D3-Celestial) <ExternalLink className="w-3 h-3 inline" />
+            </a>
+            <span className="text-slate-400">D3.js-based celestial starmap and spherical coordinate datasets for constellation shapes, stick figures, and IAU boundaries (https://github.com/ofrohn/d3-celestial).</span>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-1 md:col-span-2">
             <span className="text-cyan-300 font-bold">Carroll, B. W., & Ostlie, D. A. (2017)</span>
             <span className="text-slate-400"><em>An Introduction to Modern Astrophysics</em> (2nd ed.). Cambridge University Press.</span>
           </div>
