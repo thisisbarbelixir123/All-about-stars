@@ -319,6 +319,115 @@ export const isStarInsideConstellation = (
 };
 
 /**
+ * Normalizes constellation strings for international astronomical comparisons
+ * (strips diacritics, lowercase, trims).
+ */
+export const normalizeConstellationString = (str: string): string =>
+  (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+/**
+ * Checks whether a catalog star belongs to a constellation.
+ * Evaluates canonical IAU name, ID, abbreviation, sector aliases (Serpens Caput/Cauda),
+ * diacritic normalization (Boötes / Bootes), and Delporte spherical boundary fallback.
+ */
+export const isStarBelongingToConstellation = (
+  star: StarData,
+  constellation: ConstellationInfo,
+  boundsList?: any[]
+): boolean => {
+  const sNorm = normalizeConstellationString(star.constellation);
+  const cNorm = normalizeConstellationString(constellation.name);
+  const cId = (constellation.id || '').toLowerCase();
+  const cAbbr = (constellation.abbreviation || '').toLowerCase();
+
+  // Direct normalized name, ID, or abbreviation match
+  if (sNorm === cNorm || sNorm === cId || sNorm === cAbbr) return true;
+
+  // Multi-sector Serpens support
+  if (cId === 'serpens' && (sNorm.includes('serpens') || sNorm.includes('caput') || sNorm.includes('cauda') || sNorm === 'ser')) {
+    return true;
+  }
+
+  // Accent and spelling variants (Boötes / Bootes)
+  if (cNorm.includes('boote') && sNorm.includes('boote')) return true;
+
+  // Ursa Major / Ursa Minor abbreviation variants (UMa, UMi)
+  if (cAbbr === 'uma' && (sNorm === 'uma' || sNorm.includes('ursa major'))) return true;
+  if (cAbbr === 'umi' && (sNorm === 'umi' || sNorm.includes('ursa minor'))) return true;
+
+  // Canes Venatici / Canis Major / Minor variants
+  if (cAbbr === 'cvn' && sNorm === 'cvn') return true;
+  if (cAbbr === 'cma' && sNorm === 'cma') return true;
+  if (cAbbr === 'cmi' && sNorm === 'cmi') return true;
+
+  // Geometric boundary fallback if available
+  if (boundsList && boundsList.length > 0) {
+    return isStarInsideConstellation(star, constellation, boundsList);
+  }
+
+  return false;
+};
+
+/**
+ * Dynamically generates a rich, accurate location and astrometric context description
+ * for a catalog star inside a constellation without relying on hardcoded dictionaries.
+ */
+export const getDynamicStarLocationDescription = (
+  star: StarData,
+  constellation: ConstellationInfo
+): string => {
+  const isPrincipal = star.id === constellation.principalStarId;
+  const parts: string[] = [];
+
+  // 1. Precise astronomical coordinates
+  if (star.rightAscension && star.declination) {
+    const cleanRa = star.rightAscension.replace(/\s+/g, ' ').trim();
+    const cleanDec = star.declination.replace(/\s+/g, ' ').trim();
+    parts.push(`RA ${cleanRa} • Dec ${cleanDec}`);
+  }
+
+  // 2. Dynamic astrometric role & identity
+  if (isPrincipal) {
+    parts.push(`Principal Anchor Star (${star.bayerDesignation || 'Alpha Star'} of ${constellation.name})`);
+  } else if (STAR_CONSTELLATION_LOCATIONS[star.id]) {
+    // Supplementary historical asterism location (e.g. "Left Shoulder", "Urn Pour Point")
+    parts.push(STAR_CONSTELLATION_LOCATIONS[star.id]);
+  } else if (star.exoplanetSystem && star.exoplanetSystem.hasExoplanets) {
+    const pCount = star.exoplanetSystem.confirmedCount || star.exoplanetSystem.planets?.length || 1;
+    parts.push(`Exoplanet Host System (${pCount} Confirmed ${pCount === 1 ? 'Planet' : 'Planets'})`);
+  } else if (star.stellarStage && star.stellarStage.includes('Hypergiant')) {
+    parts.push(`Ultra-Luminous Hypergiant (${star.stellarStage})`);
+  } else if (star.stellarStage && star.stellarStage.includes('Supergiant')) {
+    parts.push(`Luminous Supergiant (${star.spectralType})`);
+  } else if (star.stellarStage && (star.stellarStage.includes('Neutron Star') || star.stellarStage.includes('Pulsar') || star.spectralClass === 'NS')) {
+    parts.push(`Compact Degenerate Relic / Pulsar`);
+  } else if (star.stellarStage && (star.stellarStage.includes('White Dwarf') || star.spectralClass === 'WD')) {
+    parts.push(`Degenerate White Dwarf Remnant`);
+  } else if (star.stellarStage && (star.stellarStage.includes('Brown Dwarf') || ['L', 'T', 'Y'].includes(star.spectralClass))) {
+    parts.push(`Substellar Brown Dwarf`);
+  } else if (star.isContactBinary || star.stellarStage === 'Contact Binary') {
+    parts.push(`Contact Binary System`);
+  } else if (star.apparentMagnitude !== undefined && star.apparentMagnitude <= 6.0) {
+    parts.push(`Naked-Eye Observable Star in ${constellation.name} (mag ${star.apparentMagnitude})`);
+  } else if (star.notableFacts && star.notableFacts.length > 0) {
+    const firstFact = star.notableFacts[0].split(/[.;]/)[0].trim();
+    if (firstFact.length > 0 && firstFact.length < 80) {
+      parts.push(firstFact);
+    } else {
+      parts.push(`${star.stellarStage || star.spectralType} Star in ${constellation.name}`);
+    }
+  } else {
+    parts.push(`${star.stellarStage || star.spectralType} Star in ${constellation.name}`);
+  }
+
+  return parts.join(' • ');
+};
+
+/**
  * Robustly matches an IAU constellation against all features in constellations.lines.json.
  * Supports multi-sector constellations like Serpens (Serpens Caput & Serpens Cauda).
  */

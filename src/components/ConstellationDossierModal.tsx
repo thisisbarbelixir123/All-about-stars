@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { ConstellationInfo } from '../data/constellationsData';
-import { STAR_CONSTELLATION_LOCATIONS } from '../data/catalogStarsConstellationLocations';
 import { CelestialData } from '../hooks/useCelestialData';
 import { ConstellationMap, SkyMapOptions } from './ConstellationMap';
 import { MapToolbarToggle } from './common/MapToolbarToggle';
@@ -10,7 +9,8 @@ import { StarDot2D } from './StarDot2D';
 import {
   extractBounds,
   isPolarConstellation,
-  isStarInsideConstellation
+  isStarBelongingToConstellation,
+  getDynamicStarLocationDescription
 } from '../utils/celestialMechanics';
 import {
   X,
@@ -382,18 +382,25 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 );
               })()}
 
-              {/* Cataloged Constellation Stars List with Known Locations */}
+              {/* Cataloged Constellation Stars List with Dynamic Coordinates & Locations */}
               {(() => {
                 const seenIds = new Set<string>();
                 const cCatalogStars = STARS_CATALOG.filter((s) => {
-                  const matches =
-                    s.constellation.toLowerCase() === constellation.name.toLowerCase() ||
-                    s.constellation.toLowerCase() === constellation.id.toLowerCase();
-                  if (!matches || seenIds.has(s.id)) return false;
-                  if (!isStarInsideConstellation(s, constellation, celestialData.bounds)) return false;
-                  seenIds.add(s.id);
-                  return true;
+                  if (seenIds.has(s.id)) return false;
+                  const belongs = isStarBelongingToConstellation(s, constellation, celestialData.bounds);
+                  if (belongs) {
+                    seenIds.add(s.id);
+                    return true;
+                  }
+                  return false;
+                }).sort((a, b) => {
+                  // Principal anchor star pinned at the top
+                  if (a.id === constellation.principalStarId) return -1;
+                  if (b.id === constellation.principalStarId) return 1;
+                  // Brightest / most prominent stars first
+                  return (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99);
                 });
+
                 if (cCatalogStars.length === 0) return null;
 
                 return (
@@ -406,7 +413,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                         </h4>
                       </div>
                       <span className="text-[11px] text-cyan-400 font-mono">
-                        Coordinates & Locations Mapped • Click to Inspect in 3D
+                        Coordinates & Astrometric Locations Mapped • Click to Inspect in 3D
                       </span>
                     </div>
 
@@ -414,9 +421,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                       {cCatalogStars.map((st) => {
                         const isPrincipal = st.id === constellation.principalStarId;
                         const cleanName = st.name.replace(/\s*\([^)]+\)/g, '').trim();
-                        const locationDesc =
-                          STAR_CONSTELLATION_LOCATIONS[st.id] ||
-                          `Key Anchor in ${constellation.name}`;
+                        const locationDesc = getDynamicStarLocationDescription(st, constellation);
 
                         return (
                           <div

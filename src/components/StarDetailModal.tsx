@@ -1274,7 +1274,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             <div className="p-5 rounded-2xl bg-[#020512]/75 backdrop-blur-md border border-cyan-500/20 space-y-3 shadow-inner">
               <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
                 <Clock className="w-4 h-4" />
-                <h4>Stellar Evolution & Final Destiny</h4>
+                <h4>Stellar Evolution</h4>
               </div>
               <div className="text-xs text-slate-300 space-y-1.5">
                 <div>
@@ -1302,7 +1302,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
           <div className="p-5 rounded-2xl bg-[#020512]/75 backdrop-blur-md border border-cyan-500/20 space-y-3 shadow-inner">
             <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
               <Award className="w-4 h-4" />
-              <h4>Observational History & Notable Astrophysical Facts</h4>
+              <h4>Notable Astrophysical Facts</h4>
             </div>
             <ul className="space-y-2">
               {star.notableFacts.map((fact, idx) => (
