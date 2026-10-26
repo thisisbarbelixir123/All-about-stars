@@ -371,10 +371,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               }}
               className={`${
                 isMobile && !isTablet ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm'
-              } rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] transition-all flex items-center gap-2 cursor-pointer active:scale-95`}
+              } rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-bold tracking-wide shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] transition-all flex items-center gap-2 cursor-pointer active:scale-95`}
             >
               <Play className="w-4 h-4 fill-slate-950" />
-              <span>QUICK PLAY (3D STAGE)</span>
+              <span>Start Exploring</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
