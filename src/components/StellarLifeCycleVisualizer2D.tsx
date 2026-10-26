@@ -65,7 +65,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
   onSelectStar,
 }) => {
   const [selectedTrackId, setSelectedTrackId] = useState<string>('solar');
-  const [progress, setProgress] = useState<number>(0.25); // Default to Present-Day Main Sequence (25% on timeline)
+  const [progress, setProgress] = useState<number>(0.15); // Default to Present-Day Main Sequence (15% on timeline)
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0); // 0.5x, 1x, 2x, 5x
   const [isFullscreenStage, setIsFullscreenStage] = useState<boolean>(false);
@@ -80,50 +80,31 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
     return STELLAR_TRACKS.find((t) => t.id === selectedTrackId) || STELLAR_TRACKS[0];
   }, [selectedTrackId]);
 
-  // Clean, non-overcomplicated evolutionary stage name for simulator header
-  // Timeline scale: -1.0 (-100%) to 0.0 (0% Star Birth) to 1.0 (100% Star Death/Remnant) to 2.0 (200% Remnant Extinction)
+  // Active stage index in the carousel (tracks active checkpoint via Voronoi/midpoint boundaries)
+  // Ensures 100% synchronization between timeline position, visual model, carousel card, and header
+  const currentStageIndex = useMemo(() => {
+    const pts = currentTrack.checkpoints;
+    if (pts.length === 0) return 0;
+    for (let i = 0; i < pts.length; i++) {
+      const prevBoundary = i === 0 ? -Infinity : (pts[i - 1].progress + pts[i].progress) / 2;
+      const nextBoundary = i === pts.length - 1 ? Infinity : (pts[i].progress + pts[i + 1].progress) / 2;
+      if (progress >= prevBoundary && progress < nextBoundary) {
+        return i;
+      }
+    }
+    return pts.length - 1;
+  }, [currentTrack, progress]);
+
+  // Active evolutionary stage
+  const activeStage = useMemo(() => {
+    return currentTrack.checkpoints[currentStageIndex] || currentTrack.checkpoints[0];
+  }, [currentTrack, currentStageIndex]);
+
+  // Clean, non-overcomplicated evolutionary stage name for simulator header,
+  // directly derived from activeStage to guarantee 100% synchronization
   const simpleStageName = useMemo(() => {
-    if (selectedTrackId === 'solar') {
-      if (progress < -0.65) return 'Giant Molecular Cloud';
-      if (progress < 0.0) return 'Protostar phase';
-      if (progress < 0.38) return 'Main-sequence phase';
-      if (progress < 0.56) return 'Post-main sequence (Yellow Subgiant)';
-      if (progress < 0.67) return 'First Red Giant phase';
-      if (progress < 0.77) return 'Red Clump phase';
-      if (progress < 0.92) return 'AGB phase';
-      if (progress <= 1.05) return 'Planetary Nebula';
-      if (progress < 1.96) return 'White Dwarf';
-      return 'Black Dwarf';
-    }
-    if (selectedTrackId === 'low-mass') {
-      if (progress < -0.65) return 'Giant Molecular Cloud';
-      if (progress < 0.0) return 'Protostar phase';
-      if (progress < 0.72) return 'Main-sequence phase';
-      if (progress < 0.98) return 'Blue Dwarf phase';
-      if (progress < 1.96) return 'White Dwarf';
-      return 'Black Dwarf';
-    }
-    if (selectedTrackId === 'massive') {
-      if (progress < -0.65) return 'Giant Molecular Cloud';
-      if (progress < 0.0) return 'Protostar phase';
-      if (progress < 0.52) return 'Main-sequence phase';
-      if (progress < 0.68) return 'Blue / Yellow Supergiant';
-      if (progress < 0.88) return 'Red Supergiant';
-      if (progress <= 1.05) return 'Supernova';
-      if (progress < 1.96) return 'Neutron Star / Pulsar';
-      return 'Cold Neutron Star';
-    }
-    if (selectedTrackId === 'hyper-massive') {
-      if (progress < -0.65) return 'Giant Molecular Cloud';
-      if (progress < 0.0) return 'Protostar phase';
-      if (progress < 0.55) return 'Main-sequence phase';
-      if (progress < 0.85) return 'Hypergiant (LBV)';
-      if (progress <= 1.05) return 'Hypernova';
-      if (progress < 1.96) return 'Black Hole (Accreting)';
-      return 'Isolated Black Hole';
-    }
-    return 'Main-sequence phase';
-  }, [selectedTrackId, progress]);
+    return activeStage?.stageName || 'Main-sequence phase';
+  }, [activeStage]);
 
   // Interpolated astrophysics telemetry
   const telemetry = useMemo(() => {
@@ -562,8 +543,9 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
             nextVisualType === 'supernova' ||
             nextVisualType === 'hypernova')
         ) {
-          // Envelope begins expanding smoothly into explosion
-          opacity = Math.max(0, 1 - alpha * 0.85);
+          // When in giant phase (alpha < 0.5), star is fully visible as giant.
+          // In explosion/nebula phase (alpha >= 0.5), outer envelope detaches / fades into explosion
+          opacity = alpha < 0.5 ? 1.0 : Math.max(0, 1 - (alpha - 0.5) * 2 * 0.85);
         }
 
         drawStarModel(starR, opacity);
@@ -574,15 +556,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isPnActive =
         visualType === 'planetary-nebula' ||
-        (visualType === 'giant' && nextVisualType === 'planetary-nebula');
+        (visualType === 'giant' && nextVisualType === 'planetary-nebula' && alpha >= 0.5);
 
       if (isPnActive) {
         let pnAlpha = 1.0;
         let expansion = 0.5;
 
         if (visualType === 'giant') {
-          pnAlpha = alpha * 0.9;
-          expansion = alpha * 0.4;
+          const tAlpha = (alpha - 0.5) * 2;
+          pnAlpha = tAlpha * 0.9;
+          expansion = tAlpha * 0.4;
         } else if (visualType === 'planetary-nebula') {
           if (nextVisualType === 'cooling-white-dwarf') {
             pnAlpha = Math.max(0, 1 - alpha * 0.9);
@@ -639,7 +622,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         // Central Ultra-Hot Nascent White Dwarf Core (Same exact REMNANT_RADIUS for seamless transition)
         const coreAlpha =
           visualType === 'giant'
-            ? alpha
+            ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
             : visualType === 'planetary-nebula'
             ? 1.0
             : 1.0;
@@ -671,15 +654,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isSnActive =
         visualType === 'supernova' ||
-        (visualType === 'giant' && nextVisualType === 'supernova');
+        (visualType === 'giant' && nextVisualType === 'supernova' && alpha >= 0.5);
 
       if (isSnActive) {
         let snAlpha = 1.0;
         let expansion = 0.5;
 
         if (visualType === 'giant') {
-          snAlpha = alpha;
-          expansion = alpha * 0.4;
+          const tAlpha = (alpha - 0.5) * 2;
+          snAlpha = tAlpha;
+          expansion = tAlpha * 0.4;
         } else if (visualType === 'supernova') {
           if (nextVisualType === 'pulsar') {
             snAlpha = Math.max(0, 1 - alpha * 0.9);
@@ -740,7 +724,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         // Central Collapsed Neutron Core (Standardized REMNANT_RADIUS = 13 for seamless morphing into pulsar)
         const coreAlpha =
           visualType === 'giant'
-            ? alpha
+            ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
             : visualType === 'supernova'
             ? 1.0
             : 1.0;
@@ -772,15 +756,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       const isHnActive =
         visualType === 'hypernova' ||
-        (visualType === 'giant' && nextVisualType === 'hypernova');
+        (visualType === 'giant' && nextVisualType === 'hypernova' && alpha >= 0.5);
 
       if (isHnActive) {
         let hAlpha = 1.0;
         let expansion = 0.5;
 
         if (visualType === 'giant') {
-          hAlpha = alpha;
-          expansion = alpha * 0.4;
+          const tAlpha = (alpha - 0.5) * 2;
+          hAlpha = tAlpha;
+          expansion = tAlpha * 0.4;
         } else if (visualType === 'hypernova') {
           if (nextVisualType === 'black-hole') {
             hAlpha = Math.max(0, 1 - alpha);
@@ -846,7 +831,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         if (nextVisualType !== 'black-hole') {
           const coreAlpha =
             visualType === 'giant'
-              ? alpha
+              ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
               : visualType === 'hypernova'
               ? 1.0
               : 1.0;
@@ -1492,19 +1477,6 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       window.removeEventListener('resize', updateSize);
     };
   }, [isFullscreenStage]);
-
-  // Active stage index in the carousel (tracks the active checkpoint)
-  const currentStageIndex = useMemo(() => {
-    const pts = currentTrack.checkpoints;
-    for (let i = pts.length - 1; i >= 0; i--) {
-      if (progress >= pts[i].progress - 0.001) {
-        return i;
-      }
-    }
-    return 0;
-  }, [currentTrack, progress]);
-
-  const activeStage = currentTrack.checkpoints[currentStageIndex] || telemetry.current;
 
   // Catalog star examples for active stage with alias resolution & dynamic fallback
   const exampleStars = useMemo(() => {
