@@ -104,7 +104,7 @@ Rather than applying arbitrary artistic tinting, Starpedia 3D computes stellar c
 | **S** | $3{,}500\text{ K} - 2{,}500\text{ K}$ | `#ffa15c` $\to$ `#ff6600` | Deep Orange | Zirconium Oxide (ZrO), LaO |
 | **L** | $2{,}200\text{ K} - 1{,}300\text{ K}$ | `#ff6a00` $\to$ `#ff1a00` | Deep Infrared Red | Metallic hydrides (FeH, CrH), alkali metals |
 | **T** | $1{,}300\text{ K} - 500\text{ K}$ | `#cc0052` $\to$ `#4d004d` | Dim Magenta / Purplish | Methane ($\text{CH}_4$), Water vapour ($\text{H}_2\text{O}$) |
-| **Y** | $< 500\text{ K}$ | `#260026` $\to$ `#444444` | Faint Purplish-Brown / Dark | Ammonia ($\text{NH}_3$), low-temp condensates |
+| **Y** | $< 500\text{ K}$ | `#260026` $\to$ `#000000` | Faint Purplish-Brown / Dark | Ammonia ($\text{NH}_3$), low-temp condensates |
 
 ---
 
