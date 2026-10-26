@@ -51,7 +51,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
                 v2.4 (2026 Edition)
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> 885 Stars • 195 Systems
+                <CheckCircle2 className="w-3 h-3" /> 885 Stars • 53 Systems
               </span>
             </div>
 
@@ -307,7 +307,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
                 <Orbit className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white">195 Multiple Star Systems & 3D Orbits</h3>
+              <h3 className="text-sm font-bold text-white">53 Multiple Star Systems & 3D Orbits</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               Visual, spectroscopic, eclipsing, and contact binaries through hierarchical multiples with live Keplerian telemetry: true anomaly, eccentric anomaly, periastron/apastron distances, and barycentric center-of-mass simulations.
@@ -376,6 +376,19 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               Native Web Audio API synthesis generating real-time low-frequency cosmic drone soundscapes and radio telescope pulsar pulse sonification without downloading heavy audio files. Global toggle via keypress <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[10px]">M</kbd>.
+            </p>
+          </div>
+
+          {/* Feature 10 */}
+          <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-orange-500/15 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 shrink-0">
+                <Gamepad2 className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">Stellar Suika: Cosmic Merge Game</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Physics-based gravity drop game where colliding two identical stars merges them into the next bigger star in the sequence (from Proxima Centauri up to Stephenson 2-18, triggering an explosive supernova).
             </p>
           </div>
         </div>

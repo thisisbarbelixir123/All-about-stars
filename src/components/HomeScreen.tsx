@@ -4,6 +4,7 @@ import { STARS_CATALOG, PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { HeroStar3D, ActiveStarInfo } from './HeroStar3D';
 import { AmbientSoundToggle } from './AmbientSoundToggle';
+import { FullscreenToggle } from './FullscreenToggle';
 import { PWAInstallButton } from './PWAInstallButton';
 import {
   ArrowRight,
@@ -251,7 +252,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 flex items-center gap-1.5 sm:gap-2">
           <PWAInstallButton />
-          <AmbientSoundToggle />
+          <AmbientSoundToggle id="btn-homescreen-audio-toggle" />
+          <FullscreenToggle id="btn-homescreen-fullscreen" />
           {!isMobile && (
             <button
               type="button"

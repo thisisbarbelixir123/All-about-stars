@@ -22,6 +22,7 @@ import { StarDot2D } from './components/StarDot2D';
 import { soundEffects } from './utils/soundEffects';
 import { spaceAudio } from './utils/spaceAudioEngine';
 import { AmbientSoundToggle } from './components/AmbientSoundToggle';
+import { FullscreenToggle } from './components/FullscreenToggle';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { CommandPaletteModal } from './components/CommandPaletteModal';
@@ -866,16 +867,7 @@ export default function App() {
             )}
 
             {/* Fullscreen Page Toggle */}
-            <button
-              type="button"
-              id="btn-topbar-fullscreen"
-              onClick={toggleFullscreen}
-              title={isFullscreen ? 'Exit Fullscreen' : 'Display Fullscreen'}
-              className="p-2 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent hover:border-cyan-500/30 transition-all cursor-pointer"
-              aria-label="Toggle Fullscreen"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
+            <FullscreenToggle id="btn-topbar-fullscreen" />
 
             {/* About App Button (Sits right on the left-hand side of Coffee button) */}
             <button
@@ -1154,8 +1146,10 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Close Encyclopedia Button */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Right: Audio, Fullscreen & Close Encyclopedia Button */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <AmbientSoundToggle id="btn-overlay-audio-toggle" />
+                <FullscreenToggle id="btn-overlay-fullscreen" />
                 <button
                   id="btn-close-overlay"
                   onClick={() => setActiveOverlay(null)}

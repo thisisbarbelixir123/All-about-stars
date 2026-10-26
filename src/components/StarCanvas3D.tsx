@@ -51,6 +51,8 @@ import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
 import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
 import { EncyclopediaDropdown } from './EncyclopediaDropdown';
+import { AmbientSoundToggle } from './AmbientSoundToggle';
+import { FullscreenToggle } from './FullscreenToggle';
 
 export type AllStarsLayoutMode = 'spiral' | 'grid' | 'linear';
 
@@ -283,12 +285,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const encyclopediaMenuRef = useRef<HTMLDivElement>(null);
   const mobileEncyclopediaMenuRef = useRef<HTMLDivElement>(null);
   const [encyclopediaDropdownAlign, setEncyclopediaDropdownAlign] = useState<'center' | 'left' | 'right'>('center');
-
-  // Sound FX State listener
-  const [isSoundOn, setIsSoundOn] = useState(() => soundEffects.isSoundEnabled());
-  useEffect(() => {
-    return soundEffects.subscribe((enabled) => setIsSoundOn(enabled));
-  }, []);
 
   // Complete Catalog identification: exclusive to the complete catalog preset or 500+ stars database
   const isAllStarsPreset = activePresetId === 'all-stars-catalog' || (stars && stars.length >= 500);
@@ -2894,26 +2890,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               )}
             </div>
 
-            {/* Sound Effects Toggle (Mute / Unmute) */}
-            <button
-              id={isMobile ? "btn-mobile-toggle-sound" : "btn-toggle-sound"}
-              onClick={() => soundEffects.toggleSound()}
-              title="Toggle sound effects"
-              aria-label={isSoundOn ? 'Mute Sound Effects' : 'Unmute Sound Effects'}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                isSoundOn 
-                  ? 'text-cyan-400 hover:text-white hover:bg-cyan-500/20' 
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/10 opacity-70'
-              }`}
-            >
-              {isSoundOn ? (
-                <Volume2 className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-              ) : (
-                <VolumeX className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-              )}
-              {isSoundOn && <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline'}>SFX</span>}
-            </button>
-
             {/* Keyboard Shortcuts Help - Desktop Only, Hidden on Mobile and Tablet */}
             {!isMobile && !isTabletDevice && (
               <button
@@ -3312,8 +3288,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                 <div className="flex-1" />
               )}
 
-              {/* Right-hand corner: About project and coffee button (just icons, no labels) */}
-              <div className="flex items-center gap-1.5 shrink-0">
+              {/* Right-hand corner: Audio, Fullscreen, About project and coffee button (just icons, no labels) */}
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <AmbientSoundToggle id="btn-mobile-top-audio" />
+                <FullscreenToggle id="btn-mobile-top-fullscreen" />
                 <button
                   id="btn-mobile-top-about"
                   onClick={onOpenAbout}
@@ -4183,25 +4161,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                               <span>Wireframe</span>
                             </span>
                             {wireframe && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                          </button>
-
-                          {/* Sound Effects Toggle */}
-                          <button
-                            id="btn-mobile-compact-sound"
-                            onClick={() => soundEffects.toggleSound()}
-                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                              isSoundOn ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5'
-                            }`}
-                          >
-                            <span className="flex items-center gap-2">
-                              {isSoundOn ? (
-                                <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
-                              ) : (
-                                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-                              )}
-                              <span>Sound Effects</span>
-                            </span>
-                            {isSoundOn && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
                           </button>
 
                           {/* Quick Viewport Reset & Fit */}

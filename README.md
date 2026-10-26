@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Starpedia 3D Banner](public/universe_sandbox_header.jpg)
+![Starpedia 3D: Stars of the Universe Homepage](public/homepage_banner.png)
 
 **An Interactive WebGL 3D Astrophysical Comparator, Stellar Catalog, Hertzsprung–Russell Kinematics Engine, and Celestial Atlas**
 
@@ -36,10 +36,10 @@
   - [3.1 3D Multi-Star Comparative Stage (WebGL/Three.js)](#31-3d-multi-star-comparative-stage-webglthreejs)
   - [3.2 Interactive Hertzsprung–Russell (H–R) Diagram](#32-interactive-hertzsprungrussell-hr-diagram)
   - [3.3 Comprehensive Stellar Catalog (885 Celestial Bodies)](#33-comprehensive-stellar-catalog-885-celestial-bodies)
-  - [3.4 Gravitationally Bound Multiple Star Systems (195 Systems)](#34-gravitationally-bound-multiple-star-systems-195-systems)
+  - [3.4 Gravitationally Bound Multiple Star Systems (53 Systems)](#34-gravitationally-bound-multiple-star-systems-53-systems)
   - [3.5 88 IAU Constellations Sky Atlas & Celestial Sphere](#35-88-iau-constellations-sky-atlas--celestial-sphere)
   - [3.6 Interactive Astrophysical Encyclopedia & Simulation Engines](#36-interactive-astrophysical-encyclopedia--simulation-engines)
-  - [3.7 Stellar Suika: Nucleosynthetic Accretion Minigame](#37-stellar-suika-nucleosynthetic-accretion-minigame)
+  - [3.7 Stellar Suika: Cosmic Star Merge Minigame](#37-stellar-suika-cosmic-star-merge-minigame)
   - [3.8 Procedural Synthesized Web Audio Engine](#38-procedural-synthesized-web-audio-engine)
   - [3.9 Ergonomics, Power-User Command Palette & Shortcuts](#39-ergonomics-power-user-command-palette--shortcuts)
 - [4. Software Architecture & Implementation Details](#4-software-architecture--implementation-details)
@@ -56,7 +56,7 @@
 **Starpedia 3D: Stars of the Universe** is a research-grade, highly interactive 3D astrophysics visualizer, stellar database, and cosmic scale explorer. Designed to solve one of the greatest pedagogical challenges in observational astronomy—**the human inability to intuitively comprehend astronomical dynamic ranges**—Starpedia 3D spans physical spatial scales over nine orders of magnitude: from sub-kilometer relativistic neutron stars and Earth-sized degenerate white dwarfs, to main-sequence dwarfs, luminous blue variables, and colossal red hypergiants exceeding $1.5 \times 10^9\text{ km}$ ($10\text{ AU}$) in diameter.
 
 Unlike conventional static astronomy applications, Starpedia 3D synthesizes:
-1. **Empirical Astrometry & Photometry:** Curated parameters for **885 stars** and **195 gravitationally bound multiple systems** compiled from the European Space Agency (ESA) Gaia DR3, Hipparcos, the CDS SIMBAD database, and the NASA Exoplanet Archive.
+1. **Empirical Astrometry & Photometry:** Curated parameters for **885 stars** and **53 gravitationally bound multiple systems** compiled from the European Space Agency (ESA) Gaia DR3, Hipparcos, the CDS SIMBAD database, and the NASA Exoplanet Archive.
 2. **First-Principles Theoretical Modeling:** Real-time computation of bolometric luminosities, effective surface temperatures, surface gravity ($\log g$), habitable zone radiative boundaries, and Keplerian orbital state vectors.
 3. **Hardware-Accelerated WebGL/Three.js Rendering:** Custom GLSL shaders modeling limb darkening, photospheric convective granulation noise, translucent coronal plasma halos, relativistic pulsar synchrotron beams, and Roche-lobe-overflow contact binary geometries.
 4. **Interactive Educational Visualizers:** Deep dives into thermonuclear fusion networks ($p\text{--}p$ chains, CNO cycle, $3\alpha$, silicon burning), stellar cross-sectional interior cutaways, mass-dependent evolutionary pathways, and the 88 International Astronomical Union (IAU) constellations.
@@ -234,7 +234,7 @@ Planetary bodies within the catalog are classified by semi-major axis $a$ agains
 
 ### 2.7 Keplerian Two-Body & Hierarchical Orbital Mechanics
 
-To accurately simulate the 195 gravitationally bound multiple star systems, orbital positions are calculated from six classical Keplerian orbital elements:
+To accurately simulate the 53 gravitationally bound multiple star systems, orbital positions are calculated from six classical Keplerian orbital elements:
 - $a$: Semi-major axis
 - $e$: Orbital eccentricity ($0 \le e < 1$)
 - $i$: Orbital inclination
@@ -282,7 +282,7 @@ Orbital radius $r$ and Cartesian coordinates in the orbital plane $(x', y', 0)$ 
 └────┬─────┘  └──────┬──────┘  └─────┬─────┘  └──────┬──────┘  └─────┬──────┘
      │               │               │               │               │
      ├─ 1:1 Scale    ├─ Log L vs T   ├─ 885 Stars    ├─ RA/Dec Grid  ├─ Fusion
-     ├─ Shaders      ├─ MK Classes   ├─ 195 Systems  ├─ Asterisms    ├─ Cross-Sect
+     ├─ Shaders      ├─ MK Classes   ├─ 53 Systems   ├─ Asterisms    ├─ Cross-Sect
      ├─ Solar Overlay├─ Isoradius    ├─ 12 Sort Keys ├─ Boundaries   ├─ Lifecycles
      └─ Coronas      └─ Deep Link    └─ Multi-Filter └─ Constell. Dossier Remnants
 ```
@@ -319,12 +319,24 @@ Users can superimpose the orbits of the Solar System directly over any selected 
 
 This reveals immediately that hypergiants like Stephenson 2-18, Stephenson 2 DFK 1, or VY Canis Majoris easily engulf Jupiter and Saturn.
 
-#### 4. Preset Scenarios & Custom Persistence
-Includes curated comparisons:
-- *Solar Neighborhood:* Proxima Centauri, Alpha Centauri A & B, Barnard's Star, Sirius A & B.
-- *The Titans of the Milky Way:* Stephenson 2-18, UY Scuti, Betelgeuse, Antares, Rigel, VY Canis Majoris.
-- *Degenerate Densities:* Procyon B, Sirius B, Crab Pulsar, PSR B1257+12, Cygnus X-1.
-- *Custom Comparison Builder:* Users can search, add, pin, reorder, and save custom groupings to browser `localStorage`.
+#### 4. Official Curated Comparison Presets & Custom Builders
+Starpedia 3D provides 11 curated astronomical comparison presets:
+
+| Preset Title | Identifier | Body Count | Description & Scientific Scope |
+|:---|:---|:---:|:---|
+| **Nearest Stars to Earth** | `nearest-stars` | 58 stars | All 58 cataloged stellar objects within $15\text{ ly}$ of Earth (Proxima Centauri, $\alpha$ Centauri AB, Barnard's Star, Sirius AB, Luhman 16, Wolf 359). |
+| **Brightest Stars in the Night Sky** | `brightest-stars-night-sky` | 51 stars | The 51 brightest stars visible from Earth with apparent magnitude $m_V \le 2.00$ (Sirius, Canopus, Rigil Kentaurus, Arcturus, Vega, Rigel). |
+| **Hottest Stars** | `hottest-stars` | 19 stars | Extreme scorching stars reaching up to $210{,}000\text{ K}$, comparing hyper-luminous Wolf-Rayet and O-type stars directly with our Sun. |
+| **Largest Stars** | `largest-stars` | 47 stars | All cosmic hypergiants $1{,}000+ D_\odot$ in diameter compared with our Sun, led by Stephenson 2-18, UY Scuti, and WOH G64. |
+| **Smallest Main-Sequence Stars** | `smallest-main-sequence` | 54 stars | Stable hydrogen-fusing red and brown dwarfs smaller than $0.5 D_\odot$ compared against the Solar diameter. |
+| **Most Massive Stars** | `most-massive-stars` | 21 stars | The most massive known stars exceeding $70 M_\odot$ to over $200 M_\odot$, spearheaded by R136a1, BAT99-98, and HD 93129A. |
+| **Exotic & Chemically Peculiar Stars** | `exotic-and-chemically-peculiar` | 12 stars | Anomalous stars exhibiting extreme magnetic fields, strange chemical overabundances, and rapid variability (e.g., Przybylski's Star, La Superba). |
+| **Stellar Remnants** | `remnants-with-sun` | 50 stars | Compact stellar corpses compared directly with our Sun: white dwarfs, neutron stars, radio pulsars, and magnetars. |
+| **Stars of the Brazilian Flag** | `brazilian-flag-stars` | 27 stars | All 27 real stars featured on the national flag of Brazil, each symbolizing a federal state or the Federal District (Spica, Canopus, Southern Cross). |
+| **88 Constellation Anchors** | `principal-88-constellations` | 88 stars | The brightest principal anchor star from each of the 88 modern official IAU constellations. |
+| **The Complete Catalog** | `all-stars-catalog` | 885 stars | The entire 885-star database loaded simultaneously across the 3D comparative stage. |
+
+- **Custom Comparison Builder:** Users can dynamically search, stage, reorder, and persist their own custom star groupings to browser `localStorage`.
 
 ---
 
@@ -366,9 +378,9 @@ Users can filter and sort in real-time by:
 
 ---
 
-### 3.4 Gravitationally Bound Multiple Star Systems (195 Systems)
+### 3.4 Gravitationally Bound Multiple Star Systems (53 Systems)
 
-Beyond isolated single stars, Starpedia 3D incorporates a dedicated catalog and real-time Keplerian orbital stage for **195 gravitationally bound multiple star systems**:
+Beyond isolated single stars, Starpedia 3D incorporates a dedicated catalog and real-time Keplerian orbital stage for **53 gravitationally bound multiple star systems**:
 - **Binary Configurations:** Visual binaries (e.g., Albireo), spectroscopic binaries (SB1/SB2), eclipsing binaries (e.g., Algol / $\beta$ Persei), and contact systems (e.g., W Ursae Majoris).
 - **Hierarchical Triple & Quadruple Systems:** (e.g., $\alpha$ Centauri AB + Proxima Centauri, Polaris system, Castor 6-star complex).
 - **Orbital Telemetry Calculations:** Evaluates true separation (in AU and km), instantaneous relative orbital velocities ($\text{km/s}$), true anomaly, eccentric anomaly, mean anomaly, and proximity to periastron/apastron in real time.
@@ -419,14 +431,21 @@ Explains historical and modern star naming standards (IAU WGSN, Bayer Greek lett
 
 ---
 
-### 3.7 Stellar Suika: Nucleosynthetic Accretion Minigame
+### 3.7 Stellar Suika: Cosmic Star Merge Minigame
 
-An astrophysics-themed gravity fusion game (`StellarSuikaGame.tsx`) built directly into the app:
-- Dropping stellar bodies collide and fuse into progressively higher-mass stages:
-  
-  $$\text{Brown Dwarf} \to \text{Red Dwarf} \to \text{Yellow G-Dwarf} \to \text{Blue Giant} \to \text{Supergiant} \to \text{Hypergiant} \to \text{Supernova} \to \text{Neutron Star} \to \text{Black Hole}$$
-
-- Physics-based kinematics reinforce mass-accumulation concepts and nucleosynthetic progression.
+An astrophysics-themed gravity drop and merge game (`StellarSuikaGame.tsx`) inspired by classic Suika (Watermelon) Game mechanics:
+- **Core Merge Rule:** When **two identical stars of the same tier collide, they merge into the next bigger star in the sequence**, expanding in physical radius and awarding escalating score points.
+- **The 9 Stellar Tiers (from Red Dwarf to Red Hypergiant):**
+  1. **Tier 0:** *Proxima Centauri* (Red Dwarf, $15\text{ px}$, 1 pt)
+  2. **Tier 1:** *The Sun* (Yellow Main-Sequence, $21\text{ px}$, 2 pts)
+  3. **Tier 2:** *Sirius A* (White Main-Sequence, $29\text{ px}$, 4 pts)
+  4. **Tier 3:** *Spica* (Blue Main-Sequence, $37\text{ px}$, 8 pts)
+  5. **Tier 4:** *Arcturus* (Orange Giant, $47\text{ px}$, 16 pts)
+  6. **Tier 5:** *Gacrux* (Red Giant, $58\text{ px}$, 32 pts)
+  7. **Tier 6:** *Eta Carinae* (Blue Hypergiant, $69\text{ px}$, 64 pts)
+  8. **Tier 7:** *Rho Cassiopeiae* (Yellow Hypergiant, $82\text{ px}$, 128 pts)
+  9. **Tier 8:** *Stephenson 2-18* (Red Hypergiant, $96\text{ px}$, 256 pts)
+- **Supernova Detonation:** Merging two ultimate **Stephenson 2-18** hypergiants causes severe gravitational instability, triggering an explosive **Supernova shockwave** that clears surrounding stars, awards massive bonus points, and unlocks persistent Supernova scaling progression (higher droppable star tiers and score multipliers up to $3\times$).
 
 ---
 
@@ -455,7 +474,7 @@ Starpedia 3D avoids heavy, bandwidth-consuming audio assets by utilizing the nat
 All-about-stars/
 ├── public/                     # Static assets, JSON boundaries, and icons
 │   ├── data/                   # IAU constellation boundaries and border GeoJSON
-│   └── *.svg, *.jpg            # High-resolution vector diagrams and textures
+│   └── *.svg, *.jpg, *.png     # High-resolution vector diagrams, banners, textures
 ├── src/
 │   ├── components/             # React 19 UI & Visualization Components
 │   │   ├── StarCanvas3D.tsx    # Core Three.js WebGL multi-star comparative stage
@@ -473,7 +492,7 @@ All-about-stars/
 │   │   └── StellarSuikaGame.tsx             # Interactive fusion drop minigame
 │   ├── data/                   # Curated astrophysical databases
 │   │   ├── starDatabase.json   # Comprehensive 885-star dataset
-│   │   ├── multipleStarSystemsData.ts       # 195 multiple star systems dataset
+│   │   ├── multipleStarSystemsData.ts       # 53 multiple star systems dataset
 │   │   ├── constellationsData.ts            # 88 IAU constellation records
 │   │   └── stellarLifeCycleData.ts          # Evolutionary pathway parameters
 │   ├── utils/                  # Mathematical, physical & rendering algorithms

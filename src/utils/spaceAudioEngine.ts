@@ -34,6 +34,9 @@ class SpaceAudioEngine {
         const savedMuted = localStorage.getItem('cosmic_ambient_soundscape_muted');
         if (savedMuted !== null) {
           this.isMuted = savedMuted === 'true';
+        } else {
+          // BGM turned on by default
+          this.isMuted = false;
         }
         const savedVol = localStorage.getItem('cosmic_ambient_soundscape_volume');
         if (savedVol !== null) {
@@ -43,9 +46,56 @@ class SpaceAudioEngine {
           }
         }
       } catch {
-        // LocalStorage fallback
+        this.isMuted = false;
+      }
+
+      // If BGM is enabled, start automatically
+      if (!this.isMuted) {
+        this.setupAutoPlay();
       }
     }
+  }
+
+  private setupAutoPlay() {
+    if (typeof window === 'undefined') return;
+
+    const startAudio = () => {
+      if (this.isMuted) return;
+      this.initAudio();
+      if (!this.ctx) return;
+
+      const runStart = () => {
+        if (!this.isPlaying && !this.isMuted) {
+          this.startSynthesizer();
+          this.isPlaying = true;
+          if (this.masterGain) {
+            this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+            this.masterGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+            this.masterGain.gain.linearRampToValueAtTime(this.volume, this.ctx.currentTime + 1.2);
+          }
+          this.notify();
+        }
+      };
+
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().then(runStart).catch(() => {});
+      } else {
+        runStart();
+      }
+    };
+
+    try {
+      startAudio();
+    } catch {
+      // Ignored if browser blocks immediate autoplay
+    }
+
+    const unlockEvents = ['click', 'pointerdown', 'touchstart', 'keydown'];
+    const unlockHandler = () => {
+      startAudio();
+      unlockEvents.forEach((ev) => window.removeEventListener(ev, unlockHandler));
+    };
+    unlockEvents.forEach((ev) => window.addEventListener(ev, unlockHandler, { passive: true }));
   }
 
   private initAudio() {
