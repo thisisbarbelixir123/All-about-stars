@@ -168,8 +168,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             <div className="flex flex-col gap-3">
               <div className="relative overflow-hidden rounded-xl border border-cyan-500/30 bg-black/40 group-hover:border-cyan-500/60 transition-all shadow-md">
                 <img
-                  src="/scale_of_universe_screenshot.svg"
-                  alt="Scale of the Universe 2 Graphic"
+                  src="/scale_of_universe_screenshot.png"
+                  alt="Cary & Michael Huang's Scale of the Universe 2 - 10^12 meters showing Pistol Star, La Superba, Deneb, and R Doradus"
                   className="w-full h-28 sm:h-32 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                   loading="lazy"
@@ -208,8 +208,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             <div className="flex flex-col gap-3">
               <div className="relative overflow-hidden rounded-xl border border-red-500/30 bg-black/40 group-hover:border-red-500/60 transition-all shadow-md">
                 <img
-                  src="/creator_youtube_thumbnail.svg"
-                  alt="The Size of the Universe 6 Thumbnail by comparisonfarts"
+                  src="/creator_youtube_thumbnail.png"
+                  alt="B123 Entertainment's The Size of the Universe 6 'The Ultimate' Comparison Video"
                   className="w-full h-28 sm:h-32 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                   loading="lazy"
