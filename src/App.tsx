@@ -1372,6 +1372,7 @@ export default function App() {
                       }
                       setActiveOverlay('catalog');
                     }}
+                    onSelectSystem={(sys) => setSelectedSystemDossier(sys)}
                   />
                 </div>
               )}

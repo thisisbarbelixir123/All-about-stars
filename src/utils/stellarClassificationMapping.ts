@@ -1,4 +1,5 @@
 import { StarData } from '../types';
+import { MultipleStarSystemData, MULTIPLE_STAR_SYSTEMS } from '../data/multipleStarSystemsData';
 
 export interface MappedClassificationInfo {
   star: StarData;
@@ -628,53 +629,165 @@ export function getMappedStarsForVariable(varId: string, catalog: StarData[]): S
 
 /**
  * Returns all stars mapped to a Star System architecture dynamically.
+ * Evaluated purely through physical traits and stellar system relationships - NO hardcoded star names.
  */
 export function getMappedStarsForStarSystem(systemId: string, catalog: StarData[]): StarData[] {
   const id = systemId.toLowerCase();
   return catalog.filter((s) => {
     const sys = getStarSystemType(s);
     const combined = `${s.description || ''} ${(s.notableFacts || []).join(' ')} ${s.name} ${s.stellarStage || ''}`.toLowerCase();
+    const hierarchy = (s.systemHierarchy || '').toLowerCase();
 
-    // 1. Binary Stars (General & Distinct Binary Pairs)
+    // 1. Visual Binary Systems (Telescope-Resolved Pairs)
+    // Strictly only visual binary stars; exclude triples and higher multiplicity
+    if (id.includes('visual-binar')) {
+      return (
+        sys === 'Binary Star System' &&
+        (hierarchy.includes('visual') || combined.includes('visual binary')) &&
+        !combined.includes('spectroscopic') &&
+        !combined.includes('triple') &&
+        !combined.includes('multiple') &&
+        !hierarchy.includes('triple')
+      );
+    }
+
+    // 2. Spectroscopic Binary Systems (Doppler Shift Detected Pairs)
+    if (id.includes('spectroscopic-binar')) {
+      return (
+        (sys === 'Binary Star System' || combined.includes('binary')) &&
+        (hierarchy.includes('spectroscopic') || combined.includes('spectroscopic')) &&
+        !combined.includes('triple') &&
+        !combined.includes('multiple')
+      );
+    }
+
+    // 3. Binary Stars (General & Distinct Binary Pairs)
     if (id === 'binary-stars' || id.includes('binary-star')) {
       return (
         sys === 'Binary Star System' ||
         sys === 'Contact Binary' ||
         sys === 'X-Ray Binary' ||
-        combined.includes('binary') ||
-        /\b(A|B|Aa|Ab|Ba|Bb)\b/.test(s.name) ||
-        s.name.includes('+')
+        combined.includes('binary')
       );
     }
 
-    // 2. Eclipsing Binaries
+    // 4. Eclipsing Binaries
     if (id.includes('eclipsing')) {
-      return s.isContactBinary || combined.includes('eclipsing') || combined.includes('algol');
+      return s.isContactBinary || combined.includes('eclipsing');
     }
 
-    // 3. Contact Binaries
+    // 5. Contact Binaries
     if (id.includes('contact')) {
       return s.isContactBinary || sys === 'Contact Binary' || combined.includes('contact binary') || combined.includes('overcontact');
     }
 
-    // 4. X-Ray Binaries
+    // 6. X-Ray Binaries
     if (id.includes('xray') || id.includes('x-ray')) {
       return sys === 'X-Ray Binary' || combined.includes('x-ray binary') || combined.includes('microquasar') || combined.includes('lmxb') || combined.includes('hmxb');
     }
 
-    // 5. Multiple Star Systems (Triple, Quadruple, etc.)
+    // 7. Multiple Star Systems (Triple, Quadruple, etc.)
     if (id.includes('multiple')) {
-      return sys === 'Multiple Star System' || combined.includes('triple') || combined.includes('quadruple') || combined.includes('sextuple') || combined.includes('multiple star');
+      return (
+        sys === 'Multiple Star System' ||
+        hierarchy.includes('triple') ||
+        hierarchy.includes('quadruple') ||
+        hierarchy.includes('sextuple') ||
+        combined.includes('triple') ||
+        combined.includes('quadruple') ||
+        combined.includes('sextuple') ||
+        combined.includes('multiple star')
+      );
     }
 
-    // 6. Star Clusters
+    // 8. Star Clusters
     if (id.includes('cluster')) {
-      return sys === 'Star Cluster Member' || combined.includes('cluster') || combined.includes('pleiades') || combined.includes('trapezium');
+      return sys === 'Star Cluster Member' || combined.includes('cluster member') || combined.includes('open cluster') || combined.includes('globular cluster');
     }
 
-    // 7. Exoplanetary Host Stars
+    // 9. Exoplanetary Host Stars
     if (id.includes('planet') || id.includes('exoplanet')) {
-      return s.exoplanetSystem && s.exoplanetSystem.hasExoplanets;
+      return Boolean(s.exoplanetSystem && s.exoplanetSystem.hasExoplanets);
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Returns all MultipleStarSystemData instances mapped to a Star System classification architecture.
+ * Evaluated purely through typed metadata, systemType, components, and astrophysics - NO hardcoded system ID lists.
+ */
+export function getMappedSystemsForStarSystemGuide(
+  systemId: string,
+  systems: MultipleStarSystemData[] = MULTIPLE_STAR_SYSTEMS
+): MultipleStarSystemData[] {
+  const id = systemId.toLowerCase();
+
+  return systems.filter((sys) => {
+    const type = sys.systemType;
+    const desc = `${sys.barycenterDescription || ''} ${sys.astrophysicalSignificance || ''} ${sys.name || ''}`.toLowerCase();
+    const orbits = sys.orbits || [];
+    const compCount = sys.components.length;
+
+    // 1. Visual Binary Systems (Telescope-Resolved Pairs)
+    // Strictly ONLY visual or astrometric binary pairs with 2 components
+    if (id.includes('visual-binar')) {
+      return (type === 'Visual Binary' || type === 'Astrometric Binary') && compCount === 2;
+    }
+
+    // 2. Spectroscopic Binary Systems (Doppler Shift Detected Pairs)
+    // Strictly ONLY spectroscopic binary pairs with 2 components
+    if (id.includes('spectroscopic-binar')) {
+      return type === 'Spectroscopic Binary' && compCount === 2;
+    }
+
+    // 3. Eclipsing Binaries
+    // Systems with mutual stellar eclipses / transits
+    if (id.includes('eclipsing')) {
+      return (
+        sys.isEclipsing === true ||
+        orbits.some((o) => o.description?.toLowerCase().includes('eclips') || o.label?.toLowerCase().includes('eclips')) ||
+        desc.includes('eclipsing binary') ||
+        desc.includes('mutual eclipses')
+      );
+    }
+
+    // 4. Contact Binaries (Overcontact)
+    // Contact binaries here are counted as one star, so left empty
+    if (id.includes('contact')) {
+      return false;
+    }
+
+    // 5. X-Ray Binaries
+    // High-energy compact accretion systems
+    if (id.includes('xray') || id.includes('x-ray')) {
+      return (
+        type === 'High-Mass X-Ray Binary' ||
+        sys.components.some((c) => c.isBlackHole || c.hasAccretionDisk) ||
+        desc.includes('x-ray binary')
+      );
+    }
+
+    // 6. Multiple Star Systems (Hierarchical Triples, Quadruples, Sextuples, Septuples)
+    // Systems with 3 or more gravitationally bound stars
+    if (id.includes('multiple')) {
+      return (
+        compCount >= 3 ||
+        ['Hierarchical Triple', 'Quadruple Hierarchy', 'Sextuple Hierarchy', 'Septuple Hierarchy'].includes(type)
+      );
+    }
+
+    // 7. Exoplanetary Host Stars & Planetary Systems
+    // Temporarily no mapped multiple systems
+    if (id.includes('planet') || id.includes('exoplanet')) {
+      return false;
+    }
+
+    // 8. Star Clusters & Stellar Associations
+    // Temporarily no mapped multiple systems
+    if (id.includes('cluster')) {
+      return false;
     }
 
     return true;
@@ -834,9 +947,22 @@ export function getMappedStarsForHypothetical(hypoId: string, catalog: StarData[
     return catalog.filter((s) => s.spectralClass === 'WD' || s.stellarStage.includes('White Dwarf') || s.spectralType.startsWith('D'));
   }
 
-  // 3. Exotic Stars (Ultra-dense quark/strange candidate analogs: compact neutron stars & magnetars)
-  if (id.includes('exotic-star')) {
+  // 3. Strange Stars & Exotic Stars (Ultra-dense quark/strange candidate analogs: compact pulsars & neutron stars)
+  if (id.includes('strange-star') || id.includes('exotic-star')) {
     return catalog.filter((s) => s.spectralClass === 'NS' || s.stellarStage.includes('Neutron Star') || s.stellarStage.includes('Pulsar'));
+  }
+
+  // 3b. Electroweak Stars (Extreme core-collapse relativistic remnants: magnetars and rapid pulsars)
+  if (id.includes('electroweak-star')) {
+    return catalog.filter((s) => {
+      const text = `${s.description || ''} ${(s.notableFacts || []).join(' ')}`.toLowerCase();
+      return (s.spectralClass === 'NS' || s.stellarStage.includes('Neutron Star')) && (text.includes('magnetar') || text.includes('pulsar') || s.massSolar >= 1.8);
+    });
+  }
+
+  // 3c. Boson Stars (Non-baryonic scalar field solitons: hypermassive gravitational mimickers)
+  if (id.includes('boson-star')) {
+    return catalog.filter((s) => isHypergiant(s) || s.massSolar >= 40);
   }
 
   // 4. Dark Stars (Primordial hypermassive diffuse giants & extreme radius titans)
@@ -852,7 +978,15 @@ export function getMappedStarsForHypothetical(hypoId: string, catalog: StarData[
     });
   }
 
-  // 6. Gravastars (Non-singular compact horizon alternatives: extreme magnetic neutron stars)
+  // 6. Frozen Stars (Progenitors: ultra-cool brown dwarfs, sub-stellar objects & low-mass dwarfs)
+  if (id.includes('frozen-star')) {
+    return catalog.filter((s) => {
+      const text = `${s.description || ''} ${(s.notableFacts || []).join(' ')}`.toLowerCase();
+      return s.massSolar <= 0.1 || s.temperatureKelvin <= 2800 || text.includes('brown dwarf') || text.includes('ultra-cool');
+    });
+  }
+
+  // 7. Gravastars (Non-singular compact horizon alternatives: extreme magnetic neutron stars)
   if (id.includes('gravastar')) {
     return catalog.filter((s) => {
       const text = `${s.description || ''} ${(s.notableFacts || []).join(' ')}`.toLowerCase();
@@ -860,7 +994,7 @@ export function getMappedStarsForHypothetical(hypoId: string, catalog: StarData[
     });
   }
 
-  // 7. Iron Stars (Cold degenerate relic progenitors: ancient carbon-oxygen white dwarfs)
+  // 8. Iron Stars (Cold degenerate relic progenitors: ancient carbon-oxygen white dwarfs)
   if (id.includes('iron-star')) {
     return catalog.filter((s) => s.spectralClass === 'WD' || s.stellarStage.includes('White Dwarf'));
   }

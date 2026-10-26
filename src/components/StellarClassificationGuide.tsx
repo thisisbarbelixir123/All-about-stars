@@ -39,10 +39,14 @@ import {
   ShieldAlert,
   Sliders,
 } from 'lucide-react';
+import { MultipleStarSystemData } from '../data/multipleStarSystemsData';
 import { ClassificationMappedStarsSection } from './ClassificationMappedStarsSection';
+import { ClassificationMappedSystemsSection } from './ClassificationMappedSystemsSection';
 import { ClassificationDirectoryModal } from './ClassificationDirectoryModal';
 import { VariableStarGraphic, VariableStarActivityMonitor } from './VariableStarGraphic';
+import { StarSystemGraphic, StarSystemActivityMonitor } from './StarSystemGraphic';
 import { StellarRemnantGraphic } from './StellarRemnantGraphic';
+import { HypotheticalStarGraphic } from './HypotheticalStarGraphic';
 import { StarDot2D } from './StarDot2D';
 import { RunningText } from './RunningText';
 import {
@@ -51,6 +55,7 @@ import {
   getMappedStarsForYerkes,
   getMappedStarsForVariable,
   getMappedStarsForStarSystem,
+  getMappedSystemsForStarSystemGuide,
   getMappedStarsForPopulation,
   getMappedStarsForRemnant,
   getMappedStarsForHypothetical,
@@ -64,6 +69,7 @@ export interface StellarClassificationGuideProps {
   onJumpToConstellations?: () => void;
   onJumpToCatalogFilter?: (spectralClass?: string, stellarStage?: string) => void;
   initialSystemIndex?: number;
+  onSelectSystem?: (system: MultipleStarSystemData) => void;
 }
 
 export const StellarClassificationGuide: React.FC<StellarClassificationGuideProps> = ({
@@ -74,6 +80,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
   onJumpToConstellations,
   onJumpToCatalogFilter,
   initialSystemIndex = 0,
+  onSelectSystem,
 }) => {
   // Classification Systems Carousel Toggle State:
   // 0: Harvard Spectral Classes (OBAFGKM)
@@ -143,6 +150,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
   // Star Systems Carousel state
   const [activeStarSystemIndex, setActiveStarSystemIndex] = useState<number>(0);
+  const [clusterMode, setClusterMode] = useState<'open' | 'globular'>('open');
 
   const handlePrevStarSystem = () => {
     isNavigatedByArrowRef.current = true;
@@ -1275,11 +1283,27 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
           {/* ------------------------------------------------------------- */}
           {classificationSystemIndex === 4 && (
             <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
+              {/* Introduction Banner: "What are star systems?" */}
+              <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-r from-[#04091e] via-[#071330] to-[#04091e] border border-cyan-500/30 shadow-[0_4px_24px_rgba(6,182,212,0.15)] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 relative overflow-hidden">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30">
+                      Astrophysical Overview
+                    </span>
+                    <h3 className="text-sm sm:text-lg font-bold text-white font-sans">
+                      What Are Star Systems?
+                    </h3>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+                    Star systems are gravitationally bound celestial configurations ranging from close binary pairs co-orbiting their mutual center of mass (barycenter) to complex hierarchical multiple architectures (<span className="text-cyan-300 font-semibold">triples</span>, <span className="text-cyan-300 font-semibold">quadruples</span>, up to <span className="text-amber-300 font-semibold">sextuple systems</span> like Castor), <span className="text-cyan-300 font-semibold">exoplanet architectures</span>, and massive <span className="text-amber-300 font-semibold">star clusters</span> containing hundreds of thousands of co-eval stellar members bound in a shared gravitational potential.
+                  </p>
+                </div>
+              </div>
+
               {/* Star Systems Quick Selector Buttons */}
               <div className="flex items-stretch gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-cyan-500/30 w-full max-w-full py-1 sm:py-1.5">
                 {STAR_SYSTEMS_GUIDE.map((item, idx) => {
                   const isSelected = idx === activeStarSystemIndex;
-                  const itemArchetype = getExampleStars(item.exampleStarIds || [])[0] || null;
                   return (
                     <button
                       key={item.id}
@@ -1288,28 +1312,28 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       onClick={() => {
                         setActiveStarSystemIndex(idx);
                       }}
-                      className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
+                      className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[130px] sm:min-w-[150px] max-w-[190px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
                           ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
                           : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
                       }`}
                       title={item.buttonTitle}
                     >
-                      <div className="flex items-center justify-between w-full min-w-0 gap-1 leading-tight">
+                      <div className="w-full min-w-0 text-left leading-tight">
                         <RunningText
                           text={item.multiplicity}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80"
-                        />
-                        <StarDot2D
-                          star={itemArchetype}
-                          colorHex={itemArchetype?.colorHex || item.colorHex}
-                          sizeClassName="w-2 h-2 sm:w-2.5 sm:h-2.5 shrink-0"
+                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase"
                         />
                       </div>
-                      <div className="w-full min-w-0 text-left">
+
+                      <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
                           className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                        />
+                        <span
+                          className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
+                          style={{ backgroundColor: item.colorHex }}
                         />
                       </div>
                     </button>
@@ -1321,10 +1345,11 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {(() => {
                 const activeStarSystemItem = STAR_SYSTEMS_GUIDE[activeStarSystemIndex] || STAR_SYSTEMS_GUIDE[0];
                 const catalogStars = getExampleStars(activeStarSystemItem.exampleStarIds || []);
+                const archetypeStar = catalogStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
-                    {/* Header with Carousel Navigation & Quick Actions */}
+                    {/* Header with Carousel Navigation & Quick Actions (Clean styling matching Variable Stars) */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
@@ -1337,17 +1362,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         >
                           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
-
-                        <div
-                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl border border-white/30"
-                          style={{
-                            backgroundColor: activeStarSystemItem.colorHex,
-                            color: '#02040a',
-                            boxShadow: `0 0 20px ${activeStarSystemItem.colorHex}66`,
-                          }}
-                        >
-                          <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
-                        </div>
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -1391,13 +1405,56 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       )}
                     </div>
 
-                    {/* Unified One-Panel Format: Side-by-side columns on landscape/larger screens, natural stacked on portrait */}
-                    <div className="grid grid-cols-1 mobile-landscape:grid-cols-12 md:grid-cols-12 lg:grid-cols-12 gap-5 sm:gap-6 items-start min-w-0">
-                      {/* Left Column: System Architecture & Dynamics + Key Observational Hallmarks */}
-                      <div className="mobile-landscape:col-span-6 md:col-span-6 lg:col-span-6 flex flex-col gap-4 min-w-0">
+                    {/* Dossier-Style Split matching Variable Stars: Left/Top = Star System Graphic ONLY, Right/Bottom = All Info */}
+                    <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
+                      {/* Left / Top Column: Star System Visual Graphic ONLY (Non-Hideable, top-aligned and bounded) */}
+                      <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                          <StarSystemGraphic
+                            systemId={activeStarSystemItem.id}
+                            archetypeStar={archetypeStar}
+                            colorHex={activeStarSystemItem.colorHex}
+                            clusterMode={clusterMode}
+                            onClusterModeChange={setClusterMode}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right / Bottom Column: All Info (Scrollable with bounded container) */}
+                      <div className="w-full mobile-landscape:w-7/12 lg:w-7/12 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col justify-start gap-3 sm:gap-4 min-w-0 pr-1">
+                        {/* Detached Real-Time Dynamics Monitor & Telemetry at Top of Right Panel */}
+                        <StarSystemActivityMonitor
+                          systemId={activeStarSystemItem.id}
+                          colorHex={activeStarSystemItem.colorHex}
+                          clusterMode={clusterMode}
+                        />
+
+                        {/* Astrophysical Profile Quick Stats */}
+                        <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Multiplicity</span>
+                            <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.multiplicity}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
+                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.category}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype System / Star</span>
+                            <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
+                              {archetypeStar ? (
+                                <span>{archetypeStar.name} ({archetypeStar.spectralType})</span>
+                              ) : (
+                                activeStarSystemItem.tag
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Architecture & Dynamics */}
                         <div className="min-w-0 space-y-3">
                           <div>
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1.5 tracking-wider">
+                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1">
                               System Architecture &amp; Dynamics
                             </h4>
                             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
@@ -1406,7 +1463,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           </div>
 
                           <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20">
-                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-amber-300 font-bold block mb-1">
                               Orbital Mechanics:
                             </span>
                             <p className="text-xs text-slate-300 leading-relaxed break-words">
@@ -1415,16 +1472,17 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           </div>
                         </div>
 
+                        {/* Key Observational Hallmarks */}
                         {activeStarSystemItem.distinguishingFeatures && activeStarSystemItem.distinguishingFeatures.length > 0 && (
-                          <div className="space-y-2 min-w-0">
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider">
+                          <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold">
                               Key Observational Hallmarks
                             </h4>
-                            <div className="grid grid-cols-1 gap-1.5 sm:gap-2 min-w-0">
+                            <div className="grid grid-cols-1 gap-1 sm:gap-2 min-w-0">
                               {activeStarSystemItem.distinguishingFeatures.map((feat, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-[11px] sm:text-xs text-slate-300 flex items-start gap-2 min-w-0"
+                                  className="p-1.5 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-[11px] sm:text-xs text-slate-300 flex items-start gap-1.5 sm:gap-2 min-w-0"
                                 >
                                   <span className="text-cyan-400 font-bold font-mono mt-0.5 shrink-0">•</span>
                                   <span className="break-words min-w-0">{feat}</span>
@@ -1433,44 +1491,30 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                             </div>
                           </div>
                         )}
-                      </div>
 
-                      {/* Right Column: Physical Profile & Examples */}
-                      <div className="mobile-landscape:col-span-6 md:col-span-6 lg:col-span-6 flex flex-col gap-3.5 sm:gap-4 min-w-0">
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1.5 tracking-wider">
-                            System Profile
-                          </h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Multiplicity</span>
-                              <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.multiplicity}</span>
-                            </div>
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
-                              <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.category}</span>
-                            </div>
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 sm:col-span-2">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Classification Tag</span>
-                              <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.tag}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Mapped Stars from Catalog */}
-                        <ClassificationMappedStarsSection
+                        {/* PRIORITIZED: Mapped Stellar Systems (Multi-Star Architectures with Interactive Dossiers) */}
+                        <ClassificationMappedSystemsSection
                           title={`Mapped ${activeStarSystemItem.name}`}
+                          categoryColor={activeStarSystemItem.colorHex}
+                          systems={getMappedSystemsForStarSystemGuide(activeStarSystemItem.id)}
+                          onSelectSystem={onSelectSystem}
+                          onSelectStar={onSelectStar}
+                        />
+
+                        {/* SECONDARY: Individual Catalog Stars */}
+                        <ClassificationMappedStarsSection
+                          title={`Individual Catalog Stars in ${activeStarSystemItem.name}`}
                           categoryColor={activeStarSystemItem.colorHex}
                           benchmarkStarIds={activeStarSystemItem.exampleStarIds || []}
                           allMappedStars={getMappedStarsForStarSystem(activeStarSystemItem.id, STARS_CATALOG)}
                           onSelectStar={onSelectStar}
                         />
 
-                        {/* Observational Benchmarks */}
+                        {/* Observational Benchmarks / Notable Archetypes */}
                         {activeStarSystemItem.externalExamples && activeStarSystemItem.externalExamples.length > 0 && (
-                          <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
-                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1.5 break-words">
-                              Famous Benchmark Systems:
+                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1 break-words">
+                              Notable Archetypes:
                             </span>
                             <div className="flex flex-wrap gap-1 min-w-0">
                               {activeStarSystemItem.externalExamples.map((ext, idx) => (
@@ -1996,6 +2040,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Hypothetical Stars Card - Carousel UI */}
               {(() => {
                 const activeHypotheticalItem = HYPOTHETICAL_STARS_GUIDE[activeHypotheticalIndex] || HYPOTHETICAL_STARS_GUIDE[0];
+                const catalogStars = getExampleStars(activeHypotheticalItem.exampleStarIds || []);
+                const archetypeStar = catalogStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -2055,21 +2101,53 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       )}
                     </div>
 
-                    {/* Unified One-Panel Format: Side-by-side columns on landscape/larger screens, natural stacked on portrait */}
-                    <div className="grid grid-cols-1 mobile-landscape:grid-cols-12 md:grid-cols-12 lg:grid-cols-12 gap-5 sm:gap-6 items-start min-w-0">
-                      {/* Left Column: Theoretical Concept & Astrophysics + Predicted Distinguishing Hallmarks */}
-                      <div className="mobile-landscape:col-span-6 md:col-span-6 lg:col-span-6 flex flex-col gap-4 min-w-0">
-                        <div className="min-w-0 space-y-3">
-                          <div>
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1.5 tracking-wider">
-                              Theoretical Concept &amp; Astrophysics
-                            </h4>
-                            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
-                              {activeHypotheticalItem.explanation}
-                            </p>
-                          </div>
+                    {/* Dossier-Style Split: Left/Top = Hypothetical Star Graphic ONLY (Non-hideable), Right/Bottom = All Info */}
+                    <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
+                      {/* Left / Top Column: 1:1 Square Animated Hypothetical Star Model ONLY */}
+                      <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                          <HypotheticalStarGraphic
+                            hypoId={activeHypotheticalItem.id}
+                            archetypeStar={archetypeStar}
+                            colorHex={activeHypotheticalItem.colorHex}
+                            onExoticModeChange={(mode) => {
+                              const targetId = mode === 'strange' ? 'strange-stars' : mode === 'electroweak' ? 'electroweak-stars' : 'boson-stars';
+                              const foundIdx = HYPOTHETICAL_STARS_GUIDE.findIndex((h) => h.id === targetId);
+                              if (foundIdx !== -1 && foundIdx !== activeHypotheticalIndex) {
+                                setActiveHypotheticalIndex(foundIdx);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
 
-                          <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20">
+                      {/* Right / Bottom Column: All Info (Scrollable with bounded container) */}
+                      <div className="w-full mobile-landscape:w-7/12 lg:w-7/12 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-2.5 sm:gap-3.5 min-w-0 pr-1">
+                        {/* Theoretical Profile Quick Stats */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
+                            <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.category}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Predicted Era</span>
+                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.theoreticalEra}</span>
+                          </div>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 sm:col-span-2">
+                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Energy Source</span>
+                            <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.energySource}</span>
+                          </div>
+                        </div>
+
+                        {/* Theoretical Concept & Astrophysics */}
+                        <div className="p-3 sm:p-3.5 rounded-xl bg-[#020512] border border-cyan-500/15 space-y-2">
+                          <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider">
+                            Theoretical Concept &amp; Astrophysics
+                          </h4>
+                          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
+                            {activeHypotheticalItem.explanation}
+                          </p>
+                          <div className="pt-2 border-t border-cyan-500/10">
                             <span className="text-[10px] sm:text-[11px] font-mono uppercase text-amber-300 font-bold block mb-1">
                               Governing Physics &amp; Mechanics:
                             </span>
@@ -2079,8 +2157,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           </div>
                         </div>
 
+                        {/* Predicted Distinguishing Hallmarks */}
                         {activeHypotheticalItem.distinguishingFeatures && activeHypotheticalItem.distinguishingFeatures.length > 0 && (
-                          <div className="space-y-2 min-w-0">
+                          <div className="space-y-1.5 min-w-0">
                             <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider">
                               Predicted Distinguishing Hallmarks
                             </h4>
@@ -2097,29 +2176,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                             </div>
                           </div>
                         )}
-                      </div>
-
-                      {/* Right Column: Theoretical Profile & Examples */}
-                      <div className="mobile-landscape:col-span-6 md:col-span-6 lg:col-span-6 flex flex-col gap-3.5 sm:gap-4 min-w-0">
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1.5 tracking-wider">
-                            Theoretical Profile
-                          </h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
-                              <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.category}</span>
-                            </div>
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Predicted Era</span>
-                              <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.theoreticalEra}</span>
-                            </div>
-                            <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 sm:col-span-2">
-                              <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Energy Source</span>
-                              <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeHypotheticalItem.energySource}</span>
-                            </div>
-                          </div>
-                        </div>
 
                         {/* Direct Ancestral / Progenitor Stars in Catalog */}
                         {(() => {

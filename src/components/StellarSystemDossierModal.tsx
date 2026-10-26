@@ -104,7 +104,7 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
 
   return (
     <div 
-      className="fixed inset-0 z-[60] w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[75] w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header Section */}

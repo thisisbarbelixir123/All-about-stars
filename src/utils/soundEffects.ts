@@ -342,6 +342,18 @@ class SoundEffectsManager {
     }
   }
 
+  public playClick() {
+    this.play('click');
+  }
+
+  public playOpenModal() {
+    this.play('openModal');
+  }
+
+  public playCloseModal() {
+    this.play('closeModal');
+  }
+
   // Setup global event listener for all button and interactive clicks
   public setupGlobalClickHandler() {
     if (this.isInitialized || typeof window === 'undefined') return;
