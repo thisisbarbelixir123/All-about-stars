@@ -24,6 +24,7 @@ import {
 } from '../data/stellarNomenclatureData';
 import { ClassificationMappedStarsSection } from './ClassificationMappedStarsSection';
 import { StarDot2D } from './StarDot2D';
+import { RunningText } from './RunningText';
 import {
   Sparkles,
   Bookmark,
@@ -457,12 +458,19 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     }`}
                   >
                     <div className="text-xs sm:text-2xl font-serif font-bold text-cyan-300 leading-tight">{item.letter}</div>
-                    <div className="text-[8px] sm:text-xs font-bold text-white font-mono leading-tight truncate">{item.name}</div>
-                    <div className="text-[7px] sm:text-[10px] text-slate-300 font-sans pt-0.5 sm:pt-1 border-t border-cyan-500/15 flex items-center justify-center gap-0.5 sm:gap-1 leading-tight truncate">
-                      {catalogStar && <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} sizeClassName="w-1 h-1 sm:w-2 sm:h-2" />}
-                      <span className={`truncate ${catalogStar ? 'group-hover:text-cyan-300 font-semibold' : ''}`} title={item.example}>
-                        {item.example}
-                      </span>
+                    <div className="min-w-0 overflow-hidden">
+                      <RunningText
+                        text={item.name}
+                        className="text-[8px] sm:text-xs font-bold text-white font-mono leading-tight"
+                      />
+                    </div>
+                    <div className="text-[7px] sm:text-[10px] text-slate-300 font-sans pt-0.5 sm:pt-1 border-t border-cyan-500/15 flex items-center justify-center gap-0.5 sm:gap-1 leading-tight min-w-0 overflow-hidden">
+                      {catalogStar && <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} sizeClassName="w-1 h-1 sm:w-2 sm:h-2 shrink-0" />}
+                      <RunningText
+                        text={item.example}
+                        className={catalogStar ? 'group-hover:text-cyan-300 font-semibold' : ''}
+                        title={item.example}
+                      />
                     </div>
                   </div>
                 );
@@ -525,15 +533,17 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             }`}
                             title={`Open ${st.name} Dossier`}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              {catalogStar && <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} sizeClassName="w-2.5 h-2.5" />}
-                              <div className="min-w-0">
-                                <div className="text-xs font-mono font-bold text-white group-hover:text-cyan-300 truncate">
-                                  {st.designation}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-sans truncate">
-                                  {st.role}
-                                </div>
+                            <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                              {catalogStar && <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} sizeClassName="w-2.5 h-2.5 shrink-0" />}
+                              <div className="min-w-0 flex-1 overflow-hidden">
+                                <RunningText
+                                  text={st.designation}
+                                  className="text-xs font-mono font-bold text-white group-hover:text-cyan-300"
+                                />
+                                <RunningText
+                                  text={st.role}
+                                  className="text-[10px] text-slate-400 font-sans"
+                                />
                               </div>
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
@@ -719,10 +729,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {star && <StarDot2D star={star} colorHex={star.colorHex} />}
-                          <div className="text-sm font-bold font-mono text-white group-hover:text-cyan-300 transition-colors truncate">
-                            {item.title}
+                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                          {star && <StarDot2D star={star} colorHex={star.colorHex} sizeClassName="w-2.5 h-2.5 shrink-0" />}
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <RunningText
+                              text={item.title}
+                              className="text-sm font-bold font-mono text-white group-hover:text-cyan-300 transition-colors"
+                            />
                           </div>
                         </div>
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 shrink-0">
@@ -850,10 +863,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {star && <StarDot2D star={star} colorHex={star.colorHex} />}
-                          <div className="text-sm font-bold font-mono text-white group-hover:text-rose-300 transition-colors truncate">
-                            {item.name}
+                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                          {star && <StarDot2D star={star} colorHex={star.colorHex} sizeClassName="w-2.5 h-2.5 shrink-0" />}
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <RunningText
+                              text={item.name}
+                              className="text-sm font-bold font-mono text-white group-hover:text-rose-300 transition-colors"
+                            />
                           </div>
                         </div>
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950/80 border border-rose-500/30 text-rose-300 shrink-0">
@@ -987,11 +1003,15 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} />
-                            <div className="min-w-0">
-                              <div className="font-mono text-xs font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
-                                {displayTitle}
-                              </div>
-                              <div className="text-[11px] text-slate-400 truncate">{cat.exampleTarget}</div>
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              <RunningText
+                                text={displayTitle}
+                                className="font-mono text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
+                              />
+                              <RunningText
+                                text={cat.exampleTarget}
+                                className="text-[11px] text-slate-400"
+                              />
                             </div>
                           </div>
                           <div className="flex items-center gap-1 text-[11px] font-mono text-cyan-400 font-semibold shrink-0">
@@ -1089,13 +1109,15 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <StarDot2D star={catalogStar} colorHex={catalogStar?.colorHex || '#ffffff'} />
-                              <div className="min-w-0">
-                                <div className="text-xs font-bold font-mono text-white group-hover:text-cyan-300 transition-colors truncate">
-                                  {starRef.name}
-                                </div>
-                                <div className="text-[11px] text-slate-400 font-sans truncate">
-                                  {starRef.role}
-                                </div>
+                              <div className="min-w-0 flex-1 overflow-hidden">
+                                <RunningText
+                                  text={starRef.name}
+                                  className="text-xs font-bold font-mono text-white group-hover:text-cyan-300 transition-colors"
+                                />
+                                <RunningText
+                                  text={starRef.role}
+                                  className="text-[11px] text-slate-400 font-sans"
+                                />
                               </div>
                             </div>
                             {catalogStar && (

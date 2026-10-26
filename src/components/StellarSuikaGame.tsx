@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { ArrowLeft, RotateCcw, Volume2, VolumeX, Sparkles, Eye, HelpCircle, X } from 'lucide-react';
 import { STARS_CATALOG } from '../data/stars';
 import { StarData } from '../types';
+import { RunningText } from './RunningText';
 
 export interface StarTier {
   tier: number;
@@ -1716,12 +1717,14 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
                         </div>
 
                         <div className="min-w-0 w-full flex-1 overflow-hidden">
-                          <div className="font-bold text-[10px] sm:text-xs text-slate-200 group-hover:text-cyan-300 truncate font-mono">
-                            {tier.name}
-                          </div>
-                          <div className="text-[8px] sm:text-[10px] text-slate-400 truncate font-mono">
-                            {tier.type}
-                          </div>
+                          <RunningText
+                            text={tier.name}
+                            className="font-bold text-[10px] sm:text-xs text-slate-200 group-hover:text-cyan-300 font-mono"
+                          />
+                          <RunningText
+                            text={tier.type}
+                            className="text-[8px] sm:text-[10px] text-slate-400 font-mono"
+                          />
                         </div>
                       </button>
                     );

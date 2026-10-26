@@ -3,6 +3,7 @@ import { StarData, PresetComparison } from '../types';
 import { STARS_CATALOG, SPECTRAL_CLASSES_META } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { X, Sparkles, Check, Search, Plus, Trash2, CheckSquare, Square } from 'lucide-react';
+import { RunningText } from './RunningText';
 
 interface CreatePresetModalProps {
   isOpen: boolean;
@@ -277,11 +278,15 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                           boxShadow: `0 0 6px ${star.colorHex}`,
                         }}
                       />
-                      <div className="truncate">
-                        <div className="text-xs font-semibold truncate">{star.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">
-                          {star.spectralType} • {star.constellation}
-                        </div>
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <RunningText
+                          text={star.name}
+                          className="text-xs font-semibold"
+                        />
+                        <RunningText
+                          text={`${star.spectralType} • ${star.constellation}`}
+                          className="text-[10px] text-slate-400"
+                        />
                       </div>
                     </div>
 

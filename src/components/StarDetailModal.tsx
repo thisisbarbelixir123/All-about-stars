@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { RunningText } from './RunningText';
 
 interface StarDetailModalProps {
   star: StarData | null;
@@ -472,9 +473,12 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                             key={itemNumber}
                             className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0b1736]/90 hover:bg-[#10224d] border border-cyan-500/25 hover:border-cyan-400/60 text-slate-200 text-[11px] font-mono transition-colors select-text"
                           >
-                            <span className="truncate text-cyan-100 font-medium">
-                              {desig}
-                            </span>
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              <RunningText
+                                text={desig}
+                                className="text-cyan-100 font-medium"
+                              />
+                            </div>
                             <span className="text-[9px] text-cyan-400/60 font-mono ml-2 shrink-0">
                               #{itemNumber}
                             </span>

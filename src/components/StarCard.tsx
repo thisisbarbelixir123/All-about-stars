@@ -48,35 +48,48 @@ export const StarCard: React.FC<StarCardProps> = ({
 
       {/* Sub-header: Spectral type badge & Constellation */}
       <div className="flex items-center justify-between gap-1.5 text-[9px] sm:text-[10px] md:text-xs font-mono leading-none min-w-0">
-        <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-bold truncate">
-          {star.spectralType}
-        </span>
-        <span className="text-slate-400 truncate text-[9px] sm:text-[10px] md:text-[11px]">
-          {star.constellation || star.stellarStage}
-        </span>
+        <div className="max-w-[70px] shrink-0 overflow-hidden">
+          <RunningText
+            text={star.spectralType}
+            className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-bold block"
+          />
+        </div>
+        <div className="min-w-0 flex-1 text-right">
+          <RunningText
+            text={star.constellation || star.stellarStage}
+            className="text-slate-400 text-[9px] sm:text-[10px] md:text-[11px]"
+            title={star.constellation || star.stellarStage}
+          />
+        </div>
       </div>
 
       {/* 3-metric strip */}
       <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-cyan-500/20 text-center font-mono">
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Diam</span>
-          <span className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={scaleObj.metricSi}>
-            {scaleObj.metricSi}
-          </span>
+          <RunningText
+            text={scaleObj.metricSi}
+            className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+            title={scaleObj.metricSi}
+          />
         </div>
 
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Mass</span>
-          <span className="text-blue-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`${star.massSolar} M☉`}>
-            {star.massSolar < 1 ? star.massSolar.toFixed(2) : star.massSolar.toFixed(1)}
-          </span>
+          <RunningText
+            text={`${star.massSolar < 1 ? star.massSolar.toFixed(2) : star.massSolar.toFixed(1)} M☉`}
+            className="text-blue-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+            title={`${star.massSolar} M☉`}
+          />
         </div>
 
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Temp</span>
-          <span className="text-amber-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`${star.temperature.toLocaleString()} K`}>
-            {star.temperature >= 1000 ? `${(star.temperature / 1000).toFixed(star.temperature >= 10000 ? 0 : 1)}k` : star.temperature}
-          </span>
+          <RunningText
+            text={star.temperature >= 1000 ? `${(star.temperature / 1000).toFixed(star.temperature >= 10000 ? 0 : 1)}k K` : `${star.temperature} K`}
+            className="text-amber-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+            title={`${star.temperature.toLocaleString()} K`}
+          />
         </div>
       </div>
 

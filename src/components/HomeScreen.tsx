@@ -6,6 +6,7 @@ import { HeroStar3D, ActiveStarInfo } from './HeroStar3D';
 import { AmbientSoundToggle } from './AmbientSoundToggle';
 import { FullscreenToggle } from './FullscreenToggle';
 import { PWAInstallButton } from './PWAInstallButton';
+import { RunningText } from './RunningText';
 import {
   ArrowRight,
   Play,
@@ -307,23 +308,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   }}
                 >
                   <div className="bg-[#040816]/95 backdrop-blur-xl px-3.5 py-2.5 rounded-2xl border border-cyan-500/40 shadow-[0_8px_32px_rgba(0,0,0,0.95)] flex flex-col gap-1 w-[220px] text-center">
-                    <div className="flex items-center justify-center gap-1.5 border-b border-cyan-500/20 pb-1.5">
+                    <div className="flex items-center justify-center gap-1.5 border-b border-cyan-500/20 pb-1.5 min-w-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full aspect-square inline-block shrink-0 shadow-sm border-0"
                         style={{ backgroundColor: activeHeroStar.star.colorHex }}
                       />
-                      <span className="text-xs font-bold text-white tracking-wide truncate max-w-[170px]">
-                        {activeHeroStar.star.name}
-                      </span>
+                      <div className="min-w-0 flex-1 max-w-[170px]">
+                        <RunningText
+                          text={activeHeroStar.star.name}
+                          className="text-xs font-bold text-white tracking-wide"
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] font-mono text-cyan-300">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-cyan-300 min-w-0">
                       <span>{activeHeroStar.star.spectralType}</span>
-                      <span className="text-slate-300">{activeHeroStar.star.stellarStage}</span>
+                      <div className="min-w-0 flex-1 text-right ml-1">
+                        <RunningText
+                          text={activeHeroStar.star.stellarStage}
+                          className="text-slate-300"
+                        />
+                      </div>
                     </div>
 
-                    <div className="text-[10px] font-mono text-slate-300">
-                      {dimensions.metricSi} • {dimensions.solarFormatted}
+                    <div className="min-w-0">
+                      <RunningText
+                        text={`${dimensions.metricSi} • ${dimensions.solarFormatted}`}
+                        className="text-[10px] font-mono text-slate-300"
+                      />
                     </div>
 
                     <div className="text-[9px] font-mono text-cyan-400/90 pt-1 border-t border-cyan-500/15 flex items-center justify-between">

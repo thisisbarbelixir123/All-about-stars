@@ -8,6 +8,7 @@ import {
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { StarDot2D } from './StarDot2D';
+import { RunningText } from './RunningText';
 import {
   Play,
   Pause,
@@ -1169,8 +1170,11 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 <Sun className="w-3.5 h-3.5 text-amber-400" />
                 <span>Physical Radius</span>
               </div>
-              <div className="text-xs font-bold text-white font-mono truncate">
-                {currentStage.radiusLabel}
+              <div className="min-w-0 overflow-hidden">
+                <RunningText
+                  text={currentStage.radiusLabel}
+                  className="text-xs font-bold text-white font-mono"
+                />
               </div>
               <div className="text-[10px] text-slate-500 font-sans">
                 {currentStage.radiusSolar >= 1 ? `${currentStage.radiusSolar} × Sun Radius` : `${(currentStage.radiusSolar * 100).toFixed(2)}% of Sun`}
@@ -1182,8 +1186,11 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 <Thermometer className="w-3.5 h-3.5 text-rose-400" />
                 <span>Surface Temp (T_eff)</span>
               </div>
-              <div className="text-xs font-bold text-white font-mono truncate">
-                {currentStage.temperatureLabel}
+              <div className="min-w-0 overflow-hidden">
+                <RunningText
+                  text={currentStage.temperatureLabel}
+                  className="text-xs font-bold text-white font-mono"
+                />
               </div>
               <div className="text-[10px] text-slate-500 font-sans">
                 Luminosity: {currentStage.luminosityLabel}
@@ -1213,8 +1220,11 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">
                   Cosmic Exemplar in Catalog
                 </span>
-                <div className="text-xs font-bold text-white truncate">
-                  {currentStage.analogStarName}
+                <div className="min-w-0 overflow-hidden">
+                  <RunningText
+                    text={currentStage.analogStarName}
+                    className="text-xs font-bold text-white"
+                  />
                 </div>
                 {currentStage.analogStarConstellation && (
                   <div className="text-[10px] text-slate-400 font-mono">
@@ -1499,9 +1509,14 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] font-mono">
-                  <span className="text-slate-500">{stage.temperatureLabel}</span>
-                  <span className="text-slate-400 truncate max-w-[60px]">{stage.radiusLabel.split(' ')[0]}</span>
+                <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] font-mono gap-1">
+                  <span className="text-slate-500 shrink-0">{stage.temperatureLabel}</span>
+                  <div className="min-w-0 max-w-[60px] overflow-hidden">
+                    <RunningText
+                      text={stage.radiusLabel.split(' ')[0]}
+                      className="text-slate-400"
+                    />
+                  </div>
                 </div>
               </div>
             );

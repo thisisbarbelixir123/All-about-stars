@@ -53,6 +53,7 @@ import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColor
 import { EncyclopediaDropdown } from './EncyclopediaDropdown';
 import { AmbientSoundToggle } from './AmbientSoundToggle';
 import { FullscreenToggle } from './FullscreenToggle';
+import { RunningText } from './RunningText';
 
 export type AllStarsLayoutMode = 'spiral' | 'grid' | 'linear';
 
@@ -3002,9 +3003,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   </span>
 
                   {/* Star Name */}
-                  <span className="font-extrabold tracking-tight text-white max-w-[180px] sm:max-w-[280px] truncate leading-normal">
-                    {star.name}
-                  </span>
+                  <div className="max-w-[180px] sm:max-w-[280px] min-w-0 overflow-hidden">
+                    <RunningText
+                      text={star.name}
+                      className="font-extrabold tracking-tight text-white leading-normal"
+                    />
+                  </div>
 
                   {/* Spectral Type Badge */}
                   <span className="text-[10px] sm:text-[11px] bg-slate-950/80 text-cyan-300 font-mono px-1.5 py-0.5 rounded border border-cyan-400/40 shrink-0 font-semibold">
@@ -3138,9 +3142,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                             : 'bg-[#040816]/95 border-cyan-500/35 text-slate-200'
                         }`}
                       >
-                        <span className="text-[11px] font-semibold text-cyan-300 truncate">
-                          {activePresetTitle}
-                        </span>
+                        <div className="min-w-0 flex-1 overflow-hidden">
+                          <RunningText
+                            text={activePresetTitle}
+                            className="text-[11px] font-semibold text-cyan-300"
+                          />
+                        </div>
                         <span className="text-[10px] text-cyan-400/80 shrink-0">
                           ({stars.length})
                         </span>
@@ -3388,9 +3395,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl backdrop-blur-xl border border-cyan-500/35 bg-[#040816]/95 text-slate-200 text-xs font-mono active:scale-95 cursor-pointer"
                           >
                             <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
-                            <span className="text-cyan-300 font-bold capitalize text-[11px] max-w-[70px] truncate">
-                              {getSortMetricLabel(sortKey)}
-                            </span>
+                            <div className="max-w-[70px] min-w-0 overflow-hidden">
+                              <RunningText
+                                text={getSortMetricLabel(sortKey)}
+                                className="text-cyan-300 font-bold capitalize text-[11px]"
+                              />
+                            </div>
                             <ChevronDown className={`w-3 h-3 text-cyan-400 transition-transform ${isSortMenuOpen ? 'rotate-180' : ''}`} />
                           </button>
 
@@ -3757,14 +3767,15 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               />
               
               <div className="flex items-center gap-x-1 sm:gap-x-2 text-[10px] sm:text-xs font-mono min-w-0 flex-1 overflow-hidden">
-                <span className="font-bold text-white flex items-center gap-1 sm:gap-1.5 min-w-0 shrink overflow-hidden">
-                  <span className="text-cyan-300 font-bold truncate min-w-0">
-                    {activeFocusedStar.name}
-                  </span>
+                <div className="font-bold text-white flex items-center gap-1 sm:gap-1.5 min-w-0 shrink overflow-hidden">
+                  <RunningText
+                    text={activeFocusedStar.name}
+                    className="text-cyan-300 font-bold"
+                  />
                   <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 font-mono border border-cyan-500/30 shrink-0 whitespace-nowrap">
                     {activeFocusedStar.spectralType}
                   </span>
-                </span>
+                </div>
 
                 <span className="text-slate-300 shrink-0 whitespace-nowrap">
                   {formatPhysicalDiameter(activeFocusedStar.diameterKm, activeFocusedStar.diameterSolar).solarFormatted}
@@ -3782,9 +3793,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
                 <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline text-slate-500 shrink-0'}>•</span>
 
-                <span className={isTabletDevice ? 'hidden' : 'hidden lg:inline text-slate-300 shrink-0 truncate'}>
-                  {activeFocusedStar.constellation}
-                </span>
+                <div className={isTabletDevice ? 'hidden' : 'hidden lg:inline min-w-0 overflow-hidden'}>
+                  <RunningText
+                    text={activeFocusedStar.constellation}
+                    className="text-slate-300"
+                  />
+                </div>
               </div>
             </div>
 

@@ -4,6 +4,7 @@ import { MULTIPLE_STAR_SYSTEMS } from '../data/multipleStarSystemsData';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { StellarSystemCard } from './StellarSystemCard';
+import { RunningText } from './RunningText';
 import { 
   Share2, 
   Sparkles, 
@@ -148,10 +149,12 @@ export const StellarSystemCatalog: React.FC<StellarSystemCatalogProps> = ({
 
       {/* Quick Summary Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-xs font-mono text-slate-400 px-1 w-full min-w-0">
-        <span className="truncate">
-          Showing <strong className="text-cyan-400 font-bold">{filteredSystems.length}</strong> of{' '}
-          {MULTIPLE_STAR_SYSTEMS.length} Systems in Registry
-        </span>
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <RunningText
+            text={`Showing ${filteredSystems.length} of ${MULTIPLE_STAR_SYSTEMS.length} Systems in Registry`}
+            className="text-slate-400"
+          />
+        </div>
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1 shrink-0 self-start sm:self-auto">
           <Orbit className="w-3 h-3 text-cyan-400" />
           <span>Click card to launch 3D Dossier</span>

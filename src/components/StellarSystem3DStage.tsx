@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Activity
 } from 'lucide-react';
+import { RunningText } from './RunningText';
 import {
   MultipleStarSystemData,
   MultipleStarComponent,
@@ -855,11 +856,16 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
           title="Choose target to center camera"
         >
           <span className="text-[10px] text-purple-400 font-bold">Focus:</span>
-          <span className="text-white font-bold max-w-[85px] truncate">
-            {focusedStarId === null
-              ? 'Barycenter'
-              : system.components.find((c) => c.id === focusedStarId)?.name.replace(/Pair|\(.*\)/g, '').trim() || 'Star'}
-          </span>
+          <div className="max-w-[85px] min-w-0 overflow-hidden">
+            <RunningText
+              text={
+                focusedStarId === null
+                  ? 'Barycenter'
+                  : system.components.find((c) => c.id === focusedStarId)?.name.replace(/Pair|\(.*\)/g, '').trim() || 'Star'
+              }
+              className="text-white font-bold"
+            />
+          </div>
           <ChevronUp className={`w-3 h-3 text-purple-400 transition-transform ${isMobileFocusOpen ? 'rotate-180' : ''}`} />
         </button>
 
@@ -892,7 +898,10 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
                 }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: comp.colorHex }} />
-                <span className="truncate">{comp.name.replace(/Pair|\(.*\)/g, '').trim()}</span>
+                <RunningText
+                  text={comp.name.replace(/Pair|\(.*\)/g, '').trim()}
+                  className="truncate"
+                />
               </button>
             ))}
           </div>

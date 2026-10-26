@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Trash2,
 } from 'lucide-react';
+import { RunningText } from './RunningText';
 
 interface StageAndPresetModalProps {
   isOpen: boolean;
@@ -370,13 +371,15 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
                                 boxShadow: `0 0 6px ${star.colorHex}`,
                               }}
                             />
-                            <div className="truncate">
-                              <div className="text-xs font-semibold truncate text-cyan-100">
-                                {star.name}
-                              </div>
-                              <div className="text-[10px] text-slate-400 truncate">
-                                {star.spectralType} • {star.constellation}
-                              </div>
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              <RunningText
+                                text={star.name}
+                                className="text-xs font-semibold text-cyan-100"
+                              />
+                              <RunningText
+                                text={`${star.spectralType} • ${star.constellation}`}
+                                className="text-[10px] text-slate-400"
+                              />
                             </div>
                           </div>
 
@@ -435,13 +438,15 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
                                 boxShadow: `0 0 6px ${star.colorHex}`,
                               }}
                             />
-                            <div className="truncate">
-                              <div className="text-xs font-semibold truncate text-slate-200">
-                                {star.name}
-                              </div>
-                              <div className="text-[10px] text-slate-500 truncate">
-                                {star.spectralType} • {star.constellation}
-                              </div>
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              <RunningText
+                                text={star.name}
+                                className="text-xs font-semibold text-slate-200"
+                              />
+                              <RunningText
+                                text={`${star.spectralType} • ${star.constellation}`}
+                                className="text-[10px] text-slate-500"
+                              />
                             </div>
                           </div>
 

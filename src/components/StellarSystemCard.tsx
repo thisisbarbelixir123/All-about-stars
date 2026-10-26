@@ -88,40 +88,51 @@ export const StellarSystemCard: React.FC<StellarSystemCardProps> = ({
           </div>
         </div>
 
-        <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold shrink-0 truncate">
-          {shortType}
-        </span>
+        <div className="max-w-[80px] shrink-0 overflow-hidden">
+          <RunningText
+            text={shortType}
+            className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold block"
+          />
+        </div>
       </div>
 
       {/* Sub-header: Member star names preview */}
       <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] md:text-xs font-mono text-slate-400 leading-none min-w-0 w-full overflow-hidden">
         <span className="text-slate-500 shrink-0 font-sans">Stars:</span>
-        <span className="text-slate-300 truncate font-sans min-w-0 flex-1" title={system.components.map((c) => c.name).join(' + ')}>
-          {system.components.map((c) => c.name.split(' (')[0]).join(' + ')}
-        </span>
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <RunningText
+            text={system.components.map((c) => c.name.split(' (')[0]).join(' + ')}
+            className="text-slate-300 font-sans block"
+            title={system.components.map((c) => c.name).join(' + ')}
+          />
+        </div>
       </div>
 
       {/* 3-Column Astronomical Metrics Strip */}
       <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-cyan-500/20 text-center font-mono w-full min-w-0">
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Stars</span>
-          <span className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate">
-            {isContact ? '2 Lobes' : effCount}
-          </span>
+          <RunningText
+            text={isContact ? '2 Lobes' : String(effCount)}
+            className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+          />
         </div>
 
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Sep</span>
-          <span className="text-blue-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`Primary semi-major axis: ${separationText}`}>
-            {separationText}
-          </span>
+          <RunningText
+            text={separationText}
+            className="text-blue-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+            title={`Primary semi-major axis: ${separationText}`}
+          />
         </div>
 
         <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Dist</span>
-          <span className="text-amber-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate">
-            {system.distanceLy} <span className="text-[8px] text-slate-400">ly</span>
-          </span>
+          <RunningText
+            text={`${system.distanceLy} ly`}
+            className="text-amber-300 font-bold text-[9px] sm:text-[10px] md:text-xs block"
+          />
         </div>
       </div>
 

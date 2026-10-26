@@ -16,6 +16,7 @@ import {
 import { STARS_CATALOG } from '../data/stars';
 import { StarData } from '../types';
 import { spaceAudio } from '../utils/spaceAudioEngine';
+import { RunningText } from './RunningText';
 
 interface CommandPaletteModalProps {
   isOpen: boolean;
@@ -347,16 +348,20 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: star.colorHex }} />
-                      <div className="min-w-0 truncate">
-                        <div className="text-xs sm:text-sm font-bold truncate flex items-center gap-2">
-                          <span>{star.name}</span>
-                          <span className="text-[10px] font-mono font-normal text-slate-400">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <div className="text-xs sm:text-sm font-bold flex items-center gap-2 min-w-0">
+                          <RunningText
+                            text={star.name}
+                            className="font-bold"
+                          />
+                          <span className="text-[10px] font-mono font-normal text-slate-400 shrink-0">
                             {star.constellation}
                           </span>
                         </div>
-                        <div className="text-[10px] font-mono text-slate-500 truncate">
-                          Class {star.spectralClass} • {star.diameterSolar} D☉ • {star.temperature} K
-                        </div>
+                        <RunningText
+                          text={`Class ${star.spectralClass} • ${star.diameterSolar} D☉ • ${star.temperature} K`}
+                          className="text-[10px] font-mono text-slate-500"
+                        />
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />

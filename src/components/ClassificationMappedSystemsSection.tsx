@@ -17,6 +17,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+import { RunningText } from './RunningText';
 
 export interface ClassificationMappedSystemsSectionProps {
   title: string;
@@ -211,9 +212,12 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
                           className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: comp.colorHex || '#ffffff' }}
                         />
-                        <span className="font-semibold truncate max-w-[110px] sm:max-w-[130px]">
-                          {comp.name.replace(/\s*\([^)]*\)/g, '')}
-                        </span>
+                        <div className="max-w-[110px] sm:max-w-[130px] min-w-0 overflow-hidden">
+                          <RunningText
+                            text={comp.name.replace(/\s*\([^)]*\)/g, '')}
+                            className="font-semibold"
+                          />
+                        </div>
                         <span className="text-cyan-400/90 text-[8.5px] sm:text-[9px]">
                           {comp.spectralType}
                         </span>

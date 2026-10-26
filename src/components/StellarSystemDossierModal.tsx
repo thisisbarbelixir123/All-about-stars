@@ -19,6 +19,7 @@ import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { StellarSystem3DStage } from './StellarSystem3DStage';
 import { soundEffects } from '../utils/soundEffects';
+import { RunningText } from './RunningText';
 
 interface StellarSystemDossierModalProps {
   system: MultipleStarSystemData | null;
@@ -290,11 +291,13 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                                 <span className="text-slate-400 block text-[9px]">Temp:</span>
                                 <span className="text-amber-300 font-bold">{comp.temperature.toLocaleString()} K</span>
                               </div>
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800 min-w-0">
+                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800 min-w-0 overflow-hidden">
                                 <span className="text-slate-400 block text-[9px]">Rotation:</span>
-                                <span className="text-cyan-300 font-bold block truncate" title={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}>
-                                  {comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
-                                </span>
+                                <RunningText
+                                  text={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
+                                  className="text-cyan-300 font-bold block"
+                                  title={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
+                                />
                               </div>
                             </div>
                           </div>

@@ -321,9 +321,12 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeMethodIndex + 1}/{STELLAR_DISCOVERY_METHODS.length})
                         </span>
                       </div>
-                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
-                        Introduced: {activeMethod.eraIntroduced} · Pioneers: {activeMethod.pioneeringScientist}
-                      </p>
+                      <div className="min-w-0 overflow-hidden">
+                        <RunningText
+                          text={`Introduced: ${activeMethod.eraIntroduced} · Pioneers: ${activeMethod.pioneeringScientist}`}
+                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
+                        />
+                      </div>
                     </div>
 
                     <button
@@ -412,8 +415,11 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           <div className="text-[10px] uppercase tracking-wider font-mono text-cyan-400">
                             Iconic Discovered Star:
                           </div>
-                          <div className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
-                            {activeMethod.famousDiscoveredStarName}
+                          <div className="min-w-0 overflow-hidden">
+                            <RunningText
+                              text={activeMethod.famousDiscoveredStarName}
+                              className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors"
+                            />
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-mono text-cyan-400 font-semibold shrink-0">
@@ -518,9 +524,12 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeTimelineIndex + 1}/{STELLAR_DISCOVERY_TIMELINE.length})
                         </span>
                       </div>
-                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
-                        {activeTimelineItem.discovererOrMission} · {activeTimelineItem.observatoryOrInstitution} ({activeTimelineItem.era})
-                      </p>
+                      <div className="min-w-0 overflow-hidden">
+                        <RunningText
+                          text={`${activeTimelineItem.discovererOrMission} · ${activeTimelineItem.observatoryOrInstitution} (${activeTimelineItem.era})`}
+                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
+                        />
+                      </div>
                     </div>
 
                     <button
@@ -573,8 +582,11 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           <div className="text-[10px] uppercase tracking-wider font-mono text-cyan-400">
                             Related Stellar Discovery:
                           </div>
-                          <div className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
-                            {activeTimelineItem.relatedStarName}
+                          <div className="min-w-0 overflow-hidden">
+                            <RunningText
+                              text={activeTimelineItem.relatedStarName}
+                              className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors"
+                            />
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-mono text-cyan-400 font-semibold shrink-0">
@@ -709,9 +721,12 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeTelescopeIndex + 1}/{HISTORIC_AND_MODERN_TELESCOPES.length})
                         </span>
                       </div>
-                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
-                        {activeTelescope.locationOrOrbit} · Aperture: <strong className="text-cyan-300">{activeTelescope.apertureDiameter}</strong> · Era: {activeTelescope.era}
-                      </p>
+                      <div className="min-w-0 overflow-hidden">
+                        <RunningText
+                          text={`${activeTelescope.locationOrOrbit} · Aperture: ${activeTelescope.apertureDiameter} · Era: ${activeTelescope.era}`}
+                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
+                        />
+                      </div>
                     </div>
 
                     <button
@@ -764,8 +779,11 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           <div className="text-[10px] uppercase tracking-wider font-mono text-cyan-400">
                             Featured Telescope Target:
                           </div>
-                          <div className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
-                            {activeTelescope.featuredStarName}
+                          <div className="min-w-0 overflow-hidden">
+                            <RunningText
+                              text={activeTelescope.featuredStarName}
+                              className="text-xs sm:text-sm font-mono font-bold text-white group-hover:text-cyan-300 transition-colors"
+                            />
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-mono text-cyan-400 font-semibold shrink-0">
@@ -859,8 +877,12 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                         <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-cyan-400">
                           {m.stellarClass}
                         </div>
-                        <div className="text-sm sm:text-base font-bold font-mono text-white mt-0.5 truncate" style={{ color: m.accentColor }}>
-                          {m.starName}
+                        <div className="min-w-0 overflow-hidden">
+                          <RunningText
+                            text={m.starName}
+                            className="text-sm sm:text-base font-bold font-mono text-white mt-0.5"
+                            style={{ color: m.accentColor }}
+                          />
                         </div>
                       </div>
                       <span className="text-[10px] sm:text-[11px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-slate-800 border border-cyan-500/30 text-cyan-300 font-bold shrink-0">
@@ -913,8 +935,11 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                         <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-mono text-slate-400">
                           Interactive 3D Catalog Entry:
                         </div>
-                        <div className="text-xs font-mono font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
-                          {star.name}
+                        <div className="min-w-0 overflow-hidden">
+                          <RunningText
+                            text={star.name}
+                            className="text-xs font-mono font-bold text-white group-hover:text-cyan-300 transition-colors"
+                          />
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-mono text-cyan-400 font-semibold shrink-0">

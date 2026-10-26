@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
+import { RunningText } from './RunningText';
 import {
   Eye,
   Plus,
@@ -1000,13 +1001,15 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                           className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_6px_currentColor]"
                           style={{ backgroundColor: star.colorHex }}
                         />
-                        <span className="text-xs font-bold text-white group-hover:text-cyan-300 truncate font-sans">
-                          {star.name}
-                        </span>
+                        <RunningText
+                          text={star.name}
+                          className="text-xs font-bold text-white group-hover:text-cyan-300 font-sans"
+                        />
                         {star.alternateNames.length > 0 && (
-                          <span className="text-[10px] text-slate-500 font-mono truncate hidden lg:inline">
-                            ({star.alternateNames[0]})
-                          </span>
+                          <RunningText
+                            text={`(${star.alternateNames[0]})`}
+                            className="text-[10px] text-slate-500 font-mono hidden lg:inline"
+                          />
                         )}
                       </div>
                       <span className="text-[10px] font-mono text-cyan-400/80 shrink-0 ml-2">
@@ -1199,18 +1202,20 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       style={{ backgroundColor: activeSpotlightStar.colorHex }}
                     />
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white font-sans truncate">
-                          {activeSpotlightStar.name}
-                        </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <RunningText
+                          text={activeSpotlightStar.name}
+                          className="text-xs font-bold text-white font-sans"
+                        />
                         <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono border border-cyan-500/40 shrink-0">
                           {activeSpotlightStar.spectralType}
                         </span>
-                        <span className="text-[9px] text-slate-400 font-mono truncate hidden sm:inline">
-                          {activeSpotlightStar.constellation}
-                        </span>
+                        <RunningText
+                          text={activeSpotlightStar.constellation}
+                          className="text-[9px] text-slate-400 font-mono hidden sm:inline"
+                        />
                       </div>
-                      <div className="text-[9px] text-slate-400 font-mono truncate">
+                      <div className="text-[9px] text-slate-400 font-mono">
                         <span className="text-amber-300 font-semibold">{activeSpotlightStar.temperature.toLocaleString()} K</span>
                         <span className="text-slate-600 mx-1">•</span>
                         <span className="text-purple-300 font-semibold">
@@ -1294,9 +1299,10 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                               className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_6px_currentColor]"
                               style={{ backgroundColor: star.colorHex }}
                             />
-                            <span className="text-[11px] font-bold text-white group-hover:text-cyan-300 truncate font-sans">
-                              {star.name}
-                            </span>
+                            <RunningText
+                              text={star.name}
+                              className="text-[11px] font-bold text-white group-hover:text-cyan-300 font-sans"
+                            />
                           </div>
                           <span className="text-[9px] font-mono text-cyan-400/80 shrink-0 ml-1">
                             {star.spectralType} • {star.temperature.toLocaleString()} K

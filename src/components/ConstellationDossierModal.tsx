@@ -6,6 +6,7 @@ import { CelestialData } from '../hooks/useCelestialData';
 import { ConstellationMap, SkyMapOptions } from './ConstellationMap';
 import { MapToolbarToggle } from './common/MapToolbarToggle';
 import { StarDot2D } from './StarDot2D';
+import { RunningText } from './RunningText';
 import {
   extractBounds,
   isPolarConstellation,
@@ -100,9 +101,11 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
             <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
               {constellation.abbreviation}
             </span>
-            <span className="text-xs text-slate-400 italic hidden md:inline truncate">
-              "{constellation.englishName}" • {constellation.genitive}
-            </span>
+            <RunningText
+              as="span"
+              text={`"${constellation.englishName}" • ${constellation.genitive}`}
+              className="text-xs text-slate-400 italic hidden md:inline"
+            />
             {constellation.isZodiac && (
               <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-500/40 shrink-0">
                 {constellation.zodiacSymbol} Zodiac Sign
@@ -435,9 +438,11 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                             <div className="flex flex-col gap-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
-                                <span className="font-bold text-xs sm:text-sm text-white truncate">
-                                  {cleanName}
-                                </span>
+                                <RunningText
+                                  as="span"
+                                  text={cleanName}
+                                  className="font-bold text-xs sm:text-sm text-white"
+                                />
                                 {st.bayerDesignation && (
                                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
                                     {st.bayerDesignation}

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { StarData } from '../types';
 import { ChevronRight, ChevronDown, ChevronUp, Search, Sparkles } from 'lucide-react';
 import { StarDot2D } from './StarDot2D';
+import { RunningText } from './RunningText';
 import { resolveStarId } from '../data/stars';
 
 interface ClassificationMappedStarsSectionProps {
@@ -140,13 +141,15 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
                   >
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <StarDot2D star={star} colorHex={star.colorHex || categoryColor} sizeClassName="w-2.5 h-2.5" />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-semibold font-mono text-slate-200 group-hover:text-white truncate">
-                          {star.name}
-                        </div>
-                        <div className="text-[9px] text-slate-400 font-mono truncate">
-                          {star.spectralType} • {star.constellation}
-                        </div>
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <RunningText
+                          text={star.name}
+                          className="text-xs font-semibold font-mono text-slate-200 group-hover:text-white"
+                        />
+                        <RunningText
+                          text={`${star.spectralType} • ${star.constellation}`}
+                          className="text-[9px] text-slate-400 font-mono"
+                        />
                       </div>
                     </div>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-300 shrink-0" />

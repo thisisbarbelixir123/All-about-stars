@@ -10,6 +10,7 @@ import {
 import { STARS_CATALOG, resolveStarId } from '../data/stars';
 import { StarData } from '../types';
 import { StarDot2D } from './StarDot2D';
+import { RunningText } from './RunningText';
 import {
   Play,
   Pause,
@@ -1836,14 +1837,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         >
           {/* Top HUD Overlay within Stage - Shows current evolutionary stage */}
           <div className="p-3 sm:p-3.5 bg-gradient-to-b from-[#040816]/95 via-[#040816]/70 to-transparent flex items-center justify-between gap-3 z-10 shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
               <div
                 className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse shadow-sm"
                 style={{ backgroundColor: telemetry.interpolatedColor }}
               />
-              <h4 className="text-sm sm:text-base font-bold text-white tracking-wide truncate">
-                {simpleStageName}
-              </h4>
+              <RunningText
+                as="h4"
+                text={simpleStageName}
+                className="text-sm sm:text-base font-bold text-white tracking-wide"
+              />
             </div>
 
             <button
@@ -1868,9 +1871,9 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
             {/* Bottom Visual Subtitles / Physical Dynamics Tag */}
             <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none text-[10px] sm:text-[11px] font-mono gap-2">
-              <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 max-w-[65%] pointer-events-auto truncate">
-                <span className="text-cyan-400 font-bold">Core: </span>
-                <span>{telemetry.current.coreEngine}</span>
+              <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 max-w-[65%] pointer-events-auto min-w-0 overflow-hidden">
+                <span className="text-cyan-400 font-bold shrink-0">Core: </span>
+                <RunningText as="span" text={telemetry.current.coreEngine} className="text-slate-300" />
               </div>
 
               <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#040816]/85 backdrop-blur-md border border-cyan-500/20 text-slate-300 pointer-events-auto shrink-0">
@@ -2012,9 +2015,12 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
                     ({currentStageIndex + 1}/{currentTrack.checkpoints.length})
                   </span>
                 </div>
-                <p className="text-[10.5px] sm:text-[11px] text-slate-400 mt-0.5 truncate font-mono">
-                  {activeStage.timeElapsedLabel} • {(activeStage.progress * 100).toFixed(0)}% Lifespan
-                </p>
+                <div className="min-w-0 overflow-hidden">
+                  <RunningText
+                    text={`${activeStage.timeElapsedLabel} • ${(activeStage.progress * 100).toFixed(0)}% Lifespan`}
+                    className="text-[10.5px] sm:text-[11px] text-slate-400 mt-0.5 font-mono"
+                  />
+                </div>
               </div>
 
               <button
@@ -2094,13 +2100,15 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
                 <div className="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-inner">
                   <Clock className="w-4 h-4 text-cyan-400" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-[9px] uppercase font-mono text-slate-400 block font-semibold truncate">
-                    Object Age (Relative to ZAMS Birth)
-                  </span>
-                  <span className="text-xs sm:text-sm font-bold text-white font-mono tracking-wide truncate block">
-                    {telemetry.interpolatedAgeLabel}
-                  </span>
+                <div className="min-w-0 overflow-hidden">
+                  <RunningText
+                    text="Object Age (Relative to ZAMS Birth)"
+                    className="text-[9px] uppercase font-mono text-slate-400 font-semibold"
+                  />
+                  <RunningText
+                    text={telemetry.interpolatedAgeLabel}
+                    className="text-xs sm:text-sm font-bold text-white font-mono tracking-wide block"
+                  />
                 </div>
               </div>
               <div className="text-right font-mono text-[10px] shrink-0">

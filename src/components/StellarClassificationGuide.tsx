@@ -1880,7 +1880,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                             <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Benchmark / Archetype Star</span>
                             <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
                               {archetypeStar ? (
-                                <span className="truncate">{archetypeStar.name}</span>
+                                <RunningText text={archetypeStar.name} className="truncate" />
                               ) : (
                                 <span>{activeRemnantItem.externalExamples?.[0] || 'Relativistic Benchmark'}</span>
                               )}
