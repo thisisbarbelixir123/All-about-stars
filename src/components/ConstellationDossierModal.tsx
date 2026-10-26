@@ -101,11 +101,9 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
             <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
               {constellation.abbreviation}
             </span>
-            <RunningText
-              as="span"
-              text={`"${constellation.englishName}" • ${constellation.genitive}`}
-              className="text-xs text-slate-400 italic hidden md:inline"
-            />
+            <span className="text-xs text-slate-400 italic hidden md:inline truncate">
+              "{constellation.englishName}" • {constellation.genitive}
+            </span>
             {constellation.isZodiac && (
               <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-500/40 shrink-0">
                 {constellation.zodiacSymbol} Zodiac Sign

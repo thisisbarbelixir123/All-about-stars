@@ -1568,15 +1568,14 @@ export const VariableStarActivityMonitor: React.FC<VariableStarActivityMonitorPr
     >
       {/* Header with Title and Real-Time Tag */}
       <div className="flex items-center justify-between gap-2 min-w-0">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0 flex-1 truncate">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
           <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider shrink-0">
             Activity Telemetry:
           </span>
-          <RunningText
-            text={telemetry.title}
-            className="text-xs sm:text-sm font-bold font-mono text-white"
-          />
+          <span className="text-xs sm:text-sm font-bold font-mono text-white truncate">
+            {telemetry.title}
+          </span>
         </div>
         <span className="text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
           Φ = {telemetry.phasePercent}%
@@ -1584,14 +1583,15 @@ export const VariableStarActivityMonitor: React.FC<VariableStarActivityMonitorPr
       </div>
 
       {/* Real-time status */}
-      <div className="min-w-0">
-        <RunningText
-          text={telemetry.statusLabel}
-          className={`text-[11px] sm:text-xs font-mono font-semibold ${
+      <div className="min-w-0 truncate">
+        <span
+          className={`text-[11px] sm:text-xs font-mono font-semibold truncate ${
             telemetry.statusColor ? '' : telemetry.isHighlighted ? 'text-amber-300' : 'text-slate-300'
           }`}
           style={telemetry.statusColor ? { color: telemetry.statusColor } : undefined}
-        />
+        >
+          {telemetry.statusLabel}
+        </span>
       </div>
 
       {/* Live Waveform Canvas */}

@@ -7,7 +7,6 @@ import {
   X,
   Trash2
 } from 'lucide-react';
-import { RunningText } from './RunningText';
 
 interface PresetSliderProps {
   presets: PresetComparison[];
@@ -87,12 +86,9 @@ export const PresetSlider: React.FC<PresetSliderProps> = ({
             : 'bg-[#040816]/95 hover:bg-[#081232] border-cyan-500/35 hover:border-cyan-400 text-slate-200 hover:text-white'
         }`}
       >
-        <div className="max-w-[160px] sm:max-w-[220px] md:max-w-[280px] min-w-0 overflow-hidden">
-          <RunningText
-            text={activeTitle}
-            className="text-[11px] sm:text-xs font-semibold text-cyan-300"
-          />
-        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-cyan-300 max-w-[160px] sm:max-w-[220px] md:max-w-[280px] truncate">
+          {activeTitle}
+        </span>
 
         <span className="text-[10px] text-cyan-400/80 shrink-0">
           ({activeCount})

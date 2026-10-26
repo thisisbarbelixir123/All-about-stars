@@ -358,10 +358,9 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                             {star.constellation}
                           </span>
                         </div>
-                        <RunningText
-                          text={`Class ${star.spectralClass} • ${star.diameterSolar} D☉ • ${star.temperature} K`}
-                          className="text-[10px] font-mono text-slate-500"
-                        />
+                        <div className="text-[10px] font-mono text-slate-500 truncate">
+                          Class {star.spectralClass} • {star.diameterSolar} D☉ • {star.temperature} K
+                        </div>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />

@@ -413,16 +413,13 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </div>
 
                       {/* Resemblance Snippet */}
-                      <RunningText
-                        as="p"
-                        text={`"${constellation.resemblance}"`}
-                        className="italic text-[9px] text-slate-300/80 my-0.5"
-                        title={constellation.resemblance}
-                      />
+                      <p className="line-clamp-1 italic text-[9px] text-slate-300/80 my-0.5 truncate" title={constellation.resemblance}>
+                        "{constellation.resemblance}"
+                      </p>
 
                       {/* Quick Specs Compact Row */}
-                      <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 py-0.5 border-t border-slate-800/80 gap-1 min-w-0">
-                        <RunningText text={constellation.hemisphere} className="text-slate-400" />
+                      <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 py-0.5 border-t border-slate-800/80">
+                        <span className="truncate">{constellation.hemisphere}</span>
                         <span className="text-cyan-300 shrink-0">{constellation.areaSqDeg} sq°</span>
                       </div>
                     </div>
@@ -519,16 +516,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
                     {/* Quick Specs */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5 text-[9.5px] sm:text-[11px] font-mono mb-2 sm:mb-3">
-                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 min-w-0 overflow-hidden">
+                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 truncate">
                         <span className="text-slate-500 block text-[8px] sm:text-[9px] uppercase">Sky Region</span>
-                        <RunningText text={constellation.hemisphere} className="text-slate-300" />
+                        <span className="truncate">{constellation.hemisphere}</span>
                       </div>
-                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 min-w-0 overflow-hidden">
+                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 truncate">
                         <span className="text-slate-500 block text-[8px] sm:text-[9px] uppercase">Area / Rank</span>
-                        <RunningText
-                          text={`${constellation.areaSqDeg} sq° (#${constellation.areaRank})`}
-                          className="text-slate-300"
-                        />
+                        <span className="truncate">
+                          {constellation.areaSqDeg} sq° (#{constellation.areaRank})
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -705,23 +701,13 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
                     {/* Date Comparison Compact Rows */}
                     <div className="space-y-0.5 text-[8px] sm:text-[9px] font-mono my-1">
-                      <div className="px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between gap-1 min-w-0 overflow-hidden">
-                        <span className="text-cyan-300 font-semibold text-[7.5px] sm:text-[8.5px] shrink-0">Real:</span>
-                        <div className="min-w-0 flex-1 text-right">
-                          <RunningText
-                            text={sign.astronomicalDates}
-                            className="text-white font-bold text-[7.5px] sm:text-[8.5px]"
-                          />
-                        </div>
+                      <div className="px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between gap-1">
+                        <span className="text-cyan-300 font-semibold truncate text-[7.5px] sm:text-[8.5px]">Real:</span>
+                        <span className="text-white font-bold truncate text-[7.5px] sm:text-[8.5px]">{sign.astronomicalDates}</span>
                       </div>
-                      <div className="px-1.5 py-0.5 rounded bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-1 min-w-0 overflow-hidden">
-                        <span className="text-slate-400 text-[7.5px] sm:text-[8.5px] shrink-0">Astro:</span>
-                        <div className="min-w-0 flex-1 text-right">
-                          <RunningText
-                            text={sign.traditionalDates}
-                            className="text-slate-300 text-[7.5px] sm:text-[8.5px]"
-                          />
-                        </div>
+                      <div className="px-1.5 py-0.5 rounded bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-1">
+                        <span className="text-slate-400 truncate text-[7.5px] sm:text-[8.5px]">Astro:</span>
+                        <span className="text-slate-300 truncate text-[7.5px] sm:text-[8.5px]">{sign.traditionalDates}</span>
                       </div>
                       <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] text-slate-400 px-0.5 pt-0.5">
                         <span>Duration:</span>

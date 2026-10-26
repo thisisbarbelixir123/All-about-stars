@@ -1006,10 +1006,9 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                           className="text-xs font-bold text-white group-hover:text-cyan-300 font-sans"
                         />
                         {star.alternateNames.length > 0 && (
-                          <RunningText
-                            text={`(${star.alternateNames[0]})`}
-                            className="text-[10px] text-slate-500 font-mono hidden lg:inline"
-                          />
+                          <span className="text-[10px] text-slate-500 font-mono hidden lg:inline truncate">
+                            ({star.alternateNames[0]})
+                          </span>
                         )}
                       </div>
                       <span className="text-[10px] font-mono text-cyan-400/80 shrink-0 ml-2">
@@ -1210,10 +1209,9 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                         <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono border border-cyan-500/40 shrink-0">
                           {activeSpotlightStar.spectralType}
                         </span>
-                        <RunningText
-                          text={activeSpotlightStar.constellation}
-                          className="text-[9px] text-slate-400 font-mono hidden sm:inline"
-                        />
+                        <span className="text-[9px] text-slate-400 font-mono hidden sm:inline truncate">
+                          {activeSpotlightStar.constellation}
+                        </span>
                       </div>
                       <div className="text-[9px] text-slate-400 font-mono">
                         <span className="text-amber-300 font-semibold">{activeSpotlightStar.temperature.toLocaleString()} K</span>

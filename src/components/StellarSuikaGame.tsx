@@ -1721,10 +1721,9 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
                             text={tier.name}
                             className="font-bold text-[10px] sm:text-xs text-slate-200 group-hover:text-cyan-300 font-mono"
                           />
-                          <RunningText
-                            text={tier.type}
-                            className="text-[8px] sm:text-[10px] text-slate-400 font-mono"
-                          />
+                          <div className="text-[8px] sm:text-[10px] text-slate-400 font-mono truncate">
+                            {tier.type}
+                          </div>
                         </div>
                       </button>
                     );

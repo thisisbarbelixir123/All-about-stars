@@ -667,7 +667,7 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
 
           {/* Interactive Hint (Hidden on left in mobile landscape) */}
           <div className="mt-2.5 mobile-landscape:hidden flex items-center justify-between w-full text-[10px] sm:text-[11px] font-mono text-slate-400 px-1 gap-2 min-w-0">
-            <RunningText text="Click or hover any layer in cross-section" className="text-slate-400" />
+            <span className="truncate">Click or hover any layer in cross-section</span>
             <span className="text-cyan-400 font-semibold shrink-0">{displayedLayer.temperature.split(' ')[0]} K</span>
           </div>
         </div>
@@ -675,8 +675,8 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
       {/* Right / Bottom Panel: Everything Else (Scrollable with bounded container) */}
       <div className="w-full mobile-landscape:w-7/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-3.5 sm:gap-4 pr-1">
         {/* Interactive Hint at top of right panel in mobile landscape */}
-        <div className="hidden mobile-landscape:flex items-center justify-between w-full text-[10px] font-mono text-slate-400 px-2.5 py-1 rounded-xl bg-[#020512] border border-cyan-500/20 gap-2 min-w-0">
-          <RunningText text="Click or hover any layer in cross-section" className="text-slate-400" />
+        <div className="hidden mobile-landscape:flex items-center justify-between w-full text-[10px] font-mono text-slate-400 px-2.5 py-1 rounded-xl bg-[#020512] border border-cyan-500/20">
+          <span className="truncate">Click or hover any layer in cross-section</span>
           <span className="text-cyan-400 font-semibold shrink-0">{displayedLayer.temperature.split(' ')[0]} K</span>
         </div>
 
@@ -815,11 +815,10 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
                 <Thermometer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <span>Temperature</span>
               </div>
-              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
-                <RunningText
-                  text={activeLayer.temperature}
-                  className="text-amber-300 font-mono font-bold text-xs"
-                />
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left truncate">
+                <span className="text-amber-300 font-mono font-bold text-xs truncate">
+                  {activeLayer.temperature}
+                </span>
               </div>
             </div>
 
@@ -828,11 +827,10 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
                 <Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 <span>Density Range</span>
               </div>
-              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
-                <RunningText
-                  text={activeLayer.density}
-                  className="text-cyan-300 font-mono font-bold text-xs"
-                />
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left truncate">
+                <span className="text-cyan-300 font-mono font-bold text-xs truncate">
+                  {activeLayer.density}
+                </span>
               </div>
             </div>
 
@@ -841,11 +839,10 @@ export const StellarCrossSectionVisualizer: React.FC<StellarCrossSectionVisualiz
                 <Atom className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                 <span>Physical State</span>
               </div>
-              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left">
-                <RunningText
-                  text={activeLayer.physicalState}
-                  className="text-slate-200 font-sans text-[11px] leading-tight"
-                />
+              <div className="min-w-0 mobile-landscape:text-right md:text-left lg:text-left truncate">
+                <span className="text-slate-200 font-sans text-[11px] leading-tight truncate">
+                  {activeLayer.physicalState}
+                </span>
               </div>
             </div>
           </div>

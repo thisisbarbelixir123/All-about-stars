@@ -14,7 +14,6 @@ import { StellarLifeCycleVisualizer2D } from './StellarLifeCycleVisualizer2D';
 import { ThermonuclearEngineVisualizer } from './ThermonuclearEngineVisualizer';
 import { AnimatedStarrySkyPanel } from './AnimatedStarrySkyPanel';
 import { StarDot2D } from './StarDot2D';
-import { RunningText } from './RunningText';
 import {
   STELLAR_MYTHS_GUIDE,
   CLASSIFICATION_QUIZ,

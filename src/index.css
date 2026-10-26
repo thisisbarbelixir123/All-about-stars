@@ -203,33 +203,8 @@
 }
 
 /* Pause running marquee on hover so the user can easily read or click */
-.running-title-active:hover,
-.group:hover .running-title-active {
+.running-title-active:hover {
   animation-play-state: paused;
-}
-
-/* Universal running text animation for any overflowing container in the app */
-@keyframes auto-running-text-bounce {
-  0%, 20% {
-    text-indent: 0;
-  }
-  50%, 70% {
-    text-indent: calc(-1 * var(--overflow-amount, 40px) - 8px);
-  }
-  90%, 100% {
-    text-indent: 0;
-  }
-}
-
-.auto-running-text {
-  text-overflow: clip !important;
-  animation: auto-running-text-bounce var(--auto-duration, 6s) ease-in-out infinite !important;
-  will-change: text-indent;
-}
-
-.auto-running-text:hover,
-.group:hover .auto-running-text {
-  animation-play-state: paused !important;
 }
 
 /* Safe area padding for mobile landscape */

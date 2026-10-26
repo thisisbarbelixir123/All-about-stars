@@ -1849,18 +1849,13 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
               title="Expand inspect panel"
             >
               <Crosshair className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform shrink-0" />
-              <div className="font-bold max-w-[130px] sm:max-w-[180px] min-w-0 overflow-hidden">
-                <RunningText
-                  text={
-                    activeStageMode === 'compare-sun'
-                      ? `Inspect: ${focusTarget === 'sun' ? 'Sun' : star.name}`
-                      : activeStageMode === 'compare-earth'
-                      ? `Inspect: ${focusTarget === 'earth' ? 'Earth' : star.name}`
-                      : `Inspect: ${selectedBodyName || 'Host Star'}`
-                  }
-                  className="font-bold"
-                />
-              </div>
+              <span className="font-bold whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px]">
+                {activeStageMode === 'compare-sun'
+                  ? `Inspect: ${focusTarget === 'sun' ? 'Sun' : star.name}`
+                  : activeStageMode === 'compare-earth'
+                  ? `Inspect: ${focusTarget === 'earth' ? 'Earth' : star.name}`
+                  : `Inspect: ${selectedBodyName || 'Host Star'}`}
+              </span>
               <ChevronDown className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             </button>
           ) : (
@@ -2033,10 +2028,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
                       }`}
                     >
                       <Orbit className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <RunningText
-                        text={`Host: ${star.name}`}
-                        className="font-bold text-[10px] sm:text-[11px]"
-                      />
+                      <span className="truncate font-bold text-[10px] sm:text-[11px]">Host: {star.name}</span>
                     </button>
 
                     <div className="flex items-center gap-1 text-emerald-300 font-bold text-[9.5px] sm:text-[10px] shrink-0">
@@ -2047,31 +2039,31 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
 
                   {/* Earth Condition Highlight Pill */}
                   {earthCondition && (
-                    <div className="px-2 py-1 rounded-lg bg-black/60 border border-slate-700/40 text-[9.5px] sm:text-[10px] font-mono flex items-center gap-1.5 leading-snug min-w-0 overflow-hidden">
+                    <div className="px-2 py-1 rounded-lg bg-black/60 border border-slate-700/40 text-[9.5px] sm:text-[10px] font-mono flex items-center gap-1.5 leading-snug">
                       <span className="text-slate-400 shrink-0">Earth (1.00 AU):</span>
                       {earthCondition.status === 'ENGULFED' && (
-                        <div className="text-rose-400 font-bold flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
+                        <span className="text-rose-400 font-bold flex items-center gap-1 truncate">
                           <Flame className="w-3 h-3 text-rose-500 animate-pulse shrink-0" />
-                          <RunningText text="Photosphere Engulfed" className="text-rose-400 font-bold" />
-                        </div>
+                          Photosphere Engulfed
+                        </span>
                       )}
                       {earthCondition.status === 'SCORCHED' && (
-                        <div className="text-amber-400 font-bold flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
+                        <span className="text-amber-400 font-bold flex items-center gap-1 truncate">
                           <Flame className="w-3 h-3 text-amber-500 shrink-0" />
-                          <RunningText text="Scorched Atmosphere" className="text-amber-400 font-bold" />
-                        </div>
+                          Scorched Atmosphere
+                        </span>
                       )}
                       {earthCondition.status === 'HABITABLE' && (
-                        <div className="text-emerald-300 font-bold flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
+                        <span className="text-emerald-300 font-bold flex items-center gap-1 truncate">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                          <RunningText text="Habitable Liquid Water" className="text-emerald-300 font-bold" />
-                        </div>
+                          Habitable Liquid Water
+                        </span>
                       )}
                       {earthCondition.status === 'FROZEN' && (
-                        <div className="text-cyan-300 font-bold flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
+                        <span className="text-cyan-300 font-bold flex items-center gap-1 truncate">
                           <Snowflake className="w-3 h-3 text-cyan-400 shrink-0" />
-                          <RunningText text="Deep Frozen Ice Age" className="text-cyan-300 font-bold" />
-                        </div>
+                          Deep Frozen Ice Age
+                        </span>
                       )}
                     </div>
                   )}
@@ -2107,9 +2099,7 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
                 className="w-2.5 h-2.5 rounded-full aspect-square shrink-0"
                 style={{ backgroundColor: star.colorHex, boxShadow: `0 0 8px ${star.colorHex}` }}
               />
-              <div className="max-w-[180px] sm:max-w-[280px] min-w-0 overflow-hidden">
-                <RunningText text={star.name} className="font-bold tracking-tight text-white leading-normal" />
-              </div>
+              <span className="font-bold tracking-tight text-white max-w-[180px] sm:max-w-[280px] truncate leading-normal">{star.name}</span>
               <span className="text-[10px] bg-slate-950/70 text-cyan-200 font-mono px-1.5 py-0.5 rounded border border-cyan-400/40 shrink-0">
                 {star.spectralType}
               </span>
@@ -2144,12 +2134,9 @@ export const StarDossier3DStage: React.FC<StarDossier3DStageProps> = ({ star, on
                     boxShadow: activeStageMode === 'compare-sun' ? '0 0 8px #FDB813' : '0 0 8px #38bdf8',
                   }}
                 />
-                <div className="max-w-[180px] sm:max-w-[280px] min-w-0 overflow-hidden">
-                  <RunningText
-                    text={activeStageMode === 'compare-sun' ? 'Sun (Sol)' : 'Earth (Terra)'}
-                    className="font-bold tracking-tight leading-normal"
-                  />
-                </div>
+                <span className="font-bold tracking-tight max-w-[180px] sm:max-w-[280px] truncate leading-normal">
+                  {activeStageMode === 'compare-sun' ? 'Sun (Sol)' : 'Earth (Terra)'}
+                </span>
                 <span className="text-[10px] bg-slate-950/70 text-slate-300 font-mono px-1.5 py-0.5 rounded border border-slate-700 shrink-0">
                   {activeStageMode === 'compare-sun' ? 'G2V' : '1.00 R⊕'}
                 </span>

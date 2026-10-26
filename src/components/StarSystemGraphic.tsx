@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StarData } from '../types';
 import { Orbit, Sparkles, Compass } from 'lucide-react';
-import { RunningText } from './RunningText';
 
 export interface StarSystemGraphicProps {
   systemId: string;
@@ -1963,15 +1962,13 @@ export const StarSystemActivityMonitor: React.FC<StarSystemActivityMonitorProps>
           <div className="p-1 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
             <Orbit className="w-3.5 h-3.5" />
           </div>
-          <div className="min-w-0 flex-1 overflow-hidden">
-            <RunningText
-              text={telemetry.title}
-              className="text-[10px] sm:text-xs font-mono font-bold text-white uppercase tracking-wider"
-            />
-            <RunningText
-              text={telemetry.status}
-              className="text-[9px] sm:text-[10px] font-sans text-cyan-300/80"
-            />
+          <div className="min-w-0">
+            <div className="text-[10px] sm:text-xs font-mono font-bold text-white uppercase tracking-wider truncate">
+              {telemetry.title}
+            </div>
+            <div className="text-[9px] sm:text-[10px] font-sans text-cyan-300/80 truncate">
+              {telemetry.status}
+            </div>
           </div>
         </div>
 
@@ -1988,17 +1985,17 @@ export const StarSystemActivityMonitor: React.FC<StarSystemActivityMonitorProps>
 
       {/* Triad Metric Readouts */}
       <div className="grid grid-cols-3 gap-1.5 text-[9px] sm:text-[10px] font-mono">
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0 overflow-hidden">
+        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric1Name}</span>
-          <RunningText text={telemetry.metric1Val} className="text-white font-bold block" />
+          <span className="text-white font-bold truncate block">{telemetry.metric1Val}</span>
         </div>
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0 overflow-hidden">
+        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric2Name}</span>
-          <RunningText text={telemetry.metric2Val} className="text-cyan-300 font-bold block" />
+          <span className="text-cyan-300 font-bold truncate block">{telemetry.metric2Val}</span>
         </div>
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0 overflow-hidden">
+        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric3Name}</span>
-          <RunningText text={telemetry.metric3Val} className="text-amber-300 font-bold block" />
+          <span className="text-amber-300 font-bold truncate block">{telemetry.metric3Val}</span>
         </div>
       </div>
     </div>

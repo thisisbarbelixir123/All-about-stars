@@ -146,10 +146,9 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
                           text={star.name}
                           className="text-xs font-semibold font-mono text-slate-200 group-hover:text-white"
                         />
-                        <RunningText
-                          text={`${star.spectralType} • ${star.constellation}`}
-                          className="text-[9px] text-slate-400 font-mono"
-                        />
+                        <div className="text-[9px] text-slate-400 font-mono truncate">
+                          {star.spectralType} • {star.constellation}
+                        </div>
                       </div>
                     </div>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-300 shrink-0" />

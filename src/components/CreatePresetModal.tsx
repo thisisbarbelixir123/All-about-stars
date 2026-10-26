@@ -283,10 +283,9 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                           text={star.name}
                           className="text-xs font-semibold"
                         />
-                        <RunningText
-                          text={`${star.spectralType} • ${star.constellation}`}
-                          className="text-[10px] text-slate-400"
-                        />
+                        <div className="text-[10px] text-slate-400 truncate">
+                          {star.spectralType} • {star.constellation}
+                        </div>
                       </div>
                     </div>
 

@@ -376,10 +376,9 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
                                 text={star.name}
                                 className="text-xs font-semibold text-cyan-100"
                               />
-                              <RunningText
-                                text={`${star.spectralType} • ${star.constellation}`}
-                                className="text-[10px] text-slate-400"
-                              />
+                              <div className="text-[10px] text-slate-400 truncate">
+                                {star.spectralType} • {star.constellation}
+                              </div>
                             </div>
                           </div>
 
@@ -443,10 +442,9 @@ export const StageAndPresetModal: React.FC<StageAndPresetModalProps> = ({
                                 text={star.name}
                                 className="text-xs font-semibold text-slate-200"
                               />
-                              <RunningText
-                                text={`${star.spectralType} • ${star.constellation}`}
-                                className="text-[10px] text-slate-500"
-                              />
+                              <div className="text-[10px] text-slate-500 truncate">
+                                {star.spectralType} • {star.constellation}
+                              </div>
                             </div>
                           </div>
 

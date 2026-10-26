@@ -506,12 +506,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           ({currentSpectralIndex + 1}/7)
                         </span>
                       </div>
-                      <div className="min-w-0 mt-0.5">
-                        <RunningText
-                          text={`"${activeSpectralItem.simpleAnalogy}" • ${activeSpectralItem.temperatureKelvin}`}
-                          className="text-[11px] sm:text-xs text-slate-400 italic"
-                        />
-                      </div>
+                      <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                        "{activeSpectralItem.simpleAnalogy}" • {activeSpectralItem.temperatureKelvin}
+                      </p>
                     </div>
 
                     {/* Right Carousel Arrow Button directly on Card */}
@@ -705,12 +702,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activeExoticIndex + 1}/{EXOTIC_CLASSES_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`${activeExoticItem.category} • ${activeExoticItem.temperature}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            {activeExoticItem.category} • {activeExoticItem.temperature}
+                          </p>
                         </div>
 
                         {/* Right Carousel Arrow Button directly on Card */}
@@ -880,10 +874,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <RunningText
-                          text={item.category}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase"
-                        />
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase truncate block">
+                          {item.category}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
@@ -933,12 +926,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activeVariableIndex + 1}/{VARIABLE_STARS_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`${activeVariableItem.category} • ${activeVariableItem.periodRange}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            {activeVariableItem.category} • {activeVariableItem.periodRange}
+                          </p>
                         </div>
 
                         <button
@@ -1172,12 +1162,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activeYerkesIndex + 1}/{LUMINOSITY_CLASSES_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`Category: ${activeYerkesItem.category.replace('-', ' ')} • Yerkes Class ${activeYerkesItem.romanNumeral}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            Category: {activeYerkesItem.category.replace('-', ' ')} • Yerkes Class {activeYerkesItem.romanNumeral}
+                          </p>
                         </div>
 
                         {/* Right Carousel Arrow Button directly on Card */}
@@ -1307,10 +1294,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <RunningText
-                          text={item.multiplicity}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase"
-                        />
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase truncate block">
+                          {item.multiplicity}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
@@ -1360,12 +1346,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activeStarSystemIndex + 1}/{STAR_SYSTEMS_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`${activeStarSystemItem.category} • Multiplicity: ${activeStarSystemItem.multiplicity}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            {activeStarSystemItem.category} • Multiplicity: {activeStarSystemItem.multiplicity}
+                          </p>
                         </div>
 
                         <button
@@ -1547,10 +1530,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <RunningText
-                          text={item.typicalAge}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80"
-                        />
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                          {item.typicalAge}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
@@ -1598,12 +1580,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activePopulationIndex + 1}/{STELLAR_POPULATIONS_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`Metallicity: ${activePopulationItem.metallicityRange} • ${activePopulationItem.typicalAge}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            Metallicity: {activePopulationItem.metallicityRange} • {activePopulationItem.typicalAge}
+                          </p>
                         </div>
 
                         <button
@@ -1755,10 +1734,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       title={`${item.buttonTitle} (${item.code})`}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <RunningText
-                          text={item.code}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80"
-                        />
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                          {item.code}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
@@ -1811,12 +1789,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               {activeRemnantItem.tag}
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`${activeRemnantItem.code} • ${activeRemnantItem.category}`}
-                              className="text-[11px] sm:text-xs text-slate-400 font-mono"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 font-mono mt-0.5 truncate">
+                            {activeRemnantItem.code} • {activeRemnantItem.category}
+                          </p>
                         </div>
 
                         <button
@@ -1999,10 +1974,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <RunningText
-                          text={item.theoreticalEra}
-                          className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80"
-                        />
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                          {item.theoreticalEra}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
@@ -2052,12 +2026,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               ({activeHypotheticalIndex + 1}/{HYPOTHETICAL_STARS_GUIDE.length})
                             </span>
                           </div>
-                          <div className="min-w-0 mt-0.5">
-                            <RunningText
-                              text={`${activeHypotheticalItem.category} • ${activeHypotheticalItem.theoreticalEra}`}
-                              className="text-[11px] sm:text-xs text-slate-400 italic"
-                            />
-                          </div>
+                          <p className="text-[11px] sm:text-xs text-slate-400 italic mt-0.5 truncate">
+                            {activeHypotheticalItem.category} • {activeHypotheticalItem.theoreticalEra}
+                          </p>
                         </div>
 
                         <button

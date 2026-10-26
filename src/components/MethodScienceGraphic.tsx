@@ -12,7 +12,6 @@ import {
   Maximize2,
   ChevronDown
 } from 'lucide-react';
-import { RunningText } from './RunningText';
 
 interface MethodScienceGraphicProps {
   methodId: string;
@@ -70,12 +69,9 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
           <span className="text-xs font-mono uppercase tracking-wider text-cyan-300 font-bold">
             Interactive Scientific Demonstration
           </span>
-          <div className="hidden sm:inline-block max-w-[210px] min-w-0 overflow-hidden">
-            <RunningText
-              text={methodName.split('&')[0].trim()}
-              className="px-2 py-0.5 rounded-md bg-slate-900 border border-cyan-500/30 text-[10px] font-mono text-cyan-400 font-semibold"
-            />
-          </div>
+          <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-slate-900 border border-cyan-500/30 text-[10px] font-mono text-cyan-400 font-semibold truncate max-w-[210px]">
+            {methodName.split('&')[0].trim()}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">

@@ -293,11 +293,12 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                               </div>
                               <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800 min-w-0 overflow-hidden">
                                 <span className="text-slate-400 block text-[9px]">Rotation:</span>
-                                <RunningText
-                                  text={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
-                                  className="text-cyan-300 font-bold block"
+                                <span
+                                  className="text-cyan-300 font-bold block truncate"
                                   title={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
-                                />
+                                >
+                                  {comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
+                                </span>
                               </div>
                             </div>
                           </div>

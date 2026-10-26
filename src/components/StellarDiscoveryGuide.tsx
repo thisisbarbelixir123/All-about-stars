@@ -321,12 +321,9 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeMethodIndex + 1}/{STELLAR_DISCOVERY_METHODS.length})
                         </span>
                       </div>
-                      <div className="min-w-0 overflow-hidden">
-                        <RunningText
-                          text={`Introduced: ${activeMethod.eraIntroduced} · Pioneers: ${activeMethod.pioneeringScientist}`}
-                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
-                        />
-                      </div>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
+                        Introduced: {activeMethod.eraIntroduced} · Pioneers: {activeMethod.pioneeringScientist}
+                      </p>
                     </div>
 
                     <button
@@ -524,12 +521,9 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeTimelineIndex + 1}/{STELLAR_DISCOVERY_TIMELINE.length})
                         </span>
                       </div>
-                      <div className="min-w-0 overflow-hidden">
-                        <RunningText
-                          text={`${activeTimelineItem.discovererOrMission} · ${activeTimelineItem.observatoryOrInstitution} (${activeTimelineItem.era})`}
-                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
-                        />
-                      </div>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
+                        {activeTimelineItem.discovererOrMission} · {activeTimelineItem.observatoryOrInstitution} ({activeTimelineItem.era})
+                      </p>
                     </div>
 
                     <button
@@ -721,12 +715,9 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                           ({activeTelescopeIndex + 1}/{HISTORIC_AND_MODERN_TELESCOPES.length})
                         </span>
                       </div>
-                      <div className="min-w-0 overflow-hidden">
-                        <RunningText
-                          text={`${activeTelescope.locationOrOrbit} · Aperture: ${activeTelescope.apertureDiameter} · Era: ${activeTelescope.era}`}
-                          className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono"
-                        />
-                      </div>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 font-mono truncate">
+                        {activeTelescope.locationOrOrbit} · Aperture: {activeTelescope.apertureDiameter} · Era: {activeTelescope.era}
+                      </p>
                     </div>
 
                     <button

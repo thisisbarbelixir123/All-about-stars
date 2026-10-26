@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Volume2, VolumeX, Sparkles, Music, ChevronDown, X } from 'lucide-react';
-import { RunningText } from './RunningText';
 import { spaceAudio } from '../utils/spaceAudioEngine';
 import { soundEffects } from '../utils/soundEffects';
 
@@ -143,15 +142,9 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-w-0">
                 <Music className={`w-4 h-4 shrink-0 ${isBgmActive ? 'text-cyan-400' : 'text-slate-500'}`} />
-                <div className="flex flex-col min-w-0 overflow-hidden">
-                  <RunningText
-                    text="Background Music"
-                    className="text-xs font-semibold text-slate-200"
-                  />
-                  <RunningText
-                    text="Cosmic Drone & Chimes"
-                    className="text-[10px] text-slate-400"
-                  />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-slate-200 truncate">Background Music</span>
+                  <span className="text-[10px] text-slate-400 truncate">Cosmic Drone & Chimes</span>
                 </div>
               </div>
               <button
@@ -193,15 +186,9 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           <div className="flex items-center justify-between bg-[#060c22] p-2.5 rounded-xl border border-cyan-500/15">
             <div className="flex items-center gap-2 min-w-0">
               <Volume2 className={`w-4 h-4 shrink-0 ${isSfxOn ? 'text-cyan-400' : 'text-slate-500'}`} />
-              <div className="flex flex-col min-w-0 overflow-hidden">
-                <RunningText
-                  text="Sound Effects (SFX)"
-                  className="text-xs font-semibold text-slate-200"
-                />
-                <RunningText
-                  text="UI clicks & celestial cues"
-                  className="text-[10px] text-slate-400"
-                />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-slate-200 truncate">Sound Effects (SFX)</span>
+                <span className="text-[10px] text-slate-400 truncate">UI clicks & celestial cues</span>
               </div>
             </div>
             <button

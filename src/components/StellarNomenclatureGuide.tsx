@@ -540,10 +540,9 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                                   text={st.designation}
                                   className="text-xs font-mono font-bold text-white group-hover:text-cyan-300"
                                 />
-                                <RunningText
-                                  text={st.role}
-                                  className="text-[10px] text-slate-400 font-sans"
-                                />
+                                <div className="text-[10px] text-slate-400 font-sans truncate">
+                                  {st.role}
+                                </div>
                               </div>
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
@@ -1008,10 +1007,9 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                                 text={displayTitle}
                                 className="font-mono text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
                               />
-                              <RunningText
-                                text={cat.exampleTarget}
-                                className="text-[11px] text-slate-400"
-                              />
+                              <div className="text-[11px] text-slate-400 truncate">
+                                {cat.exampleTarget}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 text-[11px] font-mono text-cyan-400 font-semibold shrink-0">
@@ -1114,10 +1112,9 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                                   text={starRef.name}
                                   className="text-xs font-bold font-mono text-white group-hover:text-cyan-300 transition-colors"
                                 />
-                                <RunningText
-                                  text={starRef.role}
-                                  className="text-[11px] text-slate-400 font-sans"
-                                />
+                                <div className="text-[11px] text-slate-400 font-sans truncate">
+                                  {starRef.role}
+                                </div>
                               </div>
                             </div>
                             {catalogStar && (

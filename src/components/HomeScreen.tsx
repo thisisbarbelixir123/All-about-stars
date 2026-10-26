@@ -323,19 +323,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                     <div className="flex items-center justify-between text-[10px] font-mono text-cyan-300 min-w-0">
                       <span>{activeHeroStar.star.spectralType}</span>
-                      <div className="min-w-0 flex-1 text-right ml-1">
-                        <RunningText
-                          text={activeHeroStar.star.stellarStage}
-                          className="text-slate-300"
-                        />
-                      </div>
+                      <span className="text-slate-300 truncate ml-1 text-right max-w-[120px]">
+                        {activeHeroStar.star.stellarStage}
+                      </span>
                     </div>
 
-                    <div className="min-w-0">
-                      <RunningText
-                        text={`${dimensions.metricSi} • ${dimensions.solarFormatted}`}
-                        className="text-[10px] font-mono text-slate-300"
-                      />
+                    <div className="text-[10px] font-mono text-slate-300 truncate">
+                      {dimensions.metricSi} • {dimensions.solarFormatted}
                     </div>
 
                     <div className="text-[9px] font-mono text-cyan-400/90 pt-1 border-t border-cyan-500/15 flex items-center justify-between">
