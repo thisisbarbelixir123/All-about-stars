@@ -7,9 +7,9 @@ import { resolveStarId } from '../data/stars';
 interface ClassificationMappedStarsSectionProps {
   title: string;
   categoryColor: string;
-  benchmarkStarIds: string[];
+  benchmarkStarIds?: string[];
   allMappedStars: StarData[];
-  onSelectStar: (star: StarData) => void;
+  onSelectStar?: (star: StarData) => void;
 }
 
 export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStarsSectionProps> = ({
@@ -33,10 +33,10 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
 
     if (explicit.length > 0) return explicit;
 
-    // Fallback: Dynamically pick up to 5 brightest/most prominent stars from allMappedStars
+    // Fallback: Dynamically pick up to 8 brightest/most prominent stars from allMappedStars
     return [...allMappedStars]
       .sort((a, b) => (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99))
-      .slice(0, 5);
+      .slice(0, 8);
   }, [benchmarkStarIds, allMappedStars]);
 
   // Filter all mapped stars by search query

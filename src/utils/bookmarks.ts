@@ -1,5 +1,6 @@
 // Star Bookmarking and Custom Observation List Management Utility
 // Stores user favorites, custom observing targets, and observational notes in localStorage
+import { resolveStarId } from '../data/stars';
 
 export interface ObservationList {
   id: string;
@@ -30,14 +31,14 @@ const DEFAULT_LISTS: ObservationList[] = [
     name: 'Supernova Watchlist',
     description: 'Massive evolved supergiants nearing core collapse.',
     createdAt: Date.now(),
-    starIds: ['betelgeuse', 'antares', 'eta-carinae', 'rho-cassiopeiae'],
+    starIds: ['betelgeuse', 'antares', 'eta-carinae-a', 'rho-cassiopeiae'],
   },
   {
     id: 'compact-remnants',
     name: 'Exotic Relativistic Remnants',
     description: 'White dwarfs, pulsars, magnetars, and black holes.',
     createdAt: Date.now(),
-    starIds: ['sirius-b', 'crab-pulsar', 'sgr-1806-20', 'cygnus-x-1', 'sagittarius-a-star'],
+    starIds: ['sirius-b', 'crab-pulsar', 'hde-226868', 'calvera'],
   },
 ];
 
@@ -89,7 +90,8 @@ export function saveUserAstronomyData(data: UserAstronomyData): void {
 
 export function isStarBookmarked(starId: string): boolean {
   const data = getUserAstronomyData();
-  return data.bookmarkedStarIds.includes(starId);
+  const canonical = resolveStarId(starId);
+  return data.bookmarkedStarIds.some((id) => id === starId || resolveStarId(id) === canonical);
 }
 
 export function toggleStarBookmark(starId: string): boolean {

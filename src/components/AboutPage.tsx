@@ -1,4 +1,6 @@
 import React from 'react';
+import { STARS_CATALOG } from '../data/stars';
+import { MULTIPLE_STAR_SYSTEMS } from '../data/multipleStarSystemsData';
 import {
   Compass,
   BarChart2,
@@ -51,7 +53,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
                 v2.4 (2026 Edition)
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> 885 Stars • 53 Systems
+                <CheckCircle2 className="w-3 h-3" /> {STARS_CATALOG.length} Stars • {MULTIPLE_STAR_SYSTEMS.length} Systems
               </span>
             </div>
 
@@ -294,7 +296,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
                 <Grid className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white">885-Star Multi-Wavelength Catalog</h3>
+              <h3 className="text-sm font-bold text-white">{STARS_CATALOG.length}-Star Multi-Wavelength Catalog</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               Curated database with multi-parametric real-time filtering (spectral types O–Y, stages, diameter, temperature, distance, m_v ≤ 6.5 naked-eye threshold), and cross-indexing with Bayer, Flamsteed, HD, SAO, GJ, HR, and Gaia DR3.
@@ -307,7 +309,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
                 <Orbit className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white">53 Multiple Star Systems & 3D Orbits</h3>
+              <h3 className="text-sm font-bold text-white">{MULTIPLE_STAR_SYSTEMS.length} Multiple Star Systems & 3D Orbits</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               Visual, spectroscopic, eclipsing, and contact binaries through hierarchical multiples with live Keplerian telemetry: true anomaly, eccentric anomaly, periastron/apastron distances, and barycentric center-of-mass simulations.

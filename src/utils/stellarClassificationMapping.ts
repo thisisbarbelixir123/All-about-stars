@@ -982,7 +982,7 @@ export function getMappedStarsForHypothetical(hypoId: string, catalog: StarData[
   if (id.includes('frozen-star')) {
     return catalog.filter((s) => {
       const text = `${s.description || ''} ${(s.notableFacts || []).join(' ')}`.toLowerCase();
-      return s.massSolar <= 0.1 || s.temperatureKelvin <= 2800 || text.includes('brown dwarf') || text.includes('ultra-cool');
+      return s.massSolar <= 0.1 || s.temperature <= 2800 || text.includes('brown dwarf') || text.includes('ultra-cool');
     });
   }
 

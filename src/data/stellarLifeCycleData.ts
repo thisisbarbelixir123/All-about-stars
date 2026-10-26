@@ -157,7 +157,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         detailedPhysics:
           'Unlike solar-mass stars that have a radiative zone trapping helium ash in the core, red dwarfs dredge helium throughout the star and consume nearly 100% of their hydrogen reserve.',
         keyPhenomena: ['Superflares', 'Trillion-Year Stability', '100% Convective Fuel Efficiency'],
-        analogousStarIds: ['proxima-centauri', 'barnards-star', 'trappist-1'],
+        analogousStarIds: ['proxima-centauri', 'trappist-1', 'kapteyns-star'],
         visualType: 'star',
       },
       {
@@ -524,7 +524,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         detailedPhysics:
           'Because the white dwarf has a tiny surface area and an insulating atmosphere, trapped thermal energy escapes slowly. As the interior drops below ~10 million K, carbon and oxygen ions crystallize into a solid lattice (releasing latent heat) before entering the Debye cooling regime toward cosmic extinction.',
         keyPhenomena: ['Thermal Cooling Sequence', 'Interior Core Crystallization', 'Debye Lattice Cooling'],
-        analogousStarIds: ['van-maanen-2'],
+        analogousStarIds: ['van-maanens-star'],
         visualType: 'cooling-white-dwarf',
         coolingStage: 'orange',
       },
@@ -931,7 +931,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         detailedPhysics:
           'After core hydrogen exhaustion, post-main-sequence core helium and carbon burning lasts ~300,000 years, marked by violent S Doradus and giant LBV eruptions.',
         keyPhenomena: ['Homunculus Bipolar Lobes', 'Eddington Limit Breaches', 'Giant Mass-Loss Eruptions'],
-        analogousStarIds: ['eta-carinae', 'pistol-star'],
+        analogousStarIds: ['eta-carinae-a', 'pistol-star'],
         visualType: 'giant',
       },
       {
@@ -978,7 +978,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         detailedPhysics:
           'Fallback stellar matter orbits near the Innermost Stable Circular Orbit (ISCO), heated to 10⁷ K and beamed relativistically before plunging across the Event Horizon.',
         keyPhenomena: ['Black Hole Remnant', 'Relativistic Doppler Beaming', 'Einstein Photon Ring'],
-        analogousStarIds: ['cygnus-x-1', 'v404-cygni'],
+        analogousStarIds: ['hde-226868'],
         visualType: 'black-hole',
       },
       {
@@ -1001,7 +1001,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         detailedPhysics:
           'Once all surrounding gas is consumed, the dormant black hole emits zero light (Hawking temperature ~6 nanokelvin) and eventually evaporates completely via quantum particle pair production near the horizon over ~10⁶⁷ years.',
         keyPhenomena: ['200% Remnant Extinction', 'Pure Gravitational Lensing Shadow', '10⁶⁷ yr Hawking Evaporation'],
-        analogousStarIds: ['gaia-bh1'],
+        analogousStarIds: ['hde-226868'],
         visualType: 'black-hole',
       },
     ],

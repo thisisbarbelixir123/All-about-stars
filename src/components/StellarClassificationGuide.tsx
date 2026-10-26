@@ -333,13 +333,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
     return SPECTRAL_CLASSES_GUIDE.find((s) => s.id === selectedSpectralClassId) || SPECTRAL_CLASSES_GUIDE[4];
   }, [selectedSpectralClassId]);
 
-  // Helper to find StarData instances for example star IDs
-  const getExampleStars = (starIds: string[]): StarData[] => {
-    return starIds
-      .map((id) => STARS_CATALOG.find((s) => s.id === id))
-      .filter(Boolean) as StarData[];
-  };
-
 
   return (
     <div className="w-full bg-[#060a1a]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-2xl p-4 sm:p-6 lg:p-8 mobile-landscape:p-2 mobile-landscape:border-none shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col gap-6 relative overflow-hidden text-slate-200">
@@ -609,7 +602,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <ClassificationMappedStarsSection
                       title={`Mapped Type ${activeSpectralItem.code} Stars`}
                       categoryColor={activeSpectralItem.colorHex}
-                      benchmarkStarIds={activeSpectralItem.exampleStarIds}
                       allMappedStars={getMappedStarsForHarvard(activeSpectralItem.code, STARS_CATALOG)}
                       onSelectStar={onSelectStar}
                     />
@@ -670,7 +662,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Stellar Classification Card - Carousel UI */}
               {(() => {
                 const activeExoticItem = EXOTIC_CLASSES_GUIDE[activeExoticIndex] || EXOTIC_CLASSES_GUIDE[0];
-                const catalogStars = getExampleStars(activeExoticItem.exampleStarIds || []);
                 const filterableCode = (() => {
                   const supported: string[] = ['WR', 'LBV', 'WD', 'NS', 'C', 'S', 'L', 'T', 'Y'];
                   return supported.find((sc) => activeExoticItem.code.includes(sc));
@@ -817,7 +808,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Mapped ${activeExoticItem.name}`}
                           categoryColor={activeExoticItem.colorHex}
-                          benchmarkStarIds={activeExoticItem.exampleStarIds || []}
                           allMappedStars={getMappedStarsForExotic(activeExoticItem.code, STARS_CATALOG)}
                           onSelectStar={onSelectStar}
                         />
@@ -914,8 +904,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Variable Stars Card - Carousel UI */}
               {(() => {
                 const activeVariableItem = VARIABLE_STARS_GUIDE[activeVariableIndex] || VARIABLE_STARS_GUIDE[0];
-                const catalogStars = getExampleStars(activeVariableItem.exampleStarIds || []);
-                const archetypeStar = catalogStars[0] || null;
+                const mappedVariableStars = getMappedStarsForVariable(activeVariableItem.id, STARS_CATALOG);
+                const archetypeStar = mappedVariableStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1061,8 +1051,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Mapped ${activeVariableItem.name}`}
                           categoryColor={activeVariableItem.colorHex}
-                          benchmarkStarIds={activeVariableItem.exampleStarIds || []}
-                          allMappedStars={getMappedStarsForVariable(activeVariableItem.id, STARS_CATALOG)}
+                          allMappedStars={mappedVariableStars}
                           onSelectStar={onSelectStar}
                         />
 
@@ -1144,7 +1133,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Stellar Classification Card - Carousel UI */}
               {(() => {
                 const activeYerkesItem = LUMINOSITY_CLASSES_GUIDE[activeYerkesIndex] || LUMINOSITY_CLASSES_GUIDE[0];
-                const catalogStars = getExampleStars(activeYerkesItem.exampleStarIds || []);
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1266,7 +1254,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Mapped Class ${activeYerkesItem.romanNumeral} Stars`}
                           categoryColor={activeYerkesItem.colorHex || '#38bdf8'}
-                          benchmarkStarIds={activeYerkesItem.exampleStarIds || []}
                           allMappedStars={getMappedStarsForYerkes(activeYerkesItem.romanNumeral, STARS_CATALOG)}
                           onSelectStar={onSelectStar}
                         />
@@ -1344,8 +1331,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Star Systems Card - Carousel UI */}
               {(() => {
                 const activeStarSystemItem = STAR_SYSTEMS_GUIDE[activeStarSystemIndex] || STAR_SYSTEMS_GUIDE[0];
-                const catalogStars = getExampleStars(activeStarSystemItem.exampleStarIds || []);
-                const archetypeStar = catalogStars[0] || null;
+                const mappedSystemStars = getMappedStarsForStarSystem(activeStarSystemItem.id, STARS_CATALOG);
+                const archetypeStar = mappedSystemStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1505,8 +1492,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Individual Catalog Stars in ${activeStarSystemItem.name}`}
                           categoryColor={activeStarSystemItem.colorHex}
-                          benchmarkStarIds={activeStarSystemItem.exampleStarIds || []}
-                          allMappedStars={getMappedStarsForStarSystem(activeStarSystemItem.id, STARS_CATALOG)}
+                          allMappedStars={mappedSystemStars}
                           onSelectStar={onSelectStar}
                         />
 
@@ -1585,7 +1571,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Stellar Populations Card - Carousel UI */}
               {(() => {
                 const activePopulationItem = STELLAR_POPULATIONS_GUIDE[activePopulationIndex] || STELLAR_POPULATIONS_GUIDE[0];
-                const catalogStars = getExampleStars(activePopulationItem.exampleStarIds || []);
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1715,7 +1700,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Mapped ${activePopulationItem.name}`}
                           categoryColor={activePopulationItem.colorHex}
-                          benchmarkStarIds={activePopulationItem.exampleStarIds || []}
                           allMappedStars={getMappedStarsForPopulation(activePopulationItem.id, STARS_CATALOG)}
                           onSelectStar={onSelectStar}
                         />
@@ -1795,8 +1779,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Stellar Remnants Card - Carousel UI */}
               {(() => {
                 const activeRemnantItem = STELLAR_REMNANTS_GUIDE[activeRemnantIndex] || STELLAR_REMNANTS_GUIDE[0];
-                const catalogStars = getExampleStars(activeRemnantItem.exampleStarIds || []);
-                const archetypeStar = catalogStars[0] || null;
+                const mappedRemnantStars = getMappedStarsForRemnant(activeRemnantItem.id, STARS_CATALOG);
+                const archetypeStar = mappedRemnantStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -1947,7 +1931,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               <ClassificationMappedStarsSection
                                 title={`Mapped ${activeRemnantItem.name}`}
                                 categoryColor={activeRemnantItem.colorHex}
-                                benchmarkStarIds={activeRemnantItem.exampleStarIds || []}
                                 allMappedStars={mappedStars}
                                 onSelectStar={onSelectStar}
                               />
@@ -2040,8 +2023,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Hypothetical Stars Card - Carousel UI */}
               {(() => {
                 const activeHypotheticalItem = HYPOTHETICAL_STARS_GUIDE[activeHypotheticalIndex] || HYPOTHETICAL_STARS_GUIDE[0];
-                const catalogStars = getExampleStars(activeHypotheticalItem.exampleStarIds || []);
-                const archetypeStar = catalogStars[0] || null;
+                const mappedHypoStars = getMappedStarsForHypothetical(activeHypotheticalItem.id, STARS_CATALOG);
+                const archetypeStar = mappedHypoStars[0] || null;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
@@ -2179,15 +2162,12 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                         {/* Direct Ancestral / Progenitor Stars in Catalog */}
                         {(() => {
-                          const mappedHypoStars = getMappedStarsForHypothetical(activeHypotheticalItem.id, STARS_CATALOG);
-                          const starsToShow = mappedHypoStars.length > 0 ? mappedHypoStars : getExampleStars(activeHypotheticalItem.exampleStarIds || []);
-                          if (starsToShow.length === 0) return null;
+                          if (mappedHypoStars.length === 0) return null;
                           return (
                             <ClassificationMappedStarsSection
                               title={`Mapped Progenitors & Relics: ${activeHypotheticalItem.name}`}
                               categoryColor={activeHypotheticalItem.colorHex}
-                              benchmarkStarIds={activeHypotheticalItem.exampleStarIds || []}
-                              allMappedStars={starsToShow}
+                              allMappedStars={mappedHypoStars}
                               onSelectStar={onSelectStar}
                             />
                           );

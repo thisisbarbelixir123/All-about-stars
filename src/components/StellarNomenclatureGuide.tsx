@@ -335,7 +335,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Stars with IAU-Designated & Approved Proper Names in Catalog"
             categoryColor="#f59e0b"
-            benchmarkStarIds={['sirius-a', 'canopus', 'rigel', 'betelgeuse', 'vega', 'arcturus', 'capella-aa', 'aldebaran', 'antares', 'spica', 'pollux', 'fomalhaut', 'deneb', 'polaris', 'barnards-star', 'proxima-centauri']}
             allMappedStars={mappedProperNameStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />
@@ -635,7 +634,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Bayer Greek Letter Stars in Catalog"
             categoryColor="#38bdf8"
-            benchmarkStarIds={['sirius-a', 'rigel', 'bellatrix', 'betelgeuse', 'antares', 'canopus', 'vega', 'arcturus']}
             allMappedStars={mappedGreekStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />
@@ -752,7 +750,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Numbered Stars without Bayer Designation (Flamsteed & Gould)"
             categoryColor="#38bdf8"
-            benchmarkStarIds={['51-pegasi', '61-cygni-a', '61-cygni-b', '82-g-eridani', '15-vulpeculae', 'praecipua', 'alsciaukat', 'tx-piscium', 'alcor']}
             allMappedStars={mappedNumberedStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />
@@ -888,7 +885,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Variable Stars without Bayer Designation (Argelander & GCVS)"
             categoryColor="#f43f5e"
-            benchmarkStarIds={['uy-scuti', 'vy-canis-majoris', 's-doradus', 'r-coronae-borealis', 'ah-scorpii', 'v838-monocerotis', 'v354-cephei', 'v766-centauri']}
             allMappedStars={mappedVariableStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />
@@ -1019,7 +1015,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Stars with Modern Survey Catalog Numbers (Without Bayer Designation)"
             categoryColor="#c084fc"
-            benchmarkStarIds={['methuselah-star', 'trappist-1', 'barnards-star', 'kapteyns-star', 'toi-700', 'wise-0855-0714', 'lhs-1140', 'gliese-581', 'gj-1214', 'kepler-452', 'lich-pulsar', 'wr-102', 'wolf-359', 'ross-128', 'lalande-21185', 'scorpius-x-1-ns', 'calvera', 'iras-05280-6910']}
             allMappedStars={mappedCatalogPrimaryStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />
@@ -1123,7 +1118,6 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <ClassificationMappedStarsSection
             title="Mapped Cluster & Extragalactic Stars (Without Bayer Designation)"
             categoryColor="#10b981"
-            benchmarkStarIds={['r136a1', 'r136a2', 'r136a3', 'r136c', 'stephenson-2-18', 'westerlund-1-26', 'vfts-352', 'sanduleak-2-73', 'bat99-98']}
             allMappedStars={mappedClusterExtragalacticStars}
             onSelectStar={(star) => onSelectStar && onSelectStar(star)}
           />

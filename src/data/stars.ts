@@ -38,6 +38,14 @@ export const STAR_ID_ALIASES: Record<string, string> = {
   'alpha-crucis': 'acrux-aa',
   'alpha-1-crucis': 'acrux-aa',
   'alpha-2-crucis': 'acrux-ba',
+  'cygnus-x-1': 'hde-226868',
+  'eta-carinae': 'eta-carinae-a',
+  'van-maanen-2': 'van-maanens-star',
+  'hd-93129a': 'hd-93129aa',
+  'capella': 'capella-aa',
+  'epsilon-eridani': 'ran',
+  '55-cancri-a': 'copernicus',
+  '55-cancri': 'copernicus',
 };
 
 /**

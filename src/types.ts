@@ -104,6 +104,7 @@ export interface StarData {
   // Astrophysical details
   stellarStage: StellarStage;
   isContactBinary?: boolean;
+  systemHierarchy?: string;
   lifespanEstimate: string;
   futureFate: string;
   fusionProcess: string;

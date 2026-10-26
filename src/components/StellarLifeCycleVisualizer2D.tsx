@@ -7,7 +7,7 @@ import {
   timelineToSlider,
   sliderToTimeline,
 } from '../data/stellarLifeCycleData';
-import { STARS_CATALOG } from '../data/stars';
+import { STARS_CATALOG, resolveStarId } from '../data/stars';
 import { StarData } from '../types';
 import { StarDot2D } from './StarDot2D';
 import {
@@ -1506,10 +1506,21 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
   const activeStage = currentTrack.checkpoints[currentStageIndex] || telemetry.current;
 
-  // Catalog star examples for active stage
+  // Catalog star examples for active stage with alias resolution & dynamic fallback
   const exampleStars = useMemo(() => {
-    const ids = activeStage.analogousStarIds || [];
-    return STARS_CATALOG.filter((s) => ids.includes(s.id));
+    const rawIds = activeStage.analogousStarIds || [];
+    const resolvedIds = rawIds.map((id) => resolveStarId(id));
+    const matched = STARS_CATALOG.filter((s) => rawIds.includes(s.id) || resolvedIds.includes(s.id));
+    if (matched.length > 0) return matched;
+
+    // Dynamic fallback: find stars matching stage name or spectral type
+    const stageQuery = (activeStage.stageName || '').toLowerCase();
+    const specQuery = (activeStage.spectralClassEquivalent || '').toLowerCase();
+    return STARS_CATALOG.filter((s) => {
+      const sStage = (s.stellarStage || '').toLowerCase();
+      const sSpec = (s.spectralType || '').toLowerCase();
+      return (stageQuery && sStage.includes(stageQuery)) || (specQuery && sSpec.startsWith(specQuery));
+    }).slice(0, 4);
   }, [activeStage]);
 
   const stageRibbonRef = useRef<HTMLDivElement>(null);
