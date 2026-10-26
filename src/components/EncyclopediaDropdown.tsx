@@ -173,83 +173,7 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
               </button>
             )}
 
-            {/* 4. Constellation Guide */}
-            <button
-              id="btn-encyclopedia-menu-constellations"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenConstellations();
-              }}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-            >
-              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
-                <Compass className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Constellation Guide</div>
-                <div className="text-[10px] text-slate-400 font-sans break-words">All 88 IAU constellations & lore</div>
-              </div>
-            </button>
-
-            {/* 5. H-R Diagram */}
-            <button
-              id="btn-encyclopedia-menu-hr"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenHRDiagram();
-              }}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-            >
-              <div className="p-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
-                <BarChart2 className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">H-R Diagram</div>
-                <div className="text-[10px] text-slate-400 font-sans break-words">Luminosity vs Temperature plot</div>
-              </div>
-            </button>
-
-            {/* 6. Star Catalog */}
-            <button
-              id="btn-encyclopedia-menu-catalog"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenCatalog();
-              }}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-            >
-              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
-                <Grid className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Star Catalog</div>
-                <div className="text-[10px] text-slate-400 font-sans break-words">Individual Stars & physical parameters</div>
-              </div>
-            </button>
-
-            {/* 7. System Catalog */}
-            {onOpenStellarSystems && (
-              <button
-                id="btn-encyclopedia-menu-stellar-systems"
-                onClick={() => {
-                  setIsOpen(false);
-                  onOpenStellarSystems();
-                }}
-                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
-              >
-                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
-                  <Share2 className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words flex items-center gap-1.5">
-                    <span>System Catalog</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-sans break-words">Multiple star systems & 3D orbits</div>
-                </div>
-              </button>
-            )}
-
-            {/* 8. Stellar Nomenclature */}
+            {/* 4. Stellar Nomenclature */}
             {onOpenNomenclature && (
               <button
                 id="btn-encyclopedia-menu-nomenclature"
@@ -267,6 +191,82 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
                     <span>Stellar Nomenclature</span>
                   </div>
                   <div className="text-[10px] text-slate-400 font-sans break-words">Bayer letters, Flamsteed & catalogs</div>
+                </div>
+              </button>
+            )}
+
+            {/* 5. Constellation Guide */}
+            <button
+              id="btn-encyclopedia-menu-constellations"
+              onClick={() => {
+                setIsOpen(false);
+                onOpenConstellations();
+              }}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+            >
+              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                <Compass className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Constellation Guide</div>
+                <div className="text-[10px] text-slate-400 font-sans break-words">All 88 IAU constellations & lore</div>
+              </div>
+            </button>
+
+            {/* 6. H-R Diagram */}
+            <button
+              id="btn-encyclopedia-menu-hr"
+              onClick={() => {
+                setIsOpen(false);
+                onOpenHRDiagram();
+              }}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+            >
+              <div className="p-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                <BarChart2 className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">H-R Diagram</div>
+                <div className="text-[10px] text-slate-400 font-sans break-words">Luminosity vs Temperature plot</div>
+              </div>
+            </button>
+
+            {/* 7. Star Catalog */}
+            <button
+              id="btn-encyclopedia-menu-catalog"
+              onClick={() => {
+                setIsOpen(false);
+                onOpenCatalog();
+              }}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+            >
+              <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                <Grid className="w-3.5 h-3.5" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words">Star Catalog</div>
+                <div className="text-[10px] text-slate-400 font-sans break-words">Individual Stars & physical parameters</div>
+              </div>
+            </button>
+
+            {/* 8. System Catalog */}
+            {onOpenStellarSystems && (
+              <button
+                id="btn-encyclopedia-menu-stellar-systems"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenStellarSystems();
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 text-slate-200 hover:text-white cursor-pointer group"
+              >
+                <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Share2 className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-slate-200 group-hover:text-cyan-300 break-words flex items-center gap-1.5">
+                    <span>System Catalog</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-sans break-words">Multiple star systems & 3D orbits</div>
                 </div>
               </button>
             )}

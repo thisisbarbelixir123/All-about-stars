@@ -35,7 +35,6 @@ import { MultipleStarSystemData } from './data/multipleStarSystemsData';
 import { LoadingSprite } from './components/LoadingSprite';
 
 import { 
-  Sparkles, 
   Sun, 
   Orbit, 
   Scale, 
@@ -1035,23 +1034,10 @@ export default function App() {
         <div className="fixed inset-0 z-50 w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200">
           {/* Encyclopedia Header Bar with Navigation Tabs & Close Button */}
           <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2 sm:py-3 mobile-landscape:py-1.5 mobile-landscape:px-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
-              {/* Left: Encyclopedia Brand Badge & Functionalities */}
+              {/* Left: Encyclopedia Module Switcher Tabs */}
               <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
-                <button
-                  id="overlay-brand-badge"
-                  onClick={() => {
-                    setFrontpageInitialSection('what-is-a-star');
-                    setActiveOverlay('frontpage');
-                  }}
-                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/35 text-cyan-300 font-mono text-xs font-bold tracking-wider uppercase shrink-0 shadow-sm cursor-pointer transition-all"
-                  title="Go to Encyclopedia Frontpage: What is a Star?"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Starpedia 3D</span>
-                </button>
-
                 {/* Module Switcher Tabs: In exact requested order:
-                    What is a Star - Classification - Discovery - Constellation Guide - H-R Diagram - Star Catalog - System Catalog */}
+                    What is a Star - Classification - Discovery - Nomenclature - Constellation Guide - H-R Diagram - Star Catalog - System Catalog */}
                 <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512] rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
                   {/* 1. What is a Star */}
                   <button
@@ -1101,7 +1087,22 @@ export default function App() {
                     <span>Discovery</span>
                   </button>
 
-                  {/* 4. Constellation Guide */}
+                  {/* 4. Nomenclature */}
+                  <button
+                    id="overlay-tab-nomenclature"
+                    onClick={() => setActiveOverlay('nomenclature')}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                      activeOverlay === 'nomenclature'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                    title="How We Name Stars (Stellar Nomenclature: Bayer, Flamsteed, Catalogs)"
+                  >
+                    <Bookmark className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 text-amber-400" />
+                    <span>Nomenclature</span>
+                  </button>
+
+                  {/* 5. Constellation Guide */}
                   <button
                     id="overlay-tab-constellations"
                     onClick={() => setActiveOverlay('constellations')}
@@ -1125,7 +1126,7 @@ export default function App() {
                     </span>
                   </button>
 
-                  {/* 5. H-R Diagram */}
+                  {/* 6. H-R Diagram */}
                   <button
                     id="overlay-tab-hr"
                     onClick={() => setActiveOverlay('hr-diagram')}
@@ -1140,7 +1141,7 @@ export default function App() {
                     <span>H-R Diagram</span>
                   </button>
 
-                  {/* 6. Star Catalog */}
+                  {/* 7. Star Catalog */}
                   <button
                     id="overlay-tab-catalog"
                     onClick={() => {
@@ -1165,7 +1166,7 @@ export default function App() {
                     </span>
                   </button>
 
-                  {/* 7. System Catalog */}
+                  {/* 8. System Catalog */}
                   <button
                     id="overlay-tab-system-catalog"
                     onClick={() => setActiveOverlay('stellar-systems')}
@@ -1199,15 +1200,12 @@ export default function App() {
                   className={`flex items-center justify-center gap-1.5 ${
                     isMobile ? 'p-2' : 'p-2 md:px-3 md:py-1.5'
                   } rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-500/40 text-xs font-semibold transition-all cursor-pointer active:scale-95 shrink-0`}
-                  title="Close Encyclopedia (Esc)"
+                  title="Close Encyclopedia"
                   aria-label="Close Encyclopedia"
                 >
                   <X className="w-4 h-4" />
                   {!isMobile && (
-                    <>
-                      <span className="hidden md:inline">Close</span>
-                      <span className="text-[10px] font-mono text-slate-400 hidden md:inline">[Esc]</span>
-                    </>
+                    <span className="hidden md:inline">Close</span>
                   )}
                 </button>
               </div>
