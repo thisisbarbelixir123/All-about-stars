@@ -615,8 +615,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
           </div>
 
-          {/* The 13 Zodiac Signs Side-by-Side Timeline */}
-          <div className="grid grid-cols-2 min-[420px]:grid-cols-3 mobile-landscape:grid-cols-4 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+          {/* The 13 Zodiac Signs Grid */}
+          <div className="grid grid-cols-2 min-[420px]:grid-cols-3 mobile-landscape:grid-cols-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5">
             {ZODIAC_13_SIGNS.map((sign) => {
               const star = starMap.get(sign.principalStarId);
               const constellation = ALL_88_CONSTELLATIONS.find((c) => c.name.toLowerCase() === sign.name.toLowerCase());
@@ -624,84 +624,110 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               return (
                 <div
                   key={sign.name}
-                  className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col justify-between gap-2.5 sm:gap-3 border transition-all ${
+                  onClick={() => constellation && setInspectedConstellation(constellation)}
+                  className={`group p-2 sm:p-2.5 rounded-xl flex flex-col justify-between border transition-all cursor-pointer shadow-sm ${
                     sign.isThirteenth
-                      ? 'bg-[#150f04] border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.25)]'
-                      : 'bg-[#050c20] border-cyan-500/25 hover:border-cyan-500/50'
+                      ? 'bg-[#150f04] border-amber-500/70 hover:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                      : 'bg-[#040a1c] border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
                   }`}
+                  title={constellation ? `Click to open Constellation Dossier for ${constellation.name}` : undefined}
                 >
                   <div>
-                    <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                        <span className="text-xl sm:text-2xl shrink-0">{sign.symbol}</span>
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-base font-bold text-white flex items-center gap-1 sm:gap-1.5 truncate">
-                            <span className="truncate">{sign.name}</span>
-                            {sign.isThirteenth && (
-                              <span className="text-[8px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 font-bold shrink-0">
-                                13th!
-                              </span>
-                            )}
+                    {/* Compact Header */}
+                    <div className="flex items-start justify-between gap-1 mb-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
+                          <span className="text-base sm:text-lg leading-none shrink-0">{sign.symbol}</span>
+                          <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
+                            {sign.name}
                           </h4>
-                          <p className="text-[10px] sm:text-xs text-slate-400 truncate">{sign.englishMeaning}</p>
+                          {sign.isThirteenth && (
+                            <span className="text-[7.5px] sm:text-[8px] font-mono px-1 py-0.2 rounded bg-amber-500 text-slate-950 font-bold shrink-0">
+                              13th!
+                            </span>
+                          )}
                         </div>
+                        <p className="text-[9px] text-slate-400 italic truncate">{sign.englishMeaning}</p>
                       </div>
-                      <span className="text-[10px] sm:text-xs font-mono text-cyan-400 font-bold shrink-0">
+                      <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-slate-800/80 text-cyan-400 font-bold border border-slate-700/60 shrink-0">
                         #{sign.index}
                       </span>
                     </div>
 
-                    {/* SVG Constellation Asterism Preview */}
+                    {/* SVG Constellation Asterism Preview (Consistent 1:1 Square) */}
                     {constellation && (
                       <div
-                        onClick={() => setInspectedConstellation(constellation)}
-                        className="relative w-full aspect-square bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2 p-1.5 sm:p-2 cursor-pointer"
-                        title={`Click to open Constellation Dossier for ${constellation.name}`}
+                        className="relative w-full aspect-square bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1.5"
                       >
                         <ConstellationMap
                           constellation={constellation}
                           celestialData={celestialData}
                           mode="preview"
-                          size={140}
+                          size={100}
                           className="w-full h-full"
                         />
-                        <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
+                        <div className="absolute bottom-1 right-1 text-[7px] sm:text-[8px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
                           Figure
                         </div>
                       </div>
                     )}
 
-                    {/* Date Comparison */}
-                    <div className="space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs font-mono mt-2 sm:mt-3">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between gap-1">
-                        <span className="text-cyan-300 font-semibold truncate text-[9px] sm:text-xs">Real:</span>
-                        <span className="text-white font-bold truncate text-[9px] sm:text-xs">{sign.astronomicalDates}</span>
+                    {/* Date Comparison Compact Rows */}
+                    <div className="space-y-0.5 text-[8px] sm:text-[9px] font-mono my-1">
+                      <div className="px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between gap-1">
+                        <span className="text-cyan-300 font-semibold truncate text-[7.5px] sm:text-[8.5px]">Real:</span>
+                        <span className="text-white font-bold truncate text-[7.5px] sm:text-[8.5px]">{sign.astronomicalDates}</span>
                       </div>
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-1">
-                        <span className="text-slate-400 truncate text-[9px] sm:text-xs">Astro:</span>
-                        <span className="text-slate-300 truncate text-[9px] sm:text-xs">{sign.traditionalDates}</span>
+                      <div className="px-1.5 py-0.5 rounded bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-1">
+                        <span className="text-slate-400 truncate text-[7.5px] sm:text-[8.5px]">Astro:</span>
+                        <span className="text-slate-300 truncate text-[7.5px] sm:text-[8.5px]">{sign.traditionalDates}</span>
                       </div>
-                      <div className="flex items-center justify-between text-[9px] sm:text-[11px] text-slate-400 px-1">
+                      <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] text-slate-400 px-0.5 pt-0.5">
                         <span>Duration:</span>
                         <span className="text-cyan-400 font-bold">{sign.sunDurationDays} days</span>
                       </div>
                     </div>
 
-                    <p className="text-[10px] sm:text-xs text-slate-300 mt-2 sm:mt-2.5 leading-relaxed line-clamp-3 sm:line-clamp-none">
+                    {/* Scientific Snippet */}
+                    <p
+                      className="text-[8.5px] sm:text-[9px] text-slate-300/80 my-1 leading-tight line-clamp-2"
+                      title={sign.scientificNotes}
+                    >
                       {sign.scientificNotes}
                     </p>
                   </div>
 
-                  {/* Principal Star Link */}
-                  {star && (
-                    <button
-                      onClick={() => onSelectStar(star)}
-                      className="w-full py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg sm:rounded-xl bg-slate-800/80 hover:bg-cyan-950 hover:text-cyan-300 hover:border-cyan-500/40 border border-slate-700 text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer mt-1"
-                    >
-                      <StarDot2D star={star} sizeClassName="w-2.5 h-2.5" />
-                      <span className="truncate">Inspect {star.name.split('(')[0]}</span>
-                    </button>
-                  )}
+                  {/* Principal Star Link & Dossier Footer */}
+                  <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[9px] mt-0.5">
+                    {star ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectStar(star);
+                        }}
+                        className="text-slate-300 hover:text-cyan-300 truncate flex items-center gap-1 cursor-pointer transition-colors max-w-[65%]"
+                        title={`Inspect alpha star ${star.name}`}
+                      >
+                        <StarDot2D star={star} colorHex={star?.colorHex || '#fef08a'} sizeClassName="w-2 h-2" />
+                        <span className="truncate">{star.name.split('(')[0]}</span>
+                      </button>
+                    ) : (
+                      <span className="text-slate-500 text-[8px] truncate">No alpha star</span>
+                    )}
+
+                    {constellation && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInspectedConstellation(constellation);
+                        }}
+                        className="py-0.5 px-1.5 rounded bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-500/30 text-[8px] sm:text-[9px] font-semibold font-mono cursor-pointer shrink-0 transition-colors"
+                        title="Dossier"
+                      >
+                        Dossier
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
