@@ -1474,13 +1474,36 @@ export default function App() {
               <AboutPage
                 onNavigateTab={(tab) => {
                   setIsAboutOpen(false);
-                  if (tab === 'guide') {
+                  if (tab === 'home') {
+                    setIsHomeOpen(true);
+                    setActiveOverlay(null);
+                  } else if (tab === '3d-stage') {
+                    setIsHomeOpen(false);
+                    setActiveOverlay(null);
+                  } else if (tab === 'catalog') {
+                    setIsHomeOpen(false);
+                    setCatalogSubTab('stars');
+                    setActiveOverlay('catalog');
+                  } else if (tab === 'systems') {
+                    setIsHomeOpen(false);
+                    setCatalogSubTab('systems');
+                    setActiveOverlay('stellar-systems');
+                  } else if (tab === 'hr-diagram') {
+                    setIsHomeOpen(false);
+                    setActiveOverlay('hr-diagram');
+                  } else if (tab === 'constellations') {
+                    setIsHomeOpen(false);
+                    setActiveOverlay('constellations');
+                  } else if (tab === 'classification') {
+                    setIsHomeOpen(false);
+                    setActiveOverlay('guide');
+                  } else if (tab === 'guide') {
+                    setIsHomeOpen(false);
                     setFrontpageInitialSection('what-is-a-star');
                     setActiveOverlay('frontpage');
-                  } else if (tab === 'catalog' || tab === 'hr-diagram') {
-                    setActiveOverlay(tab);
-                  } else if (tab === 'home') {
-                    setIsHomeOpen(true);
+                  } else if (tab === 'discovery' || tab === 'nomenclature') {
+                    setIsHomeOpen(false);
+                    setActiveOverlay(tab as any);
                   }
                 }}
               />

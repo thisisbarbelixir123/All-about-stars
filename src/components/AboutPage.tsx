@@ -20,11 +20,26 @@ import {
   Heart,
   Database,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  FileText,
+  Sliders,
+  Scale
 } from 'lucide-react';
 
 interface AboutPageProps {
-  onNavigateTab: (tab: 'home' | '3d-stage' | 'catalog' | 'hr-diagram' | 'guide') => void;
+  onNavigateTab: (
+    tab:
+      | 'home'
+      | '3d-stage'
+      | 'catalog'
+      | 'systems'
+      | 'hr-diagram'
+      | 'constellations'
+      | 'classification'
+      | 'guide'
+      | 'nomenclature'
+      | 'discovery'
+  ) => void;
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
@@ -50,10 +65,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
                 Official Credits & Documentation
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-white/5 text-slate-300 border border-white/10">
-                v2.4 (2026 Edition)
+                v2.5 (2026 Edition)
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> {STARS_CATALOG.length} Stars • {MULTIPLE_STAR_SYSTEMS.length} Systems
+                <CheckCircle2 className="w-3 h-3" /> {STARS_CATALOG.length} Stars • {MULTIPLE_STAR_SYSTEMS.length} Systems • 88 Constellations
               </span>
             </div>
 
@@ -330,6 +345,32 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           </div>
 
           {/* Feature 6 */}
+          <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-teal-500/15 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shrink-0">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">Stellar Classification & Taxonomy</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Standalone guide to Morgan–Keenan spectral types (O–Y, WR, WD, NS), Yerkes luminosity classes (0 to VII), exotic Carbon and S-type stars, with dedicated 3D specimen directory modals.
+            </p>
+          </div>
+
+          {/* Feature 7 */}
+          <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-indigo-500/15 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">Stellar Nomenclature Guide</h3>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Comprehensive reference on canonical IAU proper names, Bayer Greek notations, Flamsteed numbering, variable star designations (Argelander, double-letter, V-numbers), and cross-catalog identifiers.
+            </p>
+          </div>
+
+          {/* Feature 8 */}
           <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-amber-500/15 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
@@ -342,7 +383,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             </p>
           </div>
 
-          {/* Feature 7 */}
+          {/* Feature 9 */}
           <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-emerald-500/15 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -355,20 +396,20 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
             </p>
           </div>
 
-          {/* Feature 8 */}
+          {/* Feature 10 */}
           <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-rose-500/15 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
-                <BookOpen className="w-5 h-5" />
+                <Scale className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-white">Evolutionary Pathways & Remnants</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Complete evolutionary lifecycle engines and degenerate matter models: electron degeneracy and Chandrasekhar limit (1.44 M☉), neutron degeneracy and TOV limit (2.1 – 2.3 M☉), pulsars, magnetars, and black hole event horizons.
+              Synchronized evolutionary lifecycle engines and degenerate matter models: electron degeneracy and Chandrasekhar limit (1.44 M☉), neutron degeneracy and TOV limit (2.1 – 2.3 M☉), pulsars, magnetars, and black hole event horizons.
             </p>
           </div>
 
-          {/* Feature 9 */}
+          {/* Feature 11 */}
           <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-fuchsia-500/15 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20 shrink-0">
@@ -377,11 +418,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               <h3 className="text-sm font-bold text-white">Procedural Web Audio Engine</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Native Web Audio API synthesis generating real-time low-frequency cosmic drone soundscapes and radio telescope pulsar pulse sonification without downloading heavy audio files. Global toggle via keypress <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[10px]">M</kbd>.
+              Unified audio popover menu controlling native Web Audio API synthesis: low-frequency cosmic drone soundscapes, pulsar radio pulse sonification, and procedural UI SFX without heavy asset downloads.
             </p>
           </div>
 
-          {/* Feature 10 */}
+          {/* Feature 12 */}
           <div className="p-5 rounded-2xl bg-[#080d22]/80 border border-orange-500/15 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 shrink-0">
@@ -498,6 +539,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           <span className="px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-300">Vite 6.2</span>
           <span className="px-3 py-1.5 rounded-lg bg-amber-950/60 border border-amber-500/30 text-amber-300">Web Audio API</span>
           <span className="px-3 py-1.5 rounded-lg bg-rose-950/60 border border-rose-500/30 text-rose-300">Lucide Icons</span>
+          <span className="px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">MIT Open Source</span>
           <span className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300">PWA Service Workers</span>
         </div>
       </section>
@@ -517,21 +559,39 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => onNavigateTab('3d-stage')}
-            className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:brightness-110 cursor-pointer flex items-center justify-center transition-all"
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:brightness-110 cursor-pointer flex items-center justify-center transition-all"
           >
             <span>Launch 3D Stage</span>
           </button>
           <button
             onClick={() => onNavigateTab('catalog')}
-            className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs border border-white/15 cursor-pointer flex items-center justify-center transition-all"
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs border border-white/15 cursor-pointer flex items-center justify-center transition-all"
           >
-            <span>Browse Catalog</span>
+            <span>Browse Catalog ({STARS_CATALOG.length})</span>
+          </button>
+          <button
+            onClick={() => onNavigateTab('systems')}
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-purple-950/60 hover:bg-purple-900/60 text-purple-300 font-semibold text-xs border border-purple-500/30 cursor-pointer flex items-center justify-center transition-all"
+          >
+            <span>Star Systems ({MULTIPLE_STAR_SYSTEMS.length})</span>
           </button>
           <button
             onClick={() => onNavigateTab('hr-diagram')}
-            className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 font-semibold text-xs border border-cyan-500/30 cursor-pointer flex items-center justify-center transition-all"
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 font-semibold text-xs border border-cyan-500/30 cursor-pointer flex items-center justify-center transition-all"
           >
             <span>H-R Diagram</span>
+          </button>
+          <button
+            onClick={() => onNavigateTab('constellations')}
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 font-semibold text-xs border border-sky-500/30 cursor-pointer flex items-center justify-center transition-all"
+          >
+            <span>88 Constellations</span>
+          </button>
+          <button
+            onClick={() => onNavigateTab('classification')}
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-teal-950/60 hover:bg-teal-900/60 text-teal-300 font-semibold text-xs border border-teal-500/30 cursor-pointer flex items-center justify-center transition-all"
+          >
+            <span>Classification</span>
           </button>
         </div>
       </section>

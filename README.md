@@ -11,6 +11,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r185-black?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Version](https://img.shields.io/badge/Version-v2.5_(2026)-06B6D4?style=for-the-badge)](https://github.com/thisisbarbelixir123/All-about-stars)
 [![PWA Ready](https://img.shields.io/badge/PWA-Installable-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -36,12 +37,14 @@
   - [3.1 3D Multi-Star Comparative Stage (WebGL/Three.js)](#31-3d-multi-star-comparative-stage-webglthreejs)
   - [3.2 Interactive Hertzsprung–Russell (H–R) Diagram](#32-interactive-hertzsprungrussell-hr-diagram)
   - [3.3 Comprehensive Stellar Catalog (885 Celestial Bodies)](#33-comprehensive-stellar-catalog-885-celestial-bodies)
-  - [3.4 Gravitationally Bound Multiple Star Systems (53 Systems)](#34-gravitationally-bound-multiple-star-systems-53-systems)
+  - [3.4 Dedicated Multiple Star Systems Catalog & 3D Orbital Simulation (53 Systems)](#34-dedicated-multiple-star-systems-catalog--3d-orbital-simulation-53-systems)
   - [3.5 88 IAU Constellations Sky Atlas & Celestial Sphere](#35-88-iau-constellations-sky-atlas--celestial-sphere)
-  - [3.6 Interactive Astrophysical Encyclopedia & Simulation Engines](#36-interactive-astrophysical-encyclopedia--simulation-engines)
-  - [3.7 Stellar Suika: Cosmic Star Merge Minigame](#37-stellar-suika-cosmic-star-merge-minigame)
-  - [3.8 Procedural Synthesized Web Audio Engine](#38-procedural-synthesized-web-audio-engine)
-  - [3.9 Ergonomics, Power-User Command Palette & Shortcuts](#39-ergonomics-power-user-command-palette--shortcuts)
+  - [3.6 Standalone Stellar Classification & Taxonomy Guide](#36-standalone-stellar-classification--taxonomy-guide)
+  - [3.7 Dedicated Stellar Nomenclature Guide](#37-dedicated-stellar-nomenclature-guide)
+  - [3.8 Interactive Astrophysical Encyclopedia & Simulation Engines](#38-interactive-astrophysical-encyclopedia--simulation-engines)
+  - [3.9 Stellar Suika: Cosmic Star Merge Minigame](#39-stellar-suika-cosmic-star-merge-minigame)
+  - [3.10 Unified Procedural Web Audio Engine & Audio Popover Menu](#310-unified-procedural-web-audio-engine--audio-popover-menu)
+  - [3.11 Ergonomics, Dynamic Marquee Engine (RunningText) & Fullscreen Mode](#311-ergonomics-dynamic-marquee-engine-runningtext--fullscreen-mode)
 - [4. Software Architecture & Implementation Details](#4-software-architecture--implementation-details)
 - [5. Empirical Data Sources & Reduction Pipeline](#5-empirical-data-sources--reduction-pipeline)
 - [6. Installation & Local Development](#6-installation--local-development)
@@ -378,28 +381,48 @@ Users can filter and sort in real-time by:
 
 ---
 
-### 3.4 Gravitationally Bound Multiple Star Systems (53 Systems)
+### 3.4 Dedicated Multiple Star Systems Catalog & 3D Orbital Simulation (53 Systems)
 
-Beyond isolated single stars, Starpedia 3D incorporates a dedicated catalog and real-time Keplerian orbital stage for **53 gravitationally bound multiple star systems**:
-- **Binary Configurations:** Visual binaries (e.g., Albireo), spectroscopic binaries (SB1/SB2), eclipsing binaries (e.g., Algol / $\beta$ Persei), and contact systems (e.g., W Ursae Majoris).
-- **Hierarchical Triple & Quadruple Systems:** (e.g., $\alpha$ Centauri AB + Proxima Centauri, Polaris system, Castor 6-star complex).
-- **Orbital Telemetry Calculations:** Evaluates true separation (in AU and km), instantaneous relative orbital velocities ($\text{km/s}$), true anomaly, eccentric anomaly, mean anomaly, and proximity to periastron/apastron in real time.
-- **3D Orbital Stage:** Visualizes center-of-mass barycenters, elliptical orbit path sweeps, and synchronized component movement.
+Detached from the single-star catalog into an independent exploration route (`StellarSystemCatalog.tsx`), Starpedia 3D incorporates a dedicated catalog and real-time Keplerian orbital simulation stage (`StellarSystem3DStage.tsx`) for **53 gravitationally bound multiple star systems**:
+- **Binary Configurations:** Visual binaries (e.g., Albireo), spectroscopic binaries (SB1/SB2), eclipsing binaries (e.g., Algol / $\beta$ Persei), and contact systems with Roche lobe overflow (e.g., W Ursae Majoris).
+- **Hierarchical Triple & Quadruple Systems:** Complex multi-tier orbits (e.g., $\alpha$ Centauri AB + Proxima Centauri, Polaris triple, Castor 6-star complex, HD 98800).
+- **Live Keplerian Orbital Telemetry:** Real-time numerical evaluation of true separation (in AU and km), instantaneous relative orbital velocities ($\text{km/s}$), true anomaly, eccentric anomaly, mean anomaly, and proximity to periastron/apastron.
+- **3D Orbital Stage:** Visualizes center-of-mass barycenters, elliptical orbit path sweeps, and synchronized component movement with interactive time acceleration.
 
 ---
 
 ### 3.5 88 IAU Constellations Sky Atlas & Celestial Sphere
 
-An interactive celestial sphere maps the sky based on official astronomical data:
+An interactive celestial sphere (`ConstellationMap.tsx` & `ConstellationGuide.tsx`) maps the night sky based on official astronomical coordinate standards:
 - **Equatorial Coordinate Grid:** Displays lines of Right Ascension ($\alpha$, in hours $0^{\text{h}} - 24^{\text{h}}$) and Declination ($\delta$, in degrees $-90^\circ \to +90^\circ$).
 - **Great Circles:** Highlights the Celestial Equator ($\delta = 0^\circ$) and the Ecliptic Plane (Earth's orbital plane inclined at $\epsilon \approx 23.44^\circ$).
 - **Delporte (1930) Boundary Polygons:** Implements exact borders for all 88 official constellations approved by the International Astronomical Union.
-- **Historical Asterisms:** Visual stick-figure overlays identifying famous groupings (e.g., the *Summer Triangle, Winter Hexagon, Great Square of Pegasus, Big Dipper, Teapot*).
+- **Historical Asterisms:** Visual stick-figure overlays identifying famous asterisms (e.g., the *Summer Triangle, Winter Hexagon, Great Square of Pegasus, Big Dipper, Teapot*).
 - **Comprehensive Dossiers:** Detailed historical lore, mythological origins, brightest constituent stars, cataloged deep sky objects (Messier, Caldwell, NGC), and seasonal visibility windows.
 
 ---
 
-### 3.6 Interactive Astrophysical Encyclopedia & Simulation Engines
+### 3.6 Standalone Stellar Classification & Taxonomy Guide
+
+A dedicated, comprehensive educational module (`StellarClassificationGuide.tsx`) detailing the taxonomy of the cosmos:
+- **Morgan–Keenan (MKK) Spectral Continuum:** Rigorous breakdowns of classes O, B, A, F, G, K, M, L, T, Y, Wolf-Rayet (WN/WC/WO), and degenerate remnants.
+- **Yerkes Luminosity Classes:** Interactive matrix spanning Hypergiants (0 / Ia+), Supergiants (Ia, Iab, Ib), Bright Giants (II), Normal Giants (III), Subgiants (IV), Main-Sequence Dwarfs (V), Subdwarfs (VI), and White Dwarfs (VII).
+- **Chemical Peculiarities & Exotic Types:** Explanations of Carbon stars (C-R, C-N, C-J), S-type stars with s-process zirconium enrichment, B[e] emission stars, and magnetic Ap/Bp stars.
+- **3D Classification Directory Modals:** Dedicated modal interfaces allowing users to launch benchmark specimens for any spectral class directly onto the 3D stage.
+
+---
+
+### 3.7 Dedicated Stellar Nomenclature Guide
+
+A standalone reference (`StellarNomenclatureGuide.tsx`) clarifying astronomical naming conventions:
+- **IAU Canonical Proper Names:** Guidelines established by the IAU Working Group on Star Names (WGSN).
+- **Bayer Greek Designations & Flamsteed Numbers:** Systematic brightness and positional numbering systems ($\alpha$ Centauri, 61 Cygni).
+- **Variable Star Schemes:** Argelander notation (R..Z), double lettering (AA..QZ), and modern variable sequence numbering (V335..).
+- **Cross-Catalog Cross-Referencing:** Mapping identifiers across Henry Draper (HD), SAO, Gliese–Jahreiß (GJ), Bright Star (HR), and Gaia DR3 catalogs.
+
+---
+
+### 3.8 Interactive Astrophysical Encyclopedia & Simulation Engines
 
 Starpedia 3D hosts interactive educational modules accessible via top navigation:
 
@@ -409,8 +432,8 @@ Interactive particle collision visualizer demonstrating $p\text{--}p$ chain bran
 #### 2. Stellar Interior Cross-Section Visualizer (`StellarCrossSectionVisualizer.tsx`)
 Interactive cutaway models rendering core fusion zones, radiative diffusion layers, convective envelopes, tachocline shear zones, and photospheres, dynamically reacting to chosen stellar mass.
 
-#### 3. Stellar Life Cycle Visualizer (`StellarLifeCycleVisualizer2D.tsx`)
-Interactive evolutionary tracks illustrating star birth within giant molecular clouds (GMC), protostellar collapse, Jeans instability, zero-age main sequence (ZAMS), red giant ascent, horizontal branch, asymptotic giant branch (AGB), planetary nebulae, core-collapse supernovae (Type II, Ib, Ic), and compact remnant states.
+#### 3. Synchronized Stellar Life Cycle Visualizer (`StellarLifeCycleVisualizer2D.tsx`)
+Interactive evolutionary tracks illustrating star birth within giant molecular clouds (GMC), protostellar collapse, Jeans instability, zero-age main sequence (ZAMS), red giant ascent, horizontal branch, asymptotic giant branch (AGB), planetary nebulae, core-collapse supernovae (Type II, Ib, Ic), and compact remnant states. Lifetimes and transition phases for massive stars are strictly synchronized with standard astrophysical models.
 
 #### 4. Degenerate Remnant Physics Engine (`StellarRemnantGraphic.tsx`)
 Mathematical and visual comparison of degenerate matter states: electron-degenerate white dwarfs, neutron stars, magnetars with ultra-strong magnetic fields ($B \sim 10^{14} - 10^{15}\text{ G}$), and stellar black holes.
@@ -426,12 +449,9 @@ Educational walk-throughs on how astronomers measure stellar properties:
 - **Gravitational Microlensing:** General relativistic light deflection.
 - **Optical Long-Baseline Interferometry:** (CHARA, VLTI).
 
-#### 7. Stellar Nomenclature Guide (`StellarNomenclatureGuide.tsx`)
-Explains historical and modern star naming standards (IAU WGSN, Bayer Greek lettering, Flamsteed numbers, variable designations: R..Z, AA..QZ, V335..).
-
 ---
 
-### 3.7 Stellar Suika: Cosmic Star Merge Minigame
+### 3.9 Stellar Suika: Cosmic Star Merge Minigame
 
 An astrophysics-themed gravity drop and merge game (`StellarSuikaGame.tsx`) inspired by classic Suika (Watermelon) Game mechanics:
 - **Core Merge Rule:** When **two identical stars of the same tier collide, they merge into the next bigger star in the sequence**, expanding in physical radius and awarding escalating score points.
@@ -449,22 +469,25 @@ An astrophysics-themed gravity drop and merge game (`StellarSuikaGame.tsx`) insp
 
 ---
 
-### 3.8 Procedural Synthesized Web Audio Engine
+### 3.10 Unified Procedural Web Audio Engine & Audio Popover Menu
 
-Starpedia 3D avoids heavy, bandwidth-consuming audio assets by utilizing the native browser **Web Audio API** (`spaceAudioEngine.ts` and `soundEffects.ts`):
-- **Ambient Deep-Space Soundscape:** Generates low-frequency cosmic drone beds using parallel sine/triangle oscillators, dynamic pink noise buffers, and low-frequency resonance filters (LFOs).
-- **Pulsar Radio Pulse Sonification:** Synthesizes periodic electromagnetic pulses mimicking the audio conversion of radio telescope data from fast millisecond pulsars.
-- **Interactive UI Sonification:** Sub-millisecond acoustic click, snap, and modal transition feedback.
-- Quick global mute toggle via keypress `M` or top-bar audio controls.
+Starpedia 3D eliminates bulky audio downloads with a procedural synthesis engine powered by the native browser **Web Audio API** (`spaceAudioEngine.ts` and `soundEffects.ts`):
+- **Unified Audio Popover Menu (`AmbientSoundToggle.tsx`):** Consolidates Background Cosmic Music (BGM), Procedural Sound Effects (SFX), and Master Volume into a single streamlined top-bar popover.
+- **Ambient Deep-Space Soundscape:** Generates low-frequency cosmic drone beds using parallel sine/triangle oscillators, dynamic pink noise buffers, and low-frequency resonance filters (LFOs). Auto-engages upon first interaction in full accordance with browser autoplay policies.
+- **Pulsar Radio Pulse Sonification:** Procedurally simulates rhythmic electromagnetic radio sweeps characteristic of millisecond pulsars.
+- **Interactive UI Sonification:** Sub-millisecond acoustic snap, click, and transition feedback.
+- Quick global mute toggle via keypress <kbd>M</kbd> or the top-bar audio controls.
 
 ---
 
-### 3.9 Ergonomics, Power-User Command Palette & Shortcuts
+### 3.11 Ergonomics, Dynamic Marquee Engine (RunningText) & Fullscreen Mode
 
-- **Universal Command Palette:** Press `Ctrl+K`, `Cmd+K`, or `/` anywhere to launch a command modal. Instantly search and jump to any star, multiple system, constellation, or scientific article.
-- **Keyboard Shortcuts Cheat Sheet:** Press `?` to view all keybindings.
-- **Progressive Web App (PWA):** Service worker caching enables full offline functionality, fast startup, and native-like desktop installation.
-- **Accessibility (a11y):** Built with semantic HTML5 landmarks, WCAG AA contrast ratios, screen reader descriptions, and full keyboard focus rings.
+- **Adaptive Marquee Engine (`RunningText.tsx`):** Automatically detects overflowing entity names, catalog designations, and metric titles using dual `ResizeObserver` measurements. Horizontally scrolls truncated content with hover-to-pause affordance, ensuring no scientific data is clipped on constrained displays.
+- **Reusable Fullscreen Toggle (`FullscreenToggle.tsx`):** Seamless one-click fullscreen expansion integrated on the homescreen, encyclopedia overlay, and 3D stage.
+- **Universal Command Palette (`CommandPaletteModal.tsx`):** Press <kbd>⌘K</kbd>, <kbd>Ctrl+K</kbd>, or <kbd>/</kbd> anywhere to search and jump to any star, multiple system, constellation, or scientific article.
+- **Tactile Shortcuts Matrix (`KeyboardShortcutsHelpModal.tsx`):** Press <kbd>?</kbd> to view all tactile desktop keybindings.
+- **Progressive Web App (PWA):** Service worker caching enables full offline functionality, instant startup, and native-like desktop installation.
+- **Accessibility (a11y):** Built with semantic HTML5 landmarks, WCAG AA contrast compliance, and full keyboard focus rings.
 
 ---
 
@@ -481,14 +504,20 @@ All-about-stars/
 │   │   ├── HRDiagram.tsx       # Interactive Hertzsprung–Russell diagram
 │   │   ├── ConstellationMap.tsx# 88 IAU Constellations interactive sky atlas
 │   │   ├── StarDetailModal.tsx # Full-featured astrophysical dossier modal
-│   │   ├── StellarSystemCatalog.tsx # Multiple star systems directory
-│   │   ├── StellarSystem3DStage.tsx # Keplerian orbital simulation stage
+│   │   ├── StellarClassificationGuide.tsx # Standalone Morgan–Keenan & Yerkes guide
+│   │   ├── StellarNomenclatureGuide.tsx   # Dedicated IAU, Bayer & Flamsteed guide
+│   │   ├── StellarDiscoveryGuide.tsx      # Observational methods & space telescopes
+│   │   ├── StellarSystemCatalog.tsx       # Multiple star systems directory
+│   │   ├── StellarSystem3DStage.tsx       # Keplerian orbital simulation stage
 │   │   ├── ThermonuclearEngineVisualizer.tsx # Nuclear fusion reaction network
 │   │   ├── StellarCrossSectionVisualizer.tsx # Convective/radiative interior cutaway
 │   │   ├── StellarLifeCycleVisualizer2D.tsx  # Mass-dependent evolutionary tracks
 │   │   ├── StellarRemnantGraphic.tsx        # Degenerate matter & compact objects
 │   │   ├── VariableStarGraphic.tsx          # Opacity valve & pulsation models
 │   │   ├── CommandPaletteModal.tsx          # Fast search & navigation palette
+│   │   ├── AmbientSoundToggle.tsx           # Unified audio popover menu (BGM + SFX)
+│   │   ├── FullscreenToggle.tsx             # Reusable viewport fullscreen engine
+│   │   ├── RunningText.tsx                  # Adaptive marquee text overflow engine
 │   │   └── StellarSuikaGame.tsx             # Interactive fusion drop minigame
 │   ├── data/                   # Curated astrophysical databases
 │   │   ├── starDatabase.json   # Comprehensive 885-star dataset
@@ -573,17 +602,71 @@ All observational metrics in Starpedia 3D are curated and calibrated against pee
 
 ## 7. Global Keyboard Shortcuts Matrix
 
+Starpedia 3D includes a comprehensive tactile keyboard navigation engine enabling full control over the 3D canvas, cameras, navigation, tools, and interactive minigames without touching a mouse.
+
+### 7.1 Navigation & Primary Subsystems
+
 | Shortcut Key | Action / Functionality | Scope |
-|:---|:---|:---|
-| <kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> / <kbd>/</kbd> | Open Universal Command Palette & Search | Global |
-| <kbd>?</kbd> | Toggle Keyboard Shortcuts Cheat Sheet Modal | Global |
-| <kbd>M</kbd> | Toggle Ambient Procedural Space Audio (Mute / Unmute) | Global |
-| <kbd>Esc</kbd> | Dismiss active modal, drawer, or return to 3D Stage | Global |
-| <kbd>1</kbd> | Navigate to **Home Welcome Overview** | Global |
-| <kbd>2</kbd> | Open **Star Catalog Explorer** | Global |
-| <kbd>3</kbd> | Open **Interactive Hertzsprung–Russell Diagram** | Global |
-| <kbd>4</kbd> | Open **Stellar Life Cycles Visualizer** | Global |
-| <kbd>5</kbd> | Open **Stellar Classification Guide** | Global |
+|:---|:---|:---:|
+| <kbd>1</kbd> | Jump to **Overview / Welcome Home** | Global |
+| <kbd>2</kbd> | Open **3D Catalog Explorer** | Global |
+| <kbd>3</kbd> | View **Interactive Hertzsprung–Russell (H–R) Diagram** | Global |
+| <kbd>4</kbd> | Open **Stellar Life Cycles Simulation** | Global |
+| <kbd>5</kbd> | Inspect **Stellar Classification Guide & Remnants** | Global |
+
+### 7.2 General Controls & Workspace Tools
+
+| Shortcut Key | Action / Functionality | Scope |
+|:---|:---|:---:|
+| <kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> / <kbd>/</kbd> | Open Universal Command Palette & Real-Time Star Search | Global |
+| <kbd>M</kbd> | Toggle Ambient Cosmic Space Audio & Procedural Sound Effects | Global |
+| <kbd>C</kbd> | Toggle Star Comparison Dock | Global |
+| <kbd>?</kbd> | Toggle In-App Keyboard Shortcuts Cheat Sheet Modal | Global |
+| <kbd>Alt+B</kbd> / <kbd>⌘K</kbd> | Close Star Search Features | Global |
+| <kbd>Esc</kbd> | Dismiss active modal, drawer, or close overlay | Global |
+
+### 7.3 3D Celestial Stage & Camera Controls
+
+| Shortcut Key / Input | Action / Functionality | Scope |
+|:---|:---|:---:|
+| <kbd>Left Click + Drag</kbd> | Rotate & Orbit 3D Star Camera | 3D Stage |
+| <kbd>Scroll Wheel</kbd> | Smooth Zoom In / Out on Stellar Photosphere | 3D Stage |
+| <kbd>Right Click + Drag</kbd> | Pan Virtual Camera Coordinates | 3D Stage |
+| <kbd>+</kbd> / <kbd>=</kbd> | Step Camera Zoom In | 3D Stage |
+| <kbd>-</kbd> / <kbd>_</kbd> | Step Camera Zoom Out | 3D Stage |
+| <kbd>R</kbd> | Reset Virtual Camera to Default Viewing Angle & Elevation | 3D Stage |
+| <kbd>A</kbd> | Fit All Stars in Panoramic View Frame | 3D Stage |
+| <kbd>0</kbd> | Pan Camera to Center-Left Spatial Grid Anchor Point | 3D Stage |
+| <kbd>1</kbd> / <kbd>Home</kbd> | Pan Camera to First / Smallest Star in active preset | 3D Stage |
+| <kbd>9</kbd> / <kbd>End</kbd> | Pan Camera to Last / Largest Star in active preset | 3D Stage |
+| <kbd>←</kbd> / <kbd>[</kbd> | Focus Previous Star in active preset or catalog | 3D Stage |
+| <kbd>→</kbd> / <kbd>]</kbd> | Focus Next Star in active preset or catalog | 3D Stage |
+| <kbd>U</kbd> | Unfocus Selected Star (return to stage overview) | 3D Stage |
+| <kbd>D</kbd> | Open In-Depth Astrophysical Dossier modal for focused star | 3D Stage |
+| <kbd>S</kbd> | Toggle Photosphere Surface Spin (Auto-Rotation) | 3D Stage |
+| <kbd>W</kbd> | Toggle Photosphere Wireframe Geometry Mesh | 3D Stage |
+| <kbd>G</kbd> | Toggle Stage Floor Coordinate Grid | 3D Stage |
+| <kbd>H</kbd> | Toggle Hide / Show Stage HUD Controls | 3D Stage |
+| <kbd>F</kbd> | Toggle Browser Fullscreen Mode | 3D Stage |
+| <kbd>E</kbd> | Toggle Astrophysics Encyclopedia Menu | 3D Stage |
+| <kbd>T</kbd> | Toggle Automated Guided Star Tour | 3D Stage |
+| <kbd>P</kbd> (or <kbd>Shift+T</kbd>) | Cycle Tour Pace (`Short` $\to$ `Medium` $\to$ `Long`) | 3D Stage |
+| <kbd>O</kbd> | Cycle Sort Metric (Size, Distance, Mass, Temperature, Luminosity, Mag) | 3D Stage |
+| <kbd>X</kbd> | Reverse Sort Order (Ascending $\leftrightarrow$ Descending) | 3D Stage |
+| <kbd>L</kbd> | Toggle Layout Mode in All Stars Catalog (Linear vs Spiral) | 3D Stage |
+| <kbd>B</kbd> | Toggle Preset Star Search / Quick Browse Drawer | 3D Stage |
+
+### 7.4 Interactive Visualizers & Minigames
+
+| Shortcut Key | Action / Functionality | Context / Subsystem |
+|:---|:---|:---:|
+| <kbd>←</kbd> / <kbd>A</kbd> | Aim Star Drop Position Left | Stellar Suika Game |
+| <kbd>→</kbd> / <kbd>D</kbd> | Aim Star Drop Position Right | Stellar Suika Game |
+| <kbd>Space</kbd> / <kbd>↓</kbd> / <kbd>S</kbd> | Release / Drop Star into Gravitational Vessel | Stellar Suika Game |
+| <kbd>Space</kbd> | Play / Pause Evolutionary Track Simulation | Stellar Life Cycles Visualizer |
+| <kbd>←</kbd> / <kbd>→</kbd> | Step Backward / Forward through Evolutionary Phases | Stellar Life Cycles Visualizer |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Navigate Filtered Commands & Search Results | Command Palette |
+| <kbd>Enter</kbd> | Execute Action / Select Highlighted Celestial Target | Command Palette |
 
 ---
 
@@ -604,7 +687,7 @@ All observational metrics in Starpedia 3D are curated and calibrated against pee
 
 ### Creator & Development Studio
 - **Creator & Lead Developer:** **B123 Entertainment**
-- **Release Version:** v2.4 (2026)
+- **Release Version:** v2.5 (2026 Edition)
 - **Support the Project:** [Buy Me A Coffee on Ko-fi](https://ko-fi.com/b123entertainment)
 
 ### Creative & Conceptual Inspirations
