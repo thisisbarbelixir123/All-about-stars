@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { StarData } from '../types';
 import { ChevronRight, ChevronDown, ChevronUp, Search, Sparkles } from 'lucide-react';
 import { StarDot2D } from './StarDot2D';
+import { resolveStarId } from '../data/stars';
 
 interface ClassificationMappedStarsSectionProps {
   title: string;
@@ -21,11 +22,21 @@ export const ClassificationMappedStarsSection: React.FC<ClassificationMappedStar
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Find benchmark star instances
+  // Dynamically find benchmark star instances with alias resolution and fallback to prominent stars
   const benchmarkStars = useMemo(() => {
-    return benchmarkStarIds
-      .map((id) => allMappedStars.find((s) => s.id === id))
+    const explicit = (benchmarkStarIds || [])
+      .map((id) => {
+        const canonical = resolveStarId(id);
+        return allMappedStars.find((s) => s.id === id || s.id === canonical);
+      })
       .filter(Boolean) as StarData[];
+
+    if (explicit.length > 0) return explicit;
+
+    // Fallback: Dynamically pick up to 5 brightest/most prominent stars from allMappedStars
+    return [...allMappedStars]
+      .sort((a, b) => (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99))
+      .slice(0, 5);
   }, [benchmarkStarIds, allMappedStars]);
 
   // Filter all mapped stars by search query

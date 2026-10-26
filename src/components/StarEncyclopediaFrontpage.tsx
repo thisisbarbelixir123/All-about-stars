@@ -68,6 +68,7 @@ import {
   getMappedStarsForStarSystem,
   getMappedStarsForPopulation,
   getMappedStarsForRemnant,
+  getMappedStarsForHypothetical,
 } from '../utils/stellarClassificationMapping';
 
 interface StarEncyclopediaFrontpageProps {
@@ -2816,15 +2817,20 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                         </div>
 
                         {/* Direct Ancestral / Progenitor Stars in Catalog */}
-                        {activeHypotheticalItem.exampleStarIds && activeHypotheticalItem.exampleStarIds.length > 0 && (
-                          <ClassificationMappedStarsSection
-                            title="Progenitor &amp; Relic Candidates in Catalog"
-                            categoryColor={activeHypotheticalItem.colorHex}
-                            benchmarkStarIds={activeHypotheticalItem.exampleStarIds}
-                            allMappedStars={getExampleStars(activeHypotheticalItem.exampleStarIds)}
-                            onSelectStar={onSelectStar}
-                          />
-                        )}
+                        {(() => {
+                          const mappedHypoStars = getMappedStarsForHypothetical(activeHypotheticalItem.id, STARS_CATALOG);
+                          const starsToShow = mappedHypoStars.length > 0 ? mappedHypoStars : getExampleStars(activeHypotheticalItem.exampleStarIds || []);
+                          if (starsToShow.length === 0) return null;
+                          return (
+                            <ClassificationMappedStarsSection
+                              title={`Mapped Progenitors & Relics: ${activeHypotheticalItem.name}`}
+                              categoryColor={activeHypotheticalItem.colorHex}
+                              benchmarkStarIds={activeHypotheticalItem.exampleStarIds || []}
+                              allMappedStars={starsToShow}
+                              onSelectStar={onSelectStar}
+                            />
+                          );
+                        })()}
 
                         {/* Theoretical Candidates / Benchmark Models */}
                         {activeHypotheticalItem.externalExamples && activeHypotheticalItem.externalExamples.length > 0 && (
