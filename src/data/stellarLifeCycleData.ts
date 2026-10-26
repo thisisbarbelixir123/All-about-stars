@@ -207,9 +207,9 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         visualType: 'star',
       },
       {
-        progress: 0.82,
-        timeElapsedLabel: '9 Trillion Years',
-        ageYears: 9_000_000_000_000,
+        progress: 0.90,
+        timeElapsedLabel: '9.5 Trillion Years',
+        ageYears: 9_500_000_000_000,
         stageName: 'Blue Dwarf Phase',
         category: 'giant',
         surfaceTempKelvin: 6500,
@@ -480,9 +480,9 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         visualType: 'giant',
       },
       {
-        progress: 0.88,
-        timeElapsedLabel: '10.15 Billion Years',
-        ageYears: 10_150_000_000,
+        progress: 0.90,
+        timeElapsedLabel: '10.18 Billion Years',
+        ageYears: 10_180_000_000,
         stageName: 'Asymptotic Giant Branch (AGB) Phase',
         category: 'giant',
         surfaceTempKelvin: 3100,
@@ -609,11 +609,11 @@ export const STELLAR_TRACKS: StellarTrack[] = [
     name: 'Massive Star',
     massLabel: '8 to 25 Solar Masses (e.g. Betelgeuse ~16 M☉, Rigel ~21 M☉)',
     initialMassSolar: 16.0,
-    typicalLifespan: '~20 Million Years (Active Star) + Trillions of Years (Neutron Star Remnant)',
+    typicalLifespan: '~10 to 20 Million Years (Active Star) + Trillions of Years (Neutron Star Remnant)',
     fateSummary: 'Core-Collapse Supernova -> Pulsar / Neutron Star -> Cold Neutron Star',
     accentColor: '#38bdf8',
     description:
-      'Rapid 500,000-year pre-stellar formation, 18 million years of fierce blue CNO main-sequence burning, rapid supergiant onion-shell fusion, supernova death into a Pulsar, and cooling to a Cold Neutron Star.',
+      'Rapid 500,000-year pre-stellar formation, ~14 million years of fierce blue CNO main-sequence burning, rapid supergiant onion-shell fusion, supernova death into a Pulsar, and cooling to a Cold Neutron Star.',
     checkpoints: [
       {
         progress: -1.0,
@@ -686,83 +686,83 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         visualType: 'star',
       },
       {
-        progress: 0.15,
-        timeElapsedLabel: '3.0 Million Years (Main Sequence)',
-        ageYears: 3_000_000,
+        progress: 0.45,
+        timeElapsedLabel: '7.0 Million Years (Main Sequence)',
+        ageYears: 7_000_000,
         stageName: 'Main Sequence Blue Star',
         category: 'main-sequence',
-        surfaceTempKelvin: 29000,
-        coreTempKelvin: 36000000,
-        radiusSolar: 8.0,
-        luminositySolar: 32000,
+        surfaceTempKelvin: 28000,
+        coreTempKelvin: 38000000,
+        radiusSolar: 8.5,
+        luminositySolar: 35000,
         spectralClassEquivalent: 'B0.5 V',
         colorHex: '#b0d0ff',
         glowColorHex: '#ddecff',
         coreEngine: 'Carbon-Nitrogen-Oxygen (CNO) Catalytic Cycle',
         dominantPressure: 'High Radiation Pressure + Hydrostatic Gas Pressure',
         shortDescription:
-          'Burning fiercely via the CNO cycle in hydrostatic equilibrium at ~8.0 Solar Radii, producing tens of thousands of solar luminosities.',
+          'Burning fiercely via the CNO cycle in hydrostatic equilibrium at ~8.5 Solar Radii across its multi-million-year core hydrogen-burning era.',
         detailedPhysics:
-          'The CNO cycle generates intense energy in the convective core, held in equilibrium at ~8.0 Solar Radii as radiation pressure balances inward gravitational contraction.',
-        keyPhenomena: ['8.0 Solar Radii Hydrostatic Balance', 'Extreme Ultraviolet Radiance', 'Line-Driven Stellar Wind'],
+          'The CNO cycle generates intense energy in the convective core, held in equilibrium at ~8.5 Solar Radii as radiation pressure balances inward gravitational contraction.',
+        keyPhenomena: ['8.5 Solar Radii Hydrostatic Balance', 'Extreme Ultraviolet Radiance', 'Line-Driven Stellar Wind'],
         analogousStarIds: ['spica', 'bellatrix'],
         visualType: 'star',
       },
       {
-        progress: 0.35,
-        timeElapsedLabel: '7.0 Million Years (Starting to Expand)',
-        ageYears: 7_000_000,
+        progress: 0.88,
+        timeElapsedLabel: '13.5 Million Years (Terminal Main Sequence)',
+        ageYears: 13_500_000,
         stageName: 'Post-Main Sequence Blue Supergiant',
         category: 'giant',
-        surfaceTempKelvin: 22000,
-        coreTempKelvin: 60000000,
-        radiusSolar: 22.0,
-        luminositySolar: 55000,
+        surfaceTempKelvin: 19000,
+        coreTempKelvin: 70000000,
+        radiusSolar: 28.0,
+        luminositySolar: 60000,
         spectralClassEquivalent: 'B2 IV-III -> Blue Supergiant',
         colorHex: '#9ec4ff',
         glowColorHex: '#c4e0ff',
         coreEngine: 'Inert Helium Core Contraction + Hydrogen Shell Burning',
         dominantPressure: 'Radiation Pressure Near Eddington Boundary',
         shortDescription:
-          'Core hydrogen is exhausted. The star starts to expand from its original size as shell burning ignites around the contracting helium core.',
+          'Core hydrogen exhausts after ~13.5 million years. As shell fusion ignites around the contracting helium core, the star begins swelling into a luminous supergiant.',
         detailedPhysics:
-          'As core hydrogen depletes, the dense core contracts and heats, igniting a powerful hydrogen-burning shell that drives dramatic expansion from its original ~8.0 Solar Radii toward supergiant dimensions.',
+          'As core hydrogen depletes, the dense helium core contracts and heats, igniting a powerful hydrogen-burning shell that drives dramatic expansion from its original ~8.5 Solar Radii toward supergiant dimensions.',
         keyPhenomena: ['Leaving Main Sequence', 'Hydrogen Shell Ignition', 'Starting to Expand (Early Supergiant Swell)'],
         analogousStarIds: ['spica', 'bellatrix', 'achernar'],
         visualType: 'giant',
       },
       {
-        progress: 0.50,
-        timeElapsedLabel: '15 Million Years (Giant Phase Begins)',
-        ageYears: 15_000_000,
+        progress: 0.94,
+        timeElapsedLabel: '14.5 Million Years (Helium Core Fusion)',
+        ageYears: 14_500_000,
         stageName: 'Blue & Yellow Supergiant Phase',
         category: 'giant',
-        surfaceTempKelvin: 12500,
-        coreTempKelvin: 120000000,
+        surfaceTempKelvin: 12100,
+        coreTempKelvin: 150000000,
         radiusSolar: 75,
-        luminositySolar: 80000,
+        luminositySolar: 85000,
         spectralClassEquivalent: 'B8 Ia (like Rigel)',
         colorHex: '#9ec4ff',
         glowColorHex: '#c4e0ff',
         coreEngine: 'Helium Core Fusion (Triple-Alpha) + Hydrogen Shell Burning',
         dominantPressure: 'Radiation Pressure Near Eddington Boundary',
         shortDescription:
-          'The star enters the giant phase! Triple-alpha helium fusion swells the star into a colossal luminous blue and yellow supergiant.',
+          'Triple-alpha helium fusion stabilizes in the core as the star crosses the Hertzsprung-Russell diagram as a brilliant luminous blue supergiant like Rigel.',
         detailedPhysics:
-          'Entering the giant phase, core helium burning lasts ~2 million years, causing the star to expand to 75 Solar Radii and migrate across the top of the H-R diagram.',
-        keyPhenomena: ['Giant Phase Begins', 'Core Helium Fusion', 'Massive Dense Stellar Wind', 'Alpha Cygni Pulsations'],
+          'Core helium burning lasts roughly 1 million years, causing the star to expand to 75 Solar Radii and migrate across the top of the H-R diagram.',
+        keyPhenomena: ['Core Helium Fusion', 'Massive Dense Stellar Wind', 'Alpha Cygni Pulsations'],
         analogousStarIds: ['rigel', 'deneb'],
         visualType: 'giant',
       },
       {
-        progress: 0.75,
-        timeElapsedLabel: '19.9 Million Years',
-        ageYears: 19_900_000,
+        progress: 0.98,
+        timeElapsedLabel: '14.99 Million Years (Red Supergiant)',
+        ageYears: 14_990_000,
         stageName: 'Red Supergiant Phase',
         category: 'giant',
         surfaceTempKelvin: 3500,
         coreTempKelvin: 3000000000,
-        radiusSolar: 950,
+        radiusSolar: 760,
         luminositySolar: 110000,
         spectralClassEquivalent: 'M1-2 Ia-ab (like Betelgeuse / Antares)',
         colorHex: '#ef4444',
@@ -770,17 +770,17 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         coreEngine: 'Concentric Onion Fusion Layers: H -> He -> C -> Ne -> O -> Si -> Inert Fe Core',
         dominantPressure: 'Core Degeneracy Fighting Massive Gravity; Fluffy Outer Envelope',
         shortDescription:
-          'Swollen to Jupiter’s orbit while the core races through carbon, neon, oxygen, and silicon fusion, building an inert iron core in days.',
+          'Swollen to hundreds of solar radii like Betelgeuse while the core races through carbon, neon, oxygen, and silicon fusion, building an inert iron core.',
         detailedPhysics:
-          'Heavy element burning accelerates exponentially: Carbon burns for ~1,000 years, Neon for ~3 years, Oxygen for ~6 months, and Silicon into Iron in just ~1 day! Iron cannot fuse exothermically.',
+          'Heavy element burning accelerates exponentially: Carbon burns for ~1,000 years, Neon for ~3 years, Oxygen for ~6 months, and Silicon into Iron in just ~1 day! Iron cannot fuse exothermically, precipitating catastrophic core collapse.',
         keyPhenomena: ['Onion-Shell Fusion Core', 'Giant Convective Supergranules', 'Imminent Iron Core Collapse'],
         analogousStarIds: ['betelgeuse', 'antares'],
         visualType: 'giant',
       },
       {
         progress: 1.0,
-        timeElapsedLabel: '20.0 Million Years (Star Death / Supernova)',
-        ageYears: 20_000_000,
+        timeElapsedLabel: '15.0 Million Years (Star Death / Supernova)',
+        ageYears: 15_000_000,
         stageName: 'Supernova',
         category: 'explosion',
         surfaceTempKelvin: 100000000,
@@ -803,8 +803,8 @@ export const STELLAR_TRACKS: StellarTrack[] = [
       },
       {
         progress: 1.15,
-        timeElapsedLabel: '20.05 Million Years (Remnant Birth)',
-        ageYears: 20_050_000,
+        timeElapsedLabel: '15.05 Million Years (Remnant Birth)',
+        ageYears: 15_050_000,
         stageName: 'Neutron Star (Pulsar)',
         category: 'remnant',
         surfaceTempKelvin: 1500000,
@@ -881,11 +881,11 @@ export const STELLAR_TRACKS: StellarTrack[] = [
     name: 'Hyper-Massive Star',
     massLabel: '25 to 100+ Solar Masses (e.g. Eta Carinae ~100 M☉, WR 102)',
     initialMassSolar: 60.0,
-    typicalLifespan: '~3.2 Million Years (Active Star) + Eternal Black Hole Remnant',
+    typicalLifespan: '~3.5 Million Years (Active Star) + Eternal Black Hole Remnant',
     fateSummary: 'Hypernova / GRB -> Accreting Black Hole -> Quiescent / Evaporating Black Hole',
     accentColor: '#3b82f6',
     description:
-      'Torrential 200,000-year pre-stellar collapse, ~2.8 million years of blinding Class O main-sequence fusion, violent Luminous Blue Variable eruptions, Hypernova collapse into a Black Hole, and quiescent singularity stasis.',
+      'Torrential 200,000-year pre-stellar collapse, ~3.2 million years of blinding Class O main-sequence fusion, violent Luminous Blue Variable eruptions, envelope stripping into a compact Wolf-Rayet star, Hypernova collapse into a Black Hole, and quiescent singularity stasis.',
     checkpoints: [
       {
         progress: -1.0,
@@ -958,78 +958,101 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         visualType: 'star',
       },
       {
-        progress: 0.15,
-        timeElapsedLabel: '450,000 Years (Main Sequence)',
-        ageYears: 450_000,
+        progress: 0.45,
+        timeElapsedLabel: '1.6 Million Years (Main Sequence)',
+        ageYears: 1_600_000,
         stageName: 'Main Sequence Class O Star',
         category: 'main-sequence',
         surfaceTempKelvin: 49000,
         coreTempKelvin: 57000000,
-        radiusSolar: 19,
-        luminositySolar: 1700000,
-        spectralClassEquivalent: 'O3 V',
+        radiusSolar: 20,
+        luminositySolar: 1800000,
+        spectralClassEquivalent: 'O3 V - O2 If*',
         colorHex: '#70b5ff',
         glowColorHex: '#3b82f6',
         coreEngine: 'Full CNO Catalytic Core Hydrogen Fusion',
         dominantPressure: 'Dominant Radiation Pressure + Convective Core',
         shortDescription:
-          'Blistering CNO-cycle fusion drives ferocious radiation pressure in hydrostatic equilibrium at ~19 Solar Radii, producing nearly 2 million solar luminosities.',
+          'Blistering CNO-cycle fusion drives ferocious radiation pressure in hydrostatic equilibrium at ~20 Solar Radii, producing nearly 2 million solar luminosities.',
         detailedPhysics:
-          'Equilibrium is governed by immense radiation pressure matching gravitational weight at ~19 Solar Radii, while supersonic radiation winds exceed 2,500 km/s.',
-        keyPhenomena: ['19 Solar Radii Equilibrium', 'Supersonic Radiation Wind', 'Extreme UV Output'],
+          'Equilibrium is governed by immense radiation pressure matching gravitational weight at ~20 Solar Radii, while supersonic radiation winds exceed 2,500 km/s.',
+        keyPhenomena: ['20 Solar Radii Equilibrium', 'Supersonic Radiation Wind', 'Extreme UV Output'],
         analogousStarIds: ['melnick-42', 'zeta-puppis'],
         visualType: 'star',
       },
       {
-        progress: 0.35,
-        timeElapsedLabel: '1.1 Million Years (Starting to Expand)',
-        ageYears: 1_100_000,
+        progress: 0.88,
+        timeElapsedLabel: '3.1 Million Years (Terminal Main Sequence)',
+        ageYears: 3_100_000,
         stageName: 'Post-Main Sequence Hypergiant',
         category: 'giant',
-        surfaceTempKelvin: 42000,
-        coreTempKelvin: 80000000,
-        radiusSolar: 48,
-        luminositySolar: 2500000,
-        spectralClassEquivalent: 'Class O-type / Early WN (Starting to Expand)',
+        surfaceTempKelvin: 40000,
+        coreTempKelvin: 90000000,
+        radiusSolar: 45,
+        luminositySolar: 2800000,
+        spectralClassEquivalent: 'Class O-type / Early WN (Leaving Main Sequence)',
         colorHex: '#70b5ff',
         glowColorHex: '#3b82f6',
         coreEngine: 'Core Hydrogen Exhaustion + Thick Hydrogen Shell Burning',
         dominantPressure: 'Radiation Pressure Near Eddington Limit',
         shortDescription:
-          'Core hydrogen is exhausted. The star starts to expand from its original size as torrential radiation pressure and shell ignition drive outer mantle swelling.',
+          'Core hydrogen exhausts after ~3.1 million years. Torrential radiation pressure and shell ignition drive the expansion of its outer mantle toward hypergiant dimensions.',
         detailedPhysics:
-          'As the monster core depletes hydrogen and begins contracting, extreme radiation flux drives powerful mass-loss winds, beginning the dramatic expansion of its outer mantle from its original ~19 Solar Radii toward hypergiant dimensions.',
+          'As the monster core depletes hydrogen and begins contracting, extreme radiation flux drives powerful mass-loss winds, beginning the dramatic expansion of its outer mantle from its original ~20 Solar Radii toward hypergiant dimensions.',
         keyPhenomena: ['Leaving Main Sequence', 'Violent 3,000 km/s Wind', 'Starting to Expand (Hypergiant Swell)'],
-        analogousStarIds: ['melnick-42', 'zeta-puppis', 'vfts-352', 'wr-102'],
+        analogousStarIds: ['melnick-42', 'zeta-puppis', 'vfts-352'],
         visualType: 'giant',
       },
       {
-        progress: 0.50,
-        timeElapsedLabel: '1.6 Million Years (Giant Phase Begins)',
-        ageYears: 1_600_000,
+        progress: 0.94,
+        timeElapsedLabel: '3.35 Million Years (LBV Eruptions)',
+        ageYears: 3_350_000,
         stageName: 'Luminous Blue Variable (LBV) Phase',
         category: 'giant',
         surfaceTempKelvin: 18000,
         coreTempKelvin: 400000000,
-        radiusSolar: 600,
-        luminositySolar: 5000000,
+        radiusSolar: 320,
+        luminositySolar: 4500000,
         spectralClassEquivalent: 'LBV / Hypergiant (like Eta Carinae)',
         colorHex: '#38bdf8',
         glowColorHex: '#0284c7',
         coreEngine: 'Helium, Carbon & Neon Core Burning + Eddington Instability',
         dominantPressure: 'Eddington Limit Breached — Episodic Envelope Ejection',
         shortDescription:
-          'The star enters the giant phase! Shining at millions of Suns near the Eddington limit, violent mass-loss eruptions swell into a colossal hypergiant.',
+          'Shining at millions of Suns near the Eddington limit, violent mass-loss eruptions swell into a colossal hypergiant with expanding bipolar nebular lobes.',
         detailedPhysics:
-          'Entering the giant phase, post-main-sequence core helium and carbon burning lasts ~300,000 years, marked by violent S Doradus and giant LBV eruptions.',
-        keyPhenomena: ['Giant Phase Begins', 'Homunculus Bipolar Lobes', 'Eddington Limit Breaches', 'Giant Mass-Loss Eruptions'],
+          'Post-main-sequence core helium burning triggers violent S Doradus pulsations and giant eruptions like Eta Carinae’s Great Eruption, stripping dozens of solar masses from the stellar envelope.',
+        keyPhenomena: ['Homunculus Bipolar Lobes', 'Eddington Limit Breaches', 'Giant Mass-Loss Eruptions'],
         analogousStarIds: ['eta-carinae-a', 'pistol-star'],
         visualType: 'giant',
       },
       {
+        progress: 0.98,
+        timeElapsedLabel: '3.49 Million Years (Stripped WO Core)',
+        ageYears: 3_490_000,
+        stageName: 'Wolf-Rayet Stripped Star',
+        category: 'giant',
+        surfaceTempKelvin: 210000,
+        coreTempKelvin: 3500000000,
+        radiusSolar: 0.52,
+        luminositySolar: 350000,
+        spectralClassEquivalent: 'WO2 Wolf-Rayet (like WR 102)',
+        colorHex: '#60a5fa',
+        glowColorHex: '#2563eb',
+        coreEngine: 'Advanced Carbon, Neon & Silicon Fusion in Stripped Bare Core',
+        dominantPressure: 'Extreme Radiation Wind vs Impending Gravitational Freefall',
+        shortDescription:
+          'Having shed its entire hydrogen-helium envelope, the scorching 210,000 K bare carbon-oxygen core contracts down to 0.52 Solar Radii in a frantic countdown to collapse.',
+        detailedPhysics:
+          'As documented by modern Geneva and CMFGEN models (e.g. Groh et al. and WR 102), hyper-massive stars shed their outer envelopes to expose a tiny, scorching ~0.52 R☉ stripped core. Without outer hydrogen dampening, core collapse directly launches a collapsar hypernova.',
+        keyPhenomena: ['Stripped-Envelope WO Core', '210,000 K Surface Temperature', '0.52 Solar Radii Compact Size', 'Direct Collapsar Progenitor'],
+        analogousStarIds: ['wr-102'],
+        visualType: 'star',
+      },
+      {
         progress: 1.0,
-        timeElapsedLabel: '3.20 Million Years (Star Death / Hypernova)',
-        ageYears: 3_200_000,
+        timeElapsedLabel: '3.50 Million Years (Star Death / Hypernova)',
+        ageYears: 3_500_000,
         stageName: 'Hypernova',
         category: 'explosion',
         surfaceTempKelvin: 500000000,
@@ -1052,8 +1075,8 @@ export const STELLAR_TRACKS: StellarTrack[] = [
       },
       {
         progress: 1.15,
-        timeElapsedLabel: '3.25 Million Years (Remnant Birth)',
-        ageYears: 3_250_000,
+        timeElapsedLabel: '3.55 Million Years (Remnant Birth)',
+        ageYears: 3_550_000,
         stageName: 'Accreting Black Hole',
         category: 'remnant',
         surfaceTempKelvin: 10000000,
@@ -1130,6 +1153,8 @@ export function formatCosmicAge(years: number): string {
  * - Main sequence phase: 40% of slider (slider 0.15 to 0.55 for timeline 0.0 to 0.50)
  * - Post-main sequence phase: 30% of slider (slider 0.55 to 0.85 for timeline 0.50 to 1.00)
  * - Remnant phase: 15% of slider (slider 0.85 to 1.00 for timeline 1.00 to 2.00)
+ *   - Explosion & remnant birth: 7% of slider (slider 0.85 to 0.92 for timeline 1.00 to 1.15)
+ *   - Remnant cooling & final stasis: 8% of slider (slider 0.92 to 1.00 for timeline 1.15 to 2.00)
  */
 export function timelineToSlider(timelineProgress: number): number {
   if (timelineProgress <= 0) {
@@ -1141,9 +1166,12 @@ export function timelineToSlider(timelineProgress: number): number {
   } else if (timelineProgress <= 1.00) {
     // 0.50 to 1.00 maps linearly to 0.55 to 0.85
     return 0.55 + ((timelineProgress - 0.50) / 0.50) * 0.30;
+  } else if (timelineProgress <= 1.15) {
+    // 1.00 to 1.15 (Explosion to Remnant Birth) given expanded slider width: 0.85 to 0.92
+    return 0.85 + ((timelineProgress - 1.00) / 0.15) * 0.07;
   } else {
-    // 1.00 to 2.00 maps linearly to 0.85 to 1.00
-    return Math.min(1.0, 0.85 + ((timelineProgress - 1.00) / 1.00) * 0.15);
+    // 1.15 to 2.00 (Remnant cooling & eternal stasis) maps to 0.92 to 1.00
+    return Math.min(1.0, 0.92 + ((timelineProgress - 1.15) / 0.85) * 0.08);
   }
 }
 
@@ -1152,7 +1180,8 @@ export function timelineToSlider(timelineProgress: number): number {
  * - 0.00 to 0.15 maps to -1.0 to 0.0 (Protostar)
  * - 0.15 to 0.55 maps to 0.0 to 0.50 (Main sequence)
  * - 0.55 to 0.85 maps to 0.50 to 1.00 (Post-main sequence)
- * - 0.85 to 1.00 maps to 1.00 to 2.00 (Remnant)
+ * - 0.85 to 0.92 maps to 1.00 to 1.15 (Explosion & Remnant Birth)
+ * - 0.92 to 1.00 maps to 1.15 to 2.00 (Remnant cooling & stasis)
  */
 export function sliderToTimeline(sliderVal: number): number {
   const s = Math.max(0, Math.min(1.0, sliderVal));
@@ -1162,8 +1191,10 @@ export function sliderToTimeline(sliderVal: number): number {
     return ((s - 0.15) / 0.40) * 0.50;
   } else if (s <= 0.85) {
     return 0.50 + ((s - 0.55) / 0.30) * 0.50;
+  } else if (s <= 0.92) {
+    return 1.00 + ((s - 0.85) / 0.07) * 0.15;
   } else {
-    return 1.00 + ((s - 0.85) / 0.15) * 1.00;
+    return 1.15 + ((s - 0.92) / 0.08) * 0.85;
   }
 }
 

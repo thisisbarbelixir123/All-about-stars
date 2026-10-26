@@ -86,8 +86,27 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
     const pts = currentTrack.checkpoints;
     if (pts.length === 0) return 0;
     for (let i = 0; i < pts.length; i++) {
-      const prevBoundary = i === 0 ? -Infinity : (pts[i - 1].progress + pts[i].progress) / 2;
-      const nextBoundary = i === pts.length - 1 ? Infinity : (pts[i].progress + pts[i + 1].progress) / 2;
+      let prevBoundary: number;
+      let nextBoundary: number;
+
+      if (i === 0) {
+        prevBoundary = -Infinity;
+      } else if (pts[i].progress === 1.0) {
+        // Star death phase starts strictly at 100% (progress = 1.0)
+        prevBoundary = 1.0;
+      } else {
+        prevBoundary = (pts[i - 1].progress + pts[i].progress) / 2;
+      }
+
+      if (i === pts.length - 1) {
+        nextBoundary = Infinity;
+      } else if (pts[i + 1].progress === 1.0) {
+        // Pre-death giant phase lasts all the way until star death at 100% (progress = 1.0)
+        nextBoundary = 1.0;
+      } else {
+        nextBoundary = (pts[i].progress + pts[i + 1].progress) / 2;
+      }
+
       if (progress >= prevBoundary && progress < nextBoundary) {
         return i;
       }
@@ -288,20 +307,22 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       const REMNANT_RADIUS = 13;
 
       // Continuous smooth star radius calculation (No discrete jumps between normal star and giant, or blue dwarf to white dwarf!)
-      // Smoothly maps continuous telemetry.interpolatedRadius across orders of magnitude
+      // Continuous smooth star radius calculation directly mapped from astrophysics telemetry.interpolatedRadius
+      // Zero hardcoded jumps; the visual star size directly corresponds to the astrophysical radius across 7 orders of magnitude!
       const getContinuousStarRadius = () => {
-        const minPx = Math.min(width, height) * 0.12;
-        const maxPx = Math.min(width, height) * 0.35;
-        const logVal = Math.log10(Math.max(0.08, telemetry.interpolatedRadius));
-        const norm = Math.max(0, Math.min(1, (logVal + 1.1) / 4.1));
-        const pulse = Math.sin(tSec * 1.5) * (1.0 + norm * 2.0);
-        const normalStarR = minPx + norm * (maxPx - minPx) + pulse;
+        const REMNANT_CORE_R = REMNANT_RADIUS; // 13px
+        const maxPx = Math.min(width, height) * 0.35; // ~175px
 
-        // Smooth contraction from blue dwarf into degenerate white dwarf remnant (REMNANT_RADIUS = 13)
-        if (visualType === 'star' && nextVisualType === 'cooling-white-dwarf') {
-          return (1 - alpha) * normalStarR + alpha * REMNANT_RADIUS;
-        }
-        return normalStarR;
+        const R = Math.max(0.00001, telemetry.interpolatedRadius);
+        // Degenerate remnants (white dwarfs, neutron stars, black holes) are at <= 0.015 R☉ and standardized to REMNANT_RADIUS
+        const logR = Math.log10(R);
+        // Logarithmic span from degenerate remnant core (~0.015 R☉, log10 = -1.824) to monster supergiant (1000 R☉, log10 = 3.0)
+        const minLog = -1.824;
+        const maxLog = 3.0;
+        const norm = Math.max(0, Math.min(1, (logR - minLog) / (maxLog - minLog)));
+
+        const pulse = Math.sin(tSec * 1.5) * (norm * 2.5);
+        return REMNANT_CORE_R + norm * (maxPx - REMNANT_CORE_R) + pulse;
       };
 
       // Helper to draw realistic, isotropic, silky-smooth Star Model (NO straight rays, NO orb light, NO blotchy cells)
@@ -316,9 +337,16 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
 
         const starR = Math.max(12, radius);
 
-        // When contracting from blue dwarf to white dwarf, gently fade the outer corona into the compact degenerate core
-        const coronaMultiplier = (visualType === 'star' && nextVisualType === 'cooling-white-dwarf')
-          ? Math.max(0, 1 - alpha * 0.9)
+        const isDyingStar =
+          (nextVisualType === 'planetary-nebula' ||
+            nextVisualType === 'supernova' ||
+            nextVisualType === 'hypernova' ||
+            nextVisualType === 'cooling-white-dwarf') &&
+          progress >= 0.98;
+
+        // When contracting during core collapse or into white dwarf, gently contract the outer corona with the shrinking star
+        const coronaMultiplier = isDyingStar
+          ? Math.max(0.2, 1 - ((progress - 0.98) / 0.02) * 0.8)
           : 1.0;
 
         // 1. Dual-Layer Volumetric Coronal Bloom (smooth atmospheric inverse-square radiance falloff)
@@ -538,14 +566,18 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
         if (visualType === 'protostar') {
           opacity = alpha; // Fading in smoothly from protostar
         } else if (
-          visualType === 'giant' &&
+          (visualType === 'giant' || visualType === 'star') &&
           (nextVisualType === 'planetary-nebula' ||
             nextVisualType === 'supernova' ||
             nextVisualType === 'hypernova')
         ) {
-          // When in giant phase (alpha < 0.5), star is fully visible as giant.
-          // In explosion/nebula phase (alpha >= 0.5), outer envelope detaches / fades into explosion
-          opacity = alpha < 0.5 ? 1.0 : Math.max(0, 1 - (alpha - 0.5) * 2 * 0.85);
+          // Keep the star solidly visible until star death (100%)
+          // Seamlessly hands off to the remnant core right at 100%
+          if (progress >= 0.995) {
+            opacity = Math.max(0, 1 - (progress - 0.995) / 0.005);
+          } else {
+            opacity = 1.0;
+          }
         }
 
         drawStarModel(starR, opacity);
@@ -554,25 +586,27 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       // 4. PLANETARY NEBULA (EXPANDING GAS SHELLS & WHITE DWARF FORMATION)
       // -------------------------------------------------------------
+      // Stellar death graphics begin expanding & fading in at 90% as the star shrinks (official star death at 100%)
       const isPnActive =
         visualType === 'planetary-nebula' ||
-        (visualType === 'giant' && nextVisualType === 'planetary-nebula' && alpha >= 0.5);
+        (visualType === 'giant' && nextVisualType === 'planetary-nebula' && progress >= 0.90);
 
       if (isPnActive) {
         let pnAlpha = 1.0;
-        let expansion = 0.5;
+        let expansion = 0.0;
 
         if (visualType === 'giant') {
-          const tAlpha = (alpha - 0.5) * 2;
-          pnAlpha = tAlpha * 0.9;
-          expansion = tAlpha * 0.4;
+          // Pre-death dynamic envelope detachment between 90% and 100%
+          const preDeathFade = Math.max(0, Math.min(1, (progress - 0.90) / 0.10));
+          pnAlpha = preDeathFade;
+          expansion = preDeathFade * 0.45; // Dynamic billowing expansion during envelope shedding
         } else if (visualType === 'planetary-nebula') {
           if (nextVisualType === 'cooling-white-dwarf') {
-            pnAlpha = Math.max(0, 1 - alpha * 0.9);
-            expansion = 0.4 + alpha * 0.6;
+            pnAlpha = Math.max(0, 1 - alpha * 0.92);
+            expansion = 0.45 + alpha * 0.55; // Continues expanding seamlessly into deep space
           } else {
             pnAlpha = 1.0;
-            expansion = 0.5;
+            expansion = 0.45;
           }
         }
 
@@ -580,10 +614,10 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.save();
           ctx.globalAlpha = pnAlpha;
 
-          const maxShellR = Math.min(width, height) * (0.32 + expansion * 0.22);
+          const maxShellR = Math.min(width, height) * (0.22 + expansion * 0.38);
 
-          // Outer Red [H-alpha] Ionized Gas Envelope
-          const rOuter = maxShellR * (0.85 + 0.04 * Math.sin(tSec * 1.5));
+          // Outer Red [H-alpha] Ionized Gas Envelope with billowing multi-harmonic undulations
+          const rOuter = maxShellR * (0.85 + 0.05 * Math.sin(tSec * 1.8 + expansion * 6.0));
           const gradRed = createSafeRadialGradient(cx, cy, rOuter * 0.65, cx, cy, rOuter);
           gradRed.addColorStop(0, 'rgba(239, 68, 68, 0)');
           gradRed.addColorStop(0.55, 'rgba(239, 68, 68, 0.45)');
@@ -616,15 +650,31 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
           ctx.fill();
 
+          // Dynamic expanding ionized gas clumps / knots billowing outward
+          const clumpCount = 10;
+          for (let k = 0; k < clumpCount; k++) {
+            const kAngle = (k / clumpCount) * Math.PI * 2 + tSec * 0.12 + k * 0.4;
+            const kDist = maxShellR * (0.38 + 0.52 * ((expansion * 1.3 + k * 0.15) % 1.0));
+            const kx = cx + Math.cos(kAngle) * kDist;
+            const ky = cy + Math.sin(kAngle) * kDist;
+            const kr = Math.max(8, maxShellR * 0.15);
+            const kGrad = createSafeRadialGradient(kx, ky, 0, kx, ky, kr);
+            kGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
+            kGrad.addColorStop(0.5, 'rgba(16, 185, 129, 0.22)');
+            kGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            ctx.fillStyle = kGrad;
+            ctx.beginPath();
+            ctx.arc(kx, ky, kr, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
           ctx.restore();
         }
 
-        // Central Ultra-Hot Nascent White Dwarf Core (Same exact REMNANT_RADIUS for seamless transition)
+        // Central Ultra-Hot Nascent White Dwarf Core (Emerges as star finishes shrinking at 100%)
         const coreAlpha =
           visualType === 'giant'
-            ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
-            : visualType === 'planetary-nebula'
-            ? 1.0
+            ? Math.max(0, Math.min(1, (progress - 0.97) / 0.03))
             : 1.0;
 
         if (coreAlpha > 0.01) {
@@ -652,25 +702,27 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       // 5. SUPERNOVA EXPLOSION (CORE-COLLAPSE SHOCKWAVE & NEUTRON STAR FORMATION)
       // -------------------------------------------------------------
+      // Stellar death graphics begin expanding & fading in as core collapse reaches surface (official star death at 100%)
       const isSnActive =
         visualType === 'supernova' ||
-        (visualType === 'giant' && nextVisualType === 'supernova' && alpha >= 0.5);
+        (visualType === 'giant' && nextVisualType === 'supernova' && progress >= 0.98);
 
       if (isSnActive) {
         let snAlpha = 1.0;
-        let expansion = 0.5;
+        let expansion = 0.0;
 
         if (visualType === 'giant') {
-          const tAlpha = (alpha - 0.5) * 2;
-          snAlpha = tAlpha;
-          expansion = tAlpha * 0.4;
+          // Pre-death shock breakout between 98% and 100%
+          const preDeathFade = Math.max(0, Math.min(1, (progress - 0.98) / 0.02));
+          snAlpha = preDeathFade;
+          expansion = preDeathFade * 0.50; // Dynamic blast wave expansion during shock breakout
         } else if (visualType === 'supernova') {
           if (nextVisualType === 'pulsar') {
-            snAlpha = Math.max(0, 1 - alpha * 0.9);
-            expansion = 0.4 + alpha * 0.6;
+            snAlpha = Math.max(0, 1 - alpha * 0.92);
+            expansion = 0.50 + alpha * 0.50; // Continues expanding seamlessly into deep space
           } else {
             snAlpha = 1.0;
-            expansion = 0.5;
+            expansion = 0.50;
           }
         }
 
@@ -678,55 +730,81 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.save();
           ctx.globalAlpha = snAlpha;
 
-          const blastR = Math.min(width, height) * (0.32 + expansion * 0.24);
+          // Expand blast front outward, while ensuring the inner cavity stays clear of the shrinking supergiant core
+          const blastR = Math.min(width, height) * (0.24 + expansion * 0.46);
+          const innerCavityR = Math.max(REMNANT_RADIUS * 2.2, blastR * 0.62);
 
-          // Multi-harmonic turbulent shock front
-          const shockGrad = createSafeRadialGradient(cx, cy, 10, cx, cy, blastR);
-          shockGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-          shockGrad.addColorStop(0.25, 'rgba(147, 197, 253, 0.85)');
-          shockGrad.addColorStop(0.55, 'rgba(59, 130, 246, 0.55)');
-          shockGrad.addColorStop(0.85, 'rgba(239, 68, 68, 0.35)');
+          // Multi-harmonic turbulent shock front with evacuated inner cavity
+          const shockGrad = createSafeRadialGradient(cx, cy, innerCavityR, cx, cy, blastR);
+          shockGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+          shockGrad.addColorStop(0.3, 'rgba(147, 197, 253, 0.25)');
+          shockGrad.addColorStop(0.65, 'rgba(59, 130, 246, 0.7)');
+          shockGrad.addColorStop(0.88, 'rgba(239, 68, 68, 0.5)');
           shockGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
           ctx.fillStyle = shockGrad;
 
           ctx.beginPath();
-          const steps = 40;
+          const steps = 48;
           for (let s = 0; s <= steps; s++) {
             const sAngle = (s / steps) * Math.PI * 2;
-            const undulation = 1 + 0.08 * Math.sin(sAngle * 7 + tSec * 2.5) + 0.05 * Math.cos(sAngle * 11 - tSec * 1.8);
+            const undulation =
+              1 +
+              0.09 * Math.sin(sAngle * 7 + tSec * 3.2 + expansion * 8.0) +
+              0.05 * Math.cos(sAngle * 11 - tSec * 2.0);
             const r = blastR * undulation;
             const sx = cx + Math.cos(sAngle) * r;
             const sy = cy + Math.sin(sAngle) * r;
             if (s === 0) ctx.moveTo(sx, sy);
             else ctx.lineTo(sx, sy);
           }
+          // Cut out inner cavity so it's a true hollow expanding shell that never obscures the shrinking star inside!
+          for (let s = steps; s >= 0; s--) {
+            const sAngle = (s / steps) * Math.PI * 2;
+            const sx = cx + Math.cos(sAngle) * innerCavityR;
+            const sy = cy + Math.sin(sAngle) * innerCavityR;
+            ctx.lineTo(sx, sy);
+          }
           ctx.closePath();
           ctx.fill();
 
-          // Expanding curved plasma filaments
+          // Expanding curved plasma filaments riding outward on the shell
           for (let w = 0; w < 12; w++) {
-            const wAngle = (w / 12) * Math.PI * 2 + tSec * 0.15;
-            const wDist = blastR * 0.65;
+            const wAngle = (w / 12) * Math.PI * 2 + tSec * 0.22 + w * 0.2;
+            const wDist = innerCavityR + (blastR - innerCavityR) * (0.42 + 0.35 * Math.sin(w * 1.7 + tSec));
             const wx = cx + Math.cos(wAngle) * wDist;
             const wy = cy + Math.sin(wAngle) * wDist;
-            const wGrad = createSafeRadialGradient(wx, wy, 0, wx, wy, blastR * 0.25);
-            wGrad.addColorStop(0, 'rgba(224, 242, 254, 0.5)');
-            wGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+            const filamentR = Math.max(12, (blastR - innerCavityR) * 0.34);
+            const wGrad = createSafeRadialGradient(wx, wy, 0, wx, wy, filamentR);
+            wGrad.addColorStop(0, 'rgba(224, 242, 254, 0.65)');
+            wGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.3)');
+            wGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
             ctx.fillStyle = wGrad;
             ctx.beginPath();
-            ctx.arc(wx, wy, blastR * 0.25, 0, Math.PI * 2);
+            ctx.arc(wx, wy, filamentR, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Core-bounce neutrino rebound shock flash (peaks right at 99%–100%)
+          const bouncePeak = 1.0 - Math.min(1, Math.abs(progress - 1.0) / 0.05);
+          if (bouncePeak > 0.01) {
+            const flashR = REMNANT_RADIUS * (2.2 + bouncePeak * 4.5);
+            const flashGrad = createSafeRadialGradient(cx, cy, 0, cx, cy, flashR);
+            flashGrad.addColorStop(0, '#ffffff');
+            flashGrad.addColorStop(0.35, 'rgba(191, 219, 254, 0.8)');
+            flashGrad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            ctx.fillStyle = flashGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, flashR, 0, Math.PI * 2);
             ctx.fill();
           }
 
           ctx.restore();
         }
 
-        // Central Collapsed Neutron Core (Standardized REMNANT_RADIUS = 13 for seamless morphing into pulsar)
+        // Central Collapsed Neutron Core (Emerges as star finishes shrinking at 100%)
         const coreAlpha =
           visualType === 'giant'
-            ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
-            : visualType === 'supernova'
-            ? 1.0
+            ? Math.max(0, Math.min(1, (progress - 0.97) / 0.03))
             : 1.0;
 
         if (coreAlpha > 0.01) {
@@ -754,25 +832,27 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
       // -------------------------------------------------------------
       // 6. HYPERNOVA / COLLAPSAR & RELATIVISTIC GRB JETS
       // -------------------------------------------------------------
+      // Stellar death graphics begin expanding & fading in as core collapse reaches surface (official star death at 100%)
       const isHnActive =
         visualType === 'hypernova' ||
-        (visualType === 'giant' && nextVisualType === 'hypernova' && alpha >= 0.5);
+        ((visualType === 'giant' || visualType === 'star') && nextVisualType === 'hypernova' && progress >= 0.98);
 
       if (isHnActive) {
         let hAlpha = 1.0;
-        let expansion = 0.5;
+        let expansion = 0.0;
 
-        if (visualType === 'giant') {
-          const tAlpha = (alpha - 0.5) * 2;
-          hAlpha = tAlpha;
-          expansion = tAlpha * 0.4;
+        if (visualType === 'giant' || visualType === 'star') {
+          // Pre-death violent collapsar breakout between 98% and 100%
+          const preDeathFade = Math.max(0, Math.min(1, (progress - 0.98) / 0.02));
+          hAlpha = preDeathFade;
+          expansion = preDeathFade * 0.50; // Dynamic jet punching & torus eruption
         } else if (visualType === 'hypernova') {
           if (nextVisualType === 'black-hole') {
-            hAlpha = Math.max(0, 1 - alpha);
-            expansion = 0.4 + alpha * 0.7;
+            hAlpha = Math.max(0, 1 - alpha * 0.92);
+            expansion = 0.50 + alpha * 0.50; // Continues expanding seamlessly into deep space
           } else {
             hAlpha = 1.0;
-            expansion = 0.5;
+            expansion = 0.50;
           }
         }
 
@@ -780,60 +860,95 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
           ctx.save();
           ctx.globalAlpha = hAlpha;
 
-          const jetHeight = Math.min(width, height) * (0.44 + expansion * 0.12);
+          // Polar Jet reach punches outward from nascent core to deep space
+          const jetHeight = Math.min(width, height) * (0.16 + expansion * 0.54);
 
           ctx.save();
           ctx.translate(cx, cy);
 
           // Relativistic Polar Jet Breakout (Smooth Gaussian falloff beams)
+          // Starts with clear nozzle space around the event horizon
+          const jetNozzleGap = REMNANT_RADIUS * 1.6;
           const grbGrad = ctx.createLinearGradient(0, -jetHeight, 0, jetHeight);
           grbGrad.addColorStop(0, 'rgba(244, 63, 94, 0)');
           grbGrad.addColorStop(0.2, 'rgba(251, 113, 133, 0.9)');
-          grbGrad.addColorStop(0.5, 'rgba(255, 255, 255, 1)');
+          grbGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
           grbGrad.addColorStop(0.8, 'rgba(251, 113, 133, 0.9)');
           grbGrad.addColorStop(1, 'rgba(244, 63, 94, 0)');
           ctx.fillStyle = grbGrad;
 
           ctx.beginPath();
-          ctx.moveTo(-4, 0);
+          ctx.moveTo(-4, -jetNozzleGap);
           ctx.quadraticCurveTo(-12, -jetHeight * 0.5, -24, -jetHeight);
           ctx.lineTo(24, -jetHeight);
-          ctx.quadraticCurveTo(12, -jetHeight * 0.5, 4, 0);
+          ctx.quadraticCurveTo(12, -jetHeight * 0.5, 4, -jetNozzleGap);
           ctx.closePath();
           ctx.fill();
 
           ctx.beginPath();
-          ctx.moveTo(-4, 0);
+          ctx.moveTo(-4, jetNozzleGap);
           ctx.quadraticCurveTo(-12, jetHeight * 0.5, -24, jetHeight);
           ctx.lineTo(24, jetHeight);
-          ctx.quadraticCurveTo(12, jetHeight * 0.5, 4, 0);
+          ctx.quadraticCurveTo(12, jetHeight * 0.5, 4, jetNozzleGap);
           ctx.closePath();
           ctx.fill();
 
+          // Relativistic collimated jet knots streaming at 0.99999c along both poles
+          const knotCount = 6;
+          for (let k = 0; k < knotCount; k++) {
+            const knotPhase = (tSec * 3.5 + k / knotCount + expansion * 2.0) % 1.0;
+            const knotY = jetNozzleGap + knotPhase * (jetHeight - jetNozzleGap);
+            const knotW = 2.8 + 1.8 * Math.sin(knotPhase * Math.PI);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            // North jet knot
+            ctx.beginPath();
+            ctx.arc(0, -knotY, knotW, 0, Math.PI * 2);
+            ctx.fill();
+            // South jet knot
+            ctx.beginPath();
+            ctx.arc(0, knotY, knotW, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
           ctx.restore();
 
-          // Equatorial Blast Torus
-          const blastR = Math.min(width, height) * (0.35 + expansion * 0.15);
-          const bGrad = createSafeRadialGradient(cx, cy, 10, cx, cy, blastR);
-          bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-          bGrad.addColorStop(0.3, 'rgba(244, 63, 94, 0.7)');
-          bGrad.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
+          // Equatorial Blast Torus with expanded space around the black hole
+          const blastR = Math.min(width, height) * (0.22 + expansion * 0.44);
+          const innerTorusHole = Math.max(REMNANT_RADIUS * 2.2, blastR * 0.62);
+          const bGrad = createSafeRadialGradient(cx, cy, innerTorusHole, cx, cy, blastR);
+          bGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+          bGrad.addColorStop(0.35, 'rgba(244, 63, 94, 0.45)');
+          bGrad.addColorStop(0.7, 'rgba(217, 70, 239, 0.7)');
           bGrad.addColorStop(1, 'rgba(126, 34, 206, 0)');
           ctx.fillStyle = bGrad;
           ctx.beginPath();
           ctx.arc(cx, cy, blastR, 0, Math.PI * 2);
+          ctx.arc(cx, cy, innerTorusHole, 0, Math.PI * 2, true); // True hollow torus cut-out so shrinking hypergiant is visible!
           ctx.fill();
+
+          // Ultra-energetic GRB singularity puncture flash (peaks right at 99%–100%)
+          const grbFlash = 1.0 - Math.min(1, Math.abs(progress - 1.0) / 0.05);
+          if (grbFlash > 0.01) {
+            const flashR = REMNANT_RADIUS * (2.2 + grbFlash * 5.0);
+            const flashGrad = createSafeRadialGradient(cx, cy, 0, cx, cy, flashR);
+            flashGrad.addColorStop(0, '#ffffff');
+            flashGrad.addColorStop(0.35, 'rgba(254, 205, 211, 0.85)');
+            flashGrad.addColorStop(1, 'rgba(244, 63, 94, 0)');
+            ctx.fillStyle = flashGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, flashR, 0, Math.PI * 2);
+            ctx.fill();
+          }
 
           ctx.restore();
         }
 
-        // Central Singularity Collapse Core (REMNANT_RADIUS = 13 for seamless morph into black hole)
+        // Central Singularity Collapse Core (Emerges as hypergiant/Wolf-Rayet core finishes collapse at 100%)
         if (nextVisualType !== 'black-hole') {
           const coreAlpha =
-            visualType === 'giant'
-              ? (alpha >= 0.5 ? (alpha - 0.5) * 2 : 0)
-              : visualType === 'hypernova'
-              ? 1.0
+            (visualType === 'giant' || visualType === 'star')
+              ? Math.max(0, Math.min(1, (progress - 0.98) / 0.02))
               : 1.0;
 
           if (coreAlpha > 0.01) {
@@ -1995,7 +2110,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
                 <span className="text-slate-400">
                   {progress < 0
                     ? 'Pre-Birth Protostar'
-                    : progress <= 1.0
+                    : progress < 1.0
                     ? 'Active Stellar Life'
                     : 'Post-Death Remnant'}
                 </span>
