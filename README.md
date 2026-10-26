@@ -162,7 +162,7 @@ $$^{12}\text{C}(p,\gamma)^{13}\text{N}(e^+\nu_e)^{13}\text{C}(p,\gamma)^{14}\tex
 In evolved giants and supergiants, sequential gravitational contraction raises core temperatures and densities to trigger advanced alpha-capture stages:
 - **Triple-Alpha Process ($T_c \approx 10^8\text{ K}$):**
   $$2\,^4\text{He} \rightleftharpoons \,^8\text{Be}$$
-  $$^8\text{Be} + \,^4\text{He} \to \,^{12}\text{C}^* \to \,^{12}\text{C} + \gamma \quad (\text{Hoyle State Resonance})$$
+  $$^8\text{Be} + \,^4\text{He} \to \,^{12}\text{C}^\ast \to \,^{12}\text{C} + \gamma \quad (\text{Hoyle State Resonance})$$
 - **Alpha Capture:** $^{12}\text{C}(\alpha,\gamma)^{16}\text{O}(\alpha,\gamma)^{20}\text{Ne}(\alpha,\gamma)^{24}\text{Mg}$
 - **Carbon Burning ($T \approx 5 \times 10^8\text{ K}$), Neon Burning ($T \approx 1.2 \times 10^9\text{ K}$), Oxygen Burning ($T \approx 1.5 - 2.0 \times 10^9\text{ K}$)**
 - **Silicon Burning & Nuclear Statistical Equilibrium ($T \approx 3 - 4 \times 10^9\text{ K}$):** Rapid photodisintegration rearrangement terminating at the iron peak:
@@ -224,11 +224,11 @@ The app visually depicts phase-locked light curves, radial velocity curves, and 
 
 Starpedia 3D calculates circumstellar habitable zone (HZ) boundaries using the empirical planetary insolation flux model of **Kopparapu et al. (2013, 2014)**:
 
-$$S_{\text{eff}} = S_{\text{eff}\odot} + a T_* + b T_*^2 + c T_*^3 + d T_*^4$$
+$$S_{\text{eff}} = S_{\text{eff},\odot} + a T_{\ast} + b T_{\ast}^2 + c T_{\ast}^3 + d T_{\ast}^4$$
 
 $$d = \sqrt{\frac{L/L_\odot}{S_{\text{eff}}}}\text{ AU}$$
 
-where $T_* = T_{\text{eff}} - 5780\text{ K}$, and polynomial coefficients define four radiative thresholds:
+where $T_{\ast} = T_{\text{eff}} - 5780\text{ K}$, and polynomial coefficients define four radiative thresholds:
 1. **Recent Venus (Inner Empirical Limit):** Runaway evaporation boundary ($S_{\text{eff}} \approx 1.776$).
 2. **Runaway Greenhouse (Conservative Inner Limit):** Complete oceanic vaporisation ($S_{\text{eff}} \approx 1.107$).
 3. **Maximum Greenhouse (Conservative Outer Limit):** $\text{CO}_2$ condensation limit ($S_{\text{eff}} \approx 0.356$).
