@@ -94,310 +94,154 @@ export const SPECTRAL_CLASSES_META = [
   { key: 'NS', label: 'Neutron Star', color: '#00f0ff', desc: 'Ultra-dense Pulsar Relic' },
 ] as const;
 
+// ---------------------------------------------------------------------------
+// Dynamic Preset Query Generators
+// Automatically reflect all current and newly added stars in STARS_CATALOG
+// ---------------------------------------------------------------------------
+
+// Helper: identify degenerate remnants (white dwarfs, neutron stars, pulsars, magnetars)
+const isDegenerateRemnant = (s: StarData): boolean => {
+  return (
+    s.spectralClass === 'WD' ||
+    s.spectralClass === 'NS' ||
+    Boolean(
+      s.stellarStage &&
+        (s.stellarStage.includes('White Dwarf') ||
+          s.stellarStage.includes('Neutron') ||
+          s.stellarStage.includes('Pulsar') ||
+          s.stellarStage.includes('Magnetar') ||
+          s.stellarStage.includes('Degenerate'))
+    )
+  );
+};
+
+// 1. Nearest Stars to Earth (within 15 light years, starting with Sun)
+const dynamicNearestStarIds = [
+  'sun',
+  ...STARS_CATALOG.filter((s) => s.id !== 'sun' && s.distanceLy <= 15)
+    .sort((a, b) => a.distanceLy - b.distanceLy)
+    .map((s) => s.id),
+];
+
+// 2. Brightest Stars in Night Sky (apparent magnitude m <= 2.00, starting with Sun)
+const dynamicBrightestStarIds = [
+  'sun',
+  ...STARS_CATALOG.filter(
+    (s) => s.id !== 'sun' && s.apparentMagnitude !== undefined && s.apparentMagnitude <= 2.0
+  )
+    .sort((a, b) => (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99))
+    .map((s) => s.id),
+];
+
+// 3. Hottest Stars (scorching stellar atmospheres >= 40,000 K, excluding neutron stars and other degenerate remnants)
+const dynamicHottestStarIds = [
+  'sun',
+  ...STARS_CATALOG.filter((s) => {
+    if (s.id === 'sun') return false;
+    // Exclude neutron stars, white dwarfs, and other degenerate remnants
+    if (isDegenerateRemnant(s)) return false;
+    return s.temperature >= 40000;
+  })
+    .sort((a, b) => a.temperature - b.temperature)
+    .map((s) => s.id),
+];
+
+// 4. Largest Stars (cosmic hypergiants and stars >= 1,000 Solar Diameters)
+const dynamicLargestStarIds = [
+  'sun',
+  ...STARS_CATALOG.filter(
+    (s) =>
+      s.id !== 'sun' &&
+      (s.diameterSolar >= 1000 ||
+        (s.stellarStage && s.stellarStage.includes('Hypergiant')))
+  )
+    .sort((a, b) => a.diameterSolar - b.diameterSolar)
+    .map((s) => s.id),
+];
+
+// 5. Smallest Main-Sequence Stars (hydrogen-fusing dwarfs <= 0.5 Solar Diameters)
+const dynamicSmallestMainSequenceIds = [
+  ...STARS_CATALOG.filter((s) => {
+    if (s.id === 'sun') return false;
+    const isMainSequence =
+      s.stellarStage === 'Main Sequence' ||
+      s.stellarStage === 'Main Sequence Dwarf' ||
+      s.stellarStage === 'Red Dwarf';
+    return isMainSequence && s.diameterSolar <= 0.5;
+  })
+    .sort((a, b) => a.diameterSolar - b.diameterSolar)
+    .map((s) => s.id),
+  'sun',
+];
+
+// 6. Most Massive Stars (exceeding 50 to 200+ Solar Masses)
+const dynamicMostMassiveStarIds = [
+  'sun',
+  ...STARS_CATALOG.filter((s) => s.id !== 'sun' && s.massSolar >= 50)
+    .sort((a, b) => a.massSolar - b.massSolar)
+    .map((s) => s.id),
+];
+
+// 7. Stellar Remnants (white dwarfs, neutron stars, pulsars, and magnetars)
+const dynamicStellarRemnantIds = [
+  ...STARS_CATALOG.filter((s) => s.id !== 'sun' && isDegenerateRemnant(s))
+    .sort((a, b) => a.diameterKm - b.diameterKm)
+    .map((s) => s.id),
+  'sun',
+];
+
+// ---------------------------------------------------------------------------
+// Preset Comparisons Catalog
+// Combines dynamic astronomical presets with curated cultural/anchor collections
+// ---------------------------------------------------------------------------
 export const PRESET_COMPARISONS: PresetComparison[] = [
   {
     id: 'nearest-stars',
     title: 'Nearest Stars to Earth',
     defaultSortKey: 'distance',
     defaultSortDirection: 'asc',
-    starIds: [
-      'sun',
-      'proxima-centauri',
-      'alpha-centauri-a',
-      'alpha-centauri-b',
-      'barnards-star',
-      'luhman-16-a',
-      'luhman-16-b',
-      'wise-0855-0714',
-      'wolf-359',
-      'lalande-21185',
-      'sirius-a',
-      'sirius-b',
-      'luyten-726-8-a',
-      'uv-ceti',
-      'ross-154',
-      'ross-248',
-      'yz-ceti',
-      'epsilon-eridani',
-      'lacaille-9352',
-      'ross-128',
-      'wise-1506-7027',
-      'ez-aquarii-a',
-      'ez-aquarii-b',
-      'ez-aquarii-c',
-      '61-cygni-a',
-      '61-cygni-b',
-      'procyon-a',
-      'procyon-b',
-      'struve-2398-a',
-      'struve-2398-b',
-      'groombridge-34-a',
-      'groombridge-34-b',
-      'dx-cancri',
-      'tau-ceti',
-      'gj-1061',
-      'wise-0350-5658',
-      'wise-0146-4234',
-      'luytens-star',
-      'teegardens-star',
-      'scr-1845-6357-a',
-      'scr-1845-6357-b',
-      'kapteyns-star',
-      'lacaille-8760',
-      'kruger-60-a',
-      'kruger-60-b',
-      'denis-j1048-3956',
-      'ross-614-a',
-      'ross-614-b',
-      'wise-1541-2250',
-      'wolf-1061',
-      'van-maanens-star',
-      'gliese-1',
-      'wolf-424-a',
-      'wolf-424-b',
-      'tz-arietis',
-      'gliese-687',
-      'lhs-292',
-      'gliese-674'
-    ],
-    desc: 'All 58 stellar objects in the catalog within 15 light-years of Earth.'
+    starIds: dynamicNearestStarIds,
+    desc: `All ${dynamicNearestStarIds.length} stellar objects in the catalog within 15 light-years of Earth.`,
   },
   {
     id: 'brightest-stars-night-sky',
     title: 'Brightest Stars in the Night Sky',
     defaultSortKey: 'apparentMagnitude',
     defaultSortDirection: 'asc',
-    starIds: [
-      'sun',
-      'sirius-a',
-      'canopus',
-      'arcturus',
-      'alpha-centauri-a',
-      'vega',
-      'capella-aa',
-      'rigel',
-      'procyon-a',
-      'achernar',
-      'betelgeuse',
-      'hadar',
-      'altair',
-      'acrux-a',
-      'aldebaran',
-      'antares',
-      'capella-ab',
-      'spica',
-      'pollux',
-      'fomalhaut',
-      'deneb',
-      'mimosa',
-      'alpha-centauri-b',
-      'regulus',
-      'adhara',
-      'shaula',
-      'bellatrix',
-      'gacrux',
-      'elnath',
-      'miaplacidus',
-      'alnilam',
-      'alnair',
-      'alnitak',
-      'alioth',
-      'regor',
-      'dubhe',
-      'mirfak',
-      'wezen',
-      'kaus-australis',
-      'avior',
-      'alkaid',
-      'sargas',
-      'menkalinan',
-      'atria',
-      'castor-aa',
-      'alhena',
-      'peacock',
-      'alsephina',
-      'polaris',
-      'alphard',
-      'mirzam'
-    ],
-    desc: 'The 51 brightest stars visible from Earth with apparent magnitude m ≤ 2.00.'
+    starIds: dynamicBrightestStarIds,
+    desc: `The ${dynamicBrightestStarIds.length} brightest stars visible from Earth with apparent magnitude m ≤ 2.00.`,
   },
   {
     id: 'hottest-stars',
     title: 'Hottest Stars',
     defaultSortKey: 'temperature',
     defaultSortDirection: 'asc',
-    starIds: [
-      'sun',
-      'melnick-42',
-      'r136a2',
-      'r136c',
-      'hd-269810',
-      'vfts-682',
-      'r136a3',
-      'regor',
-      'wr-136',
-      'ab7',
-      'cats-eye-central',
-      'wr-30a',
-      'ngc-2371-central',
-      'wr-2',
-      'wr-93b',
-      'sanduleak-2-73',
-      'kpd-0005-5106',
-      'wr-142',
-      'wr-102'
-    ],
-    desc: 'Extreme scorching stars compared with our Sun, reaching up to 210,000 K.'
+    starIds: dynamicHottestStarIds,
+    desc: `Extreme scorching stars (≥40,000 K) compared with our Sun, reaching up to 210,000 K.`,
   },
   {
     id: 'largest-stars',
     title: 'Largest Stars',
     defaultSortKey: 'size',
     defaultSortDirection: 'asc',
-    starIds: [
-      'sun',
-      'ck-carinae',
-      'stephenson-2-dfk-68',
-      'hv-838',
-      'hv-916',
-      'v602-carinae',
-      'vv-cephei-a',
-      'lggs-j004116-m31',
-      'hv-11223',
-      'rt-carinae',
-      'westerlund-1-75',
-      'lggs-j004035-m31',
-      'stephenson-2-dfk-12',
-      'woh-s281',
-      'rsgc1-f02',
-      'bc-cygni',
-      'lggs-j013352-m33',
-      'rw-cephei',
-      'quyllur',
-      'woh-s341',
-      'ev-carinae',
-      'pz-cassiopeiae',
-      'irc-minus-10414',
-      'lggs-j004539-m31',
-      'bi-cygni',
-      'westerlund-1-237',
-      'mu-cephei',
-      'lggs-j013414-m33',
-      'v766-centauri',
-      'vx-sagittarii',
-      'gcirs-7',
-      'hv-888',
-      'woh-s170',
-      'ah-scorpii',
-      'vy-canis-majoris',
-      'ky-cygni',
-      'kw-sagittarii',
-      'my-cephei',
-      'v354-cephei',
-      'westerlund-1-26',
-      'rsgc1-f01',
-      'woh-g64',
-      'nml-cygni',
-      'uy-scuti',
-      'iras-05280-6910',
-      'hv-2112',
-      'stephenson-2-18'
-    ],
-    desc: 'All cosmic hypergiants 1,000+ D☉ wide compared with our Sun, led by Stephenson 2-18.'
+    starIds: dynamicLargestStarIds,
+    desc: `All ${dynamicLargestStarIds.length - 1} cosmic hypergiants and super-expanded stars (≥1,000 D☉) compared with our Sun.`,
   },
   {
     id: 'smallest-main-sequence',
     title: 'Smallest Main-Sequence Stars',
     defaultSortKey: 'size',
     defaultSortDirection: 'asc',
-    starIds: [
-      'eblm-j0555-57ab',
-      'vb-10',
-      'yz-ceti',
-      'wx-ursae-majoris',
-      'gj-1151',
-      'teegardens-star',
-      'trappist-1',
-      'lhs-475',
-      'struve-2398-b',
-      'gliese-445',
-      'luyten-726-8-a',
-      'gliese-682',
-      '40-eridani-c',
-      'hn-librae',
-      'ross-47',
-      'stein-2051-a',
-      'gliese-625',
-      'gliese-570-c',
-      'gj-357',
-      'struve-2398-a',
-      'gliese-105-b',
-      'uv-ceti',
-      'ev-lacertae',
-      'gliese-393',
-      'wolf-294',
-      'gliese-876',
-      'ad-leonis',
-      'proxima-centauri',
-      'wolf-359',
-      'gliese-412-a',
-      'k2-18',
-      'gliese-436',
-      'toi-700',
-      'gliese-752-a',
-      'gliese-514',
-      'gliese-570-b',
-      'gliese-832',
-      'gliese-526',
-      'groombridge-34-b',
-      'barnards-star',
-      'ross-248',
-      'ross-128',
-      'lhs-1140',
-      'gj-1214',
-      'ross-154',
-      'kapteyns-star',
-      'gliese-581',
-      'wolf-1061',
-      'luytens-star',
-      'gliese-667-c',
-      'lalande-21185',
-      'groombridge-34-a',
-      'lacaille-9352',
-      'sun'
-    ],
-    desc: 'Hydrogen-fusing dwarfs smaller than 0.5 solar diameters compared with our Sun.'
+    starIds: dynamicSmallestMainSequenceIds,
+    desc: `Hydrogen-fusing dwarfs smaller than 0.5 solar diameters (${dynamicSmallestMainSequenceIds.length - 1} stars) compared with our Sun.`,
   },
   {
     id: 'most-massive-stars',
     title: 'Most Massive Stars',
     defaultSortKey: 'mass',
     defaultSortDirection: 'asc',
-    starIds: [
-      'sun',
-      'plasketts-star',
-      'zeta-puppis',
-      'vfts-352',
-      'peony-star',
-      'v4998-sagittarii',
-      'eta-carinae-a',
-      'wr-25',
-      'cygnus-ob2-12',
-      'hd-93250',
-      'hd-93129a',
-      'wr-42e',
-      'r136c',
-      'hd-269810',
-      'r136a3',
-      'vfts-682',
-      'lbv-1806-20',
-      'r136a2',
-      'bat99-98',
-      'melnick-42',
-      'r136a1'
-    ],
-    desc: 'The most massive known stars exceeding 70 to 200 solar masses, led by R136a1.'
+    starIds: dynamicMostMassiveStarIds,
+    desc: `The most massive stars in the catalog exceeding 50 to 200+ solar masses, led by R136a1 and Godzilla.`,
   },
   {
     id: 'exotic-and-chemically-peculiar',
@@ -416,68 +260,17 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       't-lyrae',
       'v-hydrae',
       'cw-leonis',
-      'hv-2112'
-    ],
-    desc: 'Bizarre stars with anomalous chemistry, extreme pulsations, and unique spectra.'
+      'hv-2112',
+    ].map(resolveStarId),
+    desc: 'Bizarre stars with anomalous chemistry, extreme pulsations, and unique spectra.',
   },
   {
     id: 'remnants-with-sun',
     title: 'Stellar Remnants',
     defaultSortKey: 'size',
     defaultSortDirection: 'asc',
-    starIds: [
-      'rx-j1856-3754',
-      'cas-a-neutron-star',
-      'vela-jr-cco',
-      'rx-j0420-5022',
-      'westerlund-1-magnetar',
-      'crab-pulsar',
-      'vela-pulsar',
-      'lich-pulsar',
-      'psr-j1748-2446ad',
-      'double-pulsar-a',
-      'sgr-1935-2154',
-      'magnetar-1e-2259',
-      'sgr-1806-20',
-      'pks-1209-cco',
-      '1e-1841-045',
-      'redback-pulsar',
-      'double-pulsar-b',
-      'rx-j1605-3249',
-      'psr-b1055-52',
-      'calvera',
-      'swift-j1818-1607',
-      'rx-j1308-2127',
-      'psr-b0950-08',
-      'psr-b0656-14',
-      'rbs-1774',
-      'psr-b1919-21',
-      'sgr-1900-14',
-      'psr-b1259-63',
-      'scorpius-x-1-ns',
-      'rx-j0806-4123',
-      'black-widow-pulsar',
-      'rx-j0720-3125',
-      'psr-j0740-6620',
-      'psr-j0030-0451',
-      'geminga',
-      'hulse-taylor-pulsar',
-      'psr-b1509-58',
-      'magnetar-1e-1048',
-      'bpm-37093',
-      'wd-1145-017',
-      'sirius-b',
-      'procyon-b',
-      'wd-1856-534',
-      'kpd-0005-5106',
-      'van-maanens-star',
-      'stein-2051-b',
-      '40-eridani-b',
-      'lp-40-365',
-      'gd-358',
-      'sun'
-    ],
-    desc: 'Compact stellar corpses: white dwarfs, neutron stars, pulsars, and magnetars.'
+    starIds: dynamicStellarRemnantIds,
+    desc: `Compact stellar corpses (${dynamicStellarRemnantIds.length - 1} relics: white dwarfs, neutron stars, pulsars, and magnetars) compared with the Sun.`,
   },
   {
     id: 'brazilian-flag-stars',
@@ -494,7 +287,7 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'muliphein',
       'girtab',
       'shaula',
-      'acrux-a',
+      'acrux-aa',
       'mimosa',
       'imai',
       'acrab',
@@ -511,9 +304,9 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'adhara',
       'mirzam',
       'iota-1-scorpii',
-      'antares'
-    ],
-    desc: 'All 27 stars on Brazil’s national flag, representing the states and capital.'
+      'antares',
+    ].map(resolveStarId),
+    desc: 'All 27 stars on Brazil’s national flag, representing the states and capital.',
   },
   {
     id: 'principal-88-constellations',
@@ -524,7 +317,7 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'alpheratz', 'alpha-antliae', 'alpha-apodis', 'sadalsuud', 'altair', 'beta-arae', 'hamal', 'capella-aa',
       'arcturus', 'alpha-caeli', 'beta-camelopardalis', 'tarf', 'cor-caroli', 'sirius-a', 'procyon-a', 'deneb-algedi',
       'canopus', 'schedar', 'alpha-centauri-a', 'alderamin', 'diphda', 'alpha-chamaeleontis', 'alpha-circini', 'phact',
-      'beta-comae-berenices', 'meridiana', 'alphecca', 'gienah-corvi', 'labrum', 'acrux-a', 'deneb', 'rotanev',
+      'beta-comae-berenices', 'meridiana', 'alphecca', 'gienah-corvi', 'labrum', 'acrux-aa', 'deneb', 'rotanev',
       'alpha-doradus', 'eltanin', 'kitalpha', 'achernar', 'dalim', 'pollux', 'alnair', 'kornephoros',
       'alpha-horologii', 'alphard', 'beta-hydri', 'alpha-indi', 'alpha-lacertae', 'regulus', 'praecipua', 'arneb',
       'zubeneschamali', 'men-alpha-lupi', 'alpha-lyncis', 'vega', 'alpha-mensae', 'gamma-microscopii', 'beta-monocerotis', 'alpha-muscae',
@@ -532,8 +325,8 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
       'alpha-pictoris', 'alpherg', 'fomalhaut', 'zeta-puppis', 'alpha-pyxidis', 'alpha-reticuli', 'gamma-sagittae', 'kaus-australis',
       'antares', 'alpha-sculptoris', 'alpha-scuti', 'unukalhai', 'alpha-sextantis', 'aldebaran', 'alpha-telescopii', 'beta-trianguli',
       'atria', 'alpha-tucanae', 'alioth', 'polaris', 'regor', 'spica', 'beta-volantis', 'anser'
-    ],
-    desc: 'The brightest principal star from each of the 88 modern IAU constellations.'
+    ].map(resolveStarId),
+    desc: 'The brightest principal star from each of the 88 modern IAU constellations.',
   },
   {
     id: 'all-stars-catalog',
@@ -541,6 +334,6 @@ export const PRESET_COMPARISONS: PresetComparison[] = [
     defaultSortKey: 'size',
     defaultSortDirection: 'asc',
     starIds: [...STARS_CATALOG].sort((a, b) => a.diameterKm - b.diameterKm).map((s) => s.id),
-    desc: 'All 740+ stars in the catalog, from compact stellar remnants to cosmic hypergiants.'
-  }
+    desc: `All ${STARS_CATALOG.length} stars in the catalog, from compact stellar remnants to cosmic hypergiants.`,
+  },
 ];
