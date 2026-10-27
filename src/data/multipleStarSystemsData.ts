@@ -3984,7 +3984,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'theta-1-ori-a1',
         catalogStarId: 'theta-1-orionis-a1',
-        name: 'Theta-1 Orionis A1 (V1016 Ori A1)',
+        name: 'Theta-1 Orionis A1 (V1016 Orionis A1)',
         bayerDesignation: 'θ¹ Ori A1',
         spectralType: 'B0.5V',
         massSolar: 15.3,
@@ -3999,7 +3999,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'theta-1-ori-a3',
         catalogStarId: 'theta-1-orionis-a3',
-        name: 'Theta-1 Orionis A3 (V1016 Ori A3)',
+        name: 'Theta-1 Orionis A3 (V1016 Orionis A3)',
         bayerDesignation: 'θ¹ Ori A3',
         spectralType: 'G2IV-V',
         massSolar: 2.6,
@@ -4013,7 +4013,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'theta-1-ori-a2',
         catalogStarId: 'theta-1-orionis-a2',
-        name: 'Theta-1 Orionis A2 (V1016 Ori A2)',
+        name: 'Theta-1 Orionis A2 (V1016 Orionis A2)',
         bayerDesignation: 'θ¹ Ori A2',
         spectralType: 'F6V',
         massSolar: 4.0,
@@ -4562,7 +4562,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
   // 55. W Ursae Majoris System
   {
     id: 'w-ursae-majoris-system',
-    name: 'W Ursae Majoris System (W UMa Archetype)',
+    name: 'W Ursae Majoris System (W Ursae Majoris Archetype)',
     systemType: 'Overcontact Binary',
     constellation: 'Ursa Major',
     distanceLy: 169,

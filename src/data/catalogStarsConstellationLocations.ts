@@ -674,10 +674,10 @@ export const STAR_CONSTELLATION_LOCATIONS: Record<string, string> = {
   "theta-1-orionis-c": "Trapezium C • 1,344 ly Anchor O-Star Powering Orion Nebula",
   "theta-1-orionis-c1": "Trapezium C1 (HD 37022 C1) • 34 M☉ O6.5Vpe Anchor Star Illuminating M42",
   "theta-1-orionis-c2": "Trapezium C2 (HD 37022 C2) • 10 M☉ O9.5V Spectroscopic Companion (11.35y Orbit)",
-  "theta-1-orionis-a": "Trapezium A (V1016 Ori) • 1,276 ly Triple System in Trapezium Cluster",
-  "theta-1-orionis-a1": "Trapezium A1 (V1016 Ori A1) • 15.3 M☉ Hot B-Star Eclipsing Primary",
-  "theta-1-orionis-a3": "Trapezium A3 (V1016 Ori A3) • 2.6 M☉ G-Type Secondary (65.4-Day Orbit)",
-  "theta-1-orionis-a2": "Trapezium A2 (V1016 Ori A2) • 4.0 M☉ F-Type Radio Companion (214-Year Orbit)",
+  "theta-1-orionis-a": "Trapezium A (V1016 Orionis) • 1,276 ly Triple System in Trapezium Cluster",
+  "theta-1-orionis-a1": "Trapezium A1 (V1016 Orionis A1) • 15.3 M☉ Hot B-Star Eclipsing Primary",
+  "theta-1-orionis-a3": "Trapezium A3 (V1016 Orionis A3) • 2.6 M☉ G-Type Secondary (65.4-Day Orbit)",
+  "theta-1-orionis-a2": "Trapezium A2 (V1016 Orionis A2) • 4.0 M☉ F-Type Radio Companion (214-Year Orbit)",
   "epsilon-coronae-borealis": "Epsilon CrB • 221 ly Orange Giant with 6.7 M_J Planet",
   "hd-209458": "Osiris Host • 157 ly First Transiting Exoplanet Discovered",
   "hd-189733-a": "HD 189733 • 64.5 ly Cobalt-Blue World with Silicate Glass Rain",
@@ -715,7 +715,7 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 52,
       "y": 64,
       "catalogStarId": "groombridge-34-a",
-      "name": "Groombridge 34 A (GX And) (Groombridge 34 A (GX Andromedae Flare System))",
+      "name": "Groombridge 34 A (GX Andromedae Flare System)",
       "mag": 8.08,
       "locationDescription": "Groombridge 34 A (GX Andromedae Flare System)"
     },
@@ -723,7 +723,7 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 52.8,
       "y": 64.5,
       "catalogStarId": "groombridge-34-b",
-      "name": "Groombridge 34 B (GQ And) (Groombridge 34 B (GQ Andromedae Flare Companion))",
+      "name": "Groombridge 34 B (GQ Andromedae Flare Companion)",
       "mag": 11.06,
       "locationDescription": "Groombridge 34 B (GQ Andromedae Flare Companion)"
     },
@@ -943,7 +943,7 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 54,
       "y": 46,
       "catalogStarId": "la-superba",
-      "name": "La Superba (La Superba (Y CVn / Deep Scarlet Carbon Star))",
+      "name": "La Superba (Deep Scarlet Carbon Star)",
       "mag": 5.4,
       "locationDescription": "La Superba (Y CVn / Deep Scarlet Carbon Star)"
     }
@@ -2109,7 +2109,7 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 62,
       "y": 72,
       "catalogStarId": "ross-154",
-      "name": "Ross 154 (V1216 Sgr) (Teapot Base Flare Dwarf)",
+      "name": "Ross 154 (Teapot Base Flare Dwarf)",
       "mag": 10.44,
       "locationDescription": "Teapot Base Flare Dwarf"
     },
