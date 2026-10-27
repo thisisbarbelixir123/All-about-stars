@@ -5354,7 +5354,7 @@
   },
   {
     "id": "pi1-gruis",
-    "name": "Pi1 Gruis",
+    "name": "Pi-1 Gruis",
     "alternateNames": [
       "π¹ Gruis",
       "HD 212087",
@@ -13186,7 +13186,7 @@
     "name": "40 Eridani B (Keid B)",
     "alternateNames": [
       "Keid B",
-      "Omicron2 Eridani B",
+      "Omicron-2 Eridani B",
       "EGGR 33",
       "WD 0413-077"
     ],
@@ -13270,7 +13270,7 @@
       "LFT 339",
       "LP 7-781 A",
       "LPM 182",
-      "Omicron2 Eridani B",
+      "Omicron-2 Eridani B",
       "PMSC 04107-0748B",
       "STF 518B",
       "UBV 4141",
@@ -16268,12 +16268,14 @@
   },
   {
     "id": "algol-b",
-    "name": "Algol B (Beta Persei Aa2)",
+    "name": "Algol B",
     "alternateNames": [
+      "Beta Persei B",
       "Beta Persei Aa2",
+      "Algol Aa2",
       "Algol Secondary Subgiant"
     ],
-    "bayerDesignation": "β Per Aa2",
+    "bayerDesignation": "β Per B",
     "constellation": "Perseus",
     "diameterSolar": 3.48,
     "temperature": 4500,
@@ -16317,8 +16319,9 @@
     "diameterKm": 4846596,
     "diameterAU": 0.03239749320843776,
     "distanceParsecs": 27.594157397073793,
-    "primaryDesignation": "β Per Aa2",
+    "primaryDesignation": "β Per B",
     "designations": [
+      "β Per B",
       "β Per Aa2",
       "Algol B",
       "Algol",
@@ -72049,7 +72052,7 @@
   },
   {
     "id": "castor-aa",
-    "name": "Castor Aa (Castor A)",
+    "name": "Castor Aa",
     "alternateNames": [
       "Castor A",
       "Alpha Geminorum A",
@@ -72241,7 +72244,7 @@
   },
   {
     "id": "castor-ba",
-    "name": "Castor Ba (Castor B)",
+    "name": "Castor Ba",
     "alternateNames": [
       "Castor B",
       "Alpha Geminorum B",
@@ -72605,7 +72608,7 @@
   },
   {
     "id": "mizar-aa",
-    "name": "Mizar Aa (Mizar A)",
+    "name": "Mizar Aa",
     "alternateNames": [
       "Mizar A",
       "Zeta Ursae Majoris",
@@ -72836,7 +72839,7 @@
   },
   {
     "id": "mizar-ba",
-    "name": "Mizar Ba (Mizar B)",
+    "name": "Mizar Ba",
     "alternateNames": [
       "Mizar B",
       "ζ Ursae Majoris B",
@@ -78407,7 +78410,7 @@
   },
   {
     "id": "psi1-orionis",
-    "name": "Psi1 Orionis",
+    "name": "Psi-1 Orionis",
     "alternateNames": [
       "HD 39698",
       "HR 2054",
@@ -78457,7 +78460,7 @@
       "Central ionizing star of the young 25 Orionis stellar cluster.",
       "Rapid rotator with equatorial velocity exceeding 280 km/s."
     ],
-    "description": "Psi1 Orionis is a rapidly spinning B-type star and cluster head in northern Orion.",
+    "description": "Psi-1 Orionis is a rapidly spinning B-type star and cluster head in northern Orion.",
     "designations": [
       "ψ¹ Ori",
       "ψ1 Orionis",
@@ -80491,7 +80494,7 @@
   },
   {
     "id": "omega1-scorpii",
-    "name": "Omega1 Scorpii",
+    "name": "Omega-1 Scorpii",
     "alternateNames": [
       "HD 144470",
       "HR 5993",
@@ -80539,9 +80542,9 @@
     "fusionProcess": "CNO Cycle",
     "notableFacts": [
       "Beta Cephei pulsating star with a short period of ~3.5 hours.",
-      "Forms an optical double with the orange giant Omega2 Scorpii."
+      "Forms an optical double with the orange giant Omega-2 Scorpii."
     ],
-    "description": "Omega1 Scorpii is a pulsating B-type star forming a naked-eye optical double in Scorpius.",
+    "description": "Omega-1 Scorpii is a pulsating B-type star forming a naked-eye optical double in Scorpius.",
     "designations": [
       "ω¹ Sco",
       "9 Sco",
@@ -80652,7 +80655,7 @@
   },
   {
     "id": "xi2-sagittarii",
-    "name": "Xi2 Sagittarii",
+    "name": "Xi-2 Sagittarii",
     "alternateNames": [
       "HD 175738",
       "HR 7150",
@@ -80699,10 +80702,10 @@
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Helium Fusion",
     "notableFacts": [
-      "Forms a wide naked-eye optical double with Xi1 Sagittarii.",
+      "Forms a wide naked-eye optical double with Xi-1 Sagittarii.",
       "A typical red clump giant burning core helium."
     ],
-    "description": "Xi2 Sagittarii is a 3.5-magnitude yellow-orange giant star in Sagittarius.",
+    "description": "Xi-2 Sagittarii is a 3.5-magnitude yellow-orange giant star in Sagittarius.",
     "designations": [
       "ξ² Sgr",
       "ξ2 Sagittarii",
@@ -80839,7 +80842,7 @@
   },
   {
     "id": "rho1-sagittarii",
-    "name": "Rho1 Sagittarii",
+    "name": "Rho-1 Sagittarii",
     "alternateNames": [
       "HD 181577",
       "HR 7340",
@@ -80887,9 +80890,9 @@
     "fusionProcess": "CNO Cycle",
     "notableFacts": [
       "Pulsating Delta Scuti variable with multi-periodic micro-variations.",
-      "Forms a wide visual pairing with Rho2 Sagittarii."
+      "Forms a wide visual pairing with Rho-2 Sagittarii."
     ],
-    "description": "Rho1 Sagittarii is a pulsating Delta Scuti subgiant located 122 light-years away.",
+    "description": "Rho-1 Sagittarii is a pulsating Delta Scuti subgiant located 122 light-years away.",
     "designations": [
       "ρ¹ Sgr",
       "ρ1 Sagittarii",
@@ -81125,7 +81128,7 @@
   },
   {
     "id": "chi1-sagittarii",
-    "name": "Chi1 Sagittarii",
+    "name": "Chi-1 Sagittarii",
     "alternateNames": [
       "HD 180450",
       "HR 7304",
@@ -81175,7 +81178,7 @@
       "Pulsating variable star of the Delta Scuti type in eastern Sagittarius.",
       "Part of the Chi group of stars in the Archer's mantle."
     ],
-    "description": "Chi1 Sagittarii is a pulsating Delta Scuti star located 220 light-years away.",
+    "description": "Chi-1 Sagittarii is a pulsating Delta Scuti star located 220 light-years away.",
     "designations": [
       "χ¹ Sgr",
       "χ1 Sagittarii",
@@ -82154,7 +82157,7 @@
     "fusionProcess": "CNO Cycle",
     "notableFacts": [
       "One of the finest triple stars in the northern sky, displaying vivid color contrasts through small telescopes.",
-      "The primary is an Alpha2 Canum Venaticorum variable with intense magnetic fields."
+      "The primary is an Alpha-2 Canum Venaticorum variable with intense magnetic fields."
     ],
     "description": "Iota Cassiopeiae is a celebrated magnetic Ap triple star system in Cassiopeia.",
     "designations": [
@@ -85989,7 +85992,7 @@
   },
   {
     "id": "gamma-delphini-a",
-    "name": "Gamma Delphini A (Gamma2 Delphini)",
+    "name": "Gamma-2 Delphini",
     "bayerDesignation": "γ² Del",
     "flamsteedDesignation": "12 Del A",
     "primaryDesignation": "γ² Del",
@@ -86035,7 +86038,8 @@
     ],
     "description": "Gamma Delphini A is a golden-orange K1IV subgiant star forming the primary component of the celebrated double star Gamma Delphini.",
     "alternateNames": [
-      "Gamma2 Delphini",
+      "Gamma-2 Delphini",
+      "Gamma Delphini A",
       "12 Delphini A",
       "HD 197964",
       "HR 7948",
@@ -86044,8 +86048,8 @@
     ],
     "designations": [
       "γ² Del",
+      "Gamma-2 Delphini",
       "Gamma Delphini A",
-      "Gamma2 Delphini",
       "12 Delphini A",
       "HD 197964",
       "HR 7948",
@@ -86056,7 +86060,7 @@
   },
   {
     "id": "gamma-delphini-b",
-    "name": "Gamma Delphini B (Gamma1 Delphini)",
+    "name": "Gamma-1 Delphini",
     "bayerDesignation": "γ¹ Del",
     "flamsteedDesignation": "12 Del B",
     "primaryDesignation": "γ¹ Del",
@@ -86102,7 +86106,8 @@
     ],
     "description": "Gamma Delphini B is a yellowish-white F7V main-sequence dwarf star orbiting Gamma Delphini A in a 3,249-year mutual orbit.",
     "alternateNames": [
-      "Gamma1 Delphini",
+      "Gamma-1 Delphini",
+      "Gamma Delphini B",
       "12 Delphini B",
       "HD 197963",
       "HR 7947",
@@ -86111,8 +86116,8 @@
     ],
     "designations": [
       "γ¹ Del",
+      "Gamma-1 Delphini",
       "Gamma Delphini B",
-      "Gamma1 Delphini",
       "12 Delphini B",
       "HD 197963",
       "HR 7947",
@@ -86250,7 +86255,7 @@
   },
   {
     "id": "mesarthim-a",
-    "name": "Mesarthim A (Gamma2 Arietis)",
+    "name": "Mesarthim A (Gamma-2 Arietis)",
     "bayerDesignation": "γ² Ari",
     "flamsteedDesignation": "5 Ari A",
     "primaryDesignation": "γ² Ari",
@@ -86297,7 +86302,7 @@
     "description": "Mesarthim A is an archetype magnetic chemically peculiar silicon star in the historic visual binary Gamma Arietis.",
     "alternateNames": [
       "Mesarthim A",
-      "Gamma2 Arietis",
+      "Gamma-2 Arietis",
       "5 Arietis A",
       "HD 11503",
       "HR 546",
@@ -86307,7 +86312,7 @@
     "designations": [
       "γ² Ari",
       "Mesarthim A",
-      "Gamma2 Arietis",
+      "Gamma-2 Arietis",
       "5 Arietis A",
       "HD 11503",
       "HR 546",
@@ -86318,7 +86323,7 @@
   },
   {
     "id": "mesarthim-b",
-    "name": "Mesarthim B (Gamma1 Arietis)",
+    "name": "Mesarthim B (Gamma-1 Arietis)",
     "bayerDesignation": "γ¹ Ari",
     "flamsteedDesignation": "5 Ari B",
     "primaryDesignation": "γ¹ Ari",
@@ -86365,7 +86370,7 @@
     "description": "Mesarthim B is a B9V main-sequence star orbiting Mesarthim A in a wide 5,000-year visual orbit.",
     "alternateNames": [
       "Mesarthim B",
-      "Gamma1 Arietis",
+      "Gamma-1 Arietis",
       "5 Arietis B",
       "HD 11502",
       "HR 545",
@@ -86375,7 +86380,7 @@
     "designations": [
       "γ¹ Ari",
       "Mesarthim B",
-      "Gamma1 Arietis",
+      "Gamma-1 Arietis",
       "5 Arietis B",
       "HD 11502",
       "HR 545",

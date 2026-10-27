@@ -64,7 +64,7 @@ export function parseStarLabel(fullName: string): { properName: string; bayer: s
     }
   }
 
-  // If rawName is itself a Bayer designation like "Gamma Tau" or "Chi1 Ori"
+  // If rawName is itself a Bayer designation like "Gamma Tau" or "Chi-1 Ori"
   const isRawBayer = /^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)/i.test(rawName);
   
   if (isRawBayer) {

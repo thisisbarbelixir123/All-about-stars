@@ -165,98 +165,110 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
   }, [quizAnswers]);
 
   return (
-    <div className="w-full bg-[#060a1a]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-2xl p-4 sm:p-6 lg:p-8 mobile-landscape:p-2 mobile-landscape:border-none shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col gap-6 relative overflow-hidden text-slate-200">
-      {/* Background Decorative Ambient Glows */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      {/* Main Frontpage Navigation Tabs - Merged into 5 clean tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-[#020512] rounded-2xl border border-cyan-500/25 shadow-inner shrink-0">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
+      {/* Top Banner (Uniform Hero Section) */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
+        <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
+          <div className="space-y-1 sm:space-y-2 max-w-3xl">
+            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+              <Sun className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
+              <span>What is a Star?</span>
+            </h1>
+            <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
+              At its heart, a star is a colossal, glowing ball of superheated plasma held together by gravity. Deep inside its core, nuclear fusion transforms hydrogen into helium, powering the cosmos with light and forging the fundamental chemical elements of life.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+              100–400B in Milky Way
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Frontpage Sub-Tabs Navigation */}
+      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
         <button
           id="tab-frontpage-what-is-a-star"
           onClick={() => setActiveSection('what-is-a-star')}
-          className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             activeSection === 'what-is-a-star'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Sun className="w-4 h-4 shrink-0 text-amber-400" />
-          <span>What is a Star?</span>
+          <Sun className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+          <span>Anatomy &amp; Physics</span>
         </button>
-
-        {onOpenClassification && (
-          <button
-            id="tab-frontpage-goto-classification"
-            onClick={onOpenClassification}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-orange-300 hover:bg-white/5 transition-all cursor-pointer"
-            title="Open dedicated Stellar Classification Systems page"
-          >
-            <Flame className="w-3.5 h-3.5 text-orange-400" />
-            <span>Classification Systems →</span>
-          </button>
-        )}
 
         <button
           id="tab-frontpage-lifecycles"
           onClick={() => setActiveSection('life-cycles')}
-          className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             activeSection === 'life-cycles'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Activity className="w-4 h-4 shrink-0 text-emerald-400" />
+          <Activity className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
           <span>Stellar Life Cycles</span>
         </button>
 
         <button
           id="tab-frontpage-myths"
           onClick={() => setActiveSection('myths')}
-          className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             activeSection === 'myths'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Zap className="w-4 h-4 shrink-0 text-amber-300" />
+          <Zap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
           <span>Myths &amp; Realities</span>
         </button>
 
         <button
           id="tab-frontpage-quiz"
           onClick={() => setActiveSection('quiz')}
-          className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             activeSection === 'quiz'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Award className="w-4 h-4 shrink-0 text-purple-400" />
+          <Award className="w-3.5 h-3.5 shrink-0 text-purple-400" />
           <span>Knowledge Check ({quizScore}/5)</span>
         </button>
+
+        {onOpenClassification && (
+          <button
+            id="tab-frontpage-goto-classification"
+            onClick={onOpenClassification}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-orange-300 hover:bg-white/5 transition-all cursor-pointer shrink-0 ml-auto whitespace-nowrap"
+            title="Open dedicated Stellar Classification Systems page"
+          >
+            <Flame className="w-3.5 h-3.5 text-orange-400" />
+            <span>Classification Systems →</span>
+          </button>
+        )}
       </div>
 
       {/* ========================================================================= */}
       {/* SECTION 1: WHAT IS A STAR?                                                */}
       {/* ========================================================================= */}
       {activeSection === 'what-is-a-star' && (
-        <div className="flex flex-col gap-3 sm:gap-6 animate-in fade-in duration-200">
-          {/* Hero Banner: What is a Star? (Wrapped in Animated Night Sky Graphics, compact for 800x360, spacious for tablet/desktop) */}
-          <AnimatedStarrySkyPanel className="border border-cyan-500/30 mobile-landscape:p-3 mobile-landscape:py-2.5 p-5 sm:p-7 md:p-8 lg:p-10">
-            <div className="space-y-3 mobile-landscape:space-y-1.5 md:space-y-3 max-w-3xl">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center gap-3 mobile-landscape:text-lg mobile-landscape:gap-2">
-                <Sun className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-amber-400 animate-pulse shrink-0 mobile-landscape:w-5 mobile-landscape:h-5" />
-                <span>What is a Star?</span>
-              </h1>
-
-              <div className="space-y-2 mobile-landscape:space-y-1 md:space-y-2 text-slate-300 font-sans">
-                <p className="text-sm sm:text-base md:text-lg text-slate-100 leading-relaxed mobile-landscape:text-xs mobile-landscape:leading-snug font-normal">
-                  At its heart, a <strong className="text-cyan-300 font-semibold">star</strong> is a colossal, glowing ball of superheated gas held together by gravity. Deep inside its core, nuclear fusion turns hydrogen into helium, unleashing the brilliant light and warmth that shines across the cosmos for millions or billions of years—just like our own Sun!
-                </p>
-                <p className="text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed mobile-landscape:hidden sm:mobile-landscape:block md:block">
-                  Every pinpoint of light in the night sky is a distant sun. From compact red dwarfs to giant luminous beacons, stars power the universe, illuminate orbiting worlds, and forge the fundamental chemical elements that build planets, oceans, and life itself.
-                </p>
+        <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200">
+          {/* Animated Night Sky Overview Card */}
+          <AnimatedStarrySkyPanel className="border border-cyan-500/25 mobile-landscape:p-3 mobile-landscape:py-2.5 p-4 sm:p-6 rounded-2xl shadow-lg">
+            <div className="space-y-2 max-w-3xl">
+              <div className="flex items-center gap-2 text-cyan-300 font-mono text-xs uppercase tracking-wider font-semibold">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>The Cosmic Crucible</span>
               </div>
+              <p className="text-sm sm:text-base text-slate-200 font-sans leading-relaxed">
+                Every pinpoint of light in the night sky is a distant sun. From compact red dwarfs to giant luminous beacons, stars power the universe, illuminate orbiting worlds, and forge the fundamental chemical elements that build planets, oceans, and life itself.
+              </p>
             </div>
           </AnimatedStarrySkyPanel>
 
@@ -758,19 +770,24 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {/* SECTION 5: COMMON MYTHS VS FACTS                                         */}
       {/* ========================================================================= */}
       {activeSection === 'myths' && (
-        <div className="flex flex-col gap-3 sm:gap-6 animate-in fade-in duration-200">
-          {/* Hero Banner: Myths & Realities (Compact on mobile landscape) */}
+        <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200">
+          {/* Sub-tab Hero Banner: Myths & Realities */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
               <div className="space-y-1 sm:space-y-2 max-w-3xl">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl mobile-landscape:text-base font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
+                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
+                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                   <span>Myths &amp; Realities</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 leading-relaxed font-sans">
                   Uncover widespread science-fiction tropes, visual misconceptions, and historical lore—contrasted directly against empirical astrophysical measurements and nuclear realities.
                 </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+                  {STELLAR_MYTHS_GUIDE.length} Analyzed Myths
+                </span>
               </div>
             </div>
           </div>
@@ -811,14 +828,14 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {/* SECTION 6: KNOWLEDGE CHECK / QUIZ                                         */}
       {/* ========================================================================= */}
       {activeSection === 'quiz' && (
-        <div className="flex flex-col gap-3 sm:gap-6 animate-in fade-in duration-200 max-w-4xl mx-auto w-full">
-          {/* Hero Banner: Knowledge Check (Compact on mobile landscape) */}
+        <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200 w-full">
+          {/* Sub-tab Hero Banner: Knowledge Check */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div className="space-y-1 sm:space-y-2 max-w-2xl">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl mobile-landscape:text-base font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                  <Award className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 mobile-landscape:w-4 mobile-landscape:h-4 text-purple-400 shrink-0" />
+                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 mobile-landscape:w-4 mobile-landscape:h-4 text-purple-400 shrink-0" />
                   <span>Knowledge Check</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 leading-relaxed font-sans">

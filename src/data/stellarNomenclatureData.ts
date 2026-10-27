@@ -1303,7 +1303,7 @@ export const BAYER_SHARED_DESIGNATIONS_LORE: BayerSharedDesignationGroup[] = [
     phenomenon: 'Spectroscopic & Pulsating Star Pair',
     explanation: 'Bayer labeled two adjacent stars in the Crane as Pi Gruis: π¹ Gruis (an exotic pulsating S-type asymptotic giant star with giant convective cells imaged by ESO’s VLTI) and π² Gruis (a rapidly rotating F-type main sequence star).',
     stars: [
-      { catalogId: 'pi1-gruis', designation: 'π¹ Gruis (HD 212087)', name: 'Pi1 Gruis', role: 'Semi-regular S-star variable with giant convective surface cells' },
+      { catalogId: 'pi1-gruis', designation: 'π¹ Gruis (HD 212087)', name: 'Pi-1 Gruis', role: 'Semi-regular S-star variable with giant convective surface cells' },
     ],
   },
   {

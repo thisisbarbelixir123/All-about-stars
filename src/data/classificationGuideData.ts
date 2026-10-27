@@ -408,7 +408,7 @@ export const BEYOND_OBAFGKM_CLASSES_GUIDE: SpectralTypeGuideItem[] = [
       'In 1952, Paul Merrill discovered Technetium (⁹⁹Tc) in R Andromedae, providing the historic smoking-gun proof that stars actively forge heavy elements in their interiors',
       'In 2017, the ESO VLTI (PIONIER) directly resolved bubbling convective granules on Pi¹ Gruis spanning more than a quarter of the star’s visible face',
       'Spectral types range from pure S-stars (no TiO) to intermediate MS (weak ZrO) and SC (transitioning to carbon stars)',
-      'All 3 S-Type Stars in our catalog: Chi Cygni (χ Cyg), Pi1 Gruis (π¹ Gru), and R Andromedae (R And)',
+      'All 3 S-Type Stars in our catalog: Chi Cygni (χ Cyg), Pi-1 Gruis (π¹ Gru), and R Andromedae (R And)',
     ],
   },
 ];

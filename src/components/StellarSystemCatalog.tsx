@@ -81,22 +81,24 @@ export const StellarSystemCatalog: React.FC<StellarSystemCatalogProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-5 max-w-7xl mx-auto w-full min-w-0">
-      {/* Optional Standalone Hero Banner (Blue Theme) */}
+    <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0 text-slate-200">
+      {/* Standalone Hero Banner */}
       {!embedded && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#040920] via-[#081233] to-[#04081c] border border-cyan-500/30 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-2xl backdrop-blur-md w-full min-w-0">
-          <div className="absolute -top-12 -right-12 w-72 h-72 bg-cyan-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md w-full min-w-0">
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2 min-w-0 w-full">
-            <div className="max-w-3xl min-w-0">
+            <div className="space-y-1 sm:space-y-2 max-w-3xl min-w-0">
               <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
                 <Share2 className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
                 <span>Stellar System Catalog</span>
               </h1>
+              <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
+                Explore gravitational hierarchies, orbital configurations, and physical components of solved binary, triple, and multiple star systems across the Milky Way.
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="px-2.5 py-1 sm:px-3.5 sm:py-2 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/90 border border-cyan-500/40 text-cyan-300 font-mono text-[11px] sm:text-xs mobile-landscape:text-[10px] font-bold shadow-lg flex items-center gap-1.5 sm:gap-2">
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mobile-landscape:w-3 mobile-landscape:h-3 text-cyan-400" />
-                <span>{MULTIPLE_STAR_SYSTEMS.length} Solved Systems</span>
+              <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+                {MULTIPLE_STAR_SYSTEMS.length} Solved Systems
               </span>
             </div>
           </div>

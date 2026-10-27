@@ -915,38 +915,38 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
     <div className={`w-full flex flex-col ${isMobileMode ? 'gap-1.5' : 'gap-4'}`}>
       {/* Top Header Card (Uniform Hero Banner): Hidden in mobile landscape to maximize canvas viewport */}
       {(!isMobileMode || !isLandscape) && (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 ${
-          isMobileMode ? 'p-3.5' : 'p-5 sm:p-6'
-        } shadow-xl backdrop-blur-md`}>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
           <div className="absolute -top-12 -right-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-2 max-w-3xl">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 sm:gap-3">
-                <BarChart2 className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-400 shrink-0" />
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
+            <div className="space-y-1 sm:space-y-2 max-w-3xl">
+              <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <BarChart2 className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-indigo-400 shrink-0" />
                 <span>Hertzsprung–Russell Diagram</span>
-                <span
-                  id="hr-diagram-star-count"
-                  className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 font-mono border border-indigo-500/40 font-bold ml-1"
-                >
-                  {filteredStars.length} Stars (WR → Y)
-                </span>
               </h1>
               {!isMobileMode && (
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
                   The foundational map of stellar astrophysics across the classic sequence from scorching Wolf-Rayet stripped cores to ultracool Class Y brown dwarfs. Plots stellar luminosity against effective surface temperature, mapping the Main Sequence, Asymptotic Giant Branch (AGB), Carbon stars, and white dwarf cooling curves according to the Stefan–Boltzmann law.
                 </p>
               )}
             </div>
 
-            {onOpenClassificationGuide && (
-              <button
-                onClick={onOpenClassificationGuide}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                id="hr-diagram-star-count"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm"
               >
-                <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Classification Guide</span>
-              </button>
-            )}
+                {filteredStars.length} Stars (WR → Y)
+              </span>
+              {onOpenClassificationGuide && (
+                <button
+                  onClick={onOpenClassificationGuide}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#020512]/90 hover:bg-cyan-950/80 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Classification Guide →</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

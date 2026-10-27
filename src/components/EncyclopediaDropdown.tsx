@@ -94,7 +94,7 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
         }`}
       >
         <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-        {!isMobile && <span className="hidden sm:inline font-mono">Encyclopedia</span>}
+        {!isMobile && <span className="hidden sm:inline">Encyclopedia</span>}
         {!isMobile && (
           <ChevronDown
             className={`w-3.5 h-3.5 text-cyan-400 transition-transform duration-200 shrink-0 ${
@@ -108,9 +108,9 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
       {isOpen && (
         <div
           id={menuId}
-          className="absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] max-h-[75vh] overflow-y-auto scrollbar-thin bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.92),0_0_24px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl font-mono text-xs"
+          className="absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] max-h-[75vh] overflow-y-auto scrollbar-thin bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.92),0_0_24px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl text-xs"
         >
-          <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1.5 mb-1.5">
+          <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1.5 mb-1.5 font-mono">
             <span>Star Encyclopedia</span>
           </div>
 

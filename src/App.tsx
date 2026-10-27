@@ -68,6 +68,7 @@ import {
 export default function App() {
   // Homepage Overlay State - Open on startup by default
   const [isHomeOpen, setIsHomeOpen] = useState<boolean>(true);
+  const [isStageTourActive, setIsStageTourActive] = useState<boolean>(false);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
 
   useEffect(() => {
@@ -751,7 +752,7 @@ export default function App() {
       </div>
 
       {/* Top Main Navigation Header - Accessible only from 3D mode screen, removed from home screen */}
-      {!isHomeOpen && (
+      {!isHomeOpen && !isStageTourActive && (
         <header className="hidden md:flex h-14 shrink-0 z-50 bg-transparent border-b border-transparent px-2.5 sm:px-6 items-center justify-between shadow-none pointer-events-none">
           {/* Left: Home & Encyclopedia Buttons */}
           <div className="flex items-center gap-2 pointer-events-auto shrink-0">
@@ -928,6 +929,7 @@ export default function App() {
           onOpenHome={() => setIsHomeOpen(true)}
           onCloseHome={() => setIsHomeOpen(false)}
           isHomeOpen={isHomeOpen}
+          onTourStateChange={setIsStageTourActive}
           onOpenAbout={() => {
             setActiveOverlay(null);
             setIsAboutOpen(true);
@@ -1214,21 +1216,24 @@ export default function App() {
             {/* Overlay Scrollable Body */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 lg:p-10 xl:p-12 mobile-landscape:px-3 mobile-landscape:py-2 scrollbar-thin">
               {activeOverlay === 'catalog' && (
-                <div className="flex flex-col gap-5 sm:gap-6 max-w-7xl mx-auto w-full min-w-0">
+                <div className="flex flex-col gap-4 sm:gap-6 max-w-7xl mx-auto w-full min-w-0">
                   {/* Hero Banner: Stellar Catalog with Integrated Sub-Pages */}
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md w-full min-w-0">
                     <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2 min-w-0 w-full">
-                      <div className="max-w-3xl min-w-0">
+                      <div className="space-y-1 sm:space-y-2 max-w-3xl min-w-0">
                         <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
                           <Grid className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
                           <span>Stellar Catalog</span>
                         </h1>
+                        <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
+                          Explore our astrophysical catalog of curated stars across all spectral classes, luminosity types, and distances, complete with physical diameters, radial metrics, and interactive 3D comparisons.
+                        </p>
                       </div>
 
                       {/* Catalog info and shortcut to System Catalog */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-3 py-1.5 rounded-xl font-bold">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
                           {STARS_CATALOG.length} Stars Cataloged
                         </span>
                         <button
@@ -1310,7 +1315,7 @@ export default function App() {
               )}
 
               {activeOverlay === 'hr-diagram' && (
-                <div className="max-w-7xl mx-auto h-full">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <HRDiagram
                     stars={STARS_CATALOG}
                     selectedStars={selectedStars}
@@ -1325,7 +1330,7 @@ export default function App() {
               )}
 
               {(activeOverlay === 'frontpage' || activeOverlay === 'what-is-a-star') && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <StarEncyclopediaFrontpage
                     initialSection={frontpageInitialSection}
                     onOpenClassification={() => setActiveOverlay('classification')}
@@ -1352,7 +1357,7 @@ export default function App() {
               )}
 
               {(activeOverlay === 'classification' || activeOverlay === 'guide') && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <StellarClassificationGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {
@@ -1378,7 +1383,7 @@ export default function App() {
               )}
 
               {activeOverlay === 'constellations' && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <ConstellationGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {
@@ -1391,7 +1396,7 @@ export default function App() {
               )}
 
               {activeOverlay === 'discovery' && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <StellarDiscoveryGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {
@@ -1414,7 +1419,7 @@ export default function App() {
               )}
 
               {activeOverlay === 'nomenclature' && (
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto w-full min-w-0">
                   <StellarNomenclatureGuide
                     onSelectStar={(s) => setDetailModalStar(s)}
                     onCompareStar={(s) => {

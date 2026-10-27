@@ -335,56 +335,54 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
 
   return (
-    <div className="w-full bg-[#060a1a]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-2xl p-4 sm:p-6 lg:p-8 mobile-landscape:p-2 mobile-landscape:border-none shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col gap-6 relative overflow-hidden text-slate-200">
-      {/* Background Decorative Ambient Glows */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col gap-3 sm:gap-6 animate-in fade-in duration-200">
-          {/* Hero Banner: Stellar Classification Systems (Compact on mobile landscape) */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4">
-              <div className="space-y-1.5 sm:space-y-2 max-w-3xl">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl mobile-landscape:text-base font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                  <Flame className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 mobile-landscape:w-4 mobile-landscape:h-4 text-orange-400 shrink-0" />
-                  <span>Stellar Classification Systems</span>
-                </h2>
-                <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 leading-relaxed font-sans">
-                  From Annie Jump Cannon’s Harvard spectral sequence to the Yerkes luminosity matrix, explore the physical frameworks used by astrophysicists to organize stars by surface temperature, luminosity, chemistry, and evolutionary state.
-                </p>
-              </div>
-            </div>
+    <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
+      {/* Hero Banner: Stellar Classification Systems */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
+        <div className="absolute -top-12 -right-12 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
+          <div className="space-y-1 sm:space-y-2 max-w-3xl">
+            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+              <Flame className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-orange-400 shrink-0" />
+              <span>Stellar Classification Systems</span>
+            </h1>
+            <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
+              From Annie Jump Cannon’s Harvard spectral sequence to the Yerkes luminosity matrix, explore the physical frameworks used by astrophysicists to organize stars by surface temperature, luminosity, chemistry, and evolutionary state.
+            </p>
           </div>
-
-          {/* Subsystem Switcher within Stellar Classification Systems */}
-          <div className="p-1 sm:p-2 mobile-landscape:p-1 rounded-2xl bg-[#040816] border border-cyan-500/25 flex flex-wrap items-center justify-between gap-1.5 shadow-lg">
-            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono w-full sm:w-auto">
-              {[
-                { id: 0, label: 'Harvard Spectral Classes (OBAFGKM)' },
-                { id: 1, label: 'Other Spectral Classes' },
-                { id: 2, label: 'Variable Stars' },
-                { id: 3, label: 'Yerkes Luminosity System (MKK)' },
-                { id: 4, label: 'Star Systems' },
-                { id: 5, label: 'Stellar Populations' },
-                { id: 6, label: 'Stellar Remnants' },
-                { id: 7, label: 'Hypothetical Stars' },
-              ].map((sys) => (
-                <button
-                  key={sys.id}
-                  id={`btn-classification-subsystem-${sys.id}`}
-                  onClick={() => setClassificationSystemIndex(sys.id)}
-                  className={`px-2 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 mobile-landscape:py-1 mobile-landscape:px-2 rounded-lg transition-all cursor-pointer font-semibold text-[10px] sm:text-xs md:text-xs ${
-                    classificationSystemIndex === sys.id
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {sys.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-orange-950/80 border border-orange-500/40 text-orange-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+              8 Frameworks
+            </span>
           </div>
+        </div>
+      </div>
+
+      {/* Subsystem Switcher within Stellar Classification Systems */}
+      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
+        {[
+          { id: 0, label: 'Harvard Spectral Classes (OBAFGKM)' },
+          { id: 1, label: 'Other Spectral Classes' },
+          { id: 2, label: 'Variable Stars' },
+          { id: 3, label: 'Yerkes Luminosity System (MKK)' },
+          { id: 4, label: 'Star Systems' },
+          { id: 5, label: 'Stellar Populations' },
+          { id: 6, label: 'Stellar Remnants' },
+          { id: 7, label: 'Hypothetical Stars' },
+        ].map((sys) => (
+          <button
+            key={sys.id}
+            id={`btn-classification-subsystem-${sys.id}`}
+            onClick={() => setClassificationSystemIndex(sys.id)}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              classificationSystemIndex === sys.id
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {sys.label}
+          </button>
+        ))}
+      </div>
 
           {/* ------------------------------------------------------------- */}
           {/* CAROUSEL PANEL 0: SPECTRAL CLASSES (OBAFGKM)                  */}
@@ -2169,7 +2167,6 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               })()}
             </div>
           )}
-        </div>
 
       {/* Complete Stellar Classification Directory Modal */}
       <ClassificationDirectoryModal

@@ -27,8 +27,8 @@ export const STAR_CONSTELLATION_LOCATIONS: Record<string, string> = {
   "beta-arae": "Left Cornice • Principal Anchor Star of Ara",
   "zeta-arae": "Right Pillar • Core Navigational Asterism",
   "mesarthim": "Horn Tip • Core Navigational Asterism",
-  "mesarthim-a": "Mesarthim A (Gamma2 Arietis) • Magnetic Silicon Star",
-  "mesarthim-b": "Mesarthim B (Gamma1 Arietis) • Blue-White Companion",
+  "mesarthim-a": "Mesarthim A (Gamma-2 Arietis) • Magnetic Silicon Star",
+  "mesarthim-b": "Mesarthim B (Gamma-1 Arietis) • Blue-White Companion",
   "sheratan": "Horn Base • Core Navigational Asterism",
   "hamal": "Crown • Principal Anchor Star of Aries",
   "capella-aa": "Heart Star • Principal Anchor Star of Auriga",
@@ -365,7 +365,7 @@ export const STAR_CONSTELLATION_LOCATIONS: Record<string, string> = {
   "bu-geminorum": "Gemini Torso Evolved Supergiant",
   "castor-ca": "YY Geminorum A (Castor Ca Flare Dwarf)",
   "castor-cb": "YY Geminorum B (Castor Cb Flare Dwarf)",
-  "pi1-gruis": "Pi1 Gruis (Convective Giant with Giant Granulation Cells)",
+  "pi1-gruis": "Pi-1 Gruis (Convective Giant with Giant Granulation Cells)",
   "gd-358": "V777 Herculis (Prototype Pulsating DB White Dwarf)",
   "gj-1061": "GJ 1061 Multi-Planet Red Dwarf System",
   "w-hydrae": "W Hydrae Asymptotic Giant Branch Star with Water Ring",
@@ -1685,9 +1685,9 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 48,
       "y": 44,
       "catalogStarId": "pi1-gruis",
-      "name": "Pi1 Gruis (Pi1 Gruis (Convective Giant with Giant Granulation Cells))",
+      "name": "Pi-1 Gruis (Convective Giant with Giant Granulation Cells)",
       "mag": 6.1,
-      "locationDescription": "Pi1 Gruis (Convective Giant with Giant Granulation Cells)"
+      "locationDescription": "Pi-1 Gruis (Convective Giant with Giant Granulation Cells)"
     }
   ],
   "hercules": [
@@ -1987,7 +1987,7 @@ export const EXTRA_CATALOG_FIGURE_STARS: Record<string, ExtraFigureStar[]> = {
       "x": 49.5,
       "y": 58.5,
       "catalogStarId": "algol-b",
-      "name": "Algol B (Beta Persei Aa2) (Algol B (Subgiant Companion to the Demon Star))",
+      "name": "Algol B (Subgiant Companion to the Demon Star)",
       "mag": 5.4,
       "locationDescription": "Algol B (Subgiant Companion to the Demon Star)"
     },

@@ -747,8 +747,9 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
     components: [
       {
         id: 'algol-a',
-        name: 'Algol Aa1 (Hot Blue Primary)',
-        bayerDesignation: 'β Per Aa1',
+        catalogStarId: 'algol-a',
+        name: 'Algol A',
+        bayerDesignation: 'β Per A',
         spectralType: 'B8V',
         massSolar: 3.17,
         radiusSolar: 2.73,
@@ -765,8 +766,9 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
       {
         id: 'algol-b',
-        name: 'Algol Aa2 (K-Type Donor Subgiant)',
-        bayerDesignation: 'β Per Aa2',
+        catalogStarId: 'algol-b',
+        name: 'Algol B',
+        bayerDesignation: 'β Per B',
         spectralType: 'K0IV',
         massSolar: 0.70,
         radiusSolar: 3.48,
@@ -782,8 +784,9 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
       {
         id: 'algol-c',
-        name: 'Algol Ab (Tertiary A-Dwarf)',
-        bayerDesignation: 'β Per Ab',
+        catalogStarId: 'algol-c',
+        name: 'Algol C',
+        bayerDesignation: 'β Per C',
         spectralType: 'A7m',
         massSolar: 1.76,
         radiusSolar: 1.73,
@@ -800,7 +803,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         primaryId: 'algol-a',
         secondaryId: 'algol-b',
-        label: 'Algol Aa1-Aa2 2.87-Day Eclipsing Orbit',
+        label: 'Algol A-B 2.87-Day Eclipsing Orbit',
         semiMajorAxisAU: 0.062,
         orbitalPeriodYears: 0.00785,
         orbitalPeriodDays: 2.8673,
@@ -816,7 +819,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         primaryId: 'algol-a',
         secondaryId: 'algol-c',
-        label: 'Algol Ab 680-Day Tertiary Orbit',
+        label: 'Algol C 680-Day Tertiary Orbit',
         semiMajorAxisAU: 2.69,
         orbitalPeriodYears: 1.862,
         orbitalPeriodDays: 680.2,
@@ -4260,7 +4263,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'gamma-delphini-a',
         catalogStarId: 'gamma-delphini-a',
-        name: 'Gamma Delphini A (Gamma2 Delphini)',
+        name: 'Gamma-2 Delphini',
         bayerDesignation: 'γ² Del',
         spectralType: 'K1IV',
         massSolar: 1.7,
@@ -4275,7 +4278,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'gamma-delphini-b',
         catalogStarId: 'gamma-delphini-b',
-        name: 'Gamma Delphini B (Gamma1 Delphini)',
+        name: 'Gamma-1 Delphini',
         bayerDesignation: 'γ¹ Del',
         spectralType: 'F7V',
         massSolar: 1.4,
@@ -4380,7 +4383,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'mesarthim-a',
         catalogStarId: 'mesarthim-a',
-        name: 'Mesarthim A (Gamma2 Arietis)',
+        name: 'Mesarthim A (Gamma-2 Arietis)',
         bayerDesignation: 'γ² Ari',
         spectralType: 'A1pSi',
         massSolar: 2.8,
@@ -4395,7 +4398,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       {
         id: 'mesarthim-b',
         catalogStarId: 'mesarthim-b',
-        name: 'Mesarthim B (Gamma1 Arietis)',
+        name: 'Mesarthim B (Gamma-1 Arietis)',
         bayerDesignation: 'γ¹ Ari',
         spectralType: 'B9V',
         massSolar: 2.4,

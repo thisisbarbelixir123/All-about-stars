@@ -41,7 +41,8 @@ import {
   MoveHorizontal,
   Volume2,
   VolumeX,
-  Trash2
+  Trash2,
+  Square
 } from 'lucide-react';
 import { StarData, StageSortKey, SortDirection, TourLength, PresetComparison } from '../types';
 import { PRESET_COMPARISONS } from '../data/stars';
@@ -87,6 +88,7 @@ interface StarCanvas3DProps {
   onOpenHome?: () => void;
   onCloseHome?: () => void;
   isHomeOpen?: boolean;
+  onTourStateChange?: (isTouring: boolean) => void;
   onOpenAbout?: () => void;
   onOpenFrontpage?: () => void;
   onOpenCatalog?: () => void;
@@ -144,6 +146,99 @@ export const StageKbd: React.FC<StageKbdProps> = ({
   );
 };
 
+const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
+  switch (sortKey) {
+    case 'size': {
+      const scale = formatPhysicalDiameter(star.diameterKm, star.diameterSolar);
+      const primary = star.diameterSolar >= 10
+        ? `${star.diameterSolar.toLocaleString(undefined, { maximumFractionDigits: star.diameterSolar > 100 ? 0 : 1 })} D☉`
+        : star.diameterSolar >= 1
+        ? `${star.diameterSolar.toFixed(2)} D☉`
+        : star.diameterKm < 1000
+        ? `${star.diameterKm.toFixed(1)} km`
+        : `${star.diameterSolar.toFixed(3)} D☉`;
+      const secondary = `${scale.kmFormatted} (${scale.metricSi}${star.diameterAU >= 0.01 ? ` • ${star.diameterAU >= 10 ? star.diameterAU.toFixed(1) : star.diameterAU.toFixed(2)} AU` : ''})`;
+      return {
+        label: 'PHYSICAL DIAMETER',
+        primary,
+        secondary,
+        unit: 'Solar Diameters (D☉)',
+      };
+    }
+    case 'distance': {
+      const primary = `${star.distanceLy.toLocaleString(undefined, { maximumFractionDigits: 1 })} ly`;
+      const secondary = `${star.distanceParsecs.toLocaleString(undefined, { maximumFractionDigits: 1 })} parsecs (${(star.distanceLy * 9.461e12).toExponential(2)} km)`;
+      return {
+        label: 'DISTANCE FROM EARTH',
+        primary,
+        secondary,
+        unit: 'Light-Years',
+      };
+    }
+    case 'mass': {
+      const primary = star.massSolar < 0.08
+        ? `${(star.massSolar * 1047.57).toFixed(1)} M_Jup`
+        : `${star.massSolar.toLocaleString(undefined, { maximumFractionDigits: 2 })} M☉`;
+      const secondary = star.massSolar < 0.08
+        ? `${star.massSolar.toFixed(4)} M☉ (${(star.massSolar * 1.989e30).toExponential(2)} kg)`
+        : `${(star.massSolar * 1.989e30).toExponential(2)} kg`;
+      return {
+        label: 'STELLAR MASS',
+        primary,
+        secondary,
+        unit: star.massSolar < 0.08 ? 'Jupiter Masses' : 'Solar Masses (M☉)',
+      };
+    }
+    case 'temperature': {
+      const c = Math.round(star.temperature - 273.15);
+      const f = Math.round((star.temperature - 273.15) * 9 / 5 + 32);
+      return {
+        label: 'SURFACE TEMPERATURE',
+        primary: `${star.temperature.toLocaleString()} K`,
+        secondary: `${c.toLocaleString()} °C • ${f.toLocaleString()} °F`,
+        unit: 'Kelvin',
+      };
+    }
+    case 'luminosity': {
+      const primary = star.luminositySolar >= 1000
+        ? `${star.luminositySolar.toLocaleString(undefined, { maximumFractionDigits: 0 })} L☉`
+        : star.luminositySolar >= 1
+        ? `${star.luminositySolar.toFixed(2)} L☉`
+        : `${star.luminositySolar.toFixed(star.luminositySolar < 0.001 ? 5 : 3)} L☉`;
+      const secondary = star.luminositySolar < 0.01
+        ? `${(star.luminositySolar * 100).toFixed(2)}% of Solar Luminosity`
+        : `${(star.luminositySolar * 3.828e26).toExponential(2)} Watts`;
+      return {
+        label: 'BOLOMETRIC LUMINOSITY',
+        primary,
+        secondary,
+        unit: 'Solar Luminosities (L☉)',
+      };
+    }
+    case 'apparentMagnitude': {
+      const primary = star.apparentMagnitude > 0
+        ? `+${star.apparentMagnitude.toFixed(2)} mag`
+        : `${star.apparentMagnitude.toFixed(2)} mag`;
+      const secondary = `Absolute Magnitude M = ${star.absoluteMagnitude > 0 ? '+' : ''}${star.absoluteMagnitude.toFixed(2)}`;
+      return {
+        label: 'APPARENT MAGNITUDE',
+        primary,
+        secondary,
+        unit: 'Apparent Visual Magnitude (m)',
+      };
+    }
+    default: {
+      const scale = formatPhysicalDiameter(star.diameterKm, star.diameterSolar);
+      return {
+        label: 'SIZE',
+        primary: `${star.diameterSolar} D☉`,
+        secondary: `${scale.kmFormatted} (${scale.metricSi})`,
+        unit: '',
+      };
+    }
+  }
+};
+
 export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   stars,
   selectedStarId,
@@ -168,6 +263,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   onOpenHome,
   onCloseHome,
   isHomeOpen = false,
+  onTourStateChange,
   isMobile = false,
   isTablet = false,
   onOpenAbout,
@@ -249,9 +345,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const [hoveredStar, setHoveredStar] = useState<StarData | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isTourPlaying, setIsTourPlaying] = useState(false);
+  const [isTourMode, setIsTourMode] = useState(false);
   const [tourLength, setTourLength] = useState<TourLength>('medium');
   const isTourPlayingRef = useRef(isTourPlaying);
   isTourPlayingRef.current = isTourPlaying;
+  const isTourModeRef = useRef(isTourMode);
+  isTourModeRef.current = isTourMode;
 
   // Smooth-cut transition state & timers (prevents re-scrubbing across rows & first/last item wrapping)
   const [isSmoothCutActive, setIsSmoothCutActive] = useState(false);
@@ -1822,13 +1921,42 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     onSelectStar(null);
   }, [onSelectStar]);
 
-  const handleToggleTour = useCallback(() => {
-    const willPlay = !isTourPlayingRef.current;
-    isTourPlayingRef.current = willPlay;
-    setIsTourPlaying(willPlay);
-    soundEffects.play(willPlay ? 'toggleOn' : 'toggleOff');
+  const handleEndTour = useCallback(() => {
+    setIsTourMode(false);
+    isTourModeRef.current = false;
+    setIsTourPlaying(false);
+    isTourPlayingRef.current = false;
+    soundEffects.play('toggleOff');
+    if (onTourStateChange) onTourStateChange(false);
+  }, [onTourStateChange]);
 
-    if (willPlay) {
+  const handleRestartTour = useCallback(() => {
+    if (sortedStars.length === 0) return;
+    soundEffects.play('nav');
+    const firstStar = sortedStars[0];
+    const framing = getCameraFramingForStar(firstStar.id, true);
+    if (framing) {
+      cameraTargetRef.current.copy(framing.target);
+      cameraDistanceRef.current = framing.distance;
+      cameraAngleRef.current = { ...framing.angle };
+    }
+    onSelectStar(firstStar);
+    setIsTourMode(true);
+    isTourModeRef.current = true;
+    setIsTourPlaying(true);
+    isTourPlayingRef.current = true;
+    if (onTourStateChange) onTourStateChange(true);
+  }, [sortedStars, getCameraFramingForStar, onSelectStar, onTourStateChange]);
+
+  const handleToggleTour = useCallback(() => {
+    if (!isTourModeRef.current) {
+      setIsTourMode(true);
+      isTourModeRef.current = true;
+      setIsTourPlaying(true);
+      isTourPlayingRef.current = true;
+      soundEffects.play('toggleOn');
+      if (onTourStateChange) onTourStateChange(true);
+
       // If starting tour and no star is focused or already on the last star, immediately focus the first star
       // Set camera target immediately with generous label headroom so flight animation begins on frame 1 without delay!
       if (activeStarIndex === -1 || activeStarIndex >= sortedStars.length - 1) {
@@ -1842,9 +1970,22 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           }
           onSelectStar(firstStar);
         }
+      } else {
+        const curStar = sortedStars[activeStarIndex];
+        const framing = getCameraFramingForStar(curStar.id, true);
+        if (framing) {
+          cameraTargetRef.current.copy(framing.target);
+          cameraDistanceRef.current = framing.distance;
+          cameraAngleRef.current = { ...framing.angle };
+        }
       }
+    } else {
+      const willPlay = !isTourPlayingRef.current;
+      isTourPlayingRef.current = willPlay;
+      setIsTourPlaying(willPlay);
+      soundEffects.play(willPlay ? 'toggleOn' : 'toggleOff');
     }
-  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar]);
+  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar, onTourStateChange]);
 
   // Auto Tour playback effect
   useEffect(() => {
@@ -1858,6 +1999,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       // The tour ends if it reached the last star
       if (currentIndex >= sortedStars.length - 1) {
         setIsTourPlaying(false);
+        isTourPlayingRef.current = false;
       } else {
         const nextStar = sortedStars[currentIndex + 1];
         // 1. Immediately update camera coordinates on this tick for instant smooth flight with label headroom
@@ -1874,6 +2016,13 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
     return () => clearTimeout(timer);
   }, [isTourPlaying, activeStarIndex, sortedStars, tourLength, onSelectStar, getCameraFramingForStar]);
+
+  // If homepage opens while in tour mode, safely exit tour mode
+  useEffect(() => {
+    if (isHomeOpen && isTourModeRef.current) {
+      handleEndTour();
+    }
+  }, [isHomeOpen, handleEndTour]);
 
   // Main Render & Animation Loop
   useEffect(() => {
@@ -2439,6 +2588,15 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         return;
       }
 
+      // Escape key: exit tour mode if tour mode is active
+      if (e.key === 'Escape') {
+        if (isTourModeRef.current) {
+          e.preventDefault();
+          handleEndTour();
+          return;
+        }
+      }
+
       // 1. Unfocus: Re-mapped to 'U' (Escape key is preserved for exiting fullscreen)
       if (e.key === 'u' || e.key === 'U') {
         e.preventDefault();
@@ -2592,6 +2750,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     sortKey,
     onToggleSortDirection,
     handleToggleTour,
+    handleEndTour,
     isHomeOpen,
   ]);
 
@@ -2956,7 +3115,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       {children}
 
       {/* Floating 3D Star Name Labels Overlay in Preview (Virtualized: renders only active star label, saving 530 DOM nodes) */}
-      {!isHomeOpen && (
+      {!isHomeOpen && !isTourMode && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
           {displayStar && (() => {
             const star = displayStar;
@@ -3032,7 +3191,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       )}
 
       {/* Top Floating Control Bar - Accessible only from 3D mode screen, removed from home screen */}
-      {!isHomeOpen && !areControlsHidden && (
+      {!isHomeOpen && !areControlsHidden && !isTourMode && (
         <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 pointer-events-none z-30">
           {/* MOBILE TOP CONTROLS (md:hidden) */}
           <div className="flex md:hidden flex-col gap-1.5 w-full pointer-events-auto">
@@ -3734,7 +3893,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       )}
 
       {/* Bottom Floating Control Caliper & Interactive Filmstrip - ONLY when NOT on homescreen */}
-      {!isHomeOpen && (
+      {!isHomeOpen && !isTourMode && (
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 sm:gap-3 pointer-events-none z-20 max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] overflow-hidden">
         {/* Focused Star Info Bar - Only appears when a star is focused, NOT when hovered */}
         {activeFocusedStar && (
@@ -4296,6 +4455,191 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           </div>
         </div>
       </div>
+      )}
+
+      {/* 3D Stage Tour Mode: Top-Left Hover Zone & Cinematic Star Display */}
+      {isTourMode && (
+        <>
+          {/* Top-Left Hover Zone: Hidden until hovered over the top-left corner */}
+          <div className="absolute top-0 left-0 pt-3 pl-3 sm:pt-4 sm:pl-4 pb-16 pr-20 z-40 group pointer-events-auto select-none">
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 transform -translate-y-1 group-hover:translate-y-0">
+              {/* End Tour Button */}
+              <button
+                id="btn-tour-end"
+                onClick={handleEndTour}
+                title="End Tour (Esc)"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#040816]/95 hover:bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85),0_0_15px_rgba(244,63,94,0.3)] backdrop-blur-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
+              >
+                <Square className="w-3.5 h-3.5 fill-rose-400 text-rose-400" />
+                <span>End Tour</span>
+                <StageKbd variant="cyan" className="text-[9px] h-4 min-w-[1rem] px-1 ml-1 border-rose-500/30 text-rose-200">Esc</StageKbd>
+              </button>
+
+              {/* Restart Tour Button */}
+              <button
+                id="btn-tour-restart"
+                onClick={handleRestartTour}
+                title="Restart Tour from the first star"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#040816]/95 hover:bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85),0_0_15px_rgba(6,182,212,0.3)] backdrop-blur-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Restart</span>
+              </button>
+
+              {/* Play / Pause Toggle during Tour */}
+              <button
+                id="btn-tour-play-pause"
+                onClick={() => {
+                  if (activeStarIndex >= sortedStars.length - 1 && !isTourPlaying) {
+                    handleRestartTour();
+                    return;
+                  }
+                  const next = !isTourPlaying;
+                  setIsTourPlaying(next);
+                  isTourPlayingRef.current = next;
+                  soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+                }}
+                title={isTourPlaying ? 'Pause Tour (T)' : 'Resume Tour (T)'}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#040816]/95 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono transition-all cursor-pointer active:scale-95"
+              >
+                {isTourPlaying ? (
+                  <>
+                    <Pause className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-amber-300 font-semibold">Pause</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-cyan-300 font-semibold">{activeStarIndex >= sortedStars.length - 1 ? 'Replay' : 'Resume'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Cinematic 3D Comparison Lower Overlay (YouTube 3D comparison scale style) */}
+          {activeFocusedStar && (() => {
+            const metric = getTourMetricDisplay(activeFocusedStar, sortKey);
+            const currentNum = activeStarIndex >= 0 ? activeStarIndex + 1 : 1;
+            const totalStars = sortedStars.length;
+            const progressPercent = totalStars > 0 ? (currentNum / totalStars) * 100 : 0;
+            const isTourComplete = !isTourPlaying && activeStarIndex >= totalStars - 1;
+
+            return (
+              <div className="absolute inset-x-0 bottom-0 pointer-events-none z-30 flex flex-col justify-end">
+                {/* Subtle dark vignette backdrop */}
+                <div
+                  className="w-full bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-20 pb-6 px-4 sm:px-8 md:px-12 flex flex-col gap-2.5 sm:gap-3"
+                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}
+                >
+                  {/* Top metadata row: Index rank badge & tour status */}
+                  <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+                    <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-bold uppercase tracking-wider text-[11px] sm:text-xs shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+                      #{currentNum} of {totalStars} • {metric.label}
+                    </span>
+
+                    {isTourComplete ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 font-bold text-[11px] sm:text-xs animate-pulse">
+                        Tour Complete • Hover top-left to Restart or End
+                      </span>
+                    ) : isTourPlaying ? (
+                      <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px]">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                        Auto Tour Playing
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300 text-[10px] sm:text-[11px]">
+                        Tour Paused
+                      </span>
+                    )}
+
+                    {activeFocusedStar.bayerDesignation && (
+                      <span className="text-slate-400 text-xs hidden sm:inline">
+                        {activeFocusedStar.bayerDesignation}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Giant Name & Active Metric Comparison Display */}
+                  <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-3 lg:gap-8">
+                    {/* Left Column: Star Name & Astrophysical identity */}
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5">
+                        <span
+                          className="w-4 h-4 sm:w-5 sm:h-5 rounded-full aspect-square shrink-0 ring-2 ring-white/50 shadow-[0_0_20px_currentColor] mt-1 sm:mt-0"
+                          style={{ backgroundColor: activeFocusedStar.colorHex, color: activeFocusedStar.colorHex }}
+                        />
+                        <h1 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black font-display text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] break-words">
+                          {activeFocusedStar.name}
+                        </h1>
+                      </div>
+
+                      {/* Subtitle identity pills */}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-slate-300 font-sans mt-2">
+                        <span className="font-semibold text-cyan-200">
+                          {activeFocusedStar.spectralType}
+                        </span>
+                        <span className="text-slate-500">•</span>
+                        <span className="text-slate-300">
+                          {activeFocusedStar.stellarStage}
+                        </span>
+                        <span className="text-slate-500">•</span>
+                        <span className="text-slate-400">
+                          Constellation: {activeFocusedStar.constellation}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Giant Comparison Sorting Metric (YouTube 3D video scale comparison style) */}
+                    <div className="flex flex-col lg:items-end shrink-0">
+                      <div className="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase">
+                        {metric.label}
+                      </div>
+                      <div className="text-xl min-[400px]:text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-mono font-black text-cyan-300 tracking-tight leading-none drop-shadow-[0_0_30px_rgba(6,182,212,0.6)]">
+                        {metric.primary}
+                      </div>
+                      <div className="text-[11px] sm:text-xs font-mono text-slate-400 mt-1">
+                        {metric.secondary}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Secondary Vitals Ribbon */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10 text-[11px] sm:text-xs font-mono">
+                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                      <span className="text-slate-500 mr-1">Diameter:</span>
+                      <span className="text-white font-semibold">{activeFocusedStar.diameterSolar >= 10 ? activeFocusedStar.diameterSolar.toLocaleString() : activeFocusedStar.diameterSolar.toFixed(2)} D☉</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                      <span className="text-slate-500 mr-1">Mass:</span>
+                      <span className="text-white font-semibold">{activeFocusedStar.massSolar.toFixed(2)} M☉</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                      <span className="text-slate-500 mr-1">Temp:</span>
+                      <span className="text-white font-semibold">{activeFocusedStar.temperature.toLocaleString()} K</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                      <span className="text-slate-500 mr-1">Distance:</span>
+                      <span className="text-white font-semibold">{activeFocusedStar.distanceLy.toLocaleString()} ly</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300 hidden sm:inline">
+                      <span className="text-slate-500 mr-1">Luminosity:</span>
+                      <span className="text-white font-semibold">{activeFocusedStar.luminositySolar >= 100 ? activeFocusedStar.luminositySolar.toLocaleString() : activeFocusedStar.luminositySolar.toFixed(2)} L☉</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Slim Tour Progress Bar Line at Very Bottom */}
+                <div className="w-full h-1 bg-black/80 relative overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 transition-all duration-300 shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {/* Keyboard Shortcuts Guide Modal */}

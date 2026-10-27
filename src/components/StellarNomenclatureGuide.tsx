@@ -122,32 +122,37 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-6 lg:space-y-8 text-slate-200">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* HEADER SECTION - Uniform Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-8 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-1.5 md:space-y-2 max-w-4xl">
-            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
-              <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+              <Bookmark className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
               <span>Stellar Nomenclature &amp; Designations</span>
             </h1>
             <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
               From ancient Arabic and Greek proper names to multi-tier Bayer systems, numbered coordinate catalogs (Flamsteed &amp; Gould), variable star lettering, modern deep surveys (Gaia, SDSS, 2MASS, HD), star cluster designations, and multi-tier binary hierarchies.
             </p>
           </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+              7 Naming Systems
+            </span>
+          </div>
         </div>
       </div>
 
       {/* TOP NAVIGATION TABS - Clean typographic tabs without badges */}
-      <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar pb-1 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25">
+      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
         {NOMENCLATURE_TOPICS.map((topic) => {
           const isActive = activeTab === topic.id;
           return (
             <button
               key={topic.id}
               onClick={() => setActiveTab(topic.id)}
-              className={`px-2.5 sm:px-3.5 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 isActive
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'

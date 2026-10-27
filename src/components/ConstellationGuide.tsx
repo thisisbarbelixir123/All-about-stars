@@ -99,7 +99,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
   }, [calcMonth, calcDay]);
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto text-slate-200">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* Top Banner (Uniform Hero Section) */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
