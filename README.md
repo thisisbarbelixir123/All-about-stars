@@ -620,17 +620,7 @@ All observational metrics in Starpedia 3D are curated and calibrated against pee
 
 Starpedia 3D includes a comprehensive tactile keyboard navigation engine enabling full control over the 3D canvas, cameras, navigation, tools, and interactive minigames without touching a mouse.
 
-### 7.1 Navigation & Primary Subsystems
-
-| Shortcut Key | Action / Functionality | Scope |
-|:---|:---|:---:|
-| <kbd>1</kbd> | Jump to **Overview / Welcome Home** | Global |
-| <kbd>2</kbd> | Open **3D Catalog Explorer** | Global |
-| <kbd>3</kbd> | View **Interactive Hertzsprung–Russell (H–R) Diagram** | Global |
-| <kbd>4</kbd> | Open **Stellar Life Cycles Simulation** | Global |
-| <kbd>5</kbd> | Inspect **Stellar Classification Guide & Remnants** | Global |
-
-### 7.2 General Controls & Workspace Tools
+### 7.1 General Controls & Workspace Tools
 
 | Shortcut Key | Action / Functionality | Scope |
 |:---|:---|:---:|
@@ -641,7 +631,7 @@ Starpedia 3D includes a comprehensive tactile keyboard navigation engine enablin
 | <kbd>Alt+B</kbd> / <kbd>⌘K</kbd> | Close Star Search Features | Global |
 | <kbd>Esc</kbd> | Dismiss active modal, drawer, or close overlay | Global |
 
-### 7.3 3D Celestial Stage & Camera Controls
+### 7.2 3D Celestial Stage & Camera Controls
 
 | Shortcut Key / Input | Action / Functionality | Scope |
 |:---|:---|:---:|
@@ -672,7 +662,7 @@ Starpedia 3D includes a comprehensive tactile keyboard navigation engine enablin
 | <kbd>L</kbd> | Toggle Layout Mode in All Stars Catalog (Linear vs Spiral) | 3D Stage |
 | <kbd>B</kbd> | Toggle Preset Star Search / Quick Browse Drawer | 3D Stage |
 
-### 7.4 Interactive Visualizers & Minigames
+### 7.3 Interactive Visualizers & Minigames
 
 | Shortcut Key | Action / Functionality | Context / Subsystem |
 |:---|:---|:---:|
