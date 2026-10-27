@@ -185,9 +185,11 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
       const primary = star.massSolar < 0.08
         ? `${(star.massSolar * 1047.57).toFixed(1)} M_Jup`
         : `${star.massSolar.toLocaleString(undefined, { maximumFractionDigits: 2 })} M☉`;
+      const kgStr = `${(star.massSolar * 1.989e30).toExponential(2)} kg`;
+      const lbsStr = `${(star.massSolar * 4.385e30).toExponential(2)} lbs`;
       const secondary = star.massSolar < 0.08
-        ? `${star.massSolar.toFixed(4)} M☉ (${(star.massSolar * 1.989e30).toExponential(2)} kg)`
-        : `${(star.massSolar * 1.989e30).toExponential(2)} kg`;
+        ? `${star.massSolar.toFixed(4)} M☉ (${kgStr} • ${lbsStr})`
+        : `${kgStr} (${lbsStr})`;
       return {
         label: 'STELLAR MASS',
         primary,
@@ -211,9 +213,10 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
         : star.luminositySolar >= 1
         ? `${star.luminositySolar.toFixed(2)} L☉`
         : `${star.luminositySolar.toFixed(star.luminositySolar < 0.001 ? 5 : 3)} L☉`;
+      const wattsStr = `${(star.luminositySolar * 3.828e26).toExponential(2)} Watts`;
       const secondary = star.luminositySolar < 0.01
-        ? `${(star.luminositySolar * 100).toFixed(2)}% of Solar Luminosity`
-        : `${(star.luminositySolar * 3.828e26).toExponential(2)} Watts`;
+        ? `${wattsStr} (${(star.luminositySolar * 100).toFixed(star.luminositySolar < 0.0001 ? 4 : 2)}% of Solar L☉)`
+        : wattsStr;
       return {
         label: 'BOLOMETRIC LUMINOSITY',
         primary,
@@ -357,6 +360,22 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   isTourPlayingRef.current = isTourPlaying;
   const isTourModeRef = useRef(isTourMode);
   isTourModeRef.current = isTourMode;
+
+  // Tour mode cursor auto-hide: hide cursor after 5 seconds of inactivity, reappear on mouse movement
+  const [isTourCursorVisible, setIsTourCursorVisible] = useState(true);
+  const tourCursorTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetTourCursorTimer = useCallback(() => {
+    setIsTourCursorVisible(true);
+    if (tourCursorTimerRef.current) {
+      clearTimeout(tourCursorTimerRef.current);
+    }
+    if (isTourModeRef.current) {
+      tourCursorTimerRef.current = setTimeout(() => {
+        setIsTourCursorVisible(false);
+      }, 5000);
+    }
+  }, []);
 
   // Smooth-cut transition state & timers (prevents re-scrubbing across rows & first/last item wrapping)
   const [isSmoothCutActive, setIsSmoothCutActive] = useState(false);
@@ -728,7 +747,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       } else if (sortKey === 'luminosity') {
         diff = a.luminositySolar - b.luminositySolar;
       } else if (sortKey === 'apparentMagnitude') {
-        diff = (a.apparentMagnitude ?? 0) - (b.apparentMagnitude ?? 0);
+        diff = (b.apparentMagnitude ?? 0) - (a.apparentMagnitude ?? 0);
       }
 
       // Consistent tie-breakers based on true physical dimensions
@@ -1932,6 +1951,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     isTourModeRef.current = false;
     setIsTourPlaying(false);
     isTourPlayingRef.current = false;
+    setIsTourCursorVisible(true);
+    if (tourCursorTimerRef.current) {
+      clearTimeout(tourCursorTimerRef.current);
+    }
     soundEffects.play('toggleOff');
     if (onTourStateChange) onTourStateChange(false);
   }, [onTourStateChange]);
@@ -1951,8 +1974,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     isTourModeRef.current = true;
     setIsTourPlaying(true);
     isTourPlayingRef.current = true;
+    resetTourCursorTimer();
     if (onTourStateChange) onTourStateChange(true);
-  }, [sortedStars, getCameraFramingForStar, onSelectStar, onTourStateChange]);
+  }, [sortedStars, getCameraFramingForStar, onSelectStar, onTourStateChange, resetTourCursorTimer]);
 
   const handleToggleTour = useCallback(() => {
     if (!isTourModeRef.current) {
@@ -1961,6 +1985,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       setIsTourPlaying(true);
       isTourPlayingRef.current = true;
       soundEffects.play('toggleOn');
+      resetTourCursorTimer();
       if (onTourStateChange) onTourStateChange(true);
 
       // If starting tour and no star is focused or already on the last star, immediately focus the first star
@@ -1989,9 +2014,10 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       const willPlay = !isTourPlayingRef.current;
       isTourPlayingRef.current = willPlay;
       setIsTourPlaying(willPlay);
+      resetTourCursorTimer();
       soundEffects.play(willPlay ? 'toggleOn' : 'toggleOff');
     }
-  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar, onTourStateChange]);
+  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar, onTourStateChange, resetTourCursorTimer]);
 
   // Auto Tour playback effect
   useEffect(() => {
@@ -2029,6 +2055,15 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       handleEndTour();
     }
   }, [isHomeOpen, handleEndTour]);
+
+  // Clean up tour cursor timer on unmount
+  useEffect(() => {
+    return () => {
+      if (tourCursorTimerRef.current) {
+        clearTimeout(tourCursorTimerRef.current);
+      }
+    };
+  }, []);
 
   // Main Render & Animation Loop
   useEffect(() => {
@@ -2276,6 +2311,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isTourModeRef.current) {
+      resetTourCursorTimer();
+    }
     if (isRightDraggingRef.current) {
       // Pan camera target
       const deltaX = e.clientX - previousMousePositionRef.current.x;
@@ -3089,12 +3127,17 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   return (
     <div 
       ref={outerWrapperRef}
-      className="relative w-full h-full bg-[#02040c] overflow-hidden flex flex-col min-h-0"
+      onMouseMove={isTourMode ? resetTourCursorTimer : undefined}
+      className={`relative w-full h-full bg-[#02040c] overflow-hidden flex flex-col min-h-0 ${
+        isTourMode && !isTourCursorVisible ? 'cursor-none [&_*]:cursor-none' : ''
+      }`}
     >
       {/* 3D WebGL Canvas Container */}
       <div
         ref={containerRef}
-        className="w-full h-full flex-1 cursor-grab active:cursor-grabbing select-none"
+        className={`w-full h-full flex-1 select-none ${
+          isTourMode && !isTourCursorVisible ? 'cursor-none' : 'cursor-grab active:cursor-grabbing'
+        }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
