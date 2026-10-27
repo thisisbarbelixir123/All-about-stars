@@ -149,20 +149,26 @@ export const StageKbd: React.FC<StageKbdProps> = ({
 const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
   switch (sortKey) {
     case 'size': {
-      const scale = formatPhysicalDiameter(star.diameterKm, star.diameterSolar);
-      const primary = star.diameterSolar >= 10
+      const isNeutronScale = star.diameterKm < 1000;
+      const miles = Math.round(star.diameterKm * 0.621371192).toLocaleString();
+      const kmFormatted = star.diameterKm < 10
+        ? `${star.diameterKm.toFixed(1)} km`
+        : `${Math.round(star.diameterKm).toLocaleString()} km`;
+
+      const primary = isNeutronScale
+        ? `${star.diameterKm < 10 ? star.diameterKm.toFixed(1) : Math.round(star.diameterKm).toLocaleString()} km`
+        : star.diameterSolar >= 10
         ? `${star.diameterSolar.toLocaleString(undefined, { maximumFractionDigits: star.diameterSolar > 100 ? 0 : 1 })} D☉`
         : star.diameterSolar >= 1
         ? `${star.diameterSolar.toFixed(2)} D☉`
-        : star.diameterKm < 1000
-        ? `${star.diameterKm.toFixed(1)} km`
         : `${star.diameterSolar.toFixed(3)} D☉`;
-      const secondary = `${scale.kmFormatted} (${scale.metricSi}${star.diameterAU >= 0.01 ? ` • ${star.diameterAU >= 10 ? star.diameterAU.toFixed(1) : star.diameterAU.toFixed(2)} AU` : ''})`;
+
+      const secondary = `${kmFormatted} (${miles} mi${star.diameterAU >= 0.01 ? ` • ${star.diameterAU >= 10 ? star.diameterAU.toFixed(1) : star.diameterAU.toFixed(2)} AU` : ''})`;
       return {
         label: 'PHYSICAL DIAMETER',
         primary,
         secondary,
-        unit: 'Solar Diameters (D☉)',
+        unit: isNeutronScale ? 'Kilometers (km)' : 'Solar Diameters (D☉)',
       };
     }
     case 'distance': {
@@ -4608,7 +4614,13 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10 text-[11px] sm:text-xs font-mono">
                     <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
                       <span className="text-slate-500 mr-1">Diameter:</span>
-                      <span className="text-white font-semibold">{activeFocusedStar.diameterSolar >= 10 ? activeFocusedStar.diameterSolar.toLocaleString() : activeFocusedStar.diameterSolar.toFixed(2)} D☉</span>
+                      <span className="text-white font-semibold">
+                        {activeFocusedStar.diameterKm < 1000
+                          ? `${activeFocusedStar.diameterKm < 10 ? activeFocusedStar.diameterKm.toFixed(1) : Math.round(activeFocusedStar.diameterKm).toLocaleString()} km`
+                          : activeFocusedStar.diameterSolar >= 10
+                          ? `${activeFocusedStar.diameterSolar.toLocaleString()} D☉`
+                          : `${activeFocusedStar.diameterSolar.toFixed(2)} D☉`}
+                      </span>
                     </span>
                     <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
                       <span className="text-slate-500 mr-1">Mass:</span>
