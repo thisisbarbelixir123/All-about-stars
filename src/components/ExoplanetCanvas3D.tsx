@@ -5,7 +5,6 @@ import { StageDisplayableItem } from './stage/types';
 import { CelestialCanvas3D } from './stage/CelestialCanvas3D';
 import { PLANET_VERTEX_SHADER, PLANET_FRAGMENT_SHADER, getThemeIndex } from '../utils/planetShaderUtils';
 
-// 1 unit in Three.js = 1 Earth Diameter (12,742 km)
 export const KM_TO_STAGE_RADIUS = 0.5 / 12742;
 
 export interface ExoplanetDisplayItem extends StageDisplayableItem {
@@ -15,6 +14,30 @@ export interface ExoplanetDisplayItem extends StageDisplayableItem {
 interface ExoplanetCanvas3DProps {
   items: CelestialBody[];
   initialIndex?: number;
+}
+
+// Single unit sphere geometry shared by all procedural planets (scaled via mesh.scale)
+const SHARED_SPHERE_GEOMETRY = new THREE.SphereGeometry(1.0, 32, 32);
+
+// Cache materials by theme index so GPU doesn't compile 60 separate shader programs
+const MATERIAL_CACHE = new Map<number, THREE.ShaderMaterial>();
+
+function getOrCreateShaderMaterial(themeIndex: number, tempK: number): THREE.ShaderMaterial {
+  if (!MATERIAL_CACHE.has(themeIndex)) {
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: PLANET_VERTEX_SHADER,
+      fragmentShader: PLANET_FRAGMENT_SHADER,
+      uniforms: {
+        time: { value: 0 },
+        themeIndex: { value: themeIndex },
+        temperatureK: { value: tempK },
+        lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
+        seed: { value: Math.random() * 10.0 },
+      },
+    });
+    MATERIAL_CACHE.set(themeIndex, mat);
+  }
+  return MATERIAL_CACHE.get(themeIndex)!;
 }
 
 export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({ items, initialIndex = 0 }) => {
@@ -49,38 +72,31 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({ items, ini
     });
   }, [items]);
 
-  // Mesh creation callback implementing planet-specific shaders / textures
+  // Mesh creation callback implementing shared geometries & cached materials
   const renderItemMesh = useCallback(
     (item: ExoplanetDisplayItem, scene: THREE.Scene, onMeshCreated: (mesh: THREE.Object3D) => void) => {
       const body = item.rawBody;
       const radius = item.meshRadius;
 
-      const geometry = new THREE.SphereGeometry(radius, 64, 64);
-      let material: THREE.Material;
+      let mesh: THREE.Mesh;
 
       if (body.textureSource === 'official' && body.texturePath) {
         const texture = textureLoader.load(body.texturePath);
-        material = new THREE.MeshStandardMaterial({
+        const mat = new THREE.MeshStandardMaterial({
           map: texture,
           roughness: 0.8,
           metalness: 0.1,
         });
+        mesh = new THREE.Mesh(SHARED_SPHERE_GEOMETRY, mat);
       } else {
-        material = new THREE.ShaderMaterial({
-          vertexShader: PLANET_VERTEX_SHADER,
-          fragmentShader: PLANET_FRAGMENT_SHADER,
-          uniforms: {
-            time: { value: 0 },
-            themeIndex: { value: getThemeIndex(body.textureTheme) },
-            temperatureK: { value: body.temperatureK || 300 },
-            lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
-            seed: { value: (body.diameterKm % 100) * 0.13 },
-          },
-        });
+        const themeIndex = getThemeIndex(body.textureTheme);
+        const mat = getOrCreateShaderMaterial(themeIndex, body.temperatureK || 300);
+        mesh = new THREE.Mesh(SHARED_SPHERE_GEOMETRY, mat);
       }
 
-      const mesh = new THREE.Mesh(geometry, material);
-      // Tangent to y = 0 grid floor
+      // Scale unit sphere to exact physical radius
+      mesh.scale.setScalar(radius);
+      // Position tangent to grid floor (y = 0)
       mesh.position.set(0, radius, 0);
 
       onMeshCreated(mesh);

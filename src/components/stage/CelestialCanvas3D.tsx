@@ -75,7 +75,7 @@ export function CelestialCanvas3D<T extends StageDisplayableItem>({
   }, [items]);
 
   // Window of rendered objects around activeIndex to keep 60fps with 4,000+ objects
-  const WINDOW_RADIUS = 30;
+  const WINDOW_RADIUS = 8;
   const activeItem = items[activeIndex] || null;
 
   // Re-build side-by-side 3D meshes around the camera focus
