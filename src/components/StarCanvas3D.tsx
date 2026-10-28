@@ -1347,21 +1347,6 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           heightLine.computeLineDistances();
         }
         celestialGridGroup.add(heightLine);
-
-        // Circular footprint anchor on the grid floor scaled to true physical radius
-        const innerR = Math.max(sc.radius * 0.05, sc.radius * 0.92);
-        const footGeo = new THREE.RingGeometry(innerR, sc.radius, 48);
-        const footMat = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(star.colorHex),
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.35,
-          depthWrite: false,
-        });
-        const footMesh = new THREE.Mesh(footGeo, footMat);
-        footMesh.rotation.x = Math.PI / 2;
-        footMesh.position.set(sc.xPos, 0, starZ);
-        celestialGridGroup.add(footMesh);
       });
     }
 
