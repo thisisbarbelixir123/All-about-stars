@@ -177,3 +177,62 @@ export interface FilterState {
   onlyNakedEye: boolean;
   hasExoplanetsOnly: boolean;
 }
+
+export type CelestialClassification =
+  | 'Moon of Saturn'
+  | 'Moon of Neptune'
+  | 'Moon of Uranus'
+  | 'Moon of Jupiter'
+  | 'Moon of Earth'
+  | 'Moon of Pluto'
+  | 'Asteroid'
+  | 'Dwarf planet'
+  | 'Plutino'
+  | 'Trans-Neptunian Object'
+  | 'Terrestrial Planet'
+  | 'Ice Giants'
+  | 'Gas Giants'
+  | 'Exoplanet'
+  | 'Star';
+
+export type ProceduralTheme =
+  | 'carbonaceous-asteroid'
+  | 'kbo-tholin'
+  | 'kbo-ice'
+  | 'kbo-dark'
+  | 'kbo-red-sedna'
+  | 'star-plasma'
+  | 'terrestrial-rocky'
+  | 'terrestrial-ocean'
+  | 'super-earth'
+  | 'sub-neptune'
+  | 'ice-giant'
+  | 'gas-giant-banded'
+  | 'hot-jupiter'
+  | 'ultra-hot-jupiter'
+  | 'lava-world'
+  | 'chthonian-planet';
+
+export interface CelestialBody {
+  id: string;
+  name: string;
+  classification: CelestialClassification;
+  diameterKm: number;
+  diameterEarth: number; // Multiplier vs Earth (1.0 = Earth)
+  diameterJupiter: number; // Multiplier vs Jupiter (1.0 = Jupiter)
+  hostSystem: string;
+  temperatureK?: number;
+  massEarth?: number;
+  massJupiter?: number;
+  orbitalPeriodDays?: number;
+  semiMajorAxisAU?: number;
+  discoveryYear?: number;
+  discoveryMethod?: string;
+  confirmed: boolean;
+  description?: string;
+  textureSource: 'official' | 'procedural';
+  texturePath?: string;
+  textureTheme?: ProceduralTheme;
+  hasRings?: boolean;
+}
+
