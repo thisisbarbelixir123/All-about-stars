@@ -276,7 +276,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   },
   {
     id: 'sol-quaoar',
-    name: 'Trans-Neptunian Object',
+    name: 'Quaoar',
     classification: 'Trans-Neptunian Object',
     diameterKm: 1098,
     diameterEarth: +(1098 / EARTH_DIAMETER_KM).toFixed(4),

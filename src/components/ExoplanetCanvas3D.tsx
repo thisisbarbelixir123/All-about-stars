@@ -1,11 +1,12 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { CelestialBody } from '../types';
+import { CelestialBody, ProceduralTheme } from '../types';
 import { StageDisplayableItem } from './stage/types';
-import { CelestialCanvas3D } from './stage/CelestialCanvas3D';
+import { CelestialCanvas3D, CelestialSortKey } from './stage/CelestialCanvas3D';
 import { PLANET_VERTEX_SHADER, PLANET_FRAGMENT_SHADER, getThemeIndex } from '../utils/planetShaderUtils';
 
-export const KM_TO_STAGE_RADIUS = 0.5 / 12742;
+// 1 unit in Three.js = 1 Earth Radius (6,371 km)
+export const KM_TO_STAGE_RADIUS = 1.0 / 12742;
 
 export interface ExoplanetDisplayItem extends StageDisplayableItem {
   rawBody: CelestialBody;
@@ -13,41 +14,49 @@ export interface ExoplanetDisplayItem extends StageDisplayableItem {
 
 interface ExoplanetCanvas3DProps {
   items: CelestialBody[];
-  initialIndex?: number;
+  initialFocusedId?: string | null;
 }
 
-// Single unit sphere geometry shared by all procedural planets (scaled via mesh.scale)
-const SHARED_SPHERE_GEOMETRY = new THREE.SphereGeometry(1.0, 32, 32);
+const SHARED_SPHERE_GEOMETRY = new THREE.SphereGeometry(1.0, 48, 48);
 
-// Cache materials by theme index so GPU doesn't compile 60 separate shader programs
-const MATERIAL_CACHE = new Map<number, THREE.ShaderMaterial>();
-
-function getOrCreateShaderMaterial(themeIndex: number, tempK: number): THREE.ShaderMaterial {
-  if (!MATERIAL_CACHE.has(themeIndex)) {
-    const mat = new THREE.ShaderMaterial({
-      vertexShader: PLANET_VERTEX_SHADER,
-      fragmentShader: PLANET_FRAGMENT_SHADER,
-      uniforms: {
-        time: { value: 0 },
-        themeIndex: { value: themeIndex },
-        temperatureK: { value: tempK },
-        lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
-        seed: { value: Math.random() * 10.0 },
-      },
-    });
-    MATERIAL_CACHE.set(themeIndex, mat);
+function inferFallbackTheme(body: CelestialBody): ProceduralTheme {
+  if (body.textureTheme) return body.textureTheme;
+  const name = body.name.toLowerCase();
+  if (name === 'earth') return 'terrestrial-ocean';
+  if (name === 'mars' || name === 'mercury' || name === 'the moon' || name === 'vesta' || name === 'ceres') {
+    return 'terrestrial-rocky';
   }
-  return MATERIAL_CACHE.get(themeIndex)!;
+  if (name === 'venus' || name === 'titan') return 'super-earth';
+  if (name === 'io') return 'lava-world';
+  if (name === 'europa' || name === 'enceladus' || name === 'eris' || name === 'triton') return 'kbo-ice';
+  if (name === 'pluto' || name === 'charon' || name === 'makemake') return 'kbo-tholin';
+  if (body.classification === 'Ice Giants') return 'ice-giant';
+  if (body.classification === 'Gas Giants') return 'gas-giant-banded';
+  if (body.classification.startsWith('Moon of')) return 'kbo-ice';
+  return 'terrestrial-rocky';
 }
 
-export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({ items, initialIndex = 0 }) => {
+export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({ items, initialFocusedId = null }) => {
   const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
+  const sharedTimeUniformRef = useRef<{ value: number }>({ value: 0 });
+  const materialCacheRef = useRef<Map<string, THREE.ShaderMaterial>>(new Map());
 
-  // Adapt CelestialBody[] into generic StageDisplayableItem[]
+  // Sorting state matching StarCanvas3D
+  const [sortKey, setSortKey] = useState<CelestialSortKey>('size');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Adapt CelestialBody[] into generic StageDisplayableItem[] once
   const displayItems: ExoplanetDisplayItem[] = useMemo(() => {
     return items.map((body) => {
       const subtitlePills: string[] = [body.classification];
       if (body.hostSystem) subtitlePills.push(`Host: ${body.hostSystem}`);
+      if (body.massEarth !== undefined && body.massEarth > 0) {
+        subtitlePills.push(
+          body.massEarth >= 50
+            ? `Mass: ${(body.massEarth / 317.828).toFixed(2)} M♃`
+            : `Mass: ${body.massEarth.toFixed(2)} M⊕`
+        );
+      }
       if (body.temperatureK) subtitlePills.push(`${body.temperatureK} K`);
       if (body.discoveryYear && body.discoveryYear > 0) {
         subtitlePills.push(`Discovered: ${body.discoveryYear}`);
@@ -72,43 +81,72 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({ items, ini
     });
   }, [items]);
 
-  // Mesh creation callback implementing shared geometries & cached materials
-  const renderItemMesh = useCallback(
-    (item: ExoplanetDisplayItem, scene: THREE.Scene, onMeshCreated: (mesh: THREE.Object3D) => void) => {
+  // Cached shader materials
+  const getPlanetMaterial = useCallback((body: CelestialBody): THREE.ShaderMaterial => {
+    const theme = inferFallbackTheme(body);
+    const themeIndex = getThemeIndex(theme);
+    const seedBucket = Math.floor(body.diameterKm % 8);
+    const cacheKey = `${themeIndex}-${seedBucket}`;
+
+    let mat = materialCacheRef.current.get(cacheKey);
+    if (!mat) {
+      mat = new THREE.ShaderMaterial({
+        vertexShader: PLANET_VERTEX_SHADER,
+        fragmentShader: PLANET_FRAGMENT_SHADER,
+        uniforms: {
+          time: sharedTimeUniformRef.current,
+          themeIndex: { value: themeIndex },
+          temperatureK: { value: body.temperatureK || 300 },
+          lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
+          seed: { value: seedBucket * 1.37 },
+        },
+      });
+      materialCacheRef.current.set(cacheKey, mat);
+    }
+    return mat;
+  }, []);
+
+  // Mesh creation callback
+  const createItemMesh = useCallback(
+    (item: ExoplanetDisplayItem): THREE.Object3D => {
       const body = item.rawBody;
       const radius = item.meshRadius;
 
-      let mesh: THREE.Mesh;
+      const proceduralMat = getPlanetMaterial(body);
+      const mesh: THREE.Mesh = new THREE.Mesh(SHARED_SPHERE_GEOMETRY, proceduralMat);
+      mesh.scale.setScalar(radius);
 
       if (body.textureSource === 'official' && body.texturePath) {
-        const texture = textureLoader.load(body.texturePath);
-        const mat = new THREE.MeshStandardMaterial({
-          map: texture,
-          roughness: 0.8,
-          metalness: 0.1,
-        });
-        mesh = new THREE.Mesh(SHARED_SPHERE_GEOMETRY, mat);
-      } else {
-        const themeIndex = getThemeIndex(body.textureTheme);
-        const mat = getOrCreateShaderMaterial(themeIndex, body.temperatureK || 300);
-        mesh = new THREE.Mesh(SHARED_SPHERE_GEOMETRY, mat);
+        textureLoader.load(
+          body.texturePath,
+          (loadedTex) => {
+            loadedTex.colorSpace = THREE.SRGBColorSpace;
+            mesh.material = new THREE.MeshStandardMaterial({
+              map: loadedTex,
+              roughness: 0.8,
+              metalness: 0.08,
+            });
+          },
+          undefined,
+          () => {}
+        );
       }
 
-      // Scale unit sphere to exact physical radius
-      mesh.scale.setScalar(radius);
-      // Position tangent to grid floor (y = 0)
-      mesh.position.set(0, radius, 0);
-
-      onMeshCreated(mesh);
+      return mesh;
     },
-    [textureLoader]
+    [getPlanetMaterial, textureLoader]
   );
 
   return (
     <CelestialCanvas3D
       items={displayItems}
-      initialIndex={initialIndex}
-      renderItemMesh={renderItemMesh}
+      initialFocusedId={initialFocusedId}
+      createItemMesh={createItemMesh}
+      sharedTimeUniform={sharedTimeUniformRef.current}
+      sortKey={sortKey}
+      sortDirection={sortDirection}
+      onSortChange={(k) => setSortKey(k)}
+      onToggleSortDirection={() => setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))}
     />
   );
 };

@@ -13,6 +13,16 @@ const SOLAR_SYSTEM_NAMES = new Set([
   'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'moon'
 ]);
 
+// Iconic Kepler/TESS planets that must always be included even if mass wasn't measured via RV
+const NOTABLE_LANDMARK_PLANETS = new Set([
+  'Kepler-37 b', 'Kepler-37 c', 'Kepler-37 d',
+  'Kepler-186 f', 'Kepler-452 b', 'Kepler-22 b',
+  'Kepler-10 b', 'Kepler-10 c', 'Kepler-16 b',
+  'Kepler-62 e', 'Kepler-62 f', 'Kepler-442 b',
+  'Kepler-1649 c', 'Kepler-438 b', 'Kepler-1647 b',
+  'TOI-700 d', 'TOI-700 e'
+]);
+
 function getTagValue(xml, tag) {
   const match = xml.match(new RegExp(`<${tag}[^>]*>([^<]+)<\\/${tag}>`));
   return match ? match[1].trim() : null;
@@ -58,8 +68,7 @@ function determineClassificationAndTheme(radiusJupiter, tempK, massJupiter) {
 function parseSystemFile(filePath) {
   const xml = fs.readFileSync(filePath, 'utf-8');
   const systemName = getTagValue(xml, 'name') || path.basename(filePath, '.xml');
-  
-  // Skip Solar System XML from OEC since we have official Solar System roster
+
   if (systemName.toLowerCase() === 'solar system' || systemName.toLowerCase() === 'sun') {
     return [];
   }
@@ -89,6 +98,13 @@ function parseSystemFile(filePath) {
 
     const massStr = getTagValue(block, 'mass');
     const massJupiter = massStr ? parseFloat(massStr) : undefined;
+    const hasValidMass = massJupiter !== undefined && !isNaN(massJupiter) && massJupiter > 0;
+
+    // Filter to the ~1,550 well-characterized exoplanets (measured radius + measured mass, or notable landmark)
+    if (!hasValidMass && !NOTABLE_LANDMARK_PLANETS.has(planetName)) {
+      continue;
+    }
+
     const tempStr = getTagValue(block, 'temperature');
     const tempK = tempStr ? parseFloat(tempStr) : undefined;
     const periodStr = getTagValue(block, 'period');
@@ -109,7 +125,7 @@ function parseSystemFile(filePath) {
       name: planetName,
       hostStar: systemName,
       radiusJupiter,
-      massJupiter: massJupiter && !isNaN(massJupiter) ? massJupiter : undefined,
+      massJupiter: hasValidMass ? massJupiter : undefined,
       temperatureK: tempK && !isNaN(tempK) ? tempK : undefined,
       periodDays: periodDays && !isNaN(periodDays) ? periodDays : undefined,
       semiMajorAxisAU: semiMajorAxisAU && !isNaN(semiMajorAxisAU) ? semiMajorAxisAU : undefined,
@@ -136,7 +152,15 @@ function main() {
     } catch (err) {}
   }
 
-  console.log(`Parsed total ${allPlanets.length} true exoplanets.`);
+  // Deduplicate by id if any
+  const seen = new Set();
+  allPlanets = allPlanets.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  console.log(`Parsed total ${allPlanets.length} well-characterized exoplanets.`);
 
   // Sort strictly ascending by radius (diameter)
   allPlanets.sort((a, b) => a.radiusJupiter - b.radiusJupiter);
