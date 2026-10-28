@@ -141,44 +141,45 @@ function main() {
   // Sort strictly ascending by radius (diameter)
   allPlanets.sort((a, b) => a.radiusJupiter - b.radiusJupiter);
 
-  const code = `import { CelestialBody } from '../types';
-
-export const EXOPLANET_CATALOG: CelestialBody[] = [
-${allPlanets
-  .map(p => {
+  const cleanList = allPlanets.map(p => {
     const diameterKm = Math.round(p.radiusJupiter * JUPITER_DIAMETER_KM);
     const diameterEarth = +(diameterKm / EARTH_DIAMETER_KM).toFixed(4);
     const diameterJupiter = +(p.radiusJupiter).toFixed(4);
     const massEarth = p.massJupiter ? +(p.massJupiter * JUPITER_TO_EARTH_MASS).toFixed(3) : undefined;
-    const safeDesc = p.description ? p.description.replace(/'/g, "\\'").replace(/\r?\n/g, ' ') : '';
 
-    return `  {
-    id: '${p.id}',
-    name: '${p.name.replace(/'/g, "\\'")}',
-    classification: 'Exoplanet',
-    diameterKm: ${diameterKm},
-    diameterEarth: ${diameterEarth},
-    diameterJupiter: ${diameterJupiter},
-    hostSystem: '${p.hostStar.replace(/'/g, "\\'")}',
-    ${p.temperatureK ? `temperatureK: ${Math.round(p.temperatureK)},` : ''}
-    ${massEarth ? `massEarth: ${massEarth},` : ''}
-    ${p.massJupiter ? `massJupiter: ${+p.massJupiter.toFixed(4)},` : ''}
-    ${p.orbitalPeriodDays ? `orbitalPeriodDays: ${p.orbitalPeriodDays},` : ''}
-    ${p.semiMajorAxisAU ? `semiMajorAxisAU: ${p.semiMajorAxisAU},` : ''}
-    ${p.discoveryYear ? `discoveryYear: ${p.discoveryYear},` : ''}
-    ${p.discoveryMethod ? `discoveryMethod: '${p.discoveryMethod.replace(/'/g, "\\'")}',` : ''}
-    confirmed: true,
-    ${safeDesc ? `description: '${safeDesc}',` : ''}
-    textureSource: 'procedural',
-    textureTheme: '${p.textureTheme}' as const,
-  },`;
-  })
-  .join('\n')}
-];
+    return {
+      id: p.id,
+      name: p.name,
+      classification: 'Exoplanet',
+      diameterKm,
+      diameterEarth,
+      diameterJupiter,
+      hostSystem: p.hostStar,
+      temperatureK: p.temperatureK ? Math.round(p.temperatureK) : undefined,
+      massEarth,
+      massJupiter: p.massJupiter ? +p.massJupiter.toFixed(4) : undefined,
+      orbitalPeriodDays: p.periodDays,
+      semiMajorAxisAU: p.semiMajorAxisAU,
+      discoveryYear: p.discoveryYear,
+      discoveryMethod: p.discoveryMethod,
+      confirmed: true,
+      description: p.description,
+      textureSource: 'procedural',
+      textureTheme: p.textureTheme,
+    };
+  });
+
+  const jsonFile = path.join(process.cwd(), 'src', 'data', 'exoplanetCatalog.json');
+  fs.writeFileSync(jsonFile, JSON.stringify(cleanList), 'utf-8');
+
+  const code = `import { CelestialBody } from '../types';
+import rawData from './exoplanetCatalog.json';
+
+export const EXOPLANET_CATALOG: CelestialBody[] = rawData as CelestialBody[];
 `;
 
   fs.writeFileSync(OUTPUT_FILE, code, 'utf-8');
-  console.log(`Successfully generated clean exoplanet catalog with ${allPlanets.length} entries.`);
+  console.log(`Successfully generated JSON + TS wrapper for ${cleanList.length} exoplanets!`);
 }
 
 main();
