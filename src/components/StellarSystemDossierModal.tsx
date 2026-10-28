@@ -85,7 +85,19 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
         systemOverview: `Part of the ${system.name} gravitationally bound system.`,
         planets: []
       },
-      stellarStage: comp.isBlackHole ? 'Stellar Black Hole' : comp.isCompactRemnant ? 'White Dwarf' : 'Main Sequence Dwarf',
+      stellarStage: comp.isBlackHole
+        ? 'Stellar Black Hole'
+        : comp.isCompactRemnant
+          ? 'White Dwarf'
+          : comp.spectralClass === 'M' || comp.spectralClass === 'L'
+            ? 'Red Dwarf'
+            : comp.spectralClass === 'K'
+              ? 'Orange Dwarf'
+              : comp.spectralClass === 'G'
+                ? 'Yellow Main Sequence'
+                : comp.spectralClass === 'F' || comp.spectralClass === 'A'
+                  ? 'White Main Sequence'
+                  : 'Blue Main Sequence',
       lifespanEstimate: comp.isBlackHole ? '10^68 Years (Hawking Evaporation)' : '~1 Billion Years',
       futureFate: comp.isBlackHole ? 'Hawking Evaporation' : comp.isCompactRemnant ? 'Degenerate Cooling Remnant' : 'Red Giant / White Dwarf',
       fusionProcess: comp.isBlackHole ? 'None (Relativistic Infall & Accretion)' : comp.isCompactRemnant ? 'None (Degenerate Electron Core)' : 'Core Hydrogen Fusion',

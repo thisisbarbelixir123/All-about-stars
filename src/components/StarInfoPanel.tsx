@@ -117,7 +117,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
               {star.spectralType}
             </span>
             <span className="text-[10px] sm:text-xs text-slate-400 font-mono hidden sm:inline shrink-0">
-              • {star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage}
+              • {star.stellarStage}
             </span>
           </div>
 

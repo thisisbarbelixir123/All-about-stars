@@ -209,7 +209,7 @@ export async function exportStarDossierCard(star: StarData): Promise<string> {
   ctx.save();
   ctx.font = '14px monospace';
   ctx.fillStyle = '#38bdf8';
-  const stageName = star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage;
+  const stageName = star.stellarStage;
   ctx.fillText(`CONSTELLATION: ${star.constellation.toUpperCase()}  •  STAGE: ${stageName.toUpperCase()}`, infoLeft, cursorY);
   ctx.restore();
 

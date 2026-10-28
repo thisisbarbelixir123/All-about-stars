@@ -434,7 +434,19 @@ export const StellarSystem3DStage: React.FC<StellarSystem3DStageProps> = ({
         engulfsPlanets: [],
         habitableZoneAU: { inner: 1, outer: 2 },
         exoplanetSystem: { hasExoplanets: false, confirmedCount: 0, candidateCount: 0, systemOverview: '', planets: [] },
-        stellarStage: comp.isBlackHole ? 'Stellar Black Hole' : comp.isCompactRemnant ? 'White Dwarf' : 'Main Sequence Dwarf',
+        stellarStage: comp.isBlackHole
+          ? 'Stellar Black Hole'
+          : comp.isCompactRemnant
+            ? 'White Dwarf'
+            : comp.spectralClass === 'M' || comp.spectralClass === 'L'
+              ? 'Red Dwarf'
+              : comp.spectralClass === 'K'
+                ? 'Orange Dwarf'
+                : comp.spectralClass === 'G'
+                  ? 'Yellow Main Sequence'
+                  : comp.spectralClass === 'F' || comp.spectralClass === 'A'
+                    ? 'White Main Sequence'
+                    : 'Blue Main Sequence',
         lifespanEstimate: comp.isBlackHole ? '10^68 Years (Hawking Evaporation)' : '10 Billion Years',
         futureFate: comp.isBlackHole ? 'Hawking Evaporation' : comp.isCompactRemnant ? 'Degenerate Cooling Remnant' : 'Red Giant / White Dwarf',
         fusionProcess: comp.isBlackHole ? 'None (Relativistic Infall & Accretion)' : comp.isCompactRemnant ? 'None (Degenerate Electron Core)' : 'Core Hydrogen Fusion',

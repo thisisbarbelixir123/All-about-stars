@@ -554,7 +554,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             <p className="text-[9px] md:text-xs text-slate-400 flex flex-wrap items-center gap-x-1.5 md:gap-x-2 gap-y-0.5 font-mono">
               <span>Constellation: <strong className="text-slate-200">{star.constellation}</strong></span>
               <span className="hidden md:inline">•</span>
-              <span>Stage: <strong className="text-slate-200">{star.stellarStage === 'Main Sequence Dwarf' ? 'Main Sequence' : star.stellarStage}</strong></span>
+              <span>Stage: <strong className="text-slate-200">{star.stellarStage}</strong></span>
             </p>
           </div>
 

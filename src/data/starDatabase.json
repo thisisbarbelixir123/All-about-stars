@@ -1951,7 +1951,7 @@
       "systemOverview": "A multiple star system featuring a gargantuan yellow hypergiant primary with a detached companion in a 1,304-day orbit, surrounded by a complex circumstellar dust nebula.",
       "planets": []
     },
-    "stellarStage": "Yellow Supergiant",
+    "stellarStage": "Yellow Hypergiant",
     "lifespanEstimate": "~6 Million Years",
     "futureFate": "Hypernova / Core Collapse to Black Hole",
     "fusionProcess": "Post-Red Supergiant Helium/Shell Burning",
@@ -2052,7 +2052,7 @@
       "systemOverview": "Surrounded by immense expanding gas shells from periodic millihypernova outbursts.",
       "planets": []
     },
-    "stellarStage": "Yellow Supergiant",
+    "stellarStage": "Yellow Hypergiant",
     "lifespanEstimate": "< 50,000 Years Remaining",
     "futureFate": "Hypernova / Supernova Type II / Black Hole",
     "fusionProcess": "Convective Shell Fusion near the Eddington Limit",
@@ -6564,7 +6564,7 @@
       "systemOverview": "Quadruple star system: Regulus A is accompanied by a close white dwarf companion and a binary pair of orange/red dwarfs (Regulus B & C).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf Remnant",
     "fusionProcess": "CNO Hydrogen Core Fusion",
@@ -6682,7 +6682,7 @@
       "systemOverview": "Surrounded by an active circumstellar gas disk created by its blistering rotational mass loss.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~60 Million Years",
     "futureFate": "Massive White Dwarf (CO Core)",
     "fusionProcess": "CNO Hydrogen Core Fusion with Gravity Darkening",
@@ -10041,7 +10041,7 @@
       "systemOverview": "Orbited by the famous white dwarf Sirius B (\"The Pup\") in a 50.1-year eccentric orbit (separation 8.2 to 31.5 AU).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1 Billion Years",
     "futureFate": "Red Giant / Planetary Nebula / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -10181,7 +10181,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1 Billion Years",
     "futureFate": "Red Giant / Planetary Nebula / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -10306,7 +10306,7 @@
       "systemOverview": "No known exoplanets. Famous for being one of the first main sequence stars to have its oblate surface directly imaged via optical interferometry.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -10587,7 +10587,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -10920,7 +10920,7 @@
       "systemOverview": "Algol-type eclipsing binary system where the primary star is partially eclipsed by a G-type star every 17.36 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -11124,7 +11124,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~10 Billion Years",
     "futureFate": "Red Giant -> Planetary Nebula -> Carbon-Oxygen White Dwarf",
     "fusionProcess": "Proton-Proton (p-p) Chain Hydrogen Fusion",
@@ -11134,7 +11134,7 @@
       "Currently in the stable middle of its 10-billion-year main sequence lifespan.",
       "Photons generated in the core take over 100,000 years to reach the surface via radiative diffusion before racing across space in 8 minutes and 20 seconds."
     ],
-    "description": "The luminous heart of our Solar System and benchmark standard for stellar astrophysics, Sol is a yellow G-type main-sequence dwarf star providing light, energy, and life to Earth.",
+    "description": "The luminous heart of our Solar System and benchmark standard for stellar astrophysics, Sol is a yellow G-type main-sequence star providing light, energy, and life to Earth.",
     "diameterKm": 1392700,
     "diameterAU": 0.009309624485183264,
     "distanceParsecs": 0.0000048473736494192965,
@@ -11195,7 +11195,7 @@
       "planets": [],
       "systemOverview": "Candidate temperate exoplanet detections remain under active investigation with high-contrast direct imaging and radial velocity surveys."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~7.5 Billion Years",
     "futureFate": "Subgiant -> Red Giant -> Planetary Nebula -> White Dwarf",
     "fusionProcess": "Proton-Proton (p-p) Chain Hydrogen Fusion",
@@ -11296,7 +11296,7 @@
       "planets": [],
       "systemOverview": "Subject to intense radial velocity monitoring; stable circumstellar habitable orbits exist within ~2–3 AU."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~15 Billion Years",
     "futureFate": "Red Giant -> Planetary Nebula -> Carbon-Oxygen White Dwarf",
     "fusionProcess": "Proton-Proton (p-p) Chain Hydrogen Fusion",
@@ -11431,7 +11431,7 @@
       ],
       "systemOverview": "Our closest exoplanetary neighbor, home to confirmed terrestrial planet Proxima b orbiting within the habitable zone."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Red Dwarf",
     "lifespanEstimate": "~4 Trillion Years",
     "futureFate": "Blue Dwarf -> White Dwarf",
     "fusionProcess": "Convective Proton-Proton Chain Hydrogen Fusion",
@@ -11806,7 +11806,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~10 Billion Years",
     "futureFate": "Red Giant / Planetary Nebula / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -11902,7 +11902,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~15 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -12031,7 +12031,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~9 Billion Years",
     "futureFate": "Red Giant / Planetary Nebula / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -14294,7 +14294,7 @@
       "systemOverview": "Primary orange dwarf in the hierarchical triple system Gliese 667; forms a close 42.15-year orbit with Gliese 667 B.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~30 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -14366,7 +14366,7 @@
       "systemOverview": "Secondary orange dwarf in Gliese 667, orbiting Gliese 667 A at ~12.6 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~35 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -14442,7 +14442,7 @@
       "systemOverview": "Binary orange dwarf pair orbiting with a period of ~659 years at an average distance of ~84 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~30 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -14557,7 +14557,7 @@
       "systemOverview": "Companion K-dwarf to 61 Cygni A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~40 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15134,7 +15134,7 @@
       "systemOverview": "Forms a wide visual solar-twin binary with Zeta-2 Reticuli at a separation of ~9,000 AU (orbital period > 100,000 years).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~11 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15238,7 +15238,7 @@
       "systemOverview": "Remarkable solar twin hosting an expansive outer circumstellar debris ring.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~10 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15411,7 +15411,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~8.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15541,7 +15541,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton & CNO Hydrogen Fusion",
@@ -15624,7 +15624,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~11 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15769,7 +15769,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~9.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton Hydrogen Fusion",
@@ -15844,7 +15844,7 @@
       "systemOverview": "Famous equal-mass visual binary with Gamma Virginis B in an eccentric 168.9-year mutual orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~3 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "CNO Cycle Hydrogen Fusion",
@@ -15853,7 +15853,7 @@
       "Forms a spectacular binary of nearly twin F-type white stars that reached their closest periastron in 2005 (0.3 arcseconds).",
       "One of the most famous test objects for amateur and professional double-star observers."
     ],
-    "description": "A bright F-type white dwarf in Virgo, forming a renowned 169-year orbital binary with Porrima B.",
+    "description": "A bright F-type white main-sequence star in Virgo, forming a renowned 169-year orbital binary with Porrima B.",
     "diameterKm": 2061196,
     "diameterAU": 0.013778244238071231,
     "distanceParsecs": 11.681526631427907,
@@ -15969,7 +15969,7 @@
       "systemOverview": "Equal twin companion to Porrima A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~3 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "CNO Cycle Hydrogen Fusion",
@@ -16167,7 +16167,7 @@
       "systemOverview": "The quintessential prototype of all Algol-type eclipsing binaries. Eclipsed by subgiant Algol B every 2.867 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~400 Million Years",
     "futureFate": "Type Ia or II Supernova / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion (Accreting Mass)",
@@ -17070,7 +17070,7 @@
       "systemOverview": "Spectacular colliding-wind binary in the young Trumpler 14 cluster of the Carina Nebula.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "< 2 Million Years Remaining",
     "futureFate": "Type II Supernova / Black Hole",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -17400,7 +17400,7 @@
       "systemOverview": "Binary star composed of A-type dwarf Alcor A and red dwarf Alcor B, gravitationally bound to the Mizar quadruple system.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -17508,7 +17508,7 @@
       "systemOverview": "A prominent pointer star in the bowl of the Big Dipper surrounded by a dusty debris disk.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -17614,7 +17614,7 @@
       "systemOverview": "Eclipsing/spectroscopic binary paired with a K-type dwarf companion orbiting every 20.5 years.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~600 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -17725,7 +17725,7 @@
       "systemOverview": "The faintest of the seven primary stars of the Big Dipper, connecting the bowl to the handle.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -17940,7 +17940,7 @@
       "systemOverview": "Youthful hot B-type star marking the eastern tip of the Big Dipper handle.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~60 Million Years",
     "futureFate": "Type II Supernova or Massive White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -18807,7 +18807,7 @@
       "systemOverview": "Famous optical double star paired with Alpha-1 CVn (F0V) in Canes Venatici.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~500 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -22404,7 +22404,7 @@
       "systemOverview": "F-type main-sequence star in Cygnus with a wide M-dwarf companion (KIC 8462852 B) at ~880 AU, famous for mysterious, deep transits.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~3.5 Billion Years",
     "futureFate": "Subgiant → Red Giant → Carbon-Oxygen White Dwarf",
     "fusionProcess": "Hydrogen Fusion via CNO Cycle and Proton–Proton Chain in Core",
@@ -23303,7 +23303,7 @@
       "systemOverview": "A spectroscopic binary with an orbital period of 96.7 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~200 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -23811,7 +23811,7 @@
       "systemOverview": "Binary star system with a dim red dwarf companion (Class M0.5V) at 6.6 arcseconds separation.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~3 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (p-p chain and CNO)",
@@ -24376,7 +24376,7 @@
       "systemOverview": "Fast-rotating A-type dwarf with strong magnetic dynamo; no confirmed planets.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -24601,7 +24601,7 @@
       "systemOverview": "Nearby F-type main-sequence star with no confirmed planets.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -24696,7 +24696,7 @@
       "systemOverview": "Orbited by a faint red dwarf companion (Class M5.5V) at 16 arcseconds separation.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -24800,7 +24800,7 @@
       "systemOverview": "Active Be star enveloped by a decretion disk of ionized circumstellar gas.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~140 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -24906,7 +24906,7 @@
       "systemOverview": "Intensively surveyed solar analog; no giant exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~8.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (p-p chain)",
@@ -25031,7 +25031,7 @@
       "systemOverview": "Features an infrared excess indicating a cool circumstellar debris disk.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -25760,7 +25760,7 @@
       "systemOverview": "Binary star with a dim G7V dwarf companion at 4 arcseconds (269-year orbit).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -25893,7 +25893,7 @@
       "systemOverview": "A rapid single rotator with no confirmed exoplanets.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~170 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -26202,7 +26202,7 @@
       "systemOverview": "Closest subgiant to Earth, heavily monitored for asteroseismology and solar evolution comparisons.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~7.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Shell Hydrogen Fusion (Subgiant Phase)",
@@ -26409,7 +26409,7 @@
       "systemOverview": "Single A-type main-sequence star with no detected planets.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~900 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -26722,7 +26722,7 @@
       "systemOverview": "Rapidly rotating single B-type star.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~220 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -27037,7 +27037,7 @@
       "systemOverview": "Has a faint red dwarf companion (M5V) at 3.05 AU projected separation (orbit period ~30 years).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~12 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (p-p chain)",
@@ -27240,7 +27240,7 @@
       "systemOverview": "Magnificent triple Be star system consisting of three bright blue stars (A, B, and C).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~50 Million Years",
     "futureFate": "Supernova or massive White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -27611,7 +27611,7 @@
       "systemOverview": "Spectroscopic binary with a 11.75-day orbital period.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~70 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -28015,7 +28015,7 @@
       "systemOverview": "Rapidly rotating star with an oblateness of ~10% and X-ray emission.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -28023,7 +28023,7 @@
       "The brightest and principal star in Pictor (the Painter’s Easel).",
       "Spins at a blistering 206 km/s, causing noticeable centrifugal flattening at its poles."
     ],
-    "description": "The principal star of Pictor, a rapidly rotating white dwarf star.",
+    "description": "The principal star of Pictor, a rapidly rotating white main-sequence star.",
     "diameterKm": 2228320,
     "diameterAU": 0.014895399176293223,
     "distanceParsecs": 29.740369639068422,
@@ -30223,7 +30223,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -30321,7 +30321,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~7.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -30440,7 +30440,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~35 Million Years",
     "futureFate": "Core-Collapse Supernova (Type II)",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -30641,7 +30641,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.3 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (CNO)",
@@ -30752,7 +30752,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~1.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -30969,7 +30969,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~3.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning",
@@ -31305,7 +31305,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -31529,7 +31529,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~10 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Proton-Proton Hydrogen Fusion",
@@ -31886,7 +31886,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~350 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -32196,7 +32196,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~250 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -32289,7 +32289,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -32486,7 +32486,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~4.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -32606,7 +32606,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.3 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -32715,7 +32715,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~600 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -33251,7 +33251,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~500 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -33361,7 +33361,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~300 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -33568,7 +33568,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -33779,7 +33779,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~450 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion (Subgiant/Giant)",
@@ -33883,7 +33883,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~5.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Proton-Proton Hydrogen Fusion",
@@ -33999,7 +33999,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~900 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -34106,7 +34106,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34295,7 +34295,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~600 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -34407,7 +34407,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34733,7 +34733,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~1.1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34854,7 +34854,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~5.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -35171,7 +35171,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -35571,7 +35571,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -35689,7 +35689,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.1 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -36020,7 +36020,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -36948,7 +36948,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~90 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -37147,7 +37147,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -37244,7 +37244,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~8 Million Years",
     "futureFate": "Type II Supernova / Neutron Star or Black Hole",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -37453,7 +37453,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~11 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Proton-Proton Hydrogen Fusion",
@@ -38030,7 +38030,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -38133,7 +38133,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -38324,7 +38324,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion (Delta Scuti Pulsation)",
@@ -38741,7 +38741,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~45 Million Years",
     "futureFate": "Supernova or Massive White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -39186,7 +39186,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~13 Million Years",
     "futureFate": "Type II Supernova",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -39568,7 +39568,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -39640,7 +39640,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~250 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -40052,7 +40052,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Subgiant",
     "lifespanEstimate": "~2.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -40177,7 +40177,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.3 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion (Subgiant)",
@@ -40285,7 +40285,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.1 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -40511,7 +40511,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -40610,7 +40610,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -40728,7 +40728,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -40946,7 +40946,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~5.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -41075,7 +41075,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -41084,7 +41084,7 @@
       "Sits just half a degree from the celestial equator.",
       "Accompanied by a low-mass red dwarf companion star orbiting with a period of 12.5 years."
     ],
-    "description": "A rapidly spinning white dwarf star marking the waistline of the celestial Virgin.",
+    "description": "A rapidly spinning white main-sequence star marking the waistline of the celestial Virgin.",
     "diameterKm": 2924670,
     "diameterAU": 0.019550211418884855,
     "distanceParsecs": 22.71918959025742,
@@ -41176,7 +41176,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -41674,7 +41674,7 @@
       "systemOverview": "Semidetached eclipsing binary with ongoing mass transfer between the pair.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "35 Million Years",
     "futureFate": "Supernova / Massive White Dwarf depending on envelope transfer",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -41878,7 +41878,7 @@
       "systemOverview": "Fast-rotating A-type main sequence star with circumstellar dust disk signatures.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -43147,7 +43147,7 @@
       "systemOverview": "Algol-type eclipsing binary system with a 759-day orbital period.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "900 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -43255,7 +43255,7 @@
       "systemOverview": "Fast-moving blue-white star in the outer disk.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "80 Million Years",
     "futureFate": "Core Collapse Supernova / Massive ONeMg White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -43362,7 +43362,7 @@
       "systemOverview": "Famous nearby visual binary paired with an orange dwarf companion (K7V) orbiting every 480 years.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "10.5 Billion Years",
     "futureFate": "Red Giant -> White Dwarf",
     "fusionProcess": "Proton-Proton Chain Hydrogen Fusion",
@@ -44607,7 +44607,7 @@
       "systemOverview": "Multiple star system with a spectroscopic binary companion.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "160 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -45167,7 +45167,7 @@
       "systemOverview": "Slowly pulsating B-type (SPB) star.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "350 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -45377,7 +45377,7 @@
       "systemOverview": "Single A-type star with a circumstellar debris ring.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -45908,7 +45908,7 @@
       "systemOverview": "Binary star system with a 21-year orbital period.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "900 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -46109,7 +46109,7 @@
       "systemOverview": "Visual binary star with a 7th-magnitude companion separated by 28 arcseconds.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -46207,7 +46207,7 @@
       "systemOverview": "Vega-like star with a circumstellar dusty debris disk.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "500 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -46727,7 +46727,7 @@
       "systemOverview": "The premier quadruple system in the sky: two separate binary pairs orbiting a common barycenter.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -46736,7 +46736,7 @@
       "Orbits its close companion Epsilon-1 Lyrae B every 1,804 years with a 2.35 arcsecond separation.",
       "Co-orbits with the southern pair (Epsilon-2) around the mutual center of mass every 500,000 years."
     ],
-    "description": "Primary A-type main-sequence dwarf of the northern pair in Lyra's famous Double Double quadruple system.",
+    "description": "Primary A-type white main-sequence star of the northern pair in Lyra's famous Double Double quadruple system.",
     "diameterKm": 2646130,
     "diameterAU": 0.017688286521848205,
     "distanceParsecs": 49.66948331473283,
@@ -46816,7 +46816,7 @@
       "systemOverview": "The premier quadruple system in the sky: two separate binary pairs orbiting a common barycenter.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "2.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO / Proton-Proton Hydrogen Fusion",
@@ -47614,7 +47614,7 @@
       "systemOverview": "A visually striking binary star system with a yellow-white companion.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -48020,7 +48020,7 @@
       "systemOverview": "A charming close visual binary system of two white dwarf stars.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -48220,7 +48220,7 @@
       "systemOverview": "Nearby yellow-white dwarf star in the shield of Orion.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "5.0 Billion Years",
     "futureFate": "Red Giant -> White Dwarf",
     "fusionProcess": "Proton-Proton & CNO Fusion",
@@ -48597,7 +48597,7 @@
       "systemOverview": "Spectroscopic eclipsing binary with a 1.57-day orbital period.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "22 Million Years",
     "futureFate": "Core Collapse Supernova -> Neutron Star",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -48714,7 +48714,7 @@
       "systemOverview": "Spectroscopic binary with an unseen companion orbiting every 675 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "45 Million Years",
     "futureFate": "Massive White Dwarf / Supernova",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -49573,7 +49573,7 @@
       "systemOverview": "Fast-spinning Be star enveloped in an outflowing decretion disc.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "32 Million Years",
     "futureFate": "Massive White Dwarf or Electron-Capture Supernova",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -49874,7 +49874,7 @@
       "systemOverview": "Binary system with a chemically peculiar primary star and a faint M-dwarf companion.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "450 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -50476,7 +50476,7 @@
       "systemOverview": "Central brightest star of the young open cluster IC 2602 (the Southern Pleiades).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "18 Million Years",
     "futureFate": "Core-Collapse Supernova / Neutron Star",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -50581,7 +50581,7 @@
       "systemOverview": "White main-sequence star with an active planetesimal debris disc analogous to the Kuiper Belt.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -50785,7 +50785,7 @@
       "systemOverview": "Magnetic hot star with a complex multipolar field trapping stellar wind plasma.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "12 Million Years",
     "futureFate": "Type II Supernova leaving a Neutron Star",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -50995,7 +50995,7 @@
       "systemOverview": "Multiple star system featuring a pulsating B-type primary with a companion in a 14-day orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "14 Million Years",
     "futureFate": "Core-Collapse Supernova leaving a Neutron Star",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -51617,7 +51617,7 @@
       "systemOverview": "Fast-spinning white dwarf with an oblate shape and circumstellar dust.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -51626,7 +51626,7 @@
       "The extreme rotation broadens its spectral absorption lines, reflected in its spectral designation \"n\" (nebulous).",
       "Traditional Arabic name Okab simply translates to \"the Eagle\"."
     ],
-    "description": "Okab is a rapidly whirling white dwarf star in Aquila spinning at 317 km/s, flattened by centrifugal force into an oblate egg shape.",
+    "description": "Okab is a rapidly whirling white main-sequence star in Aquila spinning at 317 km/s, flattened by centrifugal force into an oblate egg shape.",
     "diameterKm": 3063940,
     "diameterAU": 0.020481173867403182,
     "distanceParsecs": 25.447945155079164,
@@ -52130,7 +52130,7 @@
       "systemOverview": "Visual binary star consisting of two hot blue-white main-sequence stars revolving every 383 years.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "40 Million Years",
     "futureFate": "Massive White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -53402,7 +53402,7 @@
       "systemOverview": "Intense chemical stratification and magnetic levitation of rare elements in the upper atmosphere.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant -> White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (Proton-Proton & CNO)",
@@ -54133,7 +54133,7 @@
       "systemOverview": "Surrounded by a dense circumstellar accretion disk fed by mass transfer from hypergiant VV Cephei A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~12 Million Years",
     "futureFate": "Type II Supernova -> Neutron Star",
     "fusionProcess": "Core Hydrogen Fusion (CNO cycle)",
@@ -54717,7 +54717,7 @@
       "planets": [],
       "systemOverview": "Surrounded by the iconic Hind’s Variable Nebula (NGC 1555), lit by reflective outflows."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "~1.8 Billion Years",
     "futureFate": "Will contract onto the Zero-Age Main Sequence as a stable early-type F or G dwarf.",
     "fusionProcess": "Gravitational Kelvin-Helmholtz contraction beginning core Deuterium and Hydrogen fusion.",
@@ -55535,7 +55535,7 @@
       "planets": [],
       "systemOverview": "Old galactic halo blue straggler formed by ancient stellar merger."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~12 Billion Years",
     "futureFate": "Ascension to red giant branch, then cooling white dwarf.",
     "fusionProcess": "Core Hydrogen fusion with low metal opacity and multiple non-radial pulsation modes.",
@@ -55628,7 +55628,7 @@
       "planets": [],
       "systemOverview": "Orbits the supergiant Polaris A at an enormous separation of ~2,400 AU (period ~42,000 years)."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Will evolve into a red giant and white dwarf long after Polaris A has died.",
     "fusionProcess": "Core Hydrogen fusion via the CNO cycle and p-p chain.",
@@ -55713,7 +55713,7 @@
       "planets": [],
       "systemOverview": "Orbits the inner Algol AB close binary pair at a distance of 2.69 AU every 680 days."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "~2 Billion Years",
     "futureFate": "Will expand into a red giant after the inner Algol binary undergoes common envelope evolution.",
     "fusionProcess": "Core Hydrogen fusion with radiative diffusion producing strong metallic absorption lines.",
@@ -55849,7 +55849,7 @@
       "planets": [],
       "systemOverview": "Only 0.12 AU (18 million km) away from primary Spica A, completing an orbit every 4.01 days."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~30 Million Years",
     "futureFate": "Will undergo mass transfer as Spica A expands, likely merging or triggering a supernova.",
     "fusionProcess": "Core Hydrogen burning via intense CNO cycle.",
@@ -55964,7 +55964,7 @@
       "planets": [],
       "systemOverview": "Orbits red supergiant Antares A at ~224 AU separation with an estimated period of 1,200 years."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~35 Million Years",
     "futureFate": "Will absorb gas from Antares A’s upcoming supernova blast wave before evolving into a white dwarf.",
     "fusionProcess": "Core Hydrogen burning with radiative envelope ionising surrounding stellar wind.",
@@ -56175,7 +56175,7 @@
       "planets": [],
       "systemOverview": "Forms the night sky’s most celebrated contrasting binary spectacle with the golden bright giant Albireo A."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "~350 Million Years",
     "futureFate": "Asymptotic Giant Branch evolution into a Carbon-Oxygen white dwarf.",
     "fusionProcess": "Core CNO hydrogen fusion with rapid equatorial rotation driving an ionized decretion disk.",
@@ -56474,7 +56474,7 @@
       "planets": [],
       "systemOverview": "Powerful stellar flares and immense starspots subject any close planets to severe magnetic activity."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "~30 Billion Years",
     "futureFate": "Extremely long-lived Main Sequence evolution into a helium white dwarf.",
     "fusionProcess": "Slow core proton-proton chain fusion surrounded by strong magnetic dynamo activity.",
@@ -60286,7 +60286,7 @@
       "systemOverview": "Embedded within a colossal, opaque edge-on circumstellar disk of gas and dust that eclipses the primary supergiant.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "75 Million Years",
     "futureFate": "Carbon-Oxygen White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -60843,7 +60843,7 @@
       "systemOverview": "Single orange dwarf flare star with a high proper motion.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "40 Billion Years",
     "futureFate": "Helium White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -60980,7 +60980,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -61840,7 +61840,7 @@
       "systemOverview": "Stable solitary orange dwarf showing minimal magnetic variability.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "22 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -62071,7 +62071,7 @@
       "systemOverview": "Hierarchical quadruple system with two red dwarfs and a distant T7.5 brown dwarf.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "30 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -62632,7 +62632,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "18 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -62973,7 +62973,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -63089,7 +63089,7 @@
       "systemOverview": "Classic visual binary star orbited by orange dwarf Xi Boötis B.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "15 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -63169,7 +63169,7 @@
       "systemOverview": "Companion in an eccentric 151.6-year orbit around Xi Boötis A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "35 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -63486,7 +63486,7 @@
       "systemOverview": "Hierarchical triple system with two distant red dwarf companions.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -63832,7 +63832,7 @@
       "systemOverview": "Single stable late orange dwarf in Ophiuchus.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "38 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -64048,7 +64048,7 @@
       "systemOverview": "Young solar twin orbited by a low-mass red dwarf companion at 6.1 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "10 Billion Years",
     "futureFate": "Red Giant shedding into a Carbon-Oxygen White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -64164,7 +64164,7 @@
       "systemOverview": "Wide visual binary star orbited by orange dwarf companion Gamma Leporis B.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "5 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Fusion",
@@ -64273,7 +64273,7 @@
       "systemOverview": "Companion orange dwarf exhibiting BY Draconis starspot variability.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -64889,7 +64889,7 @@
       "systemOverview": "Prime astrobiological search target displaying near-identical solar magnetic cycles and chromospheric activity.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "10 Billion Years",
     "futureFate": "Red Giant shedding into a Carbon-Oxygen White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion via Proton-Proton Chain",
@@ -65042,7 +65042,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "11 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65157,7 +65157,7 @@
       "systemOverview": "Famous 88-year period binary system studied by William Herschel in 1804 to prove universal gravitation beyond the solar system.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "15 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65248,7 +65248,7 @@
       "systemOverview": "Companion star in the historic 70 Ophiuchi binary orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "30 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65403,7 +65403,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "14 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65555,7 +65555,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65655,7 +65655,7 @@
       "systemOverview": "Primary solar twin in the celebrated 16 Cygni hierarchical triple system, benchmark for asteroseismology by NASA’s Kepler mission.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65773,7 +65773,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65968,7 +65968,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "18 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66080,7 +66080,7 @@
       "systemOverview": "Triple orange dwarf star system only 19.5 light-years from Earth.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66180,7 +66180,7 @@
       "systemOverview": "Single orange dwarf with very low magnetic activity, prime astrobiology candidate.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "22 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66295,7 +66295,7 @@
       "systemOverview": "Slightly metal-poor thick-disk solar analog traveling on an inclined galactic orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "11 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66428,7 +66428,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66525,7 +66525,7 @@
       "systemOverview": "Hierarchical quadruple young star system in the TW Hydrae Association with a perpendicular polar protoplanetary disk discovered by ALMA.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66631,7 +66631,7 @@
       "systemOverview": "A stable solar-type benchmark star in Carina cataloged in the southern Uranometria Argentina.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9.8 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66753,7 +66753,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "7.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66941,7 +66941,7 @@
       "systemOverview": "A bright naked-eye southern yellow-white dwarf in Volans.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "9 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -67060,7 +67060,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -67137,7 +67137,7 @@
       "systemOverview": "Close spectroscopic binary with a 280-day orbit, located just 26.3 light-years from Earth.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "7.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -67269,7 +67269,7 @@
       "systemOverview": "Young F-type dwarf surrounded by warm circumstellar dust pointing to active planetesimal collisions.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion via CNO Cycle",
@@ -68146,7 +68146,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "6 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Fusion",
@@ -68347,7 +68347,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "4.5 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Fusion",
@@ -68558,7 +68558,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "7 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -68751,7 +68751,7 @@
       "systemOverview": "Close binary component in a 45.15-day mutual orbit with Delta Velorum A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -68825,7 +68825,7 @@
       "systemOverview": "Companion yellow dwarf in an eccentric 269-year mutual orbit around Alpha Fornacis A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "18 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -68904,7 +68904,7 @@
       "systemOverview": "Spectroscopic binary with an unseen companion in a 158-day orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "4 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -69010,7 +69010,7 @@
       "systemOverview": "Celebrated system exhibiting real-time evidence of a violent Late Heavy Bombardment analogue.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -69114,7 +69114,7 @@
       "systemOverview": "Companion in a wide visual binary with the chemically peculiar variable star Cor Caroli (α² CVn).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -69215,7 +69215,7 @@
       "systemOverview": "Tight spectroscopic binary pair (Rigel Ba and Bb) orbiting primary supergiant Rigel A at 2,200 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "150 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -69332,7 +69332,7 @@
       "systemOverview": "Tight spectroscopic binary pair (Rigel Ba and Bb) orbiting primary supergiant Rigel A at 2,200 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "150 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -69449,7 +69449,7 @@
       "systemOverview": "Tight spectroscopic binary pair (Rigel Ba and Bb) orbiting primary supergiant Rigel A at 2,200 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "150 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -69512,7 +69512,7 @@
       "systemOverview": "In a 2,000-year mutual binary orbit with red dwarf companion Regulus C.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -69800,7 +69800,7 @@
       "systemOverview": "Close binary companion orbiting the classical Cepheid supergiant Polaris Aa in a 29.6-year orbit.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "4 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -69907,7 +69907,7 @@
       "systemOverview": "Wide companion star in the Fomalhaut triple system, separated by 57,000 AU (0.91 light-years).",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -70200,7 +70200,7 @@
       "systemOverview": "In a 17.36-day mutual eccentric orbit with white primary star Alphecca A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "15 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -70316,7 +70316,7 @@
       "systemOverview": "Dominant ionizing source of the Trapezium cluster, vaporizing protoplanetary disks around sibling protostars.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "5 Million Years",
     "futureFate": "Type II Supernova leaving a Black Hole",
     "fusionProcess": "Core CNO Cycle Hydrogen Fusion",
@@ -70460,7 +70460,7 @@
       "systemOverview": "Dominant ionizing source of the Trapezium cluster, vaporizing protoplanetary disks around sibling protostars.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "18 Million Years",
     "futureFate": "Core-Collapse Supernova leaving a Neutron Star",
     "fusionProcess": "Core CNO Cycle Hydrogen Fusion",
@@ -70602,7 +70602,7 @@
       "systemOverview": "Algol-type eclipsing binary in the central Trapezium asterism.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "12 Million Years",
     "futureFate": "Core-Collapse Supernova leaving a Neutron Star",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -71144,7 +71144,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "6 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -71239,7 +71239,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -71413,7 +71413,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -71496,7 +71496,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO & Proton-Proton Chain",
@@ -71582,7 +71582,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "15 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -71668,7 +71668,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -71764,7 +71764,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "30 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -71918,7 +71918,7 @@
         }
       ]
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "22 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -72093,7 +72093,7 @@
       "systemOverview": "Primary star of the Castor sextuple system, co-orbiting with red dwarf companion Castor Ab every 9.2 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -72284,7 +72284,7 @@
       "systemOverview": "Primary of the Castor B pair, co-orbiting with Castor Bb every 2.9 days and Castor A every 460 years.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -72650,7 +72650,7 @@
       "systemOverview": "Primary star of the Mizar spectroscopic binary, co-orbiting with twin Mizar Ab every 20.5 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -72765,7 +72765,7 @@
       "systemOverview": "Twin A-type companion star orbiting Mizar Aa every 20.5 days.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -72880,7 +72880,7 @@
       "systemOverview": "Primary star of the visual secondary pair Mizar B at 382 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -72980,7 +72980,7 @@
       "systemOverview": "K-type companion orbiting Mizar Ba in ~175 days at 0.92 AU.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain",
@@ -73077,7 +73077,7 @@
       "systemOverview": "Intense circumstellar accretion disk fed by the Roche-lobe-overflowing donor Sheliak A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "35 Million Years",
     "futureFate": "Type II Core-Collapse Supernova creating a Neutron Star",
     "fusionProcess": "CNO Cycle Core Hydrogen Fusion",
@@ -73172,7 +73172,7 @@
       "systemOverview": "Wide binary companion at 71 AU from the primary solar analog Achird A.",
       "planets": []
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "50 Billion Years",
     "futureFate": "Helium White Dwarf",
     "fusionProcess": "Core Proton-Proton Chain Hydrogen Fusion",
@@ -73364,7 +73364,7 @@
       "systemOverview": "Binary star pair C & D orbiting Epsilon-1 Lyrae in a grand 500,000-year sextuple/quadruple dance.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -73459,7 +73459,7 @@
       "systemOverview": "Binary star pair C & D orbiting Epsilon-1 Lyrae in a grand 500,000-year sextuple/quadruple dance.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.8 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -73542,7 +73542,7 @@
       "systemOverview": "Tertiary companion orbiting the brilliant spectroscopic binary Hadar Aa+Ab.",
       "planets": []
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "80 Million Years",
     "futureFate": "Massive Oxygen-Neon White Dwarf or Electron-Capture Supernova",
     "fusionProcess": "CNO Cycle Core Hydrogen Fusion",
@@ -73681,7 +73681,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Red Dwarf",
     "lifespanEstimate": "Trillions of Years",
     "futureFate": "Blue Dwarf then Degenerate Helium White Dwarf",
     "fusionProcess": "Minimal Proton-Proton Chain Fusion",
@@ -76292,7 +76292,7 @@
       ],
       "systemOverview": "Hosts HD 85512 b, an early candidate habitable-zone super-Earth."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "30 Billion Years",
     "futureFate": "Carbon-Oxygen White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76394,7 +76394,7 @@
       ],
       "systemOverview": "Hosts a Neptune-mass planet in an eccentric 122-day orbit."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "12 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76509,7 +76509,7 @@
       ],
       "systemOverview": "Two Neptune-mass planets discovered by HARPS, one near the habitable zone."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76609,7 +76609,7 @@
       "planets": [],
       "systemOverview": "Component of the 36 Ophiuchi triple star system."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Orange Dwarf",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76698,7 +76698,7 @@
       "planets": [],
       "systemOverview": "Hosts a prominent circumstellar debris disk."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "10 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76800,7 +76800,7 @@
       "planets": [],
       "systemOverview": "High proper motion solar analog."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "9.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain",
@@ -76916,7 +76916,7 @@
       "planets": [],
       "systemOverview": "No confirmed exoplanets."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "8.0 Billion Years",
     "futureFate": "Subgiant then Red Giant",
     "fusionProcess": "Proton-Proton Chain",
@@ -78250,7 +78250,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Blue Giant",
     "lifespanEstimate": "90 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -78355,7 +78355,7 @@
       "planets": [],
       "systemOverview": "Member of the Orion OB1c association."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "15 Million Years",
     "futureFate": "Type II Supernova / Neutron Star",
     "fusionProcess": "CNO Cycle",
@@ -78452,7 +78452,7 @@
       "planets": [],
       "systemOverview": "Central star of the young 25 Orionis stellar cluster."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "35 Million Years",
     "futureFate": "Supernova / Remnant",
     "fusionProcess": "CNO Cycle",
@@ -78560,7 +78560,7 @@
       "planets": [],
       "systemOverview": "Surrounded by a circumstellar decretion gas disk."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "45 Million Years",
     "futureFate": "White Dwarf / Supernova",
     "fusionProcess": "CNO Cycle",
@@ -78622,7 +78622,7 @@
       "planets": [],
       "systemOverview": "Hierarchical quadruple star system."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "400 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -78730,7 +78730,7 @@
       "planets": [],
       "systemOverview": "Spectroscopic binary system."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Red Giant",
     "lifespanEstimate": "700 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Helium Fusion (Red Clump)",
@@ -78830,7 +78830,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Red Giant",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Helium Core Burning",
@@ -78923,7 +78923,7 @@
       "planets": [],
       "systemOverview": "Confirmed member of the Hyades open cluster."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79027,7 +79027,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79118,7 +79118,7 @@
       "planets": [],
       "systemOverview": "Am metallic-line star."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "900 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79282,7 +79282,7 @@
       "planets": [],
       "systemOverview": "Illuminates the Running Chicken Nebula (IC 2944)."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Blue Giant",
     "lifespanEstimate": "130 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79383,7 +79383,7 @@
       "planets": [],
       "systemOverview": "Classical Be star with circumstellar ring."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "45 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79585,7 +79585,7 @@
       "planets": [],
       "systemOverview": "Spectroscopic binary star system."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "200 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79681,7 +79681,7 @@
       "planets": [],
       "systemOverview": "Single B-type dwarf."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "180 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79770,7 +79770,7 @@
       "planets": [],
       "systemOverview": "Member of Lower Centaurus-Crux."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "70 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -79868,7 +79868,7 @@
       "planets": [],
       "systemOverview": "Spectroscopic binary system."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80052,7 +80052,7 @@
       "planets": [],
       "systemOverview": "Beta Cephei pulsating star."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "55 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80249,7 +80249,7 @@
       "planets": [],
       "systemOverview": "Close spectroscopic binary."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "50 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80536,7 +80536,7 @@
       "planets": [],
       "systemOverview": "Beta Cephei pulsating star."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "32 Million Years",
     "futureFate": "Supernova / Remnant",
     "fusionProcess": "CNO Cycle",
@@ -80697,7 +80697,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Red Giant",
     "lifespanEstimate": "650 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Helium Fusion",
@@ -80789,7 +80789,7 @@
       "planets": [],
       "systemOverview": "Double star system with an optical companion."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Red Giant",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Helium Fusion",
@@ -81073,7 +81073,7 @@
       "planets": [],
       "systemOverview": "Key star in the Teapot asterism."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Blue Giant",
     "lifespanEstimate": "180 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -81377,7 +81377,7 @@
       "planets": [],
       "systemOverview": "Gamma Cassiopeiae-type variable star."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "25 Million Years",
     "futureFate": "Supernova / Neutron Star",
     "fusionProcess": "CNO Cycle",
@@ -81474,7 +81474,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "250 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -81567,7 +81567,7 @@
       "planets": [],
       "systemOverview": "Visual binary star with a blue-white companion."
     },
-    "stellarStage": "Supergiant",
+    "stellarStage": "Yellow Supergiant",
     "lifespanEstimate": "40 Million Years",
     "futureFate": "Core-Collapse Supernova / Neutron Star",
     "fusionProcess": "Helium Core Fusion",
@@ -81662,7 +81662,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "2.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Proton-Proton Chain / CNO Cycle",
@@ -81873,7 +81873,7 @@
       "planets": [],
       "systemOverview": "Multiple O-type system and primary of NGC 2362."
     },
-    "stellarStage": "Supergiant",
+    "stellarStage": "Blue Supergiant",
     "lifespanEstimate": "5.0 Million Years",
     "futureFate": "Type II/Ib Supernova / Black Hole",
     "fusionProcess": "CNO Cycle Core Burning",
@@ -82050,7 +82050,7 @@
       "planets": [],
       "systemOverview": "Spectroscopic binary."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -82151,7 +82151,7 @@
       "planets": [],
       "systemOverview": "Fascinating triple star system for backyard telescopes."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "1.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -82248,7 +82248,7 @@
       "planets": [],
       "systemOverview": "Runaway supergiant plowing through the interstellar medium."
     },
-    "stellarStage": "Supergiant",
+    "stellarStage": "Blue Supergiant",
     "lifespanEstimate": "8.0 Million Years",
     "futureFate": "Type II Supernova / Black Hole",
     "fusionProcess": "CNO Cycle Core Burning",
@@ -82350,7 +82350,7 @@
       "planets": [],
       "systemOverview": "Rapidly rotating single B-star."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "180 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -82541,7 +82541,7 @@
       "planets": [],
       "systemOverview": "Classical Be emission-line star."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Blue Giant",
     "lifespanEstimate": "110 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -82644,7 +82644,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Red Giant",
     "lifespanEstimate": "1.0 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Helium Fusion",
@@ -82835,7 +82835,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Giant",
+    "stellarStage": "Blue Giant",
     "lifespanEstimate": "350 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -82896,7 +82896,7 @@
       "planets": [],
       "systemOverview": "Spectroscopic binary."
     },
-    "stellarStage": "Main Sequence Dwarf",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "900 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -83754,7 +83754,7 @@
       "planets": [],
       "systemOverview": "A nearby solar-analogue main sequence star; excess infrared emission suggests a circumstellar debris disk."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "5 Billion Years",
     "futureFate": "Main sequence core hydrogen exhaustion followed by subgiant transition.",
     "fusionProcess": "Proton-Proton chain and CNO cycle core hydrogen fusion.",
@@ -84230,7 +84230,7 @@
       "planets": [],
       "systemOverview": "A binary system consisting of two A-type main-sequence stars."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "900 Million Years",
     "futureFate": "Main-sequence turnoff into a subgiant and red giant.",
     "fusionProcess": "CNO cycle core hydrogen fusion.",
@@ -85792,7 +85792,7 @@
       "planets": [],
       "systemOverview": "A rapidly rotating blue dwarf star; no planets detected."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "85 Million Years",
     "futureFate": "Main-sequence turnoff into a blue giant and white dwarf.",
     "fusionProcess": "CNO cycle core hydrogen fusion.",
@@ -85901,7 +85901,7 @@
       "planets": [],
       "systemOverview": "Primary component of the Lambda Tauri eclipsing binary system."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "60 Million Years",
     "futureFate": "Supernova or massive white dwarf formation.",
     "fusionProcess": "CNO cycle core hydrogen fusion.",
@@ -86096,7 +86096,7 @@
       "planets": [],
       "systemOverview": "Secondary yellowish-white dwarf companion in the Gamma Delphini system."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "Evolution into a subgiant star.",
     "fusionProcess": "Proton-Proton chain core hydrogen fusion.",
@@ -86104,7 +86104,7 @@
       "Separated by 9.6 arcseconds (~300 AU) from Gamma Delphini A, easily resolved in small telescopes.",
       "Mutual orbital period estimated at 3,249 years."
     ],
-    "description": "Gamma Delphini B is a yellowish-white F7V main-sequence dwarf star orbiting Gamma Delphini A in a 3,249-year mutual orbit.",
+    "description": "Gamma Delphini B is a yellowish-white F7V main-sequence star orbiting Gamma Delphini A in a 3,249-year mutual orbit.",
     "alternateNames": [
       "Gamma-1 Delphini",
       "Gamma Delphini B",
@@ -86291,7 +86291,7 @@
       "planets": [],
       "systemOverview": "Primary magnetic Ap silicon star of the historic Mesarthim binary."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "White Main Sequence",
     "lifespanEstimate": "600 Million Years",
     "futureFate": "Subgiant turnoff and red giant expansion.",
     "fusionProcess": "CNO cycle core hydrogen fusion.",
@@ -86359,7 +86359,7 @@
       "planets": [],
       "systemOverview": "Secondary B9V companion in the Gamma Arietis system."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "Main-sequence evolution into a subgiant.",
     "fusionProcess": "CNO cycle core hydrogen fusion.",
@@ -86427,7 +86427,7 @@
       "planets": [],
       "systemOverview": "Primary solar twin in the historic binary Xi Ursae Majoris."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "10 Billion Years",
     "futureFate": "Gradual warming into a subgiant and red giant.",
     "fusionProcess": "Proton-Proton chain core hydrogen fusion.",
@@ -86495,7 +86495,7 @@
       "planets": [],
       "systemOverview": "Secondary solar-analogue dwarf in the Xi Ursae Majoris system."
     },
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Yellow Main Sequence",
     "lifespanEstimate": "11 Billion Years",
     "futureFate": "Evolution into a subgiant star.",
     "fusionProcess": "Proton-Proton chain core hydrogen fusion.",
@@ -86599,7 +86599,7 @@
     "temperature": 24000,
     "spectralType": "B0.5V",
     "spectralClass": "B",
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "massSolar": 5.5,
     "luminositySolar": 2000,
     "apparentMagnitude": 4,
@@ -86632,7 +86632,7 @@
       "Close spectroscopic companion to Acrux Aa discovered via precision radial velocity variations.",
       "Orbits at an average separation of 1.0 AU with an orbital eccentricity of 0.46."
     ],
-    "description": "Acrux Ab is the B-type main-sequence dwarf companion orbiting Acrux Aa in an eccentric 75.77-day spectroscopic orbit.",
+    "description": "Acrux Ab is the B-type blue main-sequence companion orbiting Acrux Aa in an eccentric 75.77-day spectroscopic orbit.",
     "alternateNames": [
       "Alpha-1 Crucis Ab",
       "HD 108248 B",
@@ -86658,7 +86658,7 @@
     "temperature": 26000,
     "spectralType": "B1V",
     "spectralClass": "B",
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "massSolar": 15.5,
     "luminositySolar": 16000,
     "apparentMagnitude": 1.73,
@@ -86721,7 +86721,7 @@
     "temperature": 15000,
     "spectralType": "B3V",
     "spectralClass": "B",
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "massSolar": 3,
     "luminositySolar": 150,
     "apparentMagnitude": 6.5,
@@ -86778,7 +86778,7 @@
     "temperature": 17000,
     "spectralType": "B4V",
     "spectralClass": "B",
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "massSolar": 6,
     "luminositySolar": 1000,
     "apparentMagnitude": 5.2,
@@ -86840,7 +86840,7 @@
     "temperature": 14000,
     "spectralType": "B6V",
     "spectralClass": "B",
-    "stellarStage": "Main Sequence",
+    "stellarStage": "Blue Main Sequence",
     "massSolar": 4,
     "luminositySolar": 350,
     "apparentMagnitude": 6.8,

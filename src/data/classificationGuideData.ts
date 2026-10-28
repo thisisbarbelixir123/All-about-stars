@@ -618,11 +618,11 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
     category: 'main-sequence',
     colorHex: '#4ade80',
     plainEnglishExplanation:
-      'Where 90% of all stars in the universe spend 90% of their active lifetimes! Here, gravity pulling inward is in exact hydrostatic equilibrium with nuclear fusion pushing outward.',
+      'Where 90% of all stars in the universe spend 90% of their active lifetimes! In Yerkes Class V, hydrostatic equilibrium balances core nuclear fusion with gravity. Spans five distinct spectral stages: Red Dwarfs (M0V–M7V, plus ultracool M8–L2.5 dwarfs), Orange Dwarfs (KxV), Yellow Main Sequence (GxV, like our Sun), White Main Sequence (FxV & AxV, like Sirius A and Vega), and searing Blue Main Sequence (BxV & OxV, like Regulus and Achernar).',
     howItWorks:
       'In the core, immense temperature and pressure fuse Hydrogen nuclei into Helium, providing the outward thermal and radiation pressure that stably balances inward gravitational pull.',
-    typicalSizeComparison: '0.1 to 10 times the diameter of the Sun (depending on spectral class O to M).',
-    exampleStarIds: ['sun', 'alpha-centauri-a', 'sirius-a', 'vega', 'proxima-centauri', 'trappist-1'],
+    typicalSizeComparison: '0.08 to 15 times the diameter of the Sun across spectral classes M through O.',
+    exampleStarIds: ['sun', 'alpha-centauri-a', 'sirius-a', 'vega', 'proxima-centauri', 'trappist-1', 'regulus', '61-cygni-a'],
     coreEnergySource: 'Core Hydrogen fusion (Proton-Proton chain in low-mass stars, CNO cycle in massive stars)',
     fate: 'Eventually exhausts core hydrogen and evolves into a Subgiant / Giant or Supergiant.',
   },

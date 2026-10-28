@@ -164,9 +164,13 @@ const dynamicSmallestMainSequenceIds = [
   ...STARS_CATALOG.filter((s) => {
     if (s.id === 'sun') return false;
     const isMainSequence =
+      s.stellarStage === 'Red Dwarf' ||
+      s.stellarStage === 'Orange Dwarf' ||
+      s.stellarStage === 'Yellow Main Sequence' ||
+      s.stellarStage === 'White Main Sequence' ||
+      s.stellarStage === 'Blue Main Sequence' ||
       s.stellarStage === 'Main Sequence' ||
-      s.stellarStage === 'Main Sequence Dwarf' ||
-      s.stellarStage === 'Red Dwarf';
+      s.stellarStage === 'Main Sequence Dwarf';
     return isMainSequence && s.diameterSolar <= 0.5;
   })
     .sort((a, b) => a.diameterSolar - b.diameterSolar)
