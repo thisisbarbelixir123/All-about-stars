@@ -6564,7 +6564,7 @@
       "systemOverview": "Quadruple star system: Regulus A is accompanied by a close white dwarf companion and a binary pair of orange/red dwarfs (Regulus B & C).",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf Remnant",
     "fusionProcess": "CNO Hydrogen Core Fusion",
@@ -10429,7 +10429,7 @@
       "systemOverview": "Orbited by the faint white dwarf companion Procyon B in a 40.8-year orbit.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / Planetary Nebula / White Dwarf",
     "fusionProcess": "Exhausting Core Hydrogen (Subgiant Transition)",
@@ -15541,7 +15541,7 @@
         }
       ]
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~8 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Proton-Proton & CNO Hydrogen Fusion",
@@ -16061,7 +16061,7 @@
       "systemOverview": "Multiple star system with two faint optical companions.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Exhausting Core Hydrogen (Radial Pulsations)",
@@ -16306,7 +16306,7 @@
       "systemOverview": "Eclipsing subgiant companion in Roche-lobe overflow mass transfer onto Algol A.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "~400 Million Years",
     "futureFate": "Helium White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning around Helium Core (Roche-Lobe Overflow)",
@@ -18364,7 +18364,7 @@
       "systemOverview": "Binary system with an orange dwarf companion orbiting every 8.6 years.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion (Oblate Rotation)",
@@ -23113,7 +23113,7 @@
       "systemOverview": "Ancient Population II halo subgiant star traveling on an eccentric retrograde orbit around the Milky Way.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~14.5 Billion Years",
     "futureFate": "Carbon-Oxygen White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant Phase)",
@@ -23303,7 +23303,7 @@
       "systemOverview": "A spectroscopic binary with an orbital period of 96.7 days.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "~200 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -24150,7 +24150,7 @@
       "systemOverview": "An Algol-type eclipsing binary with an orbital period of 1.022768 days.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -25333,7 +25333,7 @@
       "systemOverview": "A close spectroscopic binary with an orbital period of 26.7 years.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~2.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Shell Hydrogen Fusion",
@@ -26202,7 +26202,7 @@
       "systemOverview": "Closest subgiant to Earth, heavily monitored for asteroseismology and solar evolution comparisons.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~7.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Shell Hydrogen Fusion (Subgiant Phase)",
@@ -27521,7 +27521,7 @@
       "systemOverview": "Delta Scuti pulsating variable with a period of 2.33 hours.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen / Shell Fusion",
@@ -30321,7 +30321,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~7.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -30752,7 +30752,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -30969,7 +30969,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~3.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning",
@@ -33251,7 +33251,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "~500 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -33361,7 +33361,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "~300 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34295,7 +34295,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~600 Million Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core CNO Hydrogen Fusion",
@@ -34407,7 +34407,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~2.5 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34733,7 +34733,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.1 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -34854,7 +34854,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~5.0 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -36020,7 +36020,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~1.2 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -37453,7 +37453,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "~11 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Core Proton-Proton Hydrogen Fusion",
@@ -40052,7 +40052,7 @@
       "systemOverview": "No confirmed exoplanets detected.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~2.2 Billion Years",
     "futureFate": "Red Giant / White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning (Subgiant)",
@@ -43031,7 +43031,7 @@
       "systemOverview": "Delta Scuti pulsating giant star.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Depletion / Shell Fusion",
@@ -43587,7 +43587,7 @@
       "systemOverview": "Spectroscopic binary subgiant with a 400-day period.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "800 Million Years",
     "futureFate": "Red Giant -> White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion",
@@ -43686,7 +43686,7 @@
       "systemOverview": "Quadruple star system consisting of two spectroscopic binary pairs.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.4 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -44480,7 +44480,7 @@
       "systemOverview": "Fast-spinning Be subgiant lighting up the iconic Tempel's Nebula.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "140 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -46303,7 +46303,7 @@
       "systemOverview": "Single subgiant anchoring the Terebellum quadrangle.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "Red Giant -> White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion",
@@ -47091,7 +47091,7 @@
       "systemOverview": "Primary anchor and luminous focal star of the IC 2391 open cluster.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "80 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -49021,7 +49021,7 @@
       "systemOverview": "Close binary system of two nearly identical white subgiant stars.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "400 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Exhaustion",
@@ -49672,7 +49672,7 @@
       "systemOverview": "Single-lined spectroscopic binary system with an 8.02-day orbital period.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "45 Million Years",
     "futureFate": "Massive White Dwarf",
     "fusionProcess": "Hydrogen Shell and Core Fusion",
@@ -49768,7 +49768,7 @@
       "systemOverview": "Fast-rotating Be shell star surrounded by an equatorial plasma ring.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "30 Million Years",
     "futureFate": "Massive White Dwarf or Electron-Capture Supernova",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -50160,7 +50160,7 @@
       "systemOverview": "Single blue-white subgiant star.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "22 Million Years",
     "futureFate": "Type II Supernova / Neutron Star",
     "fusionProcess": "Hydrogen Shell and Core Fusion",
@@ -50681,7 +50681,7 @@
       "systemOverview": "Spectroscopic binary composed of two hot B-type stars orbiting in 2.81 days, plus an outer companion.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "26 Million Years",
     "futureFate": "Massive White Dwarf or Electron-Capture Supernova",
     "fusionProcess": "CNO Hydrogen Fusion",
@@ -54616,7 +54616,7 @@
       "planets": [],
       "systemOverview": "Ancient Population II star undergoing helium flash aftermath; planets would be thoroughly sterilized."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~10.5 Billion Years",
     "futureFate": "Asymptotic giant branch ascent followed by white dwarf cooling.",
     "fusionProcess": "Core Helium burning via the triple-alpha process and shell Hydrogen fusion.",
@@ -55225,7 +55225,7 @@
       "planets": [],
       "systemOverview": "Powerful stellar wind and intense ultraviolet radiation prevent planetary survival."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "~15 Million Years",
     "futureFate": "Type II core-collapse supernova leaving a neutron star.",
     "fusionProcess": "Core Hydrogen exhaustion and rapid shell burning driven by iron-opacity pulsations (kappa mechanism).",
@@ -55432,7 +55432,7 @@
       "planets": [],
       "systemOverview": "Tidally locked binary generating massive magnetic flares and coronal loops."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "~4 Billion Years",
     "futureFate": "Common envelope phase followed by white dwarf binary configuration.",
     "fusionProcess": "Hydrogen shell burning around an expanding helium core in tidal lock with secondary.",
@@ -56917,7 +56917,7 @@
       "systemOverview": "Close binary system with an orbital period of only 18.9 hours and fierce X-ray irradiation.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "6 Billion Years",
     "futureFate": "Complete tidal mass stripping into a degenerate helium white dwarf remnant",
     "fusionProcess": "Hydrogen Core / Shell Burning (Mass-losing donor)",
@@ -64375,7 +64375,7 @@
       "systemOverview": "Ancient Population II halo subdwarf exhibiting flare activity despite an age over 12 billion years.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Yellow Subdwarf",
     "lifespanEstimate": "50 Billion Years",
     "futureFate": "Helium White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion (Metal-Poor Proton-Proton Chain)",
@@ -64491,7 +64491,7 @@
       "systemOverview": "Formed from gas enriched by just a single low-energy primordial Population III supernova.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "20 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion in pristine gas",
@@ -64554,7 +64554,7 @@
       "systemOverview": "Formed in the early universe without dust-grain cooling, challenging classic star formation thresholds.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "White Subdwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Pristine Core Hydrogen Fusion",
@@ -64620,7 +64620,7 @@
       "systemOverview": "Pure stellar laboratory for studying rapid neutron-capture (r-process) nucleosynthesis from early neutron star mergers.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "18 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core & Shell Hydrogen Fusion",
@@ -64692,7 +64692,7 @@
       "systemOverview": "First star ever to have its age calculated directly using radioactive Uranium-238 decay.",
       "planets": []
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "18 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -64759,7 +64759,7 @@
       "systemOverview": "Extremely metal-poor halo star with colossal carbon-to-iron overabundance ([C/Fe] > +4.0).",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Carbon Subdwarf",
     "lifespanEstimate": "22 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion in carbon-cooled envelope",
@@ -64823,7 +64823,7 @@
       "systemOverview": "Formed from an aspherical hypernova of a zero-metallicity first-generation star.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "White Subdwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -65876,7 +65876,7 @@
       "systemOverview": "A nearby high-velocity halo subdwarf orbited by an ultracool red dwarf companion (Mu Cas B).",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Yellow Subdwarf",
     "lifespanEstimate": "25 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "Core Hydrogen Fusion",
@@ -66860,7 +66860,7 @@
         }
       ]
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "8 Billion Years",
     "futureFate": "Red Giant shedding into a White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning",
@@ -67462,7 +67462,7 @@
       "systemOverview": "Single-lined spectroscopic binary undergoing mass transfer onto an X-ray pulsating compact companion.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Blue Subdwarf",
     "lifespanEstimate": "100 Million Years",
     "futureFate": "Type Ia Supernova Progenitor",
     "fusionProcess": "Core Helium Fusion (Helium-Burning Compact Subdwarf)",
@@ -67558,7 +67558,7 @@
       "systemOverview": "Ultra-tight binary destined to merge within 200 million years due to gravitational wave emission.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Blue Subdwarf",
     "lifespanEstimate": "150 Million Years",
     "futureFate": "Type Ia Supernova (Double Degenerate Merger)",
     "fusionProcess": "Core Helium Fusion (Stripped Envelope Subdwarf)",
@@ -67624,7 +67624,7 @@
       "systemOverview": "The shortest-period binary sdB known, orbiting an unseen massive carbon-oxygen white dwarf in 1.16 hours.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Blue Subdwarf",
     "lifespanEstimate": "100 Million Years",
     "futureFate": "Sub-Chandrasekhar Thermonuclear Explosion",
     "fusionProcess": "Core Helium Fusion with Extreme Tidal Distortion",
@@ -67749,7 +67749,7 @@
       "systemOverview": "Prototype star for EC 14026 (sdBV) asteroseismic benchmark pulsators.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Blue Subdwarf",
     "lifespanEstimate": "100 Million Years",
     "futureFate": "Helium Core Exhaustion -> Direct White Dwarf Cooling Track",
     "fusionProcess": "Core Helium Fusion (Triple-Alpha in Extreme Subdwarf)",
@@ -67819,7 +67819,7 @@
       "systemOverview": "Stripped core post-horizontal branch subdwarf shining predominantly in the extreme ultraviolet.",
       "planets": []
     },
-    "stellarStage": "Subdwarf",
+    "stellarStage": "Blue Subdwarf",
     "lifespanEstimate": "80 Million Years",
     "futureFate": "Direct White Dwarf Cooling Track",
     "fusionProcess": "Residual Core Helium Fusion / Shell Helium Burning",
@@ -67935,7 +67935,7 @@
         }
       ]
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "4.5 Billion Years",
     "futureFate": "Red Giant shedding outer layers into a Carbon-Oxygen White Dwarf",
     "fusionProcess": "Hydrogen Shell Burning around an Inert Helium Core",
@@ -79179,7 +79179,7 @@
       "planets": [],
       "systemOverview": "Binary star with a spectroscopic companion."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "40 Million Years",
     "futureFate": "White Dwarf or Electron-Capture Supernova",
     "fusionProcess": "CNO Cycle",
@@ -79487,7 +79487,7 @@
       "planets": [],
       "systemOverview": "Beta Lyrae-type eclipsing binary system."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "35 Million Years",
     "futureFate": "Supernova / Remnant",
     "fusionProcess": "CNO Cycle",
@@ -79959,7 +79959,7 @@
       "planets": [],
       "systemOverview": "Upper Centaurus-Lupus member."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "50 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80142,7 +80142,7 @@
       "planets": [],
       "systemOverview": "Eclipsing binary star system."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "500 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80441,7 +80441,7 @@
       "planets": [],
       "systemOverview": "No known exoplanets."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -80884,7 +80884,7 @@
       "planets": [],
       "systemOverview": "Delta Scuti variable star."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.5 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -81170,7 +81170,7 @@
       "planets": [],
       "systemOverview": "Delta Scuti variable star."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "750 Million Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -81272,7 +81272,7 @@
       "planets": [],
       "systemOverview": "Close binary system with an orbital period of 10.8 days."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.4 Billion Years",
     "futureFate": "White Dwarf",
     "fusionProcess": "CNO Cycle",
@@ -81988,7 +81988,7 @@
       "planets": [],
       "systemOverview": "Classical Be star undergoing cyclical disk formation."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "lifespanEstimate": "25 Million Years",
     "futureFate": "Supernova / Neutron Star",
     "fusionProcess": "CNO Cycle",
@@ -83648,7 +83648,7 @@
       "planets": [],
       "systemOverview": "Forms a multiple star system with two faint companions."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1 Billion Years",
     "futureFate": "Evolution into an orange red giant.",
     "fusionProcess": "Hydrogen shell fusion around contracting helium core.",
@@ -83875,7 +83875,7 @@
       "planets": [],
       "systemOverview": "A hierarchical quadruple system only 27.1 light-years away, orbited by a pair of red dwarfs."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Yellow Subgiant",
     "lifespanEstimate": "9 Billion Years",
     "futureFate": "Evolution into a red giant and planetary nebula ejection.",
     "fusionProcess": "Hydrogen shell burning around an inert helium core.",
@@ -84106,7 +84106,7 @@
       "planets": [],
       "systemOverview": "A spectroscopic binary system orbited by a low-mass red dwarf companion."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "4 Billion Years",
     "futureFate": "Evolution onto the red giant branch.",
     "fusionProcess": "Hydrogen shell burning around an isothermal helium core.",
@@ -84444,7 +84444,7 @@
       "planets": [],
       "systemOverview": "A high-proper-motion orange subgiant; high metallicity host."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "3.5 Billion Years",
     "futureFate": "Red giant branch expansion and helium flash.",
     "fusionProcess": "Hydrogen shell burning around contracting helium core.",
@@ -85235,7 +85235,7 @@
       "planets": [],
       "systemOverview": "A nearby astrometric binary system consisting of an F-type subgiant and a red dwarf."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "2.5 Billion Years",
     "futureFate": "Evolution into a red giant and white dwarf cooling.",
     "fusionProcess": "Hydrogen shell fusion around contracting helium core.",
@@ -85676,7 +85676,7 @@
       "planets": [],
       "systemOverview": "A nearby subgiant star exhibiting asteroseismic oscillations."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "8 Billion Years",
     "futureFate": "Evolution into a red giant and white dwarf.",
     "fusionProcess": "Hydrogen shell burning around contracting helium core.",
@@ -85968,7 +85968,7 @@
       "planets": [],
       "systemOverview": "Secondary subgiant eclipsing companion in the Lambda Tauri binary."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "Ascending the red giant branch.",
     "fusionProcess": "Hydrogen shell fusion around contracting helium core.",
@@ -86028,7 +86028,7 @@
       "planets": [],
       "systemOverview": "Primary component of the famous Gamma Delphini binary."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "Orange Subgiant",
     "lifespanEstimate": "2.5 Billion Years",
     "futureFate": "Red giant branch expansion and white dwarf cooling.",
     "fusionProcess": "Hydrogen shell burning around an inert helium core.",
@@ -86164,7 +86164,7 @@
       "planets": [],
       "systemOverview": "Primary white subgiant star of the Delta Serpentis visual binary."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.2 Billion Years",
     "futureFate": "Expansion into a red giant.",
     "fusionProcess": "Hydrogen shell burning around contracting helium core.",
@@ -86229,7 +86229,7 @@
       "planets": [],
       "systemOverview": "Secondary subgiant star in the Delta Serpentis visual binary."
     },
-    "stellarStage": "Subgiant",
+    "stellarStage": "White Subgiant",
     "lifespanEstimate": "1.5 Billion Years",
     "futureFate": "Evolution into a red giant.",
     "fusionProcess": "Hydrogen shell burning.",
@@ -86535,7 +86535,7 @@
     "temperature": 28000,
     "spectralType": "B0.5IV",
     "spectralClass": "B",
-    "stellarStage": "Subgiant",
+    "stellarStage": "Blue Subgiant",
     "massSolar": 17.8,
     "luminositySolar": 25000,
     "apparentMagnitude": 1.33,

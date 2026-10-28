@@ -600,11 +600,11 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
     category: 'subgiants',
     colorHex: '#facc15',
     plainEnglishExplanation:
-      'Stars caught in the act of changing! They have just exhausted hydrogen fuel in their innermost core and are starting to expand and cool, bridging the gap between normal main-sequence stars and full giants.',
+      'Stars caught in the act of changing! They have exhausted hydrogen in their innermost core and are starting to expand and cool toward the giant branch. Classified by spectral color into Blue Subgiants (B/O IV, like Regulus and Acrux Aa), White Subgiants (A/F IV, like Procyon A, Rasalhague, and Delta Scuti), Yellow Subgiants (G IV, like Mu Arae and Beta Hydri), and Orange Subgiants (K IV, like Algol B and Delta Eridani).',
     howItWorks:
-      'Core contraction heats up the surrounding hydrogen shell, starting the expansion process.',
-    typicalSizeComparison: '1.5 to 4 times the diameter of the Sun.',
-    exampleStarIds: ['procyon-a', 'rasalhague', 'delta-scuti', 'algol-b', 'regulus', 'methuselah-star', 'sneden-star', 'cayrel-star', 'smss-j031300'],
+      'Core contraction heats up the surrounding hydrogen shell, starting the expansion process across the Hertzsprung gap.',
+    typicalSizeComparison: '1.5 to 6 times the diameter of the Sun.',
+    exampleStarIds: ['procyon-a', 'rasalhague', 'delta-scuti', 'algol-b', 'regulus', 'methuselah-star', 'mu-arae', 'beta-hydri', 'delta-eridani'],
     coreEnergySource: 'Transitioning from core hydrogen to shell hydrogen burning',
     fate: 'Evolves directly into a Class III Red Giant over tens of millions of years.',
   },
@@ -636,21 +636,23 @@ export const LUMINOSITY_CLASSES_GUIDE: LuminosityClassGuideItem[] = [
     category: 'subdwarfs',
     colorHex: '#38bdf8',
     plainEnglishExplanation:
-      'Under-luminous stars that sit 1.5 to 2 magnitudes below the normal main sequence on the H-R diagram. Primarily ancient Population II halo stars with severe metal deficiency ([Fe/H] < -1.0) and reduced atmospheric opacity, allowing deeper, hotter, and denser layers to radiate directly.',
+      'Under-luminous stars that sit 1.5 to 2 magnitudes below the normal main sequence on the H-R diagram. Subdivided by spectral color into hot Blue Subdwarfs (sdB & sdO, such as HD 49798, Feige 34, and KPD 1930+2752), cool ancient metal-poor White Subdwarfs (sdF, like Caffau’s Star and Frebel’s Star), Yellow Subdwarfs (sdG, such as Groombridge 1830 and Mu Cassiopeiae), and primordial Carbon Subdwarfs (sdC, such as Christlieb’s Star).',
     howItWorks:
       'Low metallicity decreases atmospheric opacity (less line blanketing and electron-scattering), resulting in higher effective surface temperatures for a given mass and smaller, denser radii.',
-    typicalSizeComparison: '0.2 to 0.8 times the diameter of the Sun.',
+    typicalSizeComparison: '0.15 to 0.8 times the diameter of the Sun.',
     exampleStarIds: [
       'hd-49798',
+      'feige-34',
       'v361-hydrae',
       'kpd-1930-2752',
       'groombridge-1830',
-      'kapteyns-star',
+      'mu-cassiopeiae',
       'sdss-j102915',
-      'mu-cassiopeiae'
+      'he-0107-5240',
+      'he-1327-2326'
     ],
-    coreEnergySource: 'Pristine metal-poor core Hydrogen fusion',
-    fate: 'Extremely long lifespans (tens to hundreds of billions of years), slowly evolving into helium white dwarfs.',
+    coreEnergySource: 'Core helium burning (hot sdB/sdO) or pristine metal-poor core hydrogen fusion (cool sdF/sdG)',
+    fate: 'Extremely long lifespans (tens to hundreds of billions of years), slowly evolving into white dwarfs.',
   },
   {
     id: 'class-white-dwarfs',
