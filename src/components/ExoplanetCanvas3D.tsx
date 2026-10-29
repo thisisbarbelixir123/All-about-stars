@@ -21,6 +21,10 @@ import {
   Search,
   Square,
   Sliders,
+  Maximize2,
+  Minimize2,
+  Orbit,
+  MoveHorizontal,
 } from 'lucide-react';
 import { CelestialBody, TourLength, CelestialClassification } from '../types';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
@@ -195,6 +199,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const sortMenuRef = useRef<HTMLDivElement>(null);
 
   // Scene Controls
+  const [layoutMode, setLayoutMode] = useState<'linear' | 'spiral'>('spiral');
+  const [isLayoutMenuOpen, setIsLayoutMenuOpen] = useState(false);
+  const layoutMenuRef = useRef<HTMLDivElement>(null);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [wireframe, setWireframe] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
@@ -223,6 +230,27 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   // UI state
   const [areControlsHidden, setAreControlsHidden] = useState(false);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.warn('Fullscreen request failed:', err);
+    }
+  };
 
   // Three.js refs
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -286,35 +314,127 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     return sortedBodies.findIndex((b) => b.id === activeBodyId);
   }, [sortedBodies, activeBodyId]);
 
-  // Compute 3D scales and positions along linear X-axis (matching main branch StarCanvas3D)
+  // Compute 3D scales and positions (linear or spiral, matching StarCanvas3D)
   const bodyScales = useMemo(() => {
     const scales: Record<string, { radius: number; xPos: number; zPos: number; colorHex: string }> = {};
-    let currentX = 0;
-    const PROPORTIONAL_GAP_FACTOR = 0.38;
 
-    sortedBodies.forEach((body, idx) => {
-      const radius = Math.max(0.0001, body.diameterKm * KM_TO_SOLAR_RADIUS);
-      const colorHex = inferBodyColor(body);
+    if (layoutMode === 'spiral') {
+      const isDescending = sortDirection === 'desc';
 
-      if (idx === 0) {
-        currentX = radius;
+      if (isDescending) {
+        // Descending size spiral: largest body at center (0, 0), winding outward to smallest
+        const coreBody = sortedBodies[0];
+        const coreRadius = coreBody ? Math.max(0.0001, coreBody.diameterKm * KM_TO_SOLAR_RADIUS) : 0.001;
+
+        if (coreBody) {
+          scales[coreBody.id] = {
+            radius: coreRadius,
+            xPos: 0,
+            zPos: 0,
+            colorHex: inferBodyColor(coreBody),
+          };
+        }
+
+        let currentTheta = 0;
+        let currentR = Math.max(0.05, coreRadius * 1.25 + 0.02);
+
+        for (let idx = 1; idx < sortedBodies.length; idx++) {
+          const body = sortedBodies[idx];
+          const radius = Math.max(0.0001, body.diameterKm * KM_TO_SOLAR_RADIUS);
+          const prevBody = sortedBodies[idx - 1];
+          const prevRadius = scales[prevBody.id]?.radius || 0.0001;
+
+          // Chord distance along the spiral arm between surface of body and prev body:
+          const chord = (prevRadius + radius) * 1.38;
+          const minRForChord = chord / 1.2;
+          if (currentR < minRForChord) currentR = minRForChord;
+
+          // Angular step along the circle arc:
+          const dTheta = chord / currentR;
+          currentTheta += dTheta;
+
+          // Radial expansion per step: ensures radial distance between turns clears body diameter:
+          const dR = ((2 * radius * 1.45) / (2 * Math.PI)) * dTheta;
+          currentR += dR;
+
+          const xPos = currentR * Math.cos(currentTheta);
+          const zPos = currentR * Math.sin(currentTheta);
+
+          scales[body.id] = {
+            radius,
+            xPos,
+            zPos,
+            colorHex: inferBodyColor(body),
+          };
+        }
       } else {
-        const prevBody = sortedBodies[idx - 1];
-        const prevRadius = scales[prevBody.id]?.radius || 0.0001;
-        const gap = (prevRadius + radius) * PROPORTIONAL_GAP_FACTOR;
-        currentX += prevRadius + radius + gap;
-      }
+        // Ascending size spiral: smallest body at center (0, 0), winding outward to largest
+        let currentTheta = 0;
+        let currentR = 0.005;
 
-      scales[body.id] = {
-        radius,
-        xPos: currentX,
-        zPos: 0,
-        colorHex,
-      };
-    });
+        sortedBodies.forEach((body, idx) => {
+          const radius = Math.max(0.0001, body.diameterKm * KM_TO_SOLAR_RADIUS);
+
+          if (idx === 0) {
+            currentR = Math.max(0.005, radius * 4);
+            currentTheta = 0;
+          } else {
+            const prevBody = sortedBodies[idx - 1];
+            const prevRadius = scales[prevBody.id]?.radius || 0.0001;
+            // Chord distance along the spiral arm between surface of body and prev body:
+            const chord = (prevRadius + radius) * 1.38;
+            const minRForChord = chord / 1.5;
+            if (currentR < minRForChord) currentR = minRForChord;
+
+            // Angular step along the circle arc:
+            const dTheta = chord / currentR;
+            currentTheta += dTheta;
+
+            // Radial expansion per step: ensures radial distance between turns clears body diameter:
+            const dR = ((2 * radius * 1.5) / (2 * Math.PI)) * dTheta;
+            currentR += dR;
+          }
+
+          const xPos = currentR * Math.cos(currentTheta);
+          const zPos = currentR * Math.sin(currentTheta);
+
+          scales[body.id] = {
+            radius,
+            xPos,
+            zPos,
+            colorHex: inferBodyColor(body),
+          };
+        });
+      }
+    } else {
+      // Linear layout along X-axis (z = 0)
+      let currentX = 0;
+      const PROPORTIONAL_GAP_FACTOR = 0.38;
+
+      sortedBodies.forEach((body, idx) => {
+        const radius = Math.max(0.0001, body.diameterKm * KM_TO_SOLAR_RADIUS);
+        const colorHex = inferBodyColor(body);
+
+        if (idx === 0) {
+          currentX = radius;
+        } else {
+          const prevBody = sortedBodies[idx - 1];
+          const prevRadius = scales[prevBody.id]?.radius || 0.0001;
+          const gap = (prevRadius + radius) * PROPORTIONAL_GAP_FACTOR;
+          currentX += prevRadius + radius + gap;
+        }
+
+        scales[body.id] = {
+          radius,
+          xPos: currentX,
+          zPos: 0,
+          colorHex,
+        };
+      });
+    }
 
     return scales;
-  }, [sortedBodies]);
+  }, [sortedBodies, layoutMode, sortDirection]);
 
   const bodyScalesRef = useRef(bodyScales);
   bodyScalesRef.current = bodyScales;
@@ -344,6 +464,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       }
       if (togglesMenuRef.current && !togglesMenuRef.current.contains(target)) {
         setIsTogglesMenuOpen(false);
+      }
+      if (layoutMenuRef.current && !layoutMenuRef.current.contains(target)) {
+        setIsLayoutMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -594,11 +717,27 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // Panoramic Fit All
       const scaleList = Object.values(bodyScales);
       if (scaleList.length === 0) return;
-      const last = scaleList[scaleList.length - 1];
-      const midX = last.xPos / 2;
-      const maxR = last.radius;
-      cameraTargetRef.current.set(midX, maxR * 0.45, 0);
-      cameraDistanceRef.current = Math.max(45, (last.xPos + maxR) * 0.72);
+
+      if (layoutMode === 'spiral') {
+        const isDescending = sortDirection === 'desc';
+        // Ascending spiral: smallest body (#1) is at the center (0, 0)
+        // Descending spiral: largest body is at center, smallest is at outer edge
+        const focusedDefault = isDescending ? sortedBodies[sortedBodies.length - 1] : sortedBodies[0];
+        const defaultScale = focusedDefault ? bodyScales[focusedDefault.id] : null;
+        if (defaultScale) {
+          cameraTargetRef.current.set(defaultScale.xPos, defaultScale.radius, defaultScale.zPos);
+          cameraDistanceRef.current = Math.max(0.005, defaultScale.radius * 6.5);
+        } else {
+          cameraTargetRef.current.set(0, 0, 0);
+          cameraDistanceRef.current = 15;
+        }
+      } else {
+        const last = scaleList[scaleList.length - 1];
+        const midX = last.xPos / 2;
+        const maxR = last.radius;
+        cameraTargetRef.current.set(midX, maxR * 0.45, 0);
+        cameraDistanceRef.current = Math.max(45, (last.xPos + maxR) * 0.72);
+      }
       cameraAngleRef.current = { theta: 0, phi: Math.PI / 3 };
     } else {
       const framing = getCameraFraming(activeBodyId, isTourPlayingRef.current);
@@ -1063,6 +1202,13 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       } else if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
         handleFitAll();
+      } else if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        setLayoutMode((prev) => (prev === 'linear' ? 'spiral' : 'linear'));
+        soundEffects.play('toggleOn');
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
         setIsAutoRotating((prev) => !prev);
@@ -1390,6 +1536,104 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                   <span className="hidden sm:inline">Fit All</span>
                 </button>
 
+                {/* Spiral / Linear Layout Mode Toggle (matching StarCanvas3D) */}
+                <div className="relative pointer-events-auto" ref={layoutMenuRef}>
+                  <div
+                    className={`flex items-center rounded-lg border text-xs font-mono font-semibold transition-all shadow-sm ${
+                      layoutMode === 'spiral'
+                        ? 'bg-purple-950/80 border-purple-500/50 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                        : 'bg-emerald-950/80 border-emerald-400/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                    }`}
+                  >
+                    <button
+                      id="btn-toggle-layout"
+                      onClick={() => {
+                        setLayoutMode((m) => (m === 'linear' ? 'spiral' : 'linear'));
+                        soundEffects.play('toggleOn');
+                      }}
+                      title={`Stage Layout: ${layoutMode === 'spiral' ? 'Spiral Mode (L)' : 'Linear Mode (L)'}. Click to toggle.`}
+                      className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-l-lg select-none"
+                    >
+                      {layoutMode === 'spiral' ? (
+                        <Orbit className="w-3.5 h-3.5 shrink-0 text-purple-400 animate-spin-slow" />
+                      ) : (
+                        <MoveHorizontal className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                      )}
+                      <span className="hidden sm:inline">
+                        {layoutMode === 'spiral' ? 'Spiral' : 'Linear'}
+                      </span>
+                    </button>
+
+                    <div className="w-[1px] h-4 bg-white/20" />
+
+                    <button
+                      id="btn-layout-menu-trigger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLayoutMenuOpen((prev) => !prev);
+                      }}
+                      title="Select Layout Mode (Spiral / Linear)"
+                      className="px-1.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-r-lg"
+                    >
+                      <ChevronDown
+                        className={`w-3 h-3 transition-transform duration-200 ${
+                          isLayoutMenuOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {isLayoutMenuOpen && (
+                    <div
+                      id="menu-layout-mode-dropdown"
+                      className="absolute right-0 top-full mt-2 w-44 bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl font-mono text-xs flex flex-col gap-1"
+                    >
+                      <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1 mb-1">
+                        Catalog Layout
+                      </div>
+                      {(['spiral', 'linear'] as const).map((mode) => {
+                        const isActive = layoutMode === mode;
+                        return (
+                          <button
+                            key={mode}
+                            id={`btn-layout-option-${mode}`}
+                            onClick={() => {
+                              setLayoutMode(mode);
+                              setIsLayoutMenuOpen(false);
+                              soundEffects.play('toggleOn');
+                            }}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                              isActive
+                                ? mode === 'spiral'
+                                  ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
+                                  : 'bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-500/30'
+                                : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              {mode === 'spiral' ? (
+                                <Orbit
+                                  className={`w-3.5 h-3.5 ${
+                                    isActive ? 'text-purple-400' : 'text-slate-400'
+                                  }`}
+                                />
+                              ) : (
+                                <MoveHorizontal
+                                  className={`w-3.5 h-3.5 ${
+                                    isActive ? 'text-emerald-400' : 'text-slate-400'
+                                  }`}
+                                />
+                              )}
+                              <span>{mode === 'spiral' ? 'Spiral Mode' : 'Linear Mode'}</span>
+                            </span>
+                            {isActive && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
                 <div className="h-4 w-[1px] bg-cyan-500/20 mx-0.5" />
 
                 {/* More... Menu for Spin, Wireframe, Floor Grid */}
@@ -1454,6 +1698,27 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                         </span>
                         {showGrid && <Check className="w-3.5 h-3.5 text-cyan-400" />}
                       </button>
+
+                      <div className="border-t border-cyan-500/20 my-1" />
+
+                      <button
+                        onClick={() => {
+                          setLayoutMode((m) => (m === 'linear' ? 'spiral' : 'linear'));
+                          setIsTogglesMenuOpen(false);
+                          soundEffects.play('toggleOn');
+                        }}
+                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all text-slate-300 hover:bg-white/5 cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          {layoutMode === 'spiral' ? (
+                            <Orbit className="w-3.5 h-3.5 text-purple-400" />
+                          ) : (
+                            <MoveHorizontal className="w-3.5 h-3.5 text-emerald-400" />
+                          )}
+                          <span>Layout: {layoutMode === 'spiral' ? 'Spiral' : 'Linear'}</span>
+                        </span>
+                        <span className="text-[10px] text-cyan-400 font-bold uppercase">Toggle (L)</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1467,6 +1732,21 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                 >
                   <Keyboard className="w-3.5 h-3.5" />
                   <span>Shortcuts</span>
+                </button>
+
+                {/* Fullscreen Toggle Button */}
+                <button
+                  id="btn-fullscreen-top"
+                  onClick={toggleFullscreen}
+                  title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
+                  className="px-2 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  ) : (
+                    <Maximize2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  )}
+                  <span className="hidden sm:inline">{isFullscreen ? 'Exit' : 'Full'}</span>
                 </button>
 
                 {/* Minimize Button */}
@@ -1972,6 +2252,14 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Fit All</span>
                   <span className="text-cyan-300 font-bold">A</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300">Toggle Fullscreen</span>
+                  <span className="text-cyan-300 font-bold">F</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-300">Spiral / Linear Layout</span>
+                  <span className="text-cyan-300 font-bold">L</span>
                 </div>
               </div>
 
