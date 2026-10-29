@@ -117,8 +117,8 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 V = normalize(vViewPosition);
     vec3 L = normalize(lightDir);
 
-    float NdotL = max(0.05, dot(N, L)); // Diffuse illumination with soft ambient fill
-    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 3.0); // Atmospheric rim glow
+    float NdotL = clamp(dot(N, L) * 0.52 + 0.55, 0.32, 1.12); // Half-Lambert illumination so full spherical disc is clearly visible
+    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8); // Atmospheric rim glow
 
     vec3 surface = vec3(0.5);
     vec3 atmoColor = vec3(0.3, 0.6, 1.0);
@@ -127,8 +127,9 @@ export const PLANET_FRAGMENT_SHADER = `
     // 1. Rocky Terrestrial (Mercury/Mars/Moon/Rocky Exoplanet)
     if (themeIndex < 0.5) {
       float n = fbm(vLocalPos * 6.0 + seed);
-      surface = mix(vec3(0.28, 0.25, 0.23), vec3(0.55, 0.50, 0.45), n * 0.5 + 0.5);
-      atmoStrength = 0.05;
+      surface = mix(vec3(0.45, 0.40, 0.36), vec3(0.78, 0.70, 0.62), n * 0.5 + 0.5);
+      atmoColor = vec3(0.65, 0.72, 0.82);
+      atmoStrength = 0.22;
     }
     // 2. Terrestrial Ocean World (Earth-like)
     else if (themeIndex < 1.5) {
@@ -200,11 +201,19 @@ export const PLANET_FRAGMENT_SHADER = `
       surface = mix(rock, magma, pow(subStellar, 1.8) * step(0.35, cracks));
       atmoStrength = 0.2;
     }
-    // 10. KBO Tholin / Distant Cold Ices
-    else if (themeIndex < 10.5) {
+    // 10. KBO Tholin (Pluto / Makemake / Sedna reddish-amber ices)
+    else if (themeIndex < 9.5) {
       float n = fbm(vLocalPos * 5.0 + seed);
-      surface = mix(vec3(0.4, 0.18, 0.12), vec3(0.2, 0.18, 0.18), n * 0.5 + 0.5);
-      atmoStrength = 0.02;
+      surface = mix(vec3(0.58, 0.34, 0.24), vec3(0.82, 0.62, 0.48), n * 0.5 + 0.5);
+      atmoColor = vec3(0.55, 0.68, 0.85);
+      atmoStrength = 0.25;
+    }
+    // 11. Icy Moon / KBO Ice (Mimas, Enceladus, Europa, Triton, Eris)
+    else if (themeIndex < 10.5) {
+      float n = fbm(vLocalPos * 5.5 + seed);
+      surface = mix(vec3(0.58, 0.68, 0.78), vec3(0.88, 0.93, 0.98), n * 0.5 + 0.5);
+      atmoColor = vec3(0.45, 0.78, 1.0);
+      atmoStrength = 0.35;
     }
     // 11. Star / Solar Plasma
     else {
