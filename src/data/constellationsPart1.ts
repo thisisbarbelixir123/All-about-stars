@@ -659,7 +659,7 @@ export const CONSTELLATIONS_PART_1: RawConstellationInfo[] = [
     family: 'Heavenly Waters',
     areaSqDeg: 68,
     areaRank: 88,
-    principalStarId: 'acrux-a',
+    principalStarId: 'acrux-aa',
     principalStarName: 'Acrux (Alpha Crucis)',
     brightestMagnitude: 0.77,
     bestViewingMonth: 'May',

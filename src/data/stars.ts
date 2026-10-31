@@ -44,8 +44,6 @@ export const STAR_ID_ALIASES: Record<string, string> = {
   'hd-93129a': 'hd-93129aa',
   'capella': 'capella-aa',
   'epsilon-eridani': 'ran',
-  '55-cancri-a': 'copernicus',
-  '55-cancri': 'copernicus',
 };
 
 /**

@@ -1,4 +1,4 @@
-import { STARS_CATALOG } from './stars';
+import { STARS_CATALOG, STAR_ID_ALIASES } from './stars';
 import { parseCoordinate } from '../utils/celestialMechanics';
 
 /**
@@ -145,7 +145,7 @@ export const OFFICIAL_ASTERISMS: OfficialAsterismDefinition[] = [
     aliases: ['cru'],
     segments: [
       // Vertical beam: Gacrux -> Acrux
-      ['gacrux', 'acrux-a'],
+      ['gacrux', 'acrux-aa'],
       // Horizontal crossbar: Mimosa -> Imai
       ['mimosa', 'imai']
     ]
@@ -343,7 +343,8 @@ export function getCuratedAsterismCoordinates(
         pt.isDirectCoord = true;
         curSeg.push(pt);
       } else if (typeof node === 'string') {
-        const star = STARS_CATALOG.find((s) => s.id === node);
+        const resolvedId = (STAR_ID_ALIASES as Record<string, string>)[node] || node;
+        const star = STARS_CATALOG.find((s) => s.id === resolvedId);
         if (star) {
           const rawRa = (star as any).rightAscension || (star as any).ra;
           const rawDec = (star as any).declination || (star as any).dec;
