@@ -1,0 +1,291 @@
+/**
+ * Script: normalize-designation-tags.cjs
+ * Normalizes primaryDesignation on all 1,007 stars in starDatabase.json
+ * strictly according to the Star Designation Tag Hierarchy:
+ * 1. Greek Bayer -> 2. Numbered (Flamsteed/Gould) -> 3. Variable designations -> 4. Catalogs (HD, HR, etc.)
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const DB_PATH = path.join(__dirname, '../src/data/starDatabase.json');
+const stars = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+
+const CONSTELLATIONS_FULL_TO_ABBR = [
+  ['Canis Majoris', 'CMa'], ['Canis Major', 'CMa'],
+  ['Canis Minoris', 'CMi'], ['Canis Minor', 'CMi'],
+  ['Coma Berenices', 'Com'],
+  ['Corona Australis', 'CrA'], ['Coronae Australis', 'CrA'],
+  ['Corona Borealis', 'CrB'], ['Coronae Borealis', 'CrB'],
+  ['Canum Venaticorum', 'CVn'],
+  ['Leo Minoris', 'LMi'], ['Leo Minor', 'LMi'],
+  ['Piscis Austrini', 'PsA'], ['Piscis Austrinus', 'PsA'],
+  ['Triangulum Australe', 'TrA'], ['Trianguli Australis', 'TrA'],
+  ['Ursa Majoris', 'UMa'], ['Ursa Major', 'UMa'],
+  ['Ursa Minoris', 'UMi'], ['Ursa Minor', 'UMi'],
+  ['Andromedae', 'And'], ['Andromeda', 'And'],
+  ['Antliae', 'Ant'], ['Antlia', 'Ant'],
+  ['Apodis', 'Aps'], ['Apus', 'Aps'],
+  ['Aquilae', 'Aql'], ['Aquila', 'Aql'],
+  ['Aquarii', 'Aqr'], ['Aquarius', 'Aqr'],
+  ['Arae', 'Ara'], ['Ara', 'Ara'],
+  ['Arietis', 'Ari'], ['Aries', 'Ari'],
+  ['Aurigae', 'Aur'], ['Auriga', 'Aur'],
+  ['Bootis', 'Boo'], ['Boötes', 'Boo'], ['Bootes', 'Boo'],
+  ['Caeli', 'Cae'], ['Caelum', 'Cae'],
+  ['Camelopardalis', 'Cam'],
+  ['Capricorni', 'Cap'], ['Capricornus', 'Cap'],
+  ['Carinae', 'Car'], ['Carina', 'Car'],
+  ['Cassiopeiae', 'Cas'], ['Cassiopeia', 'Cas'],
+  ['Centauri', 'Cen'], ['Centaurus', 'Cen'],
+  ['Cephei', 'Cep'], ['Cepheus', 'Cep'],
+  ['Ceti', 'Cet'], ['Cetus', 'Cet'],
+  ['Chamaeleontis', 'Cha'], ['Chamaeleon', 'Cha'],
+  ['Circini', 'Cir'], ['Circinus', 'Cir'],
+  ['Cancri', 'Cnc'], ['Cancer', 'Cnc'],
+  ['Columbae', 'Col'], ['Columba', 'Col'],
+  ['Crateris', 'Crt'], ['Crater', 'Crt'],
+  ['Crucis', 'Cru'], ['Crux', 'Cru'],
+  ['Corvi', 'Crv'], ['Corvus', 'Crv'],
+  ['Cygni', 'Cyg'], ['Cygnus', 'Cyg'],
+  ['Delphini', 'Del'], ['Delphinus', 'Del'],
+  ['Doradus', 'Dor'], ['Dorado', 'Dor'],
+  ['Draconis', 'Dra'], ['Draco', 'Dra'],
+  ['Equulei', 'Equ'], ['Equuleus', 'Equ'],
+  ['Eridani', 'Eri'], ['Eridanus', 'Eri'],
+  ['Fornacis', 'For'], ['Fornax', 'For'],
+  ['Geminorum', 'Gem'], ['Gemini', 'Gem'],
+  ['Gruis', 'Gru'], ['Grus', 'Gru'],
+  ['Herculis', 'Her'], ['Hercules', 'Her'],
+  ['Horologii', 'Hor'], ['Horologium', 'Hor'],
+  ['Hydrae', 'Hya'], ['Hydra', 'Hya'],
+  ['Hydri', 'Hyi'], ['Hydrus', 'Hyi'],
+  ['Indi', 'Ind'], ['Indus', 'Ind'],
+  ['Lacertae', 'Lac'], ['Lacerta', 'Lac'],
+  ['Leonis', 'Leo'], ['Leo', 'Leo'],
+  ['Leporis', 'Lep'], ['Lepus', 'Lep'],
+  ['Librae', 'Lib'], ['Libra', 'Lib'],
+  ['Lupi', 'Lup'], ['Lupus', 'Lup'],
+  ['Lyncis', 'Lyn'], ['Lynx', 'Lyn'],
+  ['Lyrae', 'Lyr'], ['Lyra', 'Lyr'],
+  ['Mensae', 'Men'], ['Mensa', 'Men'],
+  ['Microscopii', 'Mic'], ['Microscopium', 'Mic'],
+  ['Monocerotis', 'Mon'], ['Monoceros', 'Mon'],
+  ['Muscae', 'Mus'], ['Musca', 'Mus'],
+  ['Normae', 'Nor'], ['Norma', 'Nor'],
+  ['Octantis', 'Oct'], ['Octans', 'Oct'],
+  ['Ophiuchi', 'Oph'], ['Ophiuchus', 'Oph'],
+  ['Orionis', 'Ori'], ['Orion', 'Ori'],
+  ['Pavonis', 'Pav'], ['Pavo', 'Pav'],
+  ['Pegasi', 'Peg'], ['Pegasus', 'Peg'],
+  ['Persei', 'Per'], ['Perseus', 'Per'],
+  ['Phoenicis', 'Phe'], ['Phoenix', 'Phe'],
+  ['Pictoris', 'Pic'], ['Pictor', 'Pic'],
+  ['Piscium', 'Psc'], ['Pisces', 'Psc'],
+  ['Puppis', 'Pup'],
+  ['Pyxidis', 'Pyx'], ['Pyxis', 'Pyx'],
+  ['Reticuli', 'Ret'], ['Reticulum', 'Ret'],
+  ['Sculptoris', 'Scl'], ['Sculptor', 'Scl'],
+  ['Scorpii', 'Sco'], ['Scorpius', 'Sco'],
+  ['Scuti', 'Sct'], ['Scutum', 'Sct'],
+  ['Serpentis', 'Ser'], ['Serpens', 'Ser'],
+  ['Sextantis', 'Sex'], ['Sextans', 'Sex'],
+  ['Sagittae', 'Sge'], ['Sagitta', 'Sge'],
+  ['Sagittarius', 'Sgr'], ['Sagittarius', 'Sgr'],
+  ['Tauri', 'Tau'], ['Taurus', 'Tau'],
+  ['Telescopii', 'Tel'], ['Telescopium', 'Tel'],
+  ['Trianguli', 'Tri'], ['Triangulum', 'Tri'],
+  ['Tucanae', 'Tuc'], ['Tucana', 'Tuc'],
+  ['Velae', 'Vel'], ['Vela', 'Vel'],
+  ['Virginis', 'Vir'], ['Virgo', 'Vir'],
+  ['Volantis', 'Vol'], ['Volans', 'Vol'],
+  ['Vulpeculae', 'Vul'], ['Vulpecula', 'Vul']
+];
+
+function abbreviateConstellation(str) {
+  if (!str) return '';
+  for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
+    if (new RegExp(`\\b${full}\\b`, 'i').test(str)) {
+      return abbr;
+    }
+  }
+  return str.slice(0, 3);
+}
+
+const GREEK_WORDS_MAP = {
+  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε',
+  zeta: 'ζ', eta: 'η', theta: 'θ', iota: 'ι', kappa: 'κ',
+  lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', omicron: 'ο',
+  pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ',
+  phi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω'
+};
+
+const GREEK_CHARS = new Set(Object.values(GREEK_WORDS_MAP));
+
+const SUPERSCRIPTS = {
+  '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+};
+
+function resolveTag(star) {
+  const cAbbr = abbreviateConstellation(star.constellation);
+
+  if (star.id === 'sun' || star.name?.toLowerCase().includes('sun (sol)') || star.name === 'Sun') {
+    return 'Sol';
+  }
+
+  if (star.spectralClass === 'NS' || star.stellarStage?.includes('Neutron Star') || star.name?.startsWith('PSR')) {
+    return star.name;
+  }
+
+  const allNames = [
+    star.bayerDesignation,
+    star.primaryDesignation,
+    star.flamsteedDesignation,
+    star.gouldDesignation,
+    star.variableStarDesignation,
+    ...(star.alternateNames || []),
+    ...(star.designations || []),
+    star.name
+  ].filter(Boolean);
+
+  // 1. GREEK BAYER
+  for (const n of allNames) {
+    const trimmed = n.trim();
+    if ([...GREEK_CHARS].some((c) => trimmed.startsWith(c))) {
+      const match = trimmed.match(/^([α-ωΑ-Ω][¹²³⁴⁵⁶⁷⁸⁹0-9]?)\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
+      if (match) {
+        const symbol = match[1];
+        const constName = match[2].trim();
+        const comp = match[3] ? ` ${match[3]}` : '';
+        const abbr = abbreviateConstellation(constName) || cAbbr;
+        return `${symbol} ${abbr}${comp}`.trim();
+      }
+      return trimmed;
+    }
+  }
+
+  for (const n of allNames) {
+    const trimmed = n.trim();
+    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)[-\s]?(\d+)?\s*(.*)$/i);
+    if (m) {
+      const gChar = GREEK_WORDS_MAP[m[1].toLowerCase()];
+      if (gChar) {
+        const num = m[2] ? (SUPERSCRIPTS[m[2]] || m[2]) : '';
+        const abbr = m[3] ? (abbreviateConstellation(m[3]) || cAbbr) : cAbbr;
+        return `${gChar}${num} ${abbr}`.trim();
+      }
+    }
+  }
+
+  // 2. NUMBERED (Flamsteed / Gould)
+  const GOULD_REGEX = /^(\d+\s+G\.\s+[A-Za-z]+)\b/i;
+  for (const n of allNames) {
+    const trimmed = n.trim();
+    const gMatch = trimmed.match(GOULD_REGEX);
+    if (gMatch) return gMatch[1];
+  }
+
+  const FLAMSTEED_REGEX = /^(\d+)\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/;
+  for (const n of allNames) {
+    const trimmed = n.trim();
+    const fMatch = trimmed.match(FLAMSTEED_REGEX);
+    if (fMatch) {
+      const num = fMatch[1];
+      const constName = fMatch[2].trim();
+      const comp = fMatch[3] ? ` ${fMatch[3]}` : '';
+      const abbr = abbreviateConstellation(constName) || cAbbr;
+      return `${num} ${abbr}${comp}`.trim();
+    }
+  }
+
+  // 3. VARIABLE DESIGNATIONS
+  const VAR_REGEX = /^([R-Z]|[A-Q][A-Z]|[R-Z]{2}|V\d{2,4})\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/;
+  for (const n of allNames) {
+    const trimmed = n.trim();
+    const vMatch = trimmed.match(VAR_REGEX);
+    if (vMatch && !trimmed.startsWith('PSR') && !trimmed.startsWith('SGR')) {
+      const varId = vMatch[1];
+      const constName = vMatch[2].trim();
+      const comp = vMatch[3] ? ` ${vMatch[3]}` : '';
+      const abbr = abbreviateConstellation(constName) || cAbbr;
+      return `${varId} ${abbr}${comp}`.trim();
+    }
+  }
+
+  // 4. CATALOGS
+  // 4A. Lensed extragalactic & survey designations (e.g. MACS0416, MACS J1149 LS1, WHL0137-LS, PSZ1 G311.65-18.48)
+  const LENSED_SURVEY_PATTERNS = [
+    /^MACS\s*(?:J\d{4}(?:\.\d)?(?:[-+]\d{4})?|\d{4})(?:\s+[A-Za-z0-9+]+)?/i,
+    /^MACS\d+/i,
+    /^WHL\s*\d+[-+]\d+(?:-[A-Za-z0-9]+)?/i,
+    /^PSZ\d*\s*G\d+(?:\.\d+)?[-+]\d+(?:\.\d+)?/i,
+  ];
+  for (const pattern of LENSED_SURVEY_PATTERNS) {
+    if (star.primaryDesignation && pattern.test(star.primaryDesignation.trim())) {
+      return star.primaryDesignation.trim();
+    }
+    for (const n of allNames) {
+      const trimmed = n.trim();
+      if (pattern.test(trimmed)) {
+        return trimmed;
+      }
+    }
+  }
+
+  // 4B. Notable Cluster/Survey Names
+  const NOTABLE_SURVEY_NAMES = [
+    'Stephenson', 'Westerlund', 'W26', 'W237', 'W75', 'WOH', 'R136', 'TRAPPIST', 'IRS 7', 'GCIRS 7',
+    'Melnick', 'Sanduleak', 'VFTS', 'BAT99', 'LH', 'HV', 'AFGL', 'RAFGL'
+  ];
+  for (const item of NOTABLE_SURVEY_NAMES) {
+    for (const n of [star.name, star.primaryDesignation, ...(star.alternateNames || [])]) {
+      if (n && n.toLowerCase().includes(item.toLowerCase())) {
+        return star.primaryDesignation || star.name;
+      }
+    }
+  }
+
+  const CATALOG_PRIORITIES = [
+    /^HD\s+\d+/i,
+    /^HR\s+\d+/i,
+    /^HIP\s+\d+/i,
+    /^G(?:J|liese)\s+[\d.]+/i,
+    /^LHS\s+\d+/i,
+    /^Wolf\s+\d+/i,
+    /^Ross\s+\d+/i,
+    /^BD[+-]\d+/i,
+    /^CD[+-]\d+/i,
+    /^TYC\s+\d+/i,
+    /^2MASS\s+J\d+/i,
+    /^Gaia\s+DR\d+/i
+  ];
+
+  for (const pattern of CATALOG_PRIORITIES) {
+    for (const n of allNames) {
+      const trimmed = n.trim();
+      if (pattern.test(trimmed)) {
+        return trimmed;
+      }
+    }
+  }
+
+  return star.primaryDesignation || star.name;
+}
+
+let modifiedCount = 0;
+for (const s of stars) {
+  const newTag = resolveTag(s);
+  if (newTag && s.primaryDesignation !== newTag) {
+    s.primaryDesignation = newTag;
+    modifiedCount++;
+  }
+  // Ensure the primary tag is at index 0 of designations
+  if (!s.designations) s.designations = [];
+  if (s.primaryDesignation && !s.designations.includes(s.primaryDesignation)) {
+    s.designations.unshift(s.primaryDesignation);
+  }
+}
+
+console.log(`Updated primaryDesignation on ${modifiedCount} stars in catalog.`);
+fs.writeFileSync(DB_PATH, JSON.stringify(stars, null, 2) + '\n');
+console.log('Saved to', DB_PATH);

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { StarData } from '../types';
 import { formatPhysicalDiameter } from '../utils/formatters';
+import { getStarDesignationTag } from '../utils/starDesignationUtils';
 import { StarDossier3DStage } from './StarDossier3DStage';
 import { soundEffects } from '../utils/soundEffects';
 import { STARS_CATALOG } from '../data/stars';
@@ -56,6 +57,95 @@ function calculateApparentSize(diameterKm: number, distanceLy: number, isSun: bo
   }
 }
 
+// Computes surface gravity (log g, m/s², and multiples of Earth gravity)
+function calculateSurfaceGravity(massSolar: number, diameterSolar: number, logGOverride?: number) {
+  const m = Math.max(0.0001, massSolar);
+  const d = Math.max(0.00001, diameterSolar);
+  const logG = typeof logGOverride === 'number' && !isNaN(logGOverride)
+    ? logGOverride
+    : (4.438 + Math.log10(m) - 2 * Math.log10(d));
+  // In cgs: g = 10^logG cm/s² -> m/s² is 10^(logG - 2)
+  const gMs2 = Math.pow(10, logG - 2);
+  const gEarth = gMs2 / 9.80665;
+  const formatG = (val: number) => {
+    if (val >= 1e6 || val < 0.001) return val.toExponential(2);
+    if (val < 0.1) return val.toFixed(3);
+    if (val < 10) return val.toFixed(2);
+    return val.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  };
+  return {
+    logG: logG.toFixed(2),
+    gMs2: formatG(gMs2),
+    gEarth: formatG(gEarth)
+  };
+}
+
+// Computes mean stellar density in g/cm³ and ratio relative to solar density (1.408 g/cm³)
+function calculateMeanDensity(massSolar: number, diameterSolar: number) {
+  const m = Math.max(0.0001, massSolar);
+  const d = Math.max(0.00001, diameterSolar);
+  const ratio = m / Math.pow(d, 3);
+  const gcm3 = 1.408 * ratio;
+  const gcm3Str = gcm3 >= 1e5 || gcm3 < 0.001
+    ? gcm3.toExponential(2)
+    : gcm3.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  const ratioStr = ratio >= 1e5 || ratio < 0.001
+    ? ratio.toExponential(2)
+    : ratio.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  return {
+    gcm3: gcm3Str,
+    solarRatio: ratioStr
+  };
+}
+
+// Computes escape velocity from the photosphere in km/s and mi/s
+function calculateEscapeVelocity(massSolar: number, diameterSolar: number) {
+  const m = Math.max(0.0001, massSolar);
+  const d = Math.max(0.00001, diameterSolar);
+  const kmS = 617.5 * Math.sqrt(m / d);
+  const miS = kmS * 0.621371;
+  const kmSStr = kmS >= 1e5 ? kmS.toExponential(2) : kmS.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const miSStr = miS >= 1e5 ? miS.toExponential(2) : miS.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  return { kmS: kmSStr, miS: miSStr };
+}
+
+// Computes human-readable light travel time from star to Earth
+function calculateLightTravelTime(distanceLy: number, isSun: boolean = false): string {
+  if (isSun || distanceLy < 0.00005) {
+    return '8 min 20 sec';
+  }
+  if (distanceLy < 0.01) {
+    const days = (distanceLy * 365.25).toFixed(1);
+    return `${days} light days`;
+  }
+  if (distanceLy < 1000) {
+    return `${distanceLy.toLocaleString(undefined, { maximumFractionDigits: 2 })} years`;
+  }
+  if (distanceLy < 1e6) {
+    return `${(distanceLy / 1e3).toLocaleString(undefined, { maximumFractionDigits: 2 })} thousand years`;
+  }
+  if (distanceLy < 1e9) {
+    return `${(distanceLy / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 })} million years`;
+  }
+  return `${(distanceLy / 1e9).toLocaleString(undefined, { maximumFractionDigits: 2 })} billion years`;
+}
+
+// Classifies peak thermal radiation wavelength band according to Wien's Law
+function getPeakWavelengthBand(tempK: number): string {
+  const nm = Math.round(2897772 / Math.max(1, tempK));
+  if (nm < 10) return `${nm} nm (X-Ray Band)`;
+  if (nm < 200) return `${nm} nm (Extreme UV)`;
+  if (nm < 380) return `${nm} nm (Near UV)`;
+  if (nm <= 450) return `${nm} nm (Visible Blue-Violet)`;
+  if (nm <= 500) return `${nm} nm (Visible Cyan-Blue)`;
+  if (nm <= 570) return `${nm} nm (Visible Green)`;
+  if (nm <= 590) return `${nm} nm (Visible Yellow)`;
+  if (nm <= 620) return `${nm} nm (Visible Orange)`;
+  if (nm <= 750) return `${nm} nm (Visible Red)`;
+  if (nm < 1400) return `${nm} nm (Near-Infrared)`;
+  return `${nm.toLocaleString()} nm (Mid-Infrared)`;
+}
+
 export const StarDetailModal: React.FC<StarDetailModalProps> = ({
   star,
   onClose,
@@ -76,15 +166,16 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const primaryDesignation = useMemo(() => {
     if (!star) return '';
-    return star.primaryDesignation || star.bayerDesignation || star.flamsteedDesignation || star.alternateNames?.[0] || star.name;
+    return getStarDesignationTag(star);
   }, [star]);
 
   const allDesignations = useMemo(() => {
     if (!star) return [];
-    const primary = (star.primaryDesignation || star.bayerDesignation || star.flamsteedDesignation || '').trim();
+    const primary = getStarDesignationTag(star);
     const sourceList = (star.designations && star.designations.length > 0)
       ? star.designations
       : [
+          primary,
           star.primaryDesignation,
           star.bayerDesignation,
           star.flamsteedDesignation,
@@ -614,7 +705,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[8px] sm:text-[9.5px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Diameter
+                    Physical Diameter
                   </span>
                   <span className="text-[8px] sm:text-[9px] text-cyan-400/60 group-hover:text-cyan-300 font-mono">ℹ️</span>
                 </div>
@@ -674,7 +765,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[8px] sm:text-[9.5px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Temperature
+                    Surface Temperature
                   </span>
                   <span className="text-[8px] sm:text-[9px] text-amber-400/60 group-hover:text-amber-300 font-mono">ℹ️</span>
                 </div>
@@ -704,7 +795,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[8px] sm:text-[9.5px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Luminosity
+                    Solar Luminosity
                   </span>
                   <span className="text-[8px] sm:text-[9px] text-purple-400/60 group-hover:text-purple-300 font-mono">ℹ️</span>
                 </div>
@@ -745,8 +836,8 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                 </div>
                 <div className="mt-0.5 sm:mt-1 md:mt-1.5">
                   <div className="text-xs sm:text-base md:text-lg font-black text-emerald-400 font-mono drop-shadow-[0_0_8px_rgba(52,211,153,0.4)] break-words leading-tight">
-                    {star.distanceLy >= 1000 ? `${(star.distanceLy / 1000).toFixed(2)}k` : star.distanceLy.toFixed(1)}{' '}
-                    <span className="text-[10px] sm:text-xs font-normal text-slate-400">ly</span>
+                    {isSun ? '1.00 AU' : star.distanceLy >= 1000 ? `${(star.distanceLy / 1000).toFixed(2)}k` : star.distanceLy.toFixed(1)}{' '}
+                    <span className="text-[10px] sm:text-xs font-normal text-slate-400">{isSun ? '' : 'ly'}</span>
                   </div>
                 </div>
               </div>
@@ -820,94 +911,157 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                 </div>
 
                 {/* Content for each Metric */}
-                {hoveredMetric === 'diameter' && (
-                  <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• In Solar Diameters:</span>
-                      <span className="text-cyan-300 font-bold font-mono text-right break-words min-w-0">
-                        {formatPhysicalDiameter(star.diameterKm, star.diameterSolar).solarFormatted}
-                      </span>
+                {hoveredMetric === 'diameter' && (() => {
+                  const dens = calculateMeanDensity(star.massSolar, star.diameterSolar);
+                  const solarVol = Math.pow(star.diameterSolar, 3);
+                  return (
+                    <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Solar Diameters:</span>
+                        <span className="text-cyan-300 font-bold font-mono text-right break-words min-w-0">
+                          {formatPhysicalDiameter(star.diameterKm, star.diameterSolar).solarFormatted}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Kilometers:</span>
+                        <span className="text-cyan-200 font-semibold font-mono text-right break-words min-w-0">
+                          {star.diameterKm.toLocaleString()} km
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Statute Miles:</span>
+                        <span className="text-cyan-200 font-semibold font-mono text-right break-words min-w-0">
+                          {Math.round(star.diameterKm * 0.621371192).toLocaleString()} mi
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Astronomical Units:</span>
+                        <span className="text-emerald-300 font-bold font-mono text-right break-words min-w-0">
+                          {star.diameterAU < 0.001 ? star.diameterAU.toExponential(3) : star.diameterAU.toFixed(4)} AU
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Equatorial Circumference:</span>
+                        <span className="text-cyan-200 font-semibold font-mono text-right break-words min-w-0">
+                          {Math.round(Math.PI * star.diameterKm).toLocaleString()} km
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Solar Volume:</span>
+                        <span className="text-purple-300 font-semibold font-mono text-right break-words min-w-0">
+                          {solarVol < 0.001 || solarVol >= 1e6
+                            ? `${solarVol.toExponential(3)} V☉`
+                            : `${solarVol.toLocaleString(undefined, { maximumFractionDigits: 3 })} V☉`}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Mean Density:</span>
+                        <span className="text-amber-300 font-bold font-mono text-right break-words min-w-0">
+                          {dens.gcm3} g/cm³ ({dens.solarRatio} ρ☉)
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Scientific Notation:</span>
+                        <span className="text-purple-300 font-semibold font-mono text-right break-words min-w-0">
+                          {formatPhysicalDiameter(star.diameterKm, star.diameterSolar).scientificNotation}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Kilometers:</span>
-                      <span className="text-cyan-200 font-semibold font-mono text-right break-words min-w-0">
-                        {star.diameterKm.toLocaleString()} km
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Statute Miles:</span>
-                      <span className="text-cyan-200 font-semibold font-mono text-right break-words min-w-0">
-                        {Math.round(star.diameterKm * 0.621371192).toLocaleString()} mi
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• SI Scientific:</span>
-                      <span className="text-purple-300 font-semibold font-mono text-right break-words min-w-0">
-                        {formatPhysicalDiameter(star.diameterKm, star.diameterSolar).scientificNotation}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Astronomical Units:</span>
-                      <span className="text-emerald-300 font-bold font-mono text-right break-words min-w-0">
-                        {star.diameterAU < 0.001 ? star.diameterAU.toExponential(3) : star.diameterAU.toFixed(4)} AU
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
-                {hoveredMetric === 'mass' && (
-                  <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Mass in M☉:</span>
-                      <span className="text-blue-300 font-bold font-mono text-right break-words min-w-0">
-                        {star.massSolar < 0.1 ? star.massSolar.toFixed(4) : star.massSolar < 1 ? star.massSolar.toFixed(3) : star.massSolar.toLocaleString(undefined, { maximumFractionDigits: 2 })} M☉
-                      </span>
+                {hoveredMetric === 'mass' && (() => {
+                  const grav = calculateSurfaceGravity(star.massSolar, star.diameterSolar, star.surfaceGravityLogG);
+                  const dens = calculateMeanDensity(star.massSolar, star.diameterSolar);
+                  const esc = calculateEscapeVelocity(star.massSolar, star.diameterSolar);
+                  return (
+                    <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Solar Masses:</span>
+                        <span className="text-blue-300 font-bold font-mono text-right break-words min-w-0">
+                          {star.massSolar < 0.1 ? star.massSolar.toFixed(4) : star.massSolar < 1 ? star.massSolar.toFixed(3) : star.massSolar.toLocaleString(undefined, { maximumFractionDigits: 2 })} M☉
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Kilograms:</span>
+                        <span className="text-blue-200 font-semibold font-mono text-right break-words min-w-0">
+                          {(star.massSolar * 1.98847).toFixed(3)} × 10³⁰ kg
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Statute Pounds:</span>
+                        <span className="text-blue-200 font-semibold font-mono text-right break-words min-w-0">
+                          {(star.massSolar * 4.38383).toFixed(3)} × 10³⁰ lbs
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Surface Gravity (log g):</span>
+                        <span className="text-cyan-300 font-bold font-mono text-right break-words min-w-0">
+                          log g = {grav.logG} ({grav.gMs2} m/s² • {grav.gEarth} g⊕)
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Mean Density:</span>
+                        <span className="text-amber-300 font-bold font-mono text-right break-words min-w-0">
+                          {dens.gcm3} g/cm³ ({dens.solarRatio} ρ☉)
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Escape Velocity:</span>
+                        <span className="text-purple-300 font-semibold font-mono text-right break-words min-w-0">
+                          {esc.kmS} km/s ({esc.miS} mi/s)
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">• Scientific Notation:</span>
+                        <span className="text-blue-300 font-mono text-[10px] text-right break-words min-w-0">
+                          {(star.massSolar * 1.98847e30).toExponential(3)} kg
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Mass in kg:</span>
-                      <span className="text-blue-200 font-semibold font-mono text-right break-words min-w-0">
-                        {(star.massSolar * 1.98847).toFixed(3)} × 10³⁰ kg
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Scientific (kg):</span>
-                      <span className="text-blue-300 font-mono text-[10px] text-right break-words min-w-0">
-                        {(star.massSolar * 1.98847e30).toExponential(3)} kg
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Mass in lbs:</span>
-                      <span className="text-blue-200 font-semibold font-mono text-right break-words min-w-0">
-                        {(star.massSolar * 4.38383).toFixed(3)} × 10³⁰ lbs
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {hoveredMetric === 'temperature' && (
                   <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Kelvin (K):</span>
+                      <span className="text-slate-400 shrink-0">• Kelvin:</span>
                       <span className="text-amber-300 font-bold font-mono text-right break-words min-w-0">
                         {star.temperature.toLocaleString()} K
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Celsius (°C):</span>
+                      <span className="text-slate-400 shrink-0">• Celsius:</span>
                       <span className="text-amber-200 font-semibold font-mono text-right break-words min-w-0">
                         {Math.round(star.temperature - 273.15).toLocaleString()} °C
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Fahrenheit (°F):</span>
+                      <span className="text-slate-400 shrink-0">• Fahrenheit:</span>
                       <span className="text-amber-200 font-semibold font-mono text-right break-words min-w-0">
                         {Math.round((star.temperature - 273.15) * 1.8 + 32).toLocaleString()} °F
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Peak Radiation:</span>
+                      <span className="text-slate-400 shrink-0">• Peak Wavelength:</span>
                       <span className="text-amber-300 font-semibold font-mono text-right break-words min-w-0">
-                        {Math.round(2897772 / star.temperature)} nm
+                        {getPeakWavelengthBand(star.temperature)}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-slate-400 shrink-0">• Blackbody Emission:</span>
+                      <span className="text-cyan-300 font-semibold font-mono text-right break-words min-w-0">
+                        {star.temperature >= 30000
+                          ? 'Extreme UV & Ionizing Flux'
+                          : star.temperature >= 10000
+                          ? 'Ultraviolet & Blue-White Photosphere'
+                          : star.temperature >= 6000
+                          ? 'Visible Light (White Spectrum)'
+                          : star.temperature >= 4000
+                          ? 'Visible Light (Yellow-Orange Spectrum)'
+                          : star.temperature >= 2500
+                          ? 'Near-Infrared & Deep Red Spectrum'
+                          : 'Infrared & Sub-Stellar Thermal Glow'}
                       </span>
                     </div>
                   </div>
@@ -916,7 +1070,7 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                 {hoveredMetric === 'luminosity' && (
                   <div className="space-y-1.5 text-[10.5px] sm:text-[11px]">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Solar Luminosity:</span>
+                      <span className="text-slate-400 shrink-0">• Solar Luminosities:</span>
                       <span className="text-purple-300 font-bold font-mono text-right break-words min-w-0">
                         {star.luminositySolar >= 1000
                           ? `${star.luminositySolar.toLocaleString(undefined, { maximumFractionDigits: 1 })} L☉`
@@ -926,15 +1080,21 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Absolute Mag (M):</span>
+                      <span className="text-slate-400 shrink-0">• Radiant Power:</span>
                       <span className="text-purple-200 font-semibold font-mono text-right break-words min-w-0">
-                        {star.absoluteMagnitude > 0 ? `+${star.absoluteMagnitude}` : star.absoluteMagnitude} M
+                        {(star.luminositySolar * 3.828e26).toExponential(3)} W
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Apparent Mag (m):</span>
+                      <span className="text-slate-400 shrink-0">• Absolute Magnitude:</span>
                       <span className="text-purple-200 font-semibold font-mono text-right break-words min-w-0">
-                        {star.apparentMagnitude > 0 ? `+${star.apparentMagnitude}` : star.apparentMagnitude} m
+                        {star.absoluteMagnitude > 0 ? `+${star.absoluteMagnitude}` : star.absoluteMagnitude} M_V
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-slate-400 shrink-0">• Apparent Magnitude:</span>
+                      <span className="text-purple-200 font-semibold font-mono text-right break-words min-w-0">
+                        {star.apparentMagnitude > 0 ? `+${star.apparentMagnitude}` : star.apparentMagnitude} m_V
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
@@ -965,19 +1125,33 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-slate-400 shrink-0">• Astronomical Units:</span>
+                      <span className="text-emerald-300 font-bold font-mono text-right break-words min-w-0">
+                        {isSun
+                          ? '1.000 AU'
+                          : `${Math.round(star.distanceLy * 63241.077).toLocaleString()} AU`}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
                       <span className="text-slate-400 shrink-0">• Kilometers:</span>
                       <span className="text-emerald-200 font-semibold font-mono text-right break-words min-w-0">
                         {isSun
-                          ? '149.6M km'
+                          ? '149,597,870 km'
                           : `${(star.distanceLy * 9.46073).toLocaleString(undefined, { maximumFractionDigits: 2 })} × 10¹² km`}
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-slate-400 shrink-0">• Miles:</span>
+                      <span className="text-slate-400 shrink-0">• Statute Miles:</span>
                       <span className="text-emerald-200 font-semibold font-mono text-right break-words min-w-0">
                         {isSun
-                          ? '92.96M mi'
+                          ? '92,955,807 mi'
                           : `${(star.distanceLy * 5.878625).toLocaleString(undefined, { maximumFractionDigits: 2 })} × 10¹² mi`}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-slate-400 shrink-0">• Light Travel Time:</span>
+                      <span className="text-cyan-300 font-bold font-mono text-right break-words min-w-0">
+                        {calculateLightTravelTime(star.distanceLy, isSun)}
                       </span>
                     </div>
                   </div>

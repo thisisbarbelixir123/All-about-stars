@@ -13,6 +13,7 @@ import {
   isStarBelongingToConstellation,
   getDynamicStarLocationDescription
 } from '../utils/celestialMechanics';
+import { getStarDesignationTag } from '../utils/starDesignationUtils';
 import {
   X,
   Compass,
@@ -441,9 +442,9 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                                   text={cleanName}
                                   className="font-bold text-xs sm:text-sm text-white"
                                 />
-                                {st.bayerDesignation && (
+                                {getStarDesignationTag(st) && (
                                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                                    {st.bayerDesignation}
+                                    {getStarDesignationTag(st)}
                                   </span>
                                 )}
                                 {isPrincipal && (

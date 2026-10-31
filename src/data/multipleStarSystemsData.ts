@@ -6,6 +6,7 @@ export interface MultipleStarComponent {
   name: string; // e.g. 'Sirius A'
   bayerDesignation?: string; // e.g. 'α CMa A'
   spectralType: string; // e.g. 'A1V'
+  spectralClass?: string; // e.g. 'A'
   massSolar: number; // e.g. 2.06
   radiusSolar: number; // in Solar Radii
   temperature: number; // in Kelvin
@@ -99,7 +100,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
     components: [
       {
         id: 'alpha-centauri-a',
-        name: 'Alpha Centauri A (Rigil Kentaurus)',
+        name: 'Alpha Centauri A',
         bayerDesignation: 'α Cen A',
         spectralType: 'G2V',
         massSolar: 1.100,
@@ -115,7 +116,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
       {
         id: 'alpha-centauri-b',
-        name: 'Alpha Centauri B (Toliman)',
+        name: 'Alpha Centauri B',
         bayerDesignation: 'α Cen B',
         spectralType: 'K1V',
         massSolar: 0.907,
@@ -130,7 +131,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
       {
         id: 'proxima-centauri',
-        name: 'Proxima Centauri (Alpha Centauri C)',
+        name: 'Proxima Centauri',
         bayerDesignation: 'α Cen C',
         spectralType: 'M5.5Ve',
         massSolar: 0.122,
@@ -193,7 +194,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
     components: [
       {
         id: 'sirius-a',
-        name: 'Sirius A (The Dog Star)',
+        name: 'Sirius A',
         bayerDesignation: 'α CMa A',
         spectralType: 'A1V',
         massSolar: 2.063,
@@ -209,7 +210,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
       {
         id: 'sirius-b',
-        name: 'Sirius B (The Pup)',
+        name: 'Sirius B',
         bayerDesignation: 'α CMa B',
         spectralType: 'DA2',
         massSolar: 1.018,

@@ -47,6 +47,7 @@ import {
 import { StarData, StageSortKey, SortDirection, TourLength, PresetComparison } from '../types';
 import { PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
+import { getStarDesignationTag } from '../utils/starDesignationUtils';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
 import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
@@ -4587,9 +4588,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                       </span>
                     )}
 
-                    {activeFocusedStar.bayerDesignation && (
+                    {getStarDesignationTag(activeFocusedStar) && (
                       <span className="text-slate-400 text-xs hidden sm:inline">
-                        {activeFocusedStar.bayerDesignation}
+                        {getStarDesignationTag(activeFocusedStar)}
                       </span>
                     )}
                   </div>

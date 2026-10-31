@@ -1632,30 +1632,30 @@ export function hasBayerGreekDesignation(star: StarData): boolean {
   return false;
 }
 
-// 2. Strict Variable star designation check: ONLY stars with formal Argelander / GCVS designations:
+// 2. Numbered stars (Flamsteed numbers & Gould designations without Bayer)
+const FLAMSTEED_GOULD_REGEX = /\b(\d+\s+(Andromedae|Antliae|Apodis|Aquarii|Aquilae|Arae|Arietis|Aurigae|Bootis|Caeli|Camelopardalis|Cancri|Canum\s+Venaticorum|Canis\s+Majoris|Canis\s+Minoris|Capricorni|Carinae|Cassiopeiae|Centauri|Cephei|Ceti|Chamaeleontis|Circini|Columbae|Comae\s+Berenices|Coronae\s+Australis|Coronae\s+Borealis|Corvi|Crateris|Crucis|Cygni|Delphini|Doradus|Draconis|Equulei|Eridani|Fornacis|Geminorum|Gruis|Herculis|Horologii|Hydrae|Hydri|Indi|Lacertae|Leonis|Leonis\s+Minoris|Leporis|Librae|Lupi|Lyncis|Lyrae|Mensae|Microscopii|Monocerotis|Muscae|Normae|Octantis|Ophiuchi|Orionis|Pavonis|Pegasi|Persei|Phoenicis|Pictoris|Piscium|Piscis\s+Austrini|Puppis|Pyxidis|Reticuli|Sagittae|Sagittarii|Scorpii|Sculptoris|Scuti|Serpentis|Sextantis|Tauri|Telescopii|Trianguli|Trianguli\s+Australis|Tucanae|Ursae\s+Majoris|Ursae\s+Minoris|Velae|Virginis|Volantis|Vulpeculae|[A-Z][a-z]+)|\d+\s+G\.\s+[A-Z][a-z]+)\b/i;
+
+export function isNumberedFlamsteedGould(star: StarData): boolean {
+  if (hasBayerGreekDesignation(star)) return false;
+  if (isNeutronStarOrPulsar(star)) return false;
+
+  const allNames = [star.name, ...(star.alternateNames || [])];
+  return allNames.some((n) => FLAMSTEED_GOULD_REGEX.test(n));
+}
+
+// 3. Strict Variable star designation check: ONLY stars with formal Argelander / GCVS designations:
 // (R-Z, RR-ZZ, AA-QZ, Vxxx [constellation genitive])
 const FORMAL_VAR_REGEX = /\b(V\d{2,4}|[R-Z]|[R-Z]{2}|[A-Q][A-Z])\s+(Andromedae|Antliae|Apodis|Aquarii|Aquilae|Arae|Arietis|Aurigae|Bootis|Caeli|Camelopardalis|Cancri|Canum\s+Venaticorum|Canis\s+Majoris|Canis\s+Minoris|Capricorni|Carinae|Cassiopeiae|Centauri|Cephei|Ceti|Chamaeleontis|Circini|Columbae|Comae\s+Berenices|Coronae\s+Australis|Coronae\s+Borealis|Corvi|Crateris|Crucis|Cygni|Delphini|Doradus|Draconis|Equulei|Eridani|Fornacis|Geminorum|Gruis|Herculis|Horologii|Hydrae|Hydri|Indi|Lacertae|Leonis|Leonis\s+Minoris|Leporis|Librae|Lupi|Lyncis|Lyrae|Mensae|Microscopii|Monocerotis|Muscae|Normae|Octantis|Ophiuchi|Orionis|Pavonis|Pegasi|Persei|Phoenicis|Pictoris|Piscium|Piscis\s+Austrini|Puppis|Pyxidis|Reticuli|Sagittae|Sagittarii|Scorpii|Sculptoris|Scuti|Serpentis|Sextantis|Tauri|Telescopii|Trianguli|Trianguli\s+Australis|Tucanae|Ursae\s+Majoris|Ursae\s+Minoris|Velae|Virginis|Volantis|Vulpeculae|[A-Z][a-z]+)\b/;
 
 export function isFormalVariableDesignation(star: StarData): boolean {
   if (hasBayerGreekDesignation(star)) return false;
+  if (isNumberedFlamsteedGould(star)) return false;
   if (isNeutronStarOrPulsar(star)) {
     return false;
   }
 
   const allNames = [star.name, ...(star.alternateNames || [])];
   return allNames.some((n) => FORMAL_VAR_REGEX.test(n) && !n.includes('PSR') && !n.includes('SGR') && !n.includes('Soft Gamma'));
-}
-
-// 3. Numbered stars (Flamsteed numbers & Gould designations without Bayer)
-const FLAMSTEED_GOULD_REGEX = /\b(\d+\s+(Andromedae|Antliae|Apodis|Aquarii|Aquilae|Arae|Arietis|Aurigae|Bootis|Caeli|Camelopardalis|Cancri|Canum\s+Venaticorum|Canis\s+Majoris|Canis\s+Minoris|Capricorni|Carinae|Cassiopeiae|Centauri|Cephei|Ceti|Chamaeleontis|Circini|Columbae|Comae\s+Berenices|Coronae\s+Australis|Coronae\s+Borealis|Corvi|Crateris|Crucis|Cygni|Delphini|Doradus|Draconis|Equulei|Eridani|Fornacis|Geminorum|Gruis|Herculis|Horologii|Hydrae|Hydri|Indi|Lacertae|Leonis|Leonis\s+Minoris|Leporis|Librae|Lupi|Lyncis|Lyrae|Mensae|Microscopii|Monocerotis|Muscae|Normae|Octantis|Ophiuchi|Orionis|Pavonis|Pegasi|Persei|Phoenicis|Pictoris|Piscium|Piscis\s+Austrini|Puppis|Pyxidis|Reticuli|Sagittae|Sagittarii|Scorpii|Sculptoris|Scuti|Serpentis|Sextantis|Tauri|Telescopii|Trianguli|Trianguli\s+Australis|Tucanae|Ursae\s+Majoris|Ursae\s+Minoris|Velae|Virginis|Volantis|Vulpeculae|[A-Z][a-z]+)|\d+\s+G\.\s+[A-Z][a-z]+)\b/i;
-
-export function isNumberedFlamsteedGould(star: StarData): boolean {
-  if (hasBayerGreekDesignation(star)) return false;
-  if (isFormalVariableDesignation(star)) return false;
-  if (isNeutronStarOrPulsar(star)) return false;
-
-  const allNames = [star.name, ...(star.alternateNames || [])];
-  return allNames.some((n) => FLAMSTEED_GOULD_REGEX.test(n));
 }
 
 // 4. Cluster & Extragalactic specific designations (without Bayer)
