@@ -102,6 +102,12 @@ export default defineConfig(() => {
               }
               return 'vendor';
             }
+            if (id.includes('starDatabase.json')) {
+              return 'catalog-database';
+            }
+            if (id.includes('multipleStarSystemsData') || id.includes('stellarNomenclatureData')) {
+              return 'catalog-lore';
+            }
           },
         },
       },
