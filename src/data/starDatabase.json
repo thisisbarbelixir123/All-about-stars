@@ -87094,7 +87094,7 @@
   },
   {
     "id": "acrux-aa",
-    "name": "Acrux Aa",
+    "name": "Acrux (Alpha Crucis)",
     "bayerDesignation": "α¹ Cru Aa",
     "primaryDesignation": "α¹ Cru Aa",
     "constellation": "Crux",
@@ -87107,7 +87107,7 @@
     "stellarStage": "Blue Subgiant",
     "massSolar": 17.8,
     "luminositySolar": 25000,
-    "apparentMagnitude": 1.33,
+    "apparentMagnitude": 0.77,
     "absoluteMagnitude": -3.75,
     "distanceLy": 320,
     "distanceParsecs": 98.1,
@@ -87139,24 +87139,30 @@
     ],
     "description": "Acrux Aa is the searing blue-white subgiant primary star of Alpha-1 Crucis, the brightest visual component of the Southern Cross.",
     "alternateNames": [
+      "Acrux",
+      "Alpha Crucis",
       "Alpha-1 Crucis Aa",
       "HD 108248 A",
       "HR 4730 A",
       "HIP 60718 A",
       "CPD-62 2745 A",
-      "Acrux Aa (Alpha-1 Crucis Aa)"
+      "Acrux Aa",
+      "Acrux (Alpha Crucis)"
     ],
     "designations": [
       "α¹ Cru Aa",
+      "Acrux",
+      "Alpha Crucis",
       "Acrux Aa",
       "Alpha-1 Crucis Aa",
       "HD 108248 A",
       "HR 4730 A",
       "HIP 60718 A",
       "CPD-62°2745 A",
-      "SAO 251904",
-      "Acrux Aa (Alpha-1 Crucis Aa)"
-    ]
+      "SAO 251904"
+    ],
+    "rightAscension": "12h 26m 35.90s",
+    "declination": "-63° 05′ 56.7″"
   },
   {
     "id": "acrux-ab",
@@ -87217,7 +87223,9 @@
       "HD 108248 B",
       "HR 4730 B",
       "Acrux Ab (Alpha-1 Crucis Ab)"
-    ]
+    ],
+    "rightAscension": "12h 26m 35.90s",
+    "declination": "-63° 05′ 56.7″"
   },
   {
     "id": "acrux-ba",
@@ -87282,7 +87290,9 @@
       "HIP 60718 B",
       "CPD-62°2745 B",
       "Acrux Ba (Alpha-2 Crucis Ba)"
-    ]
+    ],
+    "rightAscension": "12h 26m 36.35s",
+    "declination": "-63° 05′ 58.4″"
   },
   {
     "id": "acrux-bb",
@@ -87341,7 +87351,9 @@
       "Alpha-2 Crucis Bb",
       "HR 4731 B",
       "Acrux Bb (Alpha-2 Crucis Bb)"
-    ]
+    ],
+    "rightAscension": "12h 26m 36.35s",
+    "declination": "-63° 05′ 58.4″"
   },
   {
     "id": "acrux-ca",
@@ -87408,7 +87420,9 @@
       "SAO 251904 A",
       "HD 108250 A / HR 4729 A",
       "Acrux Ca (HD 108250 A / HR 4729 A)"
-    ]
+    ],
+    "rightAscension": "12h 26m 39.50s",
+    "declination": "-63° 07′ 25.0″"
   },
   {
     "id": "acrux-cb",
@@ -87469,7 +87483,9 @@
       "HR 4729 B",
       "HD 108250 B / HR 4729 B",
       "Acrux Cb (HD 108250 B / HR 4729 B)"
-    ]
+    ],
+    "rightAscension": "12h 26m 39.50s",
+    "declination": "-63° 07′ 25.0″"
   },
   {
     "id": "acrux-d",
@@ -87528,7 +87544,9 @@
       "2MASS J12263486-6306041",
       "CPD-62 2744 D",
       "Acrux D (CPD-62 2744 D)"
-    ]
+    ],
+    "rightAscension": "12h 26m 39.75s",
+    "declination": "-63° 07′ 27.0″"
   },
   {
     "id": "dabih",
