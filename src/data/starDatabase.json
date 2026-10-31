@@ -214,8 +214,8 @@
     "diameterKm": 2130831000,
     "diameterAU": 14.243725462330396,
     "distanceParsecs": 3525.9201118483184,
-    "rightAscension": "18h 10m 00.00s",
-    "declination": "-08° 48′ 00.0″",
+    "rightAscension": "16h 47m 05.40s",
+    "declination": "-45° 50′ 36.8″",
     "primaryDesignation": "W26",
     "designations": [
       "W26",
@@ -1723,8 +1723,8 @@
     "diameterKm": 1531970000,
     "diameterAU": 10.240586933701591,
     "distanceParsecs": 4231.1041342179815,
-    "rightAscension": "20h 39m 01.60s",
-    "declination": "+42° 22′ 47.0″",
+    "rightAscension": "16h 47m 08.90s",
+    "declination": "-45° 49′ 58.0″",
     "primaryDesignation": "W75",
     "designations": [
       "W75",
@@ -13056,7 +13056,9 @@
       "PSR J1748-2446",
       "Terzan 5 ad",
       "PSR J1748-2446ad (Fastest Pulsar)"
-    ]
+    ],
+    "rightAscension": "17h 48m 04.97s",
+    "declination": "-24° 46′ 40.0″"
   },
   {
     "id": "sgr-1806-20",
@@ -13865,7 +13867,9 @@
       "TOI-165",
       "WISE J055532.59-571726.7",
       "WISEA J055532.58-571726.7"
-    ]
+    ],
+    "rightAscension": "05h 55m 32.69s",
+    "declination": "-57° 17′ 23.3″"
   },
   {
     "id": "teegardens-star",
@@ -16485,7 +16489,9 @@
       "WEB 2833",
       "WEB 2834",
       "XSS J03089+4101"
-    ]
+    ],
+    "rightAscension": "03h 08m 10.13s",
+    "declination": "+40° 57′ 20.3″"
   },
   {
     "id": "wr-102",
@@ -16954,7 +16960,9 @@
       "SMC WR7 Primary",
       "SSTISAGE1C J010335.88-720322.1",
       "XMMU J010335.9-720323"
-    ]
+    ],
+    "rightAscension": "00h 50m 14.40s",
+    "declination": "-72° 53′ 31.0″"
   },
   {
     "id": "vfts-682",
@@ -17310,7 +17318,9 @@
       "WEB 6338",
       "YZ 6 3073",
       "Plaskett’s Star A (HD 47129 A)"
-    ]
+    ],
+    "rightAscension": "06h 37m 24.04s",
+    "declination": "+06° 08′ 07.4″"
   },
   {
     "id": "regor",
@@ -18241,7 +18251,9 @@
       "WEB 4762",
       "YPAC 23",
       "Capella Ab (Alpha Aurigae Ab)"
-    ]
+    ],
+    "rightAscension": "05h 16m 41.36s",
+    "declination": "+45° 59′ 52.8″"
   },
   {
     "id": "capella-h",
@@ -19057,7 +19069,9 @@
       "Luhman 16B",
       "WISE 1049-5319 B",
       "WISE J1049-5319B"
-    ]
+    ],
+    "rightAscension": "10h 49m 18.92s",
+    "declination": "-53° 19′ 10.1″"
   },
   {
     "id": "wise-1506-7027",
@@ -19110,7 +19124,9 @@
     "primaryDesignation": "WISEPC J150649.97+702736.0",
     "designations": [
       "WISEPC J150649.97+702736.0"
-    ]
+    ],
+    "rightAscension": "15h 06m 49.89s",
+    "declination": "+70° 27′ 36.1″"
   },
   {
     "id": "ez-aquarii-a",
@@ -19739,7 +19755,9 @@
       "DUP 1",
       "WISE J014656.66+423410.0",
       "WISEA J014656.66+423409.9"
-    ]
+    ],
+    "rightAscension": "01h 46m 56.66s",
+    "declination": "+42° 34′ 47.7″"
   },
   {
     "id": "scr-1845-6357-a",
@@ -19802,7 +19820,9 @@
       "SCR J1845-6357",
       "WISE J184509.29-635741.3",
       "WISEA J184509.34-635741.3"
-    ]
+    ],
+    "rightAscension": "18h 45m 05.42s",
+    "declination": "-63° 57′ 47.5″"
   },
   {
     "id": "scr-1845-6357-b",
@@ -19856,7 +19876,9 @@
       "WDS J18451-6358B",
       "BIL 1B",
       "SCR J1845-6357B"
-    ]
+    ],
+    "rightAscension": "18h 45m 05.42s",
+    "declination": "-63° 57′ 47.5″"
   },
   {
     "id": "lacaille-8760",
@@ -20195,7 +20217,9 @@
       "NHR 2A",
       "USNO-B1.0 0500-00227632",
       "WISEA J104813.47-395617.3"
-    ]
+    ],
+    "rightAscension": "10h 48m 14.64s",
+    "declination": "-39° 56′ 06.2″"
   },
   {
     "id": "ross-614-a",
@@ -20425,7 +20449,9 @@
     "primaryDesignation": "WISE J154151.66-225025.2",
     "designations": [
       "WISE J154151.66-225025.2"
-    ]
+    ],
+    "rightAscension": "15h 41m 51.57s",
+    "declination": "-22° 50′ 25.0″"
   },
   {
     "id": "gliese-1",
@@ -21190,7 +21216,9 @@
     "designations": [
       "RSGC1-F01",
       "RSGC1-01"
-    ]
+    ],
+    "rightAscension": "18h 37m 57.00s",
+    "declination": "-06° 53′ 00.0″"
   },
   {
     "id": "my-cephei",
@@ -22818,7 +22846,9 @@
       "RX J1856.5-3754",
       "RX J1856.6-3754",
       "The Magnificent Seven #1"
-    ]
+    ],
+    "rightAscension": "18h 56m 35.11s",
+    "declination": "-37° 54′ 30.5″"
   },
   {
     "id": "psr-b1509-58",
@@ -42553,7 +42583,9 @@
       "PSR J1935+2154",
       "Sgr J1935+2154",
       "SGR 1935+2154 (Milky Way FRB Magnetar)"
-    ]
+    ],
+    "rightAscension": "19h 34m 55.60s",
+    "declination": "+21° 53′ 48.2″"
   },
   {
     "id": "swift-j1818-1607",
@@ -52615,7 +52647,9 @@
       "1806-20",
       "G10.0-0.3",
       "LBV 1806-20"
-    ]
+    ],
+    "rightAscension": "18h 08m 40.31s",
+    "declination": "-20° 24′ 41.1″"
   },
   {
     "id": "omicron-1-centauri",
@@ -52780,7 +52814,9 @@
       "DENIS J183905.5-060425",
       "MSX6C G026.1215-00.0345",
       "RSGC2-49"
-    ]
+    ],
+    "rightAscension": "18h 39m 19.50s",
+    "declination": "-06° 01′ 30.0″"
   },
   {
     "id": "phi-cassiopeiae",
@@ -53052,7 +53088,9 @@
       "RSGC2-12",
       "Stephenson 2-12",
       "ZTF J183851.41-060023.0"
-    ]
+    ],
+    "rightAscension": "18h 39m 21.00s",
+    "declination": "-06° 02′ 15.0″"
   },
   {
     "id": "woh-s170",
@@ -53193,7 +53231,9 @@
       "Gaia DR3 4253084188006327424",
       "TIC 7760199",
       "RSGC2-68"
-    ]
+    ],
+    "rightAscension": "18h 39m 25.00s",
+    "declination": "-06° 03′ 10.0″"
   },
   {
     "id": "stephenson-2-dfk-3",
@@ -53263,7 +53303,9 @@
       "MSX6C G026.1903-00.0876",
       "RSGC2-3",
       "USNO-B1.0 0839-00409722"
-    ]
+    ],
+    "rightAscension": "18h 39m 15.00s",
+    "declination": "-06° 00′ 45.0″"
   },
   {
     "id": "rsgc1-f02",
@@ -53324,7 +53366,9 @@
       "RSGC1-F02",
       "2MASS J18375806-0653005",
       "RSGC1-2"
-    ]
+    ],
+    "rightAscension": "18h 37m 58.00s",
+    "declination": "-06° 52′ 50.0″"
   },
   {
     "id": "hd-179821",
@@ -53485,7 +53529,9 @@
       "Westerlund 1 BKS L",
       "Westerlund 1 W 16",
       "Westerlund 1 W 16a"
-    ]
+    ],
+    "rightAscension": "16h 47m 06.50s",
+    "declination": "-45° 50′ 40.0″"
   },
   {
     "id": "westerlund-1-4",
@@ -53540,8 +53586,8 @@
     "diameterKm": 682423000,
     "diameterAU": 4.5617159977398,
     "distanceParsecs": 4231.1041342179815,
-    "rightAscension": "02h 32m 42.00s",
-    "declination": "+61° 27′ 00.0″",
+    "rightAscension": "16h 47m 02.20s",
+    "declination": "-45° 51′ 24.0″",
     "primaryDesignation": "W4",
     "designations": [
       "W4",
@@ -54044,8 +54090,8 @@
     "diameterKm": 1336992000,
     "diameterAU": 8.937239505775935,
     "distanceParsecs": 4231.1041342179815,
-    "rightAscension": "16h 51m 18.00s",
-    "declination": "+04° 59′ 00.0″",
+    "rightAscension": "16h 47m 04.50s",
+    "declination": "-45° 51′ 12.0″",
     "primaryDesignation": "W20",
     "designations": [
       "W20",
@@ -54491,7 +54537,9 @@
       "WEB 19512",
       "WISE J215638.90+633731.1",
       "WRH 36"
-    ]
+    ],
+    "rightAscension": "21h 56m 39.14s",
+    "declination": "+63° 37′ 32.0″"
   },
   {
     "id": "godzilla",
@@ -54560,7 +54608,9 @@
       "Godzilla",
       "Sunburst Arc Lensed Star",
       "Most Luminous Star Known"
-    ]
+    ],
+    "rightAscension": "15h 50m 00.50s",
+    "declination": "-78° 11′ 45.0″"
   },
   {
     "id": "quyllur",
@@ -56227,7 +56277,9 @@
       "UBV M 19362",
       "uvby98 100116658",
       "WEB 11556"
-    ]
+    ],
+    "rightAscension": "13h 25m 11.58s",
+    "declination": "-11° 09′ 40.8″"
   },
   {
     "id": "antares-b",
@@ -57007,7 +57059,9 @@
       "Most Distant Star Known",
       "Cosmic Dawn Titan",
       "Earendel (WHL0137-LS)"
-    ]
+    ],
+    "rightAscension": "01h 37m 23.23s",
+    "declination": "-08° 27′ 52.2″"
   },
   {
     "id": "r-horologii",
@@ -57203,7 +57257,9 @@
       "X Sco XR-1",
       "XSS J16204-1536",
       "Scorpius X-1 (Neutron Star)"
-    ]
+    ],
+    "rightAscension": "16h 19m 55.07s",
+    "declination": "-15° 38′ 24.8″"
   },
   {
     "id": "scorpius-x-1-optical",
@@ -58229,7 +58285,9 @@
       "LGGS J004539.99+414004.0",
       "Andromeda Red Hypergiant 1",
       "M31-RSG1"
-    ]
+    ],
+    "rightAscension": "00h 45m 39.99s",
+    "declination": "+41° 40′ 04.0″"
   },
   {
     "id": "lggs-j004035-m31",
@@ -58292,7 +58350,9 @@
       "LGGS J004035.08+404522.2",
       "Andromeda Red Supergiant 2",
       "M31-RSG2"
-    ]
+    ],
+    "rightAscension": "00h 40m 35.08s",
+    "declination": "+40° 45′ 22.2″"
   },
   {
     "id": "lggs-j004116-m31",
@@ -58354,7 +58414,9 @@
       "LGGS J004116.14+411130.6",
       "Andromeda Red Hypergiant 3",
       "M31-RSG3"
-    ]
+    ],
+    "rightAscension": "00h 41m 16.14s",
+    "declination": "+41° 11′ 30.6″"
   },
   {
     "id": "af-andromedae",
@@ -58642,7 +58704,9 @@
       "Variable",
       "Var A",
       "Hubble-Sandage Variable A"
-    ]
+    ],
+    "rightAscension": "01h 33m 50.89s",
+    "declination": "+30° 39′ 37.0″"
   },
   {
     "id": "hv-888",
@@ -60731,7 +60795,9 @@
       "UCAC3 268-74264",
       "uvby98 100031964 ABV",
       "WEB 4548"
-    ]
+    ],
+    "rightAscension": "05h 01m 58.13s",
+    "declination": "+43° 49′ 23.9″"
   },
   {
     "id": "struve-2398-a",
@@ -65038,7 +65104,9 @@
       "WISEA J102915.22+172928.1",
       "SDSS J102915",
       "Caffau’s Star (SDSS J102915)"
-    ]
+    ],
+    "rightAscension": "10h 29m 15.15s",
+    "declination": "+17° 29′ 28.0″"
   },
   {
     "id": "sneden-star",
@@ -65318,7 +65386,9 @@
       "UCAC3 133-153417",
       "UCAC4 332-067468",
       "Frebel’s Star (HE 1327-2326)"
-    ]
+    ],
+    "rightAscension": "13h 30m 06.00s",
+    "declination": "-23° 41′ 50.0″"
   },
   {
     "id": "18-scorpii",
@@ -68151,7 +68221,9 @@
       "UCAC4 296-076701",
       "WISE J141116.16-305303.7",
       "CD-30°11223 (Hypervelocity sdB Binary)"
-    ]
+    ],
+    "rightAscension": "14h 11m 38.30s",
+    "declination": "-31° 18′ 48.0″"
   },
   {
     "id": "bss-19-47tuc",
@@ -68206,7 +68278,9 @@
     "designations": [
       "47 Tuc BSS 19",
       "NGC 104 Blue Straggler 19"
-    ]
+    ],
+    "rightAscension": "00h 24m 05.30s",
+    "declination": "-72° 04′ 53.0″"
   },
   {
     "id": "v361-hydrae",
@@ -68565,7 +68639,9 @@
       "HD 222404b",
       "HIP 116727 B",
       "Gamma Cep B"
-    ]
+    ],
+    "rightAscension": "23h 39m 20.91s",
+    "declination": "+77° 37′ 56.5″"
   },
   {
     "id": "upsilon-andromedae-a",
@@ -70259,7 +70335,9 @@
       "uvby98 100087901 A",
       "WEB 9160",
       "YPAC 43"
-    ]
+    ],
+    "rightAscension": "10h 08m 22.31s",
+    "declination": "+11° 58′ 02.0″"
   },
   {
     "id": "polaris-ab",
@@ -70363,7 +70441,9 @@
       "UBV M 8201",
       "WEB 2438",
       "WRH 39"
-    ]
+    ],
+    "rightAscension": "02h 31m 49.09s",
+    "declination": "+89° 15′ 50.8″"
   },
   {
     "id": "fomalhaut-b",
@@ -70660,7 +70740,9 @@
       "UBV M 19376",
       "uvby98 100116842",
       "WEB 11557"
-    ]
+    ],
+    "rightAscension": "13h 25m 13.54s",
+    "declination": "+54° 59′ 16.7″"
   },
   {
     "id": "alphecca-b",
@@ -72366,7 +72448,9 @@
       "Kepler-16b",
       "KOI-1611.02",
       "KOI-1615 B"
-    ]
+    ],
+    "rightAscension": "19h 16m 18.18s",
+    "declination": "+51° 45′ 26.8″"
   },
   {
     "id": "hat-p-11",
@@ -72936,7 +73020,9 @@
       "SKY# 13893",
       "STF 1110B",
       "WEB 7319"
-    ]
+    ],
+    "rightAscension": "07h 34m 35.86s",
+    "declination": "+31° 53′ 17.8″"
   },
   {
     "id": "castor-ca",
@@ -73352,7 +73438,9 @@
       "WEB 11538",
       "WISE J132355.98+545527.5",
       "Zeta Ursae Majoris Ab"
-    ]
+    ],
+    "rightAscension": "13h 23m 55.54s",
+    "declination": "+54° 55′ 31.3″"
   },
   {
     "id": "mizar-ba",
@@ -73553,7 +73641,9 @@
       "WEB 11539",
       "WISE J132356.60+545515.1",
       "Zeta Ursae Majoris Bb"
-    ]
+    ],
+    "rightAscension": "13h 23m 56.32s",
+    "declination": "+54° 55′ 18.5″"
   },
   {
     "id": "beta-lyrae-b",
@@ -75182,7 +75272,9 @@
       "PPM 367022",
       "RAVE J004312.9-701749",
       "SRS 18517"
-    ]
+    ],
+    "rightAscension": "00h 01m 27.12s",
+    "declination": "+54° 51′ 48.0″"
   },
   {
     "id": "ai-volantis",
@@ -75277,7 +75369,9 @@
       "uvby98 100064491",
       "WEB 7592",
       "YPAC 66"
-    ]
+    ],
+    "rightAscension": "07h 41m 40.06s",
+    "declination": "-72° 55′ 06.8″"
   },
   {
     "id": "v1111-ophiuchi",
@@ -75360,7 +75454,9 @@
       "WISE J183719.29+102542.5",
       "ZTF J183719.24+102542.4",
       "V1111 Ophiuchi (IRC +10365)"
-    ]
+    ],
+    "rightAscension": "16h 54m 08.13s",
+    "declination": "-04° 20′ 23.3″"
   },
   {
     "id": "xx-persei",
@@ -75450,7 +75546,9 @@
       "TOK 427",
       "uvby98 100013387",
       "WDS J02098-4052AB"
-    ]
+    ],
+    "rightAscension": "02h 03m 09.39s",
+    "declination": "+55° 13′ 56.6″"
   },
   {
     "id": "rx-telescopii",
@@ -75539,7 +75637,9 @@
       "SKY# 35370",
       "SV* HV 3303",
       "WISE J190658.43-455814.3"
-    ]
+    ],
+    "rightAscension": "19h 00m 10.98s",
+    "declination": "-52° 58′ 05.8″"
   },
   {
     "id": "v-camelopardalis",
@@ -75618,7 +75718,9 @@
       "CF 1224",
       "GSC 08068-00543",
       "PPM 308383"
-    ]
+    ],
+    "rightAscension": "03h 56m 41.52s",
+    "declination": "+60° 54′ 46.1″"
   },
   {
     "id": "s-cephei",
@@ -75707,7 +75809,9 @@
       "RAFGL 2785",
       "SKY# 41158",
       "WEB 19282"
-    ]
+    ],
+    "rightAscension": "21h 35m 12.83s",
+    "declination": "+78° 37′ 28.2″"
   },
   {
     "id": "as-cephei",
@@ -75788,7 +75892,9 @@
       "PPM 274054",
       "RAVE J223759.1-245659",
       "YZ 115 15310"
-    ]
+    ],
+    "rightAscension": "23h 24m 00.91s",
+    "declination": "+62° 18′ 59.5″"
   },
   {
     "id": "ross-128",
@@ -77887,7 +77993,9 @@
       "WEB 9714",
       "WISEA J105626.19+070025.0",
       "Zkh 147"
-    ]
+    ],
+    "rightAscension": "10h 56m 28.92s",
+    "declination": "+07° 00′ 52.8″"
   },
   {
     "id": "uv-ceti",
@@ -77973,7 +78081,9 @@
       "WDS J01388-1758B",
       "WEB 1642",
       "Zkh 28"
-    ]
+    ],
+    "rightAscension": "01h 39m 01.54s",
+    "declination": "-17° 57′ 01.8″"
   },
   {
     "id": "bl-ceti",
@@ -78052,7 +78162,9 @@
       "Luyten 726-8 A",
       "WDS J01388-1758A",
       "Zkh 27"
-    ]
+    ],
+    "rightAscension": "01h 39m 01.54s",
+    "declination": "-17° 57′ 01.8″"
   },
   {
     "id": "ross-154",
@@ -78169,7 +78281,9 @@
       "WEB 15960",
       "WISEA J184949.85-235012.5",
       "Zkh 282"
-    ]
+    ],
+    "rightAscension": "18h 49m 49.36s",
+    "declination": "-23° 50′ 10.4″"
   },
   {
     "id": "ross-248",
@@ -78270,7 +78384,9 @@
       "WEB 20625",
       "WISEA J234155.15+441022.1",
       "Zkh 353"
-    ]
+    ],
+    "rightAscension": "23h 41m 54.99s",
+    "declination": "+44° 10′ 40.8″"
   },
   {
     "id": "gliese-1061",
@@ -78383,7 +78499,9 @@
       "PM J03359-4430",
       "WISEA J033600.43-443049.7",
       "Zkh 52"
-    ]
+    ],
+    "rightAscension": "03h 35m 59.70s",
+    "declination": "-44° 30′ 45.3″"
   },
   {
     "id": "gliese-163",
@@ -78505,7 +78623,9 @@
       "PM J04092-5322",
       "UCAC4 184-003776",
       "WISEA J040916.89-532219.2"
-    ]
+    ],
+    "rightAscension": "04h 09m 15.67s",
+    "declination": "-53° 22′ 25.3″"
   },
   {
     "id": "gliese-367",
@@ -78636,7 +78756,9 @@
       "WEB 8949",
       "WISEA J094429.37-454641.4",
       "Zkh 135"
-    ]
+    ],
+    "rightAscension": "09h 41m 58.74s",
+    "declination": "-45° 53′ 54.5″"
   },
   {
     "id": "l-98-59",
@@ -78759,7 +78881,9 @@
       "UCAC4 109-016513",
       "WISEA J081807.80-681850.2",
       "L 98-59 (TOI-175)"
-    ]
+    ],
+    "rightAscension": "08h 18m 07.62s",
+    "declination": "-68° 18′ 46.8″"
   },
   {
     "id": "tau-orionis",
@@ -83573,7 +83697,9 @@
       "2MASS J03471792+2422317",
       "TIC 14144414",
       "Melotte 22 Roque 11"
-    ]
+    ],
+    "rightAscension": "03h 47m 17.92s",
+    "declination": "+24° 22′ 31.7″"
   },
   {
     "id": "w-persei",
@@ -83658,7 +83784,9 @@
       "IRAS 02421-2503",
       "PPM 245340",
       "YZ 115 1243"
-    ]
+    ],
+    "rightAscension": "02h 50m 37.89s",
+    "declination": "+56° 59′ 00.3″"
   },
   {
     "id": "sw-virginis",
@@ -83755,7 +83883,9 @@
       "WEB 11419",
       "YZ 0 3779",
       "YZ 92 3551"
-    ]
+    ],
+    "rightAscension": "13h 14m 04.38s",
+    "declination": "-06° 08′ 29.5″"
   },
   {
     "id": "altais",
@@ -83858,7 +83988,9 @@
       "UBV M 23638",
       "WDS J19126+6740A",
       "WEB 16446"
-    ]
+    ],
+    "rightAscension": "19h 12m 33.30s",
+    "declination": "+67° 39′ 41.5″"
   },
   {
     "id": "aldhibah",
@@ -83952,7 +84084,9 @@
       "WEB 14179",
       "Gaia DR2 1632499034644070528",
       "Gaia DR3 1632499034644723968"
-    ]
+    ],
+    "rightAscension": "17h 08m 47.18s",
+    "declination": "+65° 42′ 52.8″"
   },
   {
     "id": "iota-draconis",
@@ -84072,7 +84206,9 @@
       "WDS J15249+5858A",
       "WEB 12868",
       "YZ 0 8366"
-    ]
+    ],
+    "rightAscension": "15h 24m 55.78s",
+    "declination": "+58° 57′ 57.8″"
   },
   {
     "id": "xi-draconis",
@@ -84177,7 +84313,9 @@
       "WDS J17535+5652A",
       "WEB 14775",
       "YZ 56 9517"
-    ]
+    ],
+    "rightAscension": "17h 53m 31.73s",
+    "declination": "+56° 52′ 21.4″"
   },
   {
     "id": "beta-serpentis",
@@ -84283,7 +84421,9 @@
       "WDS J15462+1525A",
       "WEB 13088",
       "YZ 15 5643"
-    ]
+    ],
+    "rightAscension": "15h 46m 11.21s",
+    "declination": "+15° 25′ 18.9″"
   },
   {
     "id": "gamma-serpentis",
@@ -84404,7 +84544,9 @@
       "WEB 13203",
       "WISEA J155627.41+153928.7",
       "YZ 15 5702"
-    ]
+    ],
+    "rightAscension": "15h 56m 27.18s",
+    "declination": "+15° 39′ 41.8″"
   },
   {
     "id": "mu-herculis",
@@ -84532,7 +84674,9 @@
       "WEB 14673",
       "YZ 27 8419",
       "Zkh 264"
-    ]
+    ],
+    "rightAscension": "17h 46m 27.53s",
+    "declination": "+27° 43′ 14.4″"
   },
   {
     "id": "pi-herculis",
@@ -84635,7 +84779,9 @@
       "UBV M 22064",
       "WEB 14244",
       "WISE J171502.79+364832.7"
-    ]
+    ],
+    "rightAscension": "17h 15m 02.83s",
+    "declination": "+36° 48′ 33.0″"
   },
   {
     "id": "theta-ursae-majoris",
@@ -84759,7 +84905,9 @@
       "WDS J09329+5141A",
       "WEB 8835",
       "WISE J093250.11+514032.4"
-    ]
+    ],
+    "rightAscension": "09h 32m 51.43s",
+    "declination": "+51° 40′ 38.3″"
   },
   {
     "id": "kappa-ursae-majoris",
@@ -84865,7 +85013,9 @@
       "uvby98 100077327",
       "WDS J09036+4709AB",
       "WEB 8522"
-    ]
+    ],
+    "rightAscension": "09h 03m 37.52s",
+    "declination": "+47° 09′ 24.1″"
   },
   {
     "id": "zeta-cephei",
@@ -84973,7 +85123,9 @@
       "WEB 19675",
       "WISE J221051.61+581207.1",
       "YZ 57 12918"
-    ]
+    ],
+    "rightAscension": "22h 10m 51.28s",
+    "declination": "+58° 12′ 04.5″"
   },
   {
     "id": "eta-cephei",
@@ -85089,7 +85241,9 @@
       "uvby98 100198149",
       "WDS J20453+6150A",
       "WEB 18547"
-    ]
+    ],
+    "rightAscension": "20h 45m 17.27s",
+    "declination": "+61° 50′ 12.5″"
   },
   {
     "id": "delta-andromedae",
@@ -85203,7 +85357,9 @@
       "WDS J00393+3052A",
       "WEB 551",
       "YZ 30 378"
-    ]
+    ],
+    "rightAscension": "00h 39m 19.68s",
+    "declination": "+30° 51′ 39.7″"
   },
   {
     "id": "nu-persei",
@@ -85311,7 +85467,9 @@
       "uvby98 100023230",
       "WDS J03452+4235A",
       "WEB 3322"
-    ]
+    ],
+    "rightAscension": "03h 45m 11.64s",
+    "declination": "+42° 34′ 42.8″"
   },
   {
     "id": "kappa-geminorum",
@@ -85418,7 +85576,9 @@
       "WEB 7458",
       "WISE J074426.69+242351.5",
       "YZ 24 3095"
-    ]
+    ],
+    "rightAscension": "07h 44m 26.87s",
+    "declination": "+24° 23′ 52.8″"
   },
   {
     "id": "rho-leonis",
@@ -85526,7 +85686,9 @@
       "WEB 9417",
       "WISE J103248.67+091823.7",
       "WRH 19AB"
-    ]
+    ],
+    "rightAscension": "10h 32m 48.67s",
+    "declination": "+09° 18′ 23.7″"
   },
   {
     "id": "gamma-librae",
@@ -85660,7 +85822,9 @@
       "WEB 12958",
       "WRH 20",
       "YZ 104 5712"
-    ]
+    ],
+    "rightAscension": "15h 35m 31.54s",
+    "declination": "-14° 47′ 22.4″"
   },
   {
     "id": "kappa-ophiuchi",
@@ -85764,7 +85928,9 @@
       "USNO-B1.0 0993-00282885",
       "WEB 14033",
       "YZ 9 7561"
-    ]
+    ],
+    "rightAscension": "16h 57m 40.11s",
+    "declination": "+09° 22′ 30.2″"
   },
   {
     "id": "delta-aquilae",
@@ -85880,7 +86046,9 @@
       "WDS J19255+0307Aa,Ab",
       "WEB 16698",
       "WISE J192530.07+030654.8"
-    ]
+    ],
+    "rightAscension": "19h 25m 29.75s",
+    "declination": "+03° 06′ 52.5″"
   },
   {
     "id": "theta-aquilae",
@@ -85993,7 +86161,9 @@
       "WDS J20113-0049A",
       "WEB 17777",
       "WISE J201118.29-004917.4"
-    ]
+    ],
+    "rightAscension": "20h 11m 18.26s",
+    "declination": "-00° 49′ 17.3″"
   },
   {
     "id": "eta-aquilae",
@@ -86100,7 +86270,9 @@
       "WISE J195228.43+010020.5",
       "WISEA J195228.37+010020.5",
       "YZ 0 5001"
-    ]
+    ],
+    "rightAscension": "19h 52m 28.37s",
+    "declination": "+01° 00′ 20.4″"
   },
   {
     "id": "mu-pegasi",
@@ -86205,7 +86377,9 @@
       "USNO-B1.0 1146-00562556",
       "WEB 20089",
       "YZ 24 8764"
-    ]
+    ],
+    "rightAscension": "22h 50m 00.19s",
+    "declination": "+24° 36′ 06.1″"
   },
   {
     "id": "delta-eridani",
@@ -86321,7 +86495,9 @@
       "WEB 3283",
       "YZ 99 857",
       "Zkh 53"
-    ]
+    ],
+    "rightAscension": "03h 43m 14.90s",
+    "declination": "-09° 45′ 48.2″"
   },
   {
     "id": "eta-aurigae",
@@ -86430,7 +86606,9 @@
       "UBV M 10595",
       "uvby98 100032630",
       "WEB 4637"
-    ]
+    ],
+    "rightAscension": "05h 06m 30.87s",
+    "declination": "+41° 14′ 04.7″"
   },
   {
     "id": "lambda-tauri-a",
@@ -86497,7 +86675,9 @@
       "BD+12°561 A",
       "SAO 93864 A",
       "TYC 690-1498-1"
-    ]
+    ],
+    "rightAscension": "04h 00m 40.82s",
+    "declination": "+12° 29′ 25.4″"
   },
   {
     "id": "lambda-tauri-b",
@@ -86557,7 +86737,9 @@
       "35 Tauri B",
       "HD 25204 B",
       "HR 1239 B"
-    ]
+    ],
+    "rightAscension": "04h 00m 40.82s",
+    "declination": "+12° 29′ 25.4″"
   },
   {
     "id": "gamma-delphini-a",
@@ -86625,7 +86807,9 @@
       "HIP 102532",
       "BD+15°4290",
       "SAO 106476"
-    ]
+    ],
+    "rightAscension": "20h 46m 39.52s",
+    "declination": "+16° 07′ 27.2″"
   },
   {
     "id": "gamma-delphini-b",
@@ -86693,7 +86877,9 @@
       "HIP 102531",
       "BD+15°4289",
       "SAO 106475"
-    ]
+    ],
+    "rightAscension": "20h 46m 39.52s",
+    "declination": "+16° 07′ 27.2″"
   },
   {
     "id": "delta-serpentis-a",
@@ -86758,7 +86944,9 @@
       "HIP 76276",
       "BD+10°2833 A",
       "SAO 121130"
-    ]
+    ],
+    "rightAscension": "15h 34m 48.14s",
+    "declination": "+10° 32′ 19.9″"
   },
   {
     "id": "delta-serpentis-b",
@@ -86820,7 +87008,9 @@
       "HD 138918",
       "HR 5789",
       "BD+10°2833 B"
-    ]
+    ],
+    "rightAscension": "15h 34m 48.14s",
+    "declination": "+10° 32′ 19.9″"
   },
   {
     "id": "mesarthim-a",
@@ -86888,7 +87078,9 @@
       "HIP 8697",
       "BD+18°243 A",
       "SAO 92681"
-    ]
+    ],
+    "rightAscension": "01h 53m 31.77s",
+    "declination": "+19° 17′ 37.8″"
   },
   {
     "id": "mesarthim-b",
@@ -86956,7 +87148,9 @@
       "HIP 8696",
       "BD+18°243 B",
       "SAO 92680"
-    ]
+    ],
+    "rightAscension": "01h 53m 31.77s",
+    "declination": "+19° 17′ 37.8″"
   },
   {
     "id": "alula-australis-a",
@@ -87024,7 +87218,9 @@
       "HIP 55203",
       "BD+32°2132 A",
       "GJ 423 A"
-    ]
+    ],
+    "rightAscension": "11h 18m 10.96s",
+    "declination": "+31° 31′ 45.4″"
   },
   {
     "id": "alula-australis-b",
@@ -87090,7 +87286,9 @@
       "HR 4374",
       "BD+32°2132 B",
       "GJ 423 B"
-    ]
+    ],
+    "rightAscension": "11h 18m 10.96s",
+    "declination": "+31° 31′ 45.4″"
   },
   {
     "id": "acrux-aa",
@@ -95461,5 +95659,161 @@
       "Mu Aquarii",
       "HIP 103045"
     ]
+  },
+  {
+    "id": "barnards-star",
+    "name": "Barnard’s Star",
+    "bayerDesignation": "V2500 Oph",
+    "primaryDesignation": "V2500 Oph",
+    "constellation": "Ophiuchus",
+    "diameterSolar": 0.196,
+    "diameterKm": 272714,
+    "diameterAU": 0.001823,
+    "temperature": 3134,
+    "spectralType": "M4.0V",
+    "spectralClass": "M",
+    "stellarStage": "Red Dwarf",
+    "massSolar": 0.144,
+    "luminositySolar": 0.00329,
+    "apparentMagnitude": 9.51,
+    "absoluteMagnitude": 13.25,
+    "distanceLy": 5.96,
+    "distanceParsecs": 1.828,
+    "estimatedAge": "10 Billion Years",
+    "estimatedAgeMyr": 10000,
+    "metallicityFeH": -0.39,
+    "rotationalVelocityKmS": 0.8,
+    "surfaceGravityLogG": 5,
+    "colorHex": "#ffb56c",
+    "coronaColorHex": "#ffd1a4",
+    "solarEngulfment": "Does not engulf any planets; fits within 0.002 AU.",
+    "engulfsPlanets": [],
+    "habitableZoneAU": {
+      "inner": 0.05,
+      "outer": 0.09
+    },
+    "exoplanetSystem": {
+      "hasExoplanets": true,
+      "confirmedCount": 1,
+      "planets": [
+        {
+          "name": "Barnard's Star b",
+          "massEarth": 0.37,
+          "radiusEarth": 0.75,
+          "orbitalPeriodDays": 3.15,
+          "semiMajorAxisAU": 0.0229,
+          "habitableZoneStatus": "Hot Sub-Earth"
+        }
+      ],
+      "systemOverview": "Single M-dwarf host with one confirmed ultra-short period sub-Earth planet."
+    },
+    "lifespanEstimate": "1 Trillion Years",
+    "futureFate": "Will slowly fuse virtually all its hydrogen over a trillion years, transitioning into a blue dwarf then helium white dwarf.",
+    "fusionProcess": "Proton-proton chain reaction with fully convective core and envelope.",
+    "notableFacts": [
+      "Second closest stellar system to Earth after the Alpha Centauri triplet at 5.96 light-years.",
+      "Has the largest proper motion of any known star at 10.39 arcseconds per year, traversing the width of the Moon in 173 years."
+    ],
+    "description": "Barnard’s Star is a very low-mass red dwarf star in Ophiuchus, renowned as the second-closest known star system to the Sun and the star with the highest known proper motion across Earth’s night sky.",
+    "alternateNames": [
+      "Barnard's Star",
+      "V2500 Ophiuchi",
+      "GJ 699",
+      "BD+04°3561",
+      "HIP 87937",
+      "LHS 57"
+    ],
+    "designations": [
+      "V2500 Oph",
+      "GJ 699",
+      "HIP 87937",
+      "BD+04°3561",
+      "LHS 57",
+      "Barnard's Star"
+    ],
+    "rightAscension": "17h 57m 48.50s",
+    "declination": "+04° 41′ 36.2″"
+  },
+  {
+    "id": "lalande-21185",
+    "name": "Lalande 21185",
+    "bayerDesignation": "HD 95735",
+    "primaryDesignation": "HD 95735",
+    "constellation": "Ursa Major",
+    "diameterSolar": 0.393,
+    "diameterKm": 546820,
+    "diameterAU": 0.003655,
+    "temperature": 3601,
+    "spectralType": "M2.0V",
+    "spectralClass": "M",
+    "stellarStage": "Red Dwarf",
+    "massSolar": 0.39,
+    "luminositySolar": 0.025,
+    "apparentMagnitude": 7.52,
+    "absoluteMagnitude": 10.48,
+    "distanceLy": 8.31,
+    "distanceParsecs": 2.548,
+    "estimatedAge": "8 Billion Years",
+    "estimatedAgeMyr": 8000,
+    "metallicityFeH": -0.22,
+    "rotationalVelocityKmS": 1,
+    "surfaceGravityLogG": 4.8,
+    "colorHex": "#ffb56c",
+    "coronaColorHex": "#ffd1a4",
+    "solarEngulfment": "Does not engulf any planets; fits within 0.004 AU.",
+    "engulfsPlanets": [],
+    "habitableZoneAU": {
+      "inner": 0.12,
+      "outer": 0.24
+    },
+    "exoplanetSystem": {
+      "hasExoplanets": true,
+      "confirmedCount": 2,
+      "planets": [
+        {
+          "name": "Lalande 21185 b",
+          "massEarth": 2.69,
+          "radiusEarth": 1.45,
+          "orbitalPeriodDays": 12.95,
+          "semiMajorAxisAU": 0.0789,
+          "habitableZoneStatus": "Super-Earth"
+        },
+        {
+          "name": "Lalande 21185 c",
+          "massEarth": 13.6,
+          "radiusEarth": 3.2,
+          "orbitalPeriodDays": 2800,
+          "semiMajorAxisAU": 2.84,
+          "habitableZoneStatus": "Cold Neptune"
+        }
+      ],
+      "systemOverview": "Multi-planet system with a warm super-Earth and a distant cold gas giant."
+    },
+    "lifespanEstimate": "500 Billion Years",
+    "futureFate": "Will steadily burn core hydrogen over hundreds of billions of years before cooling into a helium white dwarf.",
+    "fusionProcess": "Proton-proton chain hydrogen burning.",
+    "notableFacts": [
+      "The fourth closest individual star system to Earth at 8.31 light-years, and the closest star in the northern celestial hemisphere.",
+      "One of the fastest-moving stars in the solar neighborhood with a high proper motion of 4.8 arcseconds per year."
+    ],
+    "description": "Lalande 21185 is a bright red dwarf in Ursa Major and the closest star system in the northern sky, orbited by multiple confirmed exoplanets.",
+    "alternateNames": [
+      "Lalande 21185",
+      "HD 95735",
+      "HIP 54035",
+      "GJ 411",
+      "BD+36°2147",
+      "LHS 267"
+    ],
+    "designations": [
+      "HD 95735",
+      "HIP 54035",
+      "GJ 411",
+      "BD+36°2147",
+      "LHS 267",
+      "Lalande 21185"
+    ],
+    "rightAscension": "11h 03m 20.19s",
+    "declination": "+35° 58′ 11.5″"
   }
 ]

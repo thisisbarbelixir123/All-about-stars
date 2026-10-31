@@ -315,6 +315,16 @@ export const isStarInsideConstellation = (
     }
   }
 
+  // Also check equatorial (lon, lat) polygon to prevent stereographic chord-sag clipping on long Delporte boundary spans
+  let rawLon = raVal * 15;
+  if (rawLon > 180) rawLon -= 360;
+  for (const ring of boundaryRings) {
+    const geoRing = ring.map(pt => ({ x: pt[0], y: pt[1] }));
+    if (pointInPolygon(rawLon, decVal, geoRing)) {
+      return true;
+    }
+  }
+
   return false;
 };
 
