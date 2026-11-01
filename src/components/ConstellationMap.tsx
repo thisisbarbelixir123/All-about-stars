@@ -398,13 +398,13 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
   const allSecondary = [...jsonStars, ...localRawDsos, ...cCatalogStars, ...extraFigureStars];
 
-  const { mappedPoints, boundaryRingsSvg, poleSvg, toSvg, midX, midY, span } = projectUniversalStereo(
+  const { mappedPoints, boundaryRingsSvg, poleSvg, toSvg, midX, midY, span, boxMargin } = projectUniversalStereo(
     constellation,
     allSecondary,
     boundaryRings,
     cLon,
     cLat,
-    70
+    82
   );
 
   let offset = 0;
@@ -445,21 +445,62 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     return results;
   }, [opts.showMilkyWay, celestialData.milkyWay, constellation.id, cLon, cLat, toSvg]);
 
-  // Project and place Bordering Constellations on the Sky Map
-  const borderingConstellationsSvg = neighbors.map(neighborName => {
-    const neighborObj = resolveConstellationByName(neighborName);
-    const abbr = neighborObj?.abbreviation || getNeighborAbbr(neighborName, neighborObj);
-    const nFeatures = (celestialData.bounds || []).filter((b: any) => {
+  // Project and place all visible bordering and surrounding constellations in the sky map field of view
+  const borderingConstellationsSvg = useMemo(() => {
+    if (!celestialData.bounds || celestialData.bounds.length === 0) return [];
+    const centerAbbr = (constellation.abbreviation || constellation.id).toLowerCase();
+    const centerId = constellation.id.toLowerCase();
+    const centerName = constellation.name.toLowerCase();
+
+    const d2r = Math.PI / 180;
+    const lam0 = cLon * d2r;
+    const phi0 = cLat * d2r;
+
+    // Filter out central constellation, which is rendered separately with mainBoundaryPathData
+    const otherFeatures = celestialData.bounds.filter((b: any) => {
       const fid = (b.id || '').toLowerCase();
       const pid = (b.properties?.id || '').toLowerCase();
       const pname = (b.properties?.name || '').toLowerCase();
-      return fid === abbr.toLowerCase() || (neighborObj && (fid === neighborObj.id.toLowerCase() || pname === neighborObj.name.toLowerCase()));
+      return fid !== centerAbbr && fid !== centerId && pid !== centerAbbr && pid !== centerId && pname !== centerName;
     });
 
-    const ringsSvg: Array<Array<{ x: number; y: number }>> = [];
-    nFeatures.forEach(feat => {
-      if (feat.geometry?.type === 'Polygon' && feat.geometry.coordinates?.[0]) {
-        const rawRing = feat.geometry.coordinates[0].map((pt: number[]) => {
+    const results: Array<{
+      name: string;
+      abbr: string;
+      neighborObj: ConstellationInfo | null;
+      pathData: string;
+      badgePos: { x: number; y: number } | null;
+      badgeWidth: number;
+      badgeHeight: number;
+      isDirectNeighbor: boolean;
+    }> = [];
+
+    otherFeatures.forEach((feat: any) => {
+      const abbr = feat.id || feat.properties?.id || '';
+      const neighborObj = resolveConstellationByName(abbr) || null;
+      const constName = neighborObj?.name || abbr;
+      const isDirectNeighbor = neighbors.some(n => 
+        n.toLowerCase() === constName.toLowerCase() || 
+        n.toLowerCase() === abbr.toLowerCase()
+      );
+
+      // Pre-check angular proximity to avoid antipodal stereographic artifacts (within ~75 degrees)
+      const ringsSvg: Array<Array<{ x: number; y: number }>> = [];
+
+      const processCoordinates = (coords: number[][]) => {
+        let hasNearbyPoint = false;
+        for (const pt of coords) {
+          const lam = pt[0] * d2r;
+          const phi = pt[1] * d2r;
+          const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lam - lam0);
+          if (cosC > 0.25) {
+            hasNearbyPoint = true;
+            break;
+          }
+        }
+        if (!hasNearbyPoint) return;
+
+        const rawRing = coords.map((pt: number[]) => {
           const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
           return toSvg(p.x, p.y);
         });
@@ -467,50 +508,39 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         if (clipped.length >= 3) {
           ringsSvg.push(clipped);
         }
+      };
+
+      if (feat.geometry?.type === 'Polygon' && feat.geometry.coordinates?.[0]) {
+        processCoordinates(feat.geometry.coordinates[0]);
       } else if (feat.geometry?.type === 'MultiPolygon' && feat.geometry.coordinates) {
         feat.geometry.coordinates.forEach((poly: any) => {
-          if (poly[0]) {
-            const rawRing = poly[0].map((pt: number[]) => {
-              const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
-              return toSvg(p.x, p.y);
-            });
-            const clipped = clipPolygonSutherlandHodgman(rawRing, -70, -70, 170, 170);
-            if (clipped.length >= 3) {
-              ringsSvg.push(clipped);
-            }
-          }
+          if (poly[0]) processCoordinates(poly[0]);
         });
       }
+
+      if (ringsSvg.length === 0) return;
+
+      const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
+
+      const bw = Math.max(8.0, Math.min(24.0, constName.length * 1.15 + 3.2));
+      const bh = 3.6;
+
+      const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
+
+      results.push({
+        name: constName,
+        abbr,
+        neighborObj,
+        pathData,
+        badgePos,
+        badgeWidth: bw,
+        badgeHeight: bh,
+        isDirectNeighbor
+      });
     });
 
-    if (ringsSvg.length === 0) return null;
-
-    const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
-
-    const bw = Math.max(8.0, Math.min(24.0, neighborName.length * 1.15 + 3.2));
-    const bh = 3.6;
-
-    const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
-    if (!badgePos) return null;
-
-    return {
-      name: neighborName,
-      abbr,
-      neighborObj,
-      pathData,
-      badgePos,
-      badgeWidth: bw,
-      badgeHeight: bh
-    };
-  }).filter(Boolean) as Array<{
-    name: string;
-    abbr: string;
-    neighborObj: ConstellationInfo | null;
-    pathData: string;
-    badgePos: { x: number; y: number };
-    badgeWidth: number;
-    badgeHeight: number;
-  }>;
+    return results;
+  }, [celestialData.bounds, constellation.id, constellation.abbreviation, constellation.name, neighbors, boundaryRingsSvg, cLon, cLat, toSvg]);
 
   // Delporte official stepped boundary line segments (for central constellation and visible neighbors)
   const delporteBorderSegments = useMemo(() => {
@@ -557,7 +587,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     if (isPolar) return null;
 
     // Parallels every 10 degrees: -80 to +80
-    const parallels: Array<{ dec: number; path: string; labelPt: { x: number; y: number }; label: string }> = [];
+    const parallels: Array<{ dec: number; path: string }> = [];
     for (let dec = -80; dec <= 80; dec += 10) {
       const pts: Array<{ x: number; y: number }> = [];
       for (let dRa = -90; dRa <= 90; dRa += 2) {
@@ -566,18 +596,15 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         const s = toSvg(sp.x, sp.y);
         pts.push(s);
       }
-      const inView = pts.filter(p => p.x >= -10 && p.x <= 110 && p.y >= -10 && p.y <= 110);
+      const inView = pts.filter(p => p.x >= -60 && p.x <= 160 && p.y >= -60 && p.y <= 160);
       if (inView.length >= 2) {
-        const nearLeft = inView.filter(p => p.x >= -5 && p.x <= 18 && p.y >= 5 && p.y <= 95);
-        const sorted = (nearLeft.length > 0 ? nearLeft : inView).sort((a, b) => Math.abs(a.x - 4.5) - Math.abs(b.x - 4.5));
-        const labelPt = sorted[0];
         const path = 'M ' + inView.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ');
-        parallels.push({ dec, path, labelPt, label: (dec > 0 ? '+' : '') + dec + '°' });
+        parallels.push({ dec, path });
       }
     }
 
     // Meridians every 1 hour (15 degrees)
-    const meridians: Array<{ h: number; path: string; labelPt: { x: number; y: number }; label: string }> = [];
+    const meridians: Array<{ h: number; path: string }> = [];
     const startH = Math.floor((cLon - 90) / 15);
     const endH = Math.ceil((cLon + 90) / 15);
     for (let h = startH; h <= endH; h++) {
@@ -588,16 +615,11 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         const s = toSvg(sp.x, sp.y);
         pts.push(s);
       }
-      const inView = pts.filter(p => p.x >= -10 && p.x <= 110 && p.y >= -10 && p.y <= 110);
+      const inView = pts.filter(p => p.x >= -60 && p.x <= 160 && p.y >= -60 && p.y <= 160);
       if (inView.length >= 2) {
-        const nearTop = inView.filter(p => p.y >= -5 && p.y <= 16 && p.x >= 2 && p.x <= 98);
-        if (nearTop.length > 0) {
-          const sorted = nearTop.sort((a, b) => Math.abs(a.y - 7.5) - Math.abs(b.y - 7.5));
-          const labelPt = sorted[0];
-          const path = 'M ' + inView.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ');
-          const hWrapped = ((h % 24) + 24) % 24;
-          meridians.push({ h: hWrapped, path, labelPt, label: `${String(hWrapped).padStart(2, '0')}h` });
-        }
+        const path = 'M ' + inView.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ');
+        const hWrapped = ((h % 24) + 24) % 24;
+        meridians.push({ h: hWrapped, path });
       }
     }
 
@@ -607,18 +629,17 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   // Dynamic astronomical frame ruler ticks whose values adjust continuously as the user zooms and pans
   const dynamicFrameRuler = useMemo(() => {
     if (isPolar) return null;
-    const boxMargin = 70;
 
     const fromScreenToCelestial = (screenX: number, screenY: number) => {
       const svgX = (screenX - 50 - pan.x) / zoom + 50;
       const svgY = (screenY - 50 - pan.y) / zoom + 50;
-      const projX = ((svgX - 50) / boxMargin) * span + midX;
-      const projY = -((svgY - 50) / boxMargin) * span + midY;
+      const projX = ((svgX - 50) / (boxMargin || 82)) * span + midX;
+      const projY = -((svgY - 50) / (boxMargin || 82)) * span + midY;
       return unprojectStereoPoint(projX, projY, cLon, cLat);
     };
 
-    // Right Ascension (RA) labels on top neatline frame (screen y = 0)
-    const raTickPositions = [18, 50, 82];
+    // Right Ascension (RA) labels on top neatline frame (aligned with major ticks at 20, 50, 80)
+    const raTickPositions = [20, 50, 80];
     const raLabels = raTickPositions.map(sx => {
       const pt = fromScreenToCelestial(sx, 0);
       const raH = pt.lonDeg / 15;
@@ -630,8 +651,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       return { x: sx, label };
     });
 
-    // Declination (Dec) labels on left neatline frame (screen x = 0)
-    const decTickPositions = [18, 50, 82];
+    // Declination (Dec) labels on left neatline frame (aligned with major ticks at 20, 50, 80)
+    const decTickPositions = [20, 50, 80];
     const decLabels = decTickPositions.map(sy => {
       const pt = fromScreenToCelestial(0, sy);
       const decVal = Math.round(pt.latDeg);
@@ -640,14 +661,21 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     });
 
     return { raLabels, decLabels };
-  }, [isPolar, zoom, pan.x, pan.y, span, midX, midY, cLon, cLat]);
+  }, [isPolar, zoom, pan.x, pan.y, span, midX, midY, cLon, cLat, boxMargin]);
 
   // Gentle relaxation pass to prevent neighboring badges from overlapping
+  const badgesWithPos = borderingConstellationsSvg.filter(b => b.badgePos !== null) as Array<{
+    name: string;
+    badgePos: { x: number; y: number };
+    badgeWidth: number;
+    badgeHeight: number;
+  }>;
+
   for (let iter = 0; iter < 15; iter++) {
-    for (let i = 0; i < borderingConstellationsSvg.length; i++) {
-      for (let j = i + 1; j < borderingConstellationsSvg.length; j++) {
-        const bi = borderingConstellationsSvg[i];
-        const bj = borderingConstellationsSvg[j];
+    for (let i = 0; i < badgesWithPos.length; i++) {
+      for (let j = i + 1; j < badgesWithPos.length; j++) {
+        const bi = badgesWithPos[i];
+        const bj = badgesWithPos[j];
 
         const cdx = bj.badgePos.x - bi.badgePos.x;
         const cdy = bj.badgePos.y - bi.badgePos.y;
@@ -674,7 +702,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     }
 
     // Clamp within visible screen margins
-    for (const b of borderingConstellationsSvg) {
+    for (const b of badgesWithPos) {
       const hw = b.badgeWidth / 2;
       const hh = b.badgeHeight / 2;
       b.badgePos.x = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, b.badgePos.x));
@@ -683,7 +711,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   }
 
   // Round badge positions
-  borderingConstellationsSvg.forEach(b => {
+  badgesWithPos.forEach(b => {
     b.badgePos.x = Math.round(b.badgePos.x * 10) / 10;
     b.badgePos.y = Math.round(b.badgePos.y * 10) / 10;
   });
@@ -978,8 +1006,14 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
               </g>
             ))}
 
-            <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-              {isPolar ? `CIRCUMPOLAR PROJECTION • ${isNorth ? 'NORTH' : 'SOUTH'} CELESTIAL REALM` : '◄ EAST • CONFORMAL STEREOGRAPHIC SKY MAP • WEST ►'}
+            <text x="5" y="4.2" textAnchor="start" fill="#64748b" fontSize="1.8" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+              ◄ EAST
+            </text>
+            <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="1.8" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+              {isPolar ? `CIRCUMPOLAR PROJECTION • ${isNorth ? 'NORTH' : 'SOUTH'} REALM` : 'CONFORMAL STEREOGRAPHIC SKY MAP'}
+            </text>
+            <text x="95" y="4.2" textAnchor="end" fill="#64748b" fontSize="1.8" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+              WEST ►
             </text>
             <text x="2.5" y="96.5" textAnchor="start" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold">
               DEC
@@ -1021,12 +1055,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           </g>
         )}
 
-        {/* Dynamic Zoom & Pan Group for all Celestial Content */}
-        <g
-          className="celestial-zoomable-content"
-          clipPath={`url(#map-frame-clip-${constellation.id})`}
-          transform={`translate(${50 + pan.x}, ${50 + pan.y}) scale(${zoom}) translate(-50, -50)`}
-        >
+        {/* Frame Boundary Clip for all Zoomable Celestial Content */}
+        <g clipPath={`url(#map-frame-clip-${constellation.id})`}>
+          <g
+            className="celestial-zoomable-content"
+            transform={`translate(${50 + pan.x}, ${50 + pan.y}) scale(${zoom}) translate(-50, -50)`}
+          >
 
         {/* Dynamic Physical Graticule (Parallels, Meridians & Astronomical Rulers) */}
         {opts.showGraticule && (
@@ -1089,18 +1123,6 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                     strokeDasharray={p.dec === 0 ? "none" : "1 3"}
                     strokeWidth={p.dec === 0 ? "0.45" : "0.35"}
                   />
-                  <text
-                    x={p.labelPt.x}
-                    y={p.labelPt.y + 0.8}
-                    textAnchor="start"
-                    fill="#38bdf8"
-                    fontSize="2.0"
-                    fontFamily="monospace"
-                    opacity="0.88"
-                    className="select-none"
-                  >
-                    {p.label}
-                  </text>
                 </g>
               ))}
               {dynamicGraticule?.meridians.map((m, idx) => (
@@ -1113,18 +1135,6 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                     strokeDasharray="1 3"
                     strokeWidth="0.35"
                   />
-                  <text
-                    x={m.labelPt.x}
-                    y={m.labelPt.y}
-                    textAnchor="middle"
-                    fill="#38bdf8"
-                    fontSize="2.1"
-                    fontFamily="monospace"
-                    opacity="0.88"
-                    className="select-none"
-                  >
-                    {m.label}
-                  </text>
                 </g>
               ))}
             </g>
@@ -1453,9 +1463,11 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {/* 9.5. Elevated Interactive Bordering Constellation Badges */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
           <g className="bordering-constellation-badges">
-            {borderingConstellationsSvg.map((neighbor) => {
-              const bx = neighbor.badgePos.x;
-              const by = neighbor.badgePos.y;
+            {borderingConstellationsSvg
+              .filter((neighbor) => neighbor.badgePos !== null)
+              .map((neighbor) => {
+                const bx = neighbor.badgePos!.x;
+                const by = neighbor.badgePos!.y;
               const bw = neighbor.badgeWidth;
               const bh = neighbor.badgeHeight;
               const isHovered = hoveredNeighborName === neighbor.name;
@@ -1706,6 +1718,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
             </g>
           );
         })()}
+        </g>
         </g>
       </svg>
     </div>

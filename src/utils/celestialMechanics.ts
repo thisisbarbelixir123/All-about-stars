@@ -609,7 +609,7 @@ export const projectUniversalStereo = (
   boundaryRings: number[][][],
   cLon: number,
   cLat: number,
-  boxMargin = 70
+  boxMargin = 82
 ) => {
   const allBoundaryProj: Array<{ x: number; y: number }> = [];
   boundaryRings.forEach(ring => {
@@ -633,7 +633,7 @@ export const projectUniversalStereo = (
 
   const midX = (minX + maxX) / 2;
   const midY = (minY + maxY) / 2;
-  const span = Math.max(maxX - minX, maxY - minY, 1) * 1.30;
+  const span = Math.max(maxX - minX, maxY - minY, 1) * 1.18;
 
   const toSvg = (projX: number, projY: number) => ({
     x: Math.round((50 + ((projX - midX) / span) * boxMargin) * 10) / 10,
@@ -673,6 +673,7 @@ export const projectUniversalStereo = (
     midX,
     midY,
     span,
+    boxMargin,
     toSvg
   };
 };
