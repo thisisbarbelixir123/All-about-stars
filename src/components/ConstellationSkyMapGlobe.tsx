@@ -521,22 +521,22 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             // Blue/White (O/B type)
             starColor = '#93c5fd';
             haloColor = 'rgba(147, 197, 253, 0.35)';
-          } else if (bvVal < 0.35) {
-            // White (A type)
+          } else if (bvVal < 0.4) {
+            // Crisp White (A/early F type)
             starColor = '#f8fafc';
             haloColor = 'rgba(248, 250, 252, 0.25)';
-          } else if (bvVal < 0.8) {
-            // Yellow-white (F/G type, Sol)
+          } else if (bvVal < 0.9) {
+            // Warm Yellow-white (F/G type, Sol)
             starColor = '#fef08a';
             haloColor = 'rgba(254, 240, 138, 0.3)';
-          } else if (bvVal < 1.3) {
-            // Orange (K type)
-            starColor = '#fdba74';
-            haloColor = 'rgba(253, 186, 116, 0.35)';
+          } else if (bvVal < 1.5) {
+            // Warm Amber / Golden (K type)
+            starColor = '#fed7aa';
+            haloColor = 'rgba(254, 215, 170, 0.35)';
           } else {
-            // Red (M type / Carbon)
-            starColor = '#f87171';
-            haloColor = 'rgba(248, 113, 113, 0.38)';
+            // Ruby / M-type Orange-Red (Betelgeuse, Antares)
+            starColor = '#fca5a5';
+            haloColor = 'rgba(252, 165, 165, 0.38)';
           }
 
           // Render halo for prominent stars (mag <= 3.2)
@@ -576,16 +576,37 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       }
     }
 
-    // 7.5. Deep-Sky Objects (DSOs: Nebulae, Star Clusters, Galaxies)
+    // 7.5. Deep-Sky Objects (Prominent Messier, Caldwell & Named NGC/IC Objects)
     if (showDSOs && celestialData.dsos && celestialData.dsos.length > 0) {
-      // Show bright DSOs at low zoom, reveal more as user zooms in
-      const dsoMagLimit = zoom < 1.0 ? 4.5 : zoom < 2.0 ? 5.5 : 6.5;
-
+      // Filter out obscure uncatalogued faint dark nebulae & obscure catalogs (LDN, LBN, Ced, Sh2, etc.)
+      // which clutter the sky with thousands of tiny red squares.
       for (const dsoFeat of celestialData.dsos) {
         const dsoProps = dsoFeat.properties || {};
+        const desig = (dsoProps.desig || '').trim();
+        const dsoId = String(dsoFeat.id || '').trim();
+        const dsoType = (dsoProps.type || '').trim().toLowerCase();
+
+        // Check for common/named objects or iconic catalogs
+        const isMessier = /^M\s*\d+$/i.test(desig);
+        const isCaldwell = /^C\s*\d+$/i.test(desig);
+        const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
+        if (isObscure && !isMessier && !isCaldwell) continue;
+
+        // Skip nameless faint dark nebulae
+        const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
+        const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
+        if (dsoType === 'dn' && !commonName) continue;
+
+        // Magnitude filter: show bright & famous at low zoom, reveal fainter ones when zooming in
         const dsoMagStr = dsoProps.mag;
-        const dsoMag = dsoMagStr ? parseFloat(dsoMagStr) : 999;
-        if (dsoMag > dsoMagLimit && dsoMag !== 999 && zoom < 2.5) continue;
+        const dsoMag = dsoMagStr && dsoMagStr !== '999' ? parseFloat(dsoMagStr) : null;
+
+        if (dsoMag !== null) {
+          const maxAllowedMag = zoom < 1.0 ? 5.5 : zoom < 1.8 ? 7.0 : 8.5;
+          if (dsoMag > maxAllowedMag && !isMessier) continue;
+        } else if (!commonName && !isMessier && !isCaldwell && zoom < 1.5) {
+          continue;
+        }
 
         const coords = dsoFeat.geometry?.coordinates;
         if (!coords || coords.length < 2) continue;
@@ -596,12 +617,12 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
         const cat = getDsoCategory(dsoProps.type);
         const config = DSO_LEGEND_CONFIG[cat];
-        const dsoRadius = Math.max(2.2, Math.min(5.5, 3.2 * Math.sqrt(zoom * 0.8)));
+        const dsoRadius = Math.max(2.0, Math.min(5.0, 2.8 * Math.sqrt(zoom * 0.8)));
 
         // Outer glow
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, dsoRadius * 1.8, 0, 2 * Math.PI);
-        ctx.fillStyle = `${config.colorHex}25`;
+        ctx.arc(pt.x, pt.y, dsoRadius * 1.6, 0, 2 * Math.PI);
+        ctx.fillStyle = `${config.colorHex}22`;
         ctx.fill();
 
         // Categorical marker shape
@@ -625,17 +646,17 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         } else {
           // Diamond / Square marker for nebula
           ctx.beginPath();
-          ctx.strokeRect(pt.x - dsoRadius * 0.8, pt.y - dsoRadius * 0.8, dsoRadius * 1.6, dsoRadius * 1.6);
+          ctx.strokeRect(pt.x - dsoRadius * 0.7, pt.y - dsoRadius * 0.7, dsoRadius * 1.4, dsoRadius * 1.4);
         }
 
         // Label prominent DSOs when zoomed in (e.g. M 31, M 42, M 45)
         const dsoDesig = dsoProps.desig || dsoFeat.id;
-        if (zoom >= 1.8 && dsoDesig && (dsoMag <= 5.0 || ['M 31', 'M 42', 'M 45', 'LMC', 'SMC'].includes(dsoDesig))) {
+        if (zoom >= 1.6 && dsoDesig && (isMessier || isCaldwell || commonName || (dsoMag !== null && dsoMag <= 5.0))) {
           ctx.font = '8px monospace';
           ctx.fillStyle = config.colorHex;
           ctx.textAlign = 'left';
           ctx.textBaseline = 'top';
-          ctx.fillText(dsoDesig, pt.x + dsoRadius + 2, pt.y - 4);
+          ctx.fillText(commonName || dsoDesig, pt.x + dsoRadius + 3, pt.y - 4);
         }
       }
     }
