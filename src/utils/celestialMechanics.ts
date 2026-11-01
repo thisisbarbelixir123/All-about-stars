@@ -75,7 +75,7 @@ export const projectStereoPoint = (
   latDeg: number,
   cLonDeg: number,
   cLatDeg: number
-): { x: number; y: number } => {
+): { x: number; y: number; cosC: number } => {
   const d2r = Math.PI / 180;
   const lam0 = cLonDeg * d2r;
   const phi0 = cLatDeg * d2r;
@@ -89,7 +89,7 @@ export const projectStereoPoint = (
   // Astronomical convention: looking up at the sky, East (increasing RA) is to the Left (-x)
   const x = -k * Math.cos(phi) * Math.sin(dLam) * (180 / Math.PI);
   const y = k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam)) * (180 / Math.PI);
-  return { x, y };
+  return { x, y, cosC };
 };
 
 /**
@@ -1372,56 +1372,33 @@ export const projectLocalStereoMilkyWayTier = (
   cLon: number,
   cLat: number,
   toSvg: (projX: number, projY: number) => { x: number; y: number },
-  viewportPadding: number = 25
+  viewportPadding: number = 80
 ): string => {
   if (!tierFeature?.geometry?.coordinates) return '';
-  const d2r = Math.PI / 180;
-  const lam0 = cLon * d2r;
-  const phi0 = cLat * d2r;
 
   let totalD = '';
 
   for (const polygon of tierFeature.geometry.coordinates) {
     for (const ring of polygon) {
-      let d = '';
-      let inSub = false;
-
+      const rawSvgRing: Array<{ x: number; y: number }> = [];
       for (let i = 0; i < ring.length; i++) {
-        const [lon, lat] = ring[i];
-        const lam = lon * d2r;
-        const phi = lat * d2r;
-        let dLam = lam - lam0;
-        while (dLam > Math.PI) dLam -= 2 * Math.PI;
-        while (dLam < -Math.PI) dLam += 2 * Math.PI;
-
-        const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(dLam);
-        if (cosC < 0.25) {
-          if (inSub) { d += ' Z '; inSub = false; }
-          continue;
-        }
-
-        const k = 2 / (1 + cosC);
-        const projX = -k * Math.cos(phi) * Math.sin(dLam) * (180 / Math.PI);
-        const projY = k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam)) * (180 / Math.PI);
-        const svgPt = toSvg(projX, projY);
-
-        // Discard points projecting far outside the viewport to prevent SVG clipping distortions
-        if (svgPt.x < -viewportPadding || svgPt.x > 100 + viewportPadding ||
-            svgPt.y < -viewportPadding || svgPt.y > 100 + viewportPadding) {
-          if (inSub) { d += ' Z '; inSub = false; }
-          continue;
-        }
-
-        if (!inSub) {
-          d += `M ${svgPt.x} ${svgPt.y} `;
-          inSub = true;
-        } else {
-          d += `L ${svgPt.x} ${svgPt.y} `;
-        }
+        const p = projectStereoPoint(ring[i][0], ring[i][1], cLon, cLat);
+        // Only keep forward-facing hemisphere points to avoid stereographic infinity jumps
+        if (p.cosC < 0.15) continue;
+        rawSvgRing.push(toSvg(p.x, p.y));
       }
 
-      if (inSub) d += ' Z ';
-      if (d.length > 0) totalD += d;
+      if (rawSvgRing.length < 3) continue;
+
+      // Cleanly clip the continuous galactic cloud polygon against the expanded viewport margin
+      // so the Milky Way streams seamlessly across all edges without abrupt flat cutoffs
+      const minClip = -viewportPadding;
+      const maxClip = 100 + viewportPadding;
+      const clipped = clipPolygonSutherlandHodgman(rawSvgRing, minClip, minClip, maxClip, maxClip);
+
+      if (clipped.length >= 3) {
+        totalD += 'M ' + clipped.map(p => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L ') + ' Z ';
+      }
     }
   }
 

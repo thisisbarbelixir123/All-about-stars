@@ -560,11 +560,15 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const lam0 = cLon * d2r;
     const phi0 = cLat * d2r;
 
-    const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = [];
-    const vertices: Array<{ x: number; y: number }> = [];
+    const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number }; constName: string }> = [];
+    const vertices: Array<{ x: number; y: number; constName: string }> = [];
     const seenVertexKeys = new Set<string>();
 
     otherFeatures.forEach((feat: any) => {
+      const abbr = feat.id || feat.properties?.id || '';
+      const neighborObj = resolveConstellationByName(abbr) || null;
+      const constName = neighborObj?.name || abbr;
+
       const rawSegs = feat.geometry?.type === 'MultiLineString'
         ? feat.geometry.coordinates
         : [feat.geometry?.coordinates];
@@ -598,20 +602,20 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           const inViewB = sB.x >= -15 && sB.x <= 115 && sB.y >= -15 && sB.y <= 115;
 
           if (inViewA || inViewB) {
-            lines.push({ from: sA, to: sB });
+            lines.push({ from: sA, to: sB, constName });
 
             if (inViewA) {
               const keyA = `${sA.x.toFixed(1)},${sA.y.toFixed(1)}`;
               if (!seenVertexKeys.has(keyA)) {
                 seenVertexKeys.add(keyA);
-                vertices.push(sA);
+                vertices.push({ ...sA, constName });
               }
             }
             if (inViewB) {
               const keyB = `${sB.x.toFixed(1)},${sB.y.toFixed(1)}`;
               if (!seenVertexKeys.has(keyB)) {
                 seenVertexKeys.add(keyB);
-                vertices.push(sB);
+                vertices.push({ ...sB, constName });
               }
             }
           }
@@ -1452,32 +1456,40 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {/* 6.5. Surrounding Non-Highlighted Constellations Asterism Stick Lines */}
         {opts.showAsterisms && surroundingAsterismLines.lines.length > 0 && (
           <g className="surrounding-constellations-asterisms pointer-events-none">
-            {surroundingAsterismLines.lines.map((l, idx) => (
-              <line
-                key={`surround-line-${idx}`}
-                x1={l.from.x}
-                y1={l.from.y}
-                x2={l.to.x}
-                y2={l.to.y}
-                stroke="#64748b"
-                strokeWidth="0.5"
-                strokeOpacity="0.4"
-                strokeDasharray="2 1.5"
-                strokeLinecap="round"
-              />
-            ))}
-            {surroundingAsterismLines.vertices.map((v, idx) => (
-              <circle
-                key={`surround-vertex-${idx}`}
-                cx={v.x}
-                cy={v.y}
-                r="0.75"
-                fill="#64748b"
-                stroke="#334155"
-                strokeWidth="0.25"
-                opacity="0.45"
-              />
-            ))}
+            {surroundingAsterismLines.lines.map((l, idx) => {
+              const isHighlighted = hoveredNeighborName === l.constName || selectedNeighborName === l.constName;
+              return (
+                <line
+                  key={`surround-line-${idx}`}
+                  x1={l.from.x}
+                  y1={l.from.y}
+                  x2={l.to.x}
+                  y2={l.to.y}
+                  stroke={isHighlighted ? "#38bdf8" : "#64748b"}
+                  strokeWidth={isHighlighted ? "0.8" : "0.55"}
+                  strokeOpacity={isHighlighted ? "0.85" : "0.45"}
+                  strokeDasharray={isHighlighted ? "none" : "2 1.5"}
+                  strokeLinecap="round"
+                  className="transition-all duration-150"
+                />
+              );
+            })}
+            {surroundingAsterismLines.vertices.map((v, idx) => {
+              const isHighlighted = hoveredNeighborName === v.constName || selectedNeighborName === v.constName;
+              return (
+                <circle
+                  key={`surround-vertex-${idx}`}
+                  cx={v.x}
+                  cy={v.y}
+                  r={isHighlighted ? "1.0" : "0.75"}
+                  fill={isHighlighted ? "#38bdf8" : "#64748b"}
+                  stroke={isHighlighted ? "#e0f2fe" : "#334155"}
+                  strokeWidth={isHighlighted ? "0.35" : "0.25"}
+                  opacity={isHighlighted ? "0.9" : "0.5"}
+                  className="transition-all duration-150"
+                />
+              );
+            })}
           </g>
         )}
 
