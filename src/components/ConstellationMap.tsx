@@ -24,7 +24,8 @@ import {
   getConstellationLineSegments,
   findOptimalNeighborBadgePos,
   projectLocalStereoMilkyWayTier,
-  isProminentDso
+  isProminentDso,
+  clipPolygonSutherlandHodgman
 } from '../utils/celestialMechanics';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
 
@@ -457,17 +458,25 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const ringsSvg: Array<Array<{ x: number; y: number }>> = [];
     nFeatures.forEach(feat => {
       if (feat.geometry?.type === 'Polygon' && feat.geometry.coordinates?.[0]) {
-        ringsSvg.push(feat.geometry.coordinates[0].map((pt: number[]) => {
+        const rawRing = feat.geometry.coordinates[0].map((pt: number[]) => {
           const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
           return toSvg(p.x, p.y);
-        }));
+        });
+        const clipped = clipPolygonSutherlandHodgman(rawRing, -5, -5, 105, 105);
+        if (clipped.length >= 3) {
+          ringsSvg.push(clipped);
+        }
       } else if (feat.geometry?.type === 'MultiPolygon' && feat.geometry.coordinates) {
         feat.geometry.coordinates.forEach((poly: any) => {
           if (poly[0]) {
-            ringsSvg.push(poly[0].map((pt: number[]) => {
+            const rawRing = poly[0].map((pt: number[]) => {
               const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
               return toSvg(p.x, p.y);
-            }));
+            });
+            const clipped = clipPolygonSutherlandHodgman(rawRing, -5, -5, 105, 105);
+            if (clipped.length >= 3) {
+              ringsSvg.push(clipped);
+            }
           }
         });
       }
@@ -501,6 +510,104 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     badgeWidth: number;
     badgeHeight: number;
   }>;
+
+  // Delporte official stepped boundary line segments (for central constellation and visible neighbors)
+  const delporteBorderSegments = useMemo(() => {
+    if (!celestialData.borders || celestialData.borders.length === 0) return [];
+    const centerAbbr = (constellation.abbreviation || constellation.id).toLowerCase();
+    const neighborAbbrSet = new Set(neighbors.map(n => {
+      const obj = resolveConstellationByName(n);
+      return (obj?.abbreviation || getNeighborAbbr(n, obj)).toLowerCase();
+    }));
+    neighborAbbrSet.add(centerAbbr);
+
+    const relevant = celestialData.borders.filter(feat => {
+      if (!feat.ids) return false;
+      const [a, b] = feat.ids.split(',').map((s: string) => s.toLowerCase());
+      if (!neighborAbbrSet.has(a) && !neighborAbbrSet.has(b)) return false;
+
+      // Ensure segment is within or crosses the viewport
+      return feat.geometry?.coordinates?.some((seg: number[][]) => {
+        return seg.some(pt => {
+          const sp = projectStereoPoint(pt[0], pt[1], cLon, cLat);
+          const s = toSvg(sp.x, sp.y);
+          return s.x >= -10 && s.x <= 110 && s.y >= -10 && s.y <= 110;
+        });
+      });
+    });
+
+    return relevant.map(feat => {
+      const [a, b] = (feat.ids || '').split(',').map((s: string) => s.toLowerCase());
+      const isCentral = a === centerAbbr || b === centerAbbr;
+
+      const pathStrings = (feat.geometry?.coordinates || []).map((seg: number[][]) => {
+        const pts = seg.map(pt => {
+          const sp = projectStereoPoint(pt[0], pt[1], cLon, cLat);
+          const s = toSvg(sp.x, sp.y);
+          return `${s.x.toFixed(2)},${s.y.toFixed(2)}`;
+        });
+        return 'M ' + pts.join(' L ');
+      });
+
+      return {
+        ids: feat.ids,
+        isCentral,
+        path: pathStrings.join(' ')
+      };
+    });
+  }, [celestialData.borders, constellation.id, constellation.abbreviation, neighbors, cLon, cLat, toSvg]);
+
+  // Dynamically computed physical RA / Dec celestial graticule that moves with the starfield
+  const dynamicGraticule = useMemo(() => {
+    if (isPolar) return null;
+
+    // Parallels every 10 degrees: -80 to +80
+    const parallels: Array<{ dec: number; path: string; labelPt: { x: number; y: number }; label: string }> = [];
+    for (let dec = -80; dec <= 80; dec += 10) {
+      const pts: Array<{ x: number; y: number }> = [];
+      for (let dRa = -90; dRa <= 90; dRa += 2) {
+        const r = cLon + dRa;
+        const sp = projectStereoPoint(r, dec, cLon, cLat);
+        const s = toSvg(sp.x, sp.y);
+        pts.push(s);
+      }
+      const inView = pts.filter(p => p.x >= -10 && p.x <= 110 && p.y >= -10 && p.y <= 110);
+      if (inView.length >= 2) {
+        const nearLeft = inView.filter(p => p.x >= -5 && p.x <= 18 && p.y >= 5 && p.y <= 95);
+        const sorted = (nearLeft.length > 0 ? nearLeft : inView).sort((a, b) => Math.abs(a.x - 4.5) - Math.abs(b.x - 4.5));
+        const labelPt = sorted[0];
+        const path = 'M ' + inView.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ');
+        parallels.push({ dec, path, labelPt, label: (dec > 0 ? '+' : '') + dec + '°' });
+      }
+    }
+
+    // Meridians every 1 hour (15 degrees)
+    const meridians: Array<{ h: number; path: string; labelPt: { x: number; y: number }; label: string }> = [];
+    const startH = Math.floor((cLon - 90) / 15);
+    const endH = Math.ceil((cLon + 90) / 15);
+    for (let h = startH; h <= endH; h++) {
+      const raDeg = h * 15;
+      const pts: Array<{ x: number; y: number }> = [];
+      for (let lat = Math.max(-88, cLat - 50); lat <= Math.min(88, cLat + 50); lat += 2) {
+        const sp = projectStereoPoint(raDeg, lat, cLon, cLat);
+        const s = toSvg(sp.x, sp.y);
+        pts.push(s);
+      }
+      const inView = pts.filter(p => p.x >= -10 && p.x <= 110 && p.y >= -10 && p.y <= 110);
+      if (inView.length >= 2) {
+        const nearTop = inView.filter(p => p.y >= -5 && p.y <= 16 && p.x >= 2 && p.x <= 98);
+        if (nearTop.length > 0) {
+          const sorted = nearTop.sort((a, b) => Math.abs(a.y - 7.5) - Math.abs(b.y - 7.5));
+          const labelPt = sorted[0];
+          const path = 'M ' + inView.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ');
+          const hWrapped = ((h % 24) + 24) % 24;
+          meridians.push({ h: hWrapped, path, labelPt, label: `${String(hWrapped).padStart(2, '0')}h` });
+        }
+      }
+    }
+
+    return { parallels, meridians };
+  }, [isPolar, cLon, cLat, toSvg]);
 
   // Gentle relaxation pass to prevent neighboring badges from overlapping
   for (let iter = 0; iter < 15; iter++) {
@@ -825,7 +932,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
         {/* 1. Sky Map Neatlines & Astronomical Frame */}
         {opts.showGraticule && (
-          <g className="neatline-frame">
+          <g className="neatline-frame pointer-events-none">
             <rect x="-0.5" y="-0.5" width="101" height="101" fill="none" stroke="#1e293b" strokeWidth="0.4" />
             <rect x="0" y="0" width="100" height="100" fill="none" stroke="#334155" strokeWidth="0.5" />
 
@@ -838,84 +945,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
               </g>
             ))}
 
-            {isPolar ? (
-              // Polar Celestial Grid & Orientation
-              <g className="polar-graticule-rings">
-                {[18, 36, 54, 72].map((rVal) => (
-                  <circle
-                    key={`polar-ring-${rVal}`}
-                    cx={poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50}
-                    cy={poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50}
-                    r={rVal}
-                    fill="none"
-                    stroke="#0ea5e9"
-                    strokeOpacity="0.09"
-                    strokeDasharray="2 3"
-                    strokeWidth="0.35"
-                  />
-                ))}
-                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
-                  const rad = (deg * Math.PI) / 180;
-                  const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
-                  const pcY = poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50;
-                  const px = pcX + 80 * Math.sin(rad);
-                  const py = pcY - 80 * Math.cos(rad);
-                  return (
-                    <line
-                      key={`spoke-${deg}`}
-                      x1={pcX}
-                      y1={pcY}
-                      x2={px}
-                      y2={py}
-                      stroke="#0ea5e9"
-                      strokeOpacity="0.07"
-                      strokeDasharray="2 3"
-                      strokeWidth="0.35"
-                    />
-                  );
-                })}
-                {poleSvg && poleSvg.x >= -5 && poleSvg.x <= 105 && poleSvg.y >= -5 && poleSvg.y <= 105 && (
-                  <g className="celestial-pole-marker pointer-events-none">
-                    <circle cx={poleSvg.x} cy={poleSvg.y} r="3.2" fill="none" stroke="#38bdf8" strokeWidth="0.5" strokeDasharray="1.5 1.5" />
-                    <line x1={poleSvg.x - 4.5} y1={poleSvg.y} x2={poleSvg.x + 4.5} y2={poleSvg.y} stroke="#38bdf8" strokeWidth="0.45" />
-                    <line x1={poleSvg.x} y1={poleSvg.y - 4.5} x2={poleSvg.x} y2={poleSvg.y + 4.5} stroke="#38bdf8" strokeWidth="0.45" />
-                    <circle cx={poleSvg.x} cy={poleSvg.y} r="0.8" fill="#facc15" />
-                    <text x={poleSvg.x + 4.5} y={poleSvg.y + 1.2} fill="#38bdf8" fontSize="2.2" fontFamily="monospace" fontWeight="bold">
-                      {isNorth ? '+90° NCP' : '-90° SCP'}
-                    </text>
-                  </g>
-                )}
-                <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="2.0" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-                  CIRCUMPOLAR PROJECTION • {isNorth ? 'NORTH' : 'SOUTH'} CELESTIAL REALM
-                </text>
-              </g>
-            ) : (
-              // Equatorial Graticule
-              <>
-                {[20, 40, 60, 80].map((c) => (
-                  <g key={`grat-${c}`}>
-                    <line x1={c} y1="0" x2={c} y2="100" stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
-                    <line x1="0" y1={c} x2="100" y2={c} stroke="#0ea5e9" strokeOpacity="0.08" strokeDasharray="1 3" strokeWidth="0.35" />
-                  </g>
-                ))}
-                <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
-                  ◄ EAST • CONFORMAL STEREOGRAPHIC SKY MAP • WEST ►
-                </text>
-                {graticule.raLabels.map((ra, idx) => (
-                  <text key={`ra-lbl-${idx}`} x={ra.x} y="7.2" textAnchor="middle" fill="#38bdf8" fontSize="2.1" fontFamily="monospace" opacity="0.85">
-                    {ra.label}
-                  </text>
-                ))}
-                <text x="2.5" y="96.5" textAnchor="start" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold">
-                  DEC
-                </text>
-                {graticule.decLabels.map((dec, idx) => (
-                  <text key={`dec-lbl-${idx}`} x="2.5" y={dec.y + 0.9} textAnchor="start" fill="#38bdf8" fontSize="2.0" fontFamily="monospace" opacity="0.85">
-                    {dec.label}
-                  </text>
-                ))}
-              </>
-            )}
+            <text x="50" y="4.2" textAnchor="middle" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold" letterSpacing="0.05em">
+              {isPolar ? `CIRCUMPOLAR PROJECTION • ${isNorth ? 'NORTH' : 'SOUTH'} CELESTIAL REALM` : '◄ EAST • CONFORMAL STEREOGRAPHIC SKY MAP • WEST ►'}
+            </text>
+            <text x="2.5" y="96.5" textAnchor="start" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold">
+              DEC
+            </text>
           </g>
         )}
 
@@ -925,6 +960,109 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           clipPath={`url(#map-frame-clip-${constellation.id})`}
           transform={`translate(${50 + pan.x}, ${50 + pan.y}) scale(${zoom}) translate(-50, -50)`}
         >
+
+        {/* Dynamic Physical Graticule (Parallels, Meridians & Astronomical Rulers) */}
+        {opts.showGraticule && (
+          isPolar ? (
+            <g className="polar-graticule-rings pointer-events-none">
+              {[18, 36, 54, 72].map((rVal) => (
+                <circle
+                  key={`polar-ring-${rVal}`}
+                  cx={poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50}
+                  cy={poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50}
+                  r={rVal}
+                  fill="none"
+                  stroke="#0ea5e9"
+                  strokeOpacity="0.12"
+                  strokeDasharray="2 3"
+                  strokeWidth="0.35"
+                />
+              ))}
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+                const rad = (deg * Math.PI) / 180;
+                const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
+                const pcY = poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50;
+                const px = pcX + 80 * Math.sin(rad);
+                const py = pcY - 80 * Math.cos(rad);
+                return (
+                  <line
+                    key={`spoke-${deg}`}
+                    x1={pcX}
+                    y1={pcY}
+                    x2={px}
+                    y2={py}
+                    stroke="#0ea5e9"
+                    strokeOpacity="0.09"
+                    strokeDasharray="2 3"
+                    strokeWidth="0.35"
+                  />
+                );
+              })}
+              {poleSvg && poleSvg.x >= -5 && poleSvg.x <= 105 && poleSvg.y >= -5 && poleSvg.y <= 105 && (
+                <g className="celestial-pole-marker pointer-events-none">
+                  <circle cx={poleSvg.x} cy={poleSvg.y} r="3.2" fill="none" stroke="#38bdf8" strokeWidth="0.5" strokeDasharray="1.5 1.5" />
+                  <line x1={poleSvg.x - 4.5} y1={poleSvg.y} x2={poleSvg.x + 4.5} y2={poleSvg.y} stroke="#38bdf8" strokeWidth="0.45" />
+                  <line x1={poleSvg.x} y1={poleSvg.y - 4.5} x2={poleSvg.x} y2={poleSvg.y + 4.5} stroke="#38bdf8" strokeWidth="0.45" />
+                  <circle cx={poleSvg.x} cy={poleSvg.y} r="0.8" fill="#facc15" />
+                  <text x={poleSvg.x + 4.5} y={poleSvg.y + 1.2} fill="#38bdf8" fontSize="2.2" fontFamily="monospace" fontWeight="bold">
+                    {isNorth ? '+90° NCP' : '-90° SCP'}
+                  </text>
+                </g>
+              )}
+            </g>
+          ) : (
+            <g className="dynamic-celestial-graticule pointer-events-none">
+              {dynamicGraticule?.parallels.map((p, idx) => (
+                <g key={`dyn-parallel-${idx}`}>
+                  <path
+                    d={p.path}
+                    fill="none"
+                    stroke="#0ea5e9"
+                    strokeOpacity={p.dec === 0 ? "0.25" : "0.1"}
+                    strokeDasharray={p.dec === 0 ? "none" : "1 3"}
+                    strokeWidth={p.dec === 0 ? "0.45" : "0.35"}
+                  />
+                  <text
+                    x={p.labelPt.x}
+                    y={p.labelPt.y + 0.8}
+                    textAnchor="start"
+                    fill="#38bdf8"
+                    fontSize="2.0"
+                    fontFamily="monospace"
+                    opacity="0.88"
+                    className="select-none"
+                  >
+                    {p.label}
+                  </text>
+                </g>
+              ))}
+              {dynamicGraticule?.meridians.map((m, idx) => (
+                <g key={`dyn-meridian-${idx}`}>
+                  <path
+                    d={m.path}
+                    fill="none"
+                    stroke="#0ea5e9"
+                    strokeOpacity="0.1"
+                    strokeDasharray="1 3"
+                    strokeWidth="0.35"
+                  />
+                  <text
+                    x={m.labelPt.x}
+                    y={m.labelPt.y}
+                    textAnchor="middle"
+                    fill="#38bdf8"
+                    fontSize="2.1"
+                    fontFamily="monospace"
+                    opacity="0.88"
+                    className="select-none"
+                  >
+                    {m.label}
+                  </text>
+                </g>
+              ))}
+            </g>
+          )
+        )}
 
         {/* 1.5. Milky Way Galactic Plane & Core Contours (Translucent Multi-Tier Glow) */}
         {opts.showMilkyWay && milkyWayPaths.length > 0 && (
@@ -1002,9 +1140,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                   key={`neighbor-path-${constellation.id}-${neighbor.name}`}
                   d={neighbor.pathData}
                   fill={isHighlighted ? "rgba(6, 182, 212, 0.32)" : "rgba(30, 41, 59, 0.45)"}
-                  stroke={isHighlighted ? "#38bdf8" : "#475569"}
-                  strokeWidth={isHighlighted ? "0.6" : "0.32"}
-                  strokeDasharray={isHighlighted ? "none" : "1.5 1"}
+                  stroke={isHighlighted ? "#38bdf8" : "none"}
+                  strokeWidth={isHighlighted ? "0.6" : "0"}
                   className="cursor-pointer transition-colors duration-150"
                   onPointerEnter={() => setHoveredNeighborName(neighbor.name)}
                   onPointerLeave={() => setHoveredNeighborName(null)}
@@ -1024,15 +1161,30 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           </g>
         )}
 
-        {/* 5. Delporte Stepped Astronomical Boundary */}
+        {/* 5. Official IAU Delporte Stepped Astronomical Boundary Segments */}
+        {opts.showBoundaries && delporteBorderSegments.length > 0 && (
+          <g className="delporte-astronomical-borders pointer-events-none">
+            {delporteBorderSegments.map((bSeg, idx) => (
+              <path
+                key={`delporte-border-seg-${idx}-${bSeg.ids}`}
+                d={bSeg.path}
+                fill="none"
+                stroke={bSeg.isCentral ? "#06b6d4" : "#475569"}
+                strokeWidth={bSeg.isCentral ? "0.45" : "0.32"}
+                strokeDasharray={bSeg.isCentral ? "2 1" : "1.5 1"}
+                strokeOpacity={bSeg.isCentral ? "0.95" : "0.75"}
+              />
+            ))}
+          </g>
+        )}
+
+        {/* Central Constellation Shading Tint */}
         {opts.showBoundaries && boundaryRingsSvg.length > 0 && (
-          <g className="delporte-astronomical-boundary">
+          <g className="central-constellation-shading pointer-events-none">
             <path
               d={mainBoundaryPathData}
               fill="rgba(6, 182, 212, 0.12)"
-              stroke="#06b6d4"
-              strokeWidth="0.38"
-              strokeDasharray="1.5 1"
+              stroke="none"
             />
           </g>
         )}

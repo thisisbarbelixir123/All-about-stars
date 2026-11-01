@@ -139,6 +139,68 @@ export const minDistanceToPolygonEdges = (
 };
 
 /**
+ * Clips a 2D polygon against an axis-aligned bounding box [xMin, yMin, xMax, yMax]
+ * using the Sutherland-Hodgman polygon clipping algorithm.
+ */
+export const clipPolygonSutherlandHodgman = (
+  poly: Array<{ x: number; y: number }>,
+  xMin: number,
+  yMin: number,
+  xMax: number,
+  yMax: number
+): Array<{ x: number; y: number }> => {
+  let outputList = poly;
+
+  const clipEdge = (
+    inside: (p: { x: number; y: number }) => boolean,
+    intersect: (s: { x: number; y: number }, e: { x: number; y: number }) => { x: number; y: number }
+  ) => {
+    const inputList = outputList;
+    outputList = [];
+    if (inputList.length === 0) return;
+
+    let s = inputList[inputList.length - 1];
+    for (let i = 0; i < inputList.length; i++) {
+      const e = inputList[i];
+      if (inside(e)) {
+        if (inside(s)) {
+          outputList.push(e);
+        } else {
+          outputList.push(intersect(s, e));
+          outputList.push(e);
+        }
+      } else if (inside(s)) {
+        outputList.push(intersect(s, e));
+      }
+      s = e;
+    }
+  };
+
+  // Left
+  clipEdge(
+    p => p.x >= xMin,
+    (s, e) => ({ x: xMin, y: s.y + ((e.y - s.y) * (xMin - s.x)) / (e.x - s.x || 1e-7) })
+  );
+  // Right
+  clipEdge(
+    p => p.x <= xMax,
+    (s, e) => ({ x: xMax, y: s.y + ((e.y - s.y) * (xMax - s.x)) / (e.x - s.x || 1e-7) })
+  );
+  // Top
+  clipEdge(
+    p => p.y >= yMin,
+    (s, e) => ({ x: s.x + ((e.x - s.x) * (yMin - s.y)) / (e.y - s.y || 1e-7), y: yMin })
+  );
+  // Bottom
+  clipEdge(
+    p => p.y <= yMax,
+    (s, e) => ({ x: s.x + ((e.x - s.x) * (yMax - s.y)) / (e.y - s.y || 1e-7), y: yMax })
+  );
+
+  return outputList;
+};
+
+/**
  * Finds the optimal interior point (Pole of Inaccessibility) inside a neighbor's visible polygon
  * that is strictly outside the central constellation boundary.
  */

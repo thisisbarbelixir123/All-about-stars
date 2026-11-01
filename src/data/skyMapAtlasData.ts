@@ -360,6 +360,12 @@ export function computeCelestialGraticule(
     if (decParts.length >= 2) {
       const parseDecNum = (s: string) => {
         const isNeg = s.includes('-') || s.includes('−');
+        // Extract leading degrees before the degree symbol °
+        const degMatch = s.match(/([+-−]?\s*\d+)\s*°/);
+        if (degMatch) {
+          const val = Math.abs(parseInt(degMatch[1].replace(/[^0-9]/g, ''), 10));
+          return isNeg ? -val : val;
+        }
         const num = parseFloat(s.replace(/[^0-9.]/g, ''));
         return isNeg ? -num : num;
       };
@@ -435,15 +441,22 @@ export function computeCelestialGraticule(
   }
 
   // Dec ticks
+  const formatDec = (val: number) => {
+    const rounded = Math.round(val);
+    if (rounded > 0) return `+${rounded}°`;
+    if (rounded === 0) return `0°`;
+    return `${rounded}°`;
+  };
+
   const decLabels: Array<{ y: number; label: string }> = [];
   if (hasEquator) {
-    decLabels.push({ y: Math.max(16, equatorY - 28), label: `+${Math.round(decMax)}°` });
+    decLabels.push({ y: Math.max(16, equatorY - 28), label: formatDec(decMax) });
     decLabels.push({ y: equatorY, label: '0° Equator' });
-    decLabels.push({ y: Math.min(84, equatorY + 28), label: `${Math.round(decMin)}°` });
+    decLabels.push({ y: Math.min(84, equatorY + 28), label: formatDec(decMin) });
   } else {
-    decLabels.push({ y: 20, label: `+${Math.round(decMax)}°` });
-    decLabels.push({ y: 50, label: `${Math.round((decMax + decMin) / 2)}°` });
-    decLabels.push({ y: 80, label: `${Math.round(decMin)}°` });
+    decLabels.push({ y: 20, label: formatDec(decMax) });
+    decLabels.push({ y: 50, label: formatDec((decMax + decMin) / 2) });
+    decLabels.push({ y: 80, label: formatDec(decMin) });
   }
 
   return {
