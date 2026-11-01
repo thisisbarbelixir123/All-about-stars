@@ -1066,19 +1066,41 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         {opts.showGraticule && (
           isPolar ? (
             <g className="polar-graticule-rings pointer-events-none">
-              {[18, 36, 54, 72].map((rVal) => (
-                <circle
-                  key={`polar-ring-${rVal}`}
-                  cx={poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50}
-                  cy={poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50}
-                  r={rVal}
-                  fill="none"
-                  stroke="#0ea5e9"
-                  strokeOpacity="0.12"
-                  strokeDasharray="2 3"
-                  strokeWidth="0.35"
-                />
-              ))}
+              {[
+                { r: 18, dec: isNorth ? '+80°' : '-80°' },
+                { r: 36, dec: isNorth ? '+70°' : '-70°' },
+                { r: 54, dec: isNorth ? '+60°' : '-60°' },
+                { r: 72, dec: isNorth ? '+50°' : '-50°' }
+              ].map((ring) => {
+                const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
+                const pcY = poleSvg && poleSvg.y >= -30 && poleSvg.y <= 130 ? poleSvg.y : 50;
+                return (
+                  <g key={`polar-ring-${ring.r}`}>
+                    <circle
+                      cx={pcX}
+                      cy={pcY}
+                      r={ring.r}
+                      fill="none"
+                      stroke="#0ea5e9"
+                      strokeOpacity="0.12"
+                      strokeDasharray="2 3"
+                      strokeWidth="0.35"
+                    />
+                    <text
+                      x={pcX + 1.2}
+                      y={pcY - ring.r - 0.8}
+                      fill="#38bdf8"
+                      fillOpacity="0.65"
+                      fontSize="1.7"
+                      fontFamily="monospace"
+                      textAnchor="start"
+                      className="select-none"
+                    >
+                      {ring.dec}
+                    </text>
+                  </g>
+                );
+              })}
               {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
                 const rad = (deg * Math.PI) / 180;
                 const pcX = poleSvg && poleSvg.x >= -30 && poleSvg.x <= 130 ? poleSvg.x : 50;
