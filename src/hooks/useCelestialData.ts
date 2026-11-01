@@ -7,6 +7,7 @@ export interface CelestialData {
   bounds: any[];
   borders: any[];
   dsoNames: Record<string, any>;
+  milkyWay: any[];
 }
 
 const DEFAULT_CELESTIAL_DATA: CelestialData = {
@@ -15,7 +16,8 @@ const DEFAULT_CELESTIAL_DATA: CelestialData = {
   starNames: {},
   bounds: [],
   borders: [],
-  dsoNames: {}
+  dsoNames: {},
+  milkyWay: []
 };
 
 // In-memory cache across component mounts to avoid re-fetching ~MBs of static celestial geo-data
@@ -50,13 +52,14 @@ export const useCelestialData = () => {
     if (!fetchPromise) {
       fetchPromise = (async () => {
         try {
-          const [dsoJson, linesJson, namesJson, boundsJson, bordersJson, dsoNamesJson] = await Promise.all([
+          const [dsoJson, linesJson, namesJson, boundsJson, bordersJson, dsoNamesJson, mwJson] = await Promise.all([
             safeFetch('/data/dsos.6.json'),
             safeFetch('/data/constellations.lines.json'),
             safeFetch('/data/starnames.json'),
             safeFetch('/data/constellations.bounds.json'),
             safeFetch('/data/constellations.borders.json'),
-            safeFetch('/data/dsonames.json')
+            safeFetch('/data/dsonames.json'),
+            safeFetch('/data/mw.json')
           ]);
 
           const loadedData: CelestialData = {
@@ -65,7 +68,8 @@ export const useCelestialData = () => {
             starNames: namesJson || {},
             bounds: boundsJson ? (Array.isArray(boundsJson) ? boundsJson : (boundsJson.features || [])) : [],
             borders: bordersJson ? (Array.isArray(bordersJson) ? bordersJson : (bordersJson.features || [])) : [],
-            dsoNames: dsoNamesJson || {}
+            dsoNames: dsoNamesJson || {},
+            milkyWay: mwJson ? (Array.isArray(mwJson) ? mwJson : (mwJson.features || [])) : []
           };
           cachedCelestialData = loadedData;
           return loadedData;
