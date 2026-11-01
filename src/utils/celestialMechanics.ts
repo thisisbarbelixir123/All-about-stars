@@ -1333,7 +1333,7 @@ export const projectLocalStereoMilkyWayTier = (
   return totalD.trim();
 };
 
-export type SkyMapProjectionType = 'stereographic' | 'orthographic' | 'mollweide';
+export type SkyMapProjectionType = 'stereographic' | 'orthographic';
 
 export interface DynamicSphericalProjectOptions {
   centerRaDeg: number;
@@ -1365,21 +1365,6 @@ export const projectDynamicSphericalPoint = (
   const cx = width / 2;
   const cy = height / 2;
   const d2r = Math.PI / 180;
-
-  if (projection === 'mollweide') {
-    // Dynamic Mollweide with center meridian
-    const raw = projectMollweideRaw(raDeg, decDeg, centerRaDeg, true);
-    const rx = radius * 2 * zoom;
-    const ry = radius * zoom;
-    const x = cx + raw.xNorm * rx;
-    const y = cy - raw.yNorm * ry;
-    return {
-      x,
-      y,
-      isVisible: raw.isInside,
-      cosC: raw.isInside ? 1 : -1
-    };
-  }
 
   // Spherical Stereographic & Orthographic
   let dLamDeg = raDeg - centerRaDeg;

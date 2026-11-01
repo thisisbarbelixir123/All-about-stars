@@ -243,7 +243,8 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       ctx.fillStyle = bgGrad;
       ctx.fill();
       ctx.clip(); // Clip to the 3D globe hemisphere
-    } else if (projection === 'stereographic') {
+    } else {
+      // Stereographic
       const discR = radius * zoom * 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy, discR, 0, 2 * Math.PI);
@@ -253,15 +254,6 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       bgGrad.addColorStop(1, '#010410');
       ctx.fillStyle = bgGrad;
       ctx.fill();
-    } else {
-      // Mollweide
-      const rx = radius * 2 * zoom;
-      const ry = radius * zoom;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.fillStyle = '#020718';
-      ctx.fill();
-      ctx.clip();
     }
 
     // 2. Coordinate Graticule (Parallels, Meridians, Equator)
@@ -577,12 +569,6 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       ctx.beginPath();
       ctx.arc(cx, cy, radius * zoom, 0, 2 * Math.PI);
       ctx.stroke();
-    } else if (projection === 'mollweide') {
-      const rx = radius * 2 * zoom;
-      const ry = radius * zoom;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
     }
   }, [
     dimensions,
@@ -748,8 +734,30 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     touchDistanceRef.current = null;
   }, []);
 
-  // Click on Canvas: inspect hovered or clicked constellation area
+  // Click on Canvas: single-click selects / highlights constellation (does not automatically open dossier)
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    let target = hoveredConstellation;
+    if (!target) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        for (const pb of renderedBoundariesRef.current) {
+          if (pointInPolygon(clickX, clickY, pb.ring)) {
+            target = pb.constInfo || null;
+            break;
+          }
+        }
+      }
+    }
+    if (target) {
+      setHoveredConstellation(target);
+    }
+  }, [hoveredConstellation]);
+
+  // Double Click on Canvas: opens the Constellation Dossier
+  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     let target = hoveredConstellation;
     if (!target) {
       const canvas = canvasRef.current;
@@ -837,15 +845,6 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
               title="Orthographic Projection (3D Celestial Globe)"
             >
               Globe
-            </button>
-            <button
-              onClick={() => setProjection('mollweide')}
-              className={`px-1.5 sm:px-2 py-0.5 rounded transition-all cursor-pointer ${
-                projection === 'mollweide' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-              title="Mollweide Projection (Equal-Area Whole Sky)"
-            >
-              Flat
             </button>
           </div>
 
@@ -999,6 +998,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
           />
 
           {/* Real-time Cursor Coordinates Readout Pill */}
@@ -1054,7 +1054,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         </div>
         <div className="text-slate-400 flex items-center gap-2">
           <span className="hidden sm:inline text-slate-500">
-            Drag to rotate • Scroll to zoom • Click constellation for dossier
+            Drag to rotate • Scroll to zoom • Double-click constellation for dossier
           </span>
           <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-bold border border-cyan-800/80">
             {zoom.toFixed(1)}×
