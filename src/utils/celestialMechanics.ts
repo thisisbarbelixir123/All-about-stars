@@ -92,6 +92,45 @@ export const projectStereoPoint = (
   return { x, y };
 };
 
+/**
+ * Conformal Stereographic Inverse Projection.
+ * Converts map projection coordinates (x, y) back to spherical celestial coordinates (lonDeg, latDeg).
+ */
+export const unprojectStereoPoint = (
+  x: number,
+  y: number,
+  cLonDeg: number,
+  cLatDeg: number
+): { lonDeg: number; latDeg: number } => {
+  const d2r = Math.PI / 180;
+  const r2d = 180 / Math.PI;
+  const phi0 = cLatDeg * d2r;
+  const lam0 = cLonDeg * d2r;
+
+  const px = x * d2r;
+  const py = y * d2r;
+  const rho = Math.hypot(px, py);
+  if (rho < 1e-7) {
+    return { lonDeg: cLonDeg, latDeg: cLatDeg };
+  }
+  const c = 2 * Math.atan(rho / 2);
+  const cosC = Math.cos(c);
+  const sinC = Math.sin(c);
+
+  const sinPhi = cosC * Math.sin(phi0) + (py * sinC * Math.cos(phi0)) / rho;
+  const phi = Math.asin(Math.max(-1, Math.min(1, sinPhi)));
+
+  const num = -px * sinC;
+  const den = rho * Math.cos(phi0) * cosC - py * Math.sin(phi0) * sinC;
+  const dLam = Math.atan2(num, den);
+
+  let lon = (lam0 + dLam) * r2d;
+  while (lon < 0) lon += 360;
+  while (lon >= 360) lon -= 360;
+
+  return { lonDeg: lon, latDeg: phi * r2d };
+};
+
 export const pointInPolygon = (px: number, py: number, ring: Array<{ x: number; y: number }>): boolean => {
   let inside = false;
   const n = ring.length;

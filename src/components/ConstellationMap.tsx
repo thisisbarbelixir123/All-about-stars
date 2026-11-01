@@ -25,7 +25,8 @@ import {
   findOptimalNeighborBadgePos,
   projectLocalStereoMilkyWayTier,
   isProminentDso,
-  clipPolygonSutherlandHodgman
+  clipPolygonSutherlandHodgman,
+  unprojectStereoPoint
 } from '../utils/celestialMechanics';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
 
@@ -397,7 +398,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
   const allSecondary = [...jsonStars, ...localRawDsos, ...cCatalogStars, ...extraFigureStars];
 
-  const { mappedPoints, boundaryRingsSvg, poleSvg, toSvg } = projectUniversalStereo(
+  const { mappedPoints, boundaryRingsSvg, poleSvg, toSvg, midX, midY, span } = projectUniversalStereo(
     constellation,
     allSecondary,
     boundaryRings,
@@ -462,7 +463,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
           return toSvg(p.x, p.y);
         });
-        const clipped = clipPolygonSutherlandHodgman(rawRing, -5, -5, 105, 105);
+        const clipped = clipPolygonSutherlandHodgman(rawRing, -70, -70, 170, 170);
         if (clipped.length >= 3) {
           ringsSvg.push(clipped);
         }
@@ -473,7 +474,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
               const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
               return toSvg(p.x, p.y);
             });
-            const clipped = clipPolygonSutherlandHodgman(rawRing, -5, -5, 105, 105);
+            const clipped = clipPolygonSutherlandHodgman(rawRing, -70, -70, 170, 170);
             if (clipped.length >= 3) {
               ringsSvg.push(clipped);
             }
@@ -515,23 +516,17 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   const delporteBorderSegments = useMemo(() => {
     if (!celestialData.borders || celestialData.borders.length === 0) return [];
     const centerAbbr = (constellation.abbreviation || constellation.id).toLowerCase();
-    const neighborAbbrSet = new Set(neighbors.map(n => {
-      const obj = resolveConstellationByName(n);
-      return (obj?.abbreviation || getNeighborAbbr(n, obj)).toLowerCase();
-    }));
-    neighborAbbrSet.add(centerAbbr);
 
+    // In wide view and zoom-out modes (down to 0.7x), include all Delporte border features within the wide FOV
     const relevant = celestialData.borders.filter(feat => {
-      if (!feat.ids) return false;
-      const [a, b] = feat.ids.split(',').map((s: string) => s.toLowerCase());
-      if (!neighborAbbrSet.has(a) && !neighborAbbrSet.has(b)) return false;
+      if (!feat.geometry?.coordinates) return false;
 
-      // Ensure segment is within or crosses the viewport
-      return feat.geometry?.coordinates?.some((seg: number[][]) => {
+      // Ensure segment is within or crosses the wide celestial viewport (-70 to 170)
+      return feat.geometry.coordinates.some((seg: number[][]) => {
         return seg.some(pt => {
           const sp = projectStereoPoint(pt[0], pt[1], cLon, cLat);
           const s = toSvg(sp.x, sp.y);
-          return s.x >= -10 && s.x <= 110 && s.y >= -10 && s.y <= 110;
+          return s.x >= -70 && s.x <= 170 && s.y >= -70 && s.y <= 170;
         });
       });
     });
@@ -555,7 +550,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         path: pathStrings.join(' ')
       };
     });
-  }, [celestialData.borders, constellation.id, constellation.abbreviation, neighbors, cLon, cLat, toSvg]);
+  }, [celestialData.borders, constellation.id, constellation.abbreviation, cLon, cLat, toSvg]);
 
   // Dynamically computed physical RA / Dec celestial graticule that moves with the starfield
   const dynamicGraticule = useMemo(() => {
@@ -608,6 +603,44 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     return { parallels, meridians };
   }, [isPolar, cLon, cLat, toSvg]);
+
+  // Dynamic astronomical frame ruler ticks whose values adjust continuously as the user zooms and pans
+  const dynamicFrameRuler = useMemo(() => {
+    if (isPolar) return null;
+    const boxMargin = 70;
+
+    const fromScreenToCelestial = (screenX: number, screenY: number) => {
+      const svgX = (screenX - 50 - pan.x) / zoom + 50;
+      const svgY = (screenY - 50 - pan.y) / zoom + 50;
+      const projX = ((svgX - 50) / boxMargin) * span + midX;
+      const projY = -((svgY - 50) / boxMargin) * span + midY;
+      return unprojectStereoPoint(projX, projY, cLon, cLat);
+    };
+
+    // Right Ascension (RA) labels on top neatline frame (screen y = 0)
+    const raTickPositions = [18, 50, 82];
+    const raLabels = raTickPositions.map(sx => {
+      const pt = fromScreenToCelestial(sx, 0);
+      const raH = pt.lonDeg / 15;
+      const h = Math.floor(raH);
+      const m = Math.round((raH - h) * 60);
+      const label = (m === 0 || m === 60)
+        ? `${String((h + (m === 60 ? 1 : 0)) % 24).padStart(2, '0')}h`
+        : `${String(h % 24).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
+      return { x: sx, label };
+    });
+
+    // Declination (Dec) labels on left neatline frame (screen x = 0)
+    const decTickPositions = [18, 50, 82];
+    const decLabels = decTickPositions.map(sy => {
+      const pt = fromScreenToCelestial(0, sy);
+      const decVal = Math.round(pt.latDeg);
+      const label = decVal > 0 ? `+${decVal}°` : `${decVal}°`;
+      return { y: sy, label };
+    });
+
+    return { raLabels, decLabels };
+  }, [isPolar, zoom, pan.x, pan.y, span, midX, midY, cLon, cLat]);
 
   // Gentle relaxation pass to prevent neighboring badges from overlapping
   for (let iter = 0; iter < 15; iter++) {
@@ -951,6 +984,40 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
             <text x="2.5" y="96.5" textAnchor="start" fill="#64748b" fontSize="1.9" fontFamily="monospace" fontWeight="bold">
               DEC
             </text>
+
+            {/* Dynamic Astronomical Frame Ruler Labels (adjust continuously with Zoom & Pan) */}
+            {!isPolar && dynamicFrameRuler && (
+              <>
+                {dynamicFrameRuler.raLabels.map((ra, idx) => (
+                  <text
+                    key={`frame-ra-tick-${idx}`}
+                    x={ra.x}
+                    y="7.2"
+                    textAnchor="middle"
+                    fill="#38bdf8"
+                    fontSize="2.1"
+                    fontFamily="monospace"
+                    opacity="0.9"
+                  >
+                    {ra.label}
+                  </text>
+                ))}
+                {dynamicFrameRuler.decLabels.map((dec, idx) => (
+                  <text
+                    key={`frame-dec-tick-${idx}`}
+                    x="2.5"
+                    y={dec.y + 0.9}
+                    textAnchor="start"
+                    fill="#38bdf8"
+                    fontSize="2.0"
+                    fontFamily="monospace"
+                    opacity="0.9"
+                  >
+                    {dec.label}
+                  </text>
+                ))}
+              </>
+            )}
           </g>
         )}
 
@@ -1066,7 +1133,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
         {/* 1.5. Milky Way Galactic Plane & Core Contours (Translucent Multi-Tier Glow) */}
         {opts.showMilkyWay && milkyWayPaths.length > 0 && (
-          <g className="milky-way-galactic-contours pointer-events-none" clipPath={`url(#map-frame-clip-${constellation.id})`}>
+          <g className="milky-way-galactic-contours pointer-events-none">
             {milkyWayPaths.map((tier, idx) => (
               <path
                 key={`mw-contour-tier-${idx}`}
@@ -1129,7 +1196,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
         {/* 4. Bordering Constellations on Sky Map (Territory Polygons) */}
         {borderingConstellationsSvg.length > 0 && opts.showNeighborGuides && (
-          <g className="bordering-constellations-areas" clipPath={`url(#map-frame-clip-${constellation.id})`}>
+          <g className="bordering-constellations-areas">
             {borderingConstellationsSvg.map((neighbor) => {
               const isHovered = hoveredNeighborName === neighbor.name;
               const isSelected = selectedNeighborName === neighbor.name;
