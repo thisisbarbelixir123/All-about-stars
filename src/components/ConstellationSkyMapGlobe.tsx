@@ -6,7 +6,8 @@ import {
   DynamicSphericalProjectOptions,
   projectDynamicSphericalPoint,
   inverseScreenToSpherical,
-  getConstellationSphericalCenter
+  getConstellationSphericalCenter,
+  pointInPolygon
 } from '../utils/celestialMechanics';
 import {
   Globe,
@@ -71,6 +72,9 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   });
   const touchDistanceRef = useRef<number | null>(null);
 
+  // Store active 2D projected boundary polygons for pixel-accurate hit-testing
+  const renderedBoundariesRef = useRef<Array<{ id: string; constInfo?: ConstellationInfo; ring: Array<{ x: number; y: number }> }>>([]);
+
   // Map abbreviation to ConstellationInfo for O(1) lookup
   const constMap = useMemo(() => {
     const map = new Map<string, ConstellationInfo>();
@@ -80,17 +84,48 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     return map;
   }, []);
 
-  // Precompute Constellation Spherical Centers for labeling and hover hit-testing
+  // Precompute Constellation Spherical Centers for labeling (each boundary sector gets its own centroid, including Serpens Caput & Cauda)
   const constellationCenters = useMemo(() => {
-    return ALL_88_CONSTELLATIONS.map((c) => {
-      const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
+    if (!celestialData.bounds || celestialData.bounds.length === 0) {
+      return ALL_88_CONSTELLATIONS.map((c) => {
+        const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
+        return {
+          constInfo: c,
+          label: c.abbreviation,
+          raDeg: (cLon % 360 + 360) % 360,
+          decDeg: cLat
+        };
+      });
+    }
+
+    return celestialData.bounds.map((feat) => {
+      const abbr = String(feat.id || '').toUpperCase();
+      const constInfo = constMap.get(abbr) || (abbr.startsWith('SER') ? constMap.get('SER') : undefined);
+      const ring = feat.geometry.coordinates[0] || [];
+      let sumLon = 0;
+      let sumLat = 0;
+      for (const [lon, lat] of ring) {
+        sumLon += lon;
+        sumLat += lat;
+      }
+      const n = Math.max(1, ring.length);
+      const cLon = sumLon / n;
+      const cLat = sumLat / n;
+      const raDeg = (cLon % 360 + 360) % 360;
+
+      let label = constInfo ? constInfo.abbreviation : abbr;
+      if (feat.id === 'Ser') {
+        label = cLon < -100 ? 'Ser (Cap)' : 'Ser (Cau)';
+      }
+
       return {
-        constInfo: c,
-        raDeg: (cLon % 360 + 360) % 360,
+        constInfo: constInfo || ALL_88_CONSTELLATIONS[0],
+        label,
+        raDeg,
         decDeg: cLat
       };
     });
-  }, [celestialData.bounds]);
+  }, [celestialData.bounds, constMap]);
 
   // Current Astronomical Solar Position on the Ecliptic
   const sunPosition = useMemo(() => {
@@ -356,6 +391,8 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     }
 
     // 5. Delporte Constellation Boundaries (89 Sectors)
+    const currentRenderedBoundaries: Array<{ id: string; constInfo?: ConstellationInfo; ring: Array<{ x: number; y: number }> }> = [];
+
     if (showBoundaries && celestialData.bounds) {
       celestialData.bounds.forEach((feat) => {
         const abbr = String(feat.id || '').toUpperCase();
@@ -376,10 +413,12 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         for (const ring of feat.geometry.coordinates) {
           ctx.beginPath();
           let started = false;
+          const currentScreenRing: Array<{ x: number; y: number }> = [];
           for (let i = 0; i < ring.length; i++) {
             const [ra, dec] = ring[i];
             const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
             if (pt.isVisible) {
+              currentScreenRing.push({ x: pt.x, y: pt.y });
               if (!started) {
                 ctx.moveTo(pt.x, pt.y);
                 started = true;
@@ -397,9 +436,18 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
               ctx.fill();
             }
           }
+          if (currentScreenRing.length >= 3 && constInfo) {
+            currentRenderedBoundaries.push({
+              id: feat.id,
+              constInfo,
+              ring: currentScreenRing
+            });
+          }
         }
       });
     }
+
+    renderedBoundariesRef.current = currentRenderedBoundaries;
 
     // 6. Constellation Stick-Figure Asterism Lines
     if (showAsterisms && celestialData.lines) {
@@ -480,23 +528,25 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      constellationCenters.forEach(({ constInfo, raDeg, decDeg }) => {
+      constellationCenters.forEach(({ constInfo, label, raDeg, decDeg }) => {
         const pt = projectDynamicSphericalPoint(raDeg, decDeg, projOpts);
         if (pt.isVisible) {
           const isHovered = hoveredConstellation?.id === constInfo.id;
-          const label = zoom >= 1.8 || isHovered ? constInfo.name.toUpperCase() : constInfo.abbreviation;
+          const displayLabel = zoom >= 2.0 || isHovered
+            ? (label.startsWith('Ser') ? label : constInfo.name.toUpperCase())
+            : label;
 
           // Text shadow
           ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-          ctx.fillText(label, pt.x + 1, pt.y + 1);
+          ctx.fillText(displayLabel, pt.x + 1, pt.y + 1);
 
           // Text foreground
           ctx.fillStyle = isHovered
             ? (constInfo.isZodiac ? '#fbbf24' : '#22d3ee')
             : constInfo.isZodiac
             ? '#fef08a'
-            : 'rgba(224, 231, 255, 0.75)';
-          ctx.fillText(label, pt.x, pt.y);
+            : 'rgba(224, 231, 255, 0.8)';
+          ctx.fillText(displayLabel, pt.x, pt.y);
         }
       });
     }
@@ -587,33 +637,42 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       return;
     }
 
-    // Hover Hit-Testing
+    // Live Coordinates Readout
     const spherical = inverseScreenToSpherical(mouseX, mouseY, projOpts);
     if (spherical) {
       setMouseCoord({
         raStr: (spherical.raDeg / 15).toFixed(2) + 'h',
         decStr: (spherical.decDeg > 0 ? '+' : '') + spherical.decDeg.toFixed(1) + '°'
       });
+    } else {
+      setMouseCoord(null);
+    }
 
-      // Find nearest constellation within hit radius
-      let closest: ConstellationInfo | null = null;
+    // 1. Primary Hit-Testing: True Boundary Polygon Containment (Ray-casting)
+    let matchedConstellation: ConstellationInfo | null = null;
+    for (const pb of renderedBoundariesRef.current) {
+      if (pointInPolygon(mouseX, mouseY, pb.ring)) {
+        matchedConstellation = pb.constInfo || null;
+        break;
+      }
+    }
+
+    // 2. Secondary Fallback: Proximity to constellation center label anchor
+    if (!matchedConstellation && spherical) {
       let minDistance = Infinity;
-
       for (const item of constellationCenters) {
         const pt = projectDynamicSphericalPoint(item.raDeg, item.decDeg, projOpts);
         if (pt.isVisible) {
           const dist = Math.hypot(pt.x - mouseX, pt.y - mouseY);
-          if (dist < 32 && dist < minDistance) {
+          if (dist < 26 && dist < minDistance) {
             minDistance = dist;
-            closest = item.constInfo;
+            matchedConstellation = item.constInfo;
           }
         }
       }
-      setHoveredConstellation(closest);
-    } else {
-      setMouseCoord(null);
-      setHoveredConstellation(null);
     }
+
+    setHoveredConstellation(matchedConstellation);
   }, [centerRa, centerDec, dimensions, zoom, projection, constellationCenters]);
 
   const handleMouseUp = useCallback(() => {
@@ -672,10 +731,25 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     touchDistanceRef.current = null;
   }, []);
 
-  // Click on Canvas: inspect hovered constellation
-  const handleClick = useCallback(() => {
-    if (hoveredConstellation && onSelectConstellation) {
-      onSelectConstellation(hoveredConstellation);
+  // Click on Canvas: inspect hovered or clicked constellation area
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    let target = hoveredConstellation;
+    if (!target) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        for (const pb of renderedBoundariesRef.current) {
+          if (pointInPolygon(clickX, clickY, pb.ring)) {
+            target = pb.constInfo || null;
+            break;
+          }
+        }
+      }
+    }
+    if (target && onSelectConstellation) {
+      onSelectConstellation(target);
     }
   }, [hoveredConstellation, onSelectConstellation]);
 
