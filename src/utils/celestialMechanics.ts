@@ -1077,6 +1077,82 @@ export const projectMollweidePolyline = (
 };
 
 /**
+ * Converts a GeoJSON MultiPolygon coordinates array into an SVG path string in Mollweide projection.
+ * Automatically inserts seam-breaking commands at antimeridian transitions and closes each ring.
+ */
+export const projectMollweideMultiPolygon = (
+  coordinates: Array<Array<Array<[number, number]>>>,
+  options: MollweideProjectionOptions = {}
+): string => {
+  if (!coordinates || coordinates.length === 0) return '';
+
+  const {
+    width = 1000,
+    height = 500,
+    padding = 24
+  } = options;
+
+  const availW = Math.max(20, width - 2 * padding);
+  const availH = Math.max(10, height - 2 * padding);
+  const rx = (availW / availH >= 2 ? (availH / 2) * 2 : availW / 2);
+  const seamBreakThreshold = rx * 1.25;
+
+  let totalD = '';
+
+  for (const polygon of coordinates) {
+    for (const ring of polygon) {
+      if (!ring || ring.length < 3) continue;
+      let d = '';
+      let inSub = false;
+      let prevX: number | null = null;
+      let prevY: number | null = null;
+
+      for (let i = 0; i < ring.length; i++) {
+        const [lon, lat] = ring[i];
+        const pt = projectMollweidePoint(lon, lat, options);
+
+        if (i === 0 || prevX === null) {
+          d += `M ${pt.x} ${pt.y} `;
+          inSub = true;
+        } else {
+          const dist = Math.hypot(pt.x - prevX, pt.y - prevY);
+          if (dist > seamBreakThreshold) {
+            if (inSub) {
+              d += 'Z ';
+            }
+            d += `M ${pt.x} ${pt.y} `;
+            inSub = true;
+          } else {
+            d += `L ${pt.x} ${pt.y} `;
+          }
+        }
+
+        prevX = pt.x;
+        prevY = pt.y;
+      }
+
+      if (inSub) {
+        d += 'Z ';
+      }
+
+      if (d) totalD += d;
+    }
+  }
+
+  return totalD.trim();
+};
+
+/**
+ * Converts a GeoJSON Polygon coordinates array (outer ring + optional holes) into an SVG path string in Mollweide projection.
+ */
+export const projectMollweidePolygon = (
+  coordinates: Array<Array<[number, number]>>,
+  options: MollweideProjectionOptions = {}
+): string => {
+  return projectMollweideMultiPolygon([coordinates], options);
+};
+
+/**
  * Generates coordinate graticule data (parallels, meridians, outer boundary, equator, and ecliptic)
  * for rendering a complete celestial globe on SVG/Canvas.
  */

@@ -11,6 +11,7 @@ import {
 } from '../data/constellationsData';
 import { useCelestialData } from '../hooks/useCelestialData';
 import { ConstellationTabs, ConstellationGuideTab } from './ConstellationTabs';
+import { ConstellationSkyMapGlobe } from './ConstellationSkyMapGlobe';
 import { ConstellationMap } from './ConstellationMap';
 import { ConstellationDossierModal } from './ConstellationDossierModal';
 import { calculateAstronomicalZodiac } from '../utils/celestialMechanics';
@@ -106,11 +107,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-2 max-w-3xl">
             <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-              <Compass className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
-              <span>Constellation Guide</span>
+              <Globe className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+              <span>Sky Map</span>
             </h1>
             <p className="text-[11px] sm:text-sm mobile-landscape:text-[10px] mobile-landscape:leading-tight text-slate-300 leading-relaxed font-sans">
-              Discover all 88 official IAU constellations dividing the celestial sphere, compare 2D Earth perspective against true 3D stellar depths, explore the real 13 astronomical zodiac constellations, and debunk astrological lore.
+              Interactive whole-sky celestial globe projecting all 88 official IAU constellations, the multi-tiered galactic disc of the Milky Way, the solar ecliptic path, and equatorial coordinate graticules in equal-area Mollweide projection.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -121,7 +122,13 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
         </div>
       </div>
 
-      {/* Sub-Tabs Switcher */}
+      {/* Whole-Sky Celestial Globe Component */}
+      <ConstellationSkyMapGlobe
+        celestialData={celestialData}
+        onSelectConstellation={(c) => setInspectedConstellation(c)}
+      />
+
+      {/* Sub-Tabs Switcher (Below Sky Map) */}
       <ConstellationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* ========================================================================= */}
