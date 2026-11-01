@@ -64846,7 +64846,7 @@
   },
   {
     "id": "groombridge-1830",
-    "name": "Groombridge 1830 (GJ451A undefined)",
+    "name": "Groombridge 1830",
     "alternateNames": [
       "CF Ursae Majoris",
       "HD 103095",
@@ -64854,8 +64854,7 @@
       "HIP 57939",
       "Giclas 122-51",
       "Groombridge 1830",
-      "GJ451A undefined",
-      "Groombridge 1830 (GJ451A undefined)"
+      "GJ 451 A"
     ],
     "constellation": "Ursa Major",
     "diameterSolar": 0.64,
@@ -64965,8 +64964,7 @@
       "Zkh 173",
       "Zkh 174",
       "Groombridge 1830",
-      "GJ451A undefined",
-      "Groombridge 1830 (GJ451A undefined)"
+      "GJ 451 A"
     ]
   },
   {
@@ -90817,8 +90815,9 @@
     "name": "Beemim (Upsilon-3 Eridani)",
     "alternateNames": [
       "Beemim",
-      "undefined3 Eridani",
-      "HD 28028"
+      "Upsilon-3 Eridani",
+      "HD 28028",
+      "υ³ Eridani"
     ],
     "constellation": "Eridanus",
     "diameterSolar": 12,
@@ -90859,21 +90858,21 @@
     "notableFacts": [
       "Officially assigned the proper name \"Beemim\" by the IAU Working Group on Star Names (WGSN).",
       "Located approximately 185 light-years from Earth in the constellation Eridanus.",
-      "Known astronomically as undefined3 Eridani and cataloged as HIP 20535."
+      "Known astronomically as Upsilon-3 Eridani and cataloged as HIP 20535."
     ],
-    "description": "Beemim (undefined3 Eridani) is a K9III red giant star situated 185 light-years away in the constellation Eridanus. It shines with an apparent visual magnitude of 3.97.",
+    "description": "Beemim (Upsilon-3 Eridani) is a K9III red giant star situated 185 light-years away in the constellation Eridanus. It shines with an apparent visual magnitude of 3.97.",
     "diameterKm": 16712400,
     "diameterAU": 0.11171549382219918,
     "distanceParsecs": 90.5,
     "rightAscension": "04h 24m 02.21s",
     "declination": "-34° 01′ 00.0″",
     "primaryDesignation": "HD 28028",
-    "bayerDesignation": "undefined3 Eridani",
+    "bayerDesignation": "υ³ Eridani",
     "designations": [
+      "υ³ Eri",
       "Beemim (Upsilon-3 Eridani)",
-      "Beemim (undefined3 Eridani)",
       "Beemim",
-      "undefined3 Eridani",
+      "Upsilon-3 Eridani",
       "HD 28028",
       "HIP 20535"
     ]
