@@ -1191,3 +1191,68 @@ export const computeMollweideGraticule = (
     eclipticPath
   };
 };
+
+/**
+ * Projects a multi-polygon Milky Way tier feature onto a local stereographic constellation viewport.
+ * Automatically culls opposite-hemisphere vertices and builds an SVG path string for the local frame.
+ */
+export const projectLocalStereoMilkyWayTier = (
+  tierFeature: any,
+  cLon: number,
+  cLat: number,
+  toSvg: (projX: number, projY: number) => { x: number; y: number },
+  viewportPadding: number = 25
+): string => {
+  if (!tierFeature?.geometry?.coordinates) return '';
+  const d2r = Math.PI / 180;
+  const lam0 = cLon * d2r;
+  const phi0 = cLat * d2r;
+
+  let totalD = '';
+
+  for (const polygon of tierFeature.geometry.coordinates) {
+    for (const ring of polygon) {
+      let d = '';
+      let inSub = false;
+
+      for (let i = 0; i < ring.length; i++) {
+        const [lon, lat] = ring[i];
+        const lam = lon * d2r;
+        const phi = lat * d2r;
+        let dLam = lam - lam0;
+        while (dLam > Math.PI) dLam -= 2 * Math.PI;
+        while (dLam < -Math.PI) dLam += 2 * Math.PI;
+
+        const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(dLam);
+        if (cosC < 0.25) {
+          if (inSub) { d += ' Z '; inSub = false; }
+          continue;
+        }
+
+        const k = 2 / (1 + cosC);
+        const projX = -k * Math.cos(phi) * Math.sin(dLam) * (180 / Math.PI);
+        const projY = k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam)) * (180 / Math.PI);
+        const svgPt = toSvg(projX, projY);
+
+        // Discard points projecting far outside the viewport to prevent SVG clipping distortions
+        if (svgPt.x < -viewportPadding || svgPt.x > 100 + viewportPadding ||
+            svgPt.y < -viewportPadding || svgPt.y > 100 + viewportPadding) {
+          if (inSub) { d += ' Z '; inSub = false; }
+          continue;
+        }
+
+        if (!inSub) {
+          d += `M ${svgPt.x} ${svgPt.y} `;
+          inSub = true;
+        } else {
+          d += `L ${svgPt.x} ${svgPt.y} `;
+        }
+      }
+
+      if (inSub) d += ' Z ';
+      if (d.length > 0) totalD += d;
+    }
+  }
+
+  return totalD.trim();
+};

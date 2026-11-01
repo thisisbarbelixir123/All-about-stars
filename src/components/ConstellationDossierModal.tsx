@@ -25,7 +25,8 @@ import {
   Navigation,
   Crosshair,
   Star,
-  Info
+  Info,
+  Waves
 } from 'lucide-react';
 
 interface ConstellationDossierModalProps {
@@ -53,7 +54,8 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
     showStarLabels: false,
     showEquatorEcliptic: true,
     showDeepSky: true,
-    showNeighborGuides: true
+    showNeighborGuides: true,
+    showMilkyWay: true
   });
 
   const [activeStarLabelId, setActiveStarLabelId] = useState<string | null>(null);
@@ -223,6 +225,15 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                     onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDeepSky: !prev.showDeepSky }))}
                     title="Toggle Iconic Messier / NGC Deep Sky Objects (Max 6)"
                     activeColorClass="bg-rose-950/80 text-rose-300 border-rose-500/50"
+                  />
+
+                  <MapToolbarToggle
+                    label="Milky Way"
+                    icon={<Waves className="w-3 h-3" />}
+                    active={skyMapOptions.showMilkyWay ?? true}
+                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showMilkyWay: !prev.showMilkyWay }))}
+                    title="Toggle Milky Way Galactic Plane & Core Contours"
+                    activeColorClass="bg-cyan-950/90 text-sky-300 border-sky-500/50"
                   />
 
                   <MapToolbarToggle

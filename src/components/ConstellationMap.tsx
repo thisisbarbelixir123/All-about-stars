@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import {
@@ -22,7 +22,8 @@ import {
   getConstellationVisibleFigureStars,
   findConstellationLineFeature,
   getConstellationLineSegments,
-  findOptimalNeighborBadgePos
+  findOptimalNeighborBadgePos,
+  projectLocalStereoMilkyWayTier
 } from '../utils/celestialMechanics';
 
 export type DsoCategory = 'nebula' | 'galaxy' | 'cluster';
@@ -72,6 +73,7 @@ export interface SkyMapOptions {
   showEquatorEcliptic: boolean;
   showDeepSky: boolean;
   showNeighborGuides: boolean;
+  showMilkyWay?: boolean;
 }
 
 export interface ConstellationMapProps {
@@ -235,6 +237,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     showEquatorEcliptic: options?.showEquatorEcliptic ?? (isLarge ? true : false),
     showDeepSky: options?.showDeepSky ?? (isLarge ? true : false),
     showNeighborGuides: options?.showNeighborGuides ?? (isLarge ? true : true),
+    showMilkyWay: options?.showMilkyWay ?? (isLarge ? true : true),
   };
 
   const border = constellation.borders;
@@ -416,6 +419,33 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   snapLineVerticesToCatalog(mappedLineVertices, mappedCatalog, 3.2);
 
   const mainBoundaryPathData = boundaryRingsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
+
+  // Project Milky Way multi-tier contours for constellations intersecting the galactic plane
+  const milkyWayPaths = useMemo(() => {
+    if (!opts.showMilkyWay || !celestialData.milkyWay || celestialData.milkyWay.length === 0) {
+      return [];
+    }
+
+    const TIER_STYLES = [
+      { fill: '#60a5fa', opacity: 0.05 }, // Tier 1: outer diffuse glow
+      { fill: '#93c5fd', opacity: 0.08 }, // Tier 2: intermediate stream
+      { fill: '#bfdbfe', opacity: 0.12 }, // Tier 3: dense galactic plane
+      { fill: '#dbeafe', opacity: 0.16 }, // Tier 4: inner core lane
+      { fill: '#f8fafc', opacity: 0.22 }, // Tier 5: galactic core / nucleus
+    ];
+
+    const results: Array<{ path: string; fill: string; opacity: number }> = [];
+
+    celestialData.milkyWay.forEach((feat: any, idx: number) => {
+      const style = TIER_STYLES[idx] || TIER_STYLES[TIER_STYLES.length - 1];
+      const d = projectLocalStereoMilkyWayTier(feat, cLon, cLat, toSvg);
+      if (d && d.length > 0) {
+        results.push({ path: d, fill: style.fill, opacity: style.opacity });
+      }
+    });
+
+    return results;
+  }, [opts.showMilkyWay, celestialData.milkyWay, constellation.id, cLon, cLat, toSvg]);
 
   // Project and place Bordering Constellations on the Sky Map
   const borderingConstellationsSvg = neighbors.map(neighborName => {
@@ -784,6 +814,21 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
                 ))}
               </>
             )}
+          </g>
+        )}
+
+        {/* 1.5. Milky Way Galactic Plane & Core Contours (Translucent Multi-Tier Glow) */}
+        {opts.showMilkyWay && milkyWayPaths.length > 0 && (
+          <g className="milky-way-galactic-contours pointer-events-none" clipPath={`url(#map-frame-clip-${constellation.id})`}>
+            {milkyWayPaths.map((tier, idx) => (
+              <path
+                key={`mw-contour-tier-${idx}`}
+                d={tier.path}
+                fill={tier.fill}
+                fillOpacity={tier.opacity}
+                stroke="none"
+              />
+            ))}
           </g>
         )}
 
