@@ -7,7 +7,8 @@ import {
   projectDynamicSphericalPoint,
   inverseScreenToSpherical,
   getConstellationSphericalCenter,
-  pointInPolygon
+  pointInPolygon,
+  isProminentDso
 } from '../utils/celestialMechanics';
 import {
   Globe,
@@ -578,35 +579,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
     // 7.5. Deep-Sky Objects (Prominent Messier, Caldwell & Named NGC/IC Objects)
     if (showDSOs && celestialData.dsos && celestialData.dsos.length > 0) {
-      // Filter out obscure uncatalogued faint dark nebulae & obscure catalogs (LDN, LBN, Ced, Sh2, etc.)
-      // which clutter the sky with thousands of tiny red squares.
+      const maxAllowedMag = zoom < 1.0 ? 5.5 : zoom < 1.8 ? 7.0 : 8.5;
+
       for (const dsoFeat of celestialData.dsos) {
-        const dsoProps = dsoFeat.properties || {};
-        const desig = (dsoProps.desig || '').trim();
-        const dsoId = String(dsoFeat.id || '').trim();
-        const dsoType = (dsoProps.type || '').trim().toLowerCase();
-
-        // Check for common/named objects or iconic catalogs
-        const isMessier = /^M\s*\d+$/i.test(desig);
-        const isCaldwell = /^C\s*\d+$/i.test(desig);
-        const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
-        if (isObscure && !isMessier && !isCaldwell) continue;
-
-        // Skip nameless faint dark nebulae
-        const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
-        const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
-        if (dsoType === 'dn' && !commonName) continue;
-
-        // Magnitude filter: show bright & famous at low zoom, reveal fainter ones when zooming in
-        const dsoMagStr = dsoProps.mag;
-        const dsoMag = dsoMagStr && dsoMagStr !== '999' ? parseFloat(dsoMagStr) : null;
-
-        if (dsoMag !== null) {
-          const maxAllowedMag = zoom < 1.0 ? 5.5 : zoom < 1.8 ? 7.0 : 8.5;
-          if (dsoMag > maxAllowedMag && !isMessier) continue;
-        } else if (!commonName && !isMessier && !isCaldwell && zoom < 1.5) {
-          continue;
-        }
+        if (!isProminentDso(dsoFeat, celestialData.dsoNames, maxAllowedMag)) continue;
 
         const coords = dsoFeat.geometry?.coordinates;
         if (!coords || coords.length < 2) continue;
@@ -614,6 +590,16 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
         const pt = projectDynamicSphericalPoint(dRa, dDec, projOpts);
         if (!pt.isVisible) continue;
+
+        const dsoProps = dsoFeat.properties || {};
+        const desig = (dsoProps.desig || '').trim();
+        const dsoId = String(dsoFeat.id || '').trim();
+        const isMessier = /^M\s*\d+$/i.test(desig);
+        const isCaldwell = /^C\s*\d+$/i.test(desig);
+        const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
+        const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
+        const dsoMagStr = dsoProps.mag;
+        const dsoMag = dsoMagStr && dsoMagStr !== '999' ? parseFloat(dsoMagStr) : null;
 
         const cat = getDsoCategory(dsoProps.type);
         const config = DSO_LEGEND_CONFIG[cat];
@@ -650,13 +636,12 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         }
 
         // Label prominent DSOs when zoomed in (e.g. M 31, M 42, M 45)
-        const dsoDesig = dsoProps.desig || dsoFeat.id;
-        if (zoom >= 1.6 && dsoDesig && (isMessier || isCaldwell || commonName || (dsoMag !== null && dsoMag <= 5.0))) {
+        if (zoom >= 1.6 && desig && (isMessier || isCaldwell || commonName || (dsoMag !== null && dsoMag <= 5.0))) {
           ctx.font = '8px monospace';
           ctx.fillStyle = config.colorHex;
           ctx.textAlign = 'left';
           ctx.textBaseline = 'top';
-          ctx.fillText(commonName || dsoDesig, pt.x + dsoRadius + 3, pt.y - 4);
+          ctx.fillText(commonName || desig, pt.x + dsoRadius + 3, pt.y - 4);
         }
       }
     }

@@ -1471,3 +1471,44 @@ export const inverseScreenToSpherical = (
 
   return null;
 };
+
+/**
+ * Standard DSO prominent filter matching across Sky Map and Constellation Dossier
+ */
+export const isProminentDso = (
+  dso: any,
+  dsoNames?: Record<string, any>,
+  maxMag: number = 8.5
+): boolean => {
+  if (!dso) return false;
+  const props = dso.properties || {};
+  const desig = (props.desig || '').trim();
+  const dsoId = String(dso.id || '').trim();
+  const dsoType = (props.type || '').trim().toLowerCase();
+
+  const isMessier = /^M\s*\d+$/i.test(desig);
+  const isCaldwell = /^C\s*\d+$/i.test(desig);
+
+  // Filter out obscure survey catalogs with thousands of uncatalogued/faint items
+  const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(
+    (pre) => desig.startsWith(pre)
+  );
+  if (isObscure && !isMessier && !isCaldwell) return false;
+
+  // Check for common/popular named objects in dsonames.json
+  const nameInfo = dsoNames?.[dsoId] || dsoNames?.[desig];
+  const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
+
+  // Dark nebulae without a common proper name are discarded
+  if (dsoType === 'dn' && !commonName) return false;
+
+  const mag = parseFloat(props.mag);
+  const hasValidMag = !isNaN(mag) && mag < 90;
+
+  if (isMessier) return true;
+  if (isCaldwell) return true;
+  if (commonName && (hasValidMag ? mag <= 9.5 : true)) return true;
+  if (hasValidMag && mag <= maxMag && (desig.startsWith('NGC') || desig.startsWith('IC') || desig === 'LMC' || desig === 'SMC')) return true;
+
+  return false;
+};

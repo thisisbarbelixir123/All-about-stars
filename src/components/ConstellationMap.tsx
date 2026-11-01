@@ -23,7 +23,8 @@ import {
   findConstellationLineFeature,
   getConstellationLineSegments,
   findOptimalNeighborBadgePos,
-  projectLocalStereoMilkyWayTier
+  projectLocalStereoMilkyWayTier,
+  isProminentDso
 } from '../utils/celestialMechanics';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
 
@@ -287,27 +288,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     const dsoDec = dso.geometry.coordinates[1];
     if (!isInsideBoundaryGeom(dso.geometry.coordinates[0], dsoDec)) return false;
 
-    const props = dso.properties || {};
-    const desig = (props.desig || '').trim();
-    const dsoId = String(dso.id || '').trim();
-    const dsoType = (props.type || '').trim().toLowerCase();
-
-    const nameInfo = celestialData.dsoNames?.[dsoId] || celestialData.dsoNames?.[desig];
-    const commonName = typeof nameInfo === 'object' && nameInfo?.name ? nameInfo.name : null;
-    const isMessier = /^M\s*\d+$/i.test(desig);
-    const isCaldwell = /^C\s*\d+$/i.test(desig);
-    const isObscure = ['LDN', 'LBN', 'Ced', 'Cr', 'vdB', 'Stock', 'Tr', 'RCW', 'SNR', 'PN G', 'B ', 'Sh2'].some(pre => desig.startsWith(pre));
-    if (isObscure) return false;
-    if (dsoType === 'dn' && !commonName) return false;
-
-    const mag = parseFloat(props.mag);
-    const hasValidMag = !isNaN(mag) && mag < 90;
-
-    if (isMessier) return true;
-    if (isCaldwell) return true;
-    if (commonName && (hasValidMag ? mag <= 9.0 : true)) return true;
-    if (hasValidMag && mag <= 8.0 && (desig.startsWith('NGC') || desig.startsWith('IC'))) return true;
-    return false;
+    // Use unified isProminentDso to match SkyMap catalog filter perfectly
+    return isProminentDso(dso, celestialData.dsoNames, 8.5);
   }).map(dso => {
     let r = dso.geometry.coordinates[0]; if (r < 0) r += 360;
     const props = dso.properties || {};
