@@ -786,3 +786,408 @@ export const calculateAstronomicalZodiac = (m: number, d: number) => {
 
   return { traditional, astronomical, symbol, isOph, daysIn, desc };
 };
+
+/* ==========================================================================
+   MOLLWEIDE PROJECTION & CARTOGRAPHY ENGINE (WHOLE-SKY GLOBE)
+   ========================================================================== */
+
+export interface MollweideProjectionOptions {
+  centerMeridianDeg?: number; // Central Right Ascension meridian in degrees (default: 0)
+  width?: number;             // Viewport width in pixels (default: 1000)
+  height?: number;            // Viewport height in pixels (default: 500)
+  padding?: number;           // Padding around ellipse in pixels (default: 24)
+  astronomical?: boolean;     // East is Left (-x) per astronomical sky convention (default: true)
+  isRaHours?: boolean;        // Whether numerical RA is expressed in hours (default: false, auto-detected if string)
+}
+
+export interface MollweideProjectedPoint {
+  x: number;          // Viewport screen X in pixels
+  y: number;          // Viewport screen Y in pixels
+  xNorm: number;      // Normalized horizontal coordinate [-1, +1]
+  yNorm: number;      // Normalized vertical coordinate [-1, +1]
+  isInside: boolean;  // Whether point lies strictly on/inside the bounding ellipse
+  thetaRad: number;   // Solved auxiliary parametric latitude in radians
+}
+
+export interface MollweideGraticuleLine {
+  id: string;
+  label?: string;
+  path: string;
+  valueDeg: number;
+}
+
+export interface MollweideGraticuleData {
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+  outlinePath: string;
+  parallels: MollweideGraticuleLine[];
+  meridians: MollweideGraticuleLine[];
+  equatorPath: string;
+  eclipticPath: string;
+}
+
+export interface MollweideGraticuleOptions {
+  centerMeridianDeg?: number;
+  padding?: number;
+  astronomical?: boolean;
+  parallelStepDeg?: number; // default 15
+  meridianStepDeg?: number; // default 30 (2 hours)
+}
+
+/**
+ * Solves the transcendental auxiliary angle theta for the Mollweide projection:
+ *   2θ + sin(2θ) = π sin(φ)
+ * Uses high-precision Newton-Raphson iteration with boundary guarantees for poles.
+ */
+export const solveMollweideTheta = (phiRad: number): number => {
+  // Handle exact poles and equator analytically
+  if (Math.abs(phiRad) >= Math.PI / 2 - 1e-10) {
+    return Math.sign(phiRad) * (Math.PI / 2);
+  }
+  if (Math.abs(phiRad) < 1e-10) {
+    return 0;
+  }
+
+  const target = Math.PI * Math.sin(phiRad);
+  let theta = phiRad; // Initial guess close to phi
+
+  for (let i = 0; i < 12; i++) {
+    const f = 2 * theta + Math.sin(2 * theta) - target;
+    const fPrime = 2 + 2 * Math.cos(2 * theta); // 4 * cos^2(theta)
+    if (Math.abs(fPrime) < 1e-12) break;
+    const delta = f / fPrime;
+    theta -= delta;
+    if (Math.abs(delta) < 1e-12) break;
+  }
+
+  return theta;
+};
+
+/**
+ * Normalizes an arbitrary Right Ascension value (string or number) into decimal degrees [0, 360).
+ */
+export const parseRaToDeg = (ra: number | string, isHours?: boolean): number => {
+  if (typeof ra === 'string') {
+    const s = ra.trim();
+    if (s.includes('h')) {
+      const parsedHours = parseCoordinate(s);
+      return isNaN(parsedHours) ? 0 : ((parsedHours * 15) % 360 + 360) % 360;
+    }
+    if (s.includes('°')) {
+      const parsedDeg = parseCoordinate(s);
+      return isNaN(parsedDeg) ? 0 : (parsedDeg % 360 + 360) % 360;
+    }
+    const num = parseFloat(s);
+    if (!isNaN(num)) {
+      const deg = isHours ? num * 15 : num;
+      return (deg % 360 + 360) % 360;
+    }
+    return 0;
+  }
+  if (typeof ra === 'number' && !isNaN(ra)) {
+    const deg = isHours ? ra * 15 : ra;
+    return (deg % 360 + 360) % 360;
+  }
+  return 0;
+};
+
+/**
+ * Normalizes an arbitrary Declination value (string or number) into decimal degrees [-90, +90].
+ */
+export const parseDecToDeg = (dec: number | string): number => {
+  if (typeof dec === 'string') {
+    const parsed = parseCoordinate(dec);
+    return isNaN(parsed) ? 0 : Math.max(-90, Math.min(90, parsed));
+  }
+  if (typeof dec === 'number' && !isNaN(dec)) {
+    return Math.max(-90, Math.min(90, dec));
+  }
+  return 0;
+};
+
+/**
+ * Computes the raw normalized Mollweide coordinates where:
+ *   xNorm in [-1, +1]
+ *   yNorm in [-1, +1]
+ *   Elliptical boundary condition: (xNorm^2 + yNorm^2) <= 1
+ */
+export const projectMollweideRaw = (
+  raDeg: number,
+  decDeg: number,
+  centerMeridianDeg: number = 0,
+  astronomical: boolean = true
+): MollweideProjectedPoint => {
+  const d2r = Math.PI / 180;
+  let dLam = (raDeg - centerMeridianDeg) * d2r;
+  while (dLam > Math.PI) dLam -= 2 * Math.PI;
+  while (dLam < -Math.PI) dLam += 2 * Math.PI;
+
+  const clampedDec = Math.max(-89.99999, Math.min(89.99999, decDeg));
+  const phi = clampedDec * d2r;
+  const theta = solveMollweideTheta(phi);
+
+  // Theoretical unscaled Mollweide formulation:
+  // x = (2 * sqrt(2) / pi) * dLam * cos(theta)
+  // y = sqrt(2) * sin(theta)
+  // Major axis semi-diameter a = 2 * sqrt(2)
+  // Minor axis semi-diameter b = sqrt(2)
+  const factor = (2 * Math.SQRT2) / Math.PI;
+  const rawX = factor * dLam * Math.cos(theta);
+  const rawY = Math.SQRT2 * Math.sin(theta);
+
+  // In astronomical orientation (looking up at celestial sphere from inside),
+  // East (increasing RA) is to the Left (-x)
+  const orientedX = astronomical ? -rawX : rawX;
+
+  // Normalized coordinates on unit ellipse (xNorm^2 + yNorm^2 <= 1)
+  const xNorm = orientedX / (2 * Math.SQRT2);
+  const yNorm = rawY / Math.SQRT2;
+  const isInside = (xNorm * xNorm + yNorm * yNorm) <= 1.00001;
+
+  return {
+    x: orientedX,
+    y: rawY,
+    xNorm,
+    yNorm,
+    isInside,
+    thetaRad: theta
+  };
+};
+
+/**
+ * Projects a celestial coordinate (RA/Dec as string or number) onto an SVG/Canvas viewport
+ * fitted to the canonical 2:1 Mollweide ellipse.
+ */
+export const projectMollweidePoint = (
+  ra: number | string,
+  dec: number | string,
+  options: MollweideProjectionOptions = {}
+): MollweideProjectedPoint => {
+  const {
+    centerMeridianDeg = 0,
+    width = 1000,
+    height = 500,
+    padding = 24,
+    astronomical = true,
+    isRaHours = false
+  } = options;
+
+  const raDeg = parseRaToDeg(ra, isRaHours);
+  const decDeg = parseDecToDeg(dec);
+
+  const raw = projectMollweideRaw(raDeg, decDeg, centerMeridianDeg, astronomical);
+
+  // Fit 2:1 aspect ellipse within available viewport
+  const availW = Math.max(20, width - 2 * padding);
+  const availH = Math.max(10, height - 2 * padding);
+
+  let rx: number;
+  let ry: number;
+
+  if (availW / availH >= 2) {
+    ry = availH / 2;
+    rx = ry * 2;
+  } else {
+    rx = availW / 2;
+    ry = rx / 2;
+  }
+
+  const cx = width / 2;
+  const cy = height / 2;
+
+  // Map to screen pixel coordinates (SVG Y increases downwards)
+  const screenX = cx + raw.xNorm * rx;
+  const screenY = cy - raw.yNorm * ry;
+
+  return {
+    x: Math.round(screenX * 100) / 100,
+    y: Math.round(screenY * 100) / 100,
+    xNorm: raw.xNorm,
+    yNorm: raw.yNorm,
+    isInside: raw.isInside,
+    thetaRad: raw.thetaRad
+  };
+};
+
+/**
+ * Checks whether a 2D screen point lies strictly inside a Mollweide bounding ellipse.
+ */
+export const isPointInMollweideEllipse = (
+  x: number,
+  y: number,
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number
+): boolean => {
+  if (rx <= 0 || ry <= 0) return false;
+  const dx = (x - cx) / rx;
+  const dy = (y - cy) / ry;
+  return (dx * dx + dy * dy) <= 1.00001;
+};
+
+/**
+ * Converts a sequence of spherical [lonDeg, latDeg] points into an SVG path string (`M ... L ...`)
+ * with automatic antimeridian seam breaking to prevent cross-ellipse horizontal slash lines.
+ */
+export const projectMollweidePolyline = (
+  coordinates: Array<[number, number]>,
+  options: MollweideProjectionOptions = {}
+): string => {
+  if (!coordinates || coordinates.length === 0) return '';
+
+  const {
+    width = 1000,
+    height = 500,
+    padding = 24
+  } = options;
+
+  const availW = Math.max(20, width - 2 * padding);
+  const availH = Math.max(10, height - 2 * padding);
+  const rx = (availW / availH >= 2 ? (availH / 2) * 2 : availW / 2);
+  const seamBreakThreshold = rx * 1.25;
+
+  let path = '';
+  let prevX: number | null = null;
+  let prevY: number | null = null;
+
+  for (let i = 0; i < coordinates.length; i++) {
+    const [lon, lat] = coordinates[i];
+    const pt = projectMollweidePoint(lon, lat, options);
+
+    if (i === 0 || prevX === null) {
+      path += `M ${pt.x} ${pt.y} `;
+    } else {
+      const dist = Math.hypot(pt.x - prevX, pt.y - prevY);
+      if (dist > seamBreakThreshold) {
+        // Break segment at the antimeridian jump
+        path += `M ${pt.x} ${pt.y} `;
+      } else {
+        path += `L ${pt.x} ${pt.y} `;
+      }
+    }
+
+    prevX = pt.x;
+    prevY = pt.y;
+  }
+
+  return path.trim();
+};
+
+/**
+ * Generates coordinate graticule data (parallels, meridians, outer boundary, equator, and ecliptic)
+ * for rendering a complete celestial globe on SVG/Canvas.
+ */
+export const computeMollweideGraticule = (
+  width: number = 1000,
+  height: number = 500,
+  options: MollweideGraticuleOptions = {}
+): MollweideGraticuleData => {
+  const {
+    centerMeridianDeg = 0,
+    padding = 24,
+    astronomical = true,
+    parallelStepDeg = 15,
+    meridianStepDeg = 30
+  } = options;
+
+  const availW = Math.max(20, width - 2 * padding);
+  const availH = Math.max(10, height - 2 * padding);
+
+  let rx: number;
+  let ry: number;
+
+  if (availW / availH >= 2) {
+    ry = availH / 2;
+    rx = ry * 2;
+  } else {
+    rx = availW / 2;
+    ry = rx / 2;
+  }
+
+  const cx = width / 2;
+  const cy = height / 2;
+
+  // 1. Outer boundary ellipse path
+  const outlinePath = `M ${cx - rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
+
+  // 2. Parallels of Declination (straight horizontal lines bounded by the ellipse)
+  const parallels: MollweideGraticuleLine[] = [];
+  for (let dec = -75; dec <= 75; dec += parallelStepDeg) {
+    const raw = projectMollweideRaw(0, dec, centerMeridianDeg, astronomical);
+    const yScreen = Math.round((cy - raw.yNorm * ry) * 100) / 100;
+    const xMaxNorm = Math.cos(raw.thetaRad);
+    const xLeft = Math.round((cx - xMaxNorm * rx) * 100) / 100;
+    const xRight = Math.round((cx + xMaxNorm * rx) * 100) / 100;
+
+    const label = dec > 0 ? `+${dec}°` : `${dec}°`;
+    parallels.push({
+      id: `parallel-${dec}`,
+      label,
+      valueDeg: dec,
+      path: `M ${xLeft} ${yScreen} L ${xRight} ${yScreen}`
+    });
+  }
+
+  // 3. Equator (dec = 0)
+  const equatorPath = `M ${cx - rx} ${cy} L ${cx + rx} ${cy}`;
+
+  // 4. Meridians of Right Ascension (curved ellipses from South Pole to North Pole)
+  const meridians: MollweideGraticuleLine[] = [];
+  for (let ra = 0; ra < 360; ra += meridianStepDeg) {
+    const pts: Array<[number, number]> = [];
+    for (let dec = -90; dec <= 90; dec += 3) {
+      pts.push([ra, dec]);
+    }
+    const pathStr = projectMollweidePolyline(pts, {
+      centerMeridianDeg,
+      width,
+      height,
+      padding,
+      astronomical,
+      isRaHours: false
+    });
+
+    const hours = (ra / 15).toFixed(0);
+    meridians.push({
+      id: `meridian-${ra}`,
+      label: `${hours}h`,
+      valueDeg: ra,
+      path: pathStr
+    });
+  }
+
+  // 5. The Ecliptic (Earth's orbital path / annual path of the Sun, obliquity ε ≈ 23.439°)
+  const obliquityRad = 23.43928 * (Math.PI / 180);
+  const eclipticPts: Array<[number, number]> = [];
+  for (let eclLon = 0; eclLon <= 360; eclLon += 2) {
+    const lRad = eclLon * (Math.PI / 180);
+    const sinDec = Math.sin(obliquityRad) * Math.sin(lRad);
+    const decDeg = Math.asin(sinDec) * (180 / Math.PI);
+    const raRad = Math.atan2(Math.sin(lRad) * Math.cos(obliquityRad), Math.cos(lRad));
+    const raDeg = ((raRad * (180 / Math.PI)) % 360 + 360) % 360;
+    eclipticPts.push([raDeg, decDeg]);
+  }
+  const eclipticPath = projectMollweidePolyline(eclipticPts, {
+    centerMeridianDeg,
+    width,
+    height,
+    padding,
+    astronomical,
+    isRaHours: false
+  });
+
+  return {
+    cx,
+    cy,
+    rx,
+    ry,
+    outlinePath,
+    parallels,
+    meridians,
+    equatorPath,
+    eclipticPath
+  };
+};
