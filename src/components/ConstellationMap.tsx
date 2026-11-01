@@ -78,6 +78,7 @@ export interface SkyMapOptions {
   showDeepSky: boolean;
   showNeighborGuides: boolean;
   showMilkyWay?: boolean;
+  showAsterisms?: boolean;
 }
 
 export interface ConstellationMapProps {
@@ -255,6 +256,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     showDeepSky: options?.showDeepSky ?? (isLarge ? true : false),
     showNeighborGuides: options?.showNeighborGuides ?? (isLarge ? true : true),
     showMilkyWay: options?.showMilkyWay ?? (isLarge ? true : true),
+    showAsterisms: options?.showAsterisms ?? (isLarge ? true : true),
   };
 
   const border = constellation.borders;
@@ -525,10 +527,8 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       const bw = Math.max(8.0, Math.min(24.0, constName.length * 1.15 + 3.2));
       const bh = 3.6;
 
-      // Only create name badges for immediate bordering constellations that share an IAU boundary
-      const badgePos = isDirectNeighbor
-        ? findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh)
-        : null;
+      // Create name badges for any constellation whose visible territory has sufficient area and clearance
+      const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
 
       results.push({
         name: constName,
@@ -544,6 +544,58 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     return results;
   }, [celestialData.bounds, constellation.id, constellation.abbreviation, constellation.name, neighbors, boundaryRingsSvg, cLon, cLat, toSvg]);
+
+  // Project asterism stick lines for non-highlighted surrounding constellations
+  const surroundingAsterismLines = useMemo(() => {
+    if (!celestialData.lines || celestialData.lines.length === 0) return { lines: [], vertices: [] };
+    const centerAbbr = (constellation.abbreviation || constellation.id).toLowerCase();
+    const centerId = constellation.id.toLowerCase();
+    const otherFeatures = celestialData.lines.filter((f: any) => {
+      const fid = (f.id || '').toLowerCase();
+      const pid = (f.properties?.id || '').toLowerCase();
+      return fid !== centerAbbr && fid !== centerId && pid !== centerAbbr && pid !== centerId;
+    });
+
+    const d2r = Math.PI / 180;
+    const lam0 = cLon * d2r;
+    const phi0 = cLat * d2r;
+
+    const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = [];
+    const vertices: Array<{ x: number; y: number }> = [];
+
+    otherFeatures.forEach((feat: any) => {
+      const rawSegs = feat.geometry?.type === 'MultiLineString'
+        ? feat.geometry.coordinates
+        : [feat.geometry?.coordinates];
+
+      (rawSegs || []).forEach((seg: number[][]) => {
+        if (!seg || seg.length < 2) return;
+        const pts: Array<{ x: number; y: number }> = [];
+        for (const pt of seg) {
+          const lam = pt[0] * d2r;
+          const phi = pt[1] * d2r;
+          const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lam - lam0);
+          if (cosC <= 0.25) return; // Skip antipodal segments
+          const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
+          pts.push(toSvg(p.x, p.y));
+        }
+
+        // Only draw if segment intersects or is close to the visible viewport
+        if (pts.some(p => p.x >= -15 && p.x <= 115 && p.y >= -15 && p.y <= 115)) {
+          for (let i = 0; i < pts.length - 1; i++) {
+            lines.push({ from: pts[i], to: pts[i + 1] });
+          }
+          pts.forEach(p => {
+            if (p.x >= -5 && p.x <= 105 && p.y >= -5 && p.y <= 105) {
+              vertices.push(p);
+            }
+          });
+        }
+      });
+    });
+
+    return { lines, vertices };
+  }, [celestialData.lines, constellation.id, constellation.abbreviation, cLon, cLat, toSvg]);
 
   // Delporte official stepped boundary line segments (for central constellation and visible neighbors)
   const delporteBorderSegments = useMemo(() => {
@@ -1371,6 +1423,38 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
             </g>
           );
         })}
+
+        {/* 6.5. Surrounding Non-Highlighted Constellations Asterism Stick Lines */}
+        {opts.showAsterisms && surroundingAsterismLines.lines.length > 0 && (
+          <g className="surrounding-constellations-asterisms pointer-events-none">
+            {surroundingAsterismLines.lines.map((l, idx) => (
+              <line
+                key={`surround-line-${idx}`}
+                x1={l.from.x}
+                y1={l.from.y}
+                x2={l.to.x}
+                y2={l.to.y}
+                stroke="#64748b"
+                strokeWidth="0.5"
+                strokeOpacity="0.4"
+                strokeDasharray="2 1.5"
+                strokeLinecap="round"
+              />
+            ))}
+            {surroundingAsterismLines.vertices.map((v, idx) => (
+              <circle
+                key={`surround-vertex-${idx}`}
+                cx={v.x}
+                cy={v.y}
+                r="0.75"
+                fill="#64748b"
+                stroke="#334155"
+                strokeWidth="0.25"
+                opacity="0.45"
+              />
+            ))}
+          </g>
+        )}
 
         {/* 7. Connecting Asterism Stick Lines from JSON */}
         {multiLineCoords.map((segment: number[][], segIdx: number) => {

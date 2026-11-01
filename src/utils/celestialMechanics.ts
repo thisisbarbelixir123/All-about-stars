@@ -252,75 +252,68 @@ export const findOptimalNeighborBadgePos = (
   const hw = badgeWidth / 2;
   const hh = badgeHeight / 2;
 
+  // Filter within the visible chart window [0, 100]
   const allPts = ringsSvg.flat();
-  const visPts = allPts.filter(p => p.x >= -15 && p.x <= 115 && p.y >= -15 && p.y <= 115);
-  if (visPts.length === 0) return null;
+  const visPts = allPts.filter(p => p.x >= 0 && p.x <= 100 && p.y >= 0 && p.y <= 100);
+  if (visPts.length < 3) return null;
 
-  const bMinX = Math.max(hw + 1.0, Math.min(...visPts.map(p => p.x)));
-  const bMaxX = Math.min(100 - hw - 1.0, Math.max(...visPts.map(p => p.x)));
-  const bMinY = Math.max(hh + 1.5, Math.min(...visPts.map(p => p.y)));
-  const bMaxY = Math.min(100 - hh - 1.5, Math.max(...visPts.map(p => p.y)));
+  const minX = Math.min(...visPts.map(p => p.x));
+  const maxX = Math.max(...visPts.map(p => p.x));
+  const minY = Math.min(...visPts.map(p => p.y));
+  const maxY = Math.max(...visPts.map(p => p.y));
+  const visW = maxX - minX;
+  const visH = maxY - minY;
+
+  // Constellation territory must have significant visible extent in the viewport to qualify for a label badge
+  if (visW < 12.0 || visH < 8.0) return null;
+
+  const bMinX = Math.max(hw + 1.2, minX + 1.0);
+  const bMaxX = Math.min(100 - hw - 1.2, maxX - 1.0);
+  const bMinY = Math.max(hh + 1.8, minY + 1.0);
+  const bMaxY = Math.min(100 - hh - 1.8, maxY - 1.0);
+
+  if (bMinX > bMaxX || bMinY > bMaxY) return null;
 
   let bestX = (bMinX + bMaxX) / 2;
   let bestY = (bMinY + bMaxY) / 2;
   let bestScore = -Infinity;
 
-  if (bMinX <= bMaxX && bMinY <= bMaxY) {
-    const stepX = Math.max(0.7, (bMaxX - bMinX) / 22);
-    const stepY = Math.max(0.7, (bMaxY - bMinY) / 22);
+  const stepX = Math.max(0.7, (bMaxX - bMinX) / 20);
+  const stepY = Math.max(0.7, (bMaxY - bMinY) / 20);
 
-    for (let gx = bMinX; gx <= bMaxX; gx += stepX) {
-      for (let gy = bMinY; gy <= bMaxY; gy += stepY) {
-        const isInsideNeighbor = ringsSvg.some(ring => pointInPolygon(gx, gy, ring));
-        if (!isInsideNeighbor) continue;
+  for (let gx = bMinX; gx <= bMaxX; gx += stepX) {
+    for (let gy = bMinY; gy <= bMaxY; gy += stepY) {
+      const isInsideNeighbor = ringsSvg.some(ring => pointInPolygon(gx, gy, ring));
+      if (!isInsideNeighbor) continue;
 
-        const isInsideCentral = boundaryRingsSvg.some(ring => pointInPolygon(gx, gy, ring));
-        if (isInsideCentral) continue;
+      const isInsideCentral = boundaryRingsSvg.some(ring => pointInPolygon(gx, gy, ring));
+      if (isInsideCentral) continue;
 
-        let clearance = Infinity;
-        ringsSvg.forEach(ring => {
-          const d = minDistanceToPolygonEdges(gx, gy, ring);
-          if (d < clearance) clearance = d;
-        });
+      let clearance = Infinity;
+      ringsSvg.forEach(ring => {
+        const d = minDistanceToPolygonEdges(gx, gy, ring);
+        if (d < clearance) clearance = d;
+      });
 
-        let distToCentral = Infinity;
-        boundaryRingsSvg.forEach(ring => {
-          const d = minDistanceToPolygonEdges(gx, gy, ring);
-          if (d < distToCentral) distToCentral = d;
-        });
+      let distToCentral = Infinity;
+      boundaryRingsSvg.forEach(ring => {
+        const d = minDistanceToPolygonEdges(gx, gy, ring);
+        if (d < distToCentral) distToCentral = d;
+      });
 
-        const dCenter = Math.hypot(gx - 50, gy - 50);
-        const score = clearance * 2.0 + Math.min(distToCentral, 10) * 0.5 - (dCenter > 48 ? (dCenter - 48) * 0.3 : 0);
+      const dCenter = Math.hypot(gx - 50, gy - 50);
+      const score = clearance * 2.0 + Math.min(distToCentral, 10) * 0.5 - (dCenter > 46 ? (dCenter - 46) * 0.35 : 0);
 
-        if (score > bestScore) {
-          bestScore = score;
-          bestX = gx;
-          bestY = gy;
-        }
+      if (score > bestScore) {
+        bestScore = score;
+        bestX = gx;
+        bestY = gy;
       }
     }
   }
 
-  if (bestScore === -Infinity) {
-    const validPts = visPts.filter(p => !boundaryRingsSvg.some(ring => pointInPolygon(p.x, p.y, ring)));
-    if (validPts.length > 0) {
-      let maxDist = -1;
-      validPts.forEach(p => {
-        let d = Infinity;
-        boundaryRingsSvg.forEach(ring => {
-          const cd = minDistanceToPolygonEdges(p.x, p.y, ring);
-          if (cd < d) d = cd;
-        });
-        if (d > maxDist) {
-          maxDist = d;
-          bestX = p.x;
-          bestY = p.y;
-        }
-      });
-    } else {
-      return null;
-    }
-  }
+  // Must have an interior clearance of at least 0.8 units to avoid overlapping boundary lines
+  if (bestScore < 0.8) return null;
 
   bestX = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, bestX));
   bestY = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, bestY));
