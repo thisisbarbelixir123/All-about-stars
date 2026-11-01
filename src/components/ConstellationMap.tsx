@@ -525,7 +525,10 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       const bw = Math.max(8.0, Math.min(24.0, constName.length * 1.15 + 3.2));
       const bh = 3.6;
 
-      const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
+      // Only create name badges for immediate bordering constellations that share an IAU boundary
+      const badgePos = isDirectNeighbor
+        ? findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh)
+        : null;
 
       results.push({
         name: constName,
