@@ -22,8 +22,10 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
-  MapPin
+  MapPin,
+  CircleDot
 } from 'lucide-react';
+import { getDsoCategory, DSO_LEGEND_CONFIG } from './ConstellationMap';
 
 interface ConstellationSkyMapGlobeProps {
   celestialData: CelestialData;
@@ -55,6 +57,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   const [showBoundaries, setShowBoundaries] = useState<boolean>(true);
   const [showAsterisms, setShowAsterisms] = useState<boolean>(true);
   const [showStars, setShowStars] = useState<boolean>(true);
+  const [showDSOs, setShowDSOs] = useState<boolean>(true);
   const [showGraticule, setShowGraticule] = useState<boolean>(true);
   const [showEcliptic, setShowEcliptic] = useState<boolean>(true);
   const [showLabels, setShowLabels] = useState<boolean>(true);
@@ -486,28 +489,155 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       ctx.stroke();
     }
 
-    // 7. Prominent Stars Field
+    // 7. Full Astrometric Starfield (down to mag 6.0 with B-V chromaticity)
     if (showStars) {
-      ALL_88_CONSTELLATIONS.forEach((c) => {
-        const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
-        const pt = projectDynamicSphericalPoint(cLon, cLat, projOpts);
-        if (pt.isVisible) {
-          const isZodiac = c.isZodiac;
-          const r = isZodiac ? 2.5 : 1.8;
+      if (celestialData.stars && celestialData.stars.length > 0) {
+        // Real astrometric starfield
+        // Limit faintest stars at low zoom to maintain crisp 60 FPS Canvas performance
+        const maxMag = zoom < 0.9 ? 4.8 : zoom < 1.4 ? 5.5 : 6.0;
 
-          // Star halo
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, r * 2.2, 0, 2 * Math.PI);
-          ctx.fillStyle = isZodiac ? 'rgba(254, 240, 138, 0.25)' : 'rgba(186, 230, 253, 0.22)';
-          ctx.fill();
+        for (const starFeat of celestialData.stars) {
+          const mag = starFeat.properties?.mag ?? 6;
+          if (mag > maxMag) continue;
 
-          // Star core
+          const coords = starFeat.geometry?.coordinates;
+          if (!coords || coords.length < 2) continue;
+          const [sRa, sDec] = coords;
+
+          const pt = projectDynamicSphericalPoint(sRa, sDec, projOpts);
+          if (!pt.isVisible) continue;
+
+          // Realistic magnitude scaling: brighter stars (lower mag) are larger
+          // Sirius is -1.44, Vega is 0.03, Polaris is 1.98, limit is ~6.0
+          const clampedMag = Math.max(-1.5, mag);
+          const baseRadius = Math.max(0.6, (6.2 - clampedMag) * 0.48 * Math.sqrt(Math.max(1, zoom * 0.8)));
+
+          // B-V Chromaticity Color Tuning
+          const bvVal = parseFloat(starFeat.properties?.bv ?? '0.4');
+          let starColor = '#ffffff';
+          let haloColor = 'rgba(255, 255, 255, 0.2)';
+
+          if (bvVal < 0.0) {
+            // Blue/White (O/B type)
+            starColor = '#93c5fd';
+            haloColor = 'rgba(147, 197, 253, 0.35)';
+          } else if (bvVal < 0.35) {
+            // White (A type)
+            starColor = '#f8fafc';
+            haloColor = 'rgba(248, 250, 252, 0.25)';
+          } else if (bvVal < 0.8) {
+            // Yellow-white (F/G type, Sol)
+            starColor = '#fef08a';
+            haloColor = 'rgba(254, 240, 138, 0.3)';
+          } else if (bvVal < 1.3) {
+            // Orange (K type)
+            starColor = '#fdba74';
+            haloColor = 'rgba(253, 186, 116, 0.35)';
+          } else {
+            // Red (M type / Carbon)
+            starColor = '#f87171';
+            haloColor = 'rgba(248, 113, 113, 0.38)';
+          }
+
+          // Render halo for prominent stars (mag <= 3.2)
+          if (clampedMag <= 3.2) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, baseRadius * 2.2, 0, 2 * Math.PI);
+            ctx.fillStyle = haloColor;
+            ctx.fill();
+          }
+
+          // Core disc
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, r, 0, 2 * Math.PI);
-          ctx.fillStyle = isZodiac ? '#fef08a' : '#ffffff';
+          ctx.arc(pt.x, pt.y, baseRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = starColor;
           ctx.fill();
         }
-      });
+      } else {
+        // Fallback: prominent constellation anchor stars if star catalog is still loading
+        ALL_88_CONSTELLATIONS.forEach((c) => {
+          const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
+          const pt = projectDynamicSphericalPoint(cLon, cLat, projOpts);
+          if (pt.isVisible) {
+            const isZodiac = c.isZodiac;
+            const r = isZodiac ? 2.5 : 1.8;
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, r * 2.2, 0, 2 * Math.PI);
+            ctx.fillStyle = isZodiac ? 'rgba(254, 240, 138, 0.25)' : 'rgba(186, 230, 253, 0.22)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, r, 0, 2 * Math.PI);
+            ctx.fillStyle = isZodiac ? '#fef08a' : '#ffffff';
+            ctx.fill();
+          }
+        });
+      }
+    }
+
+    // 7.5. Deep-Sky Objects (DSOs: Nebulae, Star Clusters, Galaxies)
+    if (showDSOs && celestialData.dsos && celestialData.dsos.length > 0) {
+      // Show bright DSOs at low zoom, reveal more as user zooms in
+      const dsoMagLimit = zoom < 1.0 ? 4.5 : zoom < 2.0 ? 5.5 : 6.5;
+
+      for (const dsoFeat of celestialData.dsos) {
+        const dsoProps = dsoFeat.properties || {};
+        const dsoMagStr = dsoProps.mag;
+        const dsoMag = dsoMagStr ? parseFloat(dsoMagStr) : 999;
+        if (dsoMag > dsoMagLimit && dsoMag !== 999 && zoom < 2.5) continue;
+
+        const coords = dsoFeat.geometry?.coordinates;
+        if (!coords || coords.length < 2) continue;
+        const [dRa, dDec] = coords;
+
+        const pt = projectDynamicSphericalPoint(dRa, dDec, projOpts);
+        if (!pt.isVisible) continue;
+
+        const cat = getDsoCategory(dsoProps.type);
+        const config = DSO_LEGEND_CONFIG[cat];
+        const dsoRadius = Math.max(2.2, Math.min(5.5, 3.2 * Math.sqrt(zoom * 0.8)));
+
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, dsoRadius * 1.8, 0, 2 * Math.PI);
+        ctx.fillStyle = `${config.colorHex}25`;
+        ctx.fill();
+
+        // Categorical marker shape
+        ctx.strokeStyle = config.strokeHex;
+        ctx.lineWidth = 1.0;
+
+        if (cat === 'cluster') {
+          // Dotted dashed ring for star cluster
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, dsoRadius, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 1.2, 0, 2 * Math.PI);
+          ctx.fillStyle = config.colorHex;
+          ctx.fill();
+        } else if (cat === 'galaxy') {
+          // Elliptical shape for galaxy
+          ctx.beginPath();
+          ctx.ellipse(pt.x, pt.y, dsoRadius * 1.3, dsoRadius * 0.7, Math.PI / 4, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else {
+          // Diamond / Square marker for nebula
+          ctx.beginPath();
+          ctx.strokeRect(pt.x - dsoRadius * 0.8, pt.y - dsoRadius * 0.8, dsoRadius * 1.6, dsoRadius * 1.6);
+        }
+
+        // Label prominent DSOs when zoomed in (e.g. M 31, M 42, M 45)
+        const dsoDesig = dsoProps.desig || dsoFeat.id;
+        if (zoom >= 1.8 && dsoDesig && (dsoMag <= 5.0 || ['M 31', 'M 42', 'M 45', 'LMC', 'SMC'].includes(dsoDesig))) {
+          ctx.font = '8px monospace';
+          ctx.fillStyle = config.colorHex;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(dsoDesig, pt.x + dsoRadius + 2, pt.y - 4);
+        }
+      }
     }
 
     // 8. Today's Sun on the Ecliptic
@@ -580,6 +710,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     showBoundaries,
     showAsterisms,
     showStars,
+    showDSOs,
     showGraticule,
     showEcliptic,
     showLabels,
@@ -888,6 +1019,34 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           >
             <Sparkles className="w-3 h-3 text-cyan-300" />
             <span className="hidden md:inline">Lines</span>
+          </button>
+
+          {/* Stars Toggle */}
+          <button
+            onClick={() => setShowStars(!showStars)}
+            className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-mono font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+              showStars
+                ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
+            }`}
+            title="Toggle 6.0 Magnitude Astrometric Starfield"
+          >
+            <CircleDot className="w-3 h-3 text-cyan-300" />
+            <span className="hidden md:inline">Stars</span>
+          </button>
+
+          {/* DSOs Toggle */}
+          <button
+            onClick={() => setShowDSOs(!showDSOs)}
+            className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-mono font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+              showDSOs
+                ? 'bg-rose-950/90 text-rose-300 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.3)]'
+                : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
+            }`}
+            title="Toggle Deep-Sky Objects (Nebulae, Star Clusters, Galaxies)"
+          >
+            <span className="text-[10px] text-rose-400">✦</span>
+            <span className="hidden md:inline">DSOs</span>
           </button>
 
           {/* Graticule Toggle */}

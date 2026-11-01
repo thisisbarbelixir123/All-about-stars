@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export interface CelestialData {
+  stars: any[];
   dsos: any[];
   lines: any[];
   starNames: Record<string, any>;
@@ -11,6 +12,7 @@ export interface CelestialData {
 }
 
 const DEFAULT_CELESTIAL_DATA: CelestialData = {
+  stars: [],
   dsos: [],
   lines: [],
   starNames: {},
@@ -52,7 +54,8 @@ export const useCelestialData = () => {
     if (!fetchPromise) {
       fetchPromise = (async () => {
         try {
-          const [dsoJson, linesJson, namesJson, boundsJson, bordersJson, dsoNamesJson, mwJson] = await Promise.all([
+          const [starsJson, dsoJson, linesJson, namesJson, boundsJson, bordersJson, dsoNamesJson, mwJson] = await Promise.all([
+            safeFetch('/data/stars.6.json'),
             safeFetch('/data/dsos.6.json'),
             safeFetch('/data/constellations.lines.json'),
             safeFetch('/data/starnames.json'),
@@ -63,6 +66,7 @@ export const useCelestialData = () => {
           ]);
 
           const loadedData: CelestialData = {
+            stars: starsJson ? (Array.isArray(starsJson) ? starsJson : (starsJson.features || [])) : [],
             dsos: dsoJson ? (Array.isArray(dsoJson) ? dsoJson : (dsoJson.features || [])) : [],
             lines: linesJson ? (Array.isArray(linesJson) ? linesJson : (linesJson.features || [])) : [],
             starNames: namesJson || {},
