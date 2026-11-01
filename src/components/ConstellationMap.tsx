@@ -562,6 +562,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
     const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = [];
     const vertices: Array<{ x: number; y: number }> = [];
+    const seenVertexKeys = new Set<string>();
 
     otherFeatures.forEach((feat: any) => {
       const rawSegs = feat.geometry?.type === 'MultiLineString'
@@ -570,26 +571,50 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
 
       (rawSegs || []).forEach((seg: number[][]) => {
         if (!seg || seg.length < 2) return;
-        const pts: Array<{ x: number; y: number }> = [];
-        for (const pt of seg) {
-          const lam = pt[0] * d2r;
-          const phi = pt[1] * d2r;
-          const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lam - lam0);
-          if (cosC <= 0.25) return; // Skip antipodal segments
-          const p = projectStereoPoint(pt[0], pt[1], cLon, cLat);
-          pts.push(toSvg(p.x, p.y));
-        }
 
-        // Only draw if segment intersects or is close to the visible viewport
-        if (pts.some(p => p.x >= -15 && p.x <= 115 && p.y >= -15 && p.y <= 115)) {
-          for (let i = 0; i < pts.length - 1; i++) {
-            lines.push({ from: pts[i], to: pts[i + 1] });
-          }
-          pts.forEach(p => {
-            if (p.x >= -5 && p.x <= 105 && p.y >= -5 && p.y <= 105) {
-              vertices.push(p);
+        // Process line pairwise to prevent long winding constellations (like Eridanus or Hydra)
+        // from being discarded entirely when their distant tail crosses into the opposite hemisphere
+        for (let i = 0; i < seg.length - 1; i++) {
+          const ptA = seg[i];
+          const ptB = seg[i + 1];
+
+          const lamA = ptA[0] * d2r;
+          const phiA = ptA[1] * d2r;
+          const cosCA = Math.sin(phi0) * Math.sin(phiA) + Math.cos(phi0) * Math.cos(phiA) * Math.cos(lamA - lam0);
+
+          const lamB = ptB[0] * d2r;
+          const phiB = ptB[1] * d2r;
+          const cosCB = Math.sin(phi0) * Math.sin(phiB) + Math.cos(phi0) * Math.cos(phiB) * Math.cos(lamB - lam0);
+
+          if (cosCA <= 0.2 || cosCB <= 0.2) continue; // Skip antipodal segments
+
+          const spA = projectStereoPoint(ptA[0], ptA[1], cLon, cLat);
+          const spB = projectStereoPoint(ptB[0], ptB[1], cLon, cLat);
+          const sA = toSvg(spA.x, spA.y);
+          const sB = toSvg(spB.x, spB.y);
+
+          // Draw if either vertex is within or near the visible canvas
+          const inViewA = sA.x >= -15 && sA.x <= 115 && sA.y >= -15 && sA.y <= 115;
+          const inViewB = sB.x >= -15 && sB.x <= 115 && sB.y >= -15 && sB.y <= 115;
+
+          if (inViewA || inViewB) {
+            lines.push({ from: sA, to: sB });
+
+            if (inViewA) {
+              const keyA = `${sA.x.toFixed(1)},${sA.y.toFixed(1)}`;
+              if (!seenVertexKeys.has(keyA)) {
+                seenVertexKeys.add(keyA);
+                vertices.push(sA);
+              }
             }
-          });
+            if (inViewB) {
+              const keyB = `${sB.x.toFixed(1)},${sB.y.toFixed(1)}`;
+              if (!seenVertexKeys.has(keyB)) {
+                seenVertexKeys.add(keyB);
+                vertices.push(sB);
+              }
+            }
+          }
         }
       });
     });
