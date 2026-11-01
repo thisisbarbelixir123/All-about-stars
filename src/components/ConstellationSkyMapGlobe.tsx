@@ -1191,7 +1191,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                       {activeConstellation.name} ({activeConstellation.englishName})
                     </span>
                     <span className="text-[10px] text-cyan-300 font-mono truncate block">
-                      Principal Alpha Star: {activeConstellation.principalStarName}
+                      Lucida: {activeConstellation.principalStarName}
                     </span>
                   </div>
                 </div>
