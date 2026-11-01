@@ -1220,19 +1220,19 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                       className="p-4 rounded-xl bg-[#020512]/90 border border-cyan-500/20 hover:border-cyan-500/40 transition-all flex flex-col justify-between gap-3 shadow-inner"
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-2 mb-1.5">
-                          <div>
-                            <h5 className="text-sm font-bold text-cyan-200 font-sans">
+                        <div className="flex flex-wrap items-start justify-between gap-2 mb-1.5">
+                          <div className="min-w-0 flex-1">
+                            <h5 className="text-sm font-bold text-cyan-200 font-sans break-words">
                               {planet.name}
                             </h5>
-                            <span className="text-[11px] text-slate-400 font-mono">
+                            <span className="text-[11px] text-slate-400 font-mono block">
                               {planet.type}
                             </span>
                           </div>
 
                           {planet.habitableZoneStatus && (
                             <span
-                              className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium border whitespace-nowrap ${
+                              className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium border shrink-0 max-w-full text-center leading-tight ${
                                 planet.habitableZoneStatus.includes('Habitable')
                                   ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.3)]'
                                   : planet.habitableZoneStatus === 'Inner Rim'
