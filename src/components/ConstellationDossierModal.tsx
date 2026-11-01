@@ -133,10 +133,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
       {/* Content Body: Continuous vertical page scroll on mobile portrait, fixed split-screen on landscape & lg */}
       <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-y-auto landscape:overflow-hidden lg:overflow-hidden bg-transparent">
         {/* Left Column: Astrometric Map Container without scrolling in landscape */}
-        <div className="w-full shrink-0 landscape:w-1/2 lg:w-7/12 landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-y-auto scrollbar-thin p-2.5 sm:p-4 md:p-5 flex flex-col justify-center">
-          {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport) */}
+        <div className="w-full shrink-0 landscape:w-3/5 lg:w-3/5 xl:w-[62%] landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-hidden p-2 sm:p-3 md:p-4 flex flex-col justify-center items-center">
+          {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport filling available height) */}
           <div
-            className="w-full aspect-square max-h-[460px] xs:max-h-[500px] sm:max-h-[580px] md:max-h-[640px] lg:max-h-[720px] landscape:max-h-[calc(100vh-80px)] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+            className="w-full h-full max-h-[calc(100vh-80px)] aspect-square max-w-[min(100%,calc(100vh-80px))] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
             onClick={() => setActiveStarLabelId(null)}
           >
                 {/* Astrometric Metadata Header Badge */}
@@ -173,7 +173,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
             </div>
 
             {/* Right Column: Data/Telemetry panel */}
-            <div className="w-full shrink-0 landscape:w-1/2 lg:w-5/12 landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
+            <div className="w-full shrink-0 landscape:w-2/5 lg:w-2/5 xl:w-[38%] landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
               {/* Astrometric Map Viewport Controls Toolbar (Top of Right Panel) */}
               <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono shadow-sm">
                 <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-cyan-400 font-bold shrink-0">

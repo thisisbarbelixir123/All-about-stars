@@ -25,6 +25,7 @@ import {
   findOptimalNeighborBadgePos,
   projectLocalStereoMilkyWayTier
 } from '../utils/celestialMechanics';
+import { Plus, Minus, RotateCcw } from 'lucide-react';
 
 export type DsoCategory = 'nebula' | 'galaxy' | 'cluster';
 
@@ -111,11 +112,24 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
   const [hoveredNeighborName, setHoveredNeighborName] = useState<string | null>(null);
   const [selectedNeighborName, setSelectedNeighborName] = useState<string | null>(null);
 
+  // Zoom & Pan state for interactive dossier exploration
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isPanningRef = useRef<boolean>(false);
+  const startPanRef = useRef<{ clientX: number; clientY: number; startPanX: number; startPanY: number }>({
+    clientX: 0,
+    clientY: 0,
+    startPanX: 0,
+    startPanY: 0
+  });
+
   useEffect(() => {
     setHoveredDsoId(null);
     setActiveDsoId(null);
     setHoveredNeighborName(null);
     setSelectedNeighborName(null);
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
   }, [constellation.id]);
   // -------------------------------------------------------------
   // MODE 1: ASTERISM PREVIEW (Small Map for Constellation Cards)
@@ -560,6 +574,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     extraFigureStars
   );
 
+  // Convert client cursor to virtual 0..100 SVG coordinates accounting for zoom and pan
   const getSvgCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
     if (!svgRef.current) return null;
     const svg = svgRef.current;
@@ -569,19 +584,26 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       pt.x = clientX;
       pt.y = clientY;
       const svgPt = pt.matrixTransform(ctm.inverse());
-      return { x: svgPt.x, y: svgPt.y };
+      // Revert pan and zoom transformation: (p - pan - 50) / zoom + 50
+      const unzoomedX = (svgPt.x - pan.x - 50) / zoom + 50;
+      const unzoomedY = (svgPt.y - pan.y - 50) / zoom + 50;
+      return { x: unzoomedX, y: unzoomedY };
     }
     const rect = svg.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return null;
+    const rawX = ((clientX - rect.left) / rect.width) * 100;
+    const rawY = ((clientY - rect.top) / rect.height) * 100;
     return {
-      x: ((clientX - rect.left) / rect.width) * 100,
-      y: ((clientY - rect.top) / rect.height) * 100
+      x: (rawX - pan.x - 50) / zoom + 50,
+      y: (rawY - pan.y - 50) / zoom + 50
     };
   };
 
   const getNearestInteractiveTarget = (coords: { x: number; y: number } | null, threshold: number) => {
     if (!coords) return null;
     let closest: { type: 'star' | 'dso'; id: string; target: any; dist: number } | null = null;
+    // Scale threshold down when zoomed in so hit-testing remains crisp
+    const scaledThreshold = threshold / Math.sqrt(zoom);
     let minD = Infinity;
 
     // Check visible assigned stars
@@ -605,10 +627,43 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       }
     }
 
-    return (closest && minD <= threshold) ? closest : null;
+    return (closest && minD <= scaledThreshold) ? closest : null;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    // Left-click dragging / touch panning
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const coords = getSvgCoords(e.clientX, e.clientY);
+    const nearest = getNearestInteractiveTarget(coords, 3.8);
+    // Don't start dragging if clicking on an interactive star or DSO
+    if (nearest) return;
+
+    isPanningRef.current = true;
+    startPanRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      startPanX: pan.x,
+      startPanY: pan.y
+    };
   };
 
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (isPanningRef.current && svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect();
+      const scaleX = 100 / (rect.width || 1);
+      const scaleY = 100 / (rect.height || 1);
+      const dx = (e.clientX - startPanRef.current.clientX) * scaleX;
+      const dy = (e.clientY - startPanRef.current.clientY) * scaleY;
+
+      // Allow panning within reasonable bounds
+      const maxPan = 50 * zoom;
+      setPan({
+        x: Math.max(-maxPan, Math.min(maxPan, startPanRef.current.startPanX + dx)),
+        y: Math.max(-maxPan, Math.min(maxPan, startPanRef.current.startPanY + dy))
+      });
+      return;
+    }
+
     const coords = getSvgCoords(e.clientX, e.clientY);
     const nearest = getNearestInteractiveTarget(coords, 3.8);
 
@@ -624,6 +679,22 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       if (hoveredStarId !== null) setHoveredStarId?.(null);
       if (hoveredDsoId !== null) setHoveredDsoId(null);
     }
+  };
+
+  const handlePointerUp = () => {
+    isPanningRef.current = false;
+  };
+
+  const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+    setZoom((prev) => {
+      const newZoom = Math.max(0.7, Math.min(6.0, prev * factor));
+      if (newZoom <= 0.75) {
+        setPan({ x: 0, y: 0 });
+      }
+      return newZoom;
+    });
   };
 
   const handlePointerLeave = () => {
@@ -689,15 +760,64 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
         </div>
       )}
 
+      {/* Zoom / Reset Controls in Corner of Dossier Map */}
+      <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-slate-950/85 border border-cyan-500/30 rounded-lg p-0.5 shadow-md backdrop-blur">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setZoom((z) => Math.min(6.0, z * 1.3));
+          }}
+          className="p-1 rounded hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer"
+          title="Zoom In"
+        >
+          <Plus className="w-3 h-3 text-cyan-400" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setZoom((z) => {
+              const nz = Math.max(0.7, z * 0.77);
+              if (nz <= 0.75) setPan({ x: 0, y: 0 });
+              return nz;
+            });
+          }}
+          className="p-1 rounded hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer"
+          title="Zoom Out"
+        >
+          <Minus className="w-3 h-3 text-cyan-400" />
+        </button>
+        {(zoom !== 1.0 || pan.x !== 0 || pan.y !== 0) && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoom(1.0);
+              setPan({ x: 0, y: 0 });
+            }}
+            className="p-1 rounded hover:bg-white/10 text-slate-300 hover:text-cyan-300 cursor-pointer border-l border-slate-800 ml-0.5"
+            title="Reset Map View (1.0× Center)"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        )}
+        <span className="text-[9px] font-mono text-cyan-300/80 px-1 font-semibold">
+          {zoom.toFixed(1)}×
+        </span>
+      </div>
+
       <svg
         ref={svgRef}
         viewBox="0 0 100 100"
         width={size}
         height={size}
-        className={`w-full h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${className}`}
-        style={{ cursor: isInteractiveHovered ? 'pointer' : undefined }}
+        className={`w-full h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.25)] ${isPanningRef.current ? 'cursor-grabbing' : 'cursor-grab'} ${className}`}
+        onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={() => {
+          handlePointerLeave();
+          handlePointerUp();
+        }}
+        onWheel={handleWheel}
         onClick={handleSvgClick}
       >
         <defs>
@@ -816,6 +936,13 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
             )}
           </g>
         )}
+
+        {/* Dynamic Zoom & Pan Group for all Celestial Content */}
+        <g
+          className="celestial-zoomable-content"
+          clipPath={`url(#map-frame-clip-${constellation.id})`}
+          transform={`translate(${50 + pan.x}, ${50 + pan.y}) scale(${zoom}) translate(-50, -50)`}
+        >
 
         {/* 1.5. Milky Way Galactic Plane & Core Contours (Translucent Multi-Tier Glow) */}
         {opts.showMilkyWay && milkyWayPaths.length > 0 && (
@@ -1378,6 +1505,7 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
             </g>
           );
         })()}
+        </g>
       </svg>
     </div>
   );
