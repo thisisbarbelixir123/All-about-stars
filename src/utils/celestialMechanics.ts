@@ -1407,8 +1407,8 @@ export const projectDynamicSphericalPoint = (
     };
   }
 
-  // Stereographic (Conformal, zero angle distortion)
-  if (cosC < -0.2) {
+  // Stereographic (Conformal, zero angle distortion across wide celestial field)
+  if (cosC < -0.75) {
     return { x: 0, y: 0, isVisible: false, cosC };
   }
 

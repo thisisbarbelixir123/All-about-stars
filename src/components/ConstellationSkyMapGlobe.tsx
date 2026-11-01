@@ -84,14 +84,20 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     return map;
   }, []);
 
-  // Precompute Constellation Spherical Centers for labeling (each boundary sector gets its own centroid, including Serpens Caput & Cauda)
+  // Precompute Constellation Spherical Centers for labeling using accurate 3D unit vector summation
+  // Completely eliminates antimeridian ±180° crossover bugs (Crux, Ursa Major, Virgo, Hydra, etc.)
   const constellationCenters = useMemo(() => {
+    const d2r = Math.PI / 180;
+    const r2d = 180 / Math.PI;
+
     if (!celestialData.bounds || celestialData.bounds.length === 0) {
       return ALL_88_CONSTELLATIONS.map((c) => {
         const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
         return {
+          id: c.abbreviation,
           constInfo: c,
           label: c.abbreviation,
+          fullName: c.name,
           raDeg: (cLon % 360 + 360) % 360,
           decDeg: cLat
         };
@@ -102,25 +108,36 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       const abbr = String(feat.id || '').toUpperCase();
       const constInfo = constMap.get(abbr) || (abbr.startsWith('SER') ? constMap.get('SER') : undefined);
       const ring = feat.geometry.coordinates[0] || [];
-      let sumLon = 0;
-      let sumLat = 0;
+
+      let sumX = 0;
+      let sumY = 0;
+      let sumZ = 0;
+
       for (const [lon, lat] of ring) {
-        sumLon += lon;
-        sumLat += lat;
+        const lam = lon * d2r;
+        const phi = lat * d2r;
+        sumX += Math.cos(phi) * Math.cos(lam);
+        sumY += Math.cos(phi) * Math.sin(lam);
+        sumZ += Math.sin(phi);
       }
-      const n = Math.max(1, ring.length);
-      const cLon = sumLon / n;
-      const cLat = sumLat / n;
+
+      const cLon = Math.atan2(sumY, sumX) * r2d;
+      const cLat = Math.atan2(sumZ, Math.hypot(sumX, sumY)) * r2d;
       const raDeg = (cLon % 360 + 360) % 360;
 
       let label = constInfo ? constInfo.abbreviation : abbr;
+      let fullName = constInfo ? constInfo.name : abbr;
       if (feat.id === 'Ser') {
-        label = cLon < -100 ? 'Ser (Cap)' : 'Ser (Cau)';
+        const isCaput = cLon < -100;
+        label = isCaput ? 'Ser (Cap)' : 'Ser (Cau)';
+        fullName = isCaput ? 'Serpens Caput' : 'Serpens Cauda';
       }
 
       return {
+        id: feat.id,
         constInfo: constInfo || ALL_88_CONSTELLATIONS[0],
         label,
+        fullName,
         raDeg,
         decDeg: cLat
       };
@@ -528,16 +545,16 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      constellationCenters.forEach(({ constInfo, label, raDeg, decDeg }) => {
+      constellationCenters.forEach(({ constInfo, label, fullName, raDeg, decDeg }) => {
         const pt = projectDynamicSphericalPoint(raDeg, decDeg, projOpts);
         if (pt.isVisible) {
           const isHovered = hoveredConstellation?.id === constInfo.id;
-          const displayLabel = zoom >= 2.0 || isHovered
-            ? (label.startsWith('Ser') ? label : constInfo.name.toUpperCase())
+          const displayLabel = zoom >= 1.7 || isHovered
+            ? (label.startsWith('Ser') ? label : fullName.toUpperCase())
             : label;
 
           // Text shadow
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
           ctx.fillText(displayLabel, pt.x + 1, pt.y + 1);
 
           // Text foreground
@@ -545,7 +562,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             ? (constInfo.isZodiac ? '#fbbf24' : '#22d3ee')
             : constInfo.isZodiac
             ? '#fef08a'
-            : 'rgba(224, 231, 255, 0.8)';
+            : 'rgba(224, 231, 255, 0.85)';
           ctx.fillText(displayLabel, pt.x, pt.y);
         }
       });
@@ -900,6 +917,20 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           >
             <Sun className="w-3 h-3 text-amber-400" />
             <span className="hidden md:inline">Ecliptic</span>
+          </button>
+
+          {/* Labels Toggle */}
+          <button
+            onClick={() => setShowLabels(!showLabels)}
+            className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-mono font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+              showLabels
+                ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
+            }`}
+            title="Toggle Constellation Names & Abbreviations"
+          >
+            <span className="font-bold text-[10px] leading-none">Aa</span>
+            <span className="hidden md:inline">Labels</span>
           </button>
 
           {/* Zoom In & Out */}
