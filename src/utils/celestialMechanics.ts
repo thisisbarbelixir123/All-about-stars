@@ -1332,3 +1332,157 @@ export const projectLocalStereoMilkyWayTier = (
 
   return totalD.trim();
 };
+
+export type SkyMapProjectionType = 'stereographic' | 'orthographic' | 'mollweide';
+
+export interface DynamicSphericalProjectOptions {
+  centerRaDeg: number;
+  centerDecDeg: number;
+  width: number;
+  height: number;
+  radius: number;
+  zoom: number;
+  projection: SkyMapProjectionType;
+}
+
+export interface DynamicProjectedPoint {
+  x: number;
+  y: number;
+  isVisible: boolean;
+  cosC: number;
+}
+
+/**
+ * Projects a spherical celestial point (RA, Dec in degrees) onto 2D screen coordinates
+ * using a dynamic center (centerRaDeg, centerDecDeg), radius, zoom, and projection mode.
+ */
+export const projectDynamicSphericalPoint = (
+  raDeg: number,
+  decDeg: number,
+  options: DynamicSphericalProjectOptions
+): DynamicProjectedPoint => {
+  const { centerRaDeg, centerDecDeg, width, height, radius, zoom, projection } = options;
+  const cx = width / 2;
+  const cy = height / 2;
+  const d2r = Math.PI / 180;
+
+  if (projection === 'mollweide') {
+    // Dynamic Mollweide with center meridian
+    const raw = projectMollweideRaw(raDeg, decDeg, centerRaDeg, true);
+    const rx = radius * 2 * zoom;
+    const ry = radius * zoom;
+    const x = cx + raw.xNorm * rx;
+    const y = cy - raw.yNorm * ry;
+    return {
+      x,
+      y,
+      isVisible: raw.isInside,
+      cosC: raw.isInside ? 1 : -1
+    };
+  }
+
+  // Spherical Stereographic & Orthographic
+  let dLamDeg = raDeg - centerRaDeg;
+  while (dLamDeg > 180) dLamDeg -= 360;
+  while (dLamDeg < -180) dLamDeg += 360;
+
+  const dLam = dLamDeg * d2r;
+  const phi = decDeg * d2r;
+  const phi0 = centerDecDeg * d2r;
+
+  const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(dLam);
+
+  if (projection === 'orthographic') {
+    if (cosC < 0) {
+      return { x: 0, y: 0, isVisible: false, cosC };
+    }
+    const rScaled = radius * zoom;
+    const x = -rScaled * Math.cos(phi) * Math.sin(dLam);
+    const y = -rScaled * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam));
+    return {
+      x: cx + x,
+      y: cy + y,
+      isVisible: true,
+      cosC
+    };
+  }
+
+  // Stereographic (Conformal, zero angle distortion)
+  if (cosC < -0.2) {
+    return { x: 0, y: 0, isVisible: false, cosC };
+  }
+
+  const k = (2 / (1 + cosC)) * radius * zoom;
+  const x = -k * Math.cos(phi) * Math.sin(dLam);
+  const y = -k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam));
+
+  return {
+    x: cx + x,
+    y: cy + y,
+    isVisible: true,
+    cosC
+  };
+};
+
+/**
+ * Inverse projection: converts screen coordinates (x, y) back into spherical (raDeg, decDeg).
+ */
+export const inverseScreenToSpherical = (
+  screenX: number,
+  screenY: number,
+  options: DynamicSphericalProjectOptions
+): { raDeg: number; decDeg: number } | null => {
+  const { centerRaDeg, centerDecDeg, width, height, radius, zoom, projection } = options;
+  const cx = width / 2;
+  const cy = height / 2;
+  const dx = screenX - cx;
+  const dy = screenY - cy;
+  const rScaled = radius * zoom;
+  if (rScaled <= 0) return null;
+
+  const d2r = Math.PI / 180;
+  const r2d = 180 / Math.PI;
+  const phi0 = centerDecDeg * d2r;
+  const lam0 = centerRaDeg * d2r;
+
+  if (projection === 'orthographic') {
+    const rho = Math.hypot(dx, dy);
+    if (rho > rScaled) return null;
+
+    const sinC = rho / rScaled;
+    const cosC = Math.sqrt(Math.max(0, 1 - sinC * sinC));
+
+    const phi = Math.asin(cosC * Math.sin(phi0) - (dy * Math.cos(phi0) * sinC) / (rho || 1));
+    const dLam = Math.atan2(
+      -dx * sinC,
+      rho * Math.cos(phi0) * cosC + dy * Math.sin(phi0) * sinC
+    );
+
+    let raDeg = ((lam0 + dLam) * r2d) % 360;
+    if (raDeg < 0) raDeg += 360;
+    const decDeg = Math.max(-90, Math.min(90, phi * r2d));
+    return { raDeg, decDeg };
+  }
+
+  if (projection === 'stereographic') {
+    const rho = Math.hypot(dx, dy);
+    if (rho === 0) return { raDeg: centerRaDeg, decDeg: centerDecDeg };
+
+    const c = 2 * Math.atan(rho / (2 * rScaled));
+    const sinC = Math.sin(c);
+    const cosC = Math.cos(c);
+
+    const phi = Math.asin(cosC * Math.sin(phi0) - (dy * Math.cos(phi0) * sinC) / rho);
+    const dLam = Math.atan2(
+      -dx * sinC,
+      rho * Math.cos(phi0) * cosC + dy * Math.sin(phi0) * sinC
+    );
+
+    let raDeg = ((lam0 + dLam) * r2d) % 360;
+    if (raDeg < 0) raDeg += 360;
+    const decDeg = Math.max(-90, Math.min(90, phi * r2d));
+    return { raDeg, decDeg };
+  }
+
+  return null;
+};

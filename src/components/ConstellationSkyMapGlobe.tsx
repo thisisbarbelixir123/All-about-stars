@@ -1,12 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ConstellationInfo, ALL_88_CONSTELLATIONS } from '../data/constellationsData';
 import { CelestialData } from '../hooks/useCelestialData';
 import {
-  computeMollweideGraticule,
-  projectMollweideMultiPolygon,
-  projectMollweidePolygon,
-  projectMollweidePolyline,
-  projectMollweidePoint,
+  SkyMapProjectionType,
+  DynamicSphericalProjectOptions,
+  projectDynamicSphericalPoint,
+  inverseScreenToSpherical,
   getConstellationSphericalCenter
 } from '../utils/celestialMechanics';
 import {
@@ -16,11 +15,13 @@ import {
   Sparkles,
   Compass,
   Sun,
-  Maximize2,
-  Minimize2,
+  Plus,
+  Minus,
+  RotateCcw,
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MapPin
 } from 'lucide-react';
 
 interface ConstellationSkyMapGlobeProps {
@@ -30,16 +31,24 @@ interface ConstellationSkyMapGlobeProps {
   className?: string;
 }
 
-const VIEW_WIDTH = 1000;
-const VIEW_HEIGHT = 500;
-const PADDING = 24;
-
 export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> = ({
   celestialData,
   onSelectConstellation,
   selectedConstellationId,
   className = ''
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Viewport Dimensions (logical pixels)
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 900, height: 480 });
+
+  // Spherical Coordinates & Camera State
+  const [centerRa, setCenterRa] = useState<number>(0); // 0° to 360°
+  const [centerDec, setCenterDec] = useState<number>(10); // -90° to +90°
+  const [zoom, setZoom] = useState<number>(1.0); // 0.6x to 12.0x
+  const [projection, setProjection] = useState<SkyMapProjectionType>('stereographic');
+
   // Layer Toggles
   const [showMilkyWay, setShowMilkyWay] = useState<boolean>(true);
   const [showBoundaries, setShowBoundaries] = useState<boolean>(true);
@@ -47,13 +56,22 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   const [showStars, setShowStars] = useState<boolean>(true);
   const [showGraticule, setShowGraticule] = useState<boolean>(true);
   const [showEcliptic, setShowEcliptic] = useState<boolean>(true);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
-  // Interaction State
+  // Interactive Hover & Drag State
   const [hoveredConstellation, setHoveredConstellation] = useState<ConstellationInfo | null>(null);
-  const [cursorCoord, setCursorCoord] = useState<{ raStr: string; decStr: string } | null>(null);
+  const [mouseCoord, setMouseCoord] = useState<{ raStr: string; decStr: string } | null>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number; startRa: number; startDec: number }>({
+    x: 0,
+    y: 0,
+    startRa: 0,
+    startDec: 0
+  });
+  const touchDistanceRef = useRef<number | null>(null);
 
-  // Abbreviation lookup map for O(1) matching of Delporte boundary IDs
+  // Map abbreviation to ConstellationInfo for O(1) lookup
   const constMap = useMemo(() => {
     const map = new Map<string, ConstellationInfo>();
     for (const c of ALL_88_CONSTELLATIONS) {
@@ -62,90 +80,23 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     return map;
   }, []);
 
-  // 1. Compute Base Graticule (Outer Ellipse, Equator, Ecliptic, Parallels, Meridians)
-  const graticule = useMemo(() => {
-    return computeMollweideGraticule(VIEW_WIDTH, VIEW_HEIGHT, {
-      centerMeridianDeg: 0,
-      padding: PADDING,
-      astronomical: true,
-      parallelStepDeg: 15,
-      meridianStepDeg: 30
-    });
-  }, []);
-
-  // 2. Pre-project Milky Way multi-tier contours
-  const milkyWayPaths = useMemo(() => {
-    if (!celestialData.milkyWay || celestialData.milkyWay.length === 0) return [];
-    const projOpts = { width: VIEW_WIDTH, height: VIEW_HEIGHT, padding: PADDING, astronomical: true };
-    return celestialData.milkyWay.map((feature, idx) => {
-      const pathD = projectMollweideMultiPolygon(feature.geometry.coordinates, projOpts);
-      return { tier: idx + 1, pathD };
-    });
-  }, [celestialData.milkyWay]);
-
-  // 3. Pre-project Constellation Delporte Boundaries
-  const boundaryPaths = useMemo(() => {
-    if (!celestialData.bounds || celestialData.bounds.length === 0) return [];
-    const projOpts = { width: VIEW_WIDTH, height: VIEW_HEIGHT, padding: PADDING, astronomical: true };
-    return celestialData.bounds.map((feat) => {
-      const abbr = String(feat.id || '').toUpperCase();
-      const constInfo = constMap.get(abbr) || (abbr.startsWith('SER') ? constMap.get('SER') : undefined);
-      const pathD = projectMollweidePolygon(feat.geometry.coordinates, projOpts);
-      return {
-        id: feat.id,
-        constInfo,
-        pathD
-      };
-    });
-  }, [celestialData.bounds, constMap]);
-
-  // 4. Pre-project Constellation Stick-Figure Lines
-  const asterismPaths = useMemo(() => {
-    if (!celestialData.lines || celestialData.lines.length === 0) return [];
-    const projOpts = { width: VIEW_WIDTH, height: VIEW_HEIGHT, padding: PADDING, astronomical: true };
-    return celestialData.lines.map((feat, idx) => {
-      const paths: string[] = [];
-      for (const line of feat.geometry.coordinates) {
-        const d = projectMollweidePolyline(line, projOpts);
-        if (d) paths.push(d);
-      }
-      return {
-        id: feat.id || `line-${idx}`,
-        pathD: paths.join(' ')
-      };
-    });
-  }, [celestialData.lines]);
-
-  // 5. Project Prominent Stars
-  const prominentStars = useMemo(() => {
-    const stars: Array<{ id: string; name: string; x: number; y: number; r: number; colorHex: string; isPrincipal: boolean }> = [];
-    const projOpts = { width: VIEW_WIDTH, height: VIEW_HEIGHT, padding: PADDING, astronomical: true, isRaHours: false };
-
-    for (const c of ALL_88_CONSTELLATIONS) {
+  // Precompute Constellation Spherical Centers for labeling and hover hit-testing
+  const constellationCenters = useMemo(() => {
+    return ALL_88_CONSTELLATIONS.map((c) => {
       const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
-      const pt = projectMollweidePoint(cLon, cLat, projOpts);
-      if (pt.isInside) {
-        const isZodiac = c.isZodiac;
-        stars.push({
-          id: `star-${c.id}`,
-          name: c.principalStarName,
-          x: pt.x,
-          y: pt.y,
-          r: isZodiac ? 2.5 : 1.8,
-          colorHex: isZodiac ? '#fef08a' : '#bae6fd',
-          isPrincipal: true
-        });
-      }
-    }
-    return stars;
+      return {
+        constInfo: c,
+        raDeg: (cLon % 360 + 360) % 360,
+        decDeg: cLat
+      };
+    });
   }, [celestialData.bounds]);
 
-  // 6. Current Astronomical Solar Position on the Ecliptic
+  // Current Astronomical Solar Position on the Ecliptic
   const sunPosition = useMemo(() => {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-    // Solar ecliptic longitude from March Equinox (~day 79)
     const solarLonDeg = (((dayOfYear - 79) / 365.2422) * 360 + 360) % 360;
     const epsRad = 23.43928 * (Math.PI / 180);
     const lRad = solarLonDeg * (Math.PI / 180);
@@ -155,32 +106,578 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     const raRad = Math.atan2(Math.sin(lRad) * Math.cos(epsRad), Math.cos(lRad));
     const raDeg = ((raRad * (180 / Math.PI)) % 360 + 360) % 360;
 
-    const pt = projectMollweidePoint(raDeg, decDeg, {
-      width: VIEW_WIDTH,
-      height: VIEW_HEIGHT,
-      padding: PADDING,
-      astronomical: true,
-      isRaHours: false
-    });
-
     return {
-      x: pt.x,
-      y: pt.y,
-      raHours: (raDeg / 15).toFixed(1),
-      decDeg: decDeg.toFixed(1)
+      raDeg,
+      decDeg,
+      raHoursStr: (raDeg / 15).toFixed(1) + 'h',
+      decDegStr: (decDeg > 0 ? '+' : '') + decDeg.toFixed(1) + '°'
     };
   }, []);
 
-  // Handler for mouse interaction with boundary paths
-  const handleBoundaryHover = useCallback((constInfo?: ConstellationInfo) => {
-    setHoveredConstellation(constInfo || null);
+  // Resize Observer to keep Canvas responsive
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const w = Math.max(300, Math.floor(rect.width));
+        // 2:1 on wide screens, 16:9 on tablets, 4:3 on mobile
+        let h = Math.floor(w * 0.52);
+        if (w < 640) h = Math.floor(w * 0.75);
+        setDimensions({ width: w, height: Math.min(540, h) });
+      }
+    };
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  const handleBoundaryClick = useCallback((constInfo?: ConstellationInfo) => {
-    if (constInfo && onSelectConstellation) {
-      onSelectConstellation(constInfo);
+  // Synchronize when selectedConstellationId prop changes (smoothly center on it)
+  useEffect(() => {
+    if (!selectedConstellationId) return;
+    const target = constellationCenters.find((item) => item.constInfo.id === selectedConstellationId);
+    if (target) {
+      setCenterRa(target.raDeg);
+      setCenterDec(target.decDeg);
+      setZoom(Math.max(1.8, zoom));
     }
-  }, [onSelectConstellation]);
+  }, [selectedConstellationId, constellationCenters]);
+
+  // Main Canvas Rendering Loop
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || isCollapsed) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const { width, height } = dimensions;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const radius = Math.min(width, height) / 2.2;
+    const cx = width / 2;
+    const cy = height / 2;
+
+    const projOpts: DynamicSphericalProjectOptions = {
+      centerRaDeg: centerRa,
+      centerDecDeg: centerDec,
+      width,
+      height,
+      radius,
+      zoom,
+      projection
+    };
+
+    // 1. Deep Space Background
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#020512';
+    ctx.fillRect(0, 0, width, height);
+
+    // Save state for clipping circular boundary (Stereographic & Orthographic)
+    ctx.save();
+
+    if (projection === 'orthographic') {
+      const discR = radius * zoom;
+      ctx.beginPath();
+      ctx.arc(cx, cy, discR, 0, 2 * Math.PI);
+      const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, discR);
+      bgGrad.addColorStop(0, '#040d29');
+      bgGrad.addColorStop(0.7, '#020718');
+      bgGrad.addColorStop(1, '#01030d');
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+      ctx.clip(); // Clip to the 3D globe hemisphere
+    } else if (projection === 'stereographic') {
+      const discR = radius * zoom * 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, discR, 0, 2 * Math.PI);
+      const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, discR);
+      bgGrad.addColorStop(0, '#040d29');
+      bgGrad.addColorStop(0.65, '#020718');
+      bgGrad.addColorStop(1, '#010410');
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+    } else {
+      // Mollweide
+      const rx = radius * 2 * zoom;
+      const ry = radius * zoom;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+      ctx.fillStyle = '#020718';
+      ctx.fill();
+      ctx.clip();
+    }
+
+    // 2. Coordinate Graticule (Parallels, Meridians, Equator)
+    if (showGraticule) {
+      ctx.lineWidth = 0.8;
+      ctx.setLineDash([2, 4]);
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.16)';
+
+      // Parallels of Declination (-75° to +75° by 15°)
+      for (let dec = -75; dec <= 75; dec += 15) {
+        if (dec === 0) continue; // Drawn separately as Equator
+        ctx.beginPath();
+        let started = false;
+        for (let ra = 0; ra <= 360; ra += 4) {
+          const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
+          if (pt.isVisible) {
+            if (!started) {
+              ctx.moveTo(pt.x, pt.y);
+              started = true;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            started = false;
+          }
+        }
+        ctx.stroke();
+      }
+
+      // Meridians of Right Ascension (every 30° / 2 hours)
+      for (let ra = 0; ra < 360; ra += 30) {
+        ctx.beginPath();
+        let started = false;
+        for (let dec = -88; dec <= 88; dec += 3) {
+          const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
+          if (pt.isVisible) {
+            if (!started) {
+              ctx.moveTo(pt.x, pt.y);
+              started = true;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            started = false;
+          }
+        }
+        ctx.stroke();
+      }
+
+      // Celestial Equator (Solid Bright Cyan)
+      ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      let startedEq = false;
+      for (let ra = 0; ra <= 360; ra += 2) {
+        const pt = projectDynamicSphericalPoint(ra, 0, projOpts);
+        if (pt.isVisible) {
+          if (!startedEq) {
+            ctx.moveTo(pt.x, pt.y);
+            startedEq = true;
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        } else {
+          startedEq = false;
+        }
+      }
+      ctx.stroke();
+    }
+
+    // 3. Solar Ecliptic Path (Annual Path of the Sun)
+    if (showEcliptic) {
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.65)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      let startedEcl = false;
+      const obliquityRad = 23.43928 * (Math.PI / 180);
+
+      for (let eclLon = 0; eclLon <= 360; eclLon += 2) {
+        const lRad = eclLon * (Math.PI / 180);
+        const sinDec = Math.sin(obliquityRad) * Math.sin(lRad);
+        const decDeg = Math.asin(sinDec) * (180 / Math.PI);
+        const raRad = Math.atan2(Math.sin(lRad) * Math.cos(obliquityRad), Math.cos(lRad));
+        const raDeg = ((raRad * (180 / Math.PI)) % 360 + 360) % 360;
+
+        const pt = projectDynamicSphericalPoint(raDeg, decDeg, projOpts);
+        if (pt.isVisible) {
+          if (!startedEcl) {
+            ctx.moveTo(pt.x, pt.y);
+            startedEcl = true;
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        } else {
+          startedEcl = false;
+        }
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // 4. Multi-tier Milky Way Galactic Contours
+    if (showMilkyWay && celestialData.milkyWay && celestialData.milkyWay.length > 0) {
+      celestialData.milkyWay.forEach((feat, idx) => {
+        let fill = 'rgba(56, 189, 248, 0.04)';
+        if (idx === 1) fill = 'rgba(56, 189, 248, 0.08)';
+        if (idx === 2) fill = 'rgba(96, 165, 250, 0.12)';
+        if (idx === 3) fill = 'rgba(147, 197, 253, 0.18)';
+        if (idx === 4) fill = 'rgba(240, 246, 255, 0.28)';
+
+        ctx.fillStyle = fill;
+
+        for (const polygon of feat.geometry.coordinates) {
+          for (const ring of polygon) {
+            ctx.beginPath();
+            let started = false;
+            for (let i = 0; i < ring.length; i++) {
+              const [ra, dec] = ring[i];
+              const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
+              if (pt.isVisible) {
+                if (!started) {
+                  ctx.moveTo(pt.x, pt.y);
+                  started = true;
+                } else {
+                  ctx.lineTo(pt.x, pt.y);
+                }
+              } else {
+                if (started) {
+                  ctx.closePath();
+                  ctx.fill();
+                  started = false;
+                }
+              }
+            }
+            if (started) {
+              ctx.closePath();
+              ctx.fill();
+            }
+          }
+        }
+      });
+    }
+
+    // 5. Delporte Constellation Boundaries (89 Sectors)
+    if (showBoundaries && celestialData.bounds) {
+      celestialData.bounds.forEach((feat) => {
+        const abbr = String(feat.id || '').toUpperCase();
+        const constInfo = constMap.get(abbr) || (abbr.startsWith('SER') ? constMap.get('SER') : undefined);
+        const isHovered = hoveredConstellation?.id === constInfo?.id;
+        const isSelected = selectedConstellationId === constInfo?.id;
+
+        if (isHovered || isSelected) {
+          ctx.lineWidth = 2.0;
+          ctx.strokeStyle = constInfo?.isZodiac ? '#f59e0b' : '#22d3ee';
+          ctx.fillStyle = constInfo?.isZodiac ? 'rgba(245, 158, 11, 0.18)' : 'rgba(6, 182, 212, 0.18)';
+        } else {
+          ctx.lineWidth = 0.8;
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.25)';
+          ctx.fillStyle = 'transparent';
+        }
+
+        for (const ring of feat.geometry.coordinates) {
+          ctx.beginPath();
+          let started = false;
+          for (let i = 0; i < ring.length; i++) {
+            const [ra, dec] = ring[i];
+            const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
+            if (pt.isVisible) {
+              if (!started) {
+                ctx.moveTo(pt.x, pt.y);
+                started = true;
+              } else {
+                ctx.lineTo(pt.x, pt.y);
+              }
+            } else {
+              started = false;
+            }
+          }
+          if (started) {
+            ctx.closePath();
+            ctx.stroke();
+            if (isHovered || isSelected) {
+              ctx.fill();
+            }
+          }
+        }
+      });
+    }
+
+    // 6. Constellation Stick-Figure Asterism Lines
+    if (showAsterisms && celestialData.lines) {
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.75)';
+      ctx.beginPath();
+
+      celestialData.lines.forEach((feat) => {
+        for (const line of feat.geometry.coordinates) {
+          let started = false;
+          for (let i = 0; i < line.length; i++) {
+            const [ra, dec] = line[i];
+            const pt = projectDynamicSphericalPoint(ra, dec, projOpts);
+            if (pt.isVisible) {
+              if (!started) {
+                ctx.moveTo(pt.x, pt.y);
+                started = true;
+              } else {
+                ctx.lineTo(pt.x, pt.y);
+              }
+            } else {
+              started = false;
+            }
+          }
+        }
+      });
+      ctx.stroke();
+    }
+
+    // 7. Prominent Stars Field
+    if (showStars) {
+      ALL_88_CONSTELLATIONS.forEach((c) => {
+        const { cLon, cLat } = getConstellationSphericalCenter(c, celestialData.bounds);
+        const pt = projectDynamicSphericalPoint(cLon, cLat, projOpts);
+        if (pt.isVisible) {
+          const isZodiac = c.isZodiac;
+          const r = isZodiac ? 2.5 : 1.8;
+
+          // Star halo
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, r * 2.2, 0, 2 * Math.PI);
+          ctx.fillStyle = isZodiac ? 'rgba(254, 240, 138, 0.25)' : 'rgba(186, 230, 253, 0.22)';
+          ctx.fill();
+
+          // Star core
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, r, 0, 2 * Math.PI);
+          ctx.fillStyle = isZodiac ? '#fef08a' : '#ffffff';
+          ctx.fill();
+        }
+      });
+    }
+
+    // 8. Today's Sun on the Ecliptic
+    if (showEcliptic) {
+      const sunPt = projectDynamicSphericalPoint(sunPosition.raDeg, sunPosition.decDeg, projOpts);
+      if (sunPt.isVisible) {
+        // Sun outer glow
+        ctx.beginPath();
+        ctx.arc(sunPt.x, sunPt.y, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.35)';
+        ctx.fill();
+
+        // Sun core
+        ctx.beginPath();
+        ctx.arc(sunPt.x, sunPt.y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = '#fffbeb';
+        ctx.lineWidth = 1;
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // 9. Constellation Names / Abbreviation Labels
+    if (showLabels) {
+      ctx.font = zoom >= 1.6 ? 'bold 10px monospace' : '9px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      constellationCenters.forEach(({ constInfo, raDeg, decDeg }) => {
+        const pt = projectDynamicSphericalPoint(raDeg, decDeg, projOpts);
+        if (pt.isVisible) {
+          const isHovered = hoveredConstellation?.id === constInfo.id;
+          const label = zoom >= 1.8 || isHovered ? constInfo.name.toUpperCase() : constInfo.abbreviation;
+
+          // Text shadow
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+          ctx.fillText(label, pt.x + 1, pt.y + 1);
+
+          // Text foreground
+          ctx.fillStyle = isHovered
+            ? (constInfo.isZodiac ? '#fbbf24' : '#22d3ee')
+            : constInfo.isZodiac
+            ? '#fef08a'
+            : 'rgba(224, 231, 255, 0.75)';
+          ctx.fillText(label, pt.x, pt.y);
+        }
+      });
+    }
+
+    ctx.restore(); // Restore unclipped state
+
+    // 10. Outer Boundary Border Ring
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+    if (projection === 'orthographic') {
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * zoom, 0, 2 * Math.PI);
+      ctx.stroke();
+    } else if (projection === 'mollweide') {
+      const rx = radius * 2 * zoom;
+      const ry = radius * zoom;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  }, [
+    dimensions,
+    centerRa,
+    centerDec,
+    zoom,
+    projection,
+    showMilkyWay,
+    showBoundaries,
+    showAsterisms,
+    showStars,
+    showGraticule,
+    showEcliptic,
+    showLabels,
+    hoveredConstellation,
+    selectedConstellationId,
+    celestialData,
+    constMap,
+    constellationCenters,
+    sunPosition,
+    isCollapsed
+  ]);
+
+  // Mouse & Touch Drag Handlers (Continuous Dynamic Rotation)
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    isDraggingRef.current = true;
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startRa: centerRa,
+      startDec: centerDec
+    };
+  }, [centerRa, centerDec]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const radius = Math.min(dimensions.width, dimensions.height) / 2.2;
+    const projOpts: DynamicSphericalProjectOptions = {
+      centerRaDeg: centerRa,
+      centerDecDeg: centerDec,
+      width: dimensions.width,
+      height: dimensions.height,
+      radius,
+      zoom,
+      projection
+    };
+
+    // If dragging, rotate celestial sphere under cursor
+    if (isDraggingRef.current) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+
+      // Sensitivity factor based on current radius & zoom
+      const degPerPx = (180 / (Math.PI * radius * zoom)) * 0.9;
+      // Invert horizontal direction for astronomical coordinate tracking
+      const deltaRa = dx * degPerPx;
+      const deltaDec = -dy * degPerPx;
+
+      const newRa = (dragStartRef.current.startRa + deltaRa + 360) % 360;
+      const newDec = Math.max(-90, Math.min(90, dragStartRef.current.startDec + deltaDec));
+
+      setCenterRa(newRa);
+      setCenterDec(newDec);
+      return;
+    }
+
+    // Hover Hit-Testing
+    const spherical = inverseScreenToSpherical(mouseX, mouseY, projOpts);
+    if (spherical) {
+      setMouseCoord({
+        raStr: (spherical.raDeg / 15).toFixed(2) + 'h',
+        decStr: (spherical.decDeg > 0 ? '+' : '') + spherical.decDeg.toFixed(1) + '°'
+      });
+
+      // Find nearest constellation within hit radius
+      let closest: ConstellationInfo | null = null;
+      let minDistance = Infinity;
+
+      for (const item of constellationCenters) {
+        const pt = projectDynamicSphericalPoint(item.raDeg, item.decDeg, projOpts);
+        if (pt.isVisible) {
+          const dist = Math.hypot(pt.x - mouseX, pt.y - mouseY);
+          if (dist < 32 && dist < minDistance) {
+            minDistance = dist;
+            closest = item.constInfo;
+          }
+        }
+      }
+      setHoveredConstellation(closest);
+    } else {
+      setMouseCoord(null);
+      setHoveredConstellation(null);
+    }
+  }, [centerRa, centerDec, dimensions, zoom, projection, constellationCenters]);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+  }, []);
+
+  // Zoom via Mouse Wheel
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+    setZoom((prev) => Math.max(0.6, Math.min(12.0, prev * factor)));
+  }, []);
+
+  // Touch Drag & Pinch-to-Zoom Handlers for Mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      isDraggingRef.current = true;
+      dragStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        startRa: centerRa,
+        startDec: centerDec
+      };
+      touchDistanceRef.current = null;
+    } else if (e.touches.length === 2) {
+      isDraggingRef.current = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchDistanceRef.current = Math.hypot(dx, dy);
+    }
+  }, [centerRa, centerDec]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1 && isDraggingRef.current) {
+      const radius = Math.min(dimensions.width, dimensions.height) / 2.2;
+      const dx = e.touches[0].clientX - dragStartRef.current.x;
+      const dy = e.touches[0].clientY - dragStartRef.current.y;
+      const degPerPx = (180 / (Math.PI * radius * zoom)) * 0.9;
+
+      const deltaRa = dx * degPerPx;
+      const deltaDec = -dy * degPerPx;
+      setCenterRa((dragStartRef.current.startRa + deltaRa + 360) % 360);
+      setCenterDec(Math.max(-90, Math.min(90, dragStartRef.current.startDec + deltaDec)));
+    } else if (e.touches.length === 2 && touchDistanceRef.current !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const newDist = Math.hypot(dx, dy);
+      const factor = newDist / touchDistanceRef.current;
+      setZoom((prev) => Math.max(0.6, Math.min(12.0, prev * factor)));
+      touchDistanceRef.current = newDist;
+    }
+  }, [dimensions, zoom]);
+
+  const handleTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    touchDistanceRef.current = null;
+  }, []);
+
+  // Click on Canvas: inspect hovered constellation
+  const handleClick = useCallback(() => {
+    if (hoveredConstellation && onSelectConstellation) {
+      onSelectConstellation(hoveredConstellation);
+    }
+  }, [hoveredConstellation, onSelectConstellation]);
 
   const activeConstellation = hoveredConstellation || (
     selectedConstellationId
@@ -189,30 +686,29 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   );
 
   return (
-    <div className={`relative flex flex-col rounded-2xl bg-[#030718] border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-md transition-all ${className}`}>
-      {/* Decorative ambient glowing backdrops */}
-      <div className="absolute -top-24 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div
+      ref={containerRef}
+      className={`relative flex flex-col rounded-2xl bg-[#030718] border border-cyan-500/30 shadow-2xl overflow-hidden backdrop-blur-md transition-all select-none ${className}`}
+    >
       {/* Top Header & Interactive Information Bar */}
-      <div className="relative z-10 px-3.5 sm:px-5 py-3 border-b border-cyan-500/20 bg-[#020512]/80 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Viewport Badge and Active Hovered Constellation Readout */}
+      <div className="relative z-10 px-3.5 sm:px-5 py-3 border-b border-cyan-500/20 bg-[#020512]/90 flex flex-wrap items-center justify-between gap-3">
+        {/* Left: Viewport Badge and Active Constellation / Center Coordinates */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="p-1.5 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 shrink-0">
-            <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Globe className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xs sm:text-sm font-black text-white tracking-wide truncate">
-                {activeConstellation ? activeConstellation.name : 'Whole-Sky Celestial Globe'}
+                {activeConstellation ? activeConstellation.name : 'Interactive Celestial Sky Map'}
               </span>
               {activeConstellation ? (
                 <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 shrink-0">
                   {activeConstellation.abbreviation}
                 </span>
               ) : (
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
-                  Mollweide Projection
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700 shrink-0 capitalize">
+                  {projection} View
                 </span>
               )}
               {activeConstellation?.isZodiac && (
@@ -224,13 +720,44 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             <p className="text-[10px] sm:text-xs text-slate-400 truncate">
               {activeConstellation
                 ? `"${activeConstellation.resemblance}" • ${activeConstellation.hemisphere} Sky • Rank #${activeConstellation.areaRank} (${activeConstellation.areaSqDeg} sq°)`
-                : 'Equal-area projection of all 88 IAU constellations, the Milky Way galactic disc, and celestial coordinates'}
+                : `Center: RA ${(centerRa / 15).toFixed(1)}h, Dec ${(centerDec > 0 ? '+' : '')}${centerDec.toFixed(1)}° • Zoom ${zoom.toFixed(1)}× • Drag to rotate, scroll to zoom`}
             </p>
           </div>
         </div>
 
-        {/* Right: Layer Toggles & Collapse Button */}
+        {/* Right: Projection Switcher, Layer Toggles, Zoom & Collapse Controls */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap">
+          {/* Projection Selector Pills */}
+          <div className="flex items-center p-0.5 rounded-lg bg-[#010410] border border-cyan-500/30 text-[9px] sm:text-[10px] font-mono font-bold">
+            <button
+              onClick={() => setProjection('stereographic')}
+              className={`px-1.5 sm:px-2 py-0.5 rounded transition-all cursor-pointer ${
+                projection === 'stereographic' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+              title="Stereographic Conformal Projection (Zero Angular Distortion)"
+            >
+              Stereo
+            </button>
+            <button
+              onClick={() => setProjection('orthographic')}
+              className={`px-1.5 sm:px-2 py-0.5 rounded transition-all cursor-pointer ${
+                projection === 'orthographic' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+              title="Orthographic Projection (3D Celestial Globe)"
+            >
+              Globe
+            </button>
+            <button
+              onClick={() => setProjection('mollweide')}
+              className={`px-1.5 sm:px-2 py-0.5 rounded transition-all cursor-pointer ${
+                projection === 'mollweide' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+              title="Mollweide Projection (Equal-Area Whole Sky)"
+            >
+              Flat
+            </button>
+          </div>
+
           {/* Milky Way Toggle */}
           <button
             onClick={() => setShowMilkyWay(!showMilkyWay)}
@@ -242,7 +769,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             title="Toggle Milky Way Galactic Plane & Core Contours"
           >
             <Waves className="w-3 h-3 text-cyan-400" />
-            <span className="hidden sm:inline">Milky Way</span>
+            <span className="hidden md:inline">Milky Way</span>
           </button>
 
           {/* Boundaries Toggle */}
@@ -253,10 +780,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                 ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                 : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
             }`}
-            title="Toggle Delporte 1930 IAU Constellation Boundaries"
+            title="Toggle Delporte IAU Constellation Boundaries"
           >
             <Layers className="w-3 h-3 text-cyan-400" />
-            <span className="hidden sm:inline">Borders</span>
+            <span className="hidden md:inline">Borders</span>
           </button>
 
           {/* Asterisms Toggle */}
@@ -267,13 +794,13 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                 ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                 : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
             }`}
-            title="Toggle Constellation Stick-Figure Asterisms"
+            title="Toggle Constellation Stick-Figure Lines"
           >
             <Sparkles className="w-3 h-3 text-cyan-300" />
-            <span className="hidden sm:inline">Lines</span>
+            <span className="hidden md:inline">Lines</span>
           </button>
 
-          {/* Coordinate Graticule Toggle */}
+          {/* Graticule Toggle */}
           <button
             onClick={() => setShowGraticule(!showGraticule)}
             className={`px-2 py-1 rounded-lg text-[10px] sm:text-xs font-mono font-semibold flex items-center gap-1 transition-all cursor-pointer ${
@@ -281,10 +808,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                 ? 'bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                 : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
             }`}
-            title="Toggle RA/Dec Coordinate Graticule"
+            title="Toggle RA/Dec Coordinate Grid"
           >
             <Compass className="w-3 h-3 text-cyan-400" />
-            <span className="hidden sm:inline">Grid</span>
+            <span className="hidden md:inline">Grid</span>
           </button>
 
           {/* Ecliptic Toggle */}
@@ -295,11 +822,40 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                 ? 'bg-amber-950/90 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]'
                 : 'bg-slate-900/60 text-slate-500 border border-slate-800 hover:text-slate-300'
             }`}
-            title="Toggle Ecliptic Solar Path and Today's Sun Position"
+            title="Toggle Ecliptic Solar Path and Today's Sun"
           >
             <Sun className="w-3 h-3 text-amber-400" />
-            <span className="hidden sm:inline">Ecliptic</span>
+            <span className="hidden md:inline">Ecliptic</span>
           </button>
+
+          {/* Zoom In & Out */}
+          <div className="flex items-center gap-0.5 bg-slate-900/80 border border-slate-700/80 rounded-lg p-0.5">
+            <button
+              onClick={() => setZoom((prev) => Math.min(12.0, prev * 1.25))}
+              className="p-1 rounded hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer"
+              title="Zoom In"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setZoom((prev) => Math.max(0.6, prev * 0.8))}
+              className="p-1 rounded hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer"
+              title="Zoom Out"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => {
+                setCenterRa(0);
+                setCenterDec(10);
+                setZoom(1.0);
+              }}
+              className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-cyan-300 cursor-pointer"
+              title="Reset View (Center RA 0h, Dec +10°, Zoom 1×)"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          </div>
 
           {/* Collapse/Expand Toggle */}
           <button
@@ -322,272 +878,40 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         </div>
       </div>
 
-      {/* Main Sky Map Interactive Viewport */}
+      {/* Main Interactive Canvas Viewport */}
       {!isCollapsed && (
-        <div className="relative w-full aspect-[2/1] min-h-[220px] max-h-[520px] bg-[#010410] flex items-center justify-center p-2 sm:p-4 select-none">
-          <svg
-            className="w-full h-full max-h-full"
-            viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <defs>
-              {/* Outer Boundary Clipping Ellipse */}
-              <clipPath id="mollweide-globe-clip">
-                <path d={graticule.outlinePath} />
-              </clipPath>
+        <div className="relative w-full bg-[#020512] overflow-hidden flex items-center justify-center">
+          <canvas
+            ref={canvasRef}
+            style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+            className="cursor-grab active:cursor-grabbing block touch-none"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onClick={handleClick}
+          />
 
-              {/* Glowing filters for hovered active boundary */}
-              <filter id="mollweide-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-              <filter id="mollweide-glow-amber" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
+          {/* Real-time Cursor Coordinates Readout Pill */}
+          {mouseCoord && (
+            <div className="absolute top-3 left-4 px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-700/80 text-[10px] font-mono text-cyan-300 pointer-events-none shadow-md flex items-center gap-1.5">
+              <MapPin className="w-3 h-3 text-cyan-400" />
+              <span>RA: {mouseCoord.raStr}</span>
+              <span>•</span>
+              <span>Dec: {mouseCoord.decStr}</span>
+            </div>
+          )}
 
-              {/* Deep Space Background Radial Gradient */}
-              <radialGradient id="space-disc-grad" cx="50%" cy="50%" r="55%">
-                <stop offset="0%" stopColor="#040d29" />
-                <stop offset="65%" stopColor="#020718" />
-                <stop offset="100%" stopColor="#01030d" />
-              </radialGradient>
-            </defs>
-
-            {/* Deep Space Filled Disc */}
-            <path
-              d={graticule.outlinePath}
-              fill="url(#space-disc-grad)"
-              className="transition-colors"
-            />
-
-            {/* Everything inside the Mollweide ellipse is clipped to prevent seam overflows */}
-            <g clipPath="url(#mollweide-globe-clip)">
-              {/* 1. Milky Way Galactic Plane & Core Contours */}
-              {showMilkyWay && (
-                <g className="milky-way-layer pointer-events-none transition-opacity duration-300">
-                  {milkyWayPaths.map((mw) => {
-                    // Multi-tiered opacity and luminous hues:
-                    let fill = 'rgba(56, 189, 248, 0.04)';
-                    if (mw.tier === 2) fill = 'rgba(56, 189, 248, 0.08)';
-                    if (mw.tier === 3) fill = 'rgba(96, 165, 250, 0.12)';
-                    if (mw.tier === 4) fill = 'rgba(147, 197, 253, 0.17)';
-                    if (mw.tier === 5) fill = 'rgba(240, 246, 255, 0.28)'; // Core nucleus
-
-                    return (
-                      <path
-                        key={`mw-tier-${mw.tier}`}
-                        d={mw.pathD}
-                        fill={fill}
-                        stroke="none"
-                        fillRule="evenodd"
-                      />
-                    );
-                  })}
-                </g>
-              )}
-
-              {/* 2. Coordinate Graticule (Parallels, Meridians, Equator) */}
-              {showGraticule && (
-                <g className="graticule-layer pointer-events-none">
-                  {/* Parallels of Declination */}
-                  {graticule.parallels.map((p) => (
-                    <path
-                      key={p.id}
-                      d={p.path}
-                      fill="none"
-                      stroke="rgba(6, 182, 212, 0.12)"
-                      strokeWidth="0.8"
-                      strokeDasharray="2 4"
-                    />
-                  ))}
-
-                  {/* Meridians of Right Ascension */}
-                  {graticule.meridians.map((m) => (
-                    <path
-                      key={m.id}
-                      d={m.path}
-                      fill="none"
-                      stroke="rgba(6, 182, 212, 0.12)"
-                      strokeWidth="0.8"
-                      strokeDasharray="2 4"
-                    />
-                  ))}
-
-                  {/* Celestial Equator (Dec = 0°) */}
-                  <path
-                    d={graticule.equatorPath}
-                    fill="none"
-                    stroke="rgba(56, 189, 248, 0.35)"
-                    strokeWidth="1.2"
-                  />
-                </g>
-              )}
-
-              {/* 3. Solar Ecliptic Path */}
-              {showEcliptic && (
-                <g className="ecliptic-layer pointer-events-none">
-                  <path
-                    d={graticule.eclipticPath}
-                    fill="none"
-                    stroke="rgba(245, 158, 11, 0.65)"
-                    strokeWidth="1.4"
-                    strokeDasharray="4 3"
-                  />
-                </g>
-              )}
-
-              {/* 4. Delporte 1930 Constellation Boundaries (89 Sectors) */}
-              {showBoundaries && (
-                <g className="constellation-boundaries-layer">
-                  {boundaryPaths.map((bp) => {
-                    const isHovered = activeConstellation?.id === bp.constInfo?.id;
-                    const isZodiac = bp.constInfo?.isZodiac;
-
-                    return (
-                      <path
-                        key={`boundary-${bp.id}`}
-                        d={bp.pathD}
-                        fill={
-                          isHovered
-                            ? isZodiac
-                              ? 'rgba(245, 158, 11, 0.20)'
-                              : 'rgba(6, 182, 212, 0.20)'
-                            : 'transparent'
-                        }
-                        stroke={
-                          isHovered
-                            ? isZodiac
-                              ? '#f59e0b'
-                              : '#22d3ee'
-                            : 'rgba(6, 182, 212, 0.22)'
-                        }
-                        strokeWidth={isHovered ? 1.8 : 0.8}
-                        filter={isHovered ? (isZodiac ? 'url(#mollweide-glow-amber)' : 'url(#mollweide-glow-cyan)') : undefined}
-                        className="transition-colors cursor-pointer"
-                        onMouseEnter={() => handleBoundaryHover(bp.constInfo)}
-                        onMouseLeave={() => handleBoundaryHover(undefined)}
-                        onClick={() => handleBoundaryClick(bp.constInfo)}
-                      >
-                        <title>{bp.constInfo ? `${bp.constInfo.name} (${bp.constInfo.englishName}) - Click to inspect dossier` : bp.id}</title>
-                      </path>
-                    );
-                  })}
-                </g>
-              )}
-
-              {/* 5. Constellation Stick-Figure Lines */}
-              {showAsterisms && (
-                <g className="asterisms-layer pointer-events-none">
-                  {asterismPaths.map((ap) => (
-                    <path
-                      key={ap.id}
-                      d={ap.pathD}
-                      fill="none"
-                      stroke="rgba(186, 230, 253, 0.65)"
-                      strokeWidth="1.1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  ))}
-                </g>
-              )}
-
-              {/* 6. Prominent Star Field */}
-              {showStars && (
-                <g className="stars-layer pointer-events-none">
-                  {prominentStars.map((s) => (
-                    <g key={s.id}>
-                      {/* Star glow */}
-                      <circle
-                        cx={s.x}
-                        cy={s.y}
-                        r={s.r * 2}
-                        fill={s.colorHex}
-                        opacity="0.25"
-                      />
-                      {/* Star core */}
-                      <circle
-                        cx={s.x}
-                        cy={s.y}
-                        r={s.r}
-                        fill={s.colorHex}
-                        stroke="#ffffff"
-                        strokeWidth="0.4"
-                      />
-                    </g>
-                  ))}
-                </g>
-              )}
-
-              {/* 7. Today's Sun Position on the Ecliptic */}
-              {showEcliptic && (
-                <g className="sun-marker-layer pointer-events-none">
-                  {/* Sun halo ripple */}
-                  <circle
-                    cx={sunPosition.x}
-                    cy={sunPosition.y}
-                    r="8"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="0.8"
-                    opacity="0.6"
-                    className="animate-ping"
-                  />
-                  <circle
-                    cx={sunPosition.x}
-                    cy={sunPosition.y}
-                    r="5"
-                    fill="rgba(245, 158, 11, 0.35)"
-                  />
-                  {/* Sun core */}
-                  <circle
-                    cx={sunPosition.x}
-                    cy={sunPosition.y}
-                    r="3.2"
-                    fill="#fbbf24"
-                    stroke="#fffbeb"
-                    strokeWidth="0.8"
-                  />
-                </g>
-              )}
-            </g>
-
-            {/* Outer Ellipse Perimeter Border */}
-            <path
-              d={graticule.outlinePath}
-              fill="none"
-              stroke="rgba(6, 182, 212, 0.55)"
-              strokeWidth="1.6"
-              className="pointer-events-none"
-            />
-
-            {/* Meridian & Parallel Labels at Boundaries */}
-            <g className="graticule-labels pointer-events-none text-[8px] font-mono fill-cyan-400/80">
-              <text x={VIEW_WIDTH / 2} y={PADDING - 6} textAnchor="middle">
-                +90° NCP
-              </text>
-              <text x={VIEW_WIDTH / 2} y={VIEW_HEIGHT - PADDING + 14} textAnchor="middle">
-                -90° SCP
-              </text>
-              <text x={PADDING - 2} y={VIEW_HEIGHT / 2 + 3} textAnchor="end">
-                12h E
-              </text>
-              <text x={VIEW_WIDTH - PADDING + 2} y={VIEW_HEIGHT / 2 + 3} textAnchor="start">
-                12h W
-              </text>
-              <text x={VIEW_WIDTH / 2} y={VIEW_HEIGHT / 2 - 4} textAnchor="middle" fill="rgba(56, 189, 248, 0.7)">
-                0h Vernal Equinox
-              </text>
-            </g>
-          </svg>
-
-          {/* Quick Click-to-Inspect Floating Callout when Constellation is Hovered */}
+          {/* Floating Constellation Dossier Banner when Hovered */}
           {activeConstellation && (
             <div className="absolute bottom-3 left-4 right-4 sm:left-auto sm:right-4 z-20 pointer-events-auto">
               <div
-                onClick={() => handleBoundaryClick(activeConstellation)}
-                className="p-2 sm:p-2.5 rounded-xl bg-[#040c24]/95 border border-cyan-400/70 shadow-[0_0_20px_rgba(6,182,212,0.35)] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#071338] transition-all"
+                onClick={() => onSelectConstellation && onSelectConstellation(activeConstellation)}
+                className="p-2 sm:p-2.5 rounded-xl bg-[#040c24]/95 border border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#071338] transition-all"
                 title={`Click to open Constellation Dossier for ${activeConstellation.name}`}
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -620,11 +944,16 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           </span>
           <span className="hidden sm:inline">•</span>
           <span className="hidden sm:inline">
-            Sun Transit Today: <strong className="text-amber-300 font-bold">RA {sunPosition.raHours}h, Dec {sunPosition.decDeg}°</strong>
+            Sun Transit Today: <strong className="text-amber-300 font-bold">RA {sunPosition.raHoursStr}, Dec {sunPosition.decDegStr}</strong>
           </span>
         </div>
-        <div className="text-slate-500">
-          Click any constellation boundary on the globe to open its dossier
+        <div className="text-slate-400 flex items-center gap-2">
+          <span className="hidden sm:inline text-slate-500">
+            Drag to rotate • Scroll to zoom • Click constellation for dossier
+          </span>
+          <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-bold border border-cyan-800/80">
+            {zoom.toFixed(1)}×
+          </span>
         </div>
       </div>
     </div>
