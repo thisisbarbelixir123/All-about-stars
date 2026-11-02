@@ -203,42 +203,39 @@ export const PLANET_FRAGMENT_SHADER = `
   }
 
   // High-performance Directional Cloud Deck & Shadow Evaluation
-  // Evaluates multi-scale synoptic weather systems, cyclonic vortices, fractal cumulus billows,
-  // delicate high-altitude cirrus filaments, and directional drop shadows
+  // Evaluates smooth, aerodynamic synoptic weather systems, cyclonic vortices,
+  // silky cumulus billows, delicate high-altitude cirrus filaments, and soft diffused drop shadows
   vec4 evaluateCloudLayer(vec3 p, vec3 lightDirVec, float timeVal, float coverage, float cloudSeed) {
     float lat = p.y;
     // Latitudinal Coriolis jet shear: equatorial trade winds drift westward, mid-latitude westerlies drift eastward
-    float coriolis = sin(lat * 3.14159 * 2.0) * 0.22;
-    vec3 advect = vec3(timeVal * 0.025 + coriolis * timeVal * 0.04, timeVal * 0.006, timeVal * 0.015);
+    float coriolis = sin(lat * 3.14159 * 2.0) * 0.20;
+    vec3 advect = vec3(timeVal * 0.025 + coriolis * timeVal * 0.035, timeVal * 0.005, timeVal * 0.015);
     vec3 cloudCoord = p + advect + cloudSeed;
 
-    // 1. Synoptic Weather Systems & Cyclonic Swirl (Domain Warping)
-    vec3 warpedCoord = domainWarp(cloudCoord * 2.4, 0.38);
+    // 1. Synoptic Weather Systems & Silky Cyclonic Swirl (Domain Warping)
+    vec3 warpedCoord = domainWarp(cloudCoord * 2.0, 0.35);
     float synoptic = fbm(warpedCoord);
 
-    // 2. Multi-Scale Cumulus Billows with Fractal Edge Detail
-    float microDetail = snoise(cloudCoord * 8.5 + synoptic * 0.5);
-    float fineDetail = snoise(cloudCoord * 18.0) * 0.25;
-    float billowNoise = synoptic + microDetail * 0.22 + fineDetail * 0.12;
+    // 2. Smooth, Aerodynamic Cumulus Billows (gentle secondary noise, no crunchy micro-noise)
+    float billowNoise = synoptic + snoise(cloudCoord * 4.5) * 0.18;
 
-    // Sharp condensation boundary (fractal edges rather than blurry gradient)
+    // Soft, smooth condensation transition (wide smoothstep range avoids harsh, pixelated edges)
     float cumulusThreshold = 1.0 - coverage;
-    float cumulus = smoothstep(cumulusThreshold, cumulusThreshold + 0.18, billowNoise);
-    // Enhance internal cloud core thickness
-    float cloudCore = smoothstep(cumulusThreshold + 0.08, cumulusThreshold + 0.28, billowNoise);
+    float cumulus = smoothstep(cumulusThreshold, cumulusThreshold + 0.30, billowNoise);
+    float cloudCore = smoothstep(cumulusThreshold + 0.10, cumulusThreshold + 0.38, billowNoise);
 
-    // 3. Delicate High-Altitude Cirrus Filaments & Jet Stream Streamers
-    vec3 cirrusCoord = vec3(cloudCoord.x * 1.5, cloudCoord.y * 5.0, cloudCoord.z * 1.5) + vec3(timeVal * 0.04, 0.0, timeVal * 0.03);
-    float cirrusFbm = snoise(cirrusCoord) * 0.65 + snoise(cirrusCoord * 2.4) * 0.35;
-    float cirrus = smoothstep(0.42, 0.72, cirrusFbm) * (1.0 - cumulus * 0.8) * 0.42;
+    // 3. Delicate, Silky High-Altitude Cirrus Streamers
+    vec3 cirrusCoord = vec3(cloudCoord.x * 1.3, cloudCoord.y * 3.6, cloudCoord.z * 1.3) + vec3(timeVal * 0.035, 0.0, timeVal * 0.025);
+    float cirrusNoise = snoise(cirrusCoord) * 0.65 + snoise(cirrusCoord * 1.8) * 0.35;
+    float cirrus = smoothstep(0.35, 0.75, cirrusNoise) * (1.0 - cumulus * 0.75) * 0.35;
 
-    // Total combined cloud optical density
+    // Total combined smooth cloud optical density
     float totalCloud = clamp(cumulus + cirrus, 0.0, 1.0);
 
-    // 4. Directional Drop Shadow: projected along stellar illumination vector L onto surface below
-    vec3 shadowCoord = domainWarp((cloudCoord + lightDirVec * 0.042) * 2.4, 0.38);
-    float shadowNoise = fbmFast(shadowCoord);
-    float shadowMask = smoothstep(cumulusThreshold, cumulusThreshold + 0.18, shadowNoise);
+    // 4. Soft, Diffused Directional Drop Shadow
+    vec3 shadowCoord = domainWarp((cloudCoord + lightDirVec * 0.038) * 2.0, 0.35);
+    float shadowBase = fbmFast(shadowCoord);
+    float shadowMask = smoothstep(cumulusThreshold, cumulusThreshold + 0.35, shadowBase) * 0.38;
 
     return vec4(totalCloud, shadowMask, cloudCore, cirrus);
   }
@@ -340,26 +337,11 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
     else if (themeIndex < 1.5) {
-      // Multi-scale domain warping for organic continental drift & plate tectonics
-      vec3 warped = domainWarp(vLocalPos * 2.5 + effSeed, 0.45);
-      float primaryPlate = fbm(warped);
-
-      // High-frequency coastline fracture (fjords, estuaries, peninsulas, bays)
-      float coastFracture = snoise(vLocalPos * 12.0 + effSeed * 1.7) * 0.12 + snoise(vLocalPos * 26.0) * 0.05;
-      
-      // Offshore volcanic archipelagos & coral atoll chains
-      float archipelagos = smoothstep(0.68, 0.88, snoise(warped * 4.2 + vec3(1.3, 4.7, 2.1))) * 0.14;
-      
-      float continental = primaryPlate + coastFracture + archipelagos;
-      float mountain = ridgedFbm(warped * 2.4);
-      float foothill = fbm(warped * 5.0) * 0.45;
+      // Smooth, natural domain warping for continental drift and ocean basins
+      vec3 warped = domainWarp(vLocalPos * 2.2 + effSeed, 0.40);
+      float continental = fbm(warped); // Low-frequency continental land/ocean mask
+      float mountain = ridgedFbm(warped * 1.8); // Alpine cordilleras
       float lat = abs(vLocalPos.y);
-
-      // Astrobiological Climate Regime:
-      // On cold M-dwarf worlds (T < 265K, e.g. Proxima b, TRAPPIST-1 e/f, Kepler-186 f, Wolf 1069 b),
-      // tidal locking or sub-stellar insolation concentrates liquid water in a dayside oasis
-      float subStellarInsolation = max(0.0, dot(vLocalPos, L));
-      float isColdEyeball = (temperatureK < 265.0) ? 1.0 : 0.0;
 
       // Multi-tier Bathymetry and Sea Color Grading
       // Fallback colors if uniforms are default
@@ -367,154 +349,101 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.44, 0.62) * effColorTint);
 
       // Temperature modulation of oceans:
-      // Frigid (<250K): Frozen steel-blue sea-ice on nightside/high-latitudes
-      if (temperatureK < 250.0 && (subStellarInsolation < 0.25 || lat > 0.60)) {
+      // Frigid (<250K): Frozen steel-blue sea-ice
+      if (temperatureK < 250.0) {
         deepColor = mix(deepColor, vec3(0.42, 0.55, 0.68), 0.75);
         shelfColor = mix(shelfColor, vec3(0.68, 0.80, 0.88), 0.85);
       }
 
-      // High-resolution ocean surface micro-waves (ripples & capillary facets)
-      float wave = snoise(vLocalPos * 38.0 + time * 0.06) * 0.5 + snoise(vLocalPos * 76.0 - time * 0.09) * 0.25;
-
-      // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
+      // A. Smooth Ocean Bathymetry & Coastal Shelves (continental < 0.05)
       if (continental < 0.05) {
-        // 4-Tier Bathymetry:
-        // 1. Abyssal Trench: ink-depth light absorption
+        // 4-Tier Smooth Bathymetry:
+        // 1. Abyssal Trench: deep ink absorption
         vec3 abyssalColor = deepColor * 0.45;
         // 2. Pelagic Open Ocean: primary deepColor
         // 3. Continental Shelf: vibrant shelfColor
-        // 4. Coastal Lagoon / Reef: luminous tropical shallows
-        vec3 lagoonColor = mix(shelfColor * 1.35, vec3(0.25, 0.95, 0.85) * shelfColor, 0.35);
+        // 4. Coastal Lagoon / Reef: luminous tropical turquoise / emerald shallows
+        vec3 lagoonColor = mix(shelfColor * 1.30, vec3(0.25, 0.95, 0.85) * shelfColor, 0.35);
 
-        float depthTrench = smoothstep(-0.65, -0.25, continental);
-        float depthShelf = smoothstep(-0.25, -0.04, continental);
-        float depthLagoon = smoothstep(-0.04, 0.04, continental);
+        float depthTrench = smoothstep(-0.60, -0.22, continental);
+        float depthShelf = smoothstep(-0.22, -0.02, continental);
+        float depthLagoon = smoothstep(-0.02, 0.045, continental);
 
         vec3 sea = mix(abyssalColor, deepColor, depthTrench);
         sea = mix(sea, shelfColor, depthShelf);
         sea = mix(sea, lagoonColor, depthLagoon);
 
-        // Subtle micro-wave color modulation
-        sea += sea * (wave * 0.08);
-
-        // Coastal beach sand & surf fringe right at the shoreline (continental: 0.035 to 0.05)
+        // Smooth beach sand & surf fringe right at the shoreline (continental: 0.035 to 0.05)
         float surf = smoothstep(0.035, 0.05, continental);
-        vec3 beachSand = mix(vec3(0.88, 0.82, 0.68), vec3(0.95, 0.95, 0.98), surf); // Sand to surf foam
-        surface = mix(sea, beachSand, surf * 0.65);
+        vec3 beachSand = mix(vec3(0.88, 0.82, 0.68), vec3(0.95, 0.95, 0.98), surf);
+        surface = mix(sea, beachSand, surf * 0.60);
       }
-      // B. Continental Landmass & Biome Stratification (continental >= 0.05)
+      // B. Smooth Continental Landmass & Biome Stratification (continental >= 0.05)
       else {
-        float landElevation = smoothstep(0.05, 0.70, continental) * 0.55 + mountain * 0.35 + foothill * 0.10;
-        
-        // Multi-zonal Biome Stratification:
-        // Incorporates latitude insolation + moisture humidity + elevation
-        float moisture = snoise(vLocalPos * 3.5 + effSeed * 0.8) * 0.5 + 0.5;
+        float landElevation = smoothstep(0.05, 0.68, continental) * 0.60 + mountain * 0.40;
         
         vec3 lowlands = lowlandColor.r > 0.001 || lowlandColor.g > 0.001 ? lowlandColor : (vec3(0.12, 0.38, 0.14) * effColorTint);
         vec3 savanna = savannaColor.r > 0.001 || savannaColor.g > 0.001 ? savannaColor : (vec3(0.38, 0.45, 0.22) * effColorTint);
         vec3 plateau = plateauColor.r > 0.001 || plateauColor.g > 0.001 ? plateauColor : (vec3(0.54, 0.46, 0.30) * effColorTint);
         vec3 mountainPeak = vec3(0.72, 0.70, 0.68) * effColorTint;
 
-        // Tropical rainforest near equator with high moisture
-        vec3 tropicalJungle = mix(lowlands, vec3(0.06, 0.26, 0.10) * effColorTint, 0.45);
-        // Arid subtropical desert / dune belt
-        vec3 aridDunes = mix(savanna, vec3(0.75, 0.52, 0.30) * effColorTint, 0.60);
-        // Sub-polar taiga / boreal coniferous forest
-        vec3 borealTaiga = mix(lowlands, vec3(0.18, 0.28, 0.22) * effColorTint, 0.70);
-
-        // Latitude & moisture driven biome blending
-        vec3 baseFoliage = mix(tropicalJungle, lowlands, smoothstep(0.15, 0.35, lat));
-        baseFoliage = mix(baseFoliage, aridDunes, smoothstep(0.20, 0.45, lat) * (1.0 - moisture * 0.8));
-        baseFoliage = mix(baseFoliage, borealTaiga, smoothstep(0.55, 0.80, lat));
-
-        // Elevation biome progression: Lowlands -> Savanna/Steppes -> Highland Plateaus -> Mountain Granite
-        vec3 biome = mix(baseFoliage, savanna, smoothstep(0.08, 0.32, landElevation));
+        // Smooth biome transitions across elevation
+        vec3 biome = mix(lowlands, savanna, smoothstep(0.08, 0.32, landElevation));
         biome = mix(biome, plateau, smoothstep(0.32, 0.62, landElevation));
-        biome = mix(biome, mountainPeak, smoothstep(0.62, 0.86, landElevation));
+        biome = mix(biome, mountainPeak, smoothstep(0.62, 0.88, landElevation));
 
-        // Dynamic Alpine Snowline:
-        // Mountain snowline descends from high elevations at equator to lower elevations at higher latitudes
-        float localSnowline = mix(0.86, 0.34, smoothstep(0.12, 0.78, lat));
+        // Smooth dynamic alpine snowline descending with latitude
+        float localSnowline = mix(0.86, 0.38, smoothstep(0.12, 0.78, lat));
         if (landElevation > localSnowline && temperatureK < 320.0) {
-          float snowCap = smoothstep(localSnowline, localSnowline + 0.08, landElevation + wave * 0.05);
-          biome = mix(biome, vec3(0.94, 0.96, 0.99), snowCap * 0.90);
+          float snowCap = smoothstep(localSnowline, localSnowline + 0.10, landElevation);
+          biome = mix(biome, vec3(0.94, 0.96, 0.99), snowCap * 0.88);
         }
 
-        // River networks & alluvial valleys cutting through continents
-        float riverNoise = abs(snoise(warped * 7.5 + vec3(0.5, 2.1, 1.4)));
-        float riverValley = smoothstep(0.025, 0.065, riverNoise);
-        biome = mix(mix(lowlands * 0.6, shelfColor, 0.5), biome, riverValley);
-
-        // Geological sedimentary striations & micro-relief
-        float landMicro = snoise(vLocalPos * 18.0) * 0.5 + snoise(vLocalPos * 36.0) * 0.25;
-        biome += biome * (landMicro * 0.08);
-
         surface = biome;
-
-        // 3D Mountain Relief Lighting (Bump/Topography Shading)
-        // Computes terrain surface normal to cast realistic mountain relief highlights and shadows
-        vec3 upVec = abs(N.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
-        vec3 tangent = normalize(cross(N, upVec));
-        vec3 bitangent = cross(N, tangent);
-        
-        float eps = 0.012;
-        vec3 pU = domainWarp((vLocalPos + tangent * eps) * 2.5 + effSeed, 0.45);
-        vec3 pV = domainWarp((vLocalPos + bitangent * eps) * 2.5 + effSeed, 0.45);
-        float hU = smoothstep(0.05, 0.70, fbm(pU)) * 0.55 + ridgedFbm(pU * 2.4) * 0.35;
-        float hV = smoothstep(0.05, 0.70, fbm(pV)) * 0.55 + ridgedFbm(pV * 2.4) * 0.35;
-        
-        vec3 surfGrad = (tangent * (hU - landElevation) + bitangent * (hV - landElevation)) / eps;
-        vec3 N_terrain = normalize(N - surfGrad * 0.42);
-        
-        float landDirect = max(0.0, dot(N_terrain, L));
-        float landNdotL = clamp(landDirect * 0.72 + ambientFill + rimFill, 0.35, 1.30);
-        surface *= (landNdotL / NdotL);
       }
 
       // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
       float baseThreshold = iceCapLatitude > 0.1 ? iceCapLatitude : 0.72;
-      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0022 - isColdEyeball * (1.0 - subStellarInsolation) * 0.18, 0.42, 0.96);
+      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0022, 0.48, 0.96);
       if (lat > polarThreshold && temperatureK < 315.0) {
-        float iceNoise = fbm(vLocalPos * 6.0 + effSeed);
-        float iceCap = smoothstep(polarThreshold, polarThreshold + 0.10, lat + iceNoise * 0.08);
-        surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
+        float iceNoise = fbmFast(vLocalPos * 4.0 + effSeed);
+        float iceCap = smoothstep(polarThreshold, polarThreshold + 0.12, lat + iceNoise * 0.06);
+        surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap * 0.92);
       }
 
-      // D. High-Quality Directional Cloud Decks & Drop Shadows
-      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.54, effSeed * 2.3);
+      // D. Smooth Directional Cloud Decks & Soft Drop Shadows
+      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.52, effSeed * 2.3);
       float cloudMask = clouds.x;
       float shadowMask = clouds.y;
       float cloudCore = clouds.z;
 
-      // Specular ocean sun glint: water reflects sharp sunlight where unclouded; land is matte
+      // Specular ocean sun glint: glassy, smooth liquid reflection of stellar source
       if (continental < 0.05 && temperatureK >= 240.0) {
-        float oceanSpec = pow(specBase, 36.0) * rawNdotL * 1.6;
-        // Modulate with micro-waves for glistening liquid water
-        oceanSpec *= clamp(0.75 + wave * 0.5, 0.2, 1.4);
-        // Water Fresnel limb reflection
-        oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.35 * rawNdotL;
+        float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.5;
+        // Smooth water Fresnel limb reflection
+        oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.30 * rawNdotL;
         specular = oceanSpec * (1.0 - cloudMask);
       }
 
-      // Directional drop shadow cast onto surface beneath
-      float directShadow = shadowMask * clamp(rawNdotL * 1.5, 0.0, 1.0) * 0.55;
+      // Soft directional drop shadow cast onto surface beneath
+      float directShadow = shadowMask * clamp(rawNdotL * 1.4, 0.0, 1.0);
       surface *= (1.0 - directShadow);
 
-      // Cloud shading: subtle terminator attenuation and forward scattering
+      // Smooth cloud shading: soft terminator attenuation and forward scattering
       vec3 cumulusColor = vec3(0.97, 0.98, 1.0);
       vec3 cirrusColor = vec3(0.92, 0.95, 0.99);
       vec3 cloudColor = mix(cirrusColor, cumulusColor, cloudCore / max(0.01, cloudMask));
       float cloudLighting = clamp(dot(N, L) * 0.65 + 0.35, 0.30, 1.0);
       cloudColor *= cloudLighting;
 
-      // Blend clouds onto surface
-      surface = mix(surface, cloudColor, cloudMask * 0.94);
+      // Blend smooth clouds onto surface
+      surface = mix(surface, cloudColor, cloudMask * 0.92);
 
-      // Subtle forward scattering silver lining on cloud edges
-      float cloudGlint = pow(specBase, 12.0) * (cloudMask - cloudCore) * 0.35;
+      // Smooth forward scattering silver lining on cloud edges
+      float cloudGlint = pow(specBase, 10.0) * (cloudMask - cloudCore) * 0.30;
       specular += cloudGlint;
 
-      atmoColor = mix(vec3(0.32, 0.65, 1.0), shelfColor * 1.5, 0.22) * effColorTint;
+      atmoColor = mix(vec3(0.32, 0.65, 1.0), shelfColor * 1.4, 0.20) * effColorTint;
       atmoStrength = 0.80;
     }
     // 3. Super-Earth (Dynamic Atmospheric & Thermal Regimes)
@@ -843,46 +772,43 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.010, 0.06, 0.26) * effColorTint);
       vec3 shallowColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.35, 0.72) * effColorTint);
 
-      vec3 warped = domainWarp(vLocalPos * 2.8 + effSeed, 0.45);
+      // Smooth domain-warped ocean convective circulation
+      vec3 warped = domainWarp(vLocalPos * 2.2 + effSeed, 0.38);
       float convectiveDepth = fbm(warped);
-      float oceanicCurrent = ridgedFbm(warped * 2.2);
-      float wave = snoise(vLocalPos * 42.0 + time * 0.08) * 0.5;
 
-      // Multi-tier deep water mantle & equatorial upwelling currents
-      vec3 abyss = deepColor * 0.40;
+      // Multi-tier deep water mantle & gentle equatorial upwelling currents
+      vec3 abyss = deepColor * 0.42;
       vec3 pelagic = deepColor;
       vec3 currentPlume = shallowColor;
 
-      vec3 sea = mix(abyss, pelagic, smoothstep(-0.5, 0.2, convectiveDepth));
-      sea = mix(sea, currentPlume, smoothstep(0.3, 0.8, oceanicCurrent) * 0.65);
-      sea += sea * (wave * 0.06);
+      vec3 sea = mix(abyss, pelagic, smoothstep(-0.55, 0.20, convectiveDepth));
+      sea = mix(sea, currentPlume, smoothstep(0.15, 0.65, convectiveDepth) * 0.50);
       surface = sea;
 
-      // Vast tropical cloud streamers & cyclonic storms with directional shadows
-      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.64, effSeed * 1.7);
+      // Smooth tropical cloud streamers & cyclonic storms with directional shadows
+      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.60, effSeed * 1.7);
       float cloudMask = hyceanClouds.x;
       float shadowMask = hyceanClouds.y;
       float cloudCore = hyceanClouds.z;
 
-      // Deep global ocean specular reflection where unclouded
-      float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.6;
-      oceanSpec *= clamp(0.75 + wave * 0.5, 0.2, 1.4);
-      oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.40 * rawNdotL;
+      // Deep global ocean specular reflection: smooth, glassy liquid sheen
+      float oceanSpec = pow(specBase, 28.0) * rawNdotL * 1.5;
+      oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.35 * rawNdotL;
       specular = oceanSpec * (1.0 - cloudMask);
 
-      // Directional drop shadows onto dark ocean abyss
-      float directShadow = shadowMask * clamp(rawNdotL * 1.5, 0.0, 1.0) * 0.55;
+      // Soft directional drop shadows onto dark ocean abyss
+      float directShadow = shadowMask * clamp(rawNdotL * 1.4, 0.0, 1.0);
       surface *= (1.0 - directShadow);
 
       // Billowing high-albedo cloud deck with delicate forward scattering
-      vec3 cloudColor = vec3(0.94, 0.97, 1.0) * clamp(dot(N, L) * 0.65 + 0.35, 0.30, 1.0);
-      surface = mix(surface, cloudColor, cloudMask * 0.95);
+      vec3 cloudColor = vec3(0.95, 0.97, 1.0) * clamp(dot(N, L) * 0.65 + 0.35, 0.30, 1.0);
+      surface = mix(surface, cloudColor, cloudMask * 0.94);
 
-      float cloudGlint = pow(specBase, 12.0) * (cloudMask - cloudCore) * 0.35;
+      float cloudGlint = pow(specBase, 10.0) * (cloudMask - cloudCore) * 0.30;
       specular += cloudGlint;
 
       // Thick hydrogen Rayleigh scattering limb
-      atmoColor = mix(vec3(0.18, 0.72, 1.0), shallowColor * 1.4, 0.30) * effColorTint;
+      atmoColor = mix(vec3(0.18, 0.72, 1.0), shallowColor * 1.4, 0.28) * effColorTint;
       atmoStrength = 0.92;
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b, WASP-12b precursors)
