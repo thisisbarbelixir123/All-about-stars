@@ -534,7 +534,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.0;
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -574,11 +574,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     });
     scene.add(new THREE.Points(starGeo, starMat));
 
-    // Ambient Lighting
-    scene.add(new THREE.AmbientLight('#ffffff', 0.9));
+    // Ambient Lighting (balanced fill for space without washing out deep textures)
+    scene.add(new THREE.AmbientLight('#ffffff', 0.45));
 
-    // Directional Sunlight (matching lightDir uniform in procedural shader)
-    const sunLight = new THREE.DirectionalLight('#ffffff', 1.3);
+    // Directional Sunlight (focused key light providing rich relief and shadows)
+    const sunLight = new THREE.DirectionalLight('#ffffff', 1.05);
     sunLight.position.set(1.0, 0.4, 0.8).normalize().multiplyScalar(100);
     scene.add(sunLight);
 
@@ -657,6 +657,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           let texture = textureCacheRef.current.get(body.texturePath);
           if (!texture) {
             texture = textureLoader.load(body.texturePath);
+            texture.colorSpace = THREE.SRGBColorSpace;
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.ClampToEdgeWrapping;
             textureCacheRef.current.set(body.texturePath, texture);

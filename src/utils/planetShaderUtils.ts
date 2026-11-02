@@ -117,7 +117,7 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 V = normalize(vViewPosition);
     vec3 L = normalize(lightDir);
 
-    float NdotL = clamp(dot(N, L) * 0.52 + 0.55, 0.32, 1.12); // Half-Lambert illumination so full spherical disc is clearly visible
+    float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0); // Balanced celestial illumination preserving contrast and saturation
     float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8); // Atmospheric rim glow
 
     vec3 surface = vec3(0.5);
