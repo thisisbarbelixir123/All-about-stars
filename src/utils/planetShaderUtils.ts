@@ -466,13 +466,27 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(1.0, 0.6, 0.1);
       atmoStrength = 1.2;
     }
-    // 13. Mirror World (Ultra-High Albedo Titanate/Silicate Clouds, e.g. LTT 9779 b)
+    // 13. Mirror World (Ultra-High Albedo Metallic Titanate/Silicate Clouds, e.g. LTT 9779 b)
     else if (themeIndex < 12.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.0 + time * 0.01, 0.3);
-      float clouds = fbm(warped);
-      surface = mix(vec3(0.88, 0.92, 0.98), vec3(0.96, 0.98, 1.0), clouds * 0.5 + 0.5);
-      atmoColor = vec3(0.70, 0.85, 1.0);
-      atmoStrength = 0.90;
+      // Differential zonal winds advecting metallic clouds
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
+      vec3 warped = domainWarp(flow * 3.0 + seed, 0.35);
+      float cloudDeck = fbm(warped);
+      float microTexture = fbmFast(vLocalPos * 14.0);
+
+      // Highly reflective silver-white enstatite and titanium dioxide cloud banks
+      vec3 deepSilver = vec3(0.82, 0.86, 0.94);
+      vec3 brilliantWhite = vec3(0.96, 0.98, 1.0);
+      surface = mix(deepSilver, brilliantWhite, cloudDeck * 0.5 + 0.5);
+
+      // Metallic multi-lobe specular sheen: reflects stellar light like polished liquid mercury / titanate crystals
+      float sharpSpec = pow(specBase, 48.0) * rawNdotL * 1.8;
+      float broadSheen = pow(specBase, 12.0) * rawNdotL * 0.65;
+      specular = (sharpSpec + broadSheen) * (0.8 + microTexture * 0.2);
+
+      // Iridescent forward-scattering horizon halo
+      atmoColor = vec3(0.75, 0.88, 1.0);
+      atmoStrength = 0.95;
     }
     // 14. Hycean Ocean World
     else if (themeIndex < 13.5) {
