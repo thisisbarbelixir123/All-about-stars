@@ -157,15 +157,35 @@ export const PLANET_FRAGMENT_SHADER = `
   }
 
   // Differential zonal rotation for gas giant atmospheric jet streams
-  // Computes azimuthal velocity variation across latitude bands
+  // Computes azimuthal velocity variation across latitude bands with smooth longitudinal fluid shearing
   vec3 zonalJetFlow(vec3 p, float t, float speed) {
     float lat = p.y; // -1 to 1 latitude
-    // Alternating eastward and westward jet streams with equatorial super-rotation
-    float jetShear = sin(lat * 12.566) * 0.75 + cos(lat * 6.283) * 0.5;
+    // Smooth alternating eastward and westward jet streams with equatorial super-rotation
+    float jetShear = sin(lat * 9.424) * 0.65 + cos(lat * 4.712) * 0.35;
     float theta = atan(p.z, p.x);
     float r = length(p.xz);
     float angleShift = theta + (speed * t * (1.0 + jetShear));
     return vec3(r * cos(angleShift), lat, r * sin(angleShift));
+  }
+
+  // Anisotropic fluid shearing for silky, laminar gas bands (avoids flattened isotropic bumpiness)
+  // Coordinates are compressed along latitude and stretched along flow lines
+  float fluidJetStream(vec3 flow, float latFrequency, float turbulence, float seedVal) {
+    // 1. Primary zonal flow coordinates: heavily stretched along azimuth, compressed along latitude
+    vec3 stretchedPos = vec3(flow.x * 0.35, flow.y * latFrequency, flow.z * 0.35);
+    
+    // 2. Large sweeping undulations (domain warping at low frequency for silky wave motion)
+    vec2 wave = vec2(
+      snoise(vec3(flow.x * 0.8, flow.y * 2.2, flow.z * 0.8) + seedVal),
+      snoise(vec3(flow.z * 0.8, flow.y * 2.2 + 3.1, flow.x * 0.8) + seedVal)
+    );
+    vec3 warpedPos = stretchedPos + vec3(wave.x * 0.45, wave.y * 0.35, wave.x * 0.45) * turbulence;
+
+    // 3. Smooth, low-octave fluid ribbon sampling
+    float primaryBand = snoise(warpedPos);
+    float secondaryRibbon = snoise(warpedPos * 1.8 + vec3(1.7, 0.4, 2.3)) * 0.4;
+    
+    return primaryBand + secondaryRibbon * turbulence;
   }
 
   // Planckian blackbody thermal radiation approximation
@@ -329,80 +349,80 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.45, 0.75, 0.60) * effColorTint;
       atmoStrength = 0.65;
     }
-    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth featureless Uranus-like and banded Neptune-like)
+    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth pastel Uranus-like and silky flowing Neptune-like jet streams)
     else if (themeIndex < 3.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
-      float latFreq = 14.0 + effBandShift * 8.0;
-      vec3 bandPos = vec3(flow.x * 1.5, flow.y * latFreq, flow.z * 1.5);
-      vec3 curl = curlNoise(flow * 2.5 + effSeed);
-      float band = fbm(bandPos + curl * 1.2);
+      float latFreq = 12.0 + effBandShift * 6.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
 
-      // Temperature & composition gradient:
-      // Cold (<250K): deep methane azure & cerulean
-      // Warm (250-600K): photochemical haze cyan & turquoise
-      // Hot (>600K): hydrocarbon smog, slate-teal, and amber-tinted mist
+      // Temperature & composition palettes:
+      // Cold (<220K): Vivid deep sapphire azure & electric cyan ribbons (Image 1 & 2)
+      // Temperate (220-500K): Photochemical haze soft aquamarine, sea-green, and turquoise
+      // Warm/Hot (>500K): Hydrocarbon smog, slate-teal, and lilac/mauve haze
       vec3 deepTone;
       vec3 lightTone;
-      if (temperatureK < 250.0) {
-        deepTone = vec3(0.06, 0.28, 0.62) * effColorTint;
-        lightTone = vec3(0.20, 0.62, 0.85) * effColorTint;
-      } else if (temperatureK < 600.0) {
-        deepTone = vec3(0.08, 0.38, 0.54) * effColorTint;
-        lightTone = vec3(0.28, 0.72, 0.76) * effColorTint;
+      if (temperatureK < 220.0) {
+        deepTone = vec3(0.04, 0.20, 0.58) * effColorTint;
+        lightTone = vec3(0.24, 0.70, 0.88) * effColorTint;
+      } else if (temperatureK < 500.0) {
+        deepTone = vec3(0.06, 0.32, 0.48) * effColorTint;
+        lightTone = vec3(0.32, 0.76, 0.75) * effColorTint;
       } else {
-        deepTone = vec3(0.22, 0.32, 0.44) * effColorTint;
-        lightTone = vec3(0.48, 0.58, 0.62) * effColorTint;
+        deepTone = vec3(0.24, 0.26, 0.42) * effColorTint;
+        lightTone = vec3(0.52, 0.56, 0.68) * effColorTint;
       }
 
-      // Smooth vs Banded Jet Stream Archetypes:
-      // bandTurbulence modulates band contrast: low = smooth pastel orb, high = sharp visible jet stream bands
-      float jetContrast = smoothstep(0.75, 1.35, bandTurbulence);
-      float smoothGradient = smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15; // Subtle pole-to-equator limb gradient
+      // Smooth vs Silky Jet Stream Archetypes:
+      // bandTurbulence modulates band contrast: low = smooth velvety orb, high = silky sweeping jet stream ribbons
+      float jetContrast = smoothstep(0.70, 1.30, bandTurbulence);
+      float smoothGradient = smoothstep(-1.0, 1.0, vLocalPos.y) * 0.12; // Gentle pole-to-equator insolation gradient
       vec3 smoothAtmosphere = mix(deepTone, lightTone, 0.5 + smoothGradient);
-      vec3 bandedAtmosphere = mix(deepTone, lightTone, band * 0.5 + 0.5);
+      vec3 bandedAtmosphere = mix(deepTone, lightTone, smoothstep(-0.6, 0.6, band));
 
       surface = mix(smoothAtmosphere, bandedAtmosphere, jetContrast);
-      atmoColor = mix(vec3(0.32, 0.68, 0.98), vec3(0.40, 0.78, 0.85), clamp(temperatureK / 800.0, 0.0, 1.0)) * effColorTint;
+      atmoColor = mix(vec3(0.28, 0.65, 0.98), vec3(0.35, 0.82, 0.85), clamp(temperatureK / 700.0, 0.0, 1.0)) * effColorTint;
       atmoStrength = 0.85;
     }
     // 5. Ice Giant (Uranus / Neptune-like methane atmosphere)
     else if (themeIndex < 4.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
-      float latFreq = 11.0 + effBandShift * 6.0;
-      vec3 bandPos = vec3(flow.x, flow.y * latFreq, flow.z);
-      vec3 curl = curlNoise(flow * 2.8 + effSeed);
-      float band = fbm(bandPos + curl * 0.9);
+      float latFreq = 10.0 + effBandShift * 5.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
 
       // Temperature & methane composition colors:
-      vec3 deepMethane = mix(vec3(0.12, 0.48, 0.64), vec3(0.05, 0.25, 0.72), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
-      vec3 lightMethane = mix(vec3(0.35, 0.76, 0.88), vec3(0.22, 0.65, 0.94), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
+      vec3 deepMethane = mix(vec3(0.08, 0.40, 0.62), vec3(0.03, 0.18, 0.68), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
+      vec3 lightMethane = mix(vec3(0.32, 0.75, 0.88), vec3(0.25, 0.68, 0.96), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
 
-      // Smooth (Uranus-like cyan sphere) vs Active Visible Jet Streams (Neptune-like dark azure bands)
-      float jetContrast = smoothstep(0.80, 1.30, bandTurbulence);
+      // Smooth (Uranus-like cyan sphere) vs Active Silky Jet Streams (Neptune-like dark azure bands with high-albedo wisps)
+      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
       vec3 smoothUranus = mix(deepMethane, lightMethane, 0.5);
-      vec3 activeNeptune = mix(deepMethane, lightMethane, band * 0.5 + 0.5);
+      vec3 activeNeptune = mix(deepMethane, lightMethane, smoothstep(-0.6, 0.6, band));
+
+      // Delicate high-altitude methane ice cloud streamers
+      if (jetContrast > 0.4) {
+        float cirrus = smoothstep(0.45, 0.80, snoise(vec3(flow.x * 0.4, flow.y * 18.0, flow.z * 0.4) + effSeed * 2.1));
+        activeNeptune = mix(activeNeptune, vec3(0.85, 0.94, 1.0), cirrus * (jetContrast - 0.4) * 0.65);
+      }
 
       surface = mix(smoothUranus, activeNeptune, jetContrast);
-      atmoColor = vec3(0.32, 0.68, 0.96) * effColorTint;
-      atmoStrength = 0.82;
+      atmoColor = vec3(0.30, 0.68, 0.96) * effColorTint;
+      atmoStrength = 0.85;
     }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with rich multi-tone latitudinal banding)
+    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with rich multi-tone latitudinal banding & smooth Jovian archetypes)
     else if (themeIndex < 5.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
-      float latFreq = 22.0 + effBandShift * 10.0;
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.5 + effSeed);
-      float band = fbm(bandPos + curl * 1.8);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
+      float latFreq = 16.0 + effBandShift * 8.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
       
       // Multi-tone latitudinal atmospheric bands:
       // Equatorial Zone, Tropical Belts, Temperate Zones, and Polar Hoods
-      vec3 darkBelt = vec3(0.55, 0.28, 0.16) * effColorTint;
-      vec3 warmOchre = vec3(0.78, 0.52, 0.32) * effColorTint;
-      vec3 paleZone = vec3(0.92, 0.86, 0.74) * effColorTint;
+      vec3 darkBelt = vec3(0.52, 0.25, 0.14) * effColorTint;
+      vec3 warmOchre = vec3(0.76, 0.50, 0.30) * effColorTint;
+      vec3 paleZone = vec3(0.90, 0.84, 0.72) * effColorTint;
       vec3 brightAmmonia = vec3(0.98, 0.95, 0.88) * effColorTint;
 
-      // 4-stop gradient across the turbulent jet band value
-      float tBand = band * 0.5 + 0.5;
+      // 4-stop silky gradient across the fluid jet stream value
+      float tBand = smoothstep(-0.85, 0.85, band);
       vec3 bandedSurface;
       if (tBand < 0.33) {
         bandedSurface = mix(darkBelt, warmOchre, tBand / 0.33);
@@ -412,26 +432,29 @@ export const PLANET_FRAGMENT_SHADER = `
         bandedSurface = mix(paleZone, brightAmmonia, (tBand - 0.66) / 0.34);
       }
 
+      // Smooth Jovian Archetype (Image 2) vs High-Turbulence Banded Archetype
+      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
+      vec3 smoothJovian = mix(warmOchre, paleZone, 0.5 + smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15);
+      vec3 compositeSurface = mix(smoothJovian, bandedSurface, jetContrast);
+
       // Latitudinal polar hoods (cool bluish-grey haze at extreme latitudes)
       float polarLat = abs(vLocalPos.y);
       if (polarLat > 0.75) {
         vec3 polarHaze = vec3(0.65, 0.72, 0.80) * effColorTint;
-        bandedSurface = mix(bandedSurface, polarHaze, smoothstep(0.75, 0.95, polarLat) * 0.65);
+        compositeSurface = mix(compositeSurface, polarHaze, smoothstep(0.75, 0.95, polarLat) * 0.65);
       }
 
-      surface = bandedSurface;
+      surface = compositeSurface;
 
       atmoColor = vec3(0.85, 0.75, 0.58) * effColorTint;
-      atmoStrength = 0.52;
+      atmoStrength = 0.55;
     }
     // 7. Hot Jupiter (Silicate/Iron clouds, Class IV)
     else if (themeIndex < 6.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.045);
-      float latFreq = 16.0 + effBandShift * 8.0;
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + effSeed);
-      float band = fbm(bandPos + curl * 1.4);
-      surface = mix(vec3(0.42, 0.16, 0.10) * effColorTint, vec3(0.75, 0.38, 0.18) * effColorTint, band * 0.5 + 0.5);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.04);
+      float latFreq = 14.0 + effBandShift * 6.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
+      surface = mix(vec3(0.40, 0.15, 0.09) * effColorTint, vec3(0.75, 0.38, 0.18) * effColorTint, smoothstep(-0.7, 0.7, band));
       atmoColor = vec3(1.0, 0.45, 0.20) * effColorTint;
       atmoStrength = 0.70;
     }
@@ -579,13 +602,17 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
     else if (themeIndex < 14.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.04);
-      float latFreq = 14.0 + effBandShift * 6.0;
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + effSeed);
-      float band = fbm(bandPos + curl * 1.2);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
+      float latFreq = 12.0 + effBandShift * 5.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
       // Deep cobalt and midnight indigo banding with subtle twilight bronze
-      surface = mix(vec3(0.06, 0.08, 0.16) * effColorTint, vec3(0.18, 0.16, 0.32) * effColorTint, band * 0.5 + 0.5);
+      vec3 darkTone = vec3(0.04, 0.06, 0.14) * effColorTint;
+      vec3 alkaliTone = vec3(0.16, 0.14, 0.30) * effColorTint;
+      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
+      vec3 smoothAlkali = mix(darkTone, alkaliTone, 0.5);
+      vec3 bandedAlkali = mix(darkTone, alkaliTone, smoothstep(-0.6, 0.6, band));
+      surface = mix(smoothAlkali, bandedAlkali, jetContrast);
+
       atmoColor = vec3(0.35, 0.30, 0.65) * effColorTint;
       atmoStrength = 0.55;
       // Faint thermal twilight horizon for hot dark giants
@@ -593,20 +620,25 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
-      float latFreq = 18.0 + effBandShift * 8.0;
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + effSeed);
-      float band = fbm(bandPos + curl * 1.5);
-      surface = mix(vec3(0.15, 0.35, 0.58) * effColorTint, vec3(0.68, 0.78, 0.90) * effColorTint, band * 0.5 + 0.5);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.028);
+      float latFreq = 14.0 + effBandShift * 6.0;
+      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
+      vec3 deepWaterCloud = vec3(0.12, 0.32, 0.55) * effColorTint;
+      vec3 brightWaterCloud = vec3(0.68, 0.78, 0.90) * effColorTint;
+      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
+      vec3 smoothCloud = mix(deepWaterCloud, brightWaterCloud, 0.5);
+      vec3 bandedCloud = mix(deepWaterCloud, brightWaterCloud, smoothstep(-0.65, 0.65, band));
+      surface = mix(smoothCloud, bandedCloud, jetContrast);
+
       atmoColor = vec3(0.40, 0.65, 0.95) * effColorTint;
       atmoStrength = 0.70;
     }
 
-    // Albedo modulation (scaled with a floor to guarantee visibility and contrast)
-    float albedoFactor = clamp(albedo * 2.0 + 0.35, 0.40, 1.8);
+    // Physical Albedo modulation:
+    // Low albedo planets absorb deep light; high albedo reflects cloud tops
+    float albedoFactor = clamp(albedo * 1.6 + 0.40, 0.35, 1.65);
 
-    // Rayleigh scattering atmospheric limb glow (enhances horizon ring along dayside terminator)
+    // Rayleigh scattering atmospheric limb glow (enhances soft atmospheric horizon ring)
     float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));
     vec3 rayleighGlow = atmoColor * (fresnel * atmoStrength * (terminatorFactor * 0.7 + 0.3));
 
@@ -705,26 +737,54 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
 
   // Gas Giant Banded (themeIdx == 5.0)
   if (themeIdx >= 4.5 && themeIdx < 5.5) {
-    // 32 variations spanning pale ivory, butterscotch, salmon-ochre, warm terracotta, and amber bronze
-    const r = 0.82 + h2 * 0.35;
-    const g = 0.75 + (h3 - 0.5) * 0.28;
-    const b = 0.65 + (h1 - 0.5) * 0.35;
-    tint.set(r, g, b);
+    // Variations spanning:
+    // - Cream & butterscotch ammonia ice (Jupiter/Saturn)
+    // - Warm caramel, mocha & honey tones (Reference Image 2 Jovian)
+    // - Magenta-rose & pinkish tholin haze (Reference Image 3 Jovian / GJ 504 b)
+    if (bucket % 8 === 3) {
+      // Magenta / pink Jovian (GJ 504 b style: tholin / methane-free warm atmosphere)
+      const r = 1.05 + h2 * 0.15;
+      const g = 0.45 + (h3 - 0.5) * 0.18;
+      const b = 0.72 + h1 * 0.20;
+      tint.set(r, g, b);
+    } else if (bucket % 8 === 5) {
+      // Warm mocha / honey-amber Jovian (Image 2 style)
+      const r = 0.92 + h2 * 0.15;
+      const g = 0.70 + (h3 - 0.5) * 0.15;
+      const b = 0.48 + (h1 - 0.5) * 0.15;
+      tint.set(r, g, b);
+    } else {
+      // Pale ivory, butterscotch, salmon-ochre, warm terracotta, and amber bronze
+      const r = 0.82 + h2 * 0.35;
+      const g = 0.75 + (h3 - 0.5) * 0.28;
+      const b = 0.65 + (h1 - 0.5) * 0.35;
+      tint.set(r, g, b);
+    }
+
+    // Toggle between smooth Jovian (like Image 2 background) and banded Jovian (like Jupiter)
+    if (bucket % 3 === 0) {
+      bandTurbulence = 0.55 + h1 * 0.20; // Smooth Jovian
+    } else {
+      bandTurbulence = 1.05 + h1 * 0.35; // Distinct jet streams
+    }
   }
   // Ice Giant & Sub-Neptune (themeIdx == 3.0 or 4.0)
   else if (themeIdx >= 2.5 && themeIdx < 4.5) {
-    // 32 variations spanning aquamarine, cyan-azure, deep sapphire, turquoise, and sea-green
-    const r = 0.70 + (h2 - 0.5) * 0.30;
-    const g = 0.85 + (h3 - 0.5) * 0.22;
-    const b = 0.95 + h1 * 0.30;
+    // 32 variations spanning:
+    // - Vivid deep sapphire & electric cyan ribbons (Reference Image 1 & 2 foreground)
+    // - Soft aquamarine, sea-green, and turquoise
+    const r = 0.65 + (h2 - 0.5) * 0.25;
+    const g = 0.88 + (h3 - 0.5) * 0.20;
+    const b = 1.02 + h1 * 0.28;
     tint.set(r, g, b);
-    // Explicitly toggle smooth vs visible jet streams across buckets:
-    // Buckets with even indices (0, 2, 4...) tend towards smooth pastel orbs (Uranus-like)
-    // Buckets with odd indices (1, 3, 5...) get pronounced, high-contrast dynamic jet streams (Neptune-like)
+
+    // Toggle smooth vs visible jet streams across buckets:
+    // Smooth pastel orbs (Uranus-like): low turbulence
+    // High-contrast dynamic jet streams (Neptune-like): silky fluid sheared ribbons
     if (bucket % 2 === 0) {
-      bandTurbulence = 0.65 + h1 * 0.15; // Smooth atmosphere
+      bandTurbulence = 0.55 + h1 * 0.18; // Smooth atmosphere
     } else {
-      bandTurbulence = 1.15 + h1 * 0.35; // Sharp visible jet stream bands
+      bandTurbulence = 1.10 + h1 * 0.35; // Sharp visible jet stream ribbons
     }
   }
   // Hot Jupiter Dark Alkali (themeIdx == 14.0)
