@@ -356,7 +356,7 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.32, 0.68, 0.96) * effColorTint;
       atmoStrength = 0.82;
     }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with randomized cyclonic vortex)
+    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with rich multi-tone latitudinal banding)
     else if (themeIndex < 5.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
       float latFreq = 22.0 + effBandShift * 10.0;
@@ -364,21 +364,32 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 curl = curlNoise(flow * 3.5 + effSeed);
       float band = fbm(bandPos + curl * 1.8);
       
-      // Belts (dark reddish-brown / phosphorus tholins) and Zones (pale cream / ammonia ice)
-      vec3 beltColor = vec3(0.60, 0.36, 0.22) * effColorTint;
-      vec3 zoneColor = vec3(0.90, 0.84, 0.72) * effColorTint;
-      surface = mix(beltColor, zoneColor, band * 0.5 + 0.5);
+      // Multi-tone latitudinal atmospheric bands:
+      // Equatorial Zone, Tropical Belts, Temperate Zones, and Polar Hoods
+      vec3 darkBelt = vec3(0.55, 0.28, 0.16) * effColorTint;
+      vec3 warmOchre = vec3(0.78, 0.52, 0.32) * effColorTint;
+      vec3 paleZone = vec3(0.92, 0.86, 0.74) * effColorTint;
+      vec3 brightAmmonia = vec3(0.98, 0.95, 0.88) * effColorTint;
 
-      // Great Red Spot / Oval cyclonic storm vortex placed per-planet via effStormSeed
-      float stormLat = -0.32 + sin(effStormSeed) * 0.18;
-      vec3 spotCenter = vec3(cos(effStormSeed) * 0.7, stormLat, sin(effStormSeed) * 0.7);
-      float spotDist = length((vLocalPos - spotCenter) * vec3(1.0, 1.8, 1.0));
-      if (spotDist < 0.28) {
-        float spotCore = smoothstep(0.28, 0.04, spotDist);
-        float vortex = fbm(curlNoise(vLocalPos * 6.0 + time * 0.05) + vLocalPos * 4.0);
-        vec3 spotColor = mix(vec3(0.78, 0.22, 0.12) * effColorTint, vec3(0.92, 0.45, 0.25) * effColorTint, vortex * 0.5 + 0.5);
-        surface = mix(surface, spotColor, spotCore * 0.88);
+      // 4-stop gradient across the turbulent jet band value
+      float tBand = band * 0.5 + 0.5;
+      vec3 bandedSurface;
+      if (tBand < 0.33) {
+        bandedSurface = mix(darkBelt, warmOchre, tBand / 0.33);
+      } else if (tBand < 0.66) {
+        bandedSurface = mix(warmOchre, paleZone, (tBand - 0.33) / 0.33);
+      } else {
+        bandedSurface = mix(paleZone, brightAmmonia, (tBand - 0.66) / 0.34);
       }
+
+      // Latitudinal polar hoods (cool bluish-grey haze at extreme latitudes)
+      float polarLat = abs(vLocalPos.y);
+      if (polarLat > 0.75) {
+        vec3 polarHaze = vec3(0.65, 0.72, 0.80) * effColorTint;
+        bandedSurface = mix(bandedSurface, polarHaze, smoothstep(0.75, 0.95, polarLat) * 0.65);
+      }
+
+      surface = bandedSurface;
 
       atmoColor = vec3(0.85, 0.75, 0.58) * effColorTint;
       atmoStrength = 0.52;
