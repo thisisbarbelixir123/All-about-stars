@@ -178,7 +178,16 @@ export interface FilterState {
   hasExoplanetsOnly: boolean;
 }
 
+export type ExoplanetTier =
+  | 'Sub-Martian'
+  | 'Martian'
+  | 'Terran'
+  | 'Superterran'
+  | 'Neptunian'
+  | 'Jovian';
+
 export type CelestialClassification =
+  | ExoplanetTier
   | 'Moon of Saturn'
   | 'Moon of Neptune'
   | 'Moon of Uranus'
