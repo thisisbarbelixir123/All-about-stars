@@ -329,25 +329,60 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.45, 0.75, 0.60) * effColorTint;
       atmoStrength = 0.65;
     }
-    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze)
+    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth featureless Uranus-like and banded Neptune-like)
     else if (themeIndex < 3.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
       float latFreq = 14.0 + effBandShift * 8.0;
       vec3 bandPos = vec3(flow.x * 1.5, flow.y * latFreq, flow.z * 1.5);
       vec3 curl = curlNoise(flow * 2.5 + effSeed);
       float band = fbm(bandPos + curl * 1.2);
-      surface = mix(vec3(0.08, 0.32, 0.58) * effColorTint, vec3(0.28, 0.68, 0.78) * effColorTint, band * 0.5 + 0.5);
-      atmoColor = vec3(0.38, 0.72, 1.0) * effColorTint;
+
+      // Temperature & composition gradient:
+      // Cold (<250K): deep methane azure & cerulean
+      // Warm (250-600K): photochemical haze cyan & turquoise
+      // Hot (>600K): hydrocarbon smog, slate-teal, and amber-tinted mist
+      vec3 deepTone;
+      vec3 lightTone;
+      if (temperatureK < 250.0) {
+        deepTone = vec3(0.06, 0.28, 0.62) * effColorTint;
+        lightTone = vec3(0.20, 0.62, 0.85) * effColorTint;
+      } else if (temperatureK < 600.0) {
+        deepTone = vec3(0.08, 0.38, 0.54) * effColorTint;
+        lightTone = vec3(0.28, 0.72, 0.76) * effColorTint;
+      } else {
+        deepTone = vec3(0.22, 0.32, 0.44) * effColorTint;
+        lightTone = vec3(0.48, 0.58, 0.62) * effColorTint;
+      }
+
+      // Smooth vs Banded Jet Stream Archetypes:
+      // bandTurbulence modulates band contrast: low = smooth pastel orb, high = sharp visible jet stream bands
+      float jetContrast = smoothstep(0.75, 1.35, bandTurbulence);
+      float smoothGradient = smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15; // Subtle pole-to-equator limb gradient
+      vec3 smoothAtmosphere = mix(deepTone, lightTone, 0.5 + smoothGradient);
+      vec3 bandedAtmosphere = mix(deepTone, lightTone, band * 0.5 + 0.5);
+
+      surface = mix(smoothAtmosphere, bandedAtmosphere, jetContrast);
+      atmoColor = mix(vec3(0.32, 0.68, 0.98), vec3(0.40, 0.78, 0.85), clamp(temperatureK / 800.0, 0.0, 1.0)) * effColorTint;
       atmoStrength = 0.85;
     }
-    // 5. Ice Giant (Uranus / Neptune-like methane atmosphere with high-speed retrograde equatorial winds)
+    // 5. Ice Giant (Uranus / Neptune-like methane atmosphere)
     else if (themeIndex < 4.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
       float latFreq = 11.0 + effBandShift * 6.0;
       vec3 bandPos = vec3(flow.x, flow.y * latFreq, flow.z);
       vec3 curl = curlNoise(flow * 2.8 + effSeed);
       float band = fbm(bandPos + curl * 0.9);
-      surface = mix(vec3(0.10, 0.38, 0.68) * effColorTint, vec3(0.30, 0.72, 0.90) * effColorTint, band * 0.5 + 0.5);
+
+      // Temperature & methane composition colors:
+      vec3 deepMethane = mix(vec3(0.12, 0.48, 0.64), vec3(0.05, 0.25, 0.72), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
+      vec3 lightMethane = mix(vec3(0.35, 0.76, 0.88), vec3(0.22, 0.65, 0.94), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
+
+      // Smooth (Uranus-like cyan sphere) vs Active Visible Jet Streams (Neptune-like dark azure bands)
+      float jetContrast = smoothstep(0.80, 1.30, bandTurbulence);
+      vec3 smoothUranus = mix(deepMethane, lightMethane, 0.5);
+      vec3 activeNeptune = mix(deepMethane, lightMethane, band * 0.5 + 0.5);
+
+      surface = mix(smoothUranus, activeNeptune, jetContrast);
       atmoColor = vec3(0.32, 0.68, 0.96) * effColorTint;
       atmoStrength = 0.82;
     }
@@ -663,7 +698,7 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
 
   // 2. Band frequency and jet-shear displacement (12 to 34 distinct latitudinal bands)
   const bandShift = (h3 - 0.5) * 0.8;
-  const bandTurbulence = 0.8 + h1 * 0.6;
+  let bandTurbulence = 0.8 + h1 * 0.6;
 
   // 3. Physical multi-color tint variations tailored by archetype
   const tint = new THREE.Vector3(1.0, 1.0, 1.0);
@@ -683,6 +718,14 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     const g = 0.85 + (h3 - 0.5) * 0.22;
     const b = 0.95 + h1 * 0.30;
     tint.set(r, g, b);
+    // Explicitly toggle smooth vs visible jet streams across buckets:
+    // Buckets with even indices (0, 2, 4...) tend towards smooth pastel orbs (Uranus-like)
+    // Buckets with odd indices (1, 3, 5...) get pronounced, high-contrast dynamic jet streams (Neptune-like)
+    if (bucket % 2 === 0) {
+      bandTurbulence = 0.65 + h1 * 0.15; // Smooth atmosphere
+    } else {
+      bandTurbulence = 1.15 + h1 * 0.35; // Sharp visible jet stream bands
+    }
   }
   // Hot Jupiter Dark Alkali (themeIdx == 14.0)
   else if (themeIdx >= 13.5 && themeIdx < 14.5) {
