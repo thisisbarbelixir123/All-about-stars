@@ -365,16 +365,41 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(1.0, 0.45, 0.20);
       atmoStrength = 0.70;
     }
-    // 8. Ultra-Hot Jupiter / Glowing Dayside (Class V)
+    // 8. Ultra-Hot Jupiter / Thermally Dissociated Atmosphere (Sudarsky Class V, e.g. WASP-12 b, KELT-9 b)
     else if (themeIndex < 7.5) {
-      float dayside = max(0.0, dot(vLocalPos, L));
-      vec3 glow = blackbody(temperatureK);
-      float n = fbm(vLocalPos * 4.5 + time * 0.04);
-      vec3 darkCrust = vec3(0.06, 0.05, 0.08);
-      surface = mix(darkCrust, glow, pow(dayside, 1.4) * (n * 0.3 + 0.85));
-      atmoColor = vec3(1.0, 0.35, 0.12);
-      atmoStrength = 0.95;
-      emissiveColor = glow * (pow(dayside, 2.0) * 0.5);
+      // Eastward-shifted equatorial hot spot due to supersonic equatorial super-rotation jets
+      // Shift substellar center by rotating L around the Y-axis by +24 degrees
+      float sinShift = 0.4067;
+      float cosShift = 0.9135;
+      vec3 shiftedL = vec3(L.x * cosShift - L.z * sinShift, L.y, L.x * sinShift + L.z * cosShift);
+      float hotSpot = max(0.0, dot(vLocalPos, shiftedL));
+      float trueDayside = max(0.0, dot(vLocalPos, L));
+
+      // Fast atmospheric zonal jet flow with high-temperature shear turbulence
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.055);
+      vec3 curl = curlNoise(flow * 3.5 + seed);
+      float turbulentHaze = fbm(vec3(flow.x * 2.0, flow.y * 18.0, flow.z * 2.0) + curl * 1.6);
+
+      // Nightside condensation zone: cold (1000K-1300K) iron and silicate clouds condense on dark limb
+      vec3 nightClouds = mix(vec3(0.04, 0.03, 0.05), vec3(0.12, 0.08, 0.10), turbulentHaze * 0.5 + 0.5);
+
+      // Dayside molecular dissociation: H2 and H2O dissociate, revealing blazing stellar-like thermal emission
+      float daysideTemp = max(2200.0, temperatureK);
+      vec3 thermalGlow = blackbody(daysideTemp);
+
+      // Ionized hydrogen plasma / metallic vapor coloration across dayside
+      vec3 ionizedHaze = mix(vec3(0.85, 0.18, 0.10), vec3(1.0, 0.65, 0.35), turbulentHaze * 0.5 + 0.5);
+      vec3 daysideAtmosphere = mix(ionizedHaze, thermalGlow, pow(hotSpot, 1.2) * 0.85);
+
+      // Blend nightside condensation with blazing dayside
+      surface = mix(nightClouds, daysideAtmosphere, pow(hotSpot, 1.3));
+
+      // Asymmetric thermal incandescence (blinding thermal emission peaking at shifted hot spot)
+      emissiveColor = thermalGlow * (pow(hotSpot, 1.5) * 1.25 + pow(trueDayside, 2.5) * 0.45);
+
+      // Deep ionized UV/Rayleigh emission along limb and dayside terminator
+      atmoColor = mix(vec3(0.9, 0.25, 0.12), vec3(1.0, 0.70, 0.30), hotSpot);
+      atmoStrength = 0.92;
     }
     // 9. Lava World (Molten Magma Oceans & Cracking Tectonic Fissures, e.g. 55 Cancri e, Kepler-10 b)
     else if (themeIndex < 8.5) {
