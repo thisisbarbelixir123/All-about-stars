@@ -9,11 +9,27 @@ export const PLANET_VERTEX_SHADER = `
   varying vec2 vUv;
   varying vec3 vViewPosition;
 
+  attribute float aSeed;
+  attribute vec3 aColorTint;
+  attribute float aBandShift;
+  attribute float aStormSeed;
+
+  varying float vSeed;
+  varying vec3 vColorTint;
+  varying float vBandShift;
+  varying float vStormSeed;
+
   void main() {
     vNormal = normalize(normalMatrix * normal);
     vPosition = position;
     vLocalPos = normalize(position); // Exact unit sphere vector for seamless 3D noise
     vUv = uv;
+
+    vSeed = aSeed;
+    vColorTint = aColorTint;
+    vBandShift = aBandShift;
+    vStormSeed = aStormSeed;
+
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -mvPosition.xyz;
     gl_Position = projectionMatrix * mvPosition;
@@ -29,6 +45,11 @@ export const PLANET_FRAGMENT_SHADER = `
   varying vec3 vLocalPos;
   varying vec2 vUv;
   varying vec3 vViewPosition;
+
+  varying float vSeed;
+  varying vec3 vColorTint;
+  varying float vBandShift;
+  varying float vStormSeed;
 
   uniform float time;
   // 0: rocky, 1: ocean, 2: super-earth, 3: sub-neptune, 4: ice-giant, 5: gas-giant-banded,
@@ -189,6 +210,11 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 V = normalize(vViewPosition);
     vec3 L = normalize(lightDir);
 
+    float effSeed = seed + vSeed;
+    vec3 effColorTint = vColorTint.r > 0.01 ? vColorTint : vec3(1.0);
+    float effBandShift = vBandShift;
+    float effStormSeed = vStormSeed;
+
     float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0);
     float rawNdotL = max(0.0, dot(N, L));
     float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8);
@@ -205,13 +231,13 @@ export const PLANET_FRAGMENT_SHADER = `
 
     // 1. Rocky Terrestrial (Sub-Martian / Martian / Airless Silicate)
     if (themeIndex < 0.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.5 + seed, 0.40);
+      vec3 warped = domainWarp(vLocalPos * 3.5 + effSeed, 0.40);
       float elevation = ridgedFbm(warped);
-      float micro = fbm(vLocalPos * 14.0 + seed);
+      float micro = fbm(vLocalPos * 14.0 + effSeed);
       
-      // Multi-tier regolith & rock stratification
-      vec3 lowBasin = mix(vec3(0.28, 0.24, 0.22), vec3(0.42, 0.35, 0.30), micro);
-      vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro);
+      // Multi-tier regolith & rock stratification tinted per planet
+      vec3 lowBasin = mix(vec3(0.28, 0.24, 0.22), vec3(0.42, 0.35, 0.30), micro) * effColorTint;
+      vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro) * effColorTint;
       surface = mix(lowBasin, highRidge, elevation);
 
       // Polar cold regolith frost
@@ -221,12 +247,12 @@ export const PLANET_FRAGMENT_SHADER = `
         surface = mix(surface, vec3(0.85, 0.88, 0.92), frost);
       }
 
-      atmoColor = vec3(0.65, 0.72, 0.82);
+      atmoColor = vec3(0.65, 0.72, 0.82) * effColorTint;
       atmoStrength = 0.16;
     }
     // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
     else if (themeIndex < 1.5) {
-      vec3 warped = domainWarp(vLocalPos * 2.6 + seed, 0.45);
+      vec3 warped = domainWarp(vLocalPos * 2.6 + effSeed, 0.45);
       float continental = fbm(warped); // Low-frequency continental land/ocean mask
       float mountain = ridgedFbm(warped * 2.2); // Razor-sharp alpine cordilleras
       float lat = abs(vLocalPos.y);
@@ -234,8 +260,8 @@ export const PLANET_FRAGMENT_SHADER = `
       // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
       if (continental < 0.05) {
         float oceanDepth = smoothstep(-0.6, 0.05, continental);
-        vec3 deepTrench = vec3(0.015, 0.08, 0.28);
-        vec3 shallowShelf = vec3(0.04, 0.32, 0.52);
+        vec3 deepTrench = vec3(0.015, 0.08, 0.28) * effColorTint;
+        vec3 shallowShelf = vec3(0.04, 0.32, 0.52) * effColorTint;
         surface = mix(deepTrench, shallowShelf, oceanDepth);
       }
       // B. Continental Landmass & Biome Stratification (continental >= 0.05)
@@ -243,13 +269,13 @@ export const PLANET_FRAGMENT_SHADER = `
         float landElevation = smoothstep(0.05, 0.65, continental) * 0.6 + mountain * 0.4;
         
         // Lowland lush vegetation / fertile river valleys
-        vec3 lushLowlands = vec3(0.12, 0.36, 0.14);
+        vec3 lushLowlands = vec3(0.12, 0.36, 0.14) * effColorTint;
         // Temperate savanna / woodland
-        vec3 savanna = vec3(0.35, 0.42, 0.20);
+        vec3 savanna = vec3(0.35, 0.42, 0.20) * effColorTint;
         // High alpine arid plateau
-        vec3 plateau = vec3(0.52, 0.42, 0.28);
+        vec3 plateau = vec3(0.52, 0.42, 0.28) * effColorTint;
         // Jagged mountain peaks / rocky granite
-        vec3 mountainPeak = vec3(0.68, 0.64, 0.60);
+        vec3 mountainPeak = vec3(0.68, 0.64, 0.60) * effColorTint;
 
         vec3 biome = mix(lushLowlands, savanna, smoothstep(0.1, 0.35, landElevation));
         biome = mix(biome, plateau, smoothstep(0.35, 0.65, landElevation));
@@ -258,16 +284,15 @@ export const PLANET_FRAGMENT_SHADER = `
       }
 
       // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
-      // Temperature modulates polar ice cap reach
       float polarThreshold = clamp(0.72 + (temperatureK - 250.0) * 0.0015, 0.60, 0.92);
       if (lat > polarThreshold) {
-        float iceNoise = fbm(vLocalPos * 6.0 + seed);
+        float iceNoise = fbm(vLocalPos * 6.0 + effSeed);
         float iceCap = smoothstep(polarThreshold, polarThreshold + 0.12, lat + iceNoise * 0.08);
         surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
       }
 
       // D. Directional Cloud Decks & Drop Shadows
-      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.52, seed * 2.3);
+      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.52, effSeed * 2.3);
       float cloudMask = clouds.x;
       float shadowMask = clouds.y;
 
@@ -288,81 +313,85 @@ export const PLANET_FRAGMENT_SHADER = `
       float cloudGlint = pow(specBase, 8.0) * cloudMask * 0.25;
       specular += cloudGlint;
 
-      atmoColor = vec3(0.35, 0.65, 1.0);
+      atmoColor = vec3(0.35, 0.65, 1.0) * effColorTint;
       atmoStrength = 0.75;
     }
     // 3. Super-Earth (Craggy Super-Continental Lithosphere)
     else if (themeIndex < 2.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.0 + seed, 0.50);
+      vec3 warped = domainWarp(vLocalPos * 3.0 + effSeed, 0.50);
       float tectonic = ridgedFbm(warped);
       float micro = fbm(vLocalPos * 12.0);
 
       // Deep iron-rich silicate desert and massive volcanic basalt plateaus
-      vec3 volcanicBasalt = vec3(0.20, 0.14, 0.12);
-      vec3 ironDesert = vec3(0.52, 0.28, 0.16);
-      vec3 highlandGranite = vec3(0.65, 0.50, 0.40);
+      vec3 volcanicBasalt = vec3(0.20, 0.14, 0.12) * effColorTint;
+      vec3 ironDesert = vec3(0.52, 0.28, 0.16) * effColorTint;
+      vec3 highlandGranite = vec3(0.65, 0.50, 0.40) * effColorTint;
 
       vec3 land = mix(volcanicBasalt, ironDesert, smoothstep(0.2, 0.55, tectonic));
       land = mix(land, highlandGranite, smoothstep(0.55, 0.85, tectonic + micro * 0.2));
       surface = land;
 
-      atmoColor = vec3(0.45, 0.75, 0.60);
+      atmoColor = vec3(0.45, 0.75, 0.60) * effColorTint;
       atmoStrength = 0.65;
     }
     // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze)
     else if (themeIndex < 3.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
-      vec3 bandPos = vec3(flow.x * 1.5, flow.y * 14.0, flow.z * 1.5);
-      vec3 curl = curlNoise(flow * 2.5 + seed);
+      float latFreq = 14.0 + effBandShift * 8.0;
+      vec3 bandPos = vec3(flow.x * 1.5, flow.y * latFreq, flow.z * 1.5);
+      vec3 curl = curlNoise(flow * 2.5 + effSeed);
       float band = fbm(bandPos + curl * 1.2);
-      surface = mix(vec3(0.08, 0.32, 0.58), vec3(0.28, 0.68, 0.78), band * 0.5 + 0.5);
-      atmoColor = vec3(0.38, 0.72, 1.0);
+      surface = mix(vec3(0.08, 0.32, 0.58) * effColorTint, vec3(0.28, 0.68, 0.78) * effColorTint, band * 0.5 + 0.5);
+      atmoColor = vec3(0.38, 0.72, 1.0) * effColorTint;
       atmoStrength = 0.85;
     }
     // 5. Ice Giant (Uranus / Neptune-like methane atmosphere with high-speed retrograde equatorial winds)
     else if (themeIndex < 4.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
-      vec3 bandPos = vec3(flow.x, flow.y * 11.0, flow.z);
-      vec3 curl = curlNoise(flow * 2.8 + seed);
+      float latFreq = 11.0 + effBandShift * 6.0;
+      vec3 bandPos = vec3(flow.x, flow.y * latFreq, flow.z);
+      vec3 curl = curlNoise(flow * 2.8 + effSeed);
       float band = fbm(bandPos + curl * 0.9);
-      // Methane absorption: deep cyan to brilliant azure blue
-      surface = mix(vec3(0.10, 0.38, 0.68), vec3(0.30, 0.72, 0.90), band * 0.5 + 0.5);
-      atmoColor = vec3(0.32, 0.68, 0.96);
+      surface = mix(vec3(0.10, 0.38, 0.68) * effColorTint, vec3(0.30, 0.72, 0.90) * effColorTint, band * 0.5 + 0.5);
+      atmoColor = vec3(0.32, 0.68, 0.96) * effColorTint;
       atmoStrength = 0.82;
     }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with Great Red Spot cyclonic vortex)
+    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with randomized cyclonic vortex)
     else if (themeIndex < 5.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 22.0, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.5 + seed);
+      float latFreq = 22.0 + effBandShift * 10.0;
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.5 + effSeed);
       float band = fbm(bandPos + curl * 1.8);
       
       // Belts (dark reddish-brown / phosphorus tholins) and Zones (pale cream / ammonia ice)
-      vec3 beltColor = vec3(0.60, 0.36, 0.22);
-      vec3 zoneColor = vec3(0.90, 0.84, 0.72);
+      vec3 beltColor = vec3(0.60, 0.36, 0.22) * effColorTint;
+      vec3 zoneColor = vec3(0.90, 0.84, 0.72) * effColorTint;
       surface = mix(beltColor, zoneColor, band * 0.5 + 0.5);
 
-      // Great Red Spot / Oval cyclonic storm vortex in southern tropical band
-      vec3 spotCenter = vec3(0.65, -0.38, 0.65);
+      // Great Red Spot / Oval cyclonic storm vortex placed per-planet via effStormSeed
+      float stormLat = -0.32 + sin(effStormSeed) * 0.18;
+      vec3 spotCenter = vec3(cos(effStormSeed) * 0.7, stormLat, sin(effStormSeed) * 0.7);
       float spotDist = length((vLocalPos - spotCenter) * vec3(1.0, 1.8, 1.0));
       if (spotDist < 0.28) {
         float spotCore = smoothstep(0.28, 0.04, spotDist);
         float vortex = fbm(curlNoise(vLocalPos * 6.0 + time * 0.05) + vLocalPos * 4.0);
-        vec3 spotColor = mix(vec3(0.78, 0.22, 0.12), vec3(0.92, 0.45, 0.25), vortex * 0.5 + 0.5);
+        vec3 spotColor = mix(vec3(0.78, 0.22, 0.12) * effColorTint, vec3(0.92, 0.45, 0.25) * effColorTint, vortex * 0.5 + 0.5);
         surface = mix(surface, spotColor, spotCore * 0.88);
       }
 
-      atmoColor = vec3(0.85, 0.75, 0.58);
+      atmoColor = vec3(0.85, 0.75, 0.58) * effColorTint;
       atmoStrength = 0.52;
     }
     // 7. Hot Jupiter (Silicate/Iron clouds, Class IV)
     else if (themeIndex < 6.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.045);
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 16.0, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + seed);
+      float latFreq = 16.0 + effBandShift * 8.0;
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + effSeed);
       float band = fbm(bandPos + curl * 1.4);
-      surface = mix(vec3(0.42, 0.16, 0.10), vec3(0.75, 0.38, 0.18), band * 0.5 + 0.5);
-      atmoColor = vec3(1.0, 0.45, 0.20);
+      surface = mix(vec3(0.42, 0.16, 0.10) * effColorTint, vec3(0.75, 0.38, 0.18) * effColorTint, band * 0.5 + 0.5);
+      atmoColor = vec3(1.0, 0.45, 0.20) * effColorTint;
       atmoStrength = 0.70;
     }
     // 8. Ultra-Hot Jupiter / Thermally Dissociated Atmosphere (Sudarsky Class V, e.g. WASP-12 b, KELT-9 b)
@@ -490,12 +519,12 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 14. Hycean Ocean World
     else if (themeIndex < 13.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.0 + seed, 0.45);
+      vec3 warped = domainWarp(vLocalPos * 3.0 + effSeed, 0.45);
       float deepWater = fbm(warped);
-      surface = mix(vec3(0.01, 0.08, 0.28), vec3(0.04, 0.22, 0.50), deepWater * 0.5 + 0.5);
+      surface = mix(vec3(0.01, 0.08, 0.28) * effColorTint, vec3(0.04, 0.22, 0.50) * effColorTint, deepWater * 0.5 + 0.5);
 
       // Vast tropical cloud streamers & cyclonic storms with directional shadows
-      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.62, seed * 1.7);
+      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.62, effSeed * 1.7);
 
       // Deep global ocean specular reflection where unclouded
       float oceanSpec = pow(specBase, 28.0) * rawNdotL * 1.4;
@@ -504,18 +533,19 @@ export const PLANET_FRAGMENT_SHADER = `
       surface *= (1.0 - hyceanClouds.y * 0.50); // Drop shadows onto dark ocean abyss
       surface = mix(surface, vec3(0.92, 0.95, 1.0), hyceanClouds.x * 0.95);
 
-      atmoColor = vec3(0.15, 0.75, 1.0);
+      atmoColor = vec3(0.15, 0.75, 1.0) * effColorTint;
       atmoStrength = 0.90;
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
     else if (themeIndex < 14.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.04);
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 14.0, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + seed);
+      float latFreq = 14.0 + effBandShift * 6.0;
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + effSeed);
       float band = fbm(bandPos + curl * 1.2);
       // Deep cobalt and midnight indigo banding with subtle twilight bronze
-      surface = mix(vec3(0.06, 0.08, 0.16), vec3(0.18, 0.16, 0.32), band * 0.5 + 0.5);
-      atmoColor = vec3(0.35, 0.30, 0.65);
+      surface = mix(vec3(0.06, 0.08, 0.16) * effColorTint, vec3(0.18, 0.16, 0.32) * effColorTint, band * 0.5 + 0.5);
+      atmoColor = vec3(0.35, 0.30, 0.65) * effColorTint;
       atmoStrength = 0.55;
       // Faint thermal twilight horizon for hot dark giants
       emissiveColor = vec3(0.7, 0.3, 0.1) * (pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15);
@@ -523,11 +553,12 @@ export const PLANET_FRAGMENT_SHADER = `
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
-      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 18.0, flow.z * 2.0);
-      vec3 curl = curlNoise(flow * 3.0 + seed);
+      float latFreq = 18.0 + effBandShift * 8.0;
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * latFreq, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + effSeed);
       float band = fbm(bandPos + curl * 1.5);
-      surface = mix(vec3(0.15, 0.35, 0.58), vec3(0.68, 0.78, 0.90), band * 0.5 + 0.5);
-      atmoColor = vec3(0.40, 0.65, 0.95);
+      surface = mix(vec3(0.15, 0.35, 0.58) * effColorTint, vec3(0.68, 0.78, 0.90) * effColorTint, band * 0.5 + 0.5);
+      atmoColor = vec3(0.40, 0.65, 0.95) * effColorTint;
       atmoStrength = 0.70;
     }
 
@@ -584,3 +615,117 @@ export const getThemeIndex = (theme?: string): number => {
       return 0.0;
   }
 };
+
+/**
+ * 32-bit FNV-1a deterministic hash function producing normalized pseudorandom numbers [0, 1)
+ */
+export function hashStringToFloat(str: string, salt: number = 0): number {
+  let h = 2166136261 ^ salt;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+export interface PlanetProceduralParameters {
+  seed: number;
+  colorTint: [number, number, number];
+  bandShift: number;
+  stormSeed: number;
+}
+
+/**
+ * Derives unique, bounded physical color tints and structural seeds per exoplanet.
+ * Ensures infinite diversity across the 1,952 exoplanets while respecting their
+ * astrophysical and chemical composition class.
+ */
+export function derivePlanetProceduralParameters(id: string, theme?: string, temperatureK: number = 300): PlanetProceduralParameters {
+  const h1 = hashStringToFloat(id, 101);
+  const h2 = hashStringToFloat(id, 203);
+  const h3 = hashStringToFloat(id, 307);
+  const h4 = hashStringToFloat(id, 409);
+
+  // 1. Spatial 3D noise coordinate seed (eliminates identical continents/clouds across planets)
+  const seed = h1 * 999.0 + 13.37;
+
+  // 2. Band frequency & latitude shift
+  const bandShift = (h2 - 0.5) * 0.45; // -0.225 to +0.225 variation
+
+  // 3. Cyclone/vortex position seed
+  const stormSeed = h3 * 6.28318; // Full 2PI angle coverage for storms
+
+  // 4. Physical color tint derived by archetype
+  let r = 1.0;
+  let g = 1.0;
+  let b = 1.0;
+
+  switch (theme) {
+    case 'gas-giant-banded': {
+      // Natural variation between golden cream, salmon-ochre, butterscotch, and warm terracotta
+      r = 0.90 + h2 * 0.22;
+      g = 0.85 + (h3 - 0.5) * 0.18;
+      b = 0.75 + (h4 - 0.5) * 0.25;
+      break;
+    }
+    case 'ice-giant':
+    case 'sub-neptune': {
+      // Natural methane/volatile variation: aquamarine, cyan-azure, deep sapphire, or turquoise
+      r = 0.75 + (h2 - 0.5) * 0.25;
+      g = 0.90 + (h3 - 0.5) * 0.18;
+      b = 0.95 + h4 * 0.20;
+      break;
+    }
+    case 'hot-jupiter-dark-alkali': {
+      // Deep cobalt, midnight slate indigo, graphite-violet, or dark bronze
+      r = 0.80 + (h2 - 0.5) * 0.30;
+      g = 0.80 + (h3 - 0.5) * 0.25;
+      b = 0.90 + h4 * 0.35;
+      break;
+    }
+    case 'gas-giant-water-clouds': {
+      // Stormy pale azure, cool steel blue, or misty celadon
+      r = 0.82 + (h2 - 0.5) * 0.20;
+      g = 0.88 + (h3 - 0.5) * 0.18;
+      b = 0.95 + (h4 - 0.5) * 0.15;
+      break;
+    }
+    case 'hot-jupiter': {
+      // Silicate and iron clouds: burnt sienna, copper, dark amber, or deep crimson
+      r = 0.95 + h2 * 0.25;
+      g = 0.78 + (h3 - 0.5) * 0.22;
+      b = 0.65 + (h4 - 0.5) * 0.20;
+      break;
+    }
+    case 'super-earth': {
+      // Continental mineralogy: iron-rich rust, arid ochre, volcanic basalt, or clay
+      r = 0.85 + h2 * 0.30;
+      g = 0.80 + (h3 - 0.5) * 0.22;
+      b = 0.75 + (h4 - 0.5) * 0.25;
+      break;
+    }
+    case 'terrestrial-rocky':
+    case 'carbonaceous-asteroid': {
+      // Lunar/Martian regolith: grey basalt, reddish dust, or dark carbonaceous
+      r = 0.85 + h2 * 0.25;
+      g = 0.82 + (h3 - 0.5) * 0.20;
+      b = 0.80 + (h4 - 0.5) * 0.20;
+      break;
+    }
+    case 'hycean-ocean': {
+      // Oceanic depth variation: deep ultramarine, cyan lagoon, or dark cerulean
+      r = 0.75 + (h2 - 0.5) * 0.20;
+      g = 0.90 + (h3 - 0.5) * 0.15;
+      b = 0.95 + h4 * 0.15;
+      break;
+    }
+    default: {
+      r = 0.90 + (h2 - 0.5) * 0.15;
+      g = 0.90 + (h3 - 0.5) * 0.15;
+      b = 0.90 + (h4 - 0.5) * 0.15;
+      break;
+    }
+  }
+
+  return { seed, colorTint: [r, g, b], bandShift, stormSeed };
+}

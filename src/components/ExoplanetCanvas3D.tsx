@@ -34,6 +34,7 @@ import {
   PLANET_VERTEX_SHADER,
   PLANET_FRAGMENT_SHADER,
   getThemeIndex,
+  derivePlanetProceduralParameters,
 } from '../utils/planetShaderUtils';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUtils';
 import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
@@ -722,8 +723,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
       const theme = body.textureTheme ?? (body.diameterJupiter >= 0.5 ? 'gas-giant-banded' : 'terrestrial-rocky');
       const themeIdx = getThemeIndex(theme);
-      const seedBucket = Math.floor(body.diameterKm % 8);
-      const key = `planet-${themeIdx}-${seedBucket}-${wireframe ? 'w' : 's'}`;
+      const key = `planet-${themeIdx}-${wireframe ? 'w' : 's'}`;
 
       let mat = materialCacheRef.current.get(key);
       if (!mat) {
@@ -736,7 +736,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             themeIndex: { value: themeIdx },
             temperatureK: { value: body.temperatureK || 300 },
             lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
-            seed: { value: seedBucket * 1.618 },
+            seed: { value: 0.0 },
             albedo: { value: body.albedo ?? 0.30 },
           },
         });
@@ -758,8 +758,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
       const mat = getMaterial(body);
 
-      // Select geometry: custom irregular mesh for sub-600 km bodies or shared sphere
-      let meshGeo = sharedSphereGeo;
+      // Select geometry: custom irregular mesh for sub-600 km bodies or cloned sphere with custom procedural attributes
+      let meshGeo: THREE.BufferGeometry;
       if (geoConfig.geometryType === 'irregular') {
         let customGeo = customGeometryCache.get(body.id);
         if (!customGeo) {
@@ -767,7 +767,29 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           customGeometryCache.set(body.id, customGeo);
         }
         meshGeo = customGeo;
+      } else {
+        // Clone sphere geometry so per-planet procedural attributes can be attached
+        meshGeo = sharedSphereGeo.clone();
       }
+
+      // Attach per-planet attributes to geometry (Zero additional material allocations!)
+      const proceduralParams = derivePlanetProceduralParameters(body.id, body.textureTheme, body.temperatureK || 300);
+      const vertexCount = meshGeo.attributes.position.count;
+
+      const seedArr = new Float32Array(vertexCount).fill(proceduralParams.seed);
+      const bandShiftArr = new Float32Array(vertexCount).fill(proceduralParams.bandShift);
+      const stormSeedArr = new Float32Array(vertexCount).fill(proceduralParams.stormSeed);
+      const colorTintArr = new Float32Array(vertexCount * 3);
+      for (let i = 0; i < vertexCount; i++) {
+        colorTintArr[i * 3] = proceduralParams.colorTint[0];
+        colorTintArr[i * 3 + 1] = proceduralParams.colorTint[1];
+        colorTintArr[i * 3 + 2] = proceduralParams.colorTint[2];
+      }
+
+      meshGeo.setAttribute('aSeed', new THREE.BufferAttribute(seedArr, 1));
+      meshGeo.setAttribute('aBandShift', new THREE.BufferAttribute(bandShiftArr, 1));
+      meshGeo.setAttribute('aStormSeed', new THREE.BufferAttribute(stormSeedArr, 1));
+      meshGeo.setAttribute('aColorTint', new THREE.BufferAttribute(colorTintArr, 3));
 
       const mesh = new THREE.Mesh(meshGeo, mat);
       mesh.scale.set(
