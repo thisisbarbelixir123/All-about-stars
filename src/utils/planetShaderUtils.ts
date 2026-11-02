@@ -352,7 +352,8 @@ export const PLANET_FRAGMENT_SHADER = `
     // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth pastel Uranus-like and silky flowing Neptune-like jet streams)
     else if (themeIndex < 3.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
-      float latFreq = 12.0 + effBandShift * 6.0;
+      // Band frequency scales with turbulence: few broad bands (latFreq ~ 4-7) vs many dense bands (latFreq ~ 14-22)
+      float latFreq = mix(5.0, 18.0, smoothstep(0.40, 1.40, bandTurbulence)) + effBandShift * 4.0;
       float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
 
       // Temperature & composition palettes:
@@ -373,8 +374,8 @@ export const PLANET_FRAGMENT_SHADER = `
       }
 
       // Smooth vs Silky Jet Stream Archetypes:
-      // bandTurbulence modulates band contrast: low = smooth velvety orb, high = silky sweeping jet stream ribbons
-      float jetContrast = smoothstep(0.70, 1.30, bandTurbulence);
+      // bandTurbulence modulates band contrast & intensity: low = smooth velvety orb, high = silky sweeping jet stream ribbons
+      float jetContrast = smoothstep(0.55, 1.35, bandTurbulence);
       float smoothGradient = smoothstep(-1.0, 1.0, vLocalPos.y) * 0.12; // Gentle pole-to-equator insolation gradient
       vec3 smoothAtmosphere = mix(deepTone, lightTone, 0.5 + smoothGradient);
       vec3 bandedAtmosphere = mix(deepTone, lightTone, smoothstep(-0.6, 0.6, band));
@@ -386,7 +387,8 @@ export const PLANET_FRAGMENT_SHADER = `
     // 5. Ice Giant (Uranus / Neptune-like methane atmosphere)
     else if (themeIndex < 4.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
-      float latFreq = 10.0 + effBandShift * 5.0;
+      // Band frequency scales with turbulence: few broad bands (latFreq ~ 4-6) vs many dense bands (latFreq ~ 12-18)
+      float latFreq = mix(4.5, 15.0, smoothstep(0.40, 1.40, bandTurbulence)) + effBandShift * 4.0;
       float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
 
       // Temperature & methane composition colors:
@@ -394,14 +396,14 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 lightMethane = mix(vec3(0.32, 0.75, 0.88), vec3(0.25, 0.68, 0.96), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
 
       // Smooth (Uranus-like cyan sphere) vs Active Silky Jet Streams (Neptune-like dark azure bands with high-albedo wisps)
-      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
+      float jetContrast = smoothstep(0.55, 1.30, bandTurbulence);
       vec3 smoothUranus = mix(deepMethane, lightMethane, 0.5);
       vec3 activeNeptune = mix(deepMethane, lightMethane, smoothstep(-0.6, 0.6, band));
 
       // Delicate high-altitude methane ice cloud streamers
-      if (jetContrast > 0.4) {
+      if (jetContrast > 0.35) {
         float cirrus = smoothstep(0.45, 0.80, snoise(vec3(flow.x * 0.4, flow.y * 18.0, flow.z * 0.4) + effSeed * 2.1));
-        activeNeptune = mix(activeNeptune, vec3(0.85, 0.94, 1.0), cirrus * (jetContrast - 0.4) * 0.65);
+        activeNeptune = mix(activeNeptune, vec3(0.85, 0.94, 1.0), cirrus * (jetContrast - 0.35) * 0.65);
       }
 
       surface = mix(smoothUranus, activeNeptune, jetContrast);
@@ -411,7 +413,8 @@ export const PLANET_FRAGMENT_SHADER = `
     // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with rich multi-tone latitudinal banding & smooth Jovian archetypes)
     else if (themeIndex < 5.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
-      float latFreq = 16.0 + effBandShift * 8.0;
+      // Band frequency scales with turbulence: few broad zones (latFreq ~ 6-9) vs many dense belts (latFreq ~ 18-28)
+      float latFreq = mix(6.0, 22.0, smoothstep(0.45, 1.45, bandTurbulence)) + effBandShift * 5.0;
       float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
       
       // Multi-tone latitudinal atmospheric bands:
@@ -432,8 +435,8 @@ export const PLANET_FRAGMENT_SHADER = `
         bandedSurface = mix(paleZone, brightAmmonia, (tBand - 0.66) / 0.34);
       }
 
-      // Smooth Jovian Archetype (Image 2) vs High-Turbulence Banded Archetype
-      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
+      // Smooth Jovian Archetype (Image 2) vs Few Bands vs Many Dense Belts (Jupiter)
+      float jetContrast = smoothstep(0.55, 1.30, bandTurbulence);
       vec3 smoothJovian = mix(warmOchre, paleZone, 0.5 + smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15);
       vec3 compositeSurface = mix(smoothJovian, bandedSurface, jetContrast);
 
@@ -761,11 +764,16 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
       tint.set(r, g, b);
     }
 
-    // Toggle between smooth Jovian (like Image 2 background) and banded Jovian (like Jupiter)
-    if (bucket % 3 === 0) {
-      bandTurbulence = 0.55 + h1 * 0.20; // Smooth Jovian
+    // Toggle between:
+    // 1. Smooth, featureless/hazy Jovian (Image 2 background style)
+    // 2. Few broad, serene bands (2 to 5 broad thermal zones)
+    // 3. Many dense, intricate jet streams (14 to 28 rapid alternating shear belts like Jupiter)
+    if (bucket % 4 === 0) {
+      bandTurbulence = 0.50 + h1 * 0.15; // Smooth / hazy Jovian
+    } else if (bucket % 4 === 1) {
+      bandTurbulence = 0.85 + h1 * 0.20; // Few broad, serene bands
     } else {
-      bandTurbulence = 1.05 + h1 * 0.35; // Distinct jet streams
+      bandTurbulence = 1.25 + h1 * 0.45; // Many dense, high-intensity jet streams
     }
   }
   // Ice Giant & Sub-Neptune (themeIdx == 3.0 or 4.0)
@@ -778,13 +786,16 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     const b = 1.02 + h1 * 0.28;
     tint.set(r, g, b);
 
-    // Toggle smooth vs visible jet streams across buckets:
-    // Smooth pastel orbs (Uranus-like): low turbulence
-    // High-contrast dynamic jet streams (Neptune-like): silky fluid sheared ribbons
-    if (bucket % 2 === 0) {
-      bandTurbulence = 0.55 + h1 * 0.18; // Smooth atmosphere
+    // Spectrum of banding density and intensity:
+    // - Smooth pastel orbs (Uranus-like): featureless methane haze
+    // - Few prominent equatorial & temperate jet ribbons (like Reference Image 1 & 2 foreground)
+    // - Many energetic latitudinal bands (Neptune Great Dark Spot era)
+    if (bucket % 4 === 0) {
+      bandTurbulence = 0.45 + h1 * 0.15; // Smooth featureless orb
+    } else if (bucket % 4 === 1) {
+      bandTurbulence = 0.80 + h1 * 0.18; // Few broad, silky jet ribbons
     } else {
-      bandTurbulence = 1.10 + h1 * 0.35; // Sharp visible jet stream ribbons
+      bandTurbulence = 1.20 + h1 * 0.40; // Many prominent, high-intensity jet streams
     }
   }
   // Hot Jupiter Dark Alkali (themeIdx == 14.0)
