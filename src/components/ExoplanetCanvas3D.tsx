@@ -272,7 +272,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const animFrameIdRef = useRef<number | null>(null);
   const continuousGridRef = useRef<ContinuousGridHandle | null>(null);
   const sharedTimeUniformRef = useRef<{ value: number }>({ value: 0 });
-  const materialCacheRef = useRef<Map<string, THREE.ShaderMaterial>>(new Map());
+  const materialCacheRef = useRef<Map<string, THREE.Material>>(new Map());
+  const textureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
   const interactiveMeshesRef = useRef<THREE.Object3D[]>([]);
   const pendingRaycastPosRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -576,6 +577,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     // Ambient Lighting
     scene.add(new THREE.AmbientLight('#ffffff', 0.9));
 
+    // Directional Sunlight (matching lightDir uniform in procedural shader)
+    const sunLight = new THREE.DirectionalLight('#ffffff', 1.3);
+    sunLight.position.set(1.0, 0.4, 0.8).normalize().multiplyScalar(100);
+    scene.add(sunLight);
+
     // Continuous Procedural Grid
     const gridGroup = new THREE.Group();
     gridGroup.name = 'ContinuousGridGroup';
@@ -611,8 +617,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   // Update wireframe property on cached materials
   useEffect(() => {
     materialCacheRef.current.forEach((mat) => {
-      mat.wireframe = wireframe;
-      mat.needsUpdate = true;
+      if ('wireframe' in mat) {
+        (mat as THREE.MeshStandardMaterial | THREE.ShaderMaterial).wireframe = wireframe;
+        mat.needsUpdate = true;
+      }
     });
   }, [wireframe]);
 
@@ -637,7 +645,34 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
     const customGeometryCache = new Map<string, THREE.BufferGeometry>();
 
-    const getMaterial = (body: CelestialBody): THREE.ShaderMaterial => {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+
+    const getMaterial = (body: CelestialBody): THREE.Material => {
+      // 1. Official Photorealistic Texture Maps (Solar System bodies)
+      if (body.textureSource === 'official' && body.texturePath) {
+        const matKey = `official-${body.id}-${wireframe ? 'w' : 's'}`;
+        let mat = materialCacheRef.current.get(matKey);
+        if (!mat) {
+          let texture = textureCacheRef.current.get(body.texturePath);
+          if (!texture) {
+            texture = textureLoader.load(body.texturePath);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            textureCacheRef.current.set(body.texturePath, texture);
+          }
+
+          mat = new THREE.MeshStandardMaterial({
+            map: texture,
+            wireframe,
+            roughness: body.classification === 'Jovian' || body.classification === 'Neptunian' ? 0.9 : 0.8,
+            metalness: 0.05,
+          });
+          materialCacheRef.current.set(matKey, mat);
+        }
+        return mat;
+      }
+
       if (body.classification === 'Star') {
         const key = `star-${wireframe ? 'w' : 's'}`;
         let mat = materialCacheRef.current.get(key);
