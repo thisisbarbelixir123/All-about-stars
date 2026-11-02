@@ -142,6 +142,18 @@ export const PLANET_FRAGMENT_SHADER = `
     return p + strength * vec3(offset.x, offset.y, offset.x * 0.5);
   }
 
+  // Differential zonal rotation for gas giant atmospheric jet streams
+  // Computes azimuthal velocity variation across latitude bands
+  vec3 zonalJetFlow(vec3 p, float t, float speed) {
+    float lat = p.y; // -1 to 1 latitude
+    // Alternating eastward and westward jet streams with equatorial super-rotation
+    float jetShear = sin(lat * 12.566) * 0.75 + cos(lat * 6.283) * 0.5;
+    float theta = atan(p.z, p.x);
+    float r = length(p.xz);
+    float angleShift = theta + (speed * t * (1.0 + jetShear));
+    return vec3(r * cos(angleShift), lat, r * sin(angleShift));
+  }
+
   // Planckian blackbody thermal radiation approximation
   vec3 blackbody(float kelvin) {
     float t = clamp(kelvin, 800.0, 3500.0);
@@ -297,36 +309,58 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.45, 0.75, 0.60);
       atmoStrength = 0.65;
     }
-    // 4. Sub-Neptune
+    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze)
     else if (themeIndex < 3.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 1.5, vLocalPos.y * 14.0, vLocalPos.z * 1.5);
-      vec3 curl = curlNoise(vLocalPos * 2.5 + time * 0.02);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
+      vec3 bandPos = vec3(flow.x * 1.5, flow.y * 14.0, flow.z * 1.5);
+      vec3 curl = curlNoise(flow * 2.5 + seed);
       float band = fbm(bandPos + curl * 1.2);
       surface = mix(vec3(0.08, 0.32, 0.58), vec3(0.28, 0.68, 0.78), band * 0.5 + 0.5);
       atmoColor = vec3(0.38, 0.72, 1.0);
       atmoStrength = 0.85;
     }
-    // 5. Ice Giant (Uranus / Neptune-like)
+    // 5. Ice Giant (Uranus / Neptune-like methane atmosphere with high-speed retrograde equatorial winds)
     else if (themeIndex < 4.5) {
-      vec3 bandPos = vec3(vLocalPos.x, vLocalPos.y * 10.0, vLocalPos.z);
-      float band = fbm(bandPos);
-      surface = mix(vec3(0.12, 0.42, 0.72), vec3(0.32, 0.68, 0.88), band * 0.5 + 0.5);
-      atmoColor = vec3(0.32, 0.65, 0.95);
-      atmoStrength = 0.80;
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
+      vec3 bandPos = vec3(flow.x, flow.y * 11.0, flow.z);
+      vec3 curl = curlNoise(flow * 2.8 + seed);
+      float band = fbm(bandPos + curl * 0.9);
+      // Methane absorption: deep cyan to brilliant azure blue
+      surface = mix(vec3(0.10, 0.38, 0.68), vec3(0.30, 0.72, 0.90), band * 0.5 + 0.5);
+      atmoColor = vec3(0.32, 0.68, 0.96);
+      atmoStrength = 0.82;
     }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like, Class I)
+    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with Great Red Spot cyclonic vortex)
     else if (themeIndex < 5.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 20.0, vLocalPos.z * 2.0);
-      vec3 curl = curlNoise(vLocalPos * 3.5 + time * 0.015);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 22.0, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.5 + seed);
       float band = fbm(bandPos + curl * 1.8);
-      surface = mix(vec3(0.65, 0.45, 0.28), vec3(0.88, 0.78, 0.64), band * 0.5 + 0.5);
-      atmoColor = vec3(0.82, 0.72, 0.55);
-      atmoStrength = 0.48;
+      
+      // Belts (dark reddish-brown / phosphorus tholins) and Zones (pale cream / ammonia ice)
+      vec3 beltColor = vec3(0.60, 0.36, 0.22);
+      vec3 zoneColor = vec3(0.90, 0.84, 0.72);
+      surface = mix(beltColor, zoneColor, band * 0.5 + 0.5);
+
+      // Great Red Spot / Oval cyclonic storm vortex in southern tropical band
+      vec3 spotCenter = vec3(0.65, -0.38, 0.65);
+      float spotDist = length((vLocalPos - spotCenter) * vec3(1.0, 1.8, 1.0));
+      if (spotDist < 0.28) {
+        float spotCore = smoothstep(0.28, 0.04, spotDist);
+        float vortex = fbm(curlNoise(vLocalPos * 6.0 + time * 0.05) + vLocalPos * 4.0);
+        vec3 spotColor = mix(vec3(0.78, 0.22, 0.12), vec3(0.92, 0.45, 0.25), vortex * 0.5 + 0.5);
+        surface = mix(surface, spotColor, spotCore * 0.88);
+      }
+
+      atmoColor = vec3(0.85, 0.75, 0.58);
+      atmoStrength = 0.52;
     }
     // 7. Hot Jupiter (Silicate/Iron clouds, Class IV)
     else if (themeIndex < 6.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 16.0, vLocalPos.z * 2.0);
-      float band = fbm(bandPos);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.045);
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 16.0, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + seed);
+      float band = fbm(bandPos + curl * 1.4);
       surface = mix(vec3(0.42, 0.16, 0.10), vec3(0.75, 0.38, 0.18), band * 0.5 + 0.5);
       atmoColor = vec3(1.0, 0.45, 0.20);
       atmoStrength = 0.70;
@@ -402,8 +436,9 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
     else if (themeIndex < 14.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 14.0, vLocalPos.z * 2.0);
-      vec3 curl = curlNoise(vLocalPos * 3.0 + time * 0.015);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.04);
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 14.0, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + seed);
       float band = fbm(bandPos + curl * 1.2);
       // Deep cobalt and midnight indigo banding with subtle twilight bronze
       surface = mix(vec3(0.06, 0.08, 0.16), vec3(0.18, 0.16, 0.32), band * 0.5 + 0.5);
@@ -414,8 +449,9 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 18.0, vLocalPos.z * 2.0);
-      vec3 curl = curlNoise(vLocalPos * 3.0 + time * 0.015);
+      vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
+      vec3 bandPos = vec3(flow.x * 2.0, flow.y * 18.0, flow.z * 2.0);
+      vec3 curl = curlNoise(flow * 3.0 + seed);
       float band = fbm(bandPos + curl * 1.5);
       surface = mix(vec3(0.15, 0.35, 0.58), vec3(0.68, 0.78, 0.90), band * 0.5 + 0.5);
       atmoColor = vec3(0.40, 0.65, 0.95);
