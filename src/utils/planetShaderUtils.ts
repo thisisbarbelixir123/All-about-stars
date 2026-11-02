@@ -186,32 +186,87 @@ export const PLANET_FRAGMENT_SHADER = `
     float atmoStrength = 0.6;
     float emissive = 0.0;
 
-    // 1. Rocky Terrestrial
+    // 1. Rocky Terrestrial (Sub-Martian / Martian / Airless Silicate)
     if (themeIndex < 0.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.5 + seed, 0.35);
-      float craggy = ridgedFbm(warped);
-      surface = mix(vec3(0.38, 0.34, 0.30), vec3(0.72, 0.65, 0.58), craggy);
-      atmoColor = vec3(0.65, 0.72, 0.82);
-      atmoStrength = 0.18;
-    }
-    // 2. Terrestrial Ocean World (Earth-like)
-    else if (themeIndex < 1.5) {
-      vec3 warped = domainWarp(vLocalPos * 2.8 + seed, 0.4);
-      float h = fbm(warped);
-      if (h < 0.0) {
-        surface = mix(vec3(0.02, 0.12, 0.38), vec3(0.06, 0.32, 0.58), h + 0.5);
-      } else {
-        float ridges = ridgedFbm(warped * 2.0);
-        surface = mix(vec3(0.18, 0.40, 0.16), vec3(0.55, 0.48, 0.34), ridges * 0.7);
+      vec3 warped = domainWarp(vLocalPos * 3.5 + seed, 0.40);
+      float elevation = ridgedFbm(warped);
+      float micro = fbm(vLocalPos * 14.0 + seed);
+      
+      // Multi-tier regolith & rock stratification
+      vec3 lowBasin = mix(vec3(0.28, 0.24, 0.22), vec3(0.42, 0.35, 0.30), micro);
+      vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro);
+      surface = mix(lowBasin, highRidge, elevation);
+
+      // Polar cold regolith frost
+      float lat = abs(vLocalPos.y);
+      if (lat > 0.82) {
+        float frost = smoothstep(0.82, 0.94, lat) * (fbm(vLocalPos * 8.0) * 0.4 + 0.8);
+        surface = mix(surface, vec3(0.85, 0.88, 0.92), frost);
       }
+
+      atmoColor = vec3(0.65, 0.72, 0.82);
+      atmoStrength = 0.16;
+    }
+    // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
+    else if (themeIndex < 1.5) {
+      vec3 warped = domainWarp(vLocalPos * 2.6 + seed, 0.45);
+      float continental = fbm(warped); // Low-frequency continental land/ocean mask
+      float mountain = ridgedFbm(warped * 2.2); // Razor-sharp alpine cordilleras
+      float lat = abs(vLocalPos.y);
+
+      // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
+      if (continental < 0.05) {
+        float oceanDepth = smoothstep(-0.6, 0.05, continental);
+        vec3 deepTrench = vec3(0.015, 0.08, 0.28);
+        vec3 shallowShelf = vec3(0.04, 0.32, 0.52);
+        surface = mix(deepTrench, shallowShelf, oceanDepth);
+      }
+      // B. Continental Landmass & Biome Stratification (continental >= 0.05)
+      else {
+        float landElevation = smoothstep(0.05, 0.65, continental) * 0.6 + mountain * 0.4;
+        
+        // Lowland lush vegetation / fertile river valleys
+        vec3 lushLowlands = vec3(0.12, 0.36, 0.14);
+        // Temperate savanna / woodland
+        vec3 savanna = vec3(0.35, 0.42, 0.20);
+        // High alpine arid plateau
+        vec3 plateau = vec3(0.52, 0.42, 0.28);
+        // Jagged mountain peaks / rocky granite
+        vec3 mountainPeak = vec3(0.68, 0.64, 0.60);
+
+        vec3 biome = mix(lushLowlands, savanna, smoothstep(0.1, 0.35, landElevation));
+        biome = mix(biome, plateau, smoothstep(0.35, 0.65, landElevation));
+        biome = mix(biome, mountainPeak, smoothstep(0.65, 0.90, landElevation));
+        surface = biome;
+      }
+
+      // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
+      // Temperature modulates polar ice cap reach
+      float polarThreshold = clamp(0.72 + (temperatureK - 250.0) * 0.0015, 0.60, 0.92);
+      if (lat > polarThreshold) {
+        float iceNoise = fbm(vLocalPos * 6.0 + seed);
+        float iceCap = smoothstep(polarThreshold, polarThreshold + 0.12, lat + iceNoise * 0.08);
+        surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
+      }
+
       atmoColor = vec3(0.35, 0.65, 1.0);
       atmoStrength = 0.75;
     }
-    // 3. Super-Earth
+    // 3. Super-Earth (Craggy Super-Continental Lithosphere)
     else if (themeIndex < 2.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.2 + seed, 0.5);
-      float h = ridgedFbm(warped);
-      surface = mix(vec3(0.32, 0.18, 0.12), vec3(0.58, 0.42, 0.30), h);
+      vec3 warped = domainWarp(vLocalPos * 3.0 + seed, 0.50);
+      float tectonic = ridgedFbm(warped);
+      float micro = fbm(vLocalPos * 12.0);
+
+      // Deep iron-rich silicate desert and massive volcanic basalt plateaus
+      vec3 volcanicBasalt = vec3(0.20, 0.14, 0.12);
+      vec3 ironDesert = vec3(0.52, 0.28, 0.16);
+      vec3 highlandGranite = vec3(0.65, 0.50, 0.40);
+
+      vec3 land = mix(volcanicBasalt, ironDesert, smoothstep(0.2, 0.55, tectonic));
+      land = mix(land, highlandGranite, smoothstep(0.55, 0.85, tectonic + micro * 0.2));
+      surface = land;
+
       atmoColor = vec3(0.45, 0.75, 0.60);
       atmoStrength = 0.65;
     }
