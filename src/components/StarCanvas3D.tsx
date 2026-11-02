@@ -48,6 +48,8 @@ import { StarData, StageSortKey, SortDirection, TourLength, PresetComparison } f
 import { PRESET_COMPARISONS } from '../data/stars';
 import { formatPhysicalDiameter } from '../utils/formatters';
 import { getStarDesignationTag } from '../utils/starDesignationUtils';
+import { SOLAR_SYSTEM_TOUR_BODIES, isSolarReferenceBody } from '../data/solarReferenceBodies';
+import { buildMilestoneStarMap, ScaleMilestone } from '../utils/scaleMilestones';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
 import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
@@ -342,8 +344,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const cameraLightRef = useRef<THREE.DirectionalLight | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const starObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
+  const planetMaterialCacheRef = useRef<Map<string, THREE.Material>>(new Map());
+  const planetTextureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
   const labelElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const animFrameIdRef = useRef<number | null>(null);
   const continuousGridRef = useRef<ContinuousGridHandle | null>(null);
@@ -361,6 +366,27 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   isTourPlayingRef.current = isTourPlaying;
   const isTourModeRef = useRef(isTourMode);
   isTourModeRef.current = isTourMode;
+
+  // Tour paused notification: shown at top-left when tour is paused, auto-dismisses after 5 seconds
+  const [showTourPausedToast, setShowTourPausedToast] = useState(false);
+  const tourPausedToastTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerTourPausedToast = useCallback(() => {
+    setShowTourPausedToast(true);
+    if (tourPausedToastTimerRef.current) {
+      clearTimeout(tourPausedToastTimerRef.current);
+    }
+    tourPausedToastTimerRef.current = setTimeout(() => {
+      setShowTourPausedToast(false);
+    }, 5000);
+  }, []);
+
+  const hideTourPausedToast = useCallback(() => {
+    setShowTourPausedToast(false);
+    if (tourPausedToastTimerRef.current) {
+      clearTimeout(tourPausedToastTimerRef.current);
+    }
+  }, []);
 
   // Tour mode cursor auto-hide: hide cursor after 5 seconds of inactivity, reappear on mouse movement
   const [isTourCursorVisible, setIsTourCursorVisible] = useState(true);
@@ -426,13 +452,17 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     return 'spiral';
   });
 
-  // Effective layout mode: when sortKey !== 'size', spiral is not allowed, so default to grid (or linear if user explicitly chose linear)
+  // Effective layout mode: when sortKey !== 'size', spiral is not allowed, so default to grid (or linear if user explicitly chose linear).
+  // CRITICAL REQUIREMENT: During Tour Mode, tours can only be done in linear mode regardless of user preference or layout toggles.
   const effectiveLayoutMode: AllStarsLayoutMode = useMemo(() => {
+    if (isTourMode) {
+      return 'linear';
+    }
     if (sortKey !== 'size') {
       return allStarsLayoutMode === 'linear' ? 'linear' : 'grid';
     }
     return allStarsLayoutMode;
-  }, [sortKey, allStarsLayoutMode]);
+  }, [sortKey, allStarsLayoutMode, isTourMode]);
 
   const availableLayoutModes: AllStarsLayoutMode[] = useMemo(() => {
     return sortKey === 'size' ? ['spiral', 'grid', 'linear'] : ['grid', 'linear'];
@@ -733,8 +763,16 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   };
 
   // Sorted stars based on sortKey ('size' | 'distance' | 'mass' | 'temperature' | 'luminosity') and sortDirection ('asc' | 'desc')
+  // CRITICAL REQUIREMENT: During Tour Mode on the Star 3D Stage (full catalog sorted by size), include the 10 Solar System reference bodies
+  // (Pluto, Moon, Mercury, Mars, Venus, Earth, Neptune, Uranus, Saturn, Jupiter) in the size comparison lineup.
   const sortedStars = useMemo(() => {
-    const list = [...stars];
+    let list = [...stars];
+    if (isTourMode && isAllStarsPreset && sortKey === 'size') {
+      // Append the 10 reference bodies if not already present
+      const existingIds = new Set(list.map(s => s.id));
+      const additions = SOLAR_SYSTEM_TOUR_BODIES.filter(b => !existingIds.has(b.id));
+      list = [...list, ...additions];
+    }
     list.sort((a, b) => {
       let diff = 0;
       if (sortKey === 'size') {
@@ -765,7 +803,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       return sortDirection === 'desc' ? -diff : diff;
     });
     return list;
-  }, [stars, sortKey, sortDirection]);
+  }, [stars, sortKey, sortDirection, isTourMode, isAllStarsPreset]);
+
+  // Precompute 1-to-1 milestone to closest star map so each milestone appears exactly once in the entire catalog
+  const milestoneStarMap = useMemo(() => {
+    return buildMilestoneStarMap(sortedStars);
+  }, [sortedStars]);
 
   const prevSortKeyForLayoutRef = useRef(sortKey);
   useEffect(() => {
@@ -1199,8 +1242,18 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     scene.add(starField);
 
     // 4. Lighting
-    const ambientLight = new THREE.AmbientLight('#ffffff', 0.85);
+    const ambientLight = new THREE.AmbientLight('#ffffff', 0.65);
     scene.add(ambientLight);
+
+    // Directional Sunlight (focused key light providing rich relief, shine, and depth)
+    const sunLight = new THREE.DirectionalLight('#ffffff', 1.15);
+    sunLight.position.set(1.0, 0.4, 0.8).normalize().multiplyScalar(100);
+    scene.add(sunLight);
+
+    // Camera-tracking headlight / fill light: illuminates front-facing surfaces and makes textures shine cleanly
+    const cameraLight = new THREE.DirectionalLight('#ffffff', 0.85);
+    scene.add(cameraLight);
+    cameraLightRef.current = cameraLight;
 
     // Single high-performance dynamic focus light (replaces 500+ individual point lights)
     const focusedPointLight = new THREE.PointLight('#ffffff', 0, 100);
@@ -1309,11 +1362,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
       // 2. Vertical height drop line and true-ground footprint anchor under each star
       // When large catalog (>50 stars) is displayed, guide footprints are focused on the active star and landmarks for silky FPS
-      const isLargeCatalog = renderedStars.length > 50;
+      const guideSourceStars = isTourMode ? sortedStars : stars.filter(s => !isSolarReferenceBody(s));
+      const isLargeCatalog = guideSourceStars.length > 50;
       const activeStarId = focusedStarId ?? selectedStarId;
       const targetStarsForGuides = isLargeCatalog
-        ? renderedStars.filter(s => s.id === activeStarId || s.id === 'sun' || s.id === renderedStars[0]?.id || s.id === renderedStars[renderedStars.length - 1]?.id)
-        : renderedStars;
+        ? guideSourceStars.filter(s => s.id === activeStarId || s.id === 'sun' || s.id === guideSourceStars[0]?.id || s.id === guideSourceStars[guideSourceStars.length - 1]?.id)
+        : guideSourceStars;
 
       targetStarsForGuides.forEach((star) => {
         const sc = starScales[star.id];
@@ -1365,7 +1419,8 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     const sharedCoronaGeo = new THREE.SphereGeometry(1, coronaSegments, coronaSegments);
     const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
 
-    renderedStars.forEach((star) => {
+    const targetStars = isTourMode ? sortedStars : stars.filter(s => !isSolarReferenceBody(s));
+    targetStars.forEach((star) => {
       const scaleInfo = starScales[star.id];
       if (!scaleInfo) return;
 
@@ -1464,16 +1519,86 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         bridgeMesh.userData = { starId: star.id, starData: star };
         starGroup.add(bridgeMesh);
       } else {
-        const photosphere = new THREE.Mesh(sharedSphereGeo, customMat);
+        const isSolarRef = isSolarReferenceBody(star);
+        let bodyMeshMaterial: THREE.Material = customMat;
+
+        // If this is a Solar System reference body (Earth, Jupiter, Saturn, etc.), reuse the photorealistic textures
+        if (isSolarRef && star.texturePath) {
+          const cacheKey = `solar-ref-mat-${star.id}-${wireframe ? 'w' : 's'}`;
+          let cachedMat = planetMaterialCacheRef.current.get(cacheKey);
+          if (!cachedMat) {
+            let tex = planetTextureCacheRef.current.get(star.texturePath);
+            if (!tex) {
+              const loader = new THREE.TextureLoader();
+              tex = loader.load(star.texturePath);
+              tex.colorSpace = THREE.SRGBColorSpace;
+              tex.wrapS = THREE.RepeatWrapping;
+              tex.wrapT = THREE.ClampToEdgeWrapping;
+              planetTextureCacheRef.current.set(star.texturePath, tex);
+            }
+
+            let roughnessMap: THREE.Texture | undefined;
+            if (star.specularPath) {
+              roughnessMap = planetTextureCacheRef.current.get(star.specularPath);
+              if (!roughnessMap) {
+                const loader = new THREE.TextureLoader();
+                roughnessMap = loader.load(star.specularPath);
+                roughnessMap.wrapS = THREE.RepeatWrapping;
+                roughnessMap.wrapT = THREE.ClampToEdgeWrapping;
+                planetTextureCacheRef.current.set(star.specularPath, roughnessMap);
+              }
+            }
+
+            const isGasGiant = star.spectralType === 'Gas Giant' || star.spectralType === 'Ice Giant';
+            cachedMat = new THREE.MeshStandardMaterial({
+              map: tex,
+              roughnessMap,
+              roughness: isGasGiant ? 0.75 : 0.65,
+              metalness: star.specularPath ? 0.25 : 0.08,
+              wireframe,
+            });
+            planetMaterialCacheRef.current.set(cacheKey, cachedMat);
+          }
+          bodyMeshMaterial = cachedMat;
+        }
+
+        const photosphere = new THREE.Mesh(sharedSphereGeo, bodyMeshMaterial);
         photosphere.scale.setScalar(scaleInfo.radius);
         photosphere.name = `Photosphere-${star.id}`;
         photosphere.userData = { starId: star.id, starData: star };
         starGroup.add(photosphere);
         newInteractiveMeshes.push(photosphere);
+
+        // Multi-layer clouds for Earth & Venus if cloudPath is provided
+        if (isSolarRef && star.cloudPath && !wireframe) {
+          const cloudKey = `cloud-tex-${star.cloudPath}`;
+          let cloudTex = planetTextureCacheRef.current.get(cloudKey);
+          if (!cloudTex) {
+            const loader = new THREE.TextureLoader();
+            cloudTex = loader.load(star.cloudPath);
+            cloudTex.wrapS = THREE.RepeatWrapping;
+            cloudTex.wrapT = THREE.ClampToEdgeWrapping;
+            planetTextureCacheRef.current.set(cloudKey, cloudTex);
+          }
+          const cloudMat = new THREE.MeshStandardMaterial({
+            map: cloudTex,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          });
+          const cloudMesh = new THREE.Mesh(sharedSphereGeo, cloudMat);
+          cloudMesh.name = `Clouds-${star.id}`;
+          cloudMesh.scale.setScalar(scaleInfo.radius * 1.018);
+          cloudMesh.raycast = () => {};
+          starGroup.add(cloudMesh);
+        }
       }
 
-      // 2. Atmospheric Corona Glow Halo (Disabled for Class T & Y brown dwarfs, Faint for Class L)
-      if (showCorona && bdType < 1.5) {
+      const isSolarRef = isSolarReferenceBody(star);
+
+      // 2. Atmospheric Corona Glow Halo (Disabled for Class T & Y brown dwarfs, Faint for Class L, Disabled for Solar Reference Planets)
+      if (showCorona && bdType < 1.5 && !isSolarRef) {
         const isFaintL = bdType === 1.0;
         // Density-adjusted glow intensity and corona radius matching hero image non-solid glow
         const normalGlowIntensity = isSpiral ? 0.45 : (0.75 - densityFactor * 0.22);
@@ -1576,6 +1701,36 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         }
       }
 
+      // 3. Planetary Orbit Scale Benchmarks (Mercury through Saturn)
+      // Placed directly at the floor of the grid (world y = 0.0001, meaning local y = -starY + 0.0001),
+      // centered below the star that is the CLOSEST in size to the orbit diameter.
+      // Shows exactly ONCE per planet orbit across the entire comparison catalog!
+      const milestone = milestoneStarMap.get(star.id);
+      if (milestone && milestone.type === 'planetary_orbit') {
+        // Orbit ring diameter in 3D stage units proportional to star's diameter
+        const orbitRadius3D = (milestone.diameterKm / (star.diameterKm || 1)) * scaleInfo.radius;
+        // Clean, prominent line ring on the grid floor
+        const ringSegments = 128;
+        const ringPoints: THREE.Vector3[] = [];
+        for (let i = 0; i <= ringSegments; i++) {
+          const theta = (i / ringSegments) * Math.PI * 2;
+          ringPoints.push(new THREE.Vector3(Math.cos(theta) * orbitRadius3D, 0, Math.sin(theta) * orbitRadius3D));
+        }
+        const ringGeo = new THREE.BufferGeometry().setFromPoints(ringPoints);
+        const ringMat = new THREE.LineBasicMaterial({
+          color: new THREE.Color(milestone.colorHex),
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+        });
+        const orbitMesh = new THREE.LineLoop(ringGeo, ringMat);
+        // Positioned at the grid floor plane (y = -starY + 0.0001) so it lies flat on the ground grid!
+        orbitMesh.position.set(0, -starY + 0.0001, 0);
+        orbitMesh.name = `MilestoneOrbitRing-${star.id}`;
+        orbitMesh.raycast = () => {};
+        starGroup.add(orbitMesh);
+      }
+
       scene.add(starGroup);
       starObjectsRef.current.set(star.id, starGroup);
     });
@@ -1587,7 +1742,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       sharedCoronaGeo.dispose();
       sharedHitGeo.dispose();
     };
-  }, [stars, starScales, scaleMode, showCorona, viewMode, wireframe, showGrid, allStarsLayoutMode, isAllStarsPreset, sortKey]);
+  }, [stars, starScales, scaleMode, showCorona, viewMode, wireframe, showGrid, allStarsLayoutMode, isAllStarsPreset, sortKey, effectiveLayoutMode, milestoneStarMap, isTourMode, sortedStars]);
 
   // Camera framing calculation:
   // Dynamically scales distance and target elevation based on true star radius.
@@ -1937,13 +2092,14 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     isTourModeRef.current = false;
     setIsTourPlaying(false);
     isTourPlayingRef.current = false;
+    hideTourPausedToast();
     setIsTourCursorVisible(true);
     if (tourCursorTimerRef.current) {
       clearTimeout(tourCursorTimerRef.current);
     }
     soundEffects.play('toggleOff');
     if (onTourStateChange) onTourStateChange(false);
-  }, [onTourStateChange]);
+  }, [onTourStateChange, hideTourPausedToast]);
 
   const handleRestartTour = useCallback(() => {
     if (sortedStars.length === 0) return;
@@ -1954,15 +2110,30 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       cameraTargetRef.current.copy(framing.target);
       cameraDistanceRef.current = framing.distance;
       cameraAngleRef.current = { ...framing.angle };
+
+      // Instant snap camera position without zoom-in lerp
+      const { theta, phi } = framing.angle;
+      const dist = framing.distance;
+      const target = framing.target;
+      const snapX = target.x + dist * Math.sin(phi) * Math.sin(theta);
+      const snapY = target.y + dist * Math.cos(phi);
+      const snapZ = target.z + dist * Math.sin(phi) * Math.cos(theta);
+      currentCameraPosRef.current.set(snapX, snapY, snapZ);
+      currentLookAtRef.current.copy(target);
+      if (cameraRef.current) {
+        cameraRef.current.position.set(snapX, snapY, snapZ);
+        cameraRef.current.lookAt(target);
+      }
     }
     onSelectStar(firstStar);
     setIsTourMode(true);
     isTourModeRef.current = true;
     setIsTourPlaying(true);
     isTourPlayingRef.current = true;
+    hideTourPausedToast();
     resetTourCursorTimer();
     if (onTourStateChange) onTourStateChange(true);
-  }, [sortedStars, getCameraFramingForStar, onSelectStar, onTourStateChange, resetTourCursorTimer]);
+  }, [sortedStars, getCameraFramingForStar, onSelectStar, onTourStateChange, resetTourCursorTimer, hideTourPausedToast]);
 
   const handleToggleTour = useCallback(() => {
     if (!isTourModeRef.current) {
@@ -1971,11 +2142,12 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       setIsTourPlaying(true);
       isTourPlayingRef.current = true;
       soundEffects.play('toggleOn');
+      hideTourPausedToast();
       resetTourCursorTimer();
       if (onTourStateChange) onTourStateChange(true);
 
       // If starting tour and no star is focused or already on the last star, immediately focus the first star
-      // Set camera target immediately with generous label headroom so flight animation begins on frame 1 without delay!
+      // Set camera target immediately with generous label headroom and instant snap framing (zero zoom-in swoop)
       if (activeStarIndex === -1 || activeStarIndex >= sortedStars.length - 1) {
         if (sortedStars.length > 0) {
           const firstStar = sortedStars[0];
@@ -1984,6 +2156,20 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             cameraTargetRef.current.copy(framing.target);
             cameraDistanceRef.current = framing.distance;
             cameraAngleRef.current = { ...framing.angle };
+
+            // Instant snap camera position without zoom-in lerp
+            const { theta, phi } = framing.angle;
+            const dist = framing.distance;
+            const target = framing.target;
+            const snapX = target.x + dist * Math.sin(phi) * Math.sin(theta);
+            const snapY = target.y + dist * Math.cos(phi);
+            const snapZ = target.z + dist * Math.sin(phi) * Math.cos(theta);
+            currentCameraPosRef.current.set(snapX, snapY, snapZ);
+            currentLookAtRef.current.copy(target);
+            if (cameraRef.current) {
+              cameraRef.current.position.set(snapX, snapY, snapZ);
+              cameraRef.current.lookAt(target);
+            }
           }
           onSelectStar(firstStar);
         }
@@ -1994,16 +2180,35 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
           cameraTargetRef.current.copy(framing.target);
           cameraDistanceRef.current = framing.distance;
           cameraAngleRef.current = { ...framing.angle };
+
+          // Instant snap camera without scrubbing across intermediate stars
+          const { theta, phi } = framing.angle;
+          const dist = framing.distance;
+          const target = framing.target;
+          const snapX = target.x + dist * Math.sin(phi) * Math.sin(theta);
+          const snapY = target.y + dist * Math.cos(phi);
+          const snapZ = target.z + dist * Math.sin(phi) * Math.cos(theta);
+          currentCameraPosRef.current.set(snapX, snapY, snapZ);
+          currentLookAtRef.current.copy(target);
+          if (cameraRef.current) {
+            cameraRef.current.position.set(snapX, snapY, snapZ);
+            cameraRef.current.lookAt(target);
+          }
         }
       }
     } else {
       const willPlay = !isTourPlayingRef.current;
       isTourPlayingRef.current = willPlay;
       setIsTourPlaying(willPlay);
+      if (willPlay) {
+        hideTourPausedToast();
+      } else {
+        triggerTourPausedToast();
+      }
       resetTourCursorTimer();
       soundEffects.play(willPlay ? 'toggleOn' : 'toggleOff');
     }
-  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar, onTourStateChange, resetTourCursorTimer]);
+  }, [activeStarIndex, sortedStars, onSelectStar, getCameraFramingForStar, onTourStateChange, resetTourCursorTimer, hideTourPausedToast, triggerTourPausedToast]);
 
   // Auto Tour playback effect
   useEffect(() => {
@@ -2018,6 +2223,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       if (currentIndex >= sortedStars.length - 1) {
         setIsTourPlaying(false);
         isTourPlayingRef.current = false;
+        hideTourPausedToast();
       } else {
         const nextStar = sortedStars[currentIndex + 1];
         // 1. Immediately update camera coordinates on this tick for instant smooth flight with label headroom
@@ -2042,11 +2248,14 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     }
   }, [isHomeOpen, handleEndTour]);
 
-  // Clean up tour cursor timer on unmount
+  // Clean up tour cursor and toast timers on unmount
   useEffect(() => {
     return () => {
       if (tourCursorTimerRef.current) {
         clearTimeout(tourCursorTimerRef.current);
+      }
+      if (tourPausedToastTimerRef.current) {
+        clearTimeout(tourPausedToastTimerRef.current);
       }
     };
   }, []);
@@ -2201,6 +2410,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
         cameraRef.current.position.copy(currentCameraPosRef.current);
         cameraRef.current.lookAt(currentLookAtRef.current);
+
+        // Synchronize camera fill light to track camera position for crystal clear illumination on standard materials
+        if (cameraLightRef.current) {
+          cameraLightRef.current.position.copy(cameraRef.current.position);
+        }
 
         // Dynamically adjust near/far planes based on current distance to maintain pristine depth-buffer precision
         // Completely eliminates Z-fighting, black clipping, and texture tearing across 1km to multi-terameter scales
@@ -4495,6 +4709,16 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       {/* 3D Stage Tour Mode: Top-Left Hover Zone & Cinematic Star Display */}
       {isTourMode && (
         <>
+          {/* Top-Left "Tour Paused" Toast Notification (disappears after 5 seconds) */}
+          {showTourPausedToast && (
+            <div className="absolute top-4 left-4 z-50 pointer-events-none animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#040816]/95 border border-amber-500/40 text-amber-300 shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono font-semibold">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Tour Paused</span>
+              </div>
+            </div>
+          )}
+
           {/* Top-Left Hover Zone: Hidden until hovered over the top-left corner */}
           <div className="absolute top-0 left-0 pt-3 pl-3 sm:pt-4 sm:pl-4 pb-16 pr-20 z-40 group pointer-events-auto select-none">
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 transform -translate-y-1 group-hover:translate-y-0">
@@ -4559,38 +4783,46 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
             const totalStars = sortedStars.length;
             const progressPercent = totalStars > 0 ? (currentNum / totalStars) * 100 : 0;
             const isTourComplete = !isTourPlaying && activeStarIndex >= totalStars - 1;
+            const isSolarRef = isSolarReferenceBody(activeFocusedStar);
+            // Milestone only appears when the comparable star (closest in size) is focused, then disappears when moved to next star
+            const activeMilestone = milestoneStarMap.get(activeFocusedStar.id);
 
             return (
               <div className="absolute inset-x-0 bottom-0 pointer-events-none z-30 flex flex-col justify-end">
+                {/* Floating Scale Milestone Bubble just above the lower third (No 'Orbital Benchmark' / 'Scale Milestone' prefix) */}
+                {activeMilestone && (
+                  <div className="px-4 sm:px-8 md:px-12 pb-2">
+                    <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-[#040816]/95 border border-cyan-500/40 shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300">
+                        <Orbit className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '8s' }} />
+                      </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                        <span className="font-bold text-cyan-300 uppercase tracking-wide text-[11px] sm:text-xs">
+                          {activeMilestone.name}
+                        </span>
+                        <span className="text-slate-400 hidden sm:inline">•</span>
+                        <span className="text-amber-300 font-semibold text-[10px] sm:text-[11px]">
+                          {activeMilestone.diameterSolar >= 1 ? `${activeMilestone.diameterSolar.toFixed(2)} D☉` : `${activeMilestone.diameterKm.toLocaleString()} km`} ({activeMilestone.diameterKm.toLocaleString()} km)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Subtle dark vignette backdrop */}
                 <div
                   className="w-full bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-20 pb-6 px-4 sm:px-8 md:px-12 flex flex-col gap-2.5 sm:gap-3"
                   style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}
                 >
-                  {/* Top metadata row: Index rank badge & tour status */}
+                  {/* Top metadata row: Index rank badge */}
                   <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                     <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-bold uppercase tracking-wider text-[11px] sm:text-xs shadow-[0_0_12px_rgba(6,182,212,0.3)]">
                       #{currentNum} of {totalStars} • {metric.label}
                     </span>
 
-                    {isTourComplete ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-400/50 text-emerald-300 font-bold text-[11px] sm:text-xs animate-pulse">
-                        Tour Complete • Hover top-left to Restart or End
-                      </span>
-                    ) : isTourPlaying ? (
-                      <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px]">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                        Auto Tour Playing
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300 text-[10px] sm:text-[11px]">
-                        Tour Paused
-                      </span>
-                    )}
-
-                    {getStarDesignationTag(activeFocusedStar) && (
-                      <span className="text-slate-400 text-xs hidden sm:inline">
-                        {getStarDesignationTag(activeFocusedStar)}
+                    {isSolarRef && (
+                      <span className="px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-400/50 text-blue-300 font-bold text-[10px] sm:text-[11px]">
+                        Solar System Reference
                       </span>
                     )}
                   </div>
@@ -4611,12 +4843,20 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
                       {/* Subtitle identity pills */}
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-slate-300 font-sans mt-2">
+                        {getStarDesignationTag(activeFocusedStar) && (
+                          <>
+                            <span className="font-mono text-cyan-400 font-semibold text-xs sm:text-sm">
+                              {getStarDesignationTag(activeFocusedStar)}
+                            </span>
+                            <span className="text-slate-500">•</span>
+                          </>
+                        )}
                         <span className="font-semibold text-cyan-200">
                           {activeFocusedStar.spectralType}
                         </span>
                         <span className="text-slate-500">•</span>
                         <span className="text-slate-300">
-                          {activeFocusedStar.stellarStage}
+                          {isSolarRef ? 'Solar System Reference Body' : activeFocusedStar.stellarStage}
                         </span>
                         <span className="text-slate-500">•</span>
                         <span className="text-slate-400">
@@ -4651,22 +4891,41 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                           : `${activeFocusedStar.diameterSolar.toFixed(2)} D☉`}
                       </span>
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Mass:</span>
-                      <span className="text-white font-semibold">{activeFocusedStar.massSolar.toFixed(2)} M☉</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Temp:</span>
-                      <span className="text-white font-semibold">{activeFocusedStar.temperature.toLocaleString()} K</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Distance:</span>
-                      <span className="text-white font-semibold">{activeFocusedStar.distanceLy.toLocaleString()} ly</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300 hidden sm:inline">
-                      <span className="text-slate-500 mr-1">Luminosity:</span>
-                      <span className="text-white font-semibold">{activeFocusedStar.luminositySolar >= 100 ? activeFocusedStar.luminositySolar.toLocaleString() : activeFocusedStar.luminositySolar.toFixed(2)} L☉</span>
-                    </span>
+                    {isSolarRef ? (
+                      <>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Mass:</span>
+                          <span className="text-white font-semibold">{(activeFocusedStar as any).planetaryMassEarth} M⊕</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Surface Gravity:</span>
+                          <span className="text-white font-semibold">{(activeFocusedStar as any).surfaceGravityMs2} m/s²</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Albedo:</span>
+                          <span className="text-white font-semibold">{(activeFocusedStar as any).albedo}</span>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Mass:</span>
+                          <span className="text-white font-semibold">{activeFocusedStar.massSolar.toFixed(2)} M☉</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Temp:</span>
+                          <span className="text-white font-semibold">{activeFocusedStar.temperature.toLocaleString()} K</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 mr-1">Distance:</span>
+                          <span className="text-white font-semibold">{activeFocusedStar.distanceLy.toLocaleString()} ly</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300 hidden sm:inline">
+                          <span className="text-slate-500 mr-1">Luminosity:</span>
+                          <span className="text-white font-semibold">{activeFocusedStar.luminositySolar >= 100 ? activeFocusedStar.luminositySolar.toLocaleString() : activeFocusedStar.luminositySolar.toFixed(2)} L☉</span>
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 
