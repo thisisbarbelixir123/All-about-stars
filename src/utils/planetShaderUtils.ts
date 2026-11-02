@@ -9,26 +9,11 @@ export const PLANET_VERTEX_SHADER = `
   varying vec2 vUv;
   varying vec3 vViewPosition;
 
-  attribute float aSeed;
-  attribute vec3 aColorTint;
-  attribute float aBandShift;
-  attribute float aStormSeed;
-
-  varying float vSeed;
-  varying vec3 vColorTint;
-  varying float vBandShift;
-  varying float vStormSeed;
-
   void main() {
     vNormal = normalize(normalMatrix * normal);
     vPosition = position;
     vLocalPos = normalize(position); // Exact unit sphere vector for seamless 3D noise
     vUv = uv;
-
-    vSeed = aSeed;
-    vColorTint = aColorTint;
-    vBandShift = aBandShift;
-    vStormSeed = aStormSeed;
 
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -mvPosition.xyz;
@@ -46,11 +31,6 @@ export const PLANET_FRAGMENT_SHADER = `
   varying vec2 vUv;
   varying vec3 vViewPosition;
 
-  varying float vSeed;
-  varying vec3 vColorTint;
-  varying float vBandShift;
-  varying float vStormSeed;
-
   uniform float time;
   // 0: rocky, 1: ocean, 2: super-earth, 3: sub-neptune, 4: ice-giant, 5: gas-giant-banded,
   // 6: hot-jupiter, 7: ultra-hot, 8: lava, 9: kbo-tholin, 10: kbo-ice, 11: star-plasma,
@@ -60,6 +40,11 @@ export const PLANET_FRAGMENT_SHADER = `
   uniform vec3 lightDir;
   uniform float seed;
   uniform float albedo;
+
+  // Approach A: Uniform-driven deterministic palettes & band variations
+  uniform vec3 colorTint;
+  uniform float bandShift;
+  uniform float bandTurbulence;
 
   // 3D Simplex noise implementation
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -210,10 +195,9 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 V = normalize(vViewPosition);
     vec3 L = normalize(lightDir);
 
-    float effSeed = seed + vSeed;
-    vec3 effColorTint = vColorTint.r > 0.01 ? vColorTint : vec3(1.0);
-    float effBandShift = vBandShift;
-    float effStormSeed = vStormSeed;
+    float effSeed = seed;
+    vec3 effColorTint = colorTint.r > 0.01 ? colorTint : vec3(1.0);
+    float effBandShift = bandShift;
 
     float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0);
     float rawNdotL = max(0.0, dot(N, L));
@@ -639,104 +623,103 @@ export function hashStringToFloat(str: string, salt: number = 0): number {
   return (h >>> 0) / 4294967296;
 }
 
-export interface PlanetProceduralParameters {
+export interface PlanetBucketUniforms {
   seed: number;
-  colorTint: [number, number, number];
+  colorTint: THREE.Vector3;
   bandShift: number;
-  stormSeed: number;
+  bandTurbulence: number;
 }
 
 /**
- * Derives unique, bounded physical color tints and structural seeds per exoplanet.
- * Ensures infinite diversity across the 1,952 exoplanets while respecting their
- * astrophysical and chemical composition class.
+ * Generates deterministic 32-bucket procedural parameters for Approach A.
+ * Computes unique 3D spatial terrain seeds, band frequency modulations,
+ * and calibrated multi-color palettes per bucket index (0..31).
  */
-export function derivePlanetProceduralParameters(id: string, theme?: string, temperatureK: number = 300): PlanetProceduralParameters {
-  const h1 = hashStringToFloat(id, 101);
-  const h2 = hashStringToFloat(id, 203);
-  const h3 = hashStringToFloat(id, 307);
-  const h4 = hashStringToFloat(id, 409);
+export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK: number = 300): PlanetBucketUniforms {
+  const normBucket = (bucket % 32) / 32.0;
+  const h1 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-seed`, 11);
+  const h2 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-tint`, 23);
+  const h3 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-band`, 37);
 
-  // 1. Spatial 3D noise coordinate seed (eliminates identical continents/clouds across planets)
-  const seed = h1 * 999.0 + 13.37;
+  // 1. Spatial 3D noise coordinate seed (different landmasses, mountain cordilleras, and storm systems)
+  const seed = h1 * 987.65 + bucket * 31.4159;
 
-  // 2. Band frequency & latitude shift
-  const bandShift = (h2 - 0.5) * 0.45; // -0.225 to +0.225 variation
+  // 2. Band frequency and jet-shear displacement (12 to 34 distinct latitudinal bands)
+  const bandShift = (h3 - 0.5) * 0.8;
+  const bandTurbulence = 0.8 + h1 * 0.6;
 
-  // 3. Cyclone/vortex position seed
-  const stormSeed = h3 * 6.28318; // Full 2PI angle coverage for storms
+  // 3. Physical multi-color tint variations tailored by archetype
+  const tint = new THREE.Vector3(1.0, 1.0, 1.0);
 
-  // 4. Physical color tint derived by archetype
-  let r = 1.0;
-  let g = 1.0;
-  let b = 1.0;
-
-  switch (theme) {
-    case 'gas-giant-banded': {
-      // Natural variation between golden cream, salmon-ochre, butterscotch, and warm terracotta
-      r = 0.90 + h2 * 0.22;
-      g = 0.85 + (h3 - 0.5) * 0.18;
-      b = 0.75 + (h4 - 0.5) * 0.25;
-      break;
-    }
-    case 'ice-giant':
-    case 'sub-neptune': {
-      // Natural methane/volatile variation: aquamarine, cyan-azure, deep sapphire, or turquoise
-      r = 0.75 + (h2 - 0.5) * 0.25;
-      g = 0.90 + (h3 - 0.5) * 0.18;
-      b = 0.95 + h4 * 0.20;
-      break;
-    }
-    case 'hot-jupiter-dark-alkali': {
-      // Deep cobalt, midnight slate indigo, graphite-violet, or dark bronze
-      r = 0.80 + (h2 - 0.5) * 0.30;
-      g = 0.80 + (h3 - 0.5) * 0.25;
-      b = 0.90 + h4 * 0.35;
-      break;
-    }
-    case 'gas-giant-water-clouds': {
-      // Stormy pale azure, cool steel blue, or misty celadon
-      r = 0.82 + (h2 - 0.5) * 0.20;
-      g = 0.88 + (h3 - 0.5) * 0.18;
-      b = 0.95 + (h4 - 0.5) * 0.15;
-      break;
-    }
-    case 'hot-jupiter': {
-      // Silicate and iron clouds: burnt sienna, copper, dark amber, or deep crimson
-      r = 0.95 + h2 * 0.25;
-      g = 0.78 + (h3 - 0.5) * 0.22;
-      b = 0.65 + (h4 - 0.5) * 0.20;
-      break;
-    }
-    case 'super-earth': {
-      // Continental mineralogy: iron-rich rust, arid ochre, volcanic basalt, or clay
-      r = 0.85 + h2 * 0.30;
-      g = 0.80 + (h3 - 0.5) * 0.22;
-      b = 0.75 + (h4 - 0.5) * 0.25;
-      break;
-    }
-    case 'terrestrial-rocky':
-    case 'carbonaceous-asteroid': {
-      // Lunar/Martian regolith: grey basalt, reddish dust, or dark carbonaceous
-      r = 0.85 + h2 * 0.25;
-      g = 0.82 + (h3 - 0.5) * 0.20;
-      b = 0.80 + (h4 - 0.5) * 0.20;
-      break;
-    }
-    case 'hycean-ocean': {
-      // Oceanic depth variation: deep ultramarine, cyan lagoon, or dark cerulean
-      r = 0.75 + (h2 - 0.5) * 0.20;
-      g = 0.90 + (h3 - 0.5) * 0.15;
-      b = 0.95 + h4 * 0.15;
-      break;
-    }
-    default: {
-      r = 0.90 + (h2 - 0.5) * 0.15;
-      g = 0.90 + (h3 - 0.5) * 0.15;
-      b = 0.90 + (h4 - 0.5) * 0.15;
-      break;
-    }
+  // Gas Giant Banded (themeIdx == 5.0)
+  if (themeIdx >= 4.5 && themeIdx < 5.5) {
+    // 32 variations spanning pale ivory, butterscotch, salmon-ochre, warm terracotta, and amber bronze
+    const r = 0.82 + h2 * 0.35;
+    const g = 0.75 + (h3 - 0.5) * 0.28;
+    const b = 0.65 + (h1 - 0.5) * 0.35;
+    tint.set(r, g, b);
+  }
+  // Ice Giant & Sub-Neptune (themeIdx == 3.0 or 4.0)
+  else if (themeIdx >= 2.5 && themeIdx < 4.5) {
+    // 32 variations spanning aquamarine, cyan-azure, deep sapphire, turquoise, and sea-green
+    const r = 0.70 + (h2 - 0.5) * 0.30;
+    const g = 0.85 + (h3 - 0.5) * 0.22;
+    const b = 0.95 + h1 * 0.30;
+    tint.set(r, g, b);
+  }
+  // Hot Jupiter Dark Alkali (themeIdx == 14.0)
+  else if (themeIdx >= 13.5 && themeIdx < 14.5) {
+    // Deep cobalt, midnight slate indigo, graphite-violet, or dark bronze
+    const r = 0.75 + (h2 - 0.5) * 0.35;
+    const g = 0.75 + (h3 - 0.5) * 0.30;
+    const b = 0.90 + h1 * 0.40;
+    tint.set(r, g, b);
+  }
+  // Gas Giant Water Clouds (themeIdx == 15.0)
+  else if (themeIdx >= 14.5) {
+    // Stormy pale azure, cool steel blue, or misty celadon
+    const r = 0.80 + (h2 - 0.5) * 0.25;
+    const g = 0.88 + (h3 - 0.5) * 0.22;
+    const b = 0.95 + (h1 - 0.5) * 0.20;
+    tint.set(r, g, b);
+  }
+  // Hot Jupiter Silicates (themeIdx == 6.0)
+  else if (themeIdx >= 5.5 && themeIdx < 6.5) {
+    // Burnt sienna, copper, dark amber, and crimson clouds
+    const r = 0.95 + h2 * 0.30;
+    const g = 0.75 + (h3 - 0.5) * 0.25;
+    const b = 0.60 + (h1 - 0.5) * 0.25;
+    tint.set(r, g, b);
+  }
+  // Super-Earth (themeIdx == 2.0)
+  else if (themeIdx >= 1.5 && themeIdx < 2.5) {
+    // Iron-rust red, volcanic basalt, arid ochre plateaus, and clay formations
+    const r = 0.80 + h2 * 0.40;
+    const g = 0.78 + (h3 - 0.5) * 0.30;
+    const b = 0.70 + (h1 - 0.5) * 0.35;
+    tint.set(r, g, b);
+  }
+  // Terrestrial Rocky (themeIdx == 0.0)
+  else if (themeIdx < 0.5) {
+    // Lunar grey basalt, Martian red dust, or dark carbonaceous regolith
+    const r = 0.85 + h2 * 0.30;
+    const g = 0.82 + (h3 - 0.5) * 0.25;
+    const b = 0.80 + (h1 - 0.5) * 0.25;
+    tint.set(r, g, b);
+  }
+  // Hycean Ocean & Terrestrial Ocean (themeIdx == 1.0 or 13.0)
+  else if ((themeIdx >= 0.5 && themeIdx < 1.5) || (themeIdx >= 12.5 && themeIdx < 13.5)) {
+    // Azure turquoise, deep cobalt abyss, sapphire archipelago, and dark cerulean
+    const r = 0.72 + (h2 - 0.5) * 0.25;
+    const g = 0.90 + (h3 - 0.5) * 0.20;
+    const b = 0.98 + h1 * 0.25;
+    tint.set(r, g, b);
+  } else {
+    const r = 0.90 + (h2 - 0.5) * 0.20;
+    const g = 0.90 + (h3 - 0.5) * 0.20;
+    const b = 0.90 + (h1 - 0.5) * 0.20;
+    tint.set(r, g, b);
   }
 
-  return { seed, colorTint: [r, g, b], bandShift, stormSeed };
+  return { seed, colorTint: tint, bandShift, bandTurbulence };
 }
