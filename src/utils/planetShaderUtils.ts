@@ -172,6 +172,27 @@ export const PLANET_FRAGMENT_SHADER = `
     }
   }
 
+  // Directional cloud deck with drop shadows onto surface terrain
+  // Evaluates clouds at coordinate p, and projects shadows along incoming light vector L
+  vec4 evaluateCloudLayer(vec3 p, vec3 lightDirVec, float timeVal, float coverage, float cloudSeed) {
+    // Advect clouds over time
+    vec3 cloudCoord = p + vec3(timeVal * 0.04, timeVal * 0.015, timeVal * 0.02) + cloudSeed;
+    vec3 warpedCoord = domainWarp(cloudCoord * 3.2, 0.45);
+    float cloudNoise = fbm(warpedCoord);
+    
+    // Cloud density mask
+    float cloudDensity = smoothstep(1.0 - coverage, 1.0 - coverage + 0.28, cloudNoise);
+
+    // Directional shadow: sample cloud density along offset in direction of light vector
+    // A cloud at altitude h casts shadow on ground at p + lightDir * shadowOffset
+    vec3 shadowCoord = (p + lightDirVec * 0.04) + vec3(timeVal * 0.04, timeVal * 0.015, timeVal * 0.02) + cloudSeed;
+    vec3 warpedShadow = domainWarp(shadowCoord * 3.2, 0.45);
+    float shadowNoise = fbm(warpedShadow);
+    float shadowMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.28, shadowNoise);
+
+    return vec4(cloudDensity, shadowMask, cloudNoise, 0.0);
+  }
+
   void main() {
     #include <logdepthbuf_fragment>
     vec3 N = normalize(vNormal);
@@ -248,6 +269,18 @@ export const PLANET_FRAGMENT_SHADER = `
         float iceCap = smoothstep(polarThreshold, polarThreshold + 0.12, lat + iceNoise * 0.08);
         surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
       }
+
+      // D. Directional Cloud Decks & Drop Shadows
+      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.52, seed * 2.3);
+      float cloudMask = clouds.x;
+      float shadowMask = clouds.y;
+
+      // Cast directional drop shadow onto surface beneath
+      surface *= (1.0 - shadowMask * 0.45);
+
+      // Blend white cloud banks onto surface
+      vec3 cloudColor = vec3(0.95, 0.97, 1.0);
+      surface = mix(surface, cloudColor, cloudMask * 0.92);
 
       atmoColor = vec3(0.35, 0.65, 1.0);
       atmoStrength = 0.75;
@@ -359,8 +392,14 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 warped = domainWarp(vLocalPos * 3.0 + seed, 0.45);
       float deepWater = fbm(warped);
       surface = mix(vec3(0.01, 0.08, 0.28), vec3(0.04, 0.22, 0.50), deepWater * 0.5 + 0.5);
-      atmoColor = vec3(0.30, 0.70, 1.0);
-      atmoStrength = 0.85;
+
+      // Vast tropical cloud streamers & cyclonic storms with directional shadows
+      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.62, seed * 1.7);
+      surface *= (1.0 - hyceanClouds.y * 0.50); // Drop shadows onto dark ocean abyss
+      surface = mix(surface, vec3(0.92, 0.95, 1.0), hyceanClouds.x * 0.95);
+
+      atmoColor = vec3(0.15, 0.75, 1.0);
+      atmoStrength = 0.90;
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
     else if (themeIndex < 14.5) {
