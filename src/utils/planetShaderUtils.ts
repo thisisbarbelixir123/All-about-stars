@@ -247,24 +247,54 @@ export const PLANET_FRAGMENT_SHADER = `
       float elevation = ridgedFbm(warped);
       float micro = fbm(vLocalPos * 14.0 + effSeed);
       
-      // Multi-tier regolith & rock stratification tinted per planet
-      vec3 lowBasin = mix(vec3(0.28, 0.24, 0.22), vec3(0.42, 0.35, 0.30), micro) * effColorTint;
-      vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro) * effColorTint;
+      // Temperature-driven regolith & lithosphere physics:
+      // A. Cold / Frozen Silicate (<280K): Frigid grey/tan regolith with bright polar frost
+      // B. Warm / Martian Arid (280K - 550K): Iron-oxide rust, ochre dust, and red canyon floors
+      // C. Scorched Furnace / Sub-Magma (>550K): Charcoal basalt, dark obsidian, and heat-cracked crust
+      vec3 lowBasin;
+      vec3 highRidge;
+      if (temperatureK < 280.0) {
+        lowBasin = mix(vec3(0.24, 0.22, 0.22), vec3(0.36, 0.32, 0.30), micro) * effColorTint;
+        highRidge = mix(vec3(0.55, 0.50, 0.46), vec3(0.72, 0.68, 0.64), micro) * effColorTint;
+      } else if (temperatureK < 550.0) {
+        lowBasin = mix(vec3(0.42, 0.18, 0.10), vec3(0.58, 0.26, 0.14), micro) * effColorTint;
+        highRidge = mix(vec3(0.70, 0.40, 0.22), vec3(0.85, 0.56, 0.32), micro) * effColorTint;
+      } else {
+        lowBasin = mix(vec3(0.12, 0.10, 0.10), vec3(0.20, 0.15, 0.14), micro) * effColorTint;
+        highRidge = mix(vec3(0.35, 0.28, 0.24), vec3(0.50, 0.40, 0.35), micro) * effColorTint;
+      }
       surface = mix(lowBasin, highRidge, elevation);
 
-      // Polar cold regolith frost (only on planets with frost enabled, controlled by iceCapLatitude > 0.0)
-      if (iceCapLatitude > 0.05 && temperatureK < 320.0) {
+      // Polar frost caps: only on cold planets (<280K) where frost can condense
+      if (temperatureK < 280.0 && iceCapLatitude > 0.05) {
         float lat = abs(vLocalPos.y);
-        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0012, 0.65, 0.96);
+        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0015, 0.65, 0.94);
         if (lat > frostThreshold) {
           float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
           float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
-          surface = mix(surface, vec3(0.85, 0.88, 0.92), frost * 0.85);
+          surface = mix(surface, vec3(0.88, 0.92, 0.96), frost * 0.85);
         }
       }
 
-      atmoColor = vec3(0.65, 0.72, 0.82) * effColorTint;
-      atmoStrength = 0.16;
+      // Faint thermal glow along sunlit fissures for scorched rocky worlds (>850K)
+      if (temperatureK > 850.0) {
+        float fissure = smoothstep(0.75, 0.92, elevation);
+        float subStellar = max(0.0, dot(vLocalPos, L));
+        vec3 thermalGlow = blackbody(min(1400.0, temperatureK));
+        emissiveColor = thermalGlow * fissure * (subStellar * 0.45 + 0.15);
+      }
+
+      // Atmosphere: truly airless for hot worlds (T > 550K); thin exosphere for cold/temperate
+      if (temperatureK > 550.0) {
+        atmoColor = vec3(0.0);
+        atmoStrength = 0.0; // Airless: sharp vacuum shadows
+      } else if (temperatureK > 280.0) {
+        atmoColor = vec3(0.85, 0.55, 0.35) * effColorTint; // Martian dust haze
+        atmoStrength = 0.12;
+      } else {
+        atmoColor = vec3(0.55, 0.68, 0.82) * effColorTint; // Thin cold exosphere
+        atmoStrength = 0.08;
+      }
     }
     // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
     else if (themeIndex < 1.5) {
@@ -276,6 +306,14 @@ export const PLANET_FRAGMENT_SHADER = `
       // Fallback colors if uniforms are default
       vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.015, 0.08, 0.28) * effColorTint);
       vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.32, 0.52) * effColorTint);
+
+      // Temperature modulation of oceans:
+      // Cold (<250K): Frozen steel-blue sea-ice
+      // Temperate (250K - 315K): Azure liquid oceans
+      if (temperatureK < 250.0) {
+        deepColor = mix(deepColor, vec3(0.45, 0.58, 0.70), 0.75);
+        shelfColor = mix(shelfColor, vec3(0.70, 0.82, 0.90), 0.85);
+      }
 
       // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
       if (continental < 0.05) {
@@ -299,9 +337,8 @@ export const PLANET_FRAGMENT_SHADER = `
       }
 
       // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
-      // Threshold modulated per-bucket by iceCapLatitude and temperature
       float baseThreshold = iceCapLatitude > 0.1 ? iceCapLatitude : 0.72;
-      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0018, 0.52, 0.96);
+      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0022, 0.48, 0.96);
       if (lat > polarThreshold && temperatureK < 315.0) {
         float iceNoise = fbm(vLocalPos * 6.0 + effSeed);
         float iceCap = smoothstep(polarThreshold, polarThreshold + 0.10, lat + iceNoise * 0.08);
@@ -314,7 +351,7 @@ export const PLANET_FRAGMENT_SHADER = `
       float shadowMask = clouds.y;
 
       // Specular ocean sun glint: water reflects sharp sunlight where unclouded; land is matte
-      if (continental < 0.05) {
+      if (continental < 0.05 && temperatureK >= 250.0) {
         float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.25;
         specular = oceanSpec * (1.0 - cloudMask);
       }
@@ -333,23 +370,56 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.35, 0.65, 1.0) * effColorTint;
       atmoStrength = 0.75;
     }
-    // 3. Super-Earth (Craggy Super-Continental Lithosphere)
+    // 3. Super-Earth (Dynamic Atmospheric & Thermal Regimes)
     else if (themeIndex < 2.5) {
       vec3 warped = domainWarp(vLocalPos * 3.0 + effSeed, 0.50);
       float tectonic = ridgedFbm(warped);
       float micro = fbm(vLocalPos * 12.0);
 
-      // Deep iron-rich silicate desert and massive volcanic basalt plateaus
-      vec3 volcanicBasalt = vec3(0.20, 0.14, 0.12) * effColorTint;
-      vec3 ironDesert = vec3(0.52, 0.28, 0.16) * effColorTint;
-      vec3 highlandGranite = vec3(0.65, 0.50, 0.40) * effColorTint;
+      // Physical Regimes based on Temperature:
+      // A. Cold Super-Earth (<280K): Glaciated plateaus, permafrost tundra, pale azure haze
+      // B. Temperate Arid Super-Earth (280K - 480K): Ochre plateaus, terracotta canyon lands, rust haze
+      // C. Venusian Super-Earth (480K - 850K): Dense sulfuric/CO2 cloud blankets (creamy yellow-ochre)
+      // D. Scorched Sub-Magma (>850K): Charcoal basalt, twilight glowing tectonic rifts
+      vec3 land;
+      if (temperatureK < 280.0) {
+        vec3 tundraLow = mix(vec3(0.25, 0.32, 0.35), vec3(0.38, 0.45, 0.42), micro) * effColorTint;
+        vec3 glacialHigh = mix(vec3(0.70, 0.78, 0.85), vec3(0.88, 0.92, 0.96), micro) * effColorTint;
+        land = mix(tundraLow, glacialHigh, smoothstep(0.3, 0.75, tectonic));
+        atmoColor = vec3(0.50, 0.72, 0.92) * effColorTint;
+        atmoStrength = 0.60;
+      } else if (temperatureK < 480.0) {
+        vec3 volcanicBasalt = vec3(0.24, 0.16, 0.12) * effColorTint;
+        vec3 ironDesert = vec3(0.58, 0.32, 0.18) * effColorTint;
+        vec3 highlandGranite = vec3(0.72, 0.55, 0.42) * effColorTint;
+        land = mix(volcanicBasalt, ironDesert, smoothstep(0.2, 0.55, tectonic));
+        land = mix(land, highlandGranite, smoothstep(0.55, 0.85, tectonic + micro * 0.2));
+        atmoColor = vec3(0.75, 0.58, 0.42) * effColorTint; // Amber Rayleigh dust haze
+        atmoStrength = 0.55;
+      } else if (temperatureK < 850.0) {
+        // Venusian super-critical CO2 & sulfuric haze atmosphere
+        vec3 sulfurCloudLow = vec3(0.72, 0.62, 0.38) * effColorTint;
+        vec3 sulfurCloudHigh = vec3(0.92, 0.88, 0.65) * effColorTint;
+        land = mix(sulfurCloudLow, sulfurCloudHigh, smoothstep(0.2, 0.8, tectonic + micro * 0.3));
+        atmoColor = vec3(0.92, 0.82, 0.50) * effColorTint; // Thick golden sulfur haze
+        atmoStrength = 0.88;
+      } else {
+        // Scorched sub-magma world (850K - 1350K)
+        vec3 darkCrust = vec3(0.10, 0.08, 0.08) * effColorTint;
+        vec3 ironHighland = vec3(0.25, 0.18, 0.16) * effColorTint;
+        land = mix(darkCrust, ironHighland, smoothstep(0.3, 0.75, tectonic));
+        
+        // Incandescent tectonic stress rifts
+        float rift = smoothstep(0.68, 0.90, tectonic);
+        float subStellar = max(0.0, dot(vLocalPos, L));
+        vec3 thermalGlow = blackbody(min(1600.0, temperatureK));
+        emissiveColor = thermalGlow * rift * (subStellar * 0.60 + 0.25);
 
-      vec3 land = mix(volcanicBasalt, ironDesert, smoothstep(0.2, 0.55, tectonic));
-      land = mix(land, highlandGranite, smoothstep(0.55, 0.85, tectonic + micro * 0.2));
+        atmoColor = vec3(0.85, 0.35, 0.15) * effColorTint; // Scorched mineral vapor
+        atmoStrength = 0.40;
+      }
+
       surface = land;
-
-      atmoColor = vec3(0.45, 0.75, 0.60) * effColorTint;
-      atmoStrength = 0.65;
     }
     // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth pastel Uranus-like and silky flowing Neptune-like jet streams)
     else if (themeIndex < 3.5) {
@@ -954,9 +1024,10 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     }
   }
 
-  // Asteroids and dwarf planets do not have polar ice caps:
-  if (themeIdx >= 15.5 || themeIdx < 0.5) {
-    iceCapLat = 0.0; // Completely disable ice caps on rocky/carbonaceous asteroids
+  // Disable polar frost caps specifically for airless asteroids (carbonaceous-asteroid: 16.0)
+  // or extremely hot terrestrial worlds (T > 280K)
+  if (themeIdx >= 15.5 || tempK >= 280.0) {
+    iceCapLat = 0.0;
   }
 
   return {
