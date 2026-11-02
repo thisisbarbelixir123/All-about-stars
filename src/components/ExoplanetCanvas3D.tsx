@@ -724,14 +724,22 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
       const theme = body.textureTheme ?? (body.diameterJupiter >= 0.5 ? 'gas-giant-banded' : 'terrestrial-rocky');
       const themeIdx = getThemeIndex(theme);
+      const tempK = body.temperatureK || 300;
 
-      // Deterministic 32-bucket index per planet
-      const bucket = Math.floor(hashStringToFloat(body.id, 97) * 32.0) % 32;
-      const key = `planet-${themeIdx}-b${bucket}-${wireframe ? 'w' : 's'}`;
+      // 4 distinct temperature regimes ensuring hot planets never share materials with cold/temperate ones:
+      // 0: Frigid / Glaciated (<280K)
+      // 1: Temperate / Arid (280K - 500K)
+      // 2: Warm / Venusian (500K - 850K)
+      // 3: Scorched / Magma (>=850K)
+      const tempRegime = tempK < 280 ? 0 : tempK < 500 ? 1 : tempK < 850 ? 2 : 3;
+
+      // Deterministic 8-bucket index per regime
+      const bucket = Math.floor(hashStringToFloat(body.id, 97) * 8.0) % 8;
+      const key = `planet-${themeIdx}-r${tempRegime}-b${bucket}-${wireframe ? 'w' : 's'}`;
 
       let mat = materialCacheRef.current.get(key);
       if (!mat) {
-        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, body.temperatureK || 300);
+        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, tempK);
         mat = new THREE.ShaderMaterial({
           wireframe,
           vertexShader: PLANET_VERTEX_SHADER,
@@ -739,7 +747,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           uniforms: {
             time: sharedTimeUniformRef.current,
             themeIndex: { value: themeIdx },
-            temperatureK: { value: body.temperatureK || 300 },
+            temperatureK: { value: tempK },
             lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
             seed: { value: bucketUniforms.seed },
             albedo: { value: body.albedo ?? 0.30 },

@@ -227,7 +227,14 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 effColorTint = colorTint.r > 0.01 ? colorTint : vec3(1.0);
     float effBandShift = bandShift;
 
-    float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0);
+    // Multi-directional celestial illumination model:
+    // 1. Direct key sunlight from stellar source (L)
+    float directLight = max(0.0, dot(N, L));
+    // 2. Soft starlight / galactic ambient fill (guarantees surface geology, craters, and continents are always crisply legible from any camera angle)
+    float ambientFill = 0.40;
+    // 3. Subtle rim backlight to silhouette the spherical limb against deep space
+    float rimFill = max(0.0, dot(N, -L)) * 0.18;
+    float NdotL = clamp(directLight * 0.72 + ambientFill + rimFill, 0.40, 1.25);
     float rawNdotL = max(0.0, dot(N, L));
     float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8);
 
@@ -247,25 +254,32 @@ export const PLANET_FRAGMENT_SHADER = `
       float elevation = ridgedFbm(warped);
       float micro = fbm(vLocalPos * 14.0 + effSeed);
       
+      // Procedural impact craters and ray ejecta patterns for authentic rocky silicate geology
+      float craterNoise = fbmFast(vLocalPos * 22.0 + effSeed * 1.7);
+      float craters = smoothstep(0.68, 0.92, craterNoise);
+
       // Temperature-driven regolith & lithosphere physics:
-      // A. Cold / Frozen Silicate (<280K): Frigid grey/tan regolith with bright polar frost
-      // B. Warm / Martian Arid (280K - 550K): Iron-oxide rust, ochre dust, and red canyon floors
-      // C. Scorched Furnace / Sub-Magma (>550K): Charcoal basalt, dark obsidian, and heat-cracked crust
+      // A. Cold / Frozen Silicate (<280K): Moon/Mercury style silvery-grey regolith with bright anorthosite highlands and polar frost
+      // B. Warm / Martian Arid (280K - 550K): Iron-oxide rust, terracotta canyon floors, and bright ochre sandstone highlands
+      // C. Scorched Furnace (550K - 1350K, e.g. Kepler-131 c, Kepler-37 b): Volcanic basalt basins, warm bronze-tan highlands, crater rays
       vec3 lowBasin;
       vec3 highRidge;
       if (temperatureK < 280.0) {
-        lowBasin = mix(vec3(0.24, 0.22, 0.22), vec3(0.36, 0.32, 0.30), micro) * effColorTint;
-        highRidge = mix(vec3(0.55, 0.50, 0.46), vec3(0.72, 0.68, 0.64), micro) * effColorTint;
+        lowBasin = mix(vec3(0.42, 0.42, 0.44), vec3(0.54, 0.52, 0.50), micro) * effColorTint;
+        highRidge = mix(vec3(0.72, 0.70, 0.68), vec3(0.88, 0.86, 0.84), micro) * effColorTint;
       } else if (temperatureK < 550.0) {
-        lowBasin = mix(vec3(0.42, 0.18, 0.10), vec3(0.58, 0.26, 0.14), micro) * effColorTint;
-        highRidge = mix(vec3(0.70, 0.40, 0.22), vec3(0.85, 0.56, 0.32), micro) * effColorTint;
+        lowBasin = mix(vec3(0.52, 0.28, 0.18), vec3(0.66, 0.38, 0.24), micro) * effColorTint;
+        highRidge = mix(vec3(0.78, 0.52, 0.34), vec3(0.92, 0.68, 0.48), micro) * effColorTint;
       } else {
         // High-temperature rocky worlds (550K - 1350K, e.g. Kepler-131 c, Kepler-37 b):
-        // Highly visible, rich volcanic crust with dark basalt lowlands, warm iron-tinted highlands, and crater rims
-        lowBasin = mix(vec3(0.26, 0.20, 0.18), vec3(0.38, 0.28, 0.24), micro) * effColorTint;
-        highRidge = mix(vec3(0.55, 0.42, 0.36), vec3(0.72, 0.58, 0.50), micro) * effColorTint;
+        // Highly visible volcanic basalt basins, warm bronze-tan highlands, and bright silicate impact ejecta
+        lowBasin = mix(vec3(0.44, 0.36, 0.32), vec3(0.58, 0.46, 0.40), micro) * effColorTint;
+        highRidge = mix(vec3(0.76, 0.64, 0.52), vec3(0.90, 0.78, 0.66), micro) * effColorTint;
       }
       surface = mix(lowBasin, highRidge, elevation);
+
+      // Add bright impact crater ray rims
+      surface = mix(surface, vec3(0.92, 0.88, 0.82) * effColorTint, craters * 0.45);
 
       // Polar frost caps: only on cold planets (<280K) where frost can condense
       if (temperatureK < 280.0 && iceCapLatitude > 0.05) {
@@ -274,7 +288,7 @@ export const PLANET_FRAGMENT_SHADER = `
         if (lat > frostThreshold) {
           float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
           float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
-          surface = mix(surface, vec3(0.88, 0.92, 0.96), frost * 0.85);
+          surface = mix(surface, vec3(0.92, 0.95, 0.98), frost * 0.85);
         }
       }
 
@@ -292,10 +306,10 @@ export const PLANET_FRAGMENT_SHADER = `
         atmoStrength = 0.0; // Airless: sharp vacuum shadows
       } else if (temperatureK > 280.0) {
         atmoColor = vec3(0.85, 0.55, 0.35) * effColorTint; // Martian dust haze
-        atmoStrength = 0.12;
+        atmoStrength = 0.15;
       } else {
         atmoColor = vec3(0.55, 0.68, 0.82) * effColorTint; // Thin cold exosphere
-        atmoStrength = 0.08;
+        atmoStrength = 0.10;
       }
     }
     // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
@@ -381,34 +395,34 @@ export const PLANET_FRAGMENT_SHADER = `
       // Physical Regimes based on Temperature:
       // A. Cold Super-Earth (<280K): Glaciated plateaus, permafrost tundra, pale azure haze
       // B. Temperate Arid Super-Earth (280K - 480K): Ochre plateaus, terracotta canyon lands, rust haze
-      // C. Venusian Super-Earth (480K - 850K): Dense sulfuric/CO2 cloud blankets (creamy yellow-ochre)
-      // D. Scorched Sub-Magma (>850K): Charcoal basalt, twilight glowing tectonic rifts
+      // C. Venusian Super-Earth (480K - 850K): Dense sulfuric/CO2 cloud blankets (creamy golden-yellow)
+      // D. Scorched Sub-Magma (>850K): Volcanic basalt, copper-iron highlands, glowing tectonic rifts
       vec3 land;
       if (temperatureK < 280.0) {
-        vec3 tundraLow = mix(vec3(0.25, 0.32, 0.35), vec3(0.38, 0.45, 0.42), micro) * effColorTint;
-        vec3 glacialHigh = mix(vec3(0.70, 0.78, 0.85), vec3(0.88, 0.92, 0.96), micro) * effColorTint;
+        vec3 tundraLow = mix(vec3(0.42, 0.48, 0.52), vec3(0.56, 0.62, 0.60), micro) * effColorTint;
+        vec3 glacialHigh = mix(vec3(0.78, 0.86, 0.92), vec3(0.92, 0.95, 0.98), micro) * effColorTint;
         land = mix(tundraLow, glacialHigh, smoothstep(0.3, 0.75, tectonic));
         atmoColor = vec3(0.50, 0.72, 0.92) * effColorTint;
         atmoStrength = 0.60;
       } else if (temperatureK < 480.0) {
-        vec3 volcanicBasalt = vec3(0.24, 0.16, 0.12) * effColorTint;
-        vec3 ironDesert = vec3(0.58, 0.32, 0.18) * effColorTint;
-        vec3 highlandGranite = vec3(0.72, 0.55, 0.42) * effColorTint;
-        land = mix(volcanicBasalt, ironDesert, smoothstep(0.2, 0.55, tectonic));
+        vec3 canyonBasin = vec3(0.48, 0.28, 0.20) * effColorTint;
+        vec3 ironDesert = vec3(0.72, 0.46, 0.30) * effColorTint;
+        vec3 highlandGranite = vec3(0.86, 0.70, 0.54) * effColorTint;
+        land = mix(canyonBasin, ironDesert, smoothstep(0.2, 0.55, tectonic));
         land = mix(land, highlandGranite, smoothstep(0.55, 0.85, tectonic + micro * 0.2));
-        atmoColor = vec3(0.75, 0.58, 0.42) * effColorTint; // Amber Rayleigh dust haze
+        atmoColor = vec3(0.78, 0.58, 0.42) * effColorTint; // Amber Rayleigh dust haze
         atmoStrength = 0.55;
       } else if (temperatureK < 850.0) {
         // Venusian super-critical CO2 & sulfuric haze atmosphere
-        vec3 sulfurCloudLow = vec3(0.72, 0.62, 0.38) * effColorTint;
-        vec3 sulfurCloudHigh = vec3(0.92, 0.88, 0.65) * effColorTint;
+        vec3 sulfurCloudLow = vec3(0.82, 0.72, 0.48) * effColorTint;
+        vec3 sulfurCloudHigh = vec3(0.96, 0.92, 0.74) * effColorTint;
         land = mix(sulfurCloudLow, sulfurCloudHigh, smoothstep(0.2, 0.8, tectonic + micro * 0.3));
-        atmoColor = vec3(0.92, 0.82, 0.50) * effColorTint; // Thick golden sulfur haze
+        atmoColor = vec3(0.94, 0.86, 0.55) * effColorTint; // Thick golden sulfur haze
         atmoStrength = 0.88;
       } else {
         // Scorched sub-magma world (850K - 1350K)
-        vec3 darkCrust = vec3(0.10, 0.08, 0.08) * effColorTint;
-        vec3 ironHighland = vec3(0.25, 0.18, 0.16) * effColorTint;
+        vec3 darkCrust = vec3(0.42, 0.32, 0.26) * effColorTint;
+        vec3 ironHighland = vec3(0.68, 0.48, 0.36) * effColorTint;
         land = mix(darkCrust, ironHighland, smoothstep(0.3, 0.75, tectonic));
         
         // Incandescent tectonic stress rifts
@@ -417,8 +431,8 @@ export const PLANET_FRAGMENT_SHADER = `
         vec3 thermalGlow = blackbody(min(1600.0, temperatureK));
         emissiveColor = thermalGlow * rift * (subStellar * 0.60 + 0.25);
 
-        atmoColor = vec3(0.85, 0.35, 0.15) * effColorTint; // Scorched mineral vapor
-        atmoStrength = 0.40;
+        atmoColor = vec3(0.88, 0.45, 0.22) * effColorTint; // Scorched mineral vapor
+        atmoStrength = 0.45;
       }
 
       surface = land;
@@ -697,9 +711,9 @@ export const PLANET_FRAGMENT_SHADER = `
       // Deep, luminous alkali absorption colors with high contrast:
       // Intense atmospheric sodium (Na D lines) and potassium (K I) absorption creates:
       // Deep midnight cobalt, glowing amethyst-plum, and twilight bronze equatorial ribbons
-      vec3 darkTone = vec3(0.08, 0.10, 0.22) * effColorTint;
-      vec3 alkaliTone = vec3(0.24, 0.18, 0.40) * effColorTint;
-      vec3 bronzeShear = vec3(0.38, 0.24, 0.16) * effColorTint;
+      vec3 darkTone = vec3(0.18, 0.16, 0.28) * effColorTint;
+      vec3 alkaliTone = vec3(0.34, 0.26, 0.52) * effColorTint;
+      vec3 bronzeShear = vec3(0.48, 0.32, 0.24) * effColorTint;
 
       float jetContrast = smoothstep(0.55, 1.25, bandTurbulence);
       float tBand = smoothstep(-0.7, 0.7, band);
@@ -739,10 +753,10 @@ export const PLANET_FRAGMENT_SHADER = `
       float craters = ridgedFbm(warped * 2.0);
       float micro = fbmFast(vLocalPos * 16.0);
       
-      // Extremely dark, low-albedo (0.04-0.12) carbonaceous / hydrated silicate regolith:
-      // Charcoal, graphite grey, and dark slate tones without any polar ice caps
-      vec3 darkBasin = mix(vec3(0.08, 0.08, 0.09), vec3(0.13, 0.13, 0.14), micro) * effColorTint;
-      vec3 impactRim = mix(vec3(0.16, 0.16, 0.17), vec3(0.24, 0.24, 0.25), micro) * effColorTint;
+      // Distinct low-albedo (0.04-0.12) carbonaceous / hydrated silicate regolith:
+      // Charcoal, graphite grey, and dark slate tones with visible impact rims
+      vec3 darkBasin = mix(vec3(0.22, 0.22, 0.24), vec3(0.32, 0.32, 0.34), micro) * effColorTint;
+      vec3 impactRim = mix(vec3(0.42, 0.42, 0.44), vec3(0.56, 0.56, 0.58), micro) * effColorTint;
       surface = mix(darkBasin, impactRim, craters);
 
       // Airless body: zero atmospheric scattering
@@ -752,8 +766,8 @@ export const PLANET_FRAGMENT_SHADER = `
 
     // Physical Albedo modulation:
     // Low albedo planets absorb deep light; high albedo reflects cloud tops
-    // Guarantee minimum optical floor (0.55) so atmospheric fluid features remain crisp and visible
-    float albedoFactor = clamp(albedo * 1.5 + 0.50, 0.55, 1.75);
+    // Maintain healthy optical dynamic range [0.75, 1.50] so surface features remain distinct and visible
+    float albedoFactor = clamp(albedo * 0.90 + 0.68, 0.75, 1.50);
 
     // Rayleigh scattering atmospheric limb glow (enhances soft atmospheric horizon ring)
     float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));
