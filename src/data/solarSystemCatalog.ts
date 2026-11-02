@@ -562,7 +562,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-mercury',
     name: 'Mercury',
-    classification: 'Terrestrial Planet',
+    classification: 'Sub-Martian',
     diameterKm: 4879,
     diameterEarth: +(4879 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(4879 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -607,7 +607,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-mars',
     name: 'Mars',
-    classification: 'Terrestrial Planet',
+    classification: 'Martian',
     diameterKm: 6779,
     diameterEarth: +(6779 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(6779 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -622,7 +622,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-venus',
     name: 'Venus',
-    classification: 'Terrestrial Planet',
+    classification: 'Terran',
     diameterKm: 12104,
     diameterEarth: +(12104 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(12104 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -637,7 +637,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-earth',
     name: 'Earth',
-    classification: 'Terrestrial Planet',
+    classification: 'Terran',
     diameterKm: 12742,
     diameterEarth: 1.0,
     diameterJupiter: +(12742 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -652,7 +652,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-neptune',
     name: 'Neptune',
-    classification: 'Ice Giants',
+    classification: 'Neptunian',
     diameterKm: 49244,
     diameterEarth: +(49244 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(49244 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -667,7 +667,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-uranus',
     name: 'Uranus',
-    classification: 'Ice Giants',
+    classification: 'Neptunian',
     diameterKm: 50724,
     diameterEarth: +(50724 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(50724 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -682,7 +682,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-saturn',
     name: 'Saturn',
-    classification: 'Gas Giants',
+    classification: 'Jovian',
     diameterKm: 116460,
     diameterEarth: +(116460 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: +(116460 / JUPITER_DIAMETER_KM).toFixed(4),
@@ -697,7 +697,7 @@ export const SOLAR_SYSTEM_ROSTER: CelestialBody[] = [
   {
     id: 'sol-jupiter',
     name: 'Jupiter',
-    classification: 'Gas Giants',
+    classification: 'Jovian',
     diameterKm: 139820,
     diameterEarth: +(139820 / EARTH_DIAMETER_KM).toFixed(4),
     diameterJupiter: 1.0,

@@ -27,6 +27,7 @@ import {
   MoveHorizontal,
 } from 'lucide-react';
 import { CelestialBody, TourLength, CelestialClassification } from '../types';
+import { MASTER_CELESTIAL_BY_ID } from '../data/masterCelestialCatalog';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
 import { soundEffects } from '../utils/soundEffects';
 import {
@@ -35,6 +36,7 @@ import {
   getThemeIndex,
 } from '../utils/planetShaderUtils';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUtils';
+import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
 
 export type CelestialSortKey = 'size' | 'mass' | 'temperature' | 'discoveryYear';
 export type SortDirection = 'asc' | 'desc';
@@ -66,12 +68,21 @@ function inferBodyColor(body: CelestialBody): string {
   if (name === 'pluto' || name === 'charon') return '#d6d3d1';
 
   switch (body.classification) {
+    case 'Jovian':
     case 'Gas Giants':
       return '#fb923c';
+    case 'Neptunian':
     case 'Ice Giants':
       return '#38bdf8';
+    case 'Superterran':
+      return '#22d3ee';
+    case 'Terran':
     case 'Terrestrial Planet':
       return '#34d399';
+    case 'Martian':
+      return '#f87171';
+    case 'Sub-Martian':
+      return '#94a3b8';
     case 'Dwarf planet':
     case 'Plutino':
     case 'Trans-Neptunian Object':
@@ -624,6 +635,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
     const sharedSphereGeo = new THREE.SphereGeometry(1, 48, 48);
     const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
+    const customGeometryCache = new Map<string, THREE.BufferGeometry>();
 
     const getMaterial = (body: CelestialBody): THREE.ShaderMaterial => {
       if (body.classification === 'Star') {
@@ -681,13 +693,32 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       const sc = bodyScales[body.id];
       if (!sc) return;
 
+      const geoConfig = getBodyGeometryConfig(body);
+      const groundY = sc.radius * geoConfig.verticalOffsetFactor;
+
       const group = new THREE.Group();
-      group.position.set(sc.xPos, sc.radius, sc.zPos);
+      group.position.set(sc.xPos, groundY, sc.zPos);
       group.userData = { bodyId: body.id, bodyData: body };
 
       const mat = getMaterial(body);
-      const mesh = new THREE.Mesh(sharedSphereGeo, mat);
-      mesh.scale.setScalar(sc.radius);
+
+      // Select geometry: custom irregular mesh for sub-600 km bodies or shared sphere
+      let meshGeo = sharedSphereGeo;
+      if (geoConfig.geometryType === 'irregular') {
+        let customGeo = customGeometryCache.get(body.id);
+        if (!customGeo) {
+          customGeo = createIrregularBodyGeometry(body.id);
+          customGeometryCache.set(body.id, customGeo);
+        }
+        meshGeo = customGeo;
+      }
+
+      const mesh = new THREE.Mesh(meshGeo, mat);
+      mesh.scale.set(
+        sc.radius * geoConfig.scaleMultiplier.x,
+        sc.radius * geoConfig.scaleMultiplier.y,
+        sc.radius * geoConfig.scaleMultiplier.z
+      );
       mesh.name = `Sphere-${body.id}`;
       mesh.userData = { bodyData: body };
       group.add(mesh);
@@ -696,7 +727,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // Tap hit target for small moons/asteroids
       const hitR = Math.max(sc.radius * 1.25, 0.0003);
       const hitMesh = new THREE.Mesh(sharedHitGeo, new THREE.MeshBasicMaterial({ visible: false }));
-      hitMesh.scale.setScalar(hitR);
+      hitMesh.scale.set(
+        hitR * geoConfig.scaleMultiplier.x,
+        hitR * geoConfig.scaleMultiplier.y,
+        hitR * geoConfig.scaleMultiplier.z
+      );
       hitMesh.userData = { bodyData: body };
       group.add(hitMesh);
       interactiveMeshesRef.current.push(hitMesh);
@@ -708,6 +743,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     return () => {
       sharedSphereGeo.dispose();
       sharedHitGeo.dispose();
+      customGeometryCache.forEach((geo) => geo.dispose());
+      customGeometryCache.clear();
     };
   }, [sortedBodies, bodyScales, wireframe]);
 
@@ -882,7 +919,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           if (el && sc) {
             const width = containerRef.current.clientWidth;
             const height = containerRef.current.clientHeight;
-            const apexY = sc.radius * 2;
+            const bodyObj = MASTER_CELESTIAL_BY_ID.get(currentActiveId);
+            const geoConfig = bodyObj ? getBodyGeometryConfig(bodyObj) : null;
+            const apexY = sc.radius * (geoConfig ? geoConfig.verticalOffsetFactor * 2 : 2);
             const tempVec = new THREE.Vector3(sc.xPos, apexY, sc.zPos).project(cameraRef.current);
 
             if (tempVec.z > 1.0 || Math.abs(tempVec.x) > 1.4 || Math.abs(tempVec.y) > 1.4) {
