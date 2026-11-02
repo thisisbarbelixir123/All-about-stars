@@ -253,11 +253,13 @@ export const PLANET_FRAGMENT_SHADER = `
     // Multi-directional celestial illumination model:
     // 1. Direct key sunlight from stellar source (L)
     float directLight = max(0.0, dot(N, L));
-    // 2. Soft starlight / galactic ambient fill (guarantees surface geology, craters, and continents are always crisply legible from any camera angle)
-    float ambientFill = 0.40;
-    // 3. Subtle rim backlight to silhouette the spherical limb against deep space
+    // 2. Camera-aligned starlight fill: guarantees surface features and relief are never lost in pitch-black shadow blind spots
+    float cameraFill = max(0.0, dot(N, V)) * 0.35;
+    // 3. Soft galactic ambient fill
+    float ambientFill = 0.45;
+    // 4. Subtle rim backlight to silhouette the spherical limb against deep space
     float rimFill = max(0.0, dot(N, -L)) * 0.18;
-    float NdotL = clamp(directLight * 0.72 + ambientFill + rimFill, 0.40, 1.25);
+    float NdotL = clamp(directLight * 0.65 + ambientFill + cameraFill + rimFill, 0.55, 1.35);
     float rawNdotL = max(0.0, dot(N, L));
     float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8);
 
@@ -303,17 +305,6 @@ export const PLANET_FRAGMENT_SHADER = `
 
       // Add bright impact crater ray rims
       surface = mix(surface, vec3(0.88, 0.85, 0.80) * effColorTint, craters * 0.40);
-
-      // Polar frost caps: only on planets with volatile ice presence (strictly confined to extreme polar cold traps)
-      if (temperatureK < 280.0 && iceCapLatitude > 0.1) {
-        float lat = abs(vLocalPos.y);
-        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0015, 0.82, 0.96);
-        if (lat > frostThreshold) {
-          float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
-          float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
-          surface = mix(surface, vec3(0.90, 0.93, 0.96), frost * 0.70);
-        }
-      }
 
       // Faint thermal glow along sunlit fissures for scorched rocky worlds (>850K)
       if (temperatureK > 850.0) {
@@ -478,10 +469,6 @@ export const PLANET_FRAGMENT_SHADER = `
           vec3 canyonFloor = mix(vec3(0.36, 0.18, 0.12), vec3(0.48, 0.24, 0.16), micro) * effColorTint;
           vec3 terracottaPlateau = mix(vec3(0.62, 0.34, 0.22), vec3(0.74, 0.42, 0.28), micro) * effColorTint;
           land = mix(canyonFloor, terracottaPlateau, smoothstep(0.25, 0.70, tectonic));
-          if (lat > 0.88) {
-            float polarFrost = smoothstep(0.88, 0.96, lat + micro * 0.04);
-            land = mix(land, vec3(0.88, 0.90, 0.94), polarFrost * 0.65);
-          }
           atmoColor = vec3(0.65, 0.45, 0.35) * effColorTint;
           atmoStrength = 0.20;
         } else if (coldRegime < 0.75) {
@@ -498,10 +485,6 @@ export const PLANET_FRAGMENT_SHADER = `
           land = mix(slateLowland, highlandCrag, smoothstep(0.30, 0.70, tectonic));
           float alpineFrost = smoothstep(0.78, 0.92, tectonic + micro * 0.15);
           land = mix(land, vec3(0.88, 0.92, 0.96), alpineFrost * 0.50);
-          if (lat > 0.85) {
-            float polarCap = smoothstep(0.85, 0.95, lat + micro * 0.05);
-            land = mix(land, vec3(0.86, 0.90, 0.95), polarCap * 0.60);
-          }
           atmoColor = vec3(0.45, 0.60, 0.80) * effColorTint;
           atmoStrength = 0.28;
         }
@@ -1254,15 +1237,9 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     }
   }
 
-  // Polar ice caps: only present on worlds with atmospheric volatiles and cold temperatures
-  if (themeIdx >= 15.5 || tempK >= 320.0) {
+  // Polar ice caps: only present on habitable ocean worlds (themeIdx == 1.0) with cold temperatures
+  if (themeIdx >= 15.5 || tempK >= 320.0 || themeIdx < 0.5 || (themeIdx >= 1.5 && themeIdx < 2.5)) {
     iceCapLat = 0.0;
-  } else if (themeIdx < 0.5) {
-    // Airless / rocky worlds: dry basalt/silicate regolith; only rare volatile-trapped worlds have polar frost
-    iceCapLat = (tempK < 250.0 && bucket % 4 === 0) ? 0.88 + h3 * 0.06 : 0.0;
-  } else if (themeIdx >= 1.5 && themeIdx < 2.5) {
-    // Super-Earths: only cold worlds with volatile reservoirs have polar frost caps
-    iceCapLat = (tempK < 250.0 && bucket % 3 === 0) ? 0.86 + h3 * 0.06 : 0.0;
   }
 
   return {

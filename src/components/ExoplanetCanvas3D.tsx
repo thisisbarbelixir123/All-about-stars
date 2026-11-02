@@ -268,6 +268,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   // Three.js refs
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const cameraLightRef = useRef<THREE.DirectionalLight | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const bodyObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
   const labelElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -577,12 +578,17 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     scene.add(new THREE.Points(starGeo, starMat));
 
     // Ambient Lighting (balanced fill for space without washing out deep textures)
-    scene.add(new THREE.AmbientLight('#ffffff', 0.45));
+    scene.add(new THREE.AmbientLight('#ffffff', 0.55));
 
     // Directional Sunlight (focused key light providing rich relief and shadows)
-    const sunLight = new THREE.DirectionalLight('#ffffff', 1.05);
+    const sunLight = new THREE.DirectionalLight('#ffffff', 1.0);
     sunLight.position.set(1.0, 0.4, 0.8).normalize().multiplyScalar(100);
     scene.add(sunLight);
+
+    // Camera-tracking headlight / fill light: completely eliminates pitch-black blind spots on the 3D stage
+    const cameraLight = new THREE.DirectionalLight('#ffffff', 0.65);
+    scene.add(cameraLight);
+    cameraLightRef.current = cameraLight;
 
     // Continuous Procedural Grid
     const gridGroup = new THREE.Group();
@@ -882,7 +888,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       }
 
       // Tap hit target for small moons/asteroids
-      const hitR = Math.max(sc.radius * 1.25, 0.0003);
+      const hitR = Math.max(sc.radius * 1.35, 0.0008);
       const hitMesh = new THREE.Mesh(sharedHitGeo, new THREE.MeshBasicMaterial({ visible: false }));
       hitMesh.scale.set(
         hitR * geoConfig.scaleMultiplier.x,
@@ -991,9 +997,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         cameraRef.current.position.copy(currentCameraPosRef.current);
         cameraRef.current.lookAt(currentLookAtRef.current);
 
-        // Dynamic clip planes: completely prevents Z-fighting and black clipping
-        const targetNear = Math.max(0.0000001, Math.min(30.0, dist * 0.002));
-        const targetFar = Math.max(150000, dist * 35.0);
+        // Dynamic clip planes: completely prevents Z-fighting and near-plane black clipping blind spots
+        const targetNear = Math.max(0.0000001, Math.min(0.01, dist * 0.0002));
+        const targetFar = Math.max(250000, dist * 50.0);
         if (
           Math.abs(cameraRef.current.near - targetNear) > targetNear * 0.1 ||
           Math.abs(cameraRef.current.far - targetFar) > 100
@@ -1003,36 +1009,15 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           cameraRef.current.updateProjectionMatrix();
         }
 
-        // High-Performance Frustum & Screen-Size Culling
-        // Cull objects behind camera or occupying less than 1.5 pixels on screen
-        cameraRef.current.updateMatrixWorld();
-        projScreenMatrix.multiplyMatrices(cameraRef.current.projectionMatrix, cameraRef.current.matrixWorldInverse);
-        frustum.setFromProjectionMatrix(projScreenMatrix);
+        // Camera fill light synchronization: tracks camera to prevent dark shadow blind spots
+        if (cameraLightRef.current) {
+          cameraLightRef.current.position.copy(cameraRef.current.position);
+        }
 
-        const camPos = cameraRef.current.position;
-        const fovRad = (cameraRef.current.fov * Math.PI) / 180;
-        const vpHeight = containerRef.current?.clientHeight || window.innerHeight;
-
-        bodyObjectsRef.current.forEach((grp, id) => {
-          const sc = bodyScalesRef.current[id];
-          if (!sc) return;
-
-          tempSphere.center.copy(grp.position);
-          tempSphere.radius = sc.radius * 1.5;
-
-          if (!frustum.intersectsSphere(tempSphere)) {
-            grp.visible = false;
-            return;
-          }
-
-          // Screen-space pixel radius estimation: R_px = (radius / dist) * (height / (2 * tan(fov / 2)))
-          const distToCam = camPos.distanceTo(grp.position);
-          const pxSize = (sc.radius / Math.max(distToCam, 0.00001)) * (vpHeight / (2.0 * Math.tan(fovRad / 2.0)));
-
-          // Cull bodies that render smaller than 1.2 physical pixels (microscopic sub-pixel dots)
-          // Keep active or hovered body always visible
-          const isTargeted = id === activeBodyId || id === hoveredBody?.id;
-          grp.visible = isTargeted || pxSize >= 1.2;
+        // Keep all celestial bodies visible and interactive across the entire 3D stage
+        // Completely eliminates culling blind spots and vanished bodies
+        bodyObjectsRef.current.forEach((grp) => {
+          grp.visible = true;
         });
       }
 
