@@ -805,10 +805,14 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     return list;
   }, [stars, sortKey, sortDirection, isTourMode, isAllStarsPreset]);
 
-  // Precompute 1-to-1 milestone to closest star map so each milestone appears exactly once in the entire catalog
+  // Precompute 1-to-1 milestone to closest star map so each milestone appears exactly once in the entire catalog.
+  // CRITICAL REQUIREMENT: Milestones and planetary orbits ONLY appear in the full catalog (isAllStarsPreset) sorted by size.
   const milestoneStarMap = useMemo(() => {
+    if (!isAllStarsPreset || sortKey !== 'size') {
+      return new Map<string, ScaleMilestone>();
+    }
     return buildMilestoneStarMap(sortedStars);
-  }, [sortedStars]);
+  }, [sortedStars, isAllStarsPreset, sortKey]);
 
   const prevSortKeyForLayoutRef = useRef(sortKey);
   useEffect(() => {
@@ -2832,6 +2836,52 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
         return;
       }
 
+      // In Tour Mode: dedicated streamlined keyboard handling
+      if (isTourModeRef.current) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleEndTour();
+          return;
+        }
+        if (e.code === 'Space' || e.key === ' ') {
+          e.preventDefault();
+          if (activeStarIndex >= sortedStars.length - 1 && !isTourPlaying) {
+            handleRestartTour();
+            return;
+          }
+          const next = !isTourPlaying;
+          setIsTourPlaying(next);
+          isTourPlayingRef.current = next;
+          soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+          return;
+        }
+        if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          handleRestartTour();
+          return;
+        }
+        if (e.key === 'ArrowLeft' || e.key === '[') {
+          e.preventDefault();
+          handlePrevStar();
+          return;
+        }
+        if (e.key === 'ArrowRight' || e.key === ']') {
+          e.preventDefault();
+          handleNextStar();
+          return;
+        }
+        if (e.key === '1' || e.key === 'Home') {
+          e.preventDefault();
+          handleRestartTour();
+          return;
+        }
+        if (e.key === '9' || e.key === 'End') {
+          e.preventDefault();
+          handlePanToLargest();
+          return;
+        }
+      }
+
       // Escape key: exit tour mode if tour mode is active
       if (e.key === 'Escape') {
         if (isTourModeRef.current) {
@@ -4726,12 +4776,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
               <button
                 id="btn-tour-end"
                 onClick={handleEndTour}
-                title="End Tour (Esc)"
+                title="End Tour"
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#040816]/95 hover:bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85),0_0_15px_rgba(244,63,94,0.3)] backdrop-blur-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
               >
                 <Square className="w-3.5 h-3.5 fill-rose-400 text-rose-400" />
                 <span>End Tour</span>
-                <StageKbd variant="cyan" className="text-[9px] h-4 min-w-[1rem] px-1 ml-1 border-rose-500/30 text-rose-200">Esc</StageKbd>
               </button>
 
               {/* Restart Tour Button */}
@@ -4758,7 +4807,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   isTourPlayingRef.current = next;
                   soundEffects.play(next ? 'toggleOn' : 'toggleOff');
                 }}
-                title={isTourPlaying ? 'Pause Tour (T)' : 'Resume Tour (T)'}
+                title={isTourPlaying ? 'Pause Tour' : 'Resume Tour'}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#040816]/95 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono transition-all cursor-pointer active:scale-95"
               >
                 {isTourPlaying ? (
