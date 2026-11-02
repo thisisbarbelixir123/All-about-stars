@@ -2302,16 +2302,24 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       }
 
       // 3. Dynamic focused point light: moves to focused star or smoothly illuminates target
+      // CRITICAL: Solar System reference planets are non-luminous bodies that reflect light.
+      // Placing an intense point light inside a focused planet causes its surface texture to blast/blow out white!
       if (focusedLightRef.current) {
         const activeStarId = focusedStarIdRef.current ?? selectedStarIdRef.current;
         const activeStar = activeStarId ? sortedStarsRef.current.find(s => s.id === activeStarId) : null;
         if (activeStar) {
           const sc = starScalesRef.current[activeStar.id];
           if (sc) {
-            focusedLightRef.current.position.set(sc.xPos, sc.radius, sc.zPos || 0);
-            focusedLightRef.current.distance = Math.max(0.00005, sc.radius * 3.2);
-            focusedLightRef.current.color.set(activeStar.colorHex);
-            focusedLightRef.current.intensity = 1.8;
+            const isPlanet = isSolarReferenceBody(activeStar);
+            if (isPlanet) {
+              // Non-luminous planet: shut off the internal star point light completely so textures render naturally with sun/ambient
+              focusedLightRef.current.intensity = 0.0;
+            } else {
+              focusedLightRef.current.position.set(sc.xPos, sc.radius, sc.zPos || 0);
+              focusedLightRef.current.distance = Math.max(0.00005, sc.radius * 3.2);
+              focusedLightRef.current.color.set(activeStar.colorHex);
+              focusedLightRef.current.intensity = 1.8;
+            }
           }
         } else {
           focusedLightRef.current.position.copy(cameraTargetRef.current);
@@ -4882,7 +4890,9 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                     <div className="flex flex-col min-w-0 flex-1">
                       <div className="flex items-start sm:items-center gap-2.5 sm:gap-3.5">
                         <span
-                          className="w-4 h-4 sm:w-5 sm:h-5 rounded-full aspect-square shrink-0 ring-2 ring-white/50 shadow-[0_0_20px_currentColor] mt-1 sm:mt-0"
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full aspect-square shrink-0 ring-2 ring-white/50 mt-1 sm:mt-0 ${
+                            isSolarRef ? 'shadow-none ring-slate-400/50' : 'shadow-[0_0_20px_currentColor]'
+                          }`}
                           style={{ backgroundColor: activeFocusedStar.colorHex, color: activeFocusedStar.colorHex }}
                         />
                         <h1 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black font-display text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] break-words">
