@@ -31,14 +31,15 @@
     "discoveryMethod": "timing",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "terrestrial-rocky",
     "temperatureK": 180,
     "massEarth": 0.02,
     "massJupiter": 0.0001,
     "orbitalPeriodDays": 25.262,
     "semiMajorAxisAU": 0.19,
-    "albedo": 0.55,
-    "albedoType": "estimated"
+    "albedo": 0.1,
+    "albedoType": "estimated",
+    "description": "Cold, airless rocky exoplanet orbiting a pulsar, subjected to intense radiation with cratered basalt bedrock and ancient silicate regolith."
   },
   {
     "id": "exo-kepler-444-b",
@@ -319,8 +320,8 @@
     "confirmed": true,
     "description": "Astronomers have found this system of seven Earth-sized planets just 40 light-years away. Using ground and space telescopes the planets were all detected as they passed in front of their parent star, the ultracool dwarf star known as TRAPPIST-1. The six inner planets form a near-resonant chain such that their orbital periods (1.51, 2.42, 4.04, 6.06, 9.21, 12.35 days) are near ratios of small integers. This architecture suggests that the planets formed farther from the star and migrated inward. The seven planets have equilibrium temperatures low enough to support liquid water on their surfaces.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
-    "albedo": 0.55,
+    "textureTheme": "terrestrial-rocky",
+    "albedo": 0.14,
     "albedoType": "estimated"
   },
   {
@@ -1127,12 +1128,12 @@
     "discoveryYear": 2019,
     "discoveryMethod": "radial velocity",
     "confirmed": true,
-    "description": "Teegarden's Star c is the second confirmed planet orbiting Teegarden's Star, situated near the outer edge of its habitable zone. It has an equilibrium temperature around 199 K, likely supporting extensive glaciated ice sheets or a thick greenhouse atmosphere.",
+    "description": "Teegarden's Star c is the second confirmed planet orbiting Teegarden's Star, situated near the outer edge of its habitable zone. It has an equilibrium temperature around 199 K, featuring cold terrestrial silicate geology with dry plateaus and cratered basalt basins.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "terrestrial-rocky",
     "temperatureK": 199,
     "semiMajorAxisAU": 0.0443,
-    "albedo": 0.55,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -1192,10 +1193,10 @@
     "confirmed": true,
     "description": "GJ 1002 c is the outer habitable-zone Earth-mass planet in the nearby GJ 1002 system, located just 15.8 light-years away. It receives roughly 26% of Earth's solar energy, maintaining an equilibrium temperature of ~182 K under an ice-glaciated or greenhouse atmosphere.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "terrestrial-rocky",
     "temperatureK": 182,
     "semiMajorAxisAU": 0.0738,
-    "albedo": 0.55,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -1692,8 +1693,8 @@
     "confirmed": true,
     "description": "Astronomers have found this system of seven Earth-sized planets just 40 light-years away. Using ground and space telescopes the planets were all detected as they passed in front of their parent star, the ultracool dwarf star known as TRAPPIST-1. The six inner planets form a near-resonant chain such that their orbital periods (1.51, 2.42, 4.04, 6.06, 9.21, 12.35 days) are near ratios of small integers. This architecture suggests that the planets formed farther from the star and migrated inward. The seven planets have equilibrium temperatures low enough to support liquid water on their surfaces.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
-    "albedo": 0.55,
+    "textureTheme": "terrestrial-rocky",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -3115,9 +3116,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 154,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -3525,9 +3526,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2021. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 131,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -5510,14 +5511,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 135,
     "massEarth": 2.311,
     "massJupiter": 0.0073,
     "orbitalPeriodDays": 40.54,
     "semiMajorAxisAU": 0.1264,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -5690,9 +5691,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 180,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -6540,9 +6541,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 185,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -6715,10 +6716,10 @@
     "confirmed": true,
     "description": "Proxima Centauri c is an outer Super-Earth candidate in the closest star system to our Sun, discovered in 2020 via radial velocity and astrometry. Orbiting far beyond the frost line at 1.49 AU, this frigid world takes over 5.2 years to complete an orbit around Proxima Centauri.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 39,
     "semiMajorAxisAU": 1.489,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -7195,9 +7196,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Ryu et al. 2022. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 159,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -7347,9 +7348,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 139,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -7693,9 +7694,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Han et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 189,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -8413,9 +8414,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 181,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {
@@ -9020,9 +9021,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Zang et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "kbo-ice",
+    "textureTheme": "super-earth",
     "temperatureK": 178,
-    "albedo": 0.55,
+    "albedo": 0.18,
     "albedoType": "estimated"
   },
   {

@@ -213,31 +213,25 @@ export function deriveScientificExoplanetTheme(params: {
     };
   }
 
-  // 4. Frigid Ice-Glaciated Worlds (T_eq < 200 K)
-  if (temperatureK < 200) {
-    return {
-      theme: 'kbo-ice',
-      albedo: 0.55,
-      albedoType: 'estimated',
-      description: 'Frigid ice-encrusted rocky world covered in nitrogen, methane, and water ice glaciers.',
-    };
-  }
-
-  // 5. Superterrans (Super-Earths) with T_eq >= 350 K (Dense Silicate/Iron Lithosphere)
+  // 4. Superterrans (Super-Earths) - both cold and warm (Dense Silicate/Iron Lithosphere)
   if (classification === 'Superterran' || diameterEarth > 1.3) {
     return {
       theme: 'super-earth',
       albedo: 0.18,
       albedoType: 'estimated',
-      description: 'Craggy Super-Earth with iron-rich silicate desert plains, tectonic faults, and volcanic activity.',
+      description: temperatureK < 250
+        ? 'Cold Super-Earth with exposed dark basalt, iron-oxide mineral plains, and rugged tectonic plateaus.'
+        : 'Craggy Super-Earth with iron-rich silicate desert plains, tectonic faults, and volcanic activity.',
     };
   }
 
-  // 6. Sub-Martian, Martian, and Rocky Terrans (Silicate Regolith / Airless / Cratered)
+  // 5. Sub-Martian, Martian, and Rocky Terrans (Silicate Regolith / Airless / Cratered)
   return {
     theme: 'terrestrial-rocky',
     albedo: 0.16,
     albedoType: 'estimated',
-    description: 'Terrestrial rocky planet with impact craters, silicate basalt plains, and highland ridges.',
+    description: temperatureK < 250
+      ? 'Cold terrestrial rocky world with impact craters, dark basaltic lowlands, and silicate regolith.'
+      : 'Terrestrial rocky planet with impact craters, silicate basalt plains, and highland ridges.',
   };
 }

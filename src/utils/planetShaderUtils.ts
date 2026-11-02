@@ -282,14 +282,14 @@ export const PLANET_FRAGMENT_SHADER = `
       float craters = smoothstep(0.68, 0.92, craterNoise);
 
       // Temperature-driven regolith & lithosphere physics:
-      // A. Cold / Frozen Silicate (<280K): Moon/Mercury style silvery-grey regolith with bright anorthosite highlands and polar frost
+      // A. Cold Silicate (<280K): Moon/Callisto style dark basaltic basins with cratered silicate highlands (dry, non-smothered rock)
       // B. Warm / Martian Arid (280K - 550K): Iron-oxide rust, terracotta canyon floors, and bright ochre sandstone highlands
       // C. Scorched Furnace (550K - 1350K, e.g. Kepler-131 c, Kepler-37 b): Volcanic basalt basins, warm bronze-tan highlands, crater rays
       vec3 lowBasin;
       vec3 highRidge;
       if (temperatureK < 280.0) {
-        lowBasin = mix(vec3(0.42, 0.42, 0.44), vec3(0.54, 0.52, 0.50), micro) * effColorTint;
-        highRidge = mix(vec3(0.72, 0.70, 0.68), vec3(0.88, 0.86, 0.84), micro) * effColorTint;
+        lowBasin = mix(vec3(0.30, 0.30, 0.32), vec3(0.44, 0.43, 0.42), micro) * effColorTint;
+        highRidge = mix(vec3(0.60, 0.58, 0.56), vec3(0.74, 0.72, 0.70), micro) * effColorTint;
       } else if (temperatureK < 550.0) {
         lowBasin = mix(vec3(0.52, 0.28, 0.18), vec3(0.66, 0.38, 0.24), micro) * effColorTint;
         highRidge = mix(vec3(0.78, 0.52, 0.34), vec3(0.92, 0.68, 0.48), micro) * effColorTint;
@@ -302,16 +302,16 @@ export const PLANET_FRAGMENT_SHADER = `
       surface = mix(lowBasin, highRidge, elevation);
 
       // Add bright impact crater ray rims
-      surface = mix(surface, vec3(0.92, 0.88, 0.82) * effColorTint, craters * 0.45);
+      surface = mix(surface, vec3(0.88, 0.85, 0.80) * effColorTint, craters * 0.40);
 
-      // Polar frost caps: only on cold planets (<280K) where frost can condense
-      if (temperatureK < 280.0 && iceCapLatitude > 0.05) {
+      // Polar frost caps: only on planets with volatile ice presence (strictly confined to extreme polar cold traps)
+      if (temperatureK < 280.0 && iceCapLatitude > 0.1) {
         float lat = abs(vLocalPos.y);
-        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0015, 0.65, 0.94);
+        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0015, 0.82, 0.96);
         if (lat > frostThreshold) {
           float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
           float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
-          surface = mix(surface, vec3(0.92, 0.95, 0.98), frost * 0.85);
+          surface = mix(surface, vec3(0.90, 0.93, 0.96), frost * 0.70);
         }
       }
 
@@ -460,11 +460,51 @@ export const PLANET_FRAGMENT_SHADER = `
       // E. Scorched Sub-Magma (>850K): Volcanic basalt, copper-iron highlands, glowing tectonic rifts
       vec3 land;
       if (temperatureK < 250.0) {
-        vec3 tundraLow = mix(vec3(0.42, 0.48, 0.52), vec3(0.56, 0.62, 0.60), micro) * effColorTint;
-        vec3 glacialHigh = mix(vec3(0.78, 0.86, 0.92), vec3(0.92, 0.95, 0.98), micro) * effColorTint;
-        land = mix(tundraLow, glacialHigh, smoothstep(0.3, 0.75, tectonic));
-        atmoColor = vec3(0.50, 0.72, 0.92) * effColorTint;
-        atmoStrength = 0.60;
+        // Cold Super-Earths (<250K) are diverse rocky worlds not smothered in universal ice sheets:
+        // Rich geological mineral regimes: dark cratered basalt, cold iron-oxide deserts,
+        // irradiated tholin crusts, and permafrost steppes with frost strictly on peaks or polar cold traps.
+        float coldRegime = fract(effSeed * 0.173 + 0.31);
+        float lat = abs(vLocalPos.y);
+
+        if (coldRegime < 0.25) {
+          // Archetype 0: Ancient Silicate / Cratered Basalt Bedrock (Dry dark rock, zero global ice)
+          vec3 darkBasalt = mix(vec3(0.18, 0.18, 0.20), vec3(0.28, 0.27, 0.28), micro) * effColorTint;
+          vec3 silicateCrags = mix(vec3(0.38, 0.36, 0.36), vec3(0.52, 0.50, 0.48), micro) * effColorTint;
+          land = mix(darkBasalt, silicateCrags, smoothstep(0.25, 0.75, tectonic));
+          atmoColor = vec3(0.40, 0.50, 0.65) * effColorTint;
+          atmoStrength = 0.12;
+        } else if (coldRegime < 0.50) {
+          // Archetype 1: Cold Iron-Oxide / Hematite Desert (Mars-like terracotta sands & dark ravines)
+          vec3 canyonFloor = mix(vec3(0.36, 0.18, 0.12), vec3(0.48, 0.24, 0.16), micro) * effColorTint;
+          vec3 terracottaPlateau = mix(vec3(0.62, 0.34, 0.22), vec3(0.74, 0.42, 0.28), micro) * effColorTint;
+          land = mix(canyonFloor, terracottaPlateau, smoothstep(0.25, 0.70, tectonic));
+          if (lat > 0.88) {
+            float polarFrost = smoothstep(0.88, 0.96, lat + micro * 0.04);
+            land = mix(land, vec3(0.88, 0.90, 0.94), polarFrost * 0.65);
+          }
+          atmoColor = vec3(0.65, 0.45, 0.35) * effColorTint;
+          atmoStrength = 0.20;
+        } else if (coldRegime < 0.75) {
+          // Archetype 2: Irradiated Hydrocarbon / Tholin Crust (Deep chocolate-umber and rich amber plains)
+          vec3 deepTholin = mix(vec3(0.26, 0.14, 0.10), vec3(0.38, 0.20, 0.14), micro) * effColorTint;
+          vec3 amberPlains = mix(vec3(0.55, 0.32, 0.20), vec3(0.68, 0.42, 0.26), micro) * effColorTint;
+          land = mix(deepTholin, amberPlains, smoothstep(0.30, 0.75, tectonic));
+          atmoColor = vec3(0.55, 0.38, 0.28) * effColorTint;
+          atmoStrength = 0.25;
+        } else {
+          // Archetype 3: Cold Permafrost Steppes & Exposed Dark Rock (Tundra & dark crags, frost strictly on summits)
+          vec3 slateLowland = mix(vec3(0.28, 0.30, 0.34), vec3(0.40, 0.42, 0.44), micro) * effColorTint;
+          vec3 highlandCrag = mix(vec3(0.48, 0.50, 0.52), vec3(0.62, 0.62, 0.60), micro) * effColorTint;
+          land = mix(slateLowland, highlandCrag, smoothstep(0.30, 0.70, tectonic));
+          float alpineFrost = smoothstep(0.78, 0.92, tectonic + micro * 0.15);
+          land = mix(land, vec3(0.88, 0.92, 0.96), alpineFrost * 0.50);
+          if (lat > 0.85) {
+            float polarCap = smoothstep(0.85, 0.95, lat + micro * 0.05);
+            land = mix(land, vec3(0.86, 0.90, 0.95), polarCap * 0.60);
+          }
+          atmoColor = vec3(0.45, 0.60, 0.80) * effColorTint;
+          atmoStrength = 0.28;
+        }
       } else if (temperatureK < 380.0) {
         // Temperate Habitable Super-Earth with epicontinental seas & dynamic cloud decks
         vec3 riftSea = vec3(0.04, 0.18, 0.36) * effColorTint;
@@ -1214,10 +1254,15 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     }
   }
 
-  // Disable polar frost caps specifically for airless asteroids (carbonaceous-asteroid: 16.0)
-  // or extremely hot worlds (T > 320K for terrestrial ocean; T > 280K for airless rocky)
-  if (themeIdx >= 15.5 || (themeIdx < 0.5 && tempK >= 280.0) || tempK >= 320.0) {
+  // Polar ice caps: only present on worlds with atmospheric volatiles and cold temperatures
+  if (themeIdx >= 15.5 || tempK >= 320.0) {
     iceCapLat = 0.0;
+  } else if (themeIdx < 0.5) {
+    // Airless / rocky worlds: dry basalt/silicate regolith; only rare volatile-trapped worlds have polar frost
+    iceCapLat = (tempK < 250.0 && bucket % 4 === 0) ? 0.88 + h3 * 0.06 : 0.0;
+  } else if (themeIdx >= 1.5 && themeIdx < 2.5) {
+    // Super-Earths: only cold worlds with volatile reservoirs have polar frost caps
+    iceCapLat = (tempK < 250.0 && bucket % 3 === 0) ? 0.86 + h3 * 0.06 : 0.0;
   }
 
   return {
