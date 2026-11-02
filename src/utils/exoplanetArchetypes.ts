@@ -13,8 +13,11 @@ const KNOWN_HABITABLE_CANDIDATE_SUBSTRINGS = [
   'trappist-1 f',
   'trappist-1 d',
   'kepler-1649 c',
+  'kepler-1649 b',
   'kepler-186 f',
+  'kepler-62 f',
   'toi-700 d',
+  'toi-700 e',
   'toi-2095 c',
   'lp 890-9 c',
   'toi-715 b',
@@ -22,7 +25,11 @@ const KNOWN_HABITABLE_CANDIDATE_SUBSTRINGS = [
   'gj 1061 d',
   'proxima centauri b',
   'ross 128 b',
-  'teegarden b'
+  'teegarden b',
+  "teegarden's star b",
+  'wolf 1069 b',
+  'gj 1002 b',
+  'gliese 12 b'
 ];
 
 // Confirmed Hycean ocean world candidates (super-Earth water worlds with deep oceans under H2 atmospheres)
@@ -30,6 +37,9 @@ const KNOWN_HYCEAN_CANDIDATE_SUBSTRINGS = [
   'kepler-62 e',
   'kepler-452 b',
   'lhs 1140 b',
+  'k2-18 b',
+  'toi-1452 b',
+  'kepler-22 b',
   'gj 273 b',
   'gj 3323 b',
   'gj 1132 c',

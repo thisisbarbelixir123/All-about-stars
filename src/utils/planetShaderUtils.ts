@@ -340,10 +340,26 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 2. Terrestrial Ocean World (Earth-like / Potentially Habitable)
     else if (themeIndex < 1.5) {
-      vec3 warped = domainWarp(vLocalPos * 2.6 + effSeed, 0.45);
-      float continental = fbm(warped); // Low-frequency continental land/ocean mask
-      float mountain = ridgedFbm(warped * 2.2); // Razor-sharp alpine cordilleras
+      // Multi-scale domain warping for organic continental drift & plate tectonics
+      vec3 warped = domainWarp(vLocalPos * 2.5 + effSeed, 0.45);
+      float primaryPlate = fbm(warped);
+
+      // High-frequency coastline fracture (fjords, estuaries, peninsulas, bays)
+      float coastFracture = snoise(vLocalPos * 12.0 + effSeed * 1.7) * 0.12 + snoise(vLocalPos * 26.0) * 0.05;
+      
+      // Offshore volcanic archipelagos & coral atoll chains
+      float archipelagos = smoothstep(0.68, 0.88, snoise(warped * 4.2 + vec3(1.3, 4.7, 2.1))) * 0.14;
+      
+      float continental = primaryPlate + coastFracture + archipelagos;
+      float mountain = ridgedFbm(warped * 2.4);
+      float foothill = fbm(warped * 5.0) * 0.45;
       float lat = abs(vLocalPos.y);
+
+      // Astrobiological Climate Regime:
+      // On cold M-dwarf worlds (T < 265K, e.g. Proxima b, TRAPPIST-1 e/f, Kepler-186 f, Wolf 1069 b),
+      // tidal locking or sub-stellar insolation concentrates liquid water in a dayside oasis
+      float subStellarInsolation = max(0.0, dot(vLocalPos, L));
+      float isColdEyeball = (temperatureK < 265.0) ? 1.0 : 0.0;
 
       // Multi-tier Bathymetry and Sea Color Grading
       // Fallback colors if uniforms are default
@@ -351,8 +367,8 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.44, 0.62) * effColorTint);
 
       // Temperature modulation of oceans:
-      // Frigid (<250K): Frozen steel-blue sea-ice
-      if (temperatureK < 250.0) {
+      // Frigid (<250K): Frozen steel-blue sea-ice on nightside/high-latitudes
+      if (temperatureK < 250.0 && (subStellarInsolation < 0.25 || lat > 0.60)) {
         deepColor = mix(deepColor, vec3(0.42, 0.55, 0.68), 0.75);
         shelfColor = mix(shelfColor, vec3(0.68, 0.80, 0.88), 0.85);
       }
@@ -388,28 +404,76 @@ export const PLANET_FRAGMENT_SHADER = `
       }
       // B. Continental Landmass & Biome Stratification (continental >= 0.05)
       else {
-        float landElevation = smoothstep(0.05, 0.65, continental) * 0.6 + mountain * 0.4;
+        float landElevation = smoothstep(0.05, 0.70, continental) * 0.55 + mountain * 0.35 + foothill * 0.10;
         
-        // Custom soil & botanical pigmentation across elevation
+        // Multi-zonal Biome Stratification:
+        // Incorporates latitude insolation + moisture humidity + elevation
+        float moisture = snoise(vLocalPos * 3.5 + effSeed * 0.8) * 0.5 + 0.5;
+        
         vec3 lowlands = lowlandColor.r > 0.001 || lowlandColor.g > 0.001 ? lowlandColor : (vec3(0.12, 0.38, 0.14) * effColorTint);
         vec3 savanna = savannaColor.r > 0.001 || savannaColor.g > 0.001 ? savannaColor : (vec3(0.38, 0.45, 0.22) * effColorTint);
         vec3 plateau = plateauColor.r > 0.001 || plateauColor.g > 0.001 ? plateauColor : (vec3(0.54, 0.46, 0.30) * effColorTint);
         vec3 mountainPeak = vec3(0.72, 0.70, 0.68) * effColorTint;
 
-        vec3 biome = mix(lowlands, savanna, smoothstep(0.08, 0.32, landElevation));
+        // Tropical rainforest near equator with high moisture
+        vec3 tropicalJungle = mix(lowlands, vec3(0.06, 0.26, 0.10) * effColorTint, 0.45);
+        // Arid subtropical desert / dune belt
+        vec3 aridDunes = mix(savanna, vec3(0.75, 0.52, 0.30) * effColorTint, 0.60);
+        // Sub-polar taiga / boreal coniferous forest
+        vec3 borealTaiga = mix(lowlands, vec3(0.18, 0.28, 0.22) * effColorTint, 0.70);
+
+        // Latitude & moisture driven biome blending
+        vec3 baseFoliage = mix(tropicalJungle, lowlands, smoothstep(0.15, 0.35, lat));
+        baseFoliage = mix(baseFoliage, aridDunes, smoothstep(0.20, 0.45, lat) * (1.0 - moisture * 0.8));
+        baseFoliage = mix(baseFoliage, borealTaiga, smoothstep(0.55, 0.80, lat));
+
+        // Elevation biome progression: Lowlands -> Savanna/Steppes -> Highland Plateaus -> Mountain Granite
+        vec3 biome = mix(baseFoliage, savanna, smoothstep(0.08, 0.32, landElevation));
         biome = mix(biome, plateau, smoothstep(0.32, 0.62, landElevation));
-        biome = mix(biome, mountainPeak, smoothstep(0.62, 0.88, landElevation));
-        
-        // Fine micro-relief on land
-        float landMicro = snoise(vLocalPos * 16.0);
+        biome = mix(biome, mountainPeak, smoothstep(0.62, 0.86, landElevation));
+
+        // Dynamic Alpine Snowline:
+        // Mountain snowline descends from high elevations at equator to lower elevations at higher latitudes
+        float localSnowline = mix(0.86, 0.34, smoothstep(0.12, 0.78, lat));
+        if (landElevation > localSnowline && temperatureK < 320.0) {
+          float snowCap = smoothstep(localSnowline, localSnowline + 0.08, landElevation + wave * 0.05);
+          biome = mix(biome, vec3(0.94, 0.96, 0.99), snowCap * 0.90);
+        }
+
+        // River networks & alluvial valleys cutting through continents
+        float riverNoise = abs(snoise(warped * 7.5 + vec3(0.5, 2.1, 1.4)));
+        float riverValley = smoothstep(0.025, 0.065, riverNoise);
+        biome = mix(mix(lowlands * 0.6, shelfColor, 0.5), biome, riverValley);
+
+        // Geological sedimentary striations & micro-relief
+        float landMicro = snoise(vLocalPos * 18.0) * 0.5 + snoise(vLocalPos * 36.0) * 0.25;
         biome += biome * (landMicro * 0.08);
 
         surface = biome;
+
+        // 3D Mountain Relief Lighting (Bump/Topography Shading)
+        // Computes terrain surface normal to cast realistic mountain relief highlights and shadows
+        vec3 upVec = abs(N.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+        vec3 tangent = normalize(cross(N, upVec));
+        vec3 bitangent = cross(N, tangent);
+        
+        float eps = 0.012;
+        vec3 pU = domainWarp((vLocalPos + tangent * eps) * 2.5 + effSeed, 0.45);
+        vec3 pV = domainWarp((vLocalPos + bitangent * eps) * 2.5 + effSeed, 0.45);
+        float hU = smoothstep(0.05, 0.70, fbm(pU)) * 0.55 + ridgedFbm(pU * 2.4) * 0.35;
+        float hV = smoothstep(0.05, 0.70, fbm(pV)) * 0.55 + ridgedFbm(pV * 2.4) * 0.35;
+        
+        vec3 surfGrad = (tangent * (hU - landElevation) + bitangent * (hV - landElevation)) / eps;
+        vec3 N_terrain = normalize(N - surfGrad * 0.42);
+        
+        float landDirect = max(0.0, dot(N_terrain, L));
+        float landNdotL = clamp(landDirect * 0.72 + ambientFill + rimFill, 0.35, 1.30);
+        surface *= (landNdotL / NdotL);
       }
 
       // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
       float baseThreshold = iceCapLatitude > 0.1 ? iceCapLatitude : 0.72;
-      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0022, 0.48, 0.96);
+      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0022 - isColdEyeball * (1.0 - subStellarInsolation) * 0.18, 0.42, 0.96);
       if (lat > polarThreshold && temperatureK < 315.0) {
         float iceNoise = fbm(vLocalPos * 6.0 + effSeed);
         float iceCap = smoothstep(polarThreshold, polarThreshold + 0.10, lat + iceNoise * 0.08);
@@ -423,7 +487,7 @@ export const PLANET_FRAGMENT_SHADER = `
       float cloudCore = clouds.z;
 
       // Specular ocean sun glint: water reflects sharp sunlight where unclouded; land is matte
-      if (continental < 0.05 && temperatureK >= 250.0) {
+      if (continental < 0.05 && temperatureK >= 240.0) {
         float oceanSpec = pow(specBase, 36.0) * rawNdotL * 1.6;
         // Modulate with micro-waves for glistening liquid water
         oceanSpec *= clamp(0.75 + wave * 0.5, 0.2, 1.4);
@@ -460,18 +524,42 @@ export const PLANET_FRAGMENT_SHADER = `
       float micro = fbm(vLocalPos * 12.0);
 
       // Physical Regimes based on Temperature:
-      // A. Cold Super-Earth (<280K): Glaciated plateaus, permafrost tundra, pale azure haze
-      // B. Temperate Arid Super-Earth (280K - 480K): Ochre plateaus, terracotta canyon lands, rust haze
-      // C. Venusian Super-Earth (480K - 850K): Dense sulfuric/CO2 cloud blankets (creamy golden-yellow)
-      // D. Scorched Sub-Magma (>850K): Volcanic basalt, copper-iron highlands, glowing tectonic rifts
+      // A. Cold Super-Earth (<250K): Glaciated plateaus, permafrost tundra, pale azure haze
+      // B. Temperate Habitable Super-Earth (250K - 380K): Epicontinental rift lakes/seas, iron/granite highlands, clouds
+      // C. Warm / Arid Super-Earth (380K - 550K): Ochre plateaus, terracotta canyon lands, rust haze
+      // D. Venusian Super-Earth (550K - 850K): Dense sulfuric/CO2 cloud blankets (creamy golden-yellow)
+      // E. Scorched Sub-Magma (>850K): Volcanic basalt, copper-iron highlands, glowing tectonic rifts
       vec3 land;
-      if (temperatureK < 280.0) {
+      if (temperatureK < 250.0) {
         vec3 tundraLow = mix(vec3(0.42, 0.48, 0.52), vec3(0.56, 0.62, 0.60), micro) * effColorTint;
         vec3 glacialHigh = mix(vec3(0.78, 0.86, 0.92), vec3(0.92, 0.95, 0.98), micro) * effColorTint;
         land = mix(tundraLow, glacialHigh, smoothstep(0.3, 0.75, tectonic));
         atmoColor = vec3(0.50, 0.72, 0.92) * effColorTint;
         atmoStrength = 0.60;
-      } else if (temperatureK < 480.0) {
+      } else if (temperatureK < 380.0) {
+        // Temperate Habitable Super-Earth with epicontinental seas & dynamic cloud decks
+        vec3 riftSea = vec3(0.04, 0.18, 0.36) * effColorTint;
+        vec3 coastalPlain = mix(vec3(0.24, 0.38, 0.20), vec3(0.42, 0.40, 0.24), micro) * effColorTint;
+        vec3 graniteHighland = mix(vec3(0.68, 0.54, 0.42), vec3(0.82, 0.70, 0.56), micro) * effColorTint;
+        
+        float seaMask = smoothstep(0.32, 0.22, tectonic);
+        land = mix(coastalPlain, graniteHighland, smoothstep(0.32, 0.75, tectonic));
+        land = mix(land, riftSea, seaMask);
+
+        // Specular glint on epicontinental rift seas
+        if (seaMask > 0.1) {
+          float seaSpec = pow(specBase, 28.0) * rawNdotL * 1.35 * seaMask;
+          specular += seaSpec;
+        }
+
+        // Directional cloud deck
+        vec4 superClouds = evaluateCloudLayer(vLocalPos, L, time * 0.9, 0.48, effSeed * 1.9);
+        land *= (1.0 - superClouds.y * clamp(rawNdotL * 1.5, 0.0, 1.0) * 0.45);
+        land = mix(land, vec3(0.95, 0.97, 1.0), superClouds.x * 0.90);
+
+        atmoColor = vec3(0.42, 0.68, 0.92) * effColorTint;
+        atmoStrength = 0.70;
+      } else if (temperatureK < 550.0) {
         vec3 canyonBasin = vec3(0.48, 0.28, 0.20) * effColorTint;
         vec3 ironDesert = vec3(0.72, 0.46, 0.30) * effColorTint;
         vec3 highlandGranite = vec3(0.86, 0.70, 0.54) * effColorTint;
