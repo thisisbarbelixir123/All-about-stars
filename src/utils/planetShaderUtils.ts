@@ -252,13 +252,15 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro) * effColorTint;
       surface = mix(lowBasin, highRidge, elevation);
 
-      // Polar cold regolith frost (modulated by temperature and seed)
-      float lat = abs(vLocalPos.y);
-      float frostThreshold = clamp(0.70 + (temperatureK - 100.0) * 0.0012, 0.72, 0.96);
-      if (lat > frostThreshold && temperatureK < 320.0) {
-        float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
-        float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
-        surface = mix(surface, vec3(0.85, 0.88, 0.92), frost * 0.85);
+      // Polar cold regolith frost (only on planets with frost enabled, controlled by iceCapLatitude > 0.0)
+      if (iceCapLatitude > 0.05 && temperatureK < 320.0) {
+        float lat = abs(vLocalPos.y);
+        float frostThreshold = clamp(iceCapLatitude + (temperatureK - 100.0) * 0.0012, 0.65, 0.96);
+        if (lat > frostThreshold) {
+          float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
+          float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
+          surface = mix(surface, vec3(0.85, 0.88, 0.92), frost * 0.85);
+        }
       }
 
       atmoColor = vec3(0.65, 0.72, 0.82) * effColorTint;
@@ -541,19 +543,30 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = mix(vec3(0.85, 0.35, 0.10), vec3(1.0, 0.65, 0.25), subStellar);
       atmoStrength = 0.55 * (subStellar * 0.8 + 0.2);
     }
-    // 10. KBO Tholin
+    // 10. KBO Tholin (e.g. Quaoar, Varuna, Ixion, Chaos)
     else if (themeIndex < 9.5) {
-      float n = fbm(vLocalPos * 4.5 + effSeed);
-      surface = mix(vec3(0.56, 0.32, 0.22) * effColorTint, vec3(0.80, 0.60, 0.46) * effColorTint, n * 0.5 + 0.5);
-      atmoColor = vec3(0.55, 0.68, 0.85) * effColorTint;
-      atmoStrength = 0.22;
+      vec3 warped = domainWarp(vLocalPos * 3.2 + effSeed, 0.35);
+      float n = fbm(warped * 1.5);
+      float micro = fbmFast(vLocalPos * 12.0);
+      // Dark reddish-brown irradiated hydrocarbon tholin crust
+      vec3 darkTholin = mix(vec3(0.35, 0.16, 0.10), vec3(0.48, 0.22, 0.14), micro) * effColorTint;
+      vec3 brightTholin = mix(vec3(0.65, 0.38, 0.26), vec3(0.78, 0.48, 0.34), micro) * effColorTint;
+      surface = mix(darkTholin, brightTholin, n * 0.5 + 0.5);
+      atmoColor = vec3(0.55, 0.40, 0.35) * effColorTint;
+      atmoStrength = 0.08; // Airless / trace exosphere
     }
-    // 11. Icy Moon / KBO Ice
+    // 11. Icy Moon / KBO Ice (e.g. Eris, Haumea, Makemake, Orcus, 2002 MS4)
     else if (themeIndex < 10.5) {
-      float n = fbm(vLocalPos * 5.0 + effSeed);
-      surface = mix(vec3(0.58, 0.68, 0.78) * effColorTint, vec3(0.90, 0.94, 0.98) * effColorTint, n * 0.5 + 0.5);
-      atmoColor = vec3(0.45, 0.78, 1.0) * effColorTint;
-      atmoStrength = 0.30;
+      vec3 warped = domainWarp(vLocalPos * 4.0 + effSeed, 0.30);
+      float n = fbm(warped);
+      float micro = fbmFast(vLocalPos * 16.0);
+      // Clean nitrogen, methane, and water ice bedrock:
+      // High albedo (Eris ~0.96, Haumea ~0.80) with subtle crystalline frost graining
+      vec3 deepIce = mix(vec3(0.72, 0.78, 0.84), vec3(0.85, 0.88, 0.92), micro) * effColorTint;
+      vec3 brightFrost = mix(vec3(0.92, 0.95, 0.98), vec3(0.98, 0.99, 1.0), micro) * effColorTint;
+      surface = mix(deepIce, brightFrost, n * 0.5 + 0.5);
+      atmoColor = vec3(0.65, 0.82, 1.0) * effColorTint;
+      atmoStrength = 0.12; // Trace nitrogen frost exosphere
     }
     // 12. Star / Solar Plasma
     else if (themeIndex < 11.5) {
@@ -622,7 +635,7 @@ export const PLANET_FRAGMENT_SHADER = `
       emissiveColor = vec3(0.7, 0.3, 0.1) * (pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15);
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
-    else {
+    else if (themeIndex < 15.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.028);
       float latFreq = 14.0 + effBandShift * 6.0;
       float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
@@ -635,6 +648,22 @@ export const PLANET_FRAGMENT_SHADER = `
 
       atmoColor = vec3(0.40, 0.65, 0.95) * effColorTint;
       atmoStrength = 0.70;
+    }
+    // 17. Carbonaceous Asteroid (Airless C-type chondrite / B-type, e.g. Hygiea, Pallas)
+    else {
+      vec3 warped = domainWarp(vLocalPos * 4.0 + effSeed, 0.45);
+      float craters = ridgedFbm(warped * 2.0);
+      float micro = fbmFast(vLocalPos * 16.0);
+      
+      // Extremely dark, low-albedo (0.04-0.12) carbonaceous / hydrated silicate regolith:
+      // Charcoal, graphite grey, and dark slate tones without any polar ice caps
+      vec3 darkBasin = mix(vec3(0.08, 0.08, 0.09), vec3(0.13, 0.13, 0.14), micro) * effColorTint;
+      vec3 impactRim = mix(vec3(0.16, 0.16, 0.17), vec3(0.24, 0.24, 0.25), micro) * effColorTint;
+      surface = mix(darkBasin, impactRim, craters);
+
+      // Airless body: zero atmospheric scattering
+      atmoColor = vec3(0.0);
+      atmoStrength = 0.0;
     }
 
     // Physical Albedo modulation:
@@ -654,7 +683,7 @@ export const getThemeIndex = (theme?: string): number => {
   switch (theme) {
     case 'terrestrial-rocky':
     case 'carbonaceous-asteroid':
-      return 0.0;
+      return 16.0;
     case 'terrestrial-ocean':
       return 1.0;
     case 'super-earth':
@@ -838,6 +867,31 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     const b = 0.80 + (h1 - 0.5) * 0.25;
     tint.set(r, g, b);
   }
+  // Carbonaceous Asteroid (themeIdx == 16.0, e.g. Hygiea, Pallas)
+  else if (themeIdx >= 15.5 && themeIdx < 16.5) {
+    // Ultra-dark charcoal, neutral graphite, and slight hydrated phyllosilicate bluish-grey tint
+    const neutral = 0.85 + (h2 - 0.5) * 0.15;
+    const r = neutral * 0.96;
+    const g = neutral * 0.98;
+    const b = neutral * 1.02;
+    tint.set(r, g, b);
+  }
+  // KBO Tholin & Red Sedna (themeIdx == 9.0, e.g. Quaoar, Varuna, Sedna, Gonggong)
+  else if (themeIdx >= 8.5 && themeIdx < 9.5) {
+    // Deep reddish-brown to crimson-amber tholin coloration
+    const r = 1.05 + h2 * 0.20;
+    const g = 0.65 + (h3 - 0.5) * 0.18;
+    const b = 0.50 + (h1 - 0.5) * 0.15;
+    tint.set(r, g, b);
+  }
+  // KBO Ice (themeIdx == 10.0, e.g. Eris, Haumea, Makemake)
+  else if (themeIdx >= 9.5 && themeIdx < 10.5) {
+    // Pristine high-albedo white with subtle nitrogen/methane ice crystalline cyan sheen
+    const r = 0.95 + (h2 - 0.5) * 0.08;
+    const g = 0.98 + (h3 - 0.5) * 0.06;
+    const b = 1.02 + (h1 - 0.5) * 0.06;
+    tint.set(r, g, b);
+  }
   // Hycean Ocean & Terrestrial Ocean (themeIdx == 1.0 or 13.0)
   else if ((themeIdx >= 0.5 && themeIdx < 1.5) || (themeIdx >= 12.5 && themeIdx < 13.5)) {
     // Azure turquoise, deep cobalt abyss, sapphire archipelago, and dark cerulean
@@ -898,6 +952,11 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
       oceanShallow.set(0.06, 0.24, 0.40);
       iceCapLat = 0.54 + h3 * 0.08; // Giant glacial pack-ice reaching mid-latitudes
     }
+  }
+
+  // Asteroids and dwarf planets do not have polar ice caps:
+  if (themeIdx >= 15.5 || themeIdx < 0.5) {
+    iceCapLat = 0.0; // Completely disable ice caps on rocky/carbonaceous asteroids
   }
 
   return {

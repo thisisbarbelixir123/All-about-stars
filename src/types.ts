@@ -225,6 +225,8 @@ export type ProceduralTheme =
   | 'mirror-world'
   | 'lava-world'
   | 'chthonian-planet';
+  | 'lava-world'
+  | 'chthonian-planet';
 
 export interface CelestialBody {
   id: string;
