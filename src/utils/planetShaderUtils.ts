@@ -203,18 +203,44 @@ export const PLANET_FRAGMENT_SHADER = `
   }
 
   // High-performance Directional Cloud Deck & Shadow Evaluation
-  // Evaluates clouds with fast 2-octave FBM and projects shadows along incoming light vector L
+  // Evaluates multi-scale synoptic weather systems, cyclonic vortices, fractal cumulus billows,
+  // delicate high-altitude cirrus filaments, and directional drop shadows
   vec4 evaluateCloudLayer(vec3 p, vec3 lightDirVec, float timeVal, float coverage, float cloudSeed) {
-    vec3 cloudCoord = p + vec3(timeVal * 0.04, timeVal * 0.015, timeVal * 0.02) + cloudSeed;
-    float cloudNoise = fbmFast(cloudCoord * 2.8);
-    float cloudDensity = smoothstep(1.0 - coverage, 1.0 - coverage + 0.25, cloudNoise);
+    float lat = p.y;
+    // Latitudinal Coriolis jet shear: equatorial trade winds drift westward, mid-latitude westerlies drift eastward
+    float coriolis = sin(lat * 3.14159 * 2.0) * 0.22;
+    vec3 advect = vec3(timeVal * 0.025 + coriolis * timeVal * 0.04, timeVal * 0.006, timeVal * 0.015);
+    vec3 cloudCoord = p + advect + cloudSeed;
 
-    // Directional shadow: single sample along offset vector towards light
-    vec3 shadowCoord = cloudCoord + lightDirVec * 0.045;
-    float shadowNoise = fbmFast(shadowCoord * 2.8);
-    float shadowMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.25, shadowNoise);
+    // 1. Synoptic Weather Systems & Cyclonic Swirl (Domain Warping)
+    vec3 warpedCoord = domainWarp(cloudCoord * 2.4, 0.38);
+    float synoptic = fbm(warpedCoord);
 
-    return vec4(cloudDensity, shadowMask, cloudNoise, 0.0);
+    // 2. Multi-Scale Cumulus Billows with Fractal Edge Detail
+    float microDetail = snoise(cloudCoord * 8.5 + synoptic * 0.5);
+    float fineDetail = snoise(cloudCoord * 18.0) * 0.25;
+    float billowNoise = synoptic + microDetail * 0.22 + fineDetail * 0.12;
+
+    // Sharp condensation boundary (fractal edges rather than blurry gradient)
+    float cumulusThreshold = 1.0 - coverage;
+    float cumulus = smoothstep(cumulusThreshold, cumulusThreshold + 0.18, billowNoise);
+    // Enhance internal cloud core thickness
+    float cloudCore = smoothstep(cumulusThreshold + 0.08, cumulusThreshold + 0.28, billowNoise);
+
+    // 3. Delicate High-Altitude Cirrus Filaments & Jet Stream Streamers
+    vec3 cirrusCoord = vec3(cloudCoord.x * 1.5, cloudCoord.y * 5.0, cloudCoord.z * 1.5) + vec3(timeVal * 0.04, 0.0, timeVal * 0.03);
+    float cirrusFbm = snoise(cirrusCoord) * 0.65 + snoise(cirrusCoord * 2.4) * 0.35;
+    float cirrus = smoothstep(0.42, 0.72, cirrusFbm) * (1.0 - cumulus * 0.8) * 0.42;
+
+    // Total combined cloud optical density
+    float totalCloud = clamp(cumulus + cirrus, 0.0, 1.0);
+
+    // 4. Directional Drop Shadow: projected along stellar illumination vector L onto surface below
+    vec3 shadowCoord = domainWarp((cloudCoord + lightDirVec * 0.042) * 2.4, 0.38);
+    float shadowNoise = fbmFast(shadowCoord);
+    float shadowMask = smoothstep(cumulusThreshold, cumulusThreshold + 0.18, shadowNoise);
+
+    return vec4(totalCloud, shadowMask, cloudCore, cirrus);
   }
 
   void main() {
@@ -319,36 +345,65 @@ export const PLANET_FRAGMENT_SHADER = `
       float mountain = ridgedFbm(warped * 2.2); // Razor-sharp alpine cordilleras
       float lat = abs(vLocalPos.y);
 
+      // Multi-tier Bathymetry and Sea Color Grading
       // Fallback colors if uniforms are default
-      vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.015, 0.08, 0.28) * effColorTint);
-      vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.32, 0.52) * effColorTint);
+      vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.012, 0.08, 0.28) * effColorTint);
+      vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.44, 0.62) * effColorTint);
 
       // Temperature modulation of oceans:
-      // Cold (<250K): Frozen steel-blue sea-ice
-      // Temperate (250K - 315K): Azure liquid oceans
+      // Frigid (<250K): Frozen steel-blue sea-ice
       if (temperatureK < 250.0) {
-        deepColor = mix(deepColor, vec3(0.45, 0.58, 0.70), 0.75);
-        shelfColor = mix(shelfColor, vec3(0.70, 0.82, 0.90), 0.85);
+        deepColor = mix(deepColor, vec3(0.42, 0.55, 0.68), 0.75);
+        shelfColor = mix(shelfColor, vec3(0.68, 0.80, 0.88), 0.85);
       }
+
+      // High-resolution ocean surface micro-waves (ripples & capillary facets)
+      float wave = snoise(vLocalPos * 38.0 + time * 0.06) * 0.5 + snoise(vLocalPos * 76.0 - time * 0.09) * 0.25;
 
       // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
       if (continental < 0.05) {
-        float oceanDepth = smoothstep(-0.6, 0.05, continental);
-        surface = mix(deepColor, shelfColor, oceanDepth);
+        // 4-Tier Bathymetry:
+        // 1. Abyssal Trench: ink-depth light absorption
+        vec3 abyssalColor = deepColor * 0.45;
+        // 2. Pelagic Open Ocean: primary deepColor
+        // 3. Continental Shelf: vibrant shelfColor
+        // 4. Coastal Lagoon / Reef: luminous tropical shallows
+        vec3 lagoonColor = mix(shelfColor * 1.35, vec3(0.25, 0.95, 0.85) * shelfColor, 0.35);
+
+        float depthTrench = smoothstep(-0.65, -0.25, continental);
+        float depthShelf = smoothstep(-0.25, -0.04, continental);
+        float depthLagoon = smoothstep(-0.04, 0.04, continental);
+
+        vec3 sea = mix(abyssalColor, deepColor, depthTrench);
+        sea = mix(sea, shelfColor, depthShelf);
+        sea = mix(sea, lagoonColor, depthLagoon);
+
+        // Subtle micro-wave color modulation
+        sea += sea * (wave * 0.08);
+
+        // Coastal beach sand & surf fringe right at the shoreline (continental: 0.035 to 0.05)
+        float surf = smoothstep(0.035, 0.05, continental);
+        vec3 beachSand = mix(vec3(0.88, 0.82, 0.68), vec3(0.95, 0.95, 0.98), surf); // Sand to surf foam
+        surface = mix(sea, beachSand, surf * 0.65);
       }
       // B. Continental Landmass & Biome Stratification (continental >= 0.05)
       else {
         float landElevation = smoothstep(0.05, 0.65, continental) * 0.6 + mountain * 0.4;
         
         // Custom soil & botanical pigmentation across elevation
-        vec3 lowlands = lowlandColor.r > 0.001 || lowlandColor.g > 0.001 ? lowlandColor : (vec3(0.12, 0.36, 0.14) * effColorTint);
-        vec3 savanna = savannaColor.r > 0.001 || savannaColor.g > 0.001 ? savannaColor : (vec3(0.35, 0.42, 0.20) * effColorTint);
-        vec3 plateau = plateauColor.r > 0.001 || plateauColor.g > 0.001 ? plateauColor : (vec3(0.52, 0.42, 0.28) * effColorTint);
-        vec3 mountainPeak = vec3(0.68, 0.64, 0.60) * effColorTint;
+        vec3 lowlands = lowlandColor.r > 0.001 || lowlandColor.g > 0.001 ? lowlandColor : (vec3(0.12, 0.38, 0.14) * effColorTint);
+        vec3 savanna = savannaColor.r > 0.001 || savannaColor.g > 0.001 ? savannaColor : (vec3(0.38, 0.45, 0.22) * effColorTint);
+        vec3 plateau = plateauColor.r > 0.001 || plateauColor.g > 0.001 ? plateauColor : (vec3(0.54, 0.46, 0.30) * effColorTint);
+        vec3 mountainPeak = vec3(0.72, 0.70, 0.68) * effColorTint;
 
-        vec3 biome = mix(lowlands, savanna, smoothstep(0.1, 0.35, landElevation));
-        biome = mix(biome, plateau, smoothstep(0.35, 0.65, landElevation));
-        biome = mix(biome, mountainPeak, smoothstep(0.65, 0.90, landElevation));
+        vec3 biome = mix(lowlands, savanna, smoothstep(0.08, 0.32, landElevation));
+        biome = mix(biome, plateau, smoothstep(0.32, 0.62, landElevation));
+        biome = mix(biome, mountainPeak, smoothstep(0.62, 0.88, landElevation));
+        
+        // Fine micro-relief on land
+        float landMicro = snoise(vLocalPos * 16.0);
+        biome += biome * (landMicro * 0.08);
+
         surface = biome;
       }
 
@@ -361,30 +416,42 @@ export const PLANET_FRAGMENT_SHADER = `
         surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
       }
 
-      // D. Directional Cloud Decks & Drop Shadows
-      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.52, effSeed * 2.3);
+      // D. High-Quality Directional Cloud Decks & Drop Shadows
+      vec4 clouds = evaluateCloudLayer(vLocalPos, L, time, 0.54, effSeed * 2.3);
       float cloudMask = clouds.x;
       float shadowMask = clouds.y;
+      float cloudCore = clouds.z;
 
       // Specular ocean sun glint: water reflects sharp sunlight where unclouded; land is matte
       if (continental < 0.05 && temperatureK >= 250.0) {
-        float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.25;
+        float oceanSpec = pow(specBase, 36.0) * rawNdotL * 1.6;
+        // Modulate with micro-waves for glistening liquid water
+        oceanSpec *= clamp(0.75 + wave * 0.5, 0.2, 1.4);
+        // Water Fresnel limb reflection
+        oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.35 * rawNdotL;
         specular = oceanSpec * (1.0 - cloudMask);
       }
 
-      // Cast directional drop shadow onto surface beneath
-      surface *= (1.0 - shadowMask * 0.45);
+      // Directional drop shadow cast onto surface beneath
+      float directShadow = shadowMask * clamp(rawNdotL * 1.5, 0.0, 1.0) * 0.55;
+      surface *= (1.0 - directShadow);
 
-      // Blend white cloud banks onto surface
-      vec3 cloudColor = vec3(0.95, 0.97, 1.0);
-      surface = mix(surface, cloudColor, cloudMask * 0.92);
+      // Cloud shading: subtle terminator attenuation and forward scattering
+      vec3 cumulusColor = vec3(0.97, 0.98, 1.0);
+      vec3 cirrusColor = vec3(0.92, 0.95, 0.99);
+      vec3 cloudColor = mix(cirrusColor, cumulusColor, cloudCore / max(0.01, cloudMask));
+      float cloudLighting = clamp(dot(N, L) * 0.65 + 0.35, 0.30, 1.0);
+      cloudColor *= cloudLighting;
 
-      // Subtle forward scattering on cloud edges
-      float cloudGlint = pow(specBase, 8.0) * cloudMask * 0.25;
+      // Blend clouds onto surface
+      surface = mix(surface, cloudColor, cloudMask * 0.94);
+
+      // Subtle forward scattering silver lining on cloud edges
+      float cloudGlint = pow(specBase, 12.0) * (cloudMask - cloudCore) * 0.35;
       specular += cloudGlint;
 
-      atmoColor = vec3(0.35, 0.65, 1.0) * effColorTint;
-      atmoStrength = 0.75;
+      atmoColor = mix(vec3(0.32, 0.65, 1.0), shelfColor * 1.5, 0.22) * effColorTint;
+      atmoStrength = 0.80;
     }
     // 3. Super-Earth (Dynamic Atmospheric & Thermal Regimes)
     else if (themeIndex < 2.5) {
@@ -685,22 +752,50 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 14. Hycean Ocean World
     else if (themeIndex < 13.5) {
-      vec3 warped = domainWarp(vLocalPos * 3.0 + effSeed, 0.45);
-      float deepWater = fbm(warped);
-      surface = mix(vec3(0.01, 0.08, 0.28) * effColorTint, vec3(0.04, 0.22, 0.50) * effColorTint, deepWater * 0.5 + 0.5);
+      vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.010, 0.06, 0.26) * effColorTint);
+      vec3 shallowColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.35, 0.72) * effColorTint);
+
+      vec3 warped = domainWarp(vLocalPos * 2.8 + effSeed, 0.45);
+      float convectiveDepth = fbm(warped);
+      float oceanicCurrent = ridgedFbm(warped * 2.2);
+      float wave = snoise(vLocalPos * 42.0 + time * 0.08) * 0.5;
+
+      // Multi-tier deep water mantle & equatorial upwelling currents
+      vec3 abyss = deepColor * 0.40;
+      vec3 pelagic = deepColor;
+      vec3 currentPlume = shallowColor;
+
+      vec3 sea = mix(abyss, pelagic, smoothstep(-0.5, 0.2, convectiveDepth));
+      sea = mix(sea, currentPlume, smoothstep(0.3, 0.8, oceanicCurrent) * 0.65);
+      sea += sea * (wave * 0.06);
+      surface = sea;
 
       // Vast tropical cloud streamers & cyclonic storms with directional shadows
-      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.62, effSeed * 1.7);
+      vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.64, effSeed * 1.7);
+      float cloudMask = hyceanClouds.x;
+      float shadowMask = hyceanClouds.y;
+      float cloudCore = hyceanClouds.z;
 
       // Deep global ocean specular reflection where unclouded
-      float oceanSpec = pow(specBase, 28.0) * rawNdotL * 1.4;
-      specular = oceanSpec * (1.0 - hyceanClouds.x);
+      float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.6;
+      oceanSpec *= clamp(0.75 + wave * 0.5, 0.2, 1.4);
+      oceanSpec += pow(1.0 - max(0.0, dot(N, V)), 5.0) * 0.40 * rawNdotL;
+      specular = oceanSpec * (1.0 - cloudMask);
 
-      surface *= (1.0 - hyceanClouds.y * 0.50); // Drop shadows onto dark ocean abyss
-      surface = mix(surface, vec3(0.92, 0.95, 1.0), hyceanClouds.x * 0.95);
+      // Directional drop shadows onto dark ocean abyss
+      float directShadow = shadowMask * clamp(rawNdotL * 1.5, 0.0, 1.0) * 0.55;
+      surface *= (1.0 - directShadow);
 
-      atmoColor = vec3(0.15, 0.75, 1.0) * effColorTint;
-      atmoStrength = 0.90;
+      // Billowing high-albedo cloud deck with delicate forward scattering
+      vec3 cloudColor = vec3(0.94, 0.97, 1.0) * clamp(dot(N, L) * 0.65 + 0.35, 0.30, 1.0);
+      surface = mix(surface, cloudColor, cloudMask * 0.95);
+
+      float cloudGlint = pow(specBase, 12.0) * (cloudMask - cloudCore) * 0.35;
+      specular += cloudGlint;
+
+      // Thick hydrogen Rayleigh scattering limb
+      atmoColor = mix(vec3(0.18, 0.72, 1.0), shallowColor * 1.4, 0.30) * effColorTint;
+      atmoStrength = 0.92;
     }
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b, WASP-12b precursors)
     else if (themeIndex < 14.5) {
@@ -1001,11 +1096,8 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
   }
   // Hycean Ocean & Terrestrial Ocean (themeIdx == 1.0 or 13.0)
   else if ((themeIdx >= 0.5 && themeIdx < 1.5) || (themeIdx >= 12.5 && themeIdx < 13.5)) {
-    // Azure turquoise, deep cobalt abyss, sapphire archipelago, and dark cerulean
-    const r = 0.72 + (h2 - 0.5) * 0.25;
-    const g = 0.90 + (h3 - 0.5) * 0.20;
-    const b = 0.98 + h1 * 0.25;
-    tint.set(r, g, b);
+    // Keep neutral base tint so calibrated multi-tier ocean palettes render with pristine color fidelity
+    tint.set(1.0, 1.0, 1.0);
   } else {
     const r = 0.90 + (h2 - 0.5) * 0.20;
     const g = 0.90 + (h3 - 0.5) * 0.20;
@@ -1014,56 +1106,103 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
   }
 
   // 4. Astrobiological Biome & Soil Archetypes for Habitable Worlds (Theme 1.0)
-  const lowland = new THREE.Vector3(0.12, 0.36, 0.14);
-  const savanna = new THREE.Vector3(0.35, 0.42, 0.20);
-  const plateau = new THREE.Vector3(0.52, 0.42, 0.28);
-  const oceanShallow = new THREE.Vector3(0.04, 0.32, 0.52);
-  const oceanDeep = new THREE.Vector3(0.015, 0.08, 0.28);
+  const lowland = new THREE.Vector3(0.12, 0.38, 0.14);
+  const savanna = new THREE.Vector3(0.38, 0.45, 0.22);
+  const plateau = new THREE.Vector3(0.54, 0.46, 0.30);
+  const oceanShallow = new THREE.Vector3(0.04, 0.44, 0.62);
+  const oceanDeep = new THREE.Vector3(0.012, 0.07, 0.28);
   let iceCapLat = 0.74;
 
   if (themeIdx >= 0.5 && themeIdx < 1.5) {
-    const regime = bucket % 4;
-    // Regime 0: Classic Earth Analogs (Chlorophytic green, savanna, deep azure oceans)
+    const regime = bucket % 6;
+    // Regime 0: Classic Earth Analogs (Chlorophytic green, savanna, deep azure / cobalt oceans)
     if (regime === 0) {
-      lowland.set(0.10 + h1 * 0.05, 0.36 + h2 * 0.06, 0.14);
-      savanna.set(0.36, 0.44, 0.22);
-      plateau.set(0.52, 0.44, 0.30);
-      oceanDeep.set(0.015, 0.08, 0.28);
-      oceanShallow.set(0.04, 0.34, 0.54);
-      iceCapLat = 0.72 + h3 * 0.08; // High latitude caps
+      lowland.set(0.10 + h1 * 0.04, 0.38 + h2 * 0.05, 0.14);
+      savanna.set(0.38, 0.45, 0.22);
+      plateau.set(0.54, 0.46, 0.30);
+      oceanDeep.set(0.012, 0.07, 0.28);
+      oceanShallow.set(0.04, 0.44, 0.62);
+      iceCapLat = 0.72 + h3 * 0.06;
     }
-    // Regime 1: M-Dwarf Red/Purple Flora Worlds (Infrared photosynthetic absorption)
+    // Regime 1: Emerald / Jade Oceans (Algal Bloom / Phyto-plankton / Copper-Rich Mineral Seas)
     else if (regime === 1) {
-      lowland.set(0.28 + h1 * 0.10, 0.08, 0.22 + h2 * 0.08); // Dark plum / crimson foliage
-      savanna.set(0.40, 0.18, 0.25);
-      plateau.set(0.48, 0.35, 0.32);
-      oceanDeep.set(0.02, 0.06, 0.20); // Deep midnight navy
-      oceanShallow.set(0.08, 0.22, 0.45);
-      iceCapLat = 0.62 + h3 * 0.10; // More extensive caps
+      lowland.set(0.16 + h1 * 0.04, 0.42 + h2 * 0.05, 0.26);
+      savanna.set(0.36, 0.48, 0.24);
+      plateau.set(0.48, 0.50, 0.36);
+      oceanDeep.set(0.012, 0.16, 0.13);
+      oceanShallow.set(0.06, 0.58, 0.44);
+      iceCapLat = 0.76 + h3 * 0.06;
     }
-    // Regime 2: Iron-Oxide Rust / Arid Super-Continent Worlds
+    // Regime 2: Wine-Dark / Amethyst / Carmine ("Purple Earth" / Haloarchaea & Ferruginous Seas)
     else if (regime === 2) {
-      lowland.set(0.48 + h1 * 0.08, 0.26, 0.14); // Terracotta / rust soil
-      savanna.set(0.60, 0.38, 0.20); // Golden dunes
-      plateau.set(0.68, 0.48, 0.34);
-      oceanDeep.set(0.03, 0.12, 0.30);
-      oceanShallow.set(0.06, 0.40, 0.48); // Vivid turquoise rift lakes
-      iceCapLat = 0.82 + h3 * 0.08; // Small or mountain-only frost
+      lowland.set(0.32 + h1 * 0.06, 0.08, 0.22 + h2 * 0.05);
+      savanna.set(0.44, 0.16, 0.28);
+      plateau.set(0.52, 0.34, 0.34);
+      oceanDeep.set(0.08, 0.025, 0.14);
+      oceanShallow.set(0.48, 0.12, 0.36);
+      iceCapLat = 0.66 + h3 * 0.08;
     }
-    // Regime 3: Sub-Glacial Cold Steppes (Permafrost / Tundra)
+    // Regime 3: Amber / Golden-Topaz / Bronze (Dissolved Organic Carbon / Hydrocarbon Brines / Sulfur-Rich Seas)
+    else if (regime === 3) {
+      lowland.set(0.46 + h1 * 0.06, 0.32, 0.14);
+      savanna.set(0.60, 0.42, 0.20);
+      plateau.set(0.68, 0.50, 0.32);
+      oceanDeep.set(0.12, 0.06, 0.02);
+      oceanShallow.set(0.62, 0.40, 0.10);
+      iceCapLat = 0.80 + h3 * 0.08;
+    }
+    // Regime 4: Glacial Milk / Powder Cyan / Steel Navy (Sub-Polar Glacial Rock-Flour Oceans)
+    else if (regime === 4) {
+      lowland.set(0.24, 0.32 + h1 * 0.05, 0.24);
+      savanna.set(0.38, 0.42, 0.36);
+      plateau.set(0.52, 0.54, 0.50);
+      oceanDeep.set(0.02, 0.07, 0.18);
+      oceanShallow.set(0.30, 0.56, 0.72);
+      iceCapLat = 0.52 + h3 * 0.08;
+    }
+    // Regime 5: Phosphor Teal / Cerulean Paradise (Hyper-Oxygenated Archipelagos)
     else {
-      lowland.set(0.24, 0.30 + h1 * 0.06, 0.22); // Pale lichen / tundra
-      savanna.set(0.38, 0.40, 0.34);
-      plateau.set(0.50, 0.52, 0.48); // Slate grey alpine cordilleras
-      oceanDeep.set(0.03, 0.08, 0.22); // Frigid steel-blue
-      oceanShallow.set(0.06, 0.24, 0.40);
-      iceCapLat = 0.54 + h3 * 0.08; // Giant glacial pack-ice reaching mid-latitudes
+      lowland.set(0.10 + h1 * 0.04, 0.44 + h2 * 0.05, 0.22);
+      savanna.set(0.32, 0.46, 0.20);
+      plateau.set(0.56, 0.45, 0.30);
+      oceanDeep.set(0.01, 0.05, 0.22);
+      oceanShallow.set(0.04, 0.62, 0.70);
+      iceCapLat = 0.82 + h3 * 0.06;
+    }
+  }
+  // 5. Hycean Ocean World Archetypes (Theme 13.0)
+  else if (themeIdx >= 12.5 && themeIdx < 13.5) {
+    const regime = bucket % 5;
+    // Regime 0: Deep Hydrogen Sapphire
+    if (regime === 0) {
+      oceanDeep.set(0.010, 0.06, 0.26);
+      oceanShallow.set(0.04, 0.35, 0.72);
+    }
+    // Regime 1: Supercritical Phosphor-Teal
+    else if (regime === 1) {
+      oceanDeep.set(0.012, 0.12, 0.22);
+      oceanShallow.set(0.06, 0.58, 0.62);
+    }
+    // Regime 2: Hydrocarbon/Methane-rich Amber-Teal
+    else if (regime === 2) {
+      oceanDeep.set(0.06, 0.08, 0.14);
+      oceanShallow.set(0.20, 0.48, 0.40);
+    }
+    // Regime 3: Ammonia-saturated Violet-Indigo
+    else if (regime === 3) {
+      oceanDeep.set(0.05, 0.03, 0.16);
+      oceanShallow.set(0.24, 0.20, 0.54);
+    }
+    // Regime 4: Ultramarine Abyss
+    else {
+      oceanDeep.set(0.008, 0.04, 0.20);
+      oceanShallow.set(0.03, 0.26, 0.62);
     }
   }
 
   // Disable polar frost caps specifically for airless asteroids (carbonaceous-asteroid: 16.0)
-  // or extremely hot terrestrial worlds (T > 280K)
-  if (themeIdx >= 15.5 || tempK >= 280.0) {
+  // or extremely hot worlds (T > 320K for terrestrial ocean; T > 280K for airless rocky)
+  if (themeIdx >= 15.5 || (themeIdx < 0.5 && tempK >= 280.0) || tempK >= 320.0) {
     iceCapLat = 0.0;
   }
 

@@ -733,8 +733,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // 3: Scorched / Magma (>=850K)
       const tempRegime = tempK < 280 ? 0 : tempK < 500 ? 1 : tempK < 850 ? 2 : 3;
 
-      // Deterministic 8-bucket index per regime
-      const bucket = Math.floor(hashStringToFloat(body.id, 97) * 8.0) % 8;
+      // Deterministic 16-bucket index per regime (Earth is anchored to bucket 0 for pristine Earth-analog calibration)
+      const bucket = body.id === 'sol-earth' ? 0 : Math.floor(hashStringToFloat(body.id, 97) * 16.0) % 16;
       const key = `planet-${themeIdx}-r${tempRegime}-b${bucket}-${wireframe ? 'w' : 's'}`;
 
       let mat = materialCacheRef.current.get(key);
