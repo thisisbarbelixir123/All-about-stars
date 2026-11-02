@@ -213,12 +213,16 @@ export type ProceduralTheme =
   | 'star-plasma'
   | 'terrestrial-rocky'
   | 'terrestrial-ocean'
+  | 'hycean-ocean'
   | 'super-earth'
   | 'sub-neptune'
   | 'ice-giant'
   | 'gas-giant-banded'
+  | 'gas-giant-water-clouds'
   | 'hot-jupiter'
+  | 'hot-jupiter-dark-alkali'
   | 'ultra-hot-jupiter'
+  | 'mirror-world'
   | 'lava-world'
   | 'chthonian-planet';
 
@@ -242,6 +246,8 @@ export interface CelestialBody {
   textureSource: 'official' | 'procedural';
   texturePath?: string;
   textureTheme?: ProceduralTheme;
+  albedo?: number;
+  albedoType?: 'measured' | 'estimated';
   hasRings?: boolean;
 }
 

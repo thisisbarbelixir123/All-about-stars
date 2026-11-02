@@ -12,7 +12,7 @@ export const PLANET_VERTEX_SHADER = `
   void main() {
     vNormal = normalize(normalMatrix * normal);
     vPosition = position;
-    vLocalPos = normal; // Unit sphere vector for seamless 3D noise
+    vLocalPos = normalize(position); // Exact unit sphere vector for seamless 3D noise
     vUv = uv;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -mvPosition.xyz;
@@ -31,12 +31,16 @@ export const PLANET_FRAGMENT_SHADER = `
   varying vec3 vViewPosition;
 
   uniform float time;
-  uniform float themeIndex; // 0: rocky, 1: ocean, 2: super-earth, 3: sub-neptune, 4: ice-giant, 5: gas-giant, 6: hot-jupiter, 7: ultra-hot, 8: lava, 9: kbo-tholin, 10: kbo-ice, 11: star-plasma
+  // 0: rocky, 1: ocean, 2: super-earth, 3: sub-neptune, 4: ice-giant, 5: gas-giant-banded,
+  // 6: hot-jupiter, 7: ultra-hot, 8: lava, 9: kbo-tholin, 10: kbo-ice, 11: star-plasma,
+  // 12: mirror-world, 13: hycean-ocean, 14: hot-jupiter-dark-alkali, 15: gas-giant-water-clouds
+  uniform float themeIndex;
   uniform float temperatureK;
   uniform vec3 lightDir;
   uniform float seed;
+  uniform float albedo;
 
-  // 3D Simplex-style pseudo noise
+  // 3D Simplex noise implementation
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -102,6 +106,7 @@ export const PLANET_FRAGMENT_SHADER = `
     return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
   }
 
+  // 4-octave Fractional Brownian Motion
   float fbm(vec3 p) {
     float f = 0.0;
     f += 0.5000 * snoise(p); p = p * 2.02;
@@ -111,119 +116,218 @@ export const PLANET_FRAGMENT_SHADER = `
     return f;
   }
 
+  // Ridged multifractal for razor-sharp mountain cordilleras and tectonic faults
+  float ridgedFbm(vec3 p) {
+    float sum = 0.0;
+    float amp = 0.5;
+    float prev = 1.0;
+    for (int i = 0; i < 4; i++) {
+      float n = 1.0 - abs(snoise(p));
+      n = n * n;
+      sum += n * amp * prev;
+      prev = n;
+      p *= 2.04;
+      amp *= 0.5;
+    }
+    return sum;
+  }
+
+  // Analytical 3D curl turbulence approximation for atmospheric vortex shear
+  vec3 curlNoise(vec3 p) {
+    const float e = 0.05;
+    float n1 = snoise(vec3(p.x, p.y + e, p.z));
+    float n2 = snoise(vec3(p.x, p.y - e, p.z));
+    float n3 = snoise(vec3(p.x, p.y, p.z + e));
+    float n4 = snoise(vec3(p.x, p.y, p.z - e));
+    float n5 = snoise(vec3(p.x + e, p.y, p.z));
+    float n6 = snoise(vec3(p.x - e, p.y, p.z));
+    return normalize(vec3(
+      (n1 - n2) - (n3 - n4),
+      (n3 - n4) - (n5 - n6),
+      (n5 - n6) - (n1 - n2)
+    ));
+  }
+
+  // Multi-octave domain warping: p' = p + alpha * noise(p + beta)
+  vec3 domainWarp(vec3 p, float strength) {
+    vec3 q = vec3(
+      fbm(p + vec3(0.0, 0.0, 0.0)),
+      fbm(p + vec3(5.2, 1.3, 2.8)),
+      fbm(p + vec3(1.8, 9.2, 4.3))
+    );
+    return p + strength * q;
+  }
+
+  // Planckian blackbody thermal radiation approximation
+  vec3 blackbody(float kelvin) {
+    float t = clamp(kelvin, 800.0, 3500.0);
+    if (t < 1100.0) {
+      return mix(vec3(0.05, 0.01, 0.005), vec3(0.4, 0.05, 0.02), (t - 800.0) / 300.0);
+    } else if (t < 1600.0) {
+      return mix(vec3(0.4, 0.05, 0.02), vec3(1.0, 0.35, 0.04), (t - 1100.0) / 500.0);
+    } else if (t < 2400.0) {
+      return mix(vec3(1.0, 0.35, 0.04), vec3(1.0, 0.75, 0.35), (t - 1600.0) / 800.0);
+    } else {
+      return mix(vec3(1.0, 0.75, 0.35), vec3(1.2, 1.15, 1.05), (t - 2400.0) / 1100.0);
+    }
+  }
+
   void main() {
     #include <logdepthbuf_fragment>
     vec3 N = normalize(vNormal);
     vec3 V = normalize(vViewPosition);
     vec3 L = normalize(lightDir);
 
-    float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0); // Balanced celestial illumination preserving contrast and saturation
-    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8); // Atmospheric rim glow
+    float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0);
+    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8);
 
     vec3 surface = vec3(0.5);
     vec3 atmoColor = vec3(0.3, 0.6, 1.0);
     float atmoStrength = 0.6;
+    float emissive = 0.0;
 
-    // 1. Rocky Terrestrial (Mercury/Mars/Moon/Rocky Exoplanet)
+    // 1. Rocky Terrestrial
     if (themeIndex < 0.5) {
-      float n = fbm(vLocalPos * 6.0 + seed);
-      surface = mix(vec3(0.45, 0.40, 0.36), vec3(0.78, 0.70, 0.62), n * 0.5 + 0.5);
+      vec3 warped = domainWarp(vLocalPos * 3.5 + seed, 0.35);
+      float craggy = ridgedFbm(warped);
+      surface = mix(vec3(0.38, 0.34, 0.30), vec3(0.72, 0.65, 0.58), craggy);
       atmoColor = vec3(0.65, 0.72, 0.82);
-      atmoStrength = 0.22;
+      atmoStrength = 0.18;
     }
     // 2. Terrestrial Ocean World (Earth-like)
     else if (themeIndex < 1.5) {
-      float h = fbm(vLocalPos * 3.5 + seed);
+      vec3 warped = domainWarp(vLocalPos * 2.8 + seed, 0.4);
+      float h = fbm(warped);
       if (h < 0.0) {
-        surface = mix(vec3(0.02, 0.1, 0.35), vec3(0.08, 0.3, 0.55), h + 0.5);
+        surface = mix(vec3(0.02, 0.12, 0.38), vec3(0.06, 0.32, 0.58), h + 0.5);
       } else {
-        surface = mix(vec3(0.15, 0.38, 0.12), vec3(0.48, 0.42, 0.28), h * 1.5);
+        float ridges = ridgedFbm(warped * 2.0);
+        surface = mix(vec3(0.18, 0.40, 0.16), vec3(0.55, 0.48, 0.34), ridges * 0.7);
       }
       atmoColor = vec3(0.35, 0.65, 1.0);
-      atmoStrength = 0.8;
+      atmoStrength = 0.75;
     }
     // 3. Super-Earth
     else if (themeIndex < 2.5) {
-      float h = fbm(vLocalPos * 4.0 + seed);
-      surface = mix(vec3(0.35, 0.22, 0.15), vec3(0.15, 0.3, 0.25), h * 0.5 + 0.5);
-      atmoColor = vec3(0.4, 0.8, 0.6);
-      atmoStrength = 0.7;
+      vec3 warped = domainWarp(vLocalPos * 3.2 + seed, 0.5);
+      float h = ridgedFbm(warped);
+      surface = mix(vec3(0.32, 0.18, 0.12), vec3(0.58, 0.42, 0.30), h);
+      atmoColor = vec3(0.45, 0.75, 0.60);
+      atmoStrength = 0.65;
     }
     // 4. Sub-Neptune
     else if (themeIndex < 3.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 1.5, vLocalPos.y * 16.0, vLocalPos.z * 1.5);
-      float band = fbm(bandPos + fbm(vLocalPos * 3.0) * 1.5);
-      surface = mix(vec3(0.1, 0.35, 0.6), vec3(0.25, 0.65, 0.75), band * 0.5 + 0.5);
-      atmoColor = vec3(0.4, 0.7, 1.0);
-      atmoStrength = 0.9;
+      vec3 bandPos = vec3(vLocalPos.x * 1.5, vLocalPos.y * 14.0, vLocalPos.z * 1.5);
+      vec3 curl = curlNoise(vLocalPos * 2.5 + time * 0.02);
+      float band = fbm(bandPos + curl * 1.2);
+      surface = mix(vec3(0.08, 0.32, 0.58), vec3(0.28, 0.68, 0.78), band * 0.5 + 0.5);
+      atmoColor = vec3(0.38, 0.72, 1.0);
+      atmoStrength = 0.85;
     }
     // 5. Ice Giant (Uranus / Neptune-like)
     else if (themeIndex < 4.5) {
-      vec3 bandPos = vec3(vLocalPos.x, vLocalPos.y * 12.0, vLocalPos.z);
+      vec3 bandPos = vec3(vLocalPos.x, vLocalPos.y * 10.0, vLocalPos.z);
       float band = fbm(bandPos);
-      surface = mix(vec3(0.12, 0.4, 0.7), vec3(0.3, 0.65, 0.85), band * 0.5 + 0.5);
-      atmoColor = vec3(0.3, 0.6, 0.9);
-      atmoStrength = 0.85;
+      surface = mix(vec3(0.12, 0.42, 0.72), vec3(0.32, 0.68, 0.88), band * 0.5 + 0.5);
+      atmoColor = vec3(0.32, 0.65, 0.95);
+      atmoStrength = 0.80;
     }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like)
+    // 6. Gas Giant Banded (Jupiter/Saturn-like, Class I)
     else if (themeIndex < 5.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 22.0, vLocalPos.z * 2.0);
-      float warp = fbm(vLocalPos * 4.0 + time * 0.02);
-      float band = fbm(bandPos + warp * 2.0);
-      surface = mix(vec3(0.65, 0.45, 0.28), vec3(0.85, 0.75, 0.6), band * 0.5 + 0.5);
-      atmoColor = vec3(0.8, 0.7, 0.5);
-      atmoStrength = 0.5;
+      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 20.0, vLocalPos.z * 2.0);
+      vec3 curl = curlNoise(vLocalPos * 3.5 + time * 0.015);
+      float band = fbm(bandPos + curl * 1.8);
+      surface = mix(vec3(0.65, 0.45, 0.28), vec3(0.88, 0.78, 0.64), band * 0.5 + 0.5);
+      atmoColor = vec3(0.82, 0.72, 0.55);
+      atmoStrength = 0.48;
     }
-    // 7. Hot Jupiter
+    // 7. Hot Jupiter (Silicate/Iron clouds, Class IV)
     else if (themeIndex < 6.5) {
-      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 18.0, vLocalPos.z * 2.0);
+      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 16.0, vLocalPos.z * 2.0);
       float band = fbm(bandPos);
-      surface = mix(vec3(0.4, 0.15, 0.1), vec3(0.7, 0.35, 0.15), band * 0.5 + 0.5);
-      atmoColor = vec3(1.0, 0.45, 0.2);
-      atmoStrength = 0.75;
+      surface = mix(vec3(0.42, 0.16, 0.10), vec3(0.75, 0.38, 0.18), band * 0.5 + 0.5);
+      atmoColor = vec3(1.0, 0.45, 0.20);
+      atmoStrength = 0.70;
     }
-    // 8. Ultra-Hot Jupiter / Glowing day side
+    // 8. Ultra-Hot Jupiter / Glowing Dayside (Class V)
     else if (themeIndex < 7.5) {
-      float heat = max(0.0, dot(vLocalPos, L));
-      float n = fbm(vLocalPos * 5.0 + time * 0.05);
-      vec3 darkCrust = vec3(0.08, 0.07, 0.09);
-      vec3 hotGlow = vec3(1.0, 0.3, 0.05) * 1.8;
-      surface = mix(darkCrust, hotGlow, pow(heat, 1.5) * (n * 0.4 + 0.8));
-      atmoColor = vec3(1.0, 0.3, 0.1);
-      atmoStrength = 0.9;
+      float dayside = max(0.0, dot(vLocalPos, L));
+      vec3 glow = blackbody(temperatureK);
+      float n = fbm(vLocalPos * 4.5 + time * 0.04);
+      vec3 darkCrust = vec3(0.06, 0.05, 0.08);
+      surface = mix(darkCrust, glow, pow(dayside, 1.4) * (n * 0.3 + 0.85));
+      atmoColor = vec3(1.0, 0.35, 0.12);
+      atmoStrength = 0.95;
+      emissive = pow(dayside, 2.0) * 0.5;
     }
-    // 9. Lava World (55 Cancri e / CoRoT-7b)
+    // 9. Lava World (Molten Magma Oceans)
     else if (themeIndex < 8.5) {
       float subStellar = max(0.0, dot(vLocalPos, vec3(0.0, 0.0, 1.0)));
-      float cracks = fbm(vLocalPos * 10.0 + time * 0.1);
-      vec3 rock = vec3(0.06, 0.05, 0.06);
-      vec3 magma = vec3(1.2, 0.4, 0.05);
-      surface = mix(rock, magma, pow(subStellar, 1.8) * step(0.35, cracks));
-      atmoStrength = 0.2;
+      float cracks = fbm(vLocalPos * 9.0 + time * 0.08);
+      vec3 rock = vec3(0.07, 0.06, 0.07);
+      vec3 magma = blackbody(temperatureK);
+      surface = mix(rock, magma, pow(subStellar, 1.5) * step(0.32, cracks));
+      atmoStrength = 0.20;
+      emissive = pow(subStellar, 1.8) * 0.6;
     }
-    // 10. KBO Tholin (Pluto / Makemake / Sedna reddish-amber ices)
+    // 10. KBO Tholin
     else if (themeIndex < 9.5) {
-      float n = fbm(vLocalPos * 5.0 + seed);
-      surface = mix(vec3(0.58, 0.34, 0.24), vec3(0.82, 0.62, 0.48), n * 0.5 + 0.5);
+      float n = fbm(vLocalPos * 4.5 + seed);
+      surface = mix(vec3(0.56, 0.32, 0.22), vec3(0.80, 0.60, 0.46), n * 0.5 + 0.5);
       atmoColor = vec3(0.55, 0.68, 0.85);
-      atmoStrength = 0.25;
+      atmoStrength = 0.22;
     }
-    // 11. Icy Moon / KBO Ice (Mimas, Enceladus, Europa, Triton, Eris)
+    // 11. Icy Moon / KBO Ice
     else if (themeIndex < 10.5) {
-      float n = fbm(vLocalPos * 5.5 + seed);
-      surface = mix(vec3(0.58, 0.68, 0.78), vec3(0.88, 0.93, 0.98), n * 0.5 + 0.5);
+      float n = fbm(vLocalPos * 5.0 + seed);
+      surface = mix(vec3(0.58, 0.68, 0.78), vec3(0.90, 0.94, 0.98), n * 0.5 + 0.5);
       atmoColor = vec3(0.45, 0.78, 1.0);
-      atmoStrength = 0.35;
+      atmoStrength = 0.30;
     }
-    // 11. Star / Solar Plasma
-    else {
+    // 12. Star / Solar Plasma
+    else if (themeIndex < 11.5) {
       float plasma = fbm(vLocalPos * 4.0 + time * 0.15);
       surface = mix(vec3(1.0, 0.7, 0.2), vec3(1.0, 0.95, 0.7), plasma * 0.5 + 0.5) * 1.5;
       atmoColor = vec3(1.0, 0.6, 0.1);
       atmoStrength = 1.2;
     }
+    // 13. Mirror World (Ultra-High Albedo Titanate/Silicate Clouds, e.g. LTT 9779 b)
+    else if (themeIndex < 12.5) {
+      vec3 warped = domainWarp(vLocalPos * 3.0 + time * 0.01, 0.3);
+      float clouds = fbm(warped);
+      surface = mix(vec3(0.88, 0.92, 0.98), vec3(0.96, 0.98, 1.0), clouds * 0.5 + 0.5);
+      atmoColor = vec3(0.70, 0.85, 1.0);
+      atmoStrength = 0.90;
+    }
+    // 14. Hycean Ocean World
+    else if (themeIndex < 13.5) {
+      vec3 warped = domainWarp(vLocalPos * 3.0 + seed, 0.45);
+      float deepWater = fbm(warped);
+      surface = mix(vec3(0.01, 0.08, 0.28), vec3(0.04, 0.22, 0.50), deepWater * 0.5 + 0.5);
+      atmoColor = vec3(0.30, 0.70, 1.0);
+      atmoStrength = 0.85;
+    }
+    // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
+    else if (themeIndex < 14.5) {
+      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 14.0, vLocalPos.z * 2.0);
+      float band = fbm(bandPos);
+      surface = mix(vec3(0.02, 0.03, 0.06), vec3(0.08, 0.07, 0.14), band * 0.5 + 0.5);
+      atmoColor = vec3(0.20, 0.15, 0.35);
+      atmoStrength = 0.40;
+    }
+    // 16. Gas Giant Water Clouds (Sudarsky Class II)
+    else {
+      vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 18.0, vLocalPos.z * 2.0);
+      vec3 curl = curlNoise(vLocalPos * 3.0 + time * 0.015);
+      float band = fbm(bandPos + curl * 1.5);
+      surface = mix(vec3(0.15, 0.35, 0.58), vec3(0.68, 0.78, 0.90), band * 0.5 + 0.5);
+      atmoColor = vec3(0.40, 0.65, 0.95);
+      atmoStrength = 0.70;
+    }
 
-    vec3 finalColor = surface * NdotL + (atmoColor * fresnel * atmoStrength);
+    // Albedo modulation
+    float albedoFactor = clamp(albedo * 2.5, 0.15, 1.8);
+    vec3 finalColor = (surface * NdotL * albedoFactor) + (atmoColor * fresnel * atmoStrength) + vec3(emissive);
     gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
@@ -257,6 +361,14 @@ export const getThemeIndex = (theme?: string): number => {
       return 10.0;
     case 'star-plasma':
       return 11.0;
+    case 'mirror-world':
+      return 12.0;
+    case 'hycean-ocean':
+      return 13.0;
+    case 'hot-jupiter-dark-alkali':
+      return 14.0;
+    case 'gas-giant-water-clouds':
+      return 15.0;
     default:
       return 0.0;
   }

@@ -737,6 +737,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             temperatureK: { value: body.temperatureK || 300 },
             lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
             seed: { value: seedBucket * 1.618 },
+            albedo: { value: body.albedo ?? 0.30 },
           },
         });
         materialCacheRef.current.set(key, mat);
@@ -2357,6 +2358,14 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                       <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
                         <span className="text-slate-500 mr-1">Temp:</span>
                         <span className="text-white font-semibold">{activeFocusedBody.temperatureK} K</span>
+                      </span>
+                    )}
+                    {activeFocusedBody.albedo !== undefined && (
+                      <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
+                        <span className="text-slate-500 mr-1">Albedo:</span>
+                        <span className="text-cyan-300 font-semibold">
+                          {(activeFocusedBody.albedo * 100).toFixed(1)}% ({activeFocusedBody.albedo.toFixed(2)})
+                        </span>
                       </span>
                     )}
                   </div>
