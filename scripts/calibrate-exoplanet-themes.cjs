@@ -57,23 +57,30 @@ function deriveScientificExoplanetTheme(p) {
   if (isGiant && temperatureK >= 1800) {
     return {
       theme: 'ultra-hot-jupiter',
-      albedo: 0.06,
+      albedo: 0.10,
       albedoType: 'estimated'
     };
   }
 
   // 5. Hot Jupiters (900 K - 1800 K)
   if (isGiant && temperatureK >= 900) {
+    if (classification === 'Neptunian' || diameterEarth < 5.0) {
+      return {
+        theme: 'sub-neptune',
+        albedo: 0.28,
+        albedoType: 'estimated'
+      };
+    }
     if (temperatureK >= 1400) {
       return {
         theme: 'hot-jupiter',
-        albedo: 0.12,
+        albedo: 0.16,
         albedoType: 'estimated'
       };
     }
     return {
       theme: 'hot-jupiter-dark-alkali',
-      albedo: 0.04,
+      albedo: 0.08,
       albedoType: 'estimated'
     };
   }

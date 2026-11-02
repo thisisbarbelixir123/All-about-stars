@@ -310,10 +310,14 @@ export const PLANET_FRAGMENT_SHADER = `
     // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
     else if (themeIndex < 14.5) {
       vec3 bandPos = vec3(vLocalPos.x * 2.0, vLocalPos.y * 14.0, vLocalPos.z * 2.0);
-      float band = fbm(bandPos);
-      surface = mix(vec3(0.02, 0.03, 0.06), vec3(0.08, 0.07, 0.14), band * 0.5 + 0.5);
-      atmoColor = vec3(0.20, 0.15, 0.35);
-      atmoStrength = 0.40;
+      vec3 curl = curlNoise(vLocalPos * 3.0 + time * 0.015);
+      float band = fbm(bandPos + curl * 1.2);
+      // Deep cobalt and midnight indigo banding with subtle twilight bronze
+      surface = mix(vec3(0.06, 0.08, 0.16), vec3(0.18, 0.16, 0.32), band * 0.5 + 0.5);
+      atmoColor = vec3(0.35, 0.30, 0.65);
+      atmoStrength = 0.55;
+      // Faint thermal twilight horizon for hot dark giants
+      emissive = pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15;
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else {
@@ -325,8 +329,8 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoStrength = 0.70;
     }
 
-    // Albedo modulation
-    float albedoFactor = clamp(albedo * 2.5, 0.15, 1.8);
+    // Albedo modulation (scaled with a floor to guarantee visibility and contrast)
+    float albedoFactor = clamp(albedo * 2.0 + 0.35, 0.40, 1.8);
     vec3 finalColor = (surface * NdotL * albedoFactor) + (atmoColor * fresnel * atmoStrength) + vec3(emissive);
     gl_FragColor = vec4(finalColor, 1.0);
   }

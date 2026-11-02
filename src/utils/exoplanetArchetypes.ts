@@ -74,7 +74,7 @@ export function deriveScientificExoplanetTheme(params: {
   if (isGiant && temperatureK >= 1800) {
     return {
       theme: 'ultra-hot-jupiter',
-      albedo: 0.06,
+      albedo: 0.10,
       albedoType: 'estimated',
       description: 'Blistering ultra-hot giant with vaporized iron, titanium oxide atmospheres, and dayside thermal glow.',
     };
@@ -82,19 +82,28 @@ export function deriveScientificExoplanetTheme(params: {
 
   // 5. Hot Jupiters (Sudarsky Class III / IV: 900 K - 1800 K)
   if (isGiant && temperatureK >= 900) {
+    // If it's a Neptunian or Sub-Neptune (not a massive Jupiter), keep it under sub-neptune / hazy atmosphere
+    if (classification === 'Neptunian' || diameterEarth < 5.0) {
+      return {
+        theme: 'sub-neptune',
+        albedo: 0.28,
+        albedoType: 'estimated',
+        description: 'Warm, volatile-rich sub-Neptune with deep hydrogen-helium envelope and photochemical haze.',
+      };
+    }
     if (temperatureK >= 1400) {
       return {
         theme: 'hot-jupiter',
-        albedo: 0.12,
+        albedo: 0.16,
         albedoType: 'estimated',
         description: 'Sudarsky Class IV gas giant enveloped in high-temperature silicate and liquid iron clouds.',
       };
     }
     return {
       theme: 'hot-jupiter-dark-alkali',
-      albedo: 0.04,
+      albedo: 0.08,
       albedoType: 'estimated',
-      description: 'Sudarsky Class III cloudless giant with deep vaporized alkali metal absorption.',
+      description: 'Sudarsky Class III cloudless giant with deep vaporized alkali metal absorption and subtle cobalt bands.',
     };
   }
 
