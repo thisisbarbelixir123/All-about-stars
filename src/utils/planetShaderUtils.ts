@@ -260,8 +260,10 @@ export const PLANET_FRAGMENT_SHADER = `
         lowBasin = mix(vec3(0.42, 0.18, 0.10), vec3(0.58, 0.26, 0.14), micro) * effColorTint;
         highRidge = mix(vec3(0.70, 0.40, 0.22), vec3(0.85, 0.56, 0.32), micro) * effColorTint;
       } else {
-        lowBasin = mix(vec3(0.12, 0.10, 0.10), vec3(0.20, 0.15, 0.14), micro) * effColorTint;
-        highRidge = mix(vec3(0.35, 0.28, 0.24), vec3(0.50, 0.40, 0.35), micro) * effColorTint;
+        // High-temperature rocky worlds (550K - 1350K, e.g. Kepler-131 c, Kepler-37 b):
+        // Highly visible, rich volcanic crust with dark basalt lowlands, warm iron-tinted highlands, and crater rims
+        lowBasin = mix(vec3(0.26, 0.20, 0.18), vec3(0.38, 0.28, 0.24), micro) * effColorTint;
+        highRidge = mix(vec3(0.55, 0.42, 0.36), vec3(0.72, 0.58, 0.50), micro) * effColorTint;
       }
       surface = mix(lowBasin, highRidge, elevation);
 
@@ -765,6 +767,7 @@ export const PLANET_FRAGMENT_SHADER = `
 export const getThemeIndex = (theme?: string): number => {
   switch (theme) {
     case 'terrestrial-rocky':
+      return 0.0;
     case 'carbonaceous-asteroid':
       return 16.0;
     case 'terrestrial-ocean':
