@@ -106,56 +106,40 @@ export const PLANET_FRAGMENT_SHADER = `
     return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
   }
 
-  // 4-octave Fractional Brownian Motion
+  // Fast 3-octave Fractional Brownian Motion (reduced from 4 for optimal fill-rate)
   float fbm(vec3 p) {
-    float f = 0.0;
-    f += 0.5000 * snoise(p); p = p * 2.02;
+    float f = 0.5000 * snoise(p); p = p * 2.02;
     f += 0.2500 * snoise(p); p = p * 2.03;
-    f += 0.1250 * snoise(p); p = p * 2.01;
-    f += 0.0625 * snoise(p);
+    f += 0.1250 * snoise(p);
     return f;
   }
 
-  // Ridged multifractal for razor-sharp mountain cordilleras and tectonic faults
+  // Fast 2-octave FBM for secondary layers (clouds, shadows, micro-cratering)
+  float fbmFast(vec3 p) {
+    return 0.65 * snoise(p) + 0.35 * snoise(p * 2.1);
+  }
+
+  // 2-octave ridged multifractal for razor-sharp mountain cordilleras and tectonic faults
   float ridgedFbm(vec3 p) {
-    float sum = 0.0;
-    float amp = 0.5;
-    float prev = 1.0;
-    for (int i = 0; i < 4; i++) {
-      float n = 1.0 - abs(snoise(p));
-      n = n * n;
-      sum += n * amp * prev;
-      prev = n;
-      p *= 2.04;
-      amp *= 0.5;
-    }
-    return sum;
+    float n1 = 1.0 - abs(snoise(p));
+    float n2 = 1.0 - abs(snoise(p * 2.08));
+    return (n1 * n1) * 0.65 + (n2 * n2) * 0.35;
   }
 
-  // Analytical 3D curl turbulence approximation for atmospheric vortex shear
+  // Fast 2-tap analytical curl turbulence
   vec3 curlNoise(vec3 p) {
-    const float e = 0.05;
-    float n1 = snoise(vec3(p.x, p.y + e, p.z));
-    float n2 = snoise(vec3(p.x, p.y - e, p.z));
-    float n3 = snoise(vec3(p.x, p.y, p.z + e));
-    float n4 = snoise(vec3(p.x, p.y, p.z - e));
-    float n5 = snoise(vec3(p.x + e, p.y, p.z));
-    float n6 = snoise(vec3(p.x - e, p.y, p.z));
-    return normalize(vec3(
-      (n1 - n2) - (n3 - n4),
-      (n3 - n4) - (n5 - n6),
-      (n5 - n6) - (n1 - n2)
-    ));
+    const float e = 0.08;
+    float n1 = snoise(p + vec3(0.0, e, 0.0));
+    float n2 = snoise(p - vec3(0.0, e, 0.0));
+    float n3 = snoise(p + vec3(0.0, 0.0, e));
+    float n4 = snoise(p - vec3(0.0, 0.0, e));
+    return normalize(vec3(n1 - n2, n3 - n4, n2 - n3 + 0.1));
   }
 
-  // Multi-octave domain warping: p' = p + alpha * noise(p + beta)
+  // Fast single-pass domain warping (only 2 noise evaluations instead of 3x4 = 12)
   vec3 domainWarp(vec3 p, float strength) {
-    vec3 q = vec3(
-      fbm(p + vec3(0.0, 0.0, 0.0)),
-      fbm(p + vec3(5.2, 1.3, 2.8)),
-      fbm(p + vec3(1.8, 9.2, 4.3))
-    );
-    return p + strength * q;
+    vec2 offset = vec2(snoise(p), snoise(p + vec3(4.3, 1.7, 2.9)));
+    return p + strength * vec3(offset.x, offset.y, offset.x * 0.5);
   }
 
   // Planckian blackbody thermal radiation approximation
@@ -172,23 +156,17 @@ export const PLANET_FRAGMENT_SHADER = `
     }
   }
 
-  // Directional cloud deck with drop shadows onto surface terrain
-  // Evaluates clouds at coordinate p, and projects shadows along incoming light vector L
+  // High-performance Directional Cloud Deck & Shadow Evaluation
+  // Evaluates clouds with fast 2-octave FBM and projects shadows along incoming light vector L
   vec4 evaluateCloudLayer(vec3 p, vec3 lightDirVec, float timeVal, float coverage, float cloudSeed) {
-    // Advect clouds over time
     vec3 cloudCoord = p + vec3(timeVal * 0.04, timeVal * 0.015, timeVal * 0.02) + cloudSeed;
-    vec3 warpedCoord = domainWarp(cloudCoord * 3.2, 0.45);
-    float cloudNoise = fbm(warpedCoord);
-    
-    // Cloud density mask
-    float cloudDensity = smoothstep(1.0 - coverage, 1.0 - coverage + 0.28, cloudNoise);
+    float cloudNoise = fbmFast(cloudCoord * 2.8);
+    float cloudDensity = smoothstep(1.0 - coverage, 1.0 - coverage + 0.25, cloudNoise);
 
-    // Directional shadow: sample cloud density along offset in direction of light vector
-    // A cloud at altitude h casts shadow on ground at p + lightDir * shadowOffset
-    vec3 shadowCoord = (p + lightDirVec * 0.04) + vec3(timeVal * 0.04, timeVal * 0.015, timeVal * 0.02) + cloudSeed;
-    vec3 warpedShadow = domainWarp(shadowCoord * 3.2, 0.45);
-    float shadowNoise = fbm(warpedShadow);
-    float shadowMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.28, shadowNoise);
+    // Directional shadow: single sample along offset vector towards light
+    vec3 shadowCoord = cloudCoord + lightDirVec * 0.045;
+    float shadowNoise = fbmFast(shadowCoord * 2.8);
+    float shadowMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.25, shadowNoise);
 
     return vec4(cloudDensity, shadowMask, cloudNoise, 0.0);
   }
@@ -200,7 +178,13 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 L = normalize(lightDir);
 
     float NdotL = clamp(dot(N, L) * 0.5 + 0.45, 0.2, 1.0);
+    float rawNdotL = max(0.0, dot(N, L));
     float fresnel = pow(1.0 - max(0.0, dot(N, V)), 2.8);
+
+    // Halfway vector for Blinn-Phong specular ocean sun glint
+    vec3 H = normalize(L + V);
+    float specBase = max(0.0, dot(N, H));
+    float specular = 0.0;
 
     vec3 surface = vec3(0.5);
     vec3 atmoColor = vec3(0.3, 0.6, 1.0);
@@ -275,12 +259,22 @@ export const PLANET_FRAGMENT_SHADER = `
       float cloudMask = clouds.x;
       float shadowMask = clouds.y;
 
+      // Specular ocean sun glint: water reflects sharp sunlight where unclouded; land is matte
+      if (continental < 0.05) {
+        float oceanSpec = pow(specBase, 32.0) * rawNdotL * 1.25;
+        specular = oceanSpec * (1.0 - cloudMask);
+      }
+
       // Cast directional drop shadow onto surface beneath
       surface *= (1.0 - shadowMask * 0.45);
 
       // Blend white cloud banks onto surface
       vec3 cloudColor = vec3(0.95, 0.97, 1.0);
       surface = mix(surface, cloudColor, cloudMask * 0.92);
+
+      // Subtle forward scattering on cloud edges
+      float cloudGlint = pow(specBase, 8.0) * cloudMask * 0.25;
+      specular += cloudGlint;
 
       atmoColor = vec3(0.35, 0.65, 1.0);
       atmoStrength = 0.75;
@@ -395,6 +389,11 @@ export const PLANET_FRAGMENT_SHADER = `
 
       // Vast tropical cloud streamers & cyclonic storms with directional shadows
       vec4 hyceanClouds = evaluateCloudLayer(vLocalPos, L, time * 0.8, 0.62, seed * 1.7);
+
+      // Deep global ocean specular reflection where unclouded
+      float oceanSpec = pow(specBase, 28.0) * rawNdotL * 1.4;
+      specular = oceanSpec * (1.0 - hyceanClouds.x);
+
       surface *= (1.0 - hyceanClouds.y * 0.50); // Drop shadows onto dark ocean abyss
       surface = mix(surface, vec3(0.92, 0.95, 1.0), hyceanClouds.x * 0.95);
 
@@ -425,7 +424,12 @@ export const PLANET_FRAGMENT_SHADER = `
 
     // Albedo modulation (scaled with a floor to guarantee visibility and contrast)
     float albedoFactor = clamp(albedo * 2.0 + 0.35, 0.40, 1.8);
-    vec3 finalColor = (surface * NdotL * albedoFactor) + (atmoColor * fresnel * atmoStrength) + vec3(emissive);
+
+    // Rayleigh scattering atmospheric limb glow (enhances horizon ring along dayside terminator)
+    float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));
+    vec3 rayleighGlow = atmoColor * (fresnel * atmoStrength * (terminatorFactor * 0.7 + 0.3));
+
+    vec3 finalColor = (surface * NdotL * albedoFactor) + rayleighGlow + vec3(specular) + vec3(emissive);
     gl_FragColor = vec4(finalColor, 1.0);
   }
 `;

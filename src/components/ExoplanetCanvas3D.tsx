@@ -940,70 +940,15 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   // Main Render & Animation Loop
   useEffect(() => {
     const clock = new THREE.Clock();
+    const projScreenMatrix = new THREE.Matrix4();
+    const frustum = new THREE.Frustum();
+    const tempSphere = new THREE.Sphere();
 
     const animate = () => {
       animFrameIdRef.current = requestAnimationFrame(animate);
 
       const delta = Math.min(clock.getDelta(), 0.05);
       const elapsedTime = clock.getElapsedTime();
-
-      // Damping
-      if (!isDraggingRef.current) {
-        if (Math.abs(orbitVelocityRef.current.x) > 0.00005 || Math.abs(orbitVelocityRef.current.y) > 0.00005) {
-          cameraAngleRef.current.theta += orbitVelocityRef.current.x;
-          cameraAngleRef.current.phi = Math.max(
-            0.1,
-            Math.min(Math.PI - 0.1, cameraAngleRef.current.phi + orbitVelocityRef.current.y)
-          );
-          orbitVelocityRef.current.x *= 0.91;
-          orbitVelocityRef.current.y *= 0.91;
-        }
-      }
-
-      // Time uniform update
-      sharedTimeUniformRef.current.value = (elapsedTime % 600.0) * rotationSpeed;
-
-      // Axial rotation & differential atmospheric dynamics
-      if (isAutoRotating) {
-        const baseRot = delta * 0.18 * rotationSpeed;
-        bodyObjectsRef.current.forEach((grp, id) => {
-          grp.rotation.y += baseRot;
-
-          // Differential cloud rotation for Earth
-          if (id === 'sol-earth') {
-            const clouds = grp.getObjectByName('Clouds-sol-earth');
-            if (clouds) {
-              clouds.rotation.y += delta * 0.06 * rotationSpeed;
-            }
-          }
-        });
-      }
-
-      // Throttled raycasting
-      if (pendingRaycastPosRef.current && containerRef.current && cameraRef.current && !isDraggingRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const mouseX = ((pendingRaycastPosRef.current.x - rect.left) / rect.width) * 2 - 1;
-        const mouseY = -((pendingRaycastPosRef.current.y - rect.top) / rect.height) * 2 + 1;
-        pendingRaycastPosRef.current = null;
-
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(new THREE.Vector2(mouseX, mouseY), cameraRef.current);
-        const intersects = raycaster.intersectObjects(interactiveMeshesRef.current, false);
-
-        let hit: CelestialBody | null = null;
-        if (intersects.length > 0) {
-          let obj: THREE.Object3D | null = intersects[0].object;
-          while (obj && (!obj.userData || !obj.userData.bodyData) && obj.parent) {
-            obj = obj.parent;
-          }
-          hit = (obj?.userData?.bodyData as CelestialBody) ?? null;
-        }
-
-        setHoveredBody(hit);
-        if (containerRef.current) {
-          containerRef.current.style.cursor = hit ? 'pointer' : 'grab';
-        }
-      }
 
       // Camera flight interpolation (fluid, zero-delay travel)
       if (cameraRef.current) {
@@ -1035,7 +980,74 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           cameraRef.current.far = targetFar;
           cameraRef.current.updateProjectionMatrix();
         }
+
+        // High-Performance Frustum & Screen-Size Culling
+        // Cull objects behind camera or occupying less than 1.5 pixels on screen
+        cameraRef.current.updateMatrixWorld();
+        projScreenMatrix.multiplyMatrices(cameraRef.current.projectionMatrix, cameraRef.current.matrixWorldInverse);
+        frustum.setFromProjectionMatrix(projScreenMatrix);
+
+        const camPos = cameraRef.current.position;
+        const fovRad = (cameraRef.current.fov * Math.PI) / 180;
+        const vpHeight = containerRef.current?.clientHeight || window.innerHeight;
+
+        bodyObjectsRef.current.forEach((grp, id) => {
+          const sc = bodyScalesRef.current[id];
+          if (!sc) return;
+
+          tempSphere.center.copy(grp.position);
+          tempSphere.radius = sc.radius * 1.5;
+
+          if (!frustum.intersectsSphere(tempSphere)) {
+            grp.visible = false;
+            return;
+          }
+
+          // Screen-space pixel radius estimation: R_px = (radius / dist) * (height / (2 * tan(fov / 2)))
+          const distToCam = camPos.distanceTo(grp.position);
+          const pxSize = (sc.radius / Math.max(distToCam, 0.00001)) * (vpHeight / (2.0 * Math.tan(fovRad / 2.0)));
+
+          // Cull bodies that render smaller than 1.2 physical pixels (microscopic sub-pixel dots)
+          // Keep active or hovered body always visible
+          const isTargeted = id === activeBodyId || id === hoveredBody?.id;
+          grp.visible = isTargeted || pxSize >= 1.2;
+        });
       }
+
+      // Damping
+      if (!isDraggingRef.current) {
+        if (Math.abs(orbitVelocityRef.current.x) > 0.00005 || Math.abs(orbitVelocityRef.current.y) > 0.00005) {
+          cameraAngleRef.current.theta += orbitVelocityRef.current.x;
+          cameraAngleRef.current.phi = Math.max(
+            0.1,
+            Math.min(Math.PI - 0.1, cameraAngleRef.current.phi + orbitVelocityRef.current.y)
+          );
+          orbitVelocityRef.current.x *= 0.91;
+          orbitVelocityRef.current.y *= 0.91;
+        }
+      }
+
+      // Time uniform update
+      sharedTimeUniformRef.current.value = (elapsedTime % 600.0) * rotationSpeed;
+
+      // Axial rotation & differential atmospheric dynamics (only for visible groups)
+      if (isAutoRotating) {
+        const baseRot = delta * 0.18 * rotationSpeed;
+        bodyObjectsRef.current.forEach((grp, id) => {
+          if (!grp.visible) return;
+          grp.rotation.y += baseRot;
+
+          // Differential cloud rotation for Earth
+          if (id === 'sol-earth') {
+            const clouds = grp.getObjectByName('Clouds-sol-earth');
+            if (clouds) {
+              clouds.rotation.y += delta * 0.06 * rotationSpeed;
+            }
+          }
+        });
+      }
+
+      // Throttled raycasting
 
       // Update continuous grid
       if (continuousGridRef.current && cameraRef.current) {
