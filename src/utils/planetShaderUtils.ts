@@ -686,23 +686,35 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.15, 0.75, 1.0) * effColorTint;
       atmoStrength = 0.90;
     }
-    // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b)
+    // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b, WASP-12b precursors)
     else if (themeIndex < 14.5) {
       vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
       float latFreq = 12.0 + effBandShift * 5.0;
       float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
-      // Deep cobalt and midnight indigo banding with subtle twilight bronze
-      vec3 darkTone = vec3(0.04, 0.06, 0.14) * effColorTint;
-      vec3 alkaliTone = vec3(0.16, 0.14, 0.30) * effColorTint;
-      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
-      vec3 smoothAlkali = mix(darkTone, alkaliTone, 0.5);
-      vec3 bandedAlkali = mix(darkTone, alkaliTone, smoothstep(-0.6, 0.6, band));
+
+      // Deep, luminous alkali absorption colors with high contrast:
+      // Intense atmospheric sodium (Na D lines) and potassium (K I) absorption creates:
+      // Deep midnight cobalt, glowing amethyst-plum, and twilight bronze equatorial ribbons
+      vec3 darkTone = vec3(0.08, 0.10, 0.22) * effColorTint;
+      vec3 alkaliTone = vec3(0.24, 0.18, 0.40) * effColorTint;
+      vec3 bronzeShear = vec3(0.38, 0.24, 0.16) * effColorTint;
+
+      float jetContrast = smoothstep(0.55, 1.25, bandTurbulence);
+      float tBand = smoothstep(-0.7, 0.7, band);
+      vec3 bandedAlkali = mix(darkTone, alkaliTone, tBand);
+      bandedAlkali = mix(bandedAlkali, bronzeShear, smoothstep(0.65, 0.95, tBand) * 0.45);
+
+      vec3 smoothAlkali = mix(darkTone, alkaliTone, 0.5 + smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15);
       surface = mix(smoothAlkali, bandedAlkali, jetContrast);
 
-      atmoColor = vec3(0.35, 0.30, 0.65) * effColorTint;
-      atmoStrength = 0.55;
-      // Faint thermal twilight horizon for hot dark giants
-      emissiveColor = vec3(0.7, 0.3, 0.1) * (pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15);
+      // Deep ionized violet-indigo Rayleigh limb scattering
+      atmoColor = vec3(0.45, 0.35, 0.85) * effColorTint;
+      atmoStrength = 0.65;
+
+      // Thermal twilight incandescence on dayside (planets at 900K - 1400K emit red/orange thermal glow)
+      float subStellar = max(0.0, dot(vLocalPos, L));
+      vec3 thermalGlow = blackbody(temperatureK);
+      emissiveColor = thermalGlow * pow(subStellar, 2.0) * 0.35;
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else if (themeIndex < 15.5) {
@@ -738,7 +750,8 @@ export const PLANET_FRAGMENT_SHADER = `
 
     // Physical Albedo modulation:
     // Low albedo planets absorb deep light; high albedo reflects cloud tops
-    float albedoFactor = clamp(albedo * 1.6 + 0.40, 0.35, 1.65);
+    // Guarantee minimum optical floor (0.55) so atmospheric fluid features remain crisp and visible
+    float albedoFactor = clamp(albedo * 1.5 + 0.50, 0.55, 1.75);
 
     // Rayleigh scattering atmospheric limb glow (enhances soft atmospheric horizon ring)
     float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));

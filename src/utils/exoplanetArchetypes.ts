@@ -96,7 +96,7 @@ export function deriveScientificExoplanetTheme(params: {
 
     // Hot Jupiters & Neptunes (900 K - 1800 K)
     if (temperatureK >= 900) {
-      if (classification === 'Neptunian' || diameterEarth < 5.0) {
+      if (classification === 'Neptunian' || diameterEarth < 8.0) {
         return {
           theme: 'sub-neptune',
           albedo: 0.28,
@@ -104,7 +104,8 @@ export function deriveScientificExoplanetTheme(params: {
           description: 'Warm, volatile-rich sub-Neptune with deep hydrogen-helium envelope and photochemical haze.',
         };
       }
-      if (temperatureK >= 1400) {
+      // Very hot silicate/iron cloud giants (T >= 1300 K)
+      if (temperatureK >= 1300) {
         return {
           theme: 'hot-jupiter',
           albedo: 0.16,
@@ -112,11 +113,22 @@ export function deriveScientificExoplanetTheme(params: {
           description: 'Sudarsky Class IV gas giant enveloped in high-temperature silicate and liquid iron clouds.',
         };
       }
+      // Differentiate between warm banded Jovians (moderate albedo) and true alkali metal absorption giants
+      // Only benchmark dark worlds or high-metallicity cloudless giants retain dark alkali
+      const isCloudlessAlkali = lowerName.includes('tres-2') || (temperatureK >= 1150 && Math.sin(temperatureK) > 0.4);
+      if (isCloudlessAlkali) {
+        return {
+          theme: 'hot-jupiter-dark-alkali',
+          albedo: 0.08,
+          albedoType: 'estimated',
+          description: 'Sudarsky Class III giant with deep vaporized alkali metal absorption and subtle cobalt/amethyst bands.',
+        };
+      }
       return {
-        theme: 'hot-jupiter-dark-alkali',
-        albedo: 0.08,
+        theme: 'gas-giant-banded',
+        albedo: 0.22,
         albedoType: 'estimated',
-        description: 'Sudarsky Class III cloudless giant with deep vaporized alkali metal absorption and subtle cobalt bands.',
+        description: 'Warm Jovian giant displaying dynamic latitudinal jet streams and photochemical smog.',
       };
     }
 

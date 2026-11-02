@@ -70,23 +70,31 @@ function deriveScientificExoplanetTheme(p) {
       };
     }
     if (temperatureK >= 900) {
-      if (classification === 'Neptunian' || diameterEarth < 5.0) {
+      if (classification === 'Neptunian' || diameterEarth < 8.0) {
         return {
           theme: 'sub-neptune',
           albedo: 0.28,
           albedoType: 'estimated'
         };
       }
-      if (temperatureK >= 1400) {
+      if (temperatureK >= 1300) {
         return {
           theme: 'hot-jupiter',
           albedo: 0.16,
           albedoType: 'estimated'
         };
       }
+      const isCloudlessAlkali = lowerName.includes('tres-2') || (temperatureK >= 1150 && Math.sin(temperatureK) > 0.4);
+      if (isCloudlessAlkali) {
+        return {
+          theme: 'hot-jupiter-dark-alkali',
+          albedo: 0.08,
+          albedoType: 'estimated'
+        };
+      }
       return {
-        theme: 'hot-jupiter-dark-alkali',
-        albedo: 0.08,
+        theme: 'gas-giant-banded',
+        albedo: 0.22,
         albedoType: 'estimated'
       };
     }

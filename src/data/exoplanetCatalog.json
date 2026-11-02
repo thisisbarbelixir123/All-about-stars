@@ -16618,9 +16618,9 @@
     "confirmed": true,
     "description": "HATS-7b is a hot super-Neptune orbiting a metal-rich K-dwarf star. The inferred composition based on its observed properties suggests it is mainly composed of heavy elements, which makes it more similar to Uranus and Neptune than Saturn.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 980,
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -16640,8 +16640,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -16727,8 +16727,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Boufleur et al. 2018. The discovery was made with a space based telescope (0.27 m CoRoT Telescope). The parameters listed here are those reported by Boufleur et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -16837,8 +16837,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Jordán et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Jordán et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -16925,8 +16925,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Jordán et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Jordán et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17056,8 +17056,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Hellier et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Hellier et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17122,8 +17122,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Addison et al. 2021. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17166,8 +17166,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Van Eylen et al. 2018. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Yu et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17232,8 +17232,8 @@
     "confirmed": true,
     "description": "WASP-145Ab is a planet in a orbit with a grazing transit. This Hot Jupiter was discovered by WASP-South.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17253,9 +17253,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 1215,
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17318,9 +17318,9 @@
     "confirmed": true,
     "description": "This planet was discovered by the Kepler spacecraft during its extended K2 mission, Campaign 1.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 948,
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17341,8 +17341,8 @@
     "confirmed": true,
     "description": "HR 8799 is a young Lambda Boötis star in the constellation of Pegasus. It hosts a debris disk and at least 4 planets. The outer two planets have peculiar spectral energy distributions that match a blend of L and T-type spectra.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17384,8 +17384,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter",
-    "albedo": 0.16,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17406,8 +17406,8 @@
     "confirmed": true,
     "description": "Kepler-117 b has been discovered by the Kepler spacecraft and is the innermost planet in the system. A new statistical analysis led by a team at NASA Ames Research Center has validated the planet with more than 99 percent confidence.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17450,8 +17450,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Hebrard et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Hebrard et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17494,8 +17494,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Sha et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "sub-neptune",
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -17537,9 +17537,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1035,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17692,8 +17692,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Yee et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17779,9 +17779,9 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 976,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17801,9 +17801,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1199,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17889,8 +17889,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17911,8 +17911,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Hartman et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Hartman et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -17932,9 +17932,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1035,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18085,9 +18085,9 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 961,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18130,8 +18130,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Psaridi et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -18151,8 +18151,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18173,8 +18173,8 @@
     "confirmed": true,
     "description": "The young and metal rich star HAT-P-3 is located in the constellation Ursa Major. The planet HAT-P-3 b has about 75 Earth masses worth of heavy elements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18281,8 +18281,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18346,8 +18346,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -18412,8 +18412,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Johnson et al. 2018. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Johnson et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18434,8 +18434,8 @@
     "confirmed": true,
     "description": "This Hot Jupiter was discovered by WASP-South.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18542,9 +18542,9 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1119,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18695,9 +18695,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 996,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18718,8 +18718,8 @@
     "confirmed": true,
     "description": "HATS-8 b is a low density transiting super-Neptune discovered as part of the HATSouth project. The low density, large radius and a large separation to its host star on the sky makes HATS-8 b an exiting target for future atmospheric characterization studies, particularly for long-slit transmission spectroscopy.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -18783,8 +18783,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18805,8 +18805,8 @@
     "confirmed": true,
     "description": "Kepler-424 b is a Hot Jupiter in a two-planet system. It was discovered using the Keple Space Telescope. The mass was determined using radial velocity measurements from the Hobby-Eberly Telescope and its High Resolution Spectrograph (HRS).",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18826,9 +18826,9 @@
     "confirmed": true,
     "description": "Lupus-TR 3b is the only planet in the system. The planet is a typical a hot Jupiter orbiting Lupus-TR 3, an early dwarf type star",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1197,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18913,10 +18913,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1206,
     "semiMajorAxisAU": 0.04038,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18936,9 +18936,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1113,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -18980,9 +18980,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1075,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19003,8 +19003,8 @@
     "confirmed": true,
     "description": "HATS-5 is a transiting Hot Saturn. It was discovered by the HAT-South survey. The bright and quiet G-type host star make this planet an ideal candidate for follow-up observations.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19134,8 +19134,8 @@
     "confirmed": true,
     "description": "This Hot Jupiter was discovered by WASP-South.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19198,9 +19198,9 @@
     "confirmed": true,
     "description": "POTS-1 b is a Hot Jupiter and the first planet discovered by the pre-OmegaTranS project survey. This survey is looking at the Carina region of the Galactic disc with the European Southern Observatory Wide Field Imager at La Silla Observatory.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1334,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -19264,8 +19264,8 @@
     "confirmed": true,
     "description": "WASP-45 b is a Jupiter mass planet transiting in front of the limb of its host star. Emission from Ca H+K suggests that the star is chromospherically active.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19328,8 +19328,8 @@
     "confirmed": true,
     "description": "The star HAT-P-2 is located in the constellation Hercules and is between 2 and 3 billion years old.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -19371,9 +19371,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1150,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19393,9 +19393,9 @@
     "confirmed": true,
     "description": "CoRoT-28 b is a Jupiter-sized planet orbiting an evolved star. It was discovered by the European space mission CoRoT.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1061,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19438,8 +19438,8 @@
     "confirmed": true,
     "description": "Kepler-15b is a planet discovered by NASA's Kepler mission and confirmed by the Hobby-Eberly Telescope. The density of the planet is high, suggesting an enrichment in heavy elements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19481,9 +19481,9 @@
     "confirmed": true,
     "description": "This planet was discovered with the Kepler telescope and confirmed with the SOPHIE and HARPS-N spectrographs. Originally announced to be in an eccentric orbit, the later re-analysis by Bonomo et al. (2015) indicated that the orbit was compatible with being circular. The planet was first announced in 2012.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 922,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19547,9 +19547,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 941,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19569,8 +19569,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19613,8 +19613,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Rodriguez et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Rodriguez et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19698,9 +19698,9 @@
     "confirmed": true,
     "description": "CoRoT-29 b is a Jupiter-sized planet orbiting an oblate star. It was discovered by the European space mission CoRoT. The transits were originally announced by Cabrera et al. (2015) to be asymmetric but this was not confirmed by the follow-up study of Pallé et al. (2016)",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1364,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -19741,9 +19741,9 @@
     "confirmed": true,
     "description": "The planet XO-2N b was the first planet discovered in the XO-2 binary. The host star is variable (Zellem et al. 2015) which complicates the analysis of the planetary properties. The stellar variability may be caused by starspots.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1345,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -19764,8 +19764,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -19808,8 +19808,8 @@
     "confirmed": true,
     "description": "This planet had been flagged by the Kepler Team as a planet candidate. Follow-up observations using the HARPS-N spectrograph at the Telescopio Nazionale Galileo have now confirmed its planetary nature.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -19918,8 +19918,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Brahm et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Brahm et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -20028,8 +20028,8 @@
     "confirmed": true,
     "description": "HR 8799 is a young Lambda Boötis star in the constellation of Pegasus. It hosts a debris disk and at least 4 planets. The outer two planets have peculiar spectral energy distributions that match a blend of L and T-type spectra.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20050,8 +20050,8 @@
     "confirmed": true,
     "description": "HR 8799 is a young Lambda Boötis star in the constellation of Pegasus. It hosts a debris disk and at least 4 planets. The inner two planets have spectral energy distributions that best match dusty L7 dwarfs.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20072,8 +20072,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Brahm et al. 2018. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Brahm et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20138,8 +20138,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20248,8 +20248,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Brahm et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20270,8 +20270,8 @@
     "confirmed": true,
     "description": "WASP-162b is a massive planet in a relatively long and highly eccentric orbit. This Hot Jupiter was discovered by WASP-South.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20357,8 +20357,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20401,8 +20401,8 @@
     "confirmed": true,
     "description": "This Jupiter-mass planet was discovered by the HATNet transit survey.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20423,8 +20423,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Alsubai et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Alsubai et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20595,10 +20595,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 913,
     "semiMajorAxisAU": 0.0705,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20661,8 +20661,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20683,8 +20683,8 @@
     "confirmed": true,
     "description": "HATS-4 is a dense transiting planet orbiting around a high-metallicity star discovered by the HATSouth survey.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -20727,8 +20727,8 @@
     "confirmed": true,
     "description": "WASP-117b is a Hot Saturn on an eccentric and misaligned orbit. This is the first planet with a period beyond 10 days found by the WASP survey. Because of its large orbital separation tidal forces are weak and have had little impact on the evolution of the system.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20749,8 +20749,8 @@
     "confirmed": true,
     "description": "The planet TOI-1259 A b is a gas giant transiting a K-dwarf star. It is a promising target for atmospheric characterization. The system also contains a bound white dwarf companion TOI-1259 B at a distance of approximately 1600 AU.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20771,8 +20771,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Jackson et al. 2022. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20792,8 +20792,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20814,8 +20814,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Nielsen et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Nielsen et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20879,9 +20879,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1340,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -20901,8 +20901,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -20988,8 +20988,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -21097,8 +21097,8 @@
     "confirmed": true,
     "description": "This planet has been announced in 2014 by the WASP team. The scientific paper describing the discovery was published on the arXiv in 2014. The planet was discovered via the transit method and confirmed using radial velocity measurements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21119,8 +21119,8 @@
     "confirmed": true,
     "description": "This planet has been announced in 2014 by the WASP team. The scientific paper describing the discovery was published on the arXiv in 2014. The planet was discovered via the transit method and confirmed using radial velocity measurements and is a good target for an extensive study of transits of star spots.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21162,8 +21162,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21184,8 +21184,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Bryant et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Bryant et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21246,8 +21246,8 @@
     "discoveryMethod": "imaging",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21334,8 +21334,8 @@
     "confirmed": true,
     "description": "This is a super-Neptune planet. The host system is possibly a binary star system.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21356,8 +21356,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team. It was published in a paper in October 2013.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21444,8 +21444,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21466,8 +21466,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21532,8 +21532,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Alsubai et al. 2018. This was a ground based discovery. The parameters listed here are those reported by Alsubai et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21597,9 +21597,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1349,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -21663,8 +21663,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -21706,9 +21706,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Chontos et al. 2019. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Chontos et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1105,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21817,8 +21817,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Brahm et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Brahm et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -21904,8 +21904,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21948,8 +21948,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Triaud et al. 2017. This was a ground based discovery. The parameters listed here are those reported by Triaud et al. 2017 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -21969,8 +21969,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22013,8 +22013,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22033,9 +22033,9 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1072,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22055,8 +22055,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22186,8 +22186,8 @@
     "confirmed": true,
     "description": "This planet had been flagged by the Kepler Team as a planet candidate. Follow-up observations using the HARPS-N spectrograph at the Telescopio Nazionale Galileo have now confirmed its planetary nature.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22229,8 +22229,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22251,8 +22251,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22273,8 +22273,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Collier Cameron et al. 2007. This was a ground based discovery. The parameters listed here are those reported by Addison et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -22295,8 +22295,8 @@
     "confirmed": true,
     "description": "The transiting exoplanet WASP-106 b is just slightly larger than Jupiter. The orbital solution is consistent with zero eccentricity, which is interesting because many other similar planets are known to have eccentric orbits. The planet was discovered by the WASP survey.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22447,8 +22447,8 @@
     "confirmed": true,
     "description": "This planet had been flagged by the Kepler Team as a planet candidate. Follow-up observations using the HARPS-N spectrograph at the Telescopio Nazionale Galileo have now confirmed its planetary nature.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -22469,8 +22469,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Costes et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Costes et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -22491,8 +22491,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Lendl et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Lendl et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22512,8 +22512,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22556,8 +22556,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22577,9 +22577,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1060,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22730,9 +22730,9 @@
     "confirmed": true,
     "description": "TrES-1 b orbits an orange dwarf star in the constellation of Lyra. It belongs to the class of Hot Jupiters",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 990,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22841,8 +22841,8 @@
     "confirmed": true,
     "description": "HR 8799 is a young Lambda Boötis star in the constellation of Pegasus. It hosts a debris disk and at least 4 planets. The inner two planets have spectral energy distributions that best match dusty L7 dwarfs.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22863,8 +22863,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -22925,8 +22925,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Anderson et al. 2011. This was a ground based discovery. The parameters listed here are those reported by Addison et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -22947,8 +22947,8 @@
     "confirmed": true,
     "description": "This is a hot Jupiter discovered by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23077,8 +23077,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23098,9 +23098,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1269,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23143,8 +23143,8 @@
     "confirmed": true,
     "description": "HAT-P-19 b is an inflated Saturn-mass planet in a short-period orbit around a K-dwarf star. The star has a rotation period of 35.5 days and varies by 4.7 millimagnitudes in the V-band as it rotates.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23405,9 +23405,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Schanche et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Schanche et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1052,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23472,8 +23472,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -23516,8 +23516,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Schlecker et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Schlecker et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23560,8 +23560,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Bakos et al. 2021. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23845,8 +23845,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23932,9 +23932,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1192,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -23977,8 +23977,8 @@
     "confirmed": true,
     "description": "This is a transiting Hot-Jupiter around a Sun-Like star.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24021,8 +24021,8 @@
     "confirmed": true,
     "description": "This is a close-in transiting hot-Jupiter around a G-type dwarf.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -24131,8 +24131,8 @@
     "confirmed": true,
     "description": "Kepler-434 b is an exoplanet that was identified in the Q1-Q6 Kepler KOI list.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24259,9 +24259,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1106,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24280,10 +24280,10 @@
     "confirmed": true,
     "description": "This planet was discovered with the Kepler spacecraft. The host star is in a close visual binary. The object was previously known as KOI-98 (Kepler Object of Interest).",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 918,
     "semiMajorAxisAU": 0.06971,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24304,8 +24304,8 @@
     "confirmed": true,
     "description": "This is a  highly inflated planet offering insights into the sub-Jovian desert.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24369,8 +24369,8 @@
     "confirmed": true,
     "description": "The planet HD 189733 b is a transiting hot Jupiter on a 2 day orbit. Astronomers have observed the secondary eclipse with the Hubble Space Telescope. They found evidence for optically thick reflective clouds on the dayside hemisphere. According to the best-fit albedo values, the planet would appear deep blue at visible wavelengths.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24412,9 +24412,9 @@
     "confirmed": true,
     "description": "This hot Jupiter planet was announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team. The K2 mission discovered two additional transiting planets in 2015, and an outer giant planet was discovered by radial velocity measurements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1250,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24698,8 +24698,8 @@
     "confirmed": true,
     "description": "Qatar-2b is a transiting hot Jupiter orbiting a K dwarf and was found by the Qatar Exoplanet Survey (QES). The radial velocity data shows evidence for a second companion with a period of about one year and a mass several times that of Jupiter.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24830,8 +24830,8 @@
     "confirmed": true,
     "description": "Kepler-422 b was initially flagged as a potential planet candidate by the Kepler team, which is why the planet is also known as KOI-22 b. Follow-up observations have confirmed the planetary nature of the object and were able to measure its mass.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -24982,8 +24982,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25155,8 +25155,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -25177,8 +25177,8 @@
     "confirmed": true,
     "description": "Qatar-1 b orbits a metal-rich K-dwarf, one of the faintest around which a planet has been discovered by ground based surveys. Measurements of the Rossiter-McLaughlin effect show that the sky-projected obliquity between the orbital plane of the planet and the star's rotation axis is only a few degrees.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -25221,8 +25221,8 @@
     "confirmed": true,
     "description": "WASP-70A b is part of a binary system. The planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team. It was published in a paper in October 2013.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -25264,8 +25264,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25373,8 +25373,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25545,8 +25545,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Davis et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Davis et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25653,9 +25653,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1235,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25676,8 +25676,8 @@
     "confirmed": true,
     "description": "HAT-P-37 b is a transiting planet that has been discovered by the HATNet collaboration. HATNet is a ground-based survey using standard telephoto lenses such as the Canon 11cm diameter f/1.8L.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25697,9 +25697,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1159,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25784,8 +25784,8 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25826,8 +25826,8 @@
     "confirmed": true,
     "description": "This planet was discovered by the HATNet transit survey. The planet is a typical hot Jupiter.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -25848,8 +25848,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Yee et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -25870,8 +25870,8 @@
     "confirmed": true,
     "description": "This is a hot-Saturn planet.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25891,8 +25891,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25913,8 +25913,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Yee et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25934,8 +25934,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25955,9 +25955,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1255,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -25998,8 +25998,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26107,8 +26107,8 @@
     "confirmed": true,
     "description": "This planet has been announced in 2014 by the WASP team. The scientific paper describing the discovery was published on the arXiv in 2014. The planet was discovered via the transit method and confirmed using radial velocity measurements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26150,9 +26150,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1268,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26194,9 +26194,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1154,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26217,8 +26217,8 @@
     "confirmed": true,
     "description": "HAT-P-34 b is a transiting planet that has been discovered by the HATNet collaboration. HATNet is a ground-based survey using standard telephoto lenses such as the Canon 11cm diameter f/1.8L.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26260,9 +26260,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Vogt et al. 2002. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 974,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26325,8 +26325,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26369,8 +26369,8 @@
     "confirmed": true,
     "description": "This is a hot Jupiter discovered by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26413,8 +26413,8 @@
     "confirmed": true,
     "description": "This hot Jupiter has an ultra-short period.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26435,8 +26435,8 @@
     "confirmed": true,
     "description": "This planet was discovered by the HATSouth project.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26566,8 +26566,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -26697,8 +26697,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26719,8 +26719,8 @@
     "confirmed": true,
     "description": "HATS-13 b is a transiting planet that was discovered by the HATSouth survey.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26890,9 +26890,9 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1223,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26934,9 +26934,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1046,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26955,9 +26955,9 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1126,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -26977,8 +26977,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27018,8 +27018,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27039,9 +27039,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1335,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -27148,8 +27148,8 @@
     "confirmed": true,
     "description": "This planet had been flagged by the Kepler Team as a planet candidate. Follow-up observations using the HARPS-N spectrograph at the Telescopio Nazionale Galileo have now confirmed its planetary nature.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27300,8 +27300,8 @@
     "confirmed": true,
     "description": "This planet has been announced in 2014 by the WASP team. The scientific paper describing the discovery was published on the arXiv in 2014. The planet was discovered via the transit method and confirmed using radial velocity measurements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27604,9 +27604,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1285,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27715,8 +27715,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Hellier et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Hellier et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27736,9 +27736,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1102,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27759,8 +27759,8 @@
     "confirmed": true,
     "description": "This is a short period hot Jupiter.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -27780,8 +27780,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -27845,9 +27845,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1287,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27866,9 +27866,9 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1124,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27888,9 +27888,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1134,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -27997,8 +27997,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28018,9 +28018,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1121,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28041,8 +28041,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Jackson et al. 2022. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28127,8 +28127,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28148,8 +28148,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28323,8 +28323,8 @@
     "confirmed": true,
     "description": "This planet was discovered by the HATNet transit survey. Follow up observations to measure the radial velocity of the star confirmed the planetary nature.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28453,8 +28453,8 @@
     "confirmed": true,
     "description": "HAT-P-43 b is a typical Hot Jupiter on a circular orbit around a late F-type main sequence star. The planet is inflated compared to our own Jupiter. It was discovered by the HATNet collaboration.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28539,9 +28539,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1098,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28692,8 +28692,8 @@
     "confirmed": true,
     "description": "This planet was discovered by the HATNet transit survey. The low stellar jitter and fovorable radii ratio make it a promising target for measuring the Rossiter-McLaughlin effect for a Saturn-mass planet.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28733,10 +28733,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1199,
     "semiMajorAxisAU": 0.04091,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28755,8 +28755,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28797,9 +28797,9 @@
     "confirmed": true,
     "description": "HATS-16b is a massive planet transiting a G3V star.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1332,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28841,8 +28841,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28905,10 +28905,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1357,
     "semiMajorAxisAU": 0.03191,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -28973,8 +28973,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -28995,8 +28995,8 @@
     "confirmed": true,
     "description": "HATS-1 b is the first planet discovery of HATSouth, a global network of autonomous wide-field telescopes.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -29060,8 +29060,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29081,8 +29081,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29124,9 +29124,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1039,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -29229,8 +29229,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -29360,9 +29360,9 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1193,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -29514,8 +29514,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Alves et al. 2022. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29557,8 +29557,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29667,8 +29667,8 @@
     "confirmed": true,
     "description": "This is a close-in transiting hot-Jupiter around a G-type dwarf.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29814,8 +29814,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29858,8 +29858,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -29878,10 +29878,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1368,
     "semiMajorAxisAU": 0.03143,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29902,8 +29902,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Yee et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -29966,9 +29966,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1033,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30010,9 +30010,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1130,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30075,8 +30075,8 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30097,8 +30097,8 @@
     "confirmed": true,
     "description": "By studying the carbon monoxide gas in the upper atmosphere with great accuracy, astronomers found evidence for a wind, blowing at a speed of 5000 to 10000 km per hour.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30118,9 +30118,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1003,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30272,8 +30272,8 @@
     "confirmed": true,
     "description": "CoRoT 6 is an F-type star in the constellation Monoceros.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30315,8 +30315,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30336,9 +30336,9 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1103,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30425,8 +30425,8 @@
     "confirmed": true,
     "description": "KELT-10 b is the first transiting exoplanet discovered using the Kilodegree Extremely Little Telescope (KELT)-South telescope. KELT-10 b is a highly inflated sub-Jupiter mass planet. This planet joins a group of highly inflated transiting exoplanets with a radius much larger and a mass much less than those of Jupiter. The planet boasts with deep transits of 1.4%.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30468,9 +30468,9 @@
     "confirmed": true,
     "description": "Kepler-91 b is a planet very close its host star. It might be destroyed within the next 55 million years. The planet was initially discovered by the Kepler telescope and later confirmed by a group of European researchers led by Jorge Lillo-Box. The radial velocities of the star show a linear trend after fitting the variations due to the planet.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 957,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30535,8 +30535,8 @@
     "confirmed": true,
     "description": "This planet has been announced at the Extreme Solar Systems II conference in Jackson Hole by the WASP team.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30556,8 +30556,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30577,9 +30577,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1063,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -30794,9 +30794,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1304,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30901,8 +30901,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -30988,9 +30988,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1104,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31139,9 +31139,9 @@
     "confirmed": true,
     "description": "This planet was discovered with the Kepler telescope and confirmed with the SOPHIE spectrograph in France.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 989,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31205,8 +31205,8 @@
     "confirmed": true,
     "description": "This planet has been announced in 2011 at the Extreme Solar Systems II conference in Jackson Hole by the WASP team. The scientific paper describing the discovery was published on the arXiv in 2014. The planet was discovered via the transit method and confirmed using radial velocity measurements.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31248,9 +31248,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Bordé et al. 2020. The discovery was made with a space based telescope (0.27 m CoRoT Telescope). The parameters listed here are those reported by Bordé et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1065,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31292,9 +31292,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1382,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31337,8 +31337,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Barkaoui et al. 2023. This was a ground based discovery. The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31358,8 +31358,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31423,8 +31423,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31445,8 +31445,8 @@
     "confirmed": true,
     "description": "This is a hot Jupiter.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31576,8 +31576,8 @@
     "confirmed": true,
     "description": "The Hot Jupiter WTS-1 b is the first extrasolar planet found by the WFCAM Transit Survey. The observations were made at the 3.8-m United Kingdom Infrared Telescope and the Hobby-Eberly Telescope. The planet has one of the largest radius anomalies among the known Hot Jupiters its mass range.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31597,9 +31597,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1043,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31685,8 +31685,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Galazutdinov et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31705,10 +31705,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1216,
     "semiMajorAxisAU": 0.03974,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31729,8 +31729,8 @@
     "confirmed": true,
     "description": "WASP-168b is a bloated Hot Jupiter in a orbit with a grazing transit. This planet was discovered by WASP-South.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31816,9 +31816,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1200,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31860,9 +31860,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1349,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -31969,8 +31969,8 @@
     "confirmed": true,
     "description": "PSO J318-22 is a free floating planetary mass object. It was discovered using the Pan-STARRS1 survey and is part of the beta Pictoris moving group. Evolutionary models give the object a temperature of 1160K and a mass about 6 times that of Jupiter, making PSO J318-22 one of the lowest mass free-floating objects in the solar neighborhood.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -31990,9 +31990,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1384,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -32056,8 +32056,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Yee et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32340,8 +32340,8 @@
     "confirmed": true,
     "description": "This is a hot Jupiter.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32449,9 +32449,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1256,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32493,8 +32493,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Psaridi et al. 2023. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here have been imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -32513,9 +32513,9 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1101,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32622,9 +32622,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1179,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32644,9 +32644,9 @@
     "confirmed": true,
     "description": "This planet was discovered by Schanche et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Schanche et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1009,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32688,9 +32688,9 @@
     "confirmed": true,
     "description": "Kepler-447 b is a hot Jupiter with an extremely grazing transit.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 930,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -32754,9 +32754,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1062,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33148,9 +33148,9 @@
     "confirmed": true,
     "description": "WASP-94 A b is a Hot Jupiter orbiting an F-star in a binary system. The other binary component WASP-94 B also hosts a Hot Jupiter, making this system an ideal test-bed to explore planet formation scenarios. The planet's orbit is misaligned with the host star rotation axis.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1099,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33192,9 +33192,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1107,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33236,9 +33236,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1185,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33258,8 +33258,8 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "hot-jupiter",
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -33300,10 +33300,10 @@
     "confirmed": true,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 946,
     "semiMajorAxisAU": 0.06563,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33367,9 +33367,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 995,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33541,9 +33541,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1399,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -33629,9 +33629,9 @@
     "confirmed": true,
     "description": "This is a giant planet orbiting a binary star system.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1021,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33759,8 +33759,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Haffert et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Wang et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33802,9 +33802,9 @@
     "confirmed": true,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1011,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33846,8 +33846,8 @@
     "confirmed": true,
     "description": "This planet was discovered by Keppler et al. 2018. This was a ground based discovery. The parameters listed here are those reported by Wang et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
-    "albedo": 0.08,
+    "textureTheme": "gas-giant-banded",
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -33883,14 +33883,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1260,
     "massEarth": 146.201,
     "massJupiter": 0.46,
     "orbitalPeriodDays": 4.231,
     "semiMajorAxisAU": 0.052,
     "description": "51 Pegasi is a Sun-like star in the constellation Pegasus. The planet is also called Bellerophon. The lower limit for the radius is given for the limit of a perfectly-reflecting Lambert sphere.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -34164,13 +34164,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 963,
     "massEarth": 143.023,
     "massJupiter": 0.45,
     "orbitalPeriodDays": 4.113775,
     "semiMajorAxisAU": 0.049,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -34312,14 +34312,14 @@
     "discoveryMethod": "timing",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 1100,
     "massEarth": 384.572,
     "massJupiter": 1.21,
     "orbitalPeriodDays": 0.090706293,
     "semiMajorAxisAU": 0.00442,
     "description": "The 5.7ms pulsar PSR J1719-14 shows timing variations on a 2.17 hour timescale. These can be explained with a Jovian planet. However, because of the planet's short distance to the star, its density has to be more then 20 times that of Jupiter. The planet is most likely a remnant of a binary star which avoided complete destruction. The chemical composition, pressure and dimensions of the planet indicate that it is crystallized, or in other words, a very big diamond (Bailes et al 2011).",
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -34356,14 +34356,14 @@
     "discoveryMethod": "timing",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 252.641,
     "massJupiter": 0.7949,
     "orbitalPeriodDays": 0.322964,
     "semiMajorAxisAU": 0.0102,
     "description": "This planet was discovered by Spiewak et al. 2018. This was a ground based discovery. The parameters listed here are those reported by Spiewak et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -34378,13 +34378,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 3813.936,
     "massJupiter": 12,
     "orbitalPeriodDays": 0.065115,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -34843,11 +34843,11 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1174,
     "orbitalPeriodDays": 6.959503,
     "description": "This planet was discovered by Rizzuto et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Rizzuto et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -34881,11 +34881,11 @@
     "discoveryMethod": "transit",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "orbitalPeriodDays": 3.951626,
     "description": "This planet was announced as part of a batch of 149 validated planets from the K2 mission.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -35375,14 +35375,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 961,
     "massEarth": 476.742,
     "massJupiter": 1.5,
     "orbitalPeriodDays": 93.4,
     "semiMajorAxisAU": 0.49,
     "description": "This planet was detected by the Bohyunsan Optical Astronomy Observatory (BOAO) which searches for exoplanets at northern circumpolar stars.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -35550,14 +35550,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 951,
     "massEarth": 2479.058,
     "massJupiter": 7.8,
     "orbitalPeriodDays": 605.2,
     "semiMajorAxisAU": 1.7,
     "description": "The planet beta Cancri b is orbiting the brighest star in the constellation Cancer once every 600 days. It was found using data from 10, collected with the Bohyunsan Observatory.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -35572,14 +35572,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 2860.452,
     "massJupiter": 9,
     "orbitalPeriodDays": 1200,
     "semiMajorAxisAU": 2.7,
     "description": "This planet was discovered by Lagrange et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Lagrange et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -35594,14 +35594,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 952,
     "massEarth": 1938.751,
     "massJupiter": 6.1,
     "orbitalPeriodDays": 522.3,
     "semiMajorAxisAU": 1.4,
     "description": "This planet is orbiting the brighest star in the bowl of the Little Dipper. The star is K giant, 130 times more luminous than the Sun and about 130 light years away. The planet was found using data collected from the Bohyunsan Observatory.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -35704,14 +35704,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1000,
     "massEarth": 138.891,
     "massJupiter": 0.437,
     "orbitalPeriodDays": 5.2072,
     "semiMajorAxisAU": 0.0664,
     "description": "This planet was discovered by Haswell et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Haswell et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -36341,14 +36341,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 557.095,
     "massJupiter": 1.7528,
     "orbitalPeriodDays": 695.66,
     "semiMajorAxisAU": 1.151,
     "description": "This planet was discovered by Johnson et al. 2007. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -36363,14 +36363,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 522.497,
     "massJupiter": 1.644,
     "orbitalPeriodDays": 6739.323,
     "semiMajorAxisAU": 5.23,
     "description": "This planet was discovered by Bryan et al. 2016. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -36781,14 +36781,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 1100,
     "massEarth": 32.422,
     "massJupiter": 0.102,
     "orbitalPeriodDays": 5094.105,
     "semiMajorAxisAU": 4.819,
     "description": "This planet was discovered by Tuomi et al. 2014. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -37023,14 +37023,14 @@
     "discoveryMethod": "astrometry",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 718.291,
     "massJupiter": 2.26,
     "orbitalPeriodDays": 284.39,
     "semiMajorAxisAU": 0.64282,
     "description": "EQ Pegasi (GJ 896) is a nearby binary system of two red dwarf stars, with a Jovian planet in orbit around the primary star, discovered using radio astrometry.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -37045,14 +37045,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 1100,
     "massEarth": 30.899,
     "massJupiter": 0.0972,
     "orbitalPeriodDays": 241.883,
     "semiMajorAxisAU": 0.403,
     "description": "This planet was discovered by Feng et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -37067,14 +37067,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 71.6,
     "massJupiter": 0.2253,
     "orbitalPeriodDays": 767.887,
     "semiMajorAxisAU": 0.87,
     "description": "This planet was discovered by Feng et al. 2020. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -37397,14 +37397,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 54.031,
     "massJupiter": 0.17,
     "orbitalPeriodDays": 125.94,
     "semiMajorAxisAU": 0.435,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -37485,14 +37485,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 731.004,
     "massJupiter": 2.3,
     "orbitalPeriodDays": 4100,
     "semiMajorAxisAU": 4.5,
     "description": "Gliese 328 b is an eccentric two Jupiter-mass planet with an orbital period of eleven years. The discovery is based on ten years' worth of radial velocity data from the Hobby-Eberly and Harlan J. Smith telescopes at McDonald Observatory, and from the Keck Telescope at Mauna Kea. It is currently the most massive, longest-period planet discovered around a low-mass dwarf.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -37682,14 +37682,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 475.153,
     "massJupiter": 1.495,
     "orbitalPeriodDays": 2867.9,
     "semiMajorAxisAU": 3.92,
     "description": "The A component of the star system Gliese 777 hosts at least two planets. With 6.7 billion years, the host star is much older than our Sun. The binary companion is a dim red dwarf orbiting at a distance of 3000 astronomical units.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -37770,14 +37770,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 218.954,
     "massJupiter": 0.6889,
     "orbitalPeriodDays": 3660,
     "semiMajorAxisAU": 3.6,
     "description": "The star Gliese 832 is a star located in the solar neighbourhood in the constallation Grus. Therefore the observed planet Gliese 832 b is a good candidate for astrometric observations. In 2014, an additional planet, Gliese 832 c has been discovered.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38269,14 +38269,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 113.9,
     "massJupiter": 0.3584,
     "orbitalPeriodDays": 3090.942,
     "semiMajorAxisAU": 4.074,
     "description": "This planet was discovered by Feng et al. 2019. This was a ground based discovery. The parameters listed here are those reported by Feng et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38355,14 +38355,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1311,
     "massEarth": 116.643,
     "massJupiter": 0.367,
     "orbitalPeriodDays": 5.8881,
     "semiMajorAxisAU": 0.07,
     "description": "The Star HD 103774 hosts a Neptune mass planet. The star shows signs for varying activity during the nine year observing campaign. The planet was discovered with the European HARPS instrument.",
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -38442,14 +38442,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 667.439,
     "massJupiter": 2.1,
     "orbitalPeriodDays": 1043,
     "semiMajorAxisAU": 2.335,
     "description": "This planet was found by the N2K campain designed to discover short-period planets.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38571,14 +38571,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 3054.327,
     "massJupiter": 9.61,
     "orbitalPeriodDays": 3630,
     "semiMajorAxisAU": 4.59,
     "description": "HD 106515A is part of a binary system. It also shows signs of a planetary companion. The star system is almost 11 billion years old.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38614,13 +38614,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 908,
     "massEarth": 82.953,
     "massJupiter": 0.261,
     "orbitalPeriodDays": 10.8985,
     "semiMajorAxisAU": 0.102,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38808,13 +38808,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1162,
     "massEarth": 88.992,
     "massJupiter": 0.28,
     "orbitalPeriodDays": 5.24,
     "semiMajorAxisAU": 0.0635,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38829,14 +38829,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 143.023,
     "massJupiter": 0.45,
     "orbitalPeriodDays": 283.8,
     "semiMajorAxisAU": 0.95,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38873,14 +38873,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1120,
     "massEarth": 985.267,
     "massJupiter": 3.1,
     "orbitalPeriodDays": 130,
     "semiMajorAxisAU": 0.64,
     "description": "The planet HD 110014 c was discovered by the Reanalysis of Archival FEROS specTra (RAFT) program. The outer planet HD 110014 b was already known.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -38982,14 +38982,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 899.453,
     "massJupiter": 2.83,
     "orbitalPeriodDays": 324,
     "semiMajorAxisAU": 0.92,
     "description": "The planet HD 113337 b is orbiting a bright young F-type star. An IR excess has been attributed to a cold debris disk around the star. The planet has been found with the SOPHIE spectrograph on the 1.9m telescope at Observatoire de Haute-Provence.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39091,14 +39091,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 152.557,
     "massJupiter": 0.48,
     "orbitalPeriodDays": 3827,
     "semiMajorAxisAU": 5.16,
     "description": "HD 114613 b is a Jupiter analogue with a period of 10 years and a moderate eccentricity of 0.25. The planet was discovered by the Anglo-Australian Planet Search group.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39113,14 +39113,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 266.976,
     "massJupiter": 0.84,
     "orbitalPeriodDays": 1135,
     "semiMajorAxisAU": 2.08,
     "description": "The planet HD 114720 A b is orbiting a Sun-like star approximately 114 light years away. It has a mass similar to Jupiter and was discovered by the California and Carnegie Planet Search.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39330,14 +39330,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 956,
     "massEarth": 2065.882,
     "massJupiter": 6.5,
     "orbitalPeriodDays": 433.7,
     "semiMajorAxisAU": 1.08,
     "description": "This planet was detected by the Bohyunsan Optical Astronomy Observatory (BOAO) which searches for exoplanets at northern circumpolar stars.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39373,14 +39373,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 185.294,
     "massJupiter": 0.583,
     "orbitalPeriodDays": 1956,
     "semiMajorAxisAU": 3.14,
     "description": "The planet hosting star HD 11964 A is a yellow subgiant in the constellation Cetus. It is a member of a wide binary.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39395,14 +39395,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 1100,
     "massEarth": 25.045,
     "massJupiter": 0.0788,
     "orbitalPeriodDays": 37.91,
     "semiMajorAxisAU": 0.229,
     "description": "The planet hosting star HD 11964 A is a yellow subgiant in the constellation Cetus. It is a member of a wide binary.",
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
@@ -39482,14 +39482,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 7627.872,
     "massJupiter": 24,
     "orbitalPeriodDays": 2777,
     "semiMajorAxisAU": 4.1,
     "description": "HD 122562 b is a massive planet or brown dwarf in an eccentric orbit around a G-type star.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39504,14 +39504,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 947.127,
     "massJupiter": 2.98,
     "orbitalPeriodDays": 58.83,
     "semiMajorAxisAU": 0.297,
     "description": "HD 12484 b is one of a batch of twelve planets identified by the SOPHIE search for northern extrasolar planets.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39914,14 +39914,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 454.494,
     "massJupiter": 1.43,
     "orbitalPeriodDays": 649,
     "semiMajorAxisAU": 1.44,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -39936,14 +39936,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 152.557,
     "massJupiter": 0.48,
     "orbitalPeriodDays": 3407,
     "semiMajorAxisAU": 4.36,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -40197,14 +40197,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 266.976,
     "massJupiter": 0.84,
     "orbitalPeriodDays": 4540,
     "semiMajorAxisAU": 5.13,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -40329,14 +40329,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 909,
     "massEarth": 274.921,
     "massJupiter": 0.865,
     "orbitalPeriodDays": 19.382,
     "semiMajorAxisAU": 0.154,
     "description": "HD 13908 b is a Hot Jupiter with an orbital period of 19 days. There is another planet in the system with a perdio of over 900 days. The system was discovered with the SOPHIE spectrograph in France.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -40655,14 +40655,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 384.572,
     "massJupiter": 1.21,
     "orbitalPeriodDays": 2.1974,
     "semiMajorAxisAU": 0.0379,
     "description": "HD 143105 b is one of a batch of twelve planets identified by the SOPHIE search for northern extrasolar planets.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -40740,14 +40740,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 724.648,
     "massJupiter": 2.28,
     "orbitalPeriodDays": 2730,
     "semiMajorAxisAU": 4.6,
     "description": "This 2 Jupiter mass planet is in a 7.5 year orbit around a giant star.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -40826,14 +40826,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 384.572,
     "massJupiter": 1.21,
     "orbitalPeriodDays": 528.4,
     "semiMajorAxisAU": 1.32,
     "description": "The star system HD 147513, also known as HR 6094, consists of a Sun-like star, a white dwarf stellar remnant and a Jupiter-mass planet. The planet was discovered on 18 June 2002.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41022,13 +41022,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "hot-jupiter",
     "temperatureK": 1389,
     "massEarth": 432.246,
     "massJupiter": 1.36,
     "orbitalPeriodDays": 4.088,
     "semiMajorAxisAU": 0.052,
-    "albedo": 0.08,
+    "albedo": 0.16,
     "albedoType": "estimated"
   },
   {
@@ -41194,13 +41194,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 365.502,
     "massJupiter": 1.15,
     "orbitalPeriodDays": 3267,
     "semiMajorAxisAU": 4.15,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41344,13 +41344,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 3086.11,
     "massJupiter": 9.71,
     "orbitalPeriodDays": 131.05,
     "semiMajorAxisAU": 0.495,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41365,14 +41365,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 2733.321,
     "massJupiter": 8.6,
     "orbitalPeriodDays": 4191,
     "semiMajorAxisAU": 4.97,
     "description": "The planet HD 156279 c was discovered in a survey of long-period giant planets by Bryan et al. (2016)",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41606,14 +41606,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 181.162,
     "massJupiter": 0.57,
     "orbitalPeriodDays": 279.3,
     "semiMajorAxisAU": 0.84,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41867,13 +41867,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 1121.933,
     "massJupiter": 3.53,
     "orbitalPeriodDays": 5144,
     "semiMajorAxisAU": 5.42,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -41952,13 +41952,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1026,
     "massEarth": 73.1,
     "massJupiter": 0.23,
     "orbitalPeriodDays": 6.403,
     "semiMajorAxisAU": 0.065,
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -42162,14 +42162,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 929,
     "massEarth": 1462.009,
     "massJupiter": 4.6,
     "orbitalPeriodDays": 349.5,
     "semiMajorAxisAU": 0.98,
     "description": "Data for this planet was imported from the exoplanet.eu database.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -42205,14 +42205,14 @@
     "discoveryMethod": "astrometry",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 476.742,
     "massJupiter": 1.5,
     "orbitalPeriodDays": 1016,
     "semiMajorAxisAU": 1.76,
     "description": "A planet orbiting one of the stars of the binary system HD 176051 was identified with PHASES differential astrometry. It is unknown which of the two stars the planet orbits.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -42315,14 +42315,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 473.564,
     "massJupiter": 1.49,
     "orbitalPeriodDays": 406.6,
     "semiMajorAxisAU": 1.2218,
     "description": "The star HD 177830 A hosts at least two planets. The planets are close to the 4:1 resonance. The star is four times brighter than our Sun but only visible with binoculars from the Earth.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -42337,14 +42337,14 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "gas-giant-banded",
     "temperatureK": 1100,
     "massEarth": 47.674,
     "massJupiter": 0.15,
     "orbitalPeriodDays": 110.9,
     "semiMajorAxisAU": 0.5137,
     "description": "The star HD 177830 A hosts at least two planets. The planets are close to the 4:1 resonance. The star is four times brighter than our Sun but only visible with binoculars from the Earth.",
-    "albedo": 0.08,
+    "albedo": 0.22,
     "albedoType": "estimated"
   },
   {
@@ -42381,13 +42381,13 @@
     "discoveryMethod": "RV",
     "confirmed": true,
     "textureSource": "procedural",
-    "textureTheme": "hot-jupiter-dark-alkali",
+    "textureTheme": "sub-neptune",
     "temperatureK": 925,
     "massEarth": 25.426,
     "massJupiter": 0.08,
     "orbitalPeriodDays": 14.476,
     "semiMajorAxisAU": 0.11,
-    "albedo": 0.08,
+    "albedo": 0.28,
     "albedoType": "estimated"
   },
   {
