@@ -663,11 +663,30 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             textureCacheRef.current.set(body.texturePath, texture);
           }
 
+          let roughnessMap: THREE.Texture | undefined;
+          let roughness = body.classification === 'Jovian' || body.classification === 'Neptunian' ? 0.9 : 0.8;
+          let metalness = 0.05;
+
+          // Earth specular water reflection
+          if (body.id === 'sol-earth') {
+            const specPath = '/textures/planets/earth-specular.jpg';
+            roughnessMap = textureCacheRef.current.get(specPath);
+            if (!roughnessMap) {
+              roughnessMap = textureLoader.load(specPath);
+              roughnessMap.wrapS = THREE.RepeatWrapping;
+              roughnessMap.wrapT = THREE.ClampToEdgeWrapping;
+              textureCacheRef.current.set(specPath, roughnessMap);
+            }
+            roughness = 0.85;
+            metalness = 0.15;
+          }
+
           mat = new THREE.MeshStandardMaterial({
             map: texture,
+            roughnessMap,
             wireframe,
-            roughness: body.classification === 'Jovian' || body.classification === 'Neptunian' ? 0.9 : 0.8,
-            metalness: 0.05,
+            roughness,
+            metalness,
           });
           materialCacheRef.current.set(matKey, mat);
         }
@@ -759,6 +778,85 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       mesh.userData = { bodyData: body };
       group.add(mesh);
       interactiveMeshesRef.current.push(mesh);
+
+      // Atmospheric & Cloud Layers for Major Bodies
+      if (!wireframe) {
+        if (body.id === 'sol-earth') {
+          // Floating clouds with additive transparency
+          const cloudPath = '/textures/planets/earth-clouds.png';
+          let cloudTex = textureCacheRef.current.get(cloudPath);
+          if (!cloudTex) {
+            cloudTex = textureLoader.load(cloudPath);
+            cloudTex.wrapS = THREE.RepeatWrapping;
+            cloudTex.wrapT = THREE.ClampToEdgeWrapping;
+            textureCacheRef.current.set(cloudPath, cloudTex);
+          }
+          const cloudMat = new THREE.MeshStandardMaterial({
+            map: cloudTex,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          });
+          const cloudMesh = new THREE.Mesh(sharedSphereGeo, cloudMat);
+          cloudMesh.name = `Clouds-${body.id}`;
+          const cloudScale = sc.radius * 1.015;
+          cloudMesh.scale.set(cloudScale, cloudScale, cloudScale);
+          group.add(cloudMesh);
+
+          // Rayleigh atmospheric rim glow
+          const atmoMat = new THREE.MeshBasicMaterial({
+            color: 0x38bdf8,
+            transparent: true,
+            opacity: 0.22,
+            side: THREE.BackSide,
+            depthWrite: false,
+          });
+          const atmoMesh = new THREE.Mesh(sharedSphereGeo, atmoMat);
+          const atmoScale = sc.radius * 1.032;
+          atmoMesh.scale.set(atmoScale, atmoScale, atmoScale);
+          group.add(atmoMesh);
+        } else if (body.id === 'sol-venus') {
+          // Venusian dense sulfuric acid haze shell
+          const venusAtmoMat = new THREE.MeshBasicMaterial({
+            color: 0xfde047,
+            transparent: true,
+            opacity: 0.20,
+            side: THREE.BackSide,
+            depthWrite: false,
+          });
+          const venusAtmoMesh = new THREE.Mesh(sharedSphereGeo, venusAtmoMat);
+          const atmoScale = sc.radius * 1.025;
+          venusAtmoMesh.scale.set(atmoScale, atmoScale, atmoScale);
+          group.add(venusAtmoMesh);
+        } else if (body.id === 'sol-titan') {
+          // Titan thick nitrogen-methane photochemical orange haze
+          const titanHazeMat = new THREE.MeshBasicMaterial({
+            color: 0xf97316,
+            transparent: true,
+            opacity: 0.32,
+            side: THREE.BackSide,
+            depthWrite: false,
+          });
+          const titanHazeMesh = new THREE.Mesh(sharedSphereGeo, titanHazeMat);
+          const hazeScale = sc.radius * 1.035;
+          titanHazeMesh.scale.set(hazeScale, hazeScale, hazeScale);
+          group.add(titanHazeMesh);
+        } else if (body.id === 'sol-mars') {
+          // Mars tenuous CO2 blue/violet Rayleigh scattering horizon
+          const marsAtmoMat = new THREE.MeshBasicMaterial({
+            color: 0x93c5fd,
+            transparent: true,
+            opacity: 0.14,
+            side: THREE.BackSide,
+            depthWrite: false,
+          });
+          const marsAtmoMesh = new THREE.Mesh(sharedSphereGeo, marsAtmoMat);
+          const marsScale = sc.radius * 1.018;
+          marsAtmoMesh.scale.set(marsScale, marsScale, marsScale);
+          group.add(marsAtmoMesh);
+        }
+      }
 
       // Tap hit target for small moons/asteroids
       const hitR = Math.max(sc.radius * 1.25, 0.0003);
@@ -864,11 +962,19 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // Time uniform update
       sharedTimeUniformRef.current.value = (elapsedTime % 600.0) * rotationSpeed;
 
-      // Axial rotation
+      // Axial rotation & differential atmospheric dynamics
       if (isAutoRotating) {
         const baseRot = delta * 0.18 * rotationSpeed;
-        bodyObjectsRef.current.forEach((grp) => {
+        bodyObjectsRef.current.forEach((grp, id) => {
           grp.rotation.y += baseRot;
+
+          // Differential cloud rotation for Earth
+          if (id === 'sol-earth') {
+            const clouds = grp.getObjectByName('Clouds-sol-earth');
+            if (clouds) {
+              clouds.rotation.y += delta * 0.06 * rotationSpeed;
+            }
+          }
         });
       }
 
