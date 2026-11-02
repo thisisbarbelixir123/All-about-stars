@@ -224,11 +224,13 @@ export const PLANET_FRAGMENT_SHADER = `
       vec3 highRidge = mix(vec3(0.60, 0.52, 0.45), vec3(0.78, 0.72, 0.65), micro) * effColorTint;
       surface = mix(lowBasin, highRidge, elevation);
 
-      // Polar cold regolith frost
+      // Polar cold regolith frost (modulated by temperature and seed)
       float lat = abs(vLocalPos.y);
-      if (lat > 0.82) {
-        float frost = smoothstep(0.82, 0.94, lat) * (fbm(vLocalPos * 8.0) * 0.4 + 0.8);
-        surface = mix(surface, vec3(0.85, 0.88, 0.92), frost);
+      float frostThreshold = clamp(0.70 + (temperatureK - 100.0) * 0.0012, 0.72, 0.96);
+      if (lat > frostThreshold && temperatureK < 320.0) {
+        float frostNoise = fbm(vLocalPos * 8.0 + effSeed);
+        float frost = smoothstep(frostThreshold, frostThreshold + 0.08, lat + frostNoise * 0.06);
+        surface = mix(surface, vec3(0.85, 0.88, 0.92), frost * 0.85);
       }
 
       atmoColor = vec3(0.65, 0.72, 0.82) * effColorTint;
@@ -471,16 +473,16 @@ export const PLANET_FRAGMENT_SHADER = `
     }
     // 10. KBO Tholin
     else if (themeIndex < 9.5) {
-      float n = fbm(vLocalPos * 4.5 + seed);
-      surface = mix(vec3(0.56, 0.32, 0.22), vec3(0.80, 0.60, 0.46), n * 0.5 + 0.5);
-      atmoColor = vec3(0.55, 0.68, 0.85);
+      float n = fbm(vLocalPos * 4.5 + effSeed);
+      surface = mix(vec3(0.56, 0.32, 0.22) * effColorTint, vec3(0.80, 0.60, 0.46) * effColorTint, n * 0.5 + 0.5);
+      atmoColor = vec3(0.55, 0.68, 0.85) * effColorTint;
       atmoStrength = 0.22;
     }
     // 11. Icy Moon / KBO Ice
     else if (themeIndex < 10.5) {
-      float n = fbm(vLocalPos * 5.0 + seed);
-      surface = mix(vec3(0.58, 0.68, 0.78), vec3(0.90, 0.94, 0.98), n * 0.5 + 0.5);
-      atmoColor = vec3(0.45, 0.78, 1.0);
+      float n = fbm(vLocalPos * 5.0 + effSeed);
+      surface = mix(vec3(0.58, 0.68, 0.78) * effColorTint, vec3(0.90, 0.94, 0.98) * effColorTint, n * 0.5 + 0.5);
+      atmoColor = vec3(0.45, 0.78, 1.0) * effColorTint;
       atmoStrength = 0.30;
     }
     // 12. Star / Solar Plasma
