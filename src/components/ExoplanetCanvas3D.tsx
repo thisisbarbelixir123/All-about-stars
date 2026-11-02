@@ -746,6 +746,12 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             colorTint: { value: bucketUniforms.colorTint },
             bandShift: { value: bucketUniforms.bandShift },
             bandTurbulence: { value: bucketUniforms.bandTurbulence },
+            lowlandColor: { value: bucketUniforms.lowlandColor },
+            savannaColor: { value: bucketUniforms.savannaColor },
+            plateauColor: { value: bucketUniforms.plateauColor },
+            oceanShallowColor: { value: bucketUniforms.oceanShallowColor },
+            oceanDeepColor: { value: bucketUniforms.oceanDeepColor },
+            iceCapLatitude: { value: bucketUniforms.iceCapLatitude },
           },
         });
         materialCacheRef.current.set(key, mat);

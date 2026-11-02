@@ -46,6 +46,14 @@ export const PLANET_FRAGMENT_SHADER = `
   uniform float bandShift;
   uniform float bandTurbulence;
 
+  // Habitable planetary biome uniforms (custom soil & vegetation pigmentation)
+  uniform vec3 lowlandColor;
+  uniform vec3 savannaColor;
+  uniform vec3 plateauColor;
+  uniform vec3 oceanShallowColor;
+  uniform vec3 oceanDeepColor;
+  uniform float iceCapLatitude;
+
   // 3D Simplex noise implementation
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -243,37 +251,38 @@ export const PLANET_FRAGMENT_SHADER = `
       float mountain = ridgedFbm(warped * 2.2); // Razor-sharp alpine cordilleras
       float lat = abs(vLocalPos.y);
 
+      // Fallback colors if uniforms are default
+      vec3 deepColor = oceanDeepColor.r > 0.001 || oceanDeepColor.b > 0.001 ? oceanDeepColor : (vec3(0.015, 0.08, 0.28) * effColorTint);
+      vec3 shelfColor = oceanShallowColor.r > 0.001 || oceanShallowColor.b > 0.001 ? oceanShallowColor : (vec3(0.04, 0.32, 0.52) * effColorTint);
+
       // A. Ocean Bathymetry & Coastal Shelves (continental < 0.05)
       if (continental < 0.05) {
         float oceanDepth = smoothstep(-0.6, 0.05, continental);
-        vec3 deepTrench = vec3(0.015, 0.08, 0.28) * effColorTint;
-        vec3 shallowShelf = vec3(0.04, 0.32, 0.52) * effColorTint;
-        surface = mix(deepTrench, shallowShelf, oceanDepth);
+        surface = mix(deepColor, shelfColor, oceanDepth);
       }
       // B. Continental Landmass & Biome Stratification (continental >= 0.05)
       else {
         float landElevation = smoothstep(0.05, 0.65, continental) * 0.6 + mountain * 0.4;
         
-        // Lowland lush vegetation / fertile river valleys
-        vec3 lushLowlands = vec3(0.12, 0.36, 0.14) * effColorTint;
-        // Temperate savanna / woodland
-        vec3 savanna = vec3(0.35, 0.42, 0.20) * effColorTint;
-        // High alpine arid plateau
-        vec3 plateau = vec3(0.52, 0.42, 0.28) * effColorTint;
-        // Jagged mountain peaks / rocky granite
+        // Custom soil & botanical pigmentation across elevation
+        vec3 lowlands = lowlandColor.r > 0.001 || lowlandColor.g > 0.001 ? lowlandColor : (vec3(0.12, 0.36, 0.14) * effColorTint);
+        vec3 savanna = savannaColor.r > 0.001 || savannaColor.g > 0.001 ? savannaColor : (vec3(0.35, 0.42, 0.20) * effColorTint);
+        vec3 plateau = plateauColor.r > 0.001 || plateauColor.g > 0.001 ? plateauColor : (vec3(0.52, 0.42, 0.28) * effColorTint);
         vec3 mountainPeak = vec3(0.68, 0.64, 0.60) * effColorTint;
 
-        vec3 biome = mix(lushLowlands, savanna, smoothstep(0.1, 0.35, landElevation));
+        vec3 biome = mix(lowlands, savanna, smoothstep(0.1, 0.35, landElevation));
         biome = mix(biome, plateau, smoothstep(0.35, 0.65, landElevation));
         biome = mix(biome, mountainPeak, smoothstep(0.65, 0.90, landElevation));
         surface = biome;
       }
 
       // C. Latitude & Temperature-Controlled Polar Glacial Ice Caps
-      float polarThreshold = clamp(0.72 + (temperatureK - 250.0) * 0.0015, 0.60, 0.92);
-      if (lat > polarThreshold) {
+      // Threshold modulated per-bucket by iceCapLatitude and temperature
+      float baseThreshold = iceCapLatitude > 0.1 ? iceCapLatitude : 0.72;
+      float polarThreshold = clamp(baseThreshold + (temperatureK - 260.0) * 0.0018, 0.52, 0.96);
+      if (lat > polarThreshold && temperatureK < 315.0) {
         float iceNoise = fbm(vLocalPos * 6.0 + effSeed);
-        float iceCap = smoothstep(polarThreshold, polarThreshold + 0.12, lat + iceNoise * 0.08);
+        float iceCap = smoothstep(polarThreshold, polarThreshold + 0.10, lat + iceNoise * 0.08);
         surface = mix(surface, vec3(0.92, 0.96, 1.0), iceCap);
       }
 
@@ -630,6 +639,12 @@ export interface PlanetBucketUniforms {
   colorTint: THREE.Vector3;
   bandShift: number;
   bandTurbulence: number;
+  lowlandColor: THREE.Vector3;
+  savannaColor: THREE.Vector3;
+  plateauColor: THREE.Vector3;
+  oceanShallowColor: THREE.Vector3;
+  oceanDeepColor: THREE.Vector3;
+  iceCapLatitude: number;
 }
 
 /**
@@ -723,5 +738,64 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     tint.set(r, g, b);
   }
 
-  return { seed, colorTint: tint, bandShift, bandTurbulence };
+  // 4. Astrobiological Biome & Soil Archetypes for Habitable Worlds (Theme 1.0)
+  const lowland = new THREE.Vector3(0.12, 0.36, 0.14);
+  const savanna = new THREE.Vector3(0.35, 0.42, 0.20);
+  const plateau = new THREE.Vector3(0.52, 0.42, 0.28);
+  const oceanShallow = new THREE.Vector3(0.04, 0.32, 0.52);
+  const oceanDeep = new THREE.Vector3(0.015, 0.08, 0.28);
+  let iceCapLat = 0.74;
+
+  if (themeIdx >= 0.5 && themeIdx < 1.5) {
+    const regime = bucket % 4;
+    // Regime 0: Classic Earth Analogs (Chlorophytic green, savanna, deep azure oceans)
+    if (regime === 0) {
+      lowland.set(0.10 + h1 * 0.05, 0.36 + h2 * 0.06, 0.14);
+      savanna.set(0.36, 0.44, 0.22);
+      plateau.set(0.52, 0.44, 0.30);
+      oceanDeep.set(0.015, 0.08, 0.28);
+      oceanShallow.set(0.04, 0.34, 0.54);
+      iceCapLat = 0.72 + h3 * 0.08; // High latitude caps
+    }
+    // Regime 1: M-Dwarf Red/Purple Flora Worlds (Infrared photosynthetic absorption)
+    else if (regime === 1) {
+      lowland.set(0.28 + h1 * 0.10, 0.08, 0.22 + h2 * 0.08); // Dark plum / crimson foliage
+      savanna.set(0.40, 0.18, 0.25);
+      plateau.set(0.48, 0.35, 0.32);
+      oceanDeep.set(0.02, 0.06, 0.20); // Deep midnight navy
+      oceanShallow.set(0.08, 0.22, 0.45);
+      iceCapLat = 0.62 + h3 * 0.10; // More extensive caps
+    }
+    // Regime 2: Iron-Oxide Rust / Arid Super-Continent Worlds
+    else if (regime === 2) {
+      lowland.set(0.48 + h1 * 0.08, 0.26, 0.14); // Terracotta / rust soil
+      savanna.set(0.60, 0.38, 0.20); // Golden dunes
+      plateau.set(0.68, 0.48, 0.34);
+      oceanDeep.set(0.03, 0.12, 0.30);
+      oceanShallow.set(0.06, 0.40, 0.48); // Vivid turquoise rift lakes
+      iceCapLat = 0.82 + h3 * 0.08; // Small or mountain-only frost
+    }
+    // Regime 3: Sub-Glacial Cold Steppes (Permafrost / Tundra)
+    else {
+      lowland.set(0.24, 0.30 + h1 * 0.06, 0.22); // Pale lichen / tundra
+      savanna.set(0.38, 0.40, 0.34);
+      plateau.set(0.50, 0.52, 0.48); // Slate grey alpine cordilleras
+      oceanDeep.set(0.03, 0.08, 0.22); // Frigid steel-blue
+      oceanShallow.set(0.06, 0.24, 0.40);
+      iceCapLat = 0.54 + h3 * 0.08; // Giant glacial pack-ice reaching mid-latitudes
+    }
+  }
+
+  return {
+    seed,
+    colorTint: tint,
+    bandShift,
+    bandTurbulence,
+    lowlandColor: lowland,
+    savannaColor: savanna,
+    plateauColor: plateau,
+    oceanShallowColor: oceanShallow,
+    oceanDeepColor: oceanDeep,
+    iceCapLatitude: iceCapLat,
+  };
 }
