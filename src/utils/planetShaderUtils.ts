@@ -201,7 +201,7 @@ export const PLANET_FRAGMENT_SHADER = `
     vec3 surface = vec3(0.5);
     vec3 atmoColor = vec3(0.3, 0.6, 1.0);
     float atmoStrength = 0.6;
-    float emissive = 0.0;
+    vec3 emissiveColor = vec3(0.0);
 
     // 1. Rocky Terrestrial (Sub-Martian / Martian / Airless Silicate)
     if (themeIndex < 0.5) {
@@ -374,17 +374,51 @@ export const PLANET_FRAGMENT_SHADER = `
       surface = mix(darkCrust, glow, pow(dayside, 1.4) * (n * 0.3 + 0.85));
       atmoColor = vec3(1.0, 0.35, 0.12);
       atmoStrength = 0.95;
-      emissive = pow(dayside, 2.0) * 0.5;
+      emissiveColor = glow * (pow(dayside, 2.0) * 0.5);
     }
-    // 9. Lava World (Molten Magma Oceans)
+    // 9. Lava World (Molten Magma Oceans & Cracking Tectonic Fissures, e.g. 55 Cancri e, Kepler-10 b)
     else if (themeIndex < 8.5) {
-      float subStellar = max(0.0, dot(vLocalPos, vec3(0.0, 0.0, 1.0)));
-      float cracks = fbm(vLocalPos * 9.0 + time * 0.08);
-      vec3 rock = vec3(0.07, 0.06, 0.07);
-      vec3 magma = blackbody(temperatureK);
-      surface = mix(rock, magma, pow(subStellar, 1.5) * step(0.32, cracks));
-      atmoStrength = 0.20;
-      emissive = pow(subStellar, 1.8) * 0.6;
+      // Tidally locked substellar point aligned with the stellar irradiation vector L
+      float subStellar = max(0.0, dot(vLocalPos, L));
+      float nightSide = max(0.0, -dot(vLocalPos, L));
+
+      // Multi-tier basaltic lithosphere & obsidian tessellation
+      vec3 warpedPos = domainWarp(vLocalPos * 3.2 + seed, 0.40);
+      float tectonicRidges = ridgedFbm(warpedPos * 2.0);
+      float microCrust = fbmFast(vLocalPos * 12.0 + seed);
+
+      // Deep obsidian nightside crags & cooling basalt
+      vec3 cooledBasalt = mix(vec3(0.05, 0.04, 0.05), vec3(0.12, 0.09, 0.08), tectonicRidges);
+      vec3 scorchedRegolith = mix(cooledBasalt, vec3(0.22, 0.14, 0.10), subStellar * 0.7);
+
+      // Dynamic convective magma fissures & cracks
+      // Convection currents accelerate with time near the substellar point
+      vec3 magmaFlowCoord = vLocalPos * 8.5 + vec3(time * 0.03, time * 0.02, 0.0);
+      float crackPattern = 1.0 - abs(snoise(magmaFlowCoord));
+      float deepFissures = smoothstep(0.72, 0.95, crackPattern);
+
+      // Blackbody thermal incandescence for molten magma
+      // Sub-stellar magma ocean reaches actual estimated temperatureK; fissures retain molten floor
+      float localMagmaTemp = mix(1200.0, max(1600.0, temperatureK), pow(subStellar, 0.8));
+      vec3 moltenMagma = blackbody(localMagmaTemp);
+
+      // Dayside expansive magma ocean: central substellar lake liquefies completely (subStellar > 0.65)
+      float magmaOceanFactor = smoothstep(0.45, 0.85, subStellar);
+      float convectiveRipples = fbmFast(vLocalPos * 16.0 + time * 0.06) * 0.25 + 0.75;
+      vec3 activeOcean = moltenMagma * convectiveRipples * 1.35;
+
+      // Composite surface: cooled crust broken by glowing fissures and transitioning to magma ocean
+      vec3 crustWithFissures = mix(scorchedRegolith, moltenMagma * 1.2, deepFissures * (subStellar * 0.75 + 0.25));
+      surface = mix(crustWithFissures, activeOcean, magmaOceanFactor);
+
+      // Self-emissive thermal radiance: radiates intensely even on dark side near fissures
+      float fissureEmissive = deepFissures * (subStellar * 0.8 + 0.35);
+      float oceanEmissive = magmaOceanFactor * 1.1;
+      emissiveColor = moltenMagma * (fissureEmissive + oceanEmissive);
+
+      // Superheated mineral vapor & ionized metal haze atmosphere
+      atmoColor = mix(vec3(0.85, 0.35, 0.10), vec3(1.0, 0.65, 0.25), subStellar);
+      atmoStrength = 0.55 * (subStellar * 0.8 + 0.2);
     }
     // 10. KBO Tholin
     else if (themeIndex < 9.5) {
@@ -445,7 +479,7 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.35, 0.30, 0.65);
       atmoStrength = 0.55;
       // Faint thermal twilight horizon for hot dark giants
-      emissive = pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15;
+      emissiveColor = vec3(0.7, 0.3, 0.1) * (pow(max(0.0, dot(vLocalPos, L)), 2.5) * 0.15);
     }
     // 16. Gas Giant Water Clouds (Sudarsky Class II)
     else {
@@ -465,7 +499,7 @@ export const PLANET_FRAGMENT_SHADER = `
     float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));
     vec3 rayleighGlow = atmoColor * (fresnel * atmoStrength * (terminatorFactor * 0.7 + 0.3));
 
-    vec3 finalColor = (surface * NdotL * albedoFactor) + rayleighGlow + vec3(specular) + vec3(emissive);
+    vec3 finalColor = (surface * NdotL * albedoFactor) + rayleighGlow + vec3(specular) + emissiveColor;
     gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
