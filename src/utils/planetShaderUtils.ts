@@ -855,40 +855,47 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
 
   // Gas Giant Banded (themeIdx == 5.0)
   if (themeIdx >= 4.5 && themeIdx < 5.5) {
-    // Variations spanning:
-    // - Cream & butterscotch ammonia ice (Jupiter/Saturn)
-    // - Warm caramel, mocha & honey tones (Reference Image 2 Jovian)
-    // - Magenta-rose & pinkish tholin haze (Reference Image 3 Jovian / GJ 504 b)
-    if (bucket % 8 === 3) {
-      // Magenta / pink Jovian (GJ 504 b style: tholin / methane-free warm atmosphere)
-      const r = 1.05 + h2 * 0.15;
-      const g = 0.45 + (h3 - 0.5) * 0.18;
-      const b = 0.72 + h1 * 0.20;
+    // Physical atmospheric composition tints based on temperature & metallicity:
+    // - Cold ammonia/water cloud giants (<300K): Cream, butterscotch, ivory, and soft sand
+    // - Warm Jovians (300K - 800K): Honey, amber, warm caramel, and salmon-ochre (Reference Image 2)
+    // - High-temperature photochemically processed giants (800K - 1300K): Muted terracotta, bronze, and subtle soft rose-mauve (subtle tholin haze, desaturated and realistic)
+    if (tempK < 300.0) {
+      // Ammonia ice clouds
+      const r = 0.88 + (h2 - 0.5) * 0.15;
+      const g = 0.82 + (h3 - 0.5) * 0.15;
+      const b = 0.72 + (h1 - 0.5) * 0.15;
       tint.set(r, g, b);
-    } else if (bucket % 8 === 5) {
-      // Warm mocha / honey-amber Jovian (Image 2 style)
-      const r = 0.92 + h2 * 0.15;
-      const g = 0.70 + (h3 - 0.5) * 0.15;
-      const b = 0.48 + (h1 - 0.5) * 0.15;
+    } else if (tempK < 800.0) {
+      // Warm tropospheric water/hydrocarbon haze (Image 2 style)
+      const r = 0.90 + (h2 - 0.5) * 0.15;
+      const g = 0.76 + (h3 - 0.5) * 0.15;
+      const b = 0.58 + (h1 - 0.5) * 0.15;
       tint.set(r, g, b);
     } else {
-      // Pale ivory, butterscotch, salmon-ochre, warm terracotta, and amber bronze
-      const r = 0.82 + h2 * 0.35;
-      const g = 0.75 + (h3 - 0.5) * 0.28;
-      const b = 0.65 + (h1 - 0.5) * 0.35;
-      tint.set(r, g, b);
+      // Warm photochemical tholin/hydrocarbon smog (e.g. GJ 504 b style: soft dusty mauve/rose-bronze, natural and desaturated)
+      if (bucket % 4 === 1) {
+        // Soft dusty rose / mauve haze (delicate and muted, NOT oversaturated neon magenta)
+        const r = 0.92 + (h2 - 0.5) * 0.12;
+        const g = 0.68 + (h3 - 0.5) * 0.10;
+        const b = 0.75 + (h1 - 0.5) * 0.12;
+        tint.set(r, g, b);
+      } else {
+        // Burnt amber, ochre-bronze, and terracotta belts
+        const r = 0.92 + (h2 - 0.5) * 0.15;
+        const g = 0.68 + (h3 - 0.5) * 0.15;
+        const b = 0.50 + (h1 - 0.5) * 0.15;
+        tint.set(r, g, b);
+      }
     }
 
-    // Toggle between:
-    // 1. Smooth, featureless/hazy Jovian (Image 2 background style)
-    // 2. Few broad, serene bands (2 to 5 broad thermal zones)
-    // 3. Many dense, intricate jet streams (14 to 28 rapid alternating shear belts like Jupiter)
-    if (bucket % 4 === 0) {
-      bandTurbulence = 0.50 + h1 * 0.15; // Smooth / hazy Jovian
-    } else if (bucket % 4 === 1) {
-      bandTurbulence = 0.85 + h1 * 0.20; // Few broad, serene bands
+    // Band density and turbulence:
+    // Some have few broad laminar zones; some have active multiple jet streams
+    if (bucket % 3 === 0) {
+      bandTurbulence = 0.55 + h1 * 0.15; // Smooth / hazy Jovian
+    } else if (bucket % 3 === 1) {
+      bandTurbulence = 0.85 + h1 * 0.20; // Few broad serene bands
     } else {
-      bandTurbulence = 1.25 + h1 * 0.45; // Many dense, high-intensity jet streams
+      bandTurbulence = 1.15 + h1 * 0.35; // Distinct jet streams
     }
   }
   // Ice Giant & Sub-Neptune (themeIdx == 3.0 or 4.0)
