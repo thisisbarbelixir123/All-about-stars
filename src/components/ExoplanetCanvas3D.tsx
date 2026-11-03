@@ -209,7 +209,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const outerWrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [activeBodyId, setActiveBodyId] = useState<string | null>(() => selectedId ?? items[0]?.id ?? null);
+  const [activeBodyId, setActiveBodyId] = useState<string | null>(
+    () => selectedId ?? items.find((b) => b.id === 'sol-earth')?.id ?? items[0]?.id ?? null
+  );
 
   useEffect(() => {
     if (selectedId !== undefined) {
@@ -1038,8 +1040,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     let hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     if (totalCount > 0) {
-      buildBodyGroup(sortedBodies[0]);
-      buildIdx = 1;
+      // Build focused body immediately on Frame 0 so it appears instantly
+      const initialFocusBody =
+        sortedBodies.find((b) => b.id === activeBodyId) ?? sortedBodies[0];
+      buildBodyGroup(initialFocusBody);
+      buildIdx = 0;
       setLoadProgress({ loaded: 1, total: totalCount });
 
       const stepBuildAndWarm = () => {
@@ -1049,7 +1054,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         let addedWarmMesh = false;
 
         for (; buildIdx < batchEnd; buildIdx++) {
-          const mat = buildBodyGroup(sortedBodies[buildIdx]);
+          const body = sortedBodies[buildIdx];
+          if (body.id === initialFocusBody.id) continue;
+          const mat = buildBodyGroup(body);
           if (mat && !warmedMaterials.has(mat)) {
             warmedMaterials.add(mat);
             const m = new THREE.Mesh(sharedLowGeo, mat);

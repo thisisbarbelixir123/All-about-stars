@@ -4,7 +4,9 @@ import { MASTER_CELESTIAL_CATALOG } from './data/masterCelestialCatalog';
 import { CelestialBody } from './types';
 
 export default function App() {
-  const [selectedBody, setSelectedBody] = useState<CelestialBody | null>(() => MASTER_CELESTIAL_CATALOG[0] ?? null);
+  const [selectedBody, setSelectedBody] = useState<CelestialBody | null>(
+    () => MASTER_CELESTIAL_CATALOG.find((b) => b.id === 'sol-earth') ?? MASTER_CELESTIAL_CATALOG[0] ?? null
+  );
 
   return (
     <div className="h-screen w-screen bg-[#02040c] text-slate-100 flex flex-col relative overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
