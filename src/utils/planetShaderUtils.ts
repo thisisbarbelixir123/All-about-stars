@@ -54,6 +54,16 @@ export const PLANET_FRAGMENT_SHADER = `
   uniform vec3 oceanDeepColor;
   uniform float iceCapLatitude;
 
+  // Jovian Sudarsky atmospheric uniforms (per-planet chemistry, albedo, and temperature coupling)
+  uniform float sudarskyIndex;
+  uniform vec3 jovianBandDark;
+  uniform vec3 jovianBandMid;
+  uniform vec3 jovianBandLight;
+  uniform vec3 jovianBandCloud;
+  uniform vec3 jovianAtmoTint;
+  uniform vec3 jovianPolarTint;
+  uniform vec4 jovianStorm;
+
   // 3D Simplex noise implementation
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -171,34 +181,160 @@ export const PLANET_FRAGMENT_SHADER = `
   // Anisotropic fluid shearing for silky, laminar gas bands (avoids flattened isotropic bumpiness)
   // Coordinates are compressed along latitude and stretched along flow lines
   float fluidJetStream(vec3 flow, float latFrequency, float turbulence, float seedVal) {
-    // 1. Primary zonal flow coordinates: heavily stretched along azimuth, compressed along latitude
-    vec3 stretchedPos = vec3(flow.x * 0.35, flow.y * latFrequency, flow.z * 0.35);
-    
-    // 2. Large sweeping undulations (domain warping at low frequency for silky wave motion)
+    vec3 stretchedPos = vec3(flow.x * 0.14, flow.y * latFrequency, flow.z * 0.14);
     vec2 wave = vec2(
-      snoise(vec3(flow.x * 0.8, flow.y * 2.2, flow.z * 0.8) + seedVal),
-      snoise(vec3(flow.z * 0.8, flow.y * 2.2 + 3.1, flow.x * 0.8) + seedVal)
+      snoise(vec3(flow.x * 0.55, flow.y * 1.8, flow.z * 0.55) + seedVal),
+      snoise(vec3(flow.z * 0.55, flow.y * 1.8 + 3.1, flow.x * 0.55) + seedVal)
     );
-    vec3 warpedPos = stretchedPos + vec3(wave.x * 0.45, wave.y * 0.35, wave.x * 0.45) * turbulence;
-
-    // 3. Smooth, low-octave fluid ribbon sampling
+    vec3 warpedPos = stretchedPos + vec3(wave.x * 0.18, wave.y * 0.16, wave.x * 0.18) * turbulence;
     float primaryBand = snoise(warpedPos);
-    float secondaryRibbon = snoise(warpedPos * 1.8 + vec3(1.7, 0.4, 2.3)) * 0.4;
-    
+    float secondaryRibbon = snoise(warpedPos * 1.6 + vec3(1.7, 0.4, 2.3)) * 0.22;
     return primaryBand + secondaryRibbon * turbulence;
   }
 
-  // Planckian blackbody thermal radiation approximation
+  // Smooth 4-stop Hermite color ramp avoiding piecewise linear slope creases
+  vec3 evalSilkyPalette(float t, vec3 c0, vec3 c1, vec3 c2, vec3 c3) {
+    float s1 = smoothstep(0.0, 0.48, t);
+    float s2 = smoothstep(0.30, 0.78, t);
+    float s3 = smoothstep(0.60, 1.0, t);
+    vec3 col = mix(c0, c1, s1);
+    col = mix(col, c2, s2);
+    col = mix(col, c3, s3);
+    return col;
+  }
+
+  // Coherent 360-degree latitudinal belt and laminar jet-stream profile for Jovian gas giants.
+  // Returns vec3(tBand, fineStreamlines, beltShearMask).
+  // turbulence < 0.60 (~63.5% of gas giants) yields 2-5 broad, ultra-smooth zones;
+  // turbulence >= 0.74 (~36.5% of gas giants) yields 10-15 silky horizontal multi-belts.
+  vec3 jovianZonalProfile(vec3 localPos, vec3 flow, float turbulence, float shiftVal, float seedVal, float albedoVal) {
+    float uLat = asin(clamp(localPos.y, -1.0, 1.0)) / 1.5707963;
+    float isMultiBelt = smoothstep(0.60, 0.74, turbulence);
+    float subSmooth = smoothstep(0.18, 0.56, turbulence);
+
+    float fewCycles = mix(1.22, 2.42, subSmooth) + shiftVal * 0.28;
+    float manyCycles = 5.0 + max(0.0, turbulence - 0.74) * 7.2 + shiftVal * 0.85;
+    float cycles = mix(fewCycles, manyCycles, isMultiBelt);
+
+    float eddyAmp = mix(0.006, 0.022, isMultiBelt);
+    float latWave = snoise(vec3(flow.x * 1.10, uLat * 2.7, flow.z * 1.10) + seedVal * 0.31) * eddyAmp;
+    float lat = uLat + latWave;
+
+    float latWarp = snoise(vec3(seedVal * 0.13, lat * cycles * 0.46 + 2.7, seedVal * 0.29)) * 1.28;
+    float phase = lat * cycles * 3.14159265 + latWarp + seedVal;
+    float z1 = sin(phase);
+    float z2 = sin(lat * cycles * 6.2831853 - latWarp * 0.62 + seedVal * 1.7) * mix(0.12, 0.34, isMultiBelt);
+    float z3 = sin(lat * cycles * 9.424778 + latWarp * 0.35 - seedVal * 0.9) * mix(0.02, 0.11, isMultiBelt);
+
+    // Belt-zone boundary shear mask where jet wind gradient is steepest
+    float shearMask = pow(clamp(abs(cos(phase)), 0.0, 1.0), 2.2);
+    float festoon = snoise(vec3(flow.x * 1.65, lat * cycles * 3.3, flow.z * 1.65) + seedVal * 1.13) * shearMask * mix(0.022, 0.085, isMultiBelt);
+
+    // High-resolution strictly horizontal Cassini/Juno laminar cloud filaments
+    float silkCoarse = snoise(vec3(flow.x * 0.24, lat * 24.0, flow.z * 0.24) + seedVal * 0.67);
+    float silkFine = snoise(vec3(flow.x * 0.16, lat * 48.0, flow.z * 0.16) - seedVal * 1.21);
+    float fineStreamlines = silkCoarse * 0.65 + silkFine * 0.35;
+    float silkWeight = mix(0.034, 0.086, isMultiBelt);
+
+    float norm = 1.0 + mix(0.14, 0.45, isMultiBelt);
+    float rawBand = (z1 + z2 + z3) / norm + festoon + fineStreamlines * silkWeight;
+    float contrast = mix(mix(0.46, 0.74, subSmooth), 0.96, isMultiBelt);
+
+    // Reflective cloud decks expand bright zone coverage; dark absorbers widen belt troughs
+    float cloudBias = (clamp(albedoVal, 0.02, 0.85) - 0.32) * 0.18;
+    float tBand = clamp(0.5 + cloudBias + 0.5 * clamp(rawBand, -1.0, 1.0) * contrast, 0.0, 1.0);
+    return vec3(tBand, fineStreamlines, shearMask);
+  }
+
+  // Neptunian circulation profile: ~70% velvety haze globes (turbulence < 0.36) and ~30% soft 2-4 band Neptune envelopes.
+  // Returns vec3(tAtmosphere, companionCirrusMask, isBandedMask).
+  vec3 neptunianAtmosphereProfile(vec3 localPos, vec3 flow, float turbulence, float shiftVal, float seedVal, float albedoVal) {
+    float uLat = asin(clamp(localPos.y, -1.0, 1.0)) / 1.5707963;
+    float isBanded = smoothstep(0.36, 0.48, turbulence);
+    float bandStrength = clamp((turbulence - 0.48) / 0.34, 0.0, 1.0);
+
+    float seasonalSign = fract(seedVal * 0.173) < 0.5 ? -1.0 : 1.0;
+    float insolation = cos(uLat * 1.5707963) * 0.13 - 0.04;
+    float polarCollar = smoothstep(0.46, 0.88, uLat * seasonalSign) * 0.14;
+    float airglowSilk = snoise(vec3(flow.x * 0.18, uLat * 11.0, flow.z * 0.18) + seedVal * 0.43) * 0.016;
+    float cloudBias = (clamp(albedoVal, 0.03, 0.85) - 0.30) * 0.22;
+    float tSmooth = clamp(0.50 + cloudBias + insolation + polarCollar + airglowSilk, 0.0, 1.0);
+
+    float cycles = mix(1.15, 1.92, bandStrength) + shiftVal * 0.20;
+    float latWave = snoise(vec3(flow.x * 0.90, uLat * 2.1, flow.z * 0.90) + seedVal * 0.27) * 0.008;
+    float lat = uLat + latWave;
+    float latWarp = snoise(vec3(seedVal * 0.19, lat * cycles * 0.42 + 1.9, seedVal * 0.31)) * 0.82;
+    float phase = lat * cycles * 3.14159265 + latWarp + seedVal;
+    float z1 = sin(phase);
+    float z2 = sin(lat * cycles * 6.2831853 - latWarp * 0.50 + seedVal * 1.4) * 0.16;
+    float shearMask = pow(clamp(abs(cos(phase)), 0.0, 1.0), 2.5);
+
+    float silk = snoise(vec3(flow.x * 0.18, lat * 28.0, flow.z * 0.18) + seedVal * 0.79) * 0.70
+      + snoise(vec3(flow.x * 0.12, lat * 52.0, flow.z * 0.12) - seedVal * 1.13) * 0.30;
+    float rawBand = (z1 + z2) / 1.16 + silk * 0.035;
+    float contrast = mix(0.16, 0.31, bandStrength);
+    float tBanded = clamp(0.50 + cloudBias + 0.5 * clamp(rawBand, -1.0, 1.0) * contrast + polarCollar * 0.45, 0.0, 1.0);
+
+    float wispNoise = snoise(vec3(flow.x * 0.26, lat * 34.0, flow.z * 0.26) + seedVal * 2.07) * 0.68
+      + snoise(vec3(flow.x * 0.52, lat * 64.0, flow.z * 0.52) - seedVal * 1.41) * 0.32;
+    float faintSmoothWisp = smoothstep(0.76, 0.94, wispNoise) * clamp((albedoVal - 0.25) * 0.55, 0.0, 0.22);
+    float bandedCirrus = smoothstep(0.54, 0.86, wispNoise) * (0.35 + 0.65 * shearMask);
+    float cirrusMask = mix(faintSmoothWisp, bandedCirrus, isBanded);
+
+    return vec3(mix(tSmooth, tBanded, isBanded), cirrusMask, isBanded);
+  }
+
+  // Seamless spherical evaluation for elliptical anticyclonic storm ovals and dark cyclonic barges
+  vec3 evaluateJovianStorm(vec3 localPos, float timeVal, float jetSpeed, vec4 storm, float seedVal) {
+    float strength = storm.w;
+    if (abs(strength) < 0.01) {
+      return vec3(0.0);
+    }
+    float uLat = asin(clamp(localPos.y, -1.0, 1.0)) / 1.5707963;
+    float sLat = storm.x;
+    float latRadius = max(0.038, storm.z);
+    float dLat = (uLat - sLat) / latRadius;
+    if (abs(dLat) > 2.2) {
+      return vec3(0.0);
+    }
+
+    float sinCenterLat = clamp(sin(sLat * 1.5707963), -0.95, 0.95);
+    float jetShear = sin(sinCenterLat * 9.424) * 0.65 + cos(sinCenterLat * 4.712) * 0.35;
+    float centerLon = storm.y - jetSpeed * timeVal * (1.0 + jetShear);
+    float fragLon = atan(localPos.z, localPos.x);
+    float dLonWrap = atan(sin(fragLon - centerLon), cos(fragLon - centerLon));
+
+    // Anticyclonic ovals have ~2.1:1 longitudinal aspect; cyclonic barges are narrower (~3.1:1)
+    float lonAspect = strength > 0.0 ? 2.15 : 3.10;
+    float cosLat = max(0.28, cos(sLat * 1.5707963));
+    float dLon = (dLonWrap * cosLat) / (latRadius * lonAspect);
+
+    float r = sqrt(dLat * dLat + dLon * dLon);
+    if (r > 1.85) {
+      return vec3(0.0);
+    }
+
+    // Tangential vortex spiral inside the eyewall
+    float swirlAngle = atan(dLat, dLon) + (1.4 - r) * (strength > 0.0 ? 2.4 : -1.8);
+    float spiral = sin(swirlAngle * 2.0 + r * 5.2 + seedVal) * 0.5 + 0.5;
+    float bodyMask = smoothstep(1.12, 0.28, r);
+    float collarMask = smoothstep(1.52, 1.08, r) * smoothstep(0.68, 1.08, r);
+    return vec3(bodyMask, collarMask, spiral);
+  }
+
+  // Planckian blackbody thermal radiation up to ultra-hot KELT-9 b temperatures (4600 K)
   vec3 blackbody(float kelvin) {
-    float t = clamp(kelvin, 800.0, 3500.0);
+    float t = clamp(kelvin, 800.0, 4600.0);
     if (t < 1100.0) {
-      return mix(vec3(0.05, 0.01, 0.005), vec3(0.4, 0.05, 0.02), (t - 800.0) / 300.0);
+      return mix(vec3(0.05, 0.01, 0.005), vec3(0.42, 0.055, 0.02), (t - 800.0) / 300.0);
     } else if (t < 1600.0) {
-      return mix(vec3(0.4, 0.05, 0.02), vec3(1.0, 0.35, 0.04), (t - 1100.0) / 500.0);
+      return mix(vec3(0.42, 0.055, 0.02), vec3(1.0, 0.36, 0.045), (t - 1100.0) / 500.0);
     } else if (t < 2400.0) {
-      return mix(vec3(1.0, 0.35, 0.04), vec3(1.0, 0.75, 0.35), (t - 1600.0) / 800.0);
+      return mix(vec3(1.0, 0.36, 0.045), vec3(1.02, 0.76, 0.36), (t - 1600.0) / 800.0);
+    } else if (t < 3400.0) {
+      return mix(vec3(1.02, 0.76, 0.36), vec3(1.18, 1.12, 1.02), (t - 2400.0) / 1000.0);
     } else {
-      return mix(vec3(1.0, 0.75, 0.35), vec3(1.2, 1.15, 1.05), (t - 2400.0) / 1100.0);
+      return mix(vec3(1.18, 1.12, 1.02), vec3(1.15, 1.22, 1.35), (t - 3400.0) / 1200.0);
     }
   }
 
@@ -544,153 +680,214 @@ export const PLANET_FRAGMENT_SHADER = `
 
       surface = land;
     }
-    // 4. Sub-Neptune (H2/He envelope with methane/ammonia haze: varied between smooth pastel Uranus-like and silky flowing Neptune-like jet streams)
+    // Sub-Neptune (temperate water/tholin envelopes, warm KCl/ZnS salt or CO-rich Neptunes, hot alkali/silicate Neptunes)
     else if (themeIndex < 3.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.025);
-      // Band frequency scales with turbulence: few broad bands (latFreq ~ 4-7) vs many dense bands (latFreq ~ 14-22)
-      float latFreq = mix(5.0, 18.0, smoothstep(0.40, 1.40, bandTurbulence)) + effBandShift * 4.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
+      float jetSpeed = 0.018;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = neptunianAtmosphereProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
 
-      // Temperature & composition palettes:
-      // Cold (<220K): Vivid deep sapphire azure & electric cyan ribbons (Image 1 & 2)
-      // Temperate (220-500K): Photochemical haze soft aquamarine, sea-green, and turquoise
-      // Warm/Hot (>500K): Hydrocarbon smog, slate-teal, and lilac/mauve haze
-      vec3 deepTone;
-      vec3 lightTone;
-      if (temperatureK < 220.0) {
-        deepTone = vec3(0.04, 0.20, 0.58) * effColorTint;
-        lightTone = vec3(0.24, 0.70, 0.88) * effColorTint;
-      } else if (temperatureK < 500.0) {
-        deepTone = vec3(0.06, 0.32, 0.48) * effColorTint;
-        lightTone = vec3(0.32, 0.76, 0.75) * effColorTint;
-      } else {
-        deepTone = vec3(0.24, 0.26, 0.42) * effColorTint;
-        lightTone = vec3(0.52, 0.56, 0.68) * effColorTint;
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.08, 0.28, 0.48) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.18, 0.50, 0.66) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.42, 0.74, 0.82) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.84, 0.94, 0.98) * effColorTint;
+      vec3 cPolar = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cDark * 0.82;
+
+      vec3 compositeSurface = evalSilkyPalette(prof.x, cDark, cMid, cLight, cCloud);
+      float cirrusGain = clamp(0.14 + albedo * 0.52, 0.12, 0.48);
+      compositeSurface = mix(compositeSurface, cCloud * 1.03, prof.y * cirrusGain);
+
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001 || storm.y > 0.001) {
+        compositeSurface = mix(compositeSurface, cDark * 0.68, storm.x * (0.46 + storm.z * 0.14) * abs(jovianStorm.w));
+        float companionWisp = storm.y * smoothstep(0.40, 0.86, storm.z);
+        compositeSurface = mix(compositeSurface, cCloud * 1.05, companionWisp * 0.44 * abs(jovianStorm.w));
       }
 
-      // Smooth vs Silky Jet Stream Archetypes:
-      // bandTurbulence modulates band contrast & intensity: low = smooth velvety orb, high = silky sweeping jet stream ribbons
-      float jetContrast = smoothstep(0.55, 1.35, bandTurbulence);
-      float smoothGradient = smoothstep(-1.0, 1.0, vLocalPos.y) * 0.12; // Gentle pole-to-equator insolation gradient
-      vec3 smoothAtmosphere = mix(deepTone, lightTone, 0.5 + smoothGradient);
-      vec3 bandedAtmosphere = mix(deepTone, lightTone, smoothstep(-0.6, 0.6, band));
+      float absLat = abs(vLocalPos.y);
+      compositeSurface = mix(compositeSurface, cPolar, smoothstep(0.66, 0.96, absLat) * 0.34);
 
-      surface = mix(smoothAtmosphere, bandedAtmosphere, jetContrast);
-      atmoColor = mix(vec3(0.28, 0.65, 0.98), vec3(0.35, 0.82, 0.85), clamp(temperatureK / 700.0, 0.0, 1.0)) * effColorTint;
-      atmoStrength = 0.85;
-    }
-    // 5. Ice Giant (Uranus / Neptune-like methane atmosphere)
-    else if (themeIndex < 4.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.02);
-      // Band frequency scales with turbulence: few broad bands (latFreq ~ 4-6) vs many dense bands (latFreq ~ 12-18)
-      float latFreq = mix(4.5, 15.0, smoothstep(0.40, 1.40, bandTurbulence)) + effBandShift * 4.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
-
-      // Temperature & methane composition colors:
-      vec3 deepMethane = mix(vec3(0.08, 0.40, 0.62), vec3(0.03, 0.18, 0.68), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
-      vec3 lightMethane = mix(vec3(0.32, 0.75, 0.88), vec3(0.25, 0.68, 0.96), clamp((150.0 - temperatureK) / 100.0, 0.0, 1.0)) * effColorTint;
-
-      // Smooth (Uranus-like cyan sphere) vs Active Silky Jet Streams (Neptune-like dark azure bands with high-albedo wisps)
-      float jetContrast = smoothstep(0.55, 1.30, bandTurbulence);
-      vec3 smoothUranus = mix(deepMethane, lightMethane, 0.5);
-      vec3 activeNeptune = mix(deepMethane, lightMethane, smoothstep(-0.6, 0.6, band));
-
-      // Delicate high-altitude methane ice cloud streamers
-      if (jetContrast > 0.35) {
-        float cirrus = smoothstep(0.45, 0.80, snoise(vec3(flow.x * 0.4, flow.y * 18.0, flow.z * 0.4) + effSeed * 2.1));
-        activeNeptune = mix(activeNeptune, vec3(0.85, 0.94, 1.0), cirrus * (jetContrast - 0.35) * 0.65);
-      }
-
-      surface = mix(smoothUranus, activeNeptune, jetContrast);
-      atmoColor = vec3(0.30, 0.68, 0.96) * effColorTint;
-      atmoStrength = 0.85;
-    }
-    // 6. Gas Giant Banded (Jupiter/Saturn-like Class I with rich multi-tone latitudinal banding & smooth Jovian archetypes)
-    else if (themeIndex < 5.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.03);
-      // Band frequency scales with turbulence: few broad zones (latFreq ~ 6-9) vs many dense belts (latFreq ~ 18-28)
-      float latFreq = mix(6.0, 22.0, smoothstep(0.45, 1.45, bandTurbulence)) + effBandShift * 5.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
-      
-      // Multi-tone latitudinal atmospheric bands:
-      // Equatorial Zone, Tropical Belts, Temperate Zones, and Polar Hoods
-      vec3 darkBelt = vec3(0.52, 0.25, 0.14) * effColorTint;
-      vec3 warmOchre = vec3(0.76, 0.50, 0.30) * effColorTint;
-      vec3 paleZone = vec3(0.90, 0.84, 0.72) * effColorTint;
-      vec3 brightAmmonia = vec3(0.98, 0.95, 0.88) * effColorTint;
-
-      // 4-stop silky gradient across the fluid jet stream value
-      float tBand = smoothstep(-0.85, 0.85, band);
-      vec3 bandedSurface;
-      if (tBand < 0.33) {
-        bandedSurface = mix(darkBelt, warmOchre, tBand / 0.33);
-      } else if (tBand < 0.66) {
-        bandedSurface = mix(warmOchre, paleZone, (tBand - 0.33) / 0.33);
-      } else {
-        bandedSurface = mix(paleZone, brightAmmonia, (tBand - 0.66) / 0.34);
-      }
-
-      // Smooth Jovian Archetype (Image 2) vs Few Bands vs Many Dense Belts (Jupiter)
-      float jetContrast = smoothstep(0.55, 1.30, bandTurbulence);
-      vec3 smoothJovian = mix(warmOchre, paleZone, 0.5 + smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15);
-      vec3 compositeSurface = mix(smoothJovian, bandedSurface, jetContrast);
-
-      // Latitudinal polar hoods (cool bluish-grey haze at extreme latitudes)
-      float polarLat = abs(vLocalPos.y);
-      if (polarLat > 0.75) {
-        vec3 polarHaze = vec3(0.65, 0.72, 0.80) * effColorTint;
-        compositeSurface = mix(compositeSurface, polarHaze, smoothstep(0.75, 0.95, polarLat) * 0.65);
+      if (temperatureK > 950.0) {
+        float subStellar = max(0.0, dot(vLocalPos, L));
+        float deepRift = clamp(1.0 - prof.x, 0.0, 1.0);
+        float glowScale = smoothstep(950.0, 2100.0, temperatureK);
+        vec3 thermal = blackbody(min(3200.0, temperatureK));
+        emissiveColor = thermal * glowScale * (deepRift * (subStellar * 0.42 + 0.10) + pow(subStellar, 2.0) * 0.18);
       }
 
       surface = compositeSurface;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.32, 0.72, 0.90) * effColorTint;
+      atmoStrength = 0.82;
+    }
+    // Cold Ice Giant (cryogenic CH4 + H2S Uranus/Neptune envelopes, <= 240 K)
+    else if (themeIndex < 4.5) {
+      float jetSpeed = 0.016;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = neptunianAtmosphereProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
 
-      atmoColor = vec3(0.85, 0.75, 0.58) * effColorTint;
-      atmoStrength = 0.55;
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.06, 0.28, 0.68) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.18, 0.54, 0.84) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.38, 0.78, 0.92) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.88, 0.96, 1.00) * effColorTint;
+      vec3 cPolar = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cLight * 0.92;
+
+      vec3 compositeSurface = evalSilkyPalette(prof.x, cDark, cMid, cLight, cCloud);
+      float methaneCirrusGain = clamp(0.18 + albedo * 0.56, 0.18, 0.52);
+      compositeSurface = mix(compositeSurface, cCloud * 1.04, prof.y * methaneCirrusGain);
+
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001 || storm.y > 0.001) {
+        compositeSurface = mix(compositeSurface, cDark * 0.64, storm.x * (0.50 + storm.z * 0.15) * abs(jovianStorm.w));
+        float companionWisp = storm.y * smoothstep(0.38, 0.85, storm.z);
+        compositeSurface = mix(compositeSurface, cCloud * 1.06, companionWisp * 0.50 * abs(jovianStorm.w));
+      }
+
+      float absLat = abs(vLocalPos.y);
+      compositeSurface = mix(compositeSurface, cPolar, smoothstep(0.64, 0.96, absLat) * 0.36);
+
+      surface = compositeSurface;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.30, 0.68, 0.96) * effColorTint;
+      atmoStrength = 0.84;
     }
-    // 7. Hot Jupiter (Silicate/Iron clouds, Class IV)
+    // 6. Sudarsky Class I Gas Giant (Ammonia ice cloud decks, <= 155 K)
+    else if (themeIndex < 5.5) {
+      float jetSpeed = 0.023;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      float tBand = prof.x;
+      float silk = prof.y;
+
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.52, 0.28, 0.16) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.76, 0.54, 0.34) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.91, 0.84, 0.72) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.98, 0.95, 0.89) * effColorTint;
+
+      vec3 compositeSurface = evalSilkyPalette(tBand, cDark, cMid, cLight, cCloud);
+
+      // High-altitude NH3 ice cirrus streamers over bright zones, scaled by planet albedo
+      float nh3Cirrus = smoothstep(0.28, 0.78, silk) * smoothstep(0.46, 0.85, tBand) * clamp((albedo - 0.30) * 1.15, 0.08, 0.42);
+      compositeSurface = mix(compositeSurface, cCloud * 1.04, nh3Cirrus);
+
+      // Anticyclonic storm oval (Great Red Spot / White Oval) or cyclonic brown barge
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001 || storm.y > 0.001) {
+        if (jovianStorm.w > 0.0) {
+          vec3 ovalCore = mix(cMid * vec3(1.18, 0.86, 0.76), cCloud, 0.35 + storm.z * 0.35);
+          compositeSurface = mix(compositeSurface, cDark * 0.88, storm.y * 0.32 * jovianStorm.w);
+          compositeSurface = mix(compositeSurface, ovalCore, storm.x * 0.82 * jovianStorm.w);
+        } else {
+          float bargeStr = -jovianStorm.w;
+          vec3 bargeCore = cDark * mix(0.62, 0.78, storm.z);
+          compositeSurface = mix(compositeSurface, bargeCore, storm.x * 0.78 * bargeStr);
+        }
+      }
+
+      // Polar stratospheric hydrocarbon / aerosol hood with subtle concentric jet rings
+      float polarLat = abs(vLocalPos.y);
+      float polarRing = sin(polarLat * 38.0 + effSeed) * 0.04;
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : vec3(0.62, 0.67, 0.73) * effColorTint;
+      compositeSurface = mix(compositeSurface, pHood * (1.0 + polarRing), smoothstep(0.73, 0.97, polarLat) * 0.62);
+
+      surface = compositeSurface;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.86, 0.76, 0.60) * effColorTint;
+      atmoStrength = 0.50 + clamp(albedo, 0.2, 0.7) * 0.22;
+    }
+    // 7. Sudarsky Class IV Gas Giant (Alkali absorption above deep silicate/iron clouds, 900 - 1400 K)
     else if (themeIndex < 6.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.04);
-      float latFreq = 14.0 + effBandShift * 6.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
-      surface = mix(vec3(0.40, 0.15, 0.09) * effColorTint, vec3(0.75, 0.38, 0.18) * effColorTint, smoothstep(-0.7, 0.7, band));
-      atmoColor = vec3(1.0, 0.45, 0.20) * effColorTint;
-      atmoStrength = 0.70;
+      float jetSpeed = 0.032;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      float tBand = prof.x;
+      float silk = prof.y;
+
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.20, 0.08, 0.08) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.42, 0.16, 0.12) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.66, 0.30, 0.17) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.86, 0.48, 0.25) * effColorTint;
+
+      vec3 compositeSurface = evalSilkyPalette(tBand, cDark, cMid, cLight, cCloud);
+
+      // Upwelling enstatite/iron silicate wisps weighted by albedo and temperature
+      float silicateWisp = smoothstep(0.25, 0.80, silk) * smoothstep(0.45, 0.88, tBand) * clamp(albedo * 2.4, 0.06, 0.38);
+      compositeSurface = mix(compositeSurface, cCloud * 1.08, silicateWisp);
+
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001 || storm.y > 0.001) {
+        float sWeight = abs(jovianStorm.w);
+        vec3 vortexCol = jovianStorm.w > 0.0 ? mix(cLight, cCloud * 1.12, storm.z) : cDark * 0.65;
+        compositeSurface = mix(compositeSurface, vortexCol, storm.x * 0.72 * sWeight);
+      }
+
+      float polarLat = abs(vLocalPos.y);
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cDark * 0.82;
+      compositeSurface = mix(compositeSurface, pHood, smoothstep(0.75, 0.98, polarLat) * 0.54);
+      surface = compositeSurface;
+
+      // Eastward-shifted equatorial jet hotspot + belt-trough 5-micron style thermal windows
+      float sinShift = 0.3090;
+      float cosShift = 0.9511;
+      vec3 shiftedL = vec3(L.x * cosShift - L.z * sinShift, L.y, L.x * sinShift + L.z * cosShift);
+      float hotSpot = max(0.0, dot(vLocalPos, shiftedL));
+      float thermalFactor = smoothstep(920.0, 1400.0, temperatureK);
+      float troughWindow = mix(1.42, 0.48, tBand);
+      emissiveColor = blackbody(temperatureK) * (pow(hotSpot, 1.65) * 0.34 + 0.06) * thermalFactor * troughWindow;
+
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.88, 0.38, 0.20) * effColorTint;
+      atmoStrength = 0.62;
     }
-    // 8. Ultra-Hot Jupiter / Thermally Dissociated Atmosphere (Sudarsky Class V, e.g. WASP-12 b, KELT-9 b)
+    // 8. Sudarsky Class V Gas Giant (High-altitude silicate clouds to dissociated H- daysides, >= 1400 K)
     else if (themeIndex < 7.5) {
-      // Eastward-shifted equatorial hot spot due to supersonic equatorial super-rotation jets
-      // Shift substellar center by rotating L around the Y-axis by +24 degrees
-      float sinShift = 0.4067;
-      float cosShift = 0.9135;
+      float sinShift = 0.3907;
+      float cosShift = 0.9205;
       vec3 shiftedL = vec3(L.x * cosShift - L.z * sinShift, L.y, L.x * sinShift + L.z * cosShift);
       float hotSpot = max(0.0, dot(vLocalPos, shiftedL));
       float trueDayside = max(0.0, dot(vLocalPos, L));
 
-      // Fast atmospheric zonal jet flow with high-temperature shear turbulence
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.055);
-      vec3 curl = curlNoise(flow * 3.5 + seed);
-      float turbulentHaze = fbm(vec3(flow.x * 2.0, flow.y * 18.0, flow.z * 2.0) + curl * 1.6);
+      float jetSpeed = 0.038;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      float tBand = prof.x;
+      float silk = prof.y;
 
-      // Nightside condensation zone: cold (1000K-1300K) iron and silicate clouds condense on dark limb
-      vec3 nightClouds = mix(vec3(0.04, 0.03, 0.05), vec3(0.12, 0.08, 0.10), turbulentHaze * 0.5 + 0.5);
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.42, 0.11, 0.06) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.76, 0.28, 0.09) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.95, 0.56, 0.18) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(1.00, 0.82, 0.42) * effColorTint;
 
-      // Dayside molecular dissociation: H2 and H2O dissociate, revealing blazing stellar-like thermal emission
-      float daysideTemp = max(2200.0, temperatureK);
-      vec3 thermalGlow = blackbody(daysideTemp);
+      vec3 silicateBands = evalSilkyPalette(tBand, cDark, cMid, cLight, cCloud);
 
-      // Ionized hydrogen plasma / metallic vapor coloration across dayside
-      vec3 ionizedHaze = mix(vec3(0.85, 0.18, 0.10), vec3(1.0, 0.65, 0.35), turbulentHaze * 0.5 + 0.5);
-      vec3 daysideAtmosphere = mix(ionizedHaze, thermalGlow, pow(hotSpot, 1.2) * 0.85);
+      // Reflective forsterite/enstatite streamers on high-albedo Class V worlds (1400-1950 K)
+      float silicateSheen = smoothstep(0.22, 0.78, silk) * smoothstep(0.42, 0.88, tBand) * clamp((albedo - 0.14) * 0.95, 0.0, 0.42);
+      silicateBands = mix(silicateBands, cCloud * 1.10, silicateSheen);
 
-      // Blend nightside condensation with blazing dayside
-      surface = mix(nightClouds, daysideAtmosphere, pow(hotSpot, 1.3));
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001) {
+        float sWeight = abs(jovianStorm.w);
+        vec3 plumeCol = jovianStorm.w > 0.0 ? cCloud * 1.12 : cDark * 0.68;
+        silicateBands = mix(silicateBands, plumeCol, storm.x * 0.65 * sWeight);
+      }
 
-      // Asymmetric thermal incandescence (blinding thermal emission peaking at shifted hot spot)
-      emissiveColor = thermalGlow * (pow(hotSpot, 1.5) * 1.25 + pow(trueDayside, 2.5) * 0.45);
+      float polarLat = abs(vLocalPos.y);
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cDark * 0.78;
+      silicateBands = mix(silicateBands, pHood, smoothstep(0.76, 0.98, polarLat) * 0.50);
 
-      // Deep ionized UV/Rayleigh emission along limb and dayside terminator
-      atmoColor = mix(vec3(0.9, 0.25, 0.12), vec3(1.0, 0.70, 0.30), hotSpot);
-      atmoStrength = 0.92;
+      // Thermal emission scales up as silicate clouds vaporize above 1950 K and H- continuum dominates
+      float extremeHeat = smoothstep(1800.0, 2750.0, temperatureK);
+      float darkAbsorberBoost = clamp((0.35 - albedo) * 1.6, 0.0, 0.55);
+      vec3 thermalGlow = blackbody(max(1450.0, temperatureK));
+      float troughWindow = mix(1.30, 0.68, tBand * (1.0 - extremeHeat * 0.55));
+
+      surface = mix(silicateBands, mix(silicateBands, thermalGlow, 0.52), pow(hotSpot, 1.25) * extremeHeat);
+      float baseThermal = mix(0.20, 0.92, extremeHeat) + darkAbsorberBoost * 0.28;
+      emissiveColor = thermalGlow * (pow(hotSpot, 1.45) * baseThermal * troughWindow + pow(trueDayside, 2.1) * (0.20 * extremeHeat));
+
+      // Metallic silicate forward glint on high-albedo Class V cloud decks
+      if (albedo > 0.28) {
+        specular = pow(specBase, 18.0) * rawNdotL * (albedo - 0.25) * 0.65 * smoothstep(0.45, 0.90, tBand);
+      }
+
+      vec3 baseAtmo = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.95, 0.42, 0.16);
+      atmoColor = mix(baseAtmo, thermalGlow * 0.92, hotSpot * (0.45 + extremeHeat * 0.40));
+      atmoStrength = 0.78;
     }
     // 9. Lava World (Molten Magma Oceans & Cracking Tectonic Fissures, e.g. 55 Cancri e, Kepler-10 b)
     else if (themeIndex < 8.5) {
@@ -834,53 +1031,86 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = mix(vec3(0.18, 0.72, 1.0), shallowColor * 1.4, 0.28) * effColorTint;
       atmoStrength = 0.92;
     }
-    // 15. Hot Jupiter Dark Alkali (Sudarsky Class III, e.g. TrES-2b, WASP-12b precursors)
+    // 15. Sudarsky Class IV Dark Alkali Gas Giant (e.g. TrES-2 b, high-opacity Na/K absorption)
     else if (themeIndex < 14.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.035);
-      float latFreq = 12.0 + effBandShift * 5.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
+      float jetSpeed = 0.030;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      float tBand = prof.x;
 
-      // Deep, luminous alkali absorption colors with high contrast:
-      // Intense atmospheric sodium (Na D lines) and potassium (K I) absorption creates:
-      // Deep midnight cobalt, glowing amethyst-plum, and twilight bronze equatorial ribbons
-      vec3 darkTone = vec3(0.18, 0.16, 0.28) * effColorTint;
-      vec3 alkaliTone = vec3(0.34, 0.26, 0.52) * effColorTint;
-      vec3 bronzeShear = vec3(0.48, 0.32, 0.24) * effColorTint;
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.10, 0.09, 0.16) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.20, 0.15, 0.29) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.32, 0.20, 0.30) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.45, 0.27, 0.22) * effColorTint;
 
-      float jetContrast = smoothstep(0.55, 1.25, bandTurbulence);
-      float tBand = smoothstep(-0.7, 0.7, band);
-      vec3 bandedAlkali = mix(darkTone, alkaliTone, tBand);
-      bandedAlkali = mix(bandedAlkali, bronzeShear, smoothstep(0.65, 0.95, tBand) * 0.45);
+      vec3 compositeDark = evalSilkyPalette(tBand, cDark, cMid, cLight, cCloud);
 
-      vec3 smoothAlkali = mix(darkTone, alkaliTone, 0.5 + smoothstep(-1.0, 1.0, vLocalPos.y) * 0.15);
-      surface = mix(smoothAlkali, bandedAlkali, jetContrast);
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001) {
+        float sWeight = abs(jovianStorm.w);
+        vec3 darkEye = mix(cDark * 0.70, cCloud * 1.15, storm.z * 0.65);
+        compositeDark = mix(compositeDark, darkEye, storm.x * 0.68 * sWeight);
+      }
 
-      // Deep ionized violet-indigo Rayleigh limb scattering
-      atmoColor = vec3(0.45, 0.35, 0.85) * effColorTint;
-      atmoStrength = 0.65;
+      float polarLat = abs(vLocalPos.y);
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cDark * 0.80;
+      surface = mix(compositeDark, pHood, smoothstep(0.74, 0.98, polarLat) * 0.55);
 
-      // Thermal twilight incandescence on dayside (planets at 900K - 1400K emit red/orange thermal glow)
-      float subStellar = max(0.0, dot(vLocalPos, L));
-      vec3 thermalGlow = blackbody(temperatureK);
-      emissiveColor = thermalGlow * pow(subStellar, 2.0) * 0.35;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.44, 0.34, 0.78) * effColorTint;
+      atmoStrength = 0.58;
+
+      // Deep infrared/crimson glow bleeding through dark alkali absorption troughs
+      float sinShift = 0.2924;
+      float cosShift = 0.9563;
+      vec3 shiftedL = vec3(L.x * cosShift - L.z * sinShift, L.y, L.x * sinShift + L.z * cosShift);
+      float hotSpot = max(0.0, dot(vLocalPos, shiftedL));
+      float troughWindow = mix(1.55, 0.35, tBand);
+      vec3 thermalGlow = blackbody(max(980.0, temperatureK));
+      emissiveColor = thermalGlow * (pow(hotSpot, 1.75) * 0.36 + 0.07) * troughWindow * smoothstep(900.0, 1400.0, temperatureK);
     }
-    // 16. Gas Giant Water Clouds (Sudarsky Class II)
+    // 16. Sudarsky Class II Gas Giant (Condensed tropospheric water vapor clouds, 155 - 350 K)
     else if (themeIndex < 15.5) {
-      vec3 flow = zonalJetFlow(vLocalPos, time, 0.028);
-      float latFreq = 14.0 + effBandShift * 6.0;
-      float band = fluidJetStream(flow, latFreq, bandTurbulence, effSeed);
-      vec3 deepWaterCloud = vec3(0.12, 0.32, 0.55) * effColorTint;
-      vec3 brightWaterCloud = vec3(0.68, 0.78, 0.90) * effColorTint;
-      float jetContrast = smoothstep(0.70, 1.25, bandTurbulence);
-      vec3 smoothCloud = mix(deepWaterCloud, brightWaterCloud, 0.5);
-      vec3 bandedCloud = mix(deepWaterCloud, brightWaterCloud, smoothstep(-0.65, 0.65, band));
-      surface = mix(smoothCloud, bandedCloud, jetContrast);
+      float jetSpeed = 0.024;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      float tBand = prof.x;
+      float silk = prof.y;
 
-      atmoColor = vec3(0.40, 0.65, 0.95) * effColorTint;
-      atmoStrength = 0.70;
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.15, 0.36, 0.62) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.36, 0.60, 0.84) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.72, 0.86, 0.96) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.95, 0.98, 1.00) * effColorTint;
+
+      vec3 compositeCloud = evalSilkyPalette(tBand, cDark, cMid, cLight, cCloud);
+
+      // Tropospheric H2O ice-crystal cirrus wisps scaled by water-cloud albedo
+      float h2oCirrus = smoothstep(0.24, 0.76, silk) * smoothstep(0.38, 0.82, tBand) * clamp((albedo - 0.45) * 1.25, 0.12, 0.48);
+      compositeCloud = mix(compositeCloud, cCloud * 1.03, h2oCirrus);
+
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001 || storm.y > 0.001) {
+        if (jovianStorm.w > 0.0) {
+          vec3 whiteOval = mix(cLight, vec3(0.98, 0.99, 1.0), 0.55 + storm.z * 0.35);
+          compositeCloud = mix(compositeCloud, cDark * 0.85, storm.y * 0.28 * jovianStorm.w);
+          compositeCloud = mix(compositeCloud, whiteOval, storm.x * 0.82 * jovianStorm.w);
+        } else {
+          compositeCloud = mix(compositeCloud, cDark * 0.72, storm.x * 0.74 * (-jovianStorm.w));
+        }
+      }
+
+      float polarLat = abs(vLocalPos.y);
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : vec3(0.48, 0.68, 0.86) * effColorTint;
+      compositeCloud = mix(compositeCloud, pHood, smoothstep(0.74, 0.97, polarLat) * 0.50);
+
+      // Subtle silver-lining forward glint on dense water-ice cloud tops
+      specular = pow(specBase, 14.0) * rawNdotL * clamp((albedo - 0.55) * 0.65, 0.0, 0.22) * smoothstep(0.55, 0.92, tBand);
+
+      surface = compositeCloud;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.42, 0.70, 0.98) * effColorTint;
+      atmoStrength = 0.68 + clamp((albedo - 0.50) * 0.45, 0.0, 0.18);
     }
     // 17. Carbonaceous Asteroid (Airless C-type chondrite / B-type, e.g. Hygiea, Pallas)
-    else {
+    else if (themeIndex < 16.5) {
       vec3 warped = domainWarp(vLocalPos * 4.0 + effSeed, 0.45);
       float craters = ridgedFbm(warped * 2.0);
       float micro = fbmFast(vLocalPos * 16.0);
@@ -895,15 +1125,58 @@ export const PLANET_FRAGMENT_SHADER = `
       atmoColor = vec3(0.0);
       atmoStrength = 0.0;
     }
+    // 18. Sudarsky Class III Cloudless Gas Giant (350 - 900 K) & Silicate-Rain Cobalt Class IV (HD 189733 b)
+    else {
+      float jetSpeed = 0.027;
+      vec3 flow = zonalJetFlow(vLocalPos, time, jetSpeed);
+      vec3 prof = jovianZonalProfile(vLocalPos, flow, bandTurbulence, effBandShift, effSeed, albedo);
+      // Cloudless Rayleigh atmospheres show silkier, subtler belt-to-zone contrast than condensed-cloud classes
+      float subduedBand = mix(0.5, prof.x, 0.72);
+
+      vec3 cDark = length(jovianBandDark) > 0.01 ? jovianBandDark : vec3(0.06, 0.13, 0.38) * effColorTint;
+      vec3 cMid = length(jovianBandMid) > 0.01 ? jovianBandMid : vec3(0.10, 0.25, 0.60) * effColorTint;
+      vec3 cLight = length(jovianBandLight) > 0.01 ? jovianBandLight : vec3(0.16, 0.39, 0.78) * effColorTint;
+      vec3 cCloud = length(jovianBandCloud) > 0.01 ? jovianBandCloud : vec3(0.28, 0.54, 0.90) * effColorTint;
+
+      vec3 compositeCobalt = evalSilkyPalette(subduedBand, cDark, cMid, cLight, cCloud);
+
+      // Delicate high-altitude methane/silicate-haze streamlines
+      float hazeStream = smoothstep(0.32, 0.82, prof.y) * 0.14;
+      compositeCobalt = mix(compositeCobalt, cCloud * 1.06, hazeStream);
+
+      vec3 storm = evaluateJovianStorm(vLocalPos, time, jetSpeed, jovianStorm, effSeed);
+      if (storm.x > 0.001) {
+        float sWeight = abs(jovianStorm.w);
+        vec3 deepSpot = jovianStorm.w > 0.0 ? mix(cLight, cCloud * 1.15, storm.z) : cDark * 0.66;
+        compositeCobalt = mix(compositeCobalt, deepSpot, storm.x * 0.66 * sWeight);
+      }
+
+      float polarLat = abs(vLocalPos.y);
+      vec3 pHood = length(jovianPolarTint) > 0.01 ? jovianPolarTint : cDark * 0.84;
+      compositeCobalt = mix(compositeCobalt, pHood, smoothstep(0.74, 0.97, polarLat) * 0.52);
+
+      // Hot Class III / Cobalt Class IV (> 780 K) faint deep-troposphere thermal glow
+      if (temperatureK > 780.0) {
+        float subStellar = max(0.0, dot(vLocalPos, L));
+        emissiveColor = blackbody(temperatureK) * pow(subStellar, 2.0) * smoothstep(780.0, 1300.0, temperatureK) * 0.16 * (1.2 - subduedBand * 0.5);
+      }
+
+      surface = compositeCobalt;
+      atmoColor = length(jovianAtmoTint) > 0.01 ? jovianAtmoTint : vec3(0.22, 0.54, 0.98) * effColorTint;
+      atmoStrength = 0.82;
+    }
 
     // Physical Albedo modulation:
-    // Low albedo planets absorb deep light; high albedo reflects cloud tops
-    // Maintain healthy optical dynamic range [0.75, 1.50] so surface features remain distinct and visible
-    float albedoFactor = clamp(albedo * 0.90 + 0.68, 0.75, 1.50);
+    // Giant volatile envelopes span dark alkali absorbers (0.015) to bright water/salt clouds (0.81);
+    // rocky and ocean archetypes retain their [0.75, 1.50] optical response.
+    bool isGiantEnvelope = sudarskyIndex > 0.5 || (themeIndex >= 2.5 && themeIndex < 4.5);
+    float albedoFactor = isGiantEnvelope
+      ? clamp(0.32 + pow(clamp(albedo, 0.0, 1.0), 0.74) * 1.22, 0.32, 1.54)
+      : clamp(albedo * 0.90 + 0.68, 0.75, 1.50);
 
-    // Rayleigh scattering atmospheric limb glow (enhances soft atmospheric horizon ring)
     float terminatorFactor = smoothstep(-0.25, 0.45, dot(N, L));
-    vec3 rayleighGlow = atmoColor * (fresnel * atmoStrength * (terminatorFactor * 0.7 + 0.3));
+    float limbCurve = isGiantEnvelope ? mix(fresnel, pow(1.0 - max(0.0, dot(N, V)), 2.2), 0.35) : fresnel;
+    vec3 rayleighGlow = atmoColor * (limbCurve * atmoStrength * (terminatorFactor * 0.7 + 0.3));
 
     vec3 finalColor = (surface * NdotL * albedoFactor) + rayleighGlow + vec3(specular) + emissiveColor;
     gl_FragColor = vec4(finalColor, 1.0);
@@ -916,6 +1189,8 @@ export const getThemeIndex = (theme?: string): number => {
       return 0.0;
     case 'carbonaceous-asteroid':
       return 16.0;
+    case 'gas-giant-cloudless':
+      return 17.0;
     case 'terrestrial-ocean':
       return 1.0;
     case 'super-earth':
@@ -976,119 +1251,591 @@ export interface PlanetBucketUniforms {
   oceanShallowColor: THREE.Vector3;
   oceanDeepColor: THREE.Vector3;
   iceCapLatitude: number;
+  sudarskyIndex: number;
+  jovianBandDark: THREE.Vector3;
+  jovianBandMid: THREE.Vector3;
+  jovianBandLight: THREE.Vector3;
+  jovianBandCloud: THREE.Vector3;
+  jovianAtmoTint: THREE.Vector3;
+  jovianPolarTint: THREE.Vector3;
+  jovianStorm: THREE.Vector4;
 }
 
-/**
- * Generates deterministic 32-bucket procedural parameters for Approach A.
- * Computes unique 3D spatial terrain seeds, band frequency modulations,
- * and calibrated multi-color palettes per bucket index (0..31).
- */
-export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK: number = 300): PlanetBucketUniforms {
-  const normBucket = (bucket % 32) / 32.0;
-  const h1 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-seed`, 11);
-  const h2 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-tint`, 23);
-  const h3 = hashStringToFloat(`bucket-${themeIdx}-${bucket}-band`, 37);
+export interface PlanetProceduralOptions {
+  bodyId?: string;
+  albedo?: number;
+  sudarskyClass?: string;
+  classification?: string;
+  densityGcm3?: number;
+}
 
-  // 1. Spatial 3D noise coordinate seed (different landmasses, mountain cordilleras, and storm systems)
-  const seed = h1 * 987.65 + bucket * 31.4159;
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v));
+}
 
-  // 2. Band frequency and jet-shear displacement (12 to 34 distinct latitudinal bands)
+function mixVec3(a: readonly [number, number, number], b: readonly [number, number, number], t: number): [number, number, number] {
+  const k = clamp01(t);
+  return [
+    a[0] + (b[0] - a[0]) * k,
+    a[1] + (b[1] - a[1]) * k,
+    a[2] + (b[2] - a[2]) * k,
+  ];
+}
+
+function scaleRgb(c: readonly [number, number, number], s: number): [number, number, number] {
+  return [
+    Math.max(0.01, Math.min(1.15, c[0] * s)),
+    Math.max(0.01, Math.min(1.15, c[1] * s)),
+    Math.max(0.01, Math.min(1.15, c[2] * s)),
+  ];
+}
+
+function resolveSudarskyNumericIndex(sudarskyClass: string | undefined, themeIdx: number, tempK: number): number {
+  if (sudarskyClass === 'Class I') return 1;
+  if (sudarskyClass === 'Class II') return 2;
+  if (sudarskyClass === 'Class III') return 3;
+  if (sudarskyClass === 'Class IV') return 4;
+  if (sudarskyClass === 'Class V') return 5;
+  if (themeIdx >= 4.5 && themeIdx < 5.5) return 1;
+  if (themeIdx >= 14.5 && themeIdx < 15.5) return 2;
+  if (themeIdx >= 16.5 && themeIdx < 17.5) return tempK >= 900 ? 4 : 3;
+  if ((themeIdx >= 5.5 && themeIdx < 6.5) || (themeIdx >= 13.5 && themeIdx < 14.5)) return 4;
+  if (themeIdx >= 6.5 && themeIdx < 7.5) return 5;
+  return 0;
+}
+
+function computeJovianAtmospherePalette(
+  sudarskyIndex: number,
+  themeIdx: number,
+  tempK: number,
+  albedo: number,
+  hChem: number,
+  hHue: number
+): {
+  dark: THREE.Vector3;
+  mid: THREE.Vector3;
+  light: THREE.Vector3;
+  cloud: THREE.Vector3;
+  atmo: THREE.Vector3;
+  polar: THREE.Vector3;
+} {
+  let dark: [number, number, number] = [0.46, 0.24, 0.15];
+  let mid: [number, number, number] = [0.74, 0.48, 0.30];
+  let light: [number, number, number] = [0.90, 0.82, 0.70];
+  let cloud: [number, number, number] = [0.98, 0.95, 0.89];
+  let atmo: [number, number, number] = [0.86, 0.75, 0.60];
+  let polar: [number, number, number] = [0.56, 0.61, 0.68];
+
+  const hueJitter = (hHue - 0.5) * 0.08;
+
+  if (sudarskyIndex === 1) {
+    // Class I (<= 155 K): Ammonia ice clouds over NH4SH and P4/tholin chromophores
+    const albFrac = clamp01((albedo - 0.34) / 0.26);
+    const coldHaze = clamp01((95 - tempK) / 45);
+    const warmFrost = clamp01((tempK - 130) / 25);
+
+    if (hChem < 0.22) {
+      // Classic Jovian Sienna & Ochre
+      dark = [0.46 + hueJitter, 0.22, 0.13];
+      mid = [0.74 + hueJitter * 0.6, 0.47, 0.28];
+      light = [0.90, 0.82, 0.69];
+      cloud = [0.98, 0.95, 0.88];
+      polar = [0.54, 0.60, 0.69];
+      atmo = [0.86, 0.74, 0.58];
+    } else if (hChem < 0.44) {
+      // Saturnian Champagne & Butterscotch
+      dark = [0.53, 0.41 + hueJitter * 0.5, 0.24];
+      mid = [0.76, 0.64, 0.42];
+      light = [0.91, 0.85, 0.69];
+      cloud = [0.97, 0.94, 0.83];
+      polar = [0.52, 0.61, 0.64];
+      atmo = [0.88, 0.80, 0.62];
+    } else if (hChem < 0.64) {
+      // Phosphide Russet-Rose & Alabaster
+      dark = [0.44, 0.17, 0.15 - hueJitter * 0.4];
+      mid = [0.72, 0.39, 0.31];
+      light = [0.91, 0.79, 0.72];
+      cloud = [0.98, 0.94, 0.91];
+      polar = [0.57, 0.56, 0.66];
+      atmo = [0.88, 0.68, 0.60];
+    } else if (hChem < 0.82) {
+      // Hydrosulfide Olive-Amber & Parchment
+      dark = [0.41, 0.32 + hueJitter * 0.5, 0.18];
+      mid = [0.66, 0.54, 0.33];
+      light = [0.86, 0.81, 0.67];
+      cloud = [0.95, 0.93, 0.85];
+      polar = [0.49, 0.56, 0.60];
+      atmo = [0.80, 0.76, 0.58];
+    } else {
+      // Cryo-Cinnamon & Slate Ivory
+      dark = [0.38, 0.29, 0.27 - hueJitter * 0.4];
+      mid = [0.64, 0.49, 0.40];
+      light = [0.86, 0.82, 0.78];
+      cloud = [0.96, 0.96, 0.95];
+      polar = [0.51, 0.60, 0.71];
+      atmo = [0.78, 0.79, 0.85];
+    }
+
+    if (coldHaze > 0.01) {
+      dark = mixVec3(dark, [0.50, 0.40, 0.26], coldHaze * 0.35);
+      light = mixVec3(light, [0.86, 0.79, 0.63], coldHaze * 0.32);
+    }
+    if (warmFrost > 0.01) {
+      dark = mixVec3(dark, [0.34, 0.28, 0.32], warmFrost * 0.30);
+      cloud = mixVec3(cloud, [0.99, 0.98, 0.97], warmFrost * 0.45);
+    }
+
+    const beltScale = 0.84 + albFrac * 0.26;
+    const zoneScale = 0.93 + albFrac * 0.13;
+    dark = scaleRgb(dark, beltScale);
+    mid = scaleRgb(mid, 0.88 + albFrac * 0.20);
+    light = scaleRgb(light, zoneScale);
+    cloud = scaleRgb(cloud, 0.95 + albFrac * 0.08);
+  } else if (sudarskyIndex === 2) {
+    // Class II (155 - 350 K): Tropospheric H2O cloud decks over Rayleigh/methane sky belts
+    const tFrac = clamp01((tempK - 155) / 195);
+    const albFrac = clamp01((albedo - 0.54) / 0.27);
+
+    const coldDark: [number, number, number] = [0.23, 0.46, 0.68];
+    const midDark: [number, number, number] = [0.11, 0.32, 0.62];
+    const warmDark: [number, number, number] = [0.07, 0.19, 0.47];
+
+    const coldMid: [number, number, number] = [0.47, 0.70, 0.88];
+    const midMid: [number, number, number] = [0.31, 0.57, 0.85];
+    const warmMid: [number, number, number] = [0.19, 0.43, 0.74];
+
+    const coldLight: [number, number, number] = [0.80, 0.91, 0.98];
+    const midLight: [number, number, number] = [0.71, 0.86, 0.97];
+    const warmLight: [number, number, number] = [0.57, 0.76, 0.92];
+
+    dark = tFrac < 0.5 ? mixVec3(coldDark, midDark, tFrac * 2) : mixVec3(midDark, warmDark, (tFrac - 0.5) * 2);
+    mid = tFrac < 0.5 ? mixVec3(coldMid, midMid, tFrac * 2) : mixVec3(midMid, warmMid, (tFrac - 0.5) * 2);
+    light = tFrac < 0.5 ? mixVec3(coldLight, midLight, tFrac * 2) : mixVec3(midLight, warmLight, (tFrac - 0.5) * 2);
+    cloud = mixVec3([0.90, 0.95, 0.99], [0.98, 0.99, 1.00], albFrac);
+    polar = mixVec3([0.56, 0.73, 0.88], [0.28, 0.46, 0.72], tFrac);
+    atmo = mixVec3([0.52, 0.78, 0.98], [0.28, 0.58, 0.95], tFrac);
+
+    if (hChem < 0.30) {
+      // Methane-enriched aquamarine-turquoise tint in deeper belts
+      dark = [dark[0] * 0.85, Math.min(1, dark[1] * 1.16), dark[2] * 0.96];
+      mid = [mid[0] * 0.90, Math.min(1, mid[1] * 1.10), mid[2] * 0.98];
+    } else if (hChem > 0.72) {
+      // Trace tropospheric sulfide warmth in cloud-top highlights
+      light = [Math.min(1, light[0] * 1.05), light[1] * 1.01, light[2] * 0.96];
+      cloud = [0.99, 0.98, 0.95];
+    }
+
+    dark = scaleRgb(dark, 0.82 + albFrac * 0.28);
+    light = scaleRgb(light, 0.92 + albFrac * 0.12);
+  } else if (sudarskyIndex === 3) {
+    // Class III (350 - 900 K): Cloudless H2/He Rayleigh scattering darkened by Na/K absorption wings
+    const tFrac = clamp01((tempK - 350) / 550);
+    const albFrac = clamp01((albedo - 0.05) / 0.16);
+
+    const coolD: [number, number, number] = [0.06, 0.20, 0.46];
+    const midD: [number, number, number] = [0.05, 0.11, 0.36];
+    const hotD: [number, number, number] = [0.07, 0.07, 0.22];
+
+    const coolM: [number, number, number] = [0.11, 0.35, 0.68];
+    const midM: [number, number, number] = [0.09, 0.22, 0.58];
+    const hotM: [number, number, number] = [0.13, 0.14, 0.38];
+
+    const coolL: [number, number, number] = [0.19, 0.52, 0.84];
+    const midL: [number, number, number] = [0.15, 0.36, 0.76];
+    const hotL: [number, number, number] = [0.21, 0.24, 0.54];
+
+    const coolC: [number, number, number] = [0.34, 0.68, 0.94];
+    const midC: [number, number, number] = [0.25, 0.50, 0.88];
+    const hotC: [number, number, number] = [0.33, 0.35, 0.68];
+
+    dark = tFrac < 0.5 ? mixVec3(coolD, midD, tFrac * 2) : mixVec3(midD, hotD, (tFrac - 0.5) * 2);
+    mid = tFrac < 0.5 ? mixVec3(coolM, midM, tFrac * 2) : mixVec3(midM, hotM, (tFrac - 0.5) * 2);
+    light = tFrac < 0.5 ? mixVec3(coolL, midL, tFrac * 2) : mixVec3(midL, hotL, (tFrac - 0.5) * 2);
+    cloud = tFrac < 0.5 ? mixVec3(coolC, midC, tFrac * 2) : mixVec3(midC, hotC, (tFrac - 0.5) * 2);
+    polar = scaleRgb(dark, 0.86);
+    atmo = mixVec3([0.26, 0.66, 0.98], [0.24, 0.38, 0.86], tFrac);
+
+    if (hChem < 0.32) {
+      // Residual CH4 cyan-teal tilt
+      mid[1] = Math.min(1, mid[1] * 1.14);
+      light[1] = Math.min(1, light[1] * 1.12);
+    } else if (hChem > 0.70) {
+      // Strong potassium 770 nm violet-indigo tilt
+      mid[0] = Math.min(1, mid[0] * 1.18);
+      light[0] = Math.min(1, light[0] * 1.15);
+    }
+
+    const rayleighGain = 0.82 + albFrac * 0.34;
+    dark = scaleRgb(dark, rayleighGain);
+    mid = scaleRgb(mid, rayleighGain);
+    light = scaleRgb(light, rayleighGain);
+    cloud = scaleRgb(cloud, rayleighGain);
+  } else if (sudarskyIndex === 4) {
+    // Class IV (900 - 1400 K): Strong atomic Na/K absorption above deep silicate/iron clouds
+    const tFrac = clamp01((tempK - 900) / 500);
+    const albFrac = clamp01((albedo - 0.015) / 0.125);
+
+    if (themeIdx >= 16.5) {
+      // Silicate-rain Rayleigh cobalt hot Jupiter (HD 189733 b class)
+      dark = [0.05, 0.12, 0.38];
+      mid = [0.09, 0.26, 0.66];
+      light = [0.16, 0.42, 0.84];
+      cloud = [0.30, 0.58, 0.96];
+      polar = [0.05, 0.10, 0.30];
+      atmo = [0.20, 0.56, 1.00];
+    } else if (albedo <= 0.058 || (themeIdx >= 13.5 && themeIdx < 14.5)) {
+      // Ultra-dark alkali absorber (TrES-2 b and dark Na/K peers)
+      const sootyD: [number, number, number] = [0.07, 0.06, 0.09];
+      const plumD: [number, number, number] = [0.10, 0.08, 0.16];
+      dark = mixVec3(sootyD, plumD, hChem);
+      mid = mixVec3([0.14, 0.11, 0.17], [0.20, 0.14, 0.28], hChem);
+      light = mixVec3([0.23, 0.16, 0.21], [0.31, 0.20, 0.30], hChem);
+      cloud = mixVec3([0.36, 0.22, 0.19], [0.46, 0.28, 0.24], tFrac * 0.7 + hChem * 0.3);
+      polar = scaleRgb(dark, 0.80);
+      atmo = mixVec3([0.36, 0.28, 0.62], [0.54, 0.32, 0.58], tFrac);
+
+      const ultraDarkScale = 0.72 + clamp01(albedo / 0.058) * 0.36;
+      dark = scaleRgb(dark, ultraDarkScale);
+      mid = scaleRgb(mid, ultraDarkScale);
+      light = scaleRgb(light, ultraDarkScale);
+      cloud = scaleRgb(cloud, ultraDarkScale);
+    } else {
+      // Standard Class IV: smoky violet-bronze (900-1150 K) to mahogany & copper silicate (1150-1400 K)
+      const cool4D: [number, number, number] = [0.14, 0.10, 0.18];
+      const hot4D: [number, number, number] = [0.22, 0.08, 0.07];
+      const cool4M: [number, number, number] = [0.28, 0.18, 0.27];
+      const hot4M: [number, number, number] = [0.45, 0.17, 0.12];
+      const cool4L: [number, number, number] = [0.46, 0.28, 0.27];
+      const hot4L: [number, number, number] = [0.68, 0.32, 0.17];
+      const cool4C: [number, number, number] = [0.64, 0.40, 0.30];
+      const hot4C: [number, number, number] = [0.88, 0.52, 0.26];
+
+      const blend = clamp01(tFrac * 0.72 + (hChem - 0.5) * 0.36);
+      dark = mixVec3(cool4D, hot4D, blend);
+      mid = mixVec3(cool4M, hot4M, blend);
+      light = mixVec3(cool4L, hot4L, blend);
+      cloud = mixVec3(cool4C, hot4C, blend);
+      polar = scaleRgb(dark, 0.82);
+      atmo = mixVec3([0.62, 0.38, 0.56], [0.90, 0.42, 0.20], blend);
+
+      const silicateLift = 0.85 + albFrac * 0.32;
+      light = scaleRgb(light, silicateLift);
+      cloud = scaleRgb(cloud, silicateLift);
+    }
+  } else {
+    // Class V (>= 1400 K): Reflective high-altitude silicates (1400-1920 K) to dissociated H- daysides (> 2280 K)
+    const albFrac = clamp01((albedo - 0.03) / 0.53);
+
+    if (tempK < 1920 && albedo >= 0.26) {
+      // Reflective high-altitude enstatite / forsterite / quartz silicate cloud decks (Kepler-7 b regime)
+      if (hChem < 0.36) {
+        // Golden Saffron & Garnet
+        dark = [0.36, 0.13, 0.07];
+        mid = [0.68, 0.32, 0.12];
+        light = [0.92, 0.62, 0.24];
+        cloud = [1.00, 0.86, 0.52];
+        atmo = [0.96, 0.62, 0.24];
+      } else if (hChem < 0.70) {
+        // Warm Bronze-Ochre & Quartz Cream
+        dark = [0.34, 0.20, 0.12];
+        mid = [0.62, 0.42, 0.24];
+        light = [0.86, 0.70, 0.45];
+        cloud = [0.98, 0.90, 0.72];
+        atmo = [0.94, 0.76, 0.46];
+      } else {
+        // Copper-Coral & Marigold Silicates
+        dark = [0.40, 0.12, 0.09];
+        mid = [0.74, 0.28, 0.14];
+        light = [0.95, 0.54, 0.22];
+        cloud = [1.00, 0.80, 0.46];
+        atmo = [0.96, 0.50, 0.20];
+      }
+      polar = scaleRgb(dark, 0.80);
+      const deckGain = 0.90 + albFrac * 0.22;
+      light = scaleRgb(light, deckGain);
+      cloud = scaleRgb(cloud, deckGain);
+    } else if (tempK < 2280 && albedo >= 0.15) {
+      // Partial silicate sublimation / iron-corundum transition (1920 - 2280 K)
+      const subFrac = clamp01((tempK - 1900) / 380);
+      dark = mixVec3([0.32, 0.09, 0.07], [0.18, 0.07, 0.09], subFrac);
+      mid = mixVec3([0.66, 0.22, 0.09], [0.42, 0.14, 0.12], subFrac);
+      light = mixVec3([0.90, 0.45, 0.15], [0.68, 0.28, 0.15], subFrac);
+      cloud = mixVec3([1.00, 0.75, 0.35], [0.88, 0.52, 0.26], subFrac);
+      polar = scaleRgb(dark, 0.78);
+      atmo = [0.95, 0.42, 0.16];
+    } else {
+      // Ultra-hot dissociated H- continuum absorber (WASP-12 b, HAT-P-7 b, WASP-121 b, KELT-9 b)
+      const ultraScale = 0.72 + clamp01(albedo / 0.15) * 0.34;
+      dark = scaleRgb([0.13, 0.06, 0.10], ultraScale);
+      mid = scaleRgb([0.27, 0.11, 0.14], ultraScale);
+      light = scaleRgb([0.48, 0.20, 0.16], ultraScale);
+      cloud = scaleRgb([0.72, 0.36, 0.22], ultraScale);
+      polar = scaleRgb(dark, 0.76);
+      atmo = tempK > 3000 ? [0.96, 0.78, 0.68] : [0.94, 0.38, 0.16];
+    }
+  }
+
+  return {
+    dark: new THREE.Vector3(...dark),
+    mid: new THREE.Vector3(...mid),
+    light: new THREE.Vector3(...light),
+    cloud: new THREE.Vector3(...cloud),
+    atmo: new THREE.Vector3(...atmo),
+    polar: new THREE.Vector3(...polar),
+  };
+}
+
+// Synthesizes Neptunian atmospheric palettes from equilibrium temperature, optical albedo,
+// bulk-density metallicity (super-puffs vs volatile-rich envelopes), and condensate/haze chemistry.
+function computeNeptunianAtmospherePalette(
+  tempK: number,
+  albedo: number,
+  densityGcm3: number | undefined,
+  hChem: number,
+  hHue: number
+): {
+  dark: THREE.Vector3;
+  mid: THREE.Vector3;
+  light: THREE.Vector3;
+  cloud: THREE.Vector3;
+  atmo: THREE.Vector3;
+  polar: THREE.Vector3;
+} {
+  const a = clamp01(albedo);
+  const rho = densityGcm3 ?? 1.65;
+  const isSuperPuff = rho > 0 && rho < 1.05;
+  const metalBlend = clamp01((rho - 1.35) / 1.65);
+
+  let dark: [number, number, number];
+  let mid: [number, number, number];
+  let light: [number, number, number];
+  let cloud: [number, number, number];
+  let atmo: [number, number, number];
+  let polar: [number, number, number];
+
+  if (tempK <= 220) {
+    // Cryogenic CH4 + H2S ice giants: stagnant hydrocarbon haze (Uranus-like) vs active methane azure (Neptune-like)
+    const brightGain = 0.86 + clamp01((a - 0.26) / 0.22) * 0.22;
+    if (a >= 0.345 || hChem < 0.42) {
+      dark = scaleRgb(mixVec3([0.24, 0.56, 0.68], [0.20, 0.52, 0.62], hHue), brightGain);
+      mid = scaleRgb(mixVec3([0.38, 0.73, 0.82], [0.34, 0.70, 0.78], hHue), brightGain);
+      light = scaleRgb(mixVec3([0.56, 0.85, 0.90], [0.52, 0.83, 0.86], hHue), brightGain);
+      cloud = scaleRgb([0.84, 0.95, 0.97], brightGain);
+      polar = scaleRgb([0.66, 0.88, 0.90], brightGain);
+      atmo = [0.46, 0.82, 0.92];
+    } else {
+      dark = scaleRgb(mixVec3([0.07, 0.26, 0.68], [0.11, 0.24, 0.72], hHue), brightGain);
+      mid = scaleRgb(mixVec3([0.15, 0.44, 0.84], [0.21, 0.42, 0.86], hHue), brightGain);
+      light = scaleRgb(mixVec3([0.29, 0.65, 0.94], [0.36, 0.62, 0.95], hHue), brightGain);
+      cloud = [0.90, 0.96, 1.00];
+      polar = scaleRgb(mixVec3([0.14, 0.38, 0.74], [0.22, 0.44, 0.80], hHue), brightGain);
+      atmo = mixVec3([0.28, 0.64, 0.98], [0.38, 0.62, 0.98], hHue);
+    }
+  } else if (tempK < 480) {
+    // Cool/temperate sub-Neptunes: bright H2O/NH3 cloud decks vs UV photochemical tholin haze
+    if (a >= 0.40) {
+      const cloudBright = 0.88 + clamp01((a - 0.40) / 0.28) * 0.22;
+      dark = scaleRgb(mixVec3([0.18, 0.44, 0.66], [0.16, 0.48, 0.58], metalBlend), cloudBright);
+      mid = scaleRgb(mixVec3([0.38, 0.66, 0.82], [0.36, 0.68, 0.74], metalBlend), cloudBright);
+      light = scaleRgb(mixVec3([0.66, 0.84, 0.93], [0.64, 0.85, 0.88], metalBlend), cloudBright);
+      cloud = scaleRgb([0.94, 0.98, 1.00], cloudBright);
+      polar = scaleRgb([0.30, 0.52, 0.68], cloudBright);
+      atmo = mixVec3([0.42, 0.76, 0.96], [0.46, 0.80, 0.86], metalBlend);
+    } else if (hHue < 0.56) {
+      dark = [0.12, 0.31, 0.38];
+      mid = [0.24, 0.48, 0.52];
+      light = [0.42, 0.66, 0.66];
+      cloud = [0.76, 0.88, 0.88];
+      polar = [0.16, 0.34, 0.38];
+      atmo = [0.34, 0.68, 0.72];
+    } else {
+      // Organic tholin photochemical haze under K/M-dwarf UV flux
+      dark = mixVec3([0.22, 0.29, 0.35], [0.28, 0.27, 0.31], metalBlend);
+      mid = mixVec3([0.38, 0.45, 0.47], [0.46, 0.43, 0.42], metalBlend);
+      light = mixVec3([0.56, 0.60, 0.58], [0.64, 0.59, 0.53], metalBlend);
+      cloud = [0.80, 0.81, 0.78];
+      polar = [0.26, 0.30, 0.33];
+      atmo = [0.48, 0.58, 0.62];
+    }
+  } else if (tempK < 850) {
+    // Warm Neptunes: reflective KCl/ZnS salt clouds (GJ 1214 b), CO/H2O CH4-depleted skies (Gliese 436 b), or hydrocarbon soot
+    if (a >= 0.33) {
+      const saltGain = 0.88 + clamp01((a - 0.33) / 0.25) * 0.22;
+      dark = scaleRgb(mixVec3([0.38, 0.42, 0.52], [0.44, 0.42, 0.48], metalBlend), saltGain);
+      mid = scaleRgb(mixVec3([0.58, 0.61, 0.69], [0.63, 0.60, 0.64], metalBlend), saltGain);
+      light = scaleRgb(mixVec3([0.76, 0.78, 0.84], [0.81, 0.79, 0.80], metalBlend), saltGain);
+      cloud = scaleRgb([0.94, 0.95, 0.97], saltGain);
+      polar = scaleRgb([0.46, 0.48, 0.56], saltGain);
+      atmo = mixVec3([0.62, 0.68, 0.84], [0.72, 0.70, 0.78], metalBlend);
+    } else if (a >= 0.13) {
+      const warmFade = clamp01((tempK - 480) / 370);
+      dark = mixVec3([0.10, 0.20, 0.42], [0.13, 0.17, 0.36], warmFade);
+      mid = mixVec3([0.20, 0.34, 0.58], [0.24, 0.29, 0.52], warmFade);
+      light = mixVec3([0.34, 0.49, 0.72], [0.38, 0.43, 0.66], warmFade);
+      cloud = mixVec3([0.66, 0.76, 0.90], [0.68, 0.72, 0.86], warmFade);
+      polar = [0.12, 0.18, 0.34];
+      atmo = mixVec3([0.32, 0.50, 0.84], [0.40, 0.46, 0.78], metalBlend);
+    } else {
+      // Hydrocarbon soot and tholin smog maximum (~550-800 K)
+      dark = [0.13, 0.10, 0.16];
+      mid = mixVec3([0.24, 0.19, 0.26], [0.28, 0.21, 0.22], hHue);
+      light = mixVec3([0.36, 0.30, 0.36], [0.42, 0.32, 0.30], hHue);
+      cloud = [0.54, 0.47, 0.50];
+      polar = [0.11, 0.09, 0.13];
+      atmo = [0.38, 0.32, 0.44];
+    }
+  } else if (tempK < 1500) {
+    // Hot Neptunes: Na2S sulfide clouds, clear H2O + Na/K optical absorption, or heavy carbon-alkali dark haze
+    if (a >= 0.15) {
+      dark = [0.19, 0.16, 0.20];
+      mid = mixVec3([0.34, 0.29, 0.30], [0.38, 0.31, 0.26], metalBlend);
+      light = mixVec3([0.52, 0.45, 0.42], [0.56, 0.47, 0.38], metalBlend);
+      cloud = [0.74, 0.67, 0.58];
+      polar = [0.16, 0.14, 0.17];
+      atmo = [0.56, 0.48, 0.44];
+    } else if (a >= 0.08) {
+      dark = [0.06, 0.11, 0.25];
+      mid = [0.13, 0.21, 0.39];
+      light = [0.22, 0.33, 0.53];
+      cloud = [0.46, 0.57, 0.74];
+      polar = [0.05, 0.09, 0.20];
+      atmo = [0.26, 0.44, 0.74];
+    } else {
+      dark = [0.05, 0.04, 0.08];
+      mid = [0.10, 0.08, 0.14];
+      light = [0.17, 0.14, 0.21];
+      cloud = [0.28, 0.23, 0.31];
+      polar = [0.04, 0.03, 0.06];
+      atmo = [0.26, 0.20, 0.34];
+    }
+  } else {
+    // Neptunian desert (>= 1500 K): high-altitude enstatite silicate haze vs dissociated thermal envelope
+    if (a >= 0.18 && tempK < 1950) {
+      dark = [0.22, 0.14, 0.14];
+      mid = [0.44, 0.30, 0.24];
+      light = [0.66, 0.49, 0.37];
+      cloud = [0.86, 0.74, 0.60];
+      polar = [0.18, 0.12, 0.12];
+      atmo = [0.84, 0.56, 0.38];
+    } else {
+      dark = [0.07, 0.04, 0.08];
+      mid = [0.15, 0.08, 0.12];
+      light = [0.26, 0.14, 0.16];
+      cloud = [0.42, 0.22, 0.20];
+      polar = [0.06, 0.03, 0.06];
+      atmo = [0.76, 0.32, 0.22];
+    }
+  }
+
+  // Ultra-low-density super-puffs exhibit extended Rayleigh scattering scale heights with airy cyan-lavender limbs
+  if (isSuperPuff) {
+    atmo = scaleRgb(mixVec3(atmo, [0.58, 0.80, 0.98], 0.35), 1.14);
+    light = mixVec3(light, [0.70, 0.84, 0.96], 0.16);
+  }
+
+  return {
+    dark: new THREE.Vector3(...dark),
+    mid: new THREE.Vector3(...mid),
+    light: new THREE.Vector3(...light),
+    cloud: new THREE.Vector3(...cloud),
+    atmo: new THREE.Vector3(...atmo),
+    polar: new THREE.Vector3(...polar),
+  };
+}
+
+// Generates deterministic per-planet procedural uniforms for Jovian, Neptunian, rocky, and ocean worlds.
+export function getPlanetBucketUniforms(
+  themeIdx: number,
+  bucket: number,
+  tempK: number = 300,
+  options?: PlanetProceduralOptions
+): PlanetBucketUniforms {
+  const identityKey = options?.bodyId ?? `bucket-${themeIdx}-${bucket}`;
+  const h1 = hashStringToFloat(`${identityKey}-seed`, 11);
+  const h2 = hashStringToFloat(`${identityKey}-tint`, 23);
+  const h3 = hashStringToFloat(`${identityKey}-band`, 37);
+  const hChem = hashStringToFloat(`${identityKey}-chem`, 29);
+  const hHue = hashStringToFloat(`${identityKey}-hue`, 53);
+  const hStripe = hashStringToFloat(identityKey, 97);
+
+  const seed = options?.bodyId ? h1 * 987.65 + h2 * 314.159 : h1 * 987.65 + bucket * 31.4159;
   const bandShift = (h3 - 0.5) * 0.8;
   let bandTurbulence = 0.8 + h1 * 0.6;
 
-  // 3. Physical multi-color tint variations tailored by archetype
   const tint = new THREE.Vector3(1.0, 1.0, 1.0);
+  const b16 = ((bucket % 16) + 16) % 16;
 
-  // Gas Giant Banded (themeIdx == 5.0)
-  if (themeIdx >= 4.5 && themeIdx < 5.5) {
-    // Physical atmospheric composition tints based on temperature & metallicity:
-    // - Cold ammonia/water cloud giants (<300K): Cream, butterscotch, ivory, and soft sand
-    // - Warm Jovians (300K - 800K): Honey, amber, warm caramel, and salmon-ochre (Reference Image 2)
-    // - High-temperature photochemically processed giants (800K - 1300K): Muted terracotta, bronze, and subtle soft rose-mauve (subtle tholin haze, desaturated and realistic)
-    if (tempK < 300.0) {
-      // Ammonia ice clouds
-      const r = 0.88 + (h2 - 0.5) * 0.15;
-      const g = 0.82 + (h3 - 0.5) * 0.15;
-      const b = 0.72 + (h1 - 0.5) * 0.15;
-      tint.set(r, g, b);
-    } else if (tempK < 800.0) {
-      // Warm tropospheric water/hydrocarbon haze (Image 2 style)
-      const r = 0.90 + (h2 - 0.5) * 0.15;
-      const g = 0.76 + (h3 - 0.5) * 0.15;
-      const b = 0.58 + (h1 - 0.5) * 0.15;
-      tint.set(r, g, b);
-    } else {
-      // Warm photochemical tholin/hydrocarbon smog (e.g. GJ 504 b style: soft dusty mauve/rose-bronze, natural and desaturated)
-      if (bucket % 4 === 1) {
-        // Soft dusty rose / mauve haze (delicate and muted, NOT oversaturated neon magenta)
-        const r = 0.92 + (h2 - 0.5) * 0.12;
-        const g = 0.68 + (h3 - 0.5) * 0.10;
-        const b = 0.75 + (h1 - 0.5) * 0.12;
-        tint.set(r, g, b);
-      } else {
-        // Burnt amber, ochre-bronze, and terracotta belts
-        const r = 0.92 + (h2 - 0.5) * 0.15;
-        const g = 0.68 + (h3 - 0.5) * 0.15;
-        const b = 0.50 + (h1 - 0.5) * 0.15;
-        tint.set(r, g, b);
-      }
-    }
+  const sudarskyIndex = resolveSudarskyNumericIndex(options?.sudarskyClass, themeIdx, tempK);
+  const effAlbedo = options?.albedo ?? 0.30;
 
-    // Band density and turbulence:
-    // Some have few broad laminar zones; some have active multiple jet streams
-    if (bucket % 3 === 0) {
-      bandTurbulence = 0.55 + h1 * 0.15; // Smooth / hazy Jovian
-    } else if (bucket % 3 === 1) {
-      bandTurbulence = 0.85 + h1 * 0.20; // Few broad serene bands
-    } else {
-      bandTurbulence = 1.15 + h1 * 0.35; // Distinct jet streams
-    }
-  }
-  // Ice Giant & Sub-Neptune (themeIdx == 3.0 or 4.0)
-  else if (themeIdx >= 2.5 && themeIdx < 4.5) {
-    // 32 variations spanning:
-    // - Vivid deep sapphire & electric cyan ribbons (Reference Image 1 & 2 foreground)
-    // - Soft aquamarine, sea-green, and turquoise
-    const r = 0.65 + (h2 - 0.5) * 0.25;
-    const g = 0.88 + (h3 - 0.5) * 0.20;
-    const b = 1.02 + h1 * 0.28;
-    tint.set(r, g, b);
+  // >=60% (~65%) of Jovians receive fewer, smoother broad stripes; ~35% receive multi-belt horizontal zones
+  const smoothThreshold = sudarskyIndex === 2 ? 0.68 : 0.64;
+  const isSmoothBroadJovian = options?.bodyId ? hStripe < smoothThreshold : b16 < 10;
+  const isUltraBroadJovian = options?.bodyId ? hStripe < 0.25 : b16 < 4;
+  const jovianBandTurbulence = isUltraBroadJovian
+    ? 0.18 + h1 * 0.14
+    : isSmoothBroadJovian
+    ? 0.34 + h1 * 0.20
+    : 0.77 + h1 * 0.30;
 
-    // Spectrum of banding density and intensity:
-    // - Smooth pastel orbs (Uranus-like): featureless methane haze
-    // - Few prominent equatorial & temperate jet ribbons (like Reference Image 1 & 2 foreground)
-    // - Many energetic latitudinal bands (Neptune Great Dark Spot era)
-    if (bucket % 4 === 0) {
-      bandTurbulence = 0.45 + h1 * 0.15; // Smooth featureless orb
-    } else if (bucket % 4 === 1) {
-      bandTurbulence = 0.80 + h1 * 0.18; // Few broad, silky jet ribbons
-    } else {
-      bandTurbulence = 1.20 + h1 * 0.40; // Many prominent, high-intensity jet streams
+  let jovianBandDark = new THREE.Vector3(0, 0, 0);
+  let jovianBandMid = new THREE.Vector3(0, 0, 0);
+  let jovianBandLight = new THREE.Vector3(0, 0, 0);
+  let jovianBandCloud = new THREE.Vector3(0, 0, 0);
+  let jovianAtmoTint = new THREE.Vector3(0, 0, 0);
+  let jovianPolarTint = new THREE.Vector3(0, 0, 0);
+  const jovianStorm = new THREE.Vector4(0, 0, 0.06, 0);
+
+  if (sudarskyIndex > 0) {
+    const pal = computeJovianAtmospherePalette(sudarskyIndex, themeIdx, tempK, effAlbedo, hChem, hHue);
+    jovianBandDark = pal.dark;
+    jovianBandMid = pal.mid;
+    jovianBandLight = pal.light;
+    jovianBandCloud = pal.cloud;
+    jovianAtmoTint = pal.atmo;
+    jovianPolarTint = pal.polar;
+    bandTurbulence = jovianBandTurbulence;
+
+    const hStormPresence = hashStringToFloat(`${identityKey}-storm`, 71);
+    const hStormLat = hashStringToFloat(`${identityKey}-slat`, 83);
+    const hStormLon = hashStringToFloat(`${identityKey}-slon`, 109);
+    if (hStormPresence >= 0.62) {
+      const sign = hStormLat < 0.5 ? -1 : 1;
+      const latMag = 0.12 + ((hStormLat * 2) % 1) * 0.40;
+      const lon = (hStormLon - 0.5) * Math.PI * 2;
+      const isOval = hStormPresence < 0.87;
+      const radius = isOval ? 0.055 + hHue * 0.042 : 0.038 + hHue * 0.024;
+      const strength = isOval ? 0.68 + hChem * 0.30 : -(0.62 + hChem * 0.28);
+      jovianStorm.set(sign * latMag, lon, radius, strength);
     }
-  }
-  // Hot Jupiter Dark Alkali (themeIdx == 14.0)
-  else if (themeIdx >= 13.5 && themeIdx < 14.5) {
-    // Deep cobalt, midnight slate indigo, graphite-violet, or dark bronze
-    const r = 0.75 + (h2 - 0.5) * 0.35;
-    const g = 0.75 + (h3 - 0.5) * 0.30;
-    const b = 0.90 + h1 * 0.40;
-    tint.set(r, g, b);
-  }
-  // Gas Giant Water Clouds (themeIdx == 15.0)
-  else if (themeIdx >= 14.5) {
-    // Stormy pale azure, cool steel blue, or misty celadon
-    const r = 0.80 + (h2 - 0.5) * 0.25;
-    const g = 0.88 + (h3 - 0.5) * 0.22;
-    const b = 0.95 + (h1 - 0.5) * 0.20;
-    tint.set(r, g, b);
-  }
-  // Hot Jupiter Silicates (themeIdx == 6.0)
-  else if (themeIdx >= 5.5 && themeIdx < 6.5) {
-    // Burnt sienna, copper, dark amber, and crimson clouds
-    const r = 0.95 + h2 * 0.30;
-    const g = 0.75 + (h3 - 0.5) * 0.25;
-    const b = 0.60 + (h1 - 0.5) * 0.25;
-    tint.set(r, g, b);
+  } else if (themeIdx >= 2.5 && themeIdx < 4.5) {
+    const pal = computeNeptunianAtmospherePalette(tempK, effAlbedo, options?.densityGcm3, hChem, hHue);
+    jovianBandDark = pal.dark;
+    jovianBandMid = pal.mid;
+    jovianBandLight = pal.light;
+    jovianBandCloud = pal.cloud;
+    jovianAtmoTint = pal.atmo;
+    jovianPolarTint = pal.polar;
+    tint.set(1.0, 1.0, 1.0);
+
+    // ~70% of Neptunians render as smooth Uranus/haze globes; ~30% show subtle 2-4 band Neptune circulation
+    const isSmoothNeptunian = options?.bodyId ? hStripe < 0.70 : b16 < 11;
+    bandTurbulence = isSmoothNeptunian ? 0.08 + h1 * 0.20 : 0.48 + h1 * 0.34;
+
+    const hStormPresence = hashStringToFloat(`${identityKey}-nstorm`, 73);
+    const hStormLat = hashStringToFloat(`${identityKey}-nslat`, 89);
+    const hStormLon = hashStringToFloat(`${identityKey}-nslon`, 113);
+    const hasDarkSpot =
+      (!isSmoothNeptunian && hStormPresence >= 0.55) ||
+      (isSmoothNeptunian && tempK < 320 && hStormPresence >= 0.93);
+    if (hasDarkSpot) {
+      const sign = hStormLat < 0.5 ? -1 : 1;
+      const latMag = 0.14 + ((hStormLat * 2) % 1) * 0.34;
+      const lon = (hStormLon - 0.5) * Math.PI * 2;
+      const radius = 0.042 + hHue * 0.026;
+      const strength = -(0.52 + hChem * 0.28);
+      jovianStorm.set(sign * latMag, lon, radius, strength);
+    }
   }
   // Super-Earth (themeIdx == 2.0)
   else if (themeIdx >= 1.5 && themeIdx < 2.5) {
@@ -1253,5 +2000,13 @@ export function getPlanetBucketUniforms(themeIdx: number, bucket: number, tempK:
     oceanShallowColor: oceanShallow,
     oceanDeepColor: oceanDeep,
     iceCapLatitude: iceCapLat,
+    sudarskyIndex,
+    jovianBandDark,
+    jovianBandMid,
+    jovianBandLight,
+    jovianBandCloud,
+    jovianAtmoTint,
+    jovianPolarTint,
+    jovianStorm,
   };
 }

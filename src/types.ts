@@ -204,6 +204,13 @@ export type CelestialClassification =
   | 'Exoplanet'
   | 'Star';
 
+export type SudarskyClass =
+  | 'Class I'
+  | 'Class II'
+  | 'Class III'
+  | 'Class IV'
+  | 'Class V';
+
 export type ProceduralTheme =
   | 'carbonaceous-asteroid'
   | 'kbo-tholin'
@@ -219,12 +226,11 @@ export type ProceduralTheme =
   | 'ice-giant'
   | 'gas-giant-banded'
   | 'gas-giant-water-clouds'
+  | 'gas-giant-cloudless'
   | 'hot-jupiter'
   | 'hot-jupiter-dark-alkali'
   | 'ultra-hot-jupiter'
   | 'mirror-world'
-  | 'lava-world'
-  | 'chthonian-planet';
   | 'lava-world'
   | 'chthonian-planet';
 
@@ -232,6 +238,7 @@ export interface CelestialBody {
   id: string;
   name: string;
   classification: CelestialClassification;
+  sudarskyClass?: SudarskyClass;
   diameterKm: number;
   diameterEarth: number; // Multiplier vs Earth (1.0 = Earth)
   diameterJupiter: number; // Multiplier vs Jupiter (1.0 = Jupiter)

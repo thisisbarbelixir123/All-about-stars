@@ -13,10 +13,39 @@
     color: #e2e8f0;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
+
+  a[href],
+  button:not(:disabled),
+  summary,
+  select:not(:disabled),
+  label[for],
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab']:not([aria-disabled='true']),
+  [role='switch']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
   
   h1, h2, h3, .font-title, .font-display {
     font-family: 'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif;
     letter-spacing: 0.03em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

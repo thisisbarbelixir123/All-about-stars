@@ -37,6 +37,7 @@ import {
   getPlanetBucketUniforms,
   hashStringToFloat,
 } from '../utils/planetShaderUtils';
+import { deriveSudarskyClass, SUDARSKY_CLASS_INFO } from '../utils/exoplanetArchetypes';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUtils';
 import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
 
@@ -71,13 +72,32 @@ function inferBodyColor(body: CelestialBody): string {
 
   switch (body.classification) {
     case 'Jovian':
-    case 'Gas Giants':
-      return '#fb923c';
+    case 'Gas Giants': {
+      const sudarsky = deriveSudarskyClass(body);
+      if (body.textureTheme === 'gas-giant-cloudless' && sudarsky === 'Class IV') {
+        return '#38bdf8';
+      }
+      if (sudarsky === 'Class IV' && (body.albedo ?? 0.08) <= 0.058) {
+        return '#a78bfa';
+      }
+      if (sudarsky === 'Class V') {
+        return (body.albedo ?? 0.35) >= 0.26 ? '#fbbf24' : '#fb7185';
+      }
+      return sudarsky ? SUDARSKY_CLASS_INFO[sudarsky].colorHex : '#fb923c';
+    }
     case 'Neptunian':
-    case 'Ice Giants':
+    case 'Ice Giants': {
+      const tK = body.temperatureK ?? 200;
+      const alb = body.albedo ?? 0.30;
+      if (body.textureTheme === 'mirror-world' || (tK >= 480 && alb >= 0.34)) return '#cbd5e1';
+      if (tK >= 1450) return '#fb923c';
+      if (tK >= 480) return '#818cf8';
       return '#38bdf8';
+    }
     case 'Superterran':
-      return '#22d3ee';
+      if (body.textureTheme === 'lava-world') return '#f97316';
+      if (body.textureTheme === 'hycean-ocean' || body.textureTheme === 'terrestrial-ocean') return '#22d3ee';
+      return '#2dd4bf';
     case 'Terran':
     case 'Terrestrial Planet':
       return '#34d399';
@@ -270,8 +290,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const cameraLightRef = useRef<THREE.DirectionalLight | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const [webglError, setWebglError] = useState<string | null>(null);
   const bodyObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
-  const labelElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const labelElementsRef = useRef<Map<string, HTMLElement>>(new Map());
   const animFrameIdRef = useRef<number | null>(null);
   const continuousGridRef = useRef<ContinuousGridHandle | null>(null);
   const sharedTimeUniformRef = useRef<{ value: number }>({ value: 0 });
@@ -454,15 +475,25 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const bodyScalesRef = useRef(bodyScales);
   bodyScalesRef.current = bodyScales;
 
-  // Filtered search results
+  // Filtered search results (supports names, classifications, host systems, and Sudarsky Class I-V)
   const filteredBodies = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return sortedBodies;
+    const exactClassMatch = q.match(/^(?:sudarsky\s+)?(class\s+(?:i|ii|iii|iv|v))$/i);
     return sortedBodies.filter((b) => {
+      const sudarsky = deriveSudarskyClass(b);
+      if (exactClassMatch) {
+        return sudarsky?.toLowerCase() === exactClassMatch[1].replace(/\s+/g, ' ').toLowerCase();
+      }
+      const sudarskyMeta = sudarsky ? SUDARSKY_CLASS_INFO[sudarsky] : undefined;
       return (
         b.name.toLowerCase().includes(q) ||
         b.classification.toLowerCase().includes(q) ||
-        b.hostSystem.toLowerCase().includes(q)
+        b.hostSystem.toLowerCase().includes(q) ||
+        (sudarskyMeta
+          ? sudarskyMeta.fullLabel.toLowerCase().includes(q) ||
+            sudarskyMeta.cloudDeck.toLowerCase().includes(q)
+          : false)
       );
     });
   }, [sortedBodies, searchQuery]);
@@ -528,12 +559,26 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     camera.position.set(0, 20, 65);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      logarithmicDepthBuffer: true,
-      powerPreference: 'high-performance',
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        logarithmicDepthBuffer: true,
+        powerPreference: 'high-performance',
+      });
+    } catch {
+      try {
+        renderer = new THREE.WebGLRenderer({
+          antialias: false,
+          alpha: true,
+        });
+      } catch {
+        setWebglError('WebGL hardware acceleration is unavailable in this browser window.');
+        return;
+      }
+    }
+    setWebglError(null);
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -649,7 +694,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     bodyObjectsRef.current.clear();
     interactiveMeshesRef.current = [];
 
-    const sharedSphereGeo = new THREE.SphereGeometry(1, 48, 48);
+    const sharedSphereGeo = new THREE.SphereGeometry(1, 64, 64);
     const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
     const customGeometryCache = new Map<string, THREE.BufferGeometry>();
 
@@ -731,21 +776,26 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       const theme = body.textureTheme ?? (body.diameterJupiter >= 0.5 ? 'gas-giant-banded' : 'terrestrial-rocky');
       const themeIdx = getThemeIndex(theme);
       const tempK = body.temperatureK || 300;
+      const bodyAlbedo = body.albedo ?? 0.30;
+      const sudarskyClass = deriveSudarskyClass(body);
+      const densityGcm3 =
+        body.massEarth && body.massEarth > 0 && body.diameterEarth > 0
+          ? 5.514 * (body.massEarth / Math.pow(body.diameterEarth, 3))
+          : undefined;
 
-      // 4 distinct temperature regimes ensuring hot planets never share materials with cold/temperate ones:
-      // 0: Frigid / Glaciated (<280K)
-      // 1: Temperate / Arid (280K - 500K)
-      // 2: Warm / Venusian (500K - 850K)
-      // 3: Scorched / Magma (>=850K)
-      const tempRegime = tempK < 280 ? 0 : tempK < 500 ? 1 : tempK < 850 ? 2 : 3;
-
-      // Deterministic 16-bucket index per regime (Earth is anchored to bucket 0 for pristine Earth-analog calibration)
+      // Deterministic biome bucket for habitable/Hycean worlds; per-planet key preserves exact albedo, temperature, and chemistry palette
       const bucket = body.id === 'sol-earth' ? 0 : Math.floor(hashStringToFloat(body.id, 97) * 16.0) % 16;
-      const key = `planet-${themeIdx}-r${tempRegime}-b${bucket}-${wireframe ? 'w' : 's'}`;
+      const key = `planet-${body.id}-${wireframe ? 'w' : 's'}`;
 
       let mat = materialCacheRef.current.get(key);
       if (!mat) {
-        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, tempK);
+        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, tempK, {
+          bodyId: body.id,
+          albedo: bodyAlbedo,
+          sudarskyClass,
+          classification: body.classification,
+          densityGcm3,
+        });
         mat = new THREE.ShaderMaterial({
           wireframe,
           vertexShader: PLANET_VERTEX_SHADER,
@@ -756,7 +806,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             temperatureK: { value: tempK },
             lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
             seed: { value: bucketUniforms.seed },
-            albedo: { value: body.albedo ?? 0.30 },
+            albedo: { value: bodyAlbedo },
             colorTint: { value: bucketUniforms.colorTint },
             bandShift: { value: bucketUniforms.bandShift },
             bandTurbulence: { value: bucketUniforms.bandTurbulence },
@@ -766,6 +816,14 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             oceanShallowColor: { value: bucketUniforms.oceanShallowColor },
             oceanDeepColor: { value: bucketUniforms.oceanDeepColor },
             iceCapLatitude: { value: bucketUniforms.iceCapLatitude },
+            sudarskyIndex: { value: bucketUniforms.sudarskyIndex },
+            jovianBandDark: { value: bucketUniforms.jovianBandDark },
+            jovianBandMid: { value: bucketUniforms.jovianBandMid },
+            jovianBandLight: { value: bucketUniforms.jovianBandLight },
+            jovianBandCloud: { value: bucketUniforms.jovianBandCloud },
+            jovianAtmoTint: { value: bucketUniforms.jovianAtmoTint },
+            jovianPolarTint: { value: bucketUniforms.jovianPolarTint },
+            jovianStorm: { value: bucketUniforms.jovianStorm },
           },
         });
         materialCacheRef.current.set(key, mat);
@@ -787,7 +845,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       const mat = getMaterial(body);
 
       // Select geometry: custom irregular mesh for sub-600 km bodies or shared sphere
-      let meshGeo = sharedSphereGeo;
+      let meshGeo: THREE.BufferGeometry = sharedSphereGeo;
       if (geoConfig.geometryType === 'irregular') {
         let customGeo = customGeometryCache.get(body.id);
         if (!customGeo) {
@@ -1459,6 +1517,25 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         onContextMenu={(e) => e.preventDefault()}
       />
 
+      {webglError && (
+        <div
+          role="alert"
+          className="absolute inset-0 z-20 flex items-center justify-center p-6 pointer-events-auto bg-slate-950/90"
+        >
+          <div className="max-w-md rounded-xl border border-slate-700 bg-slate-900 p-5 text-slate-100">
+            <h2 className="text-base font-semibold text-cyan-300">3D Viewport Unavailable</h2>
+            <p className="mt-2 text-sm text-slate-200">{webglError}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-4 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 cursor-pointer"
+            >
+              Reload Viewport
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Floating 3D Pill Label above focused/hovered body (matching StarCanvas3D) */}
       {!isTourMode && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
@@ -1466,8 +1543,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             const body = displayBody;
             const isSelected = body.id === activeBodyId;
             const color = inferBodyColor(body);
+            const sudarsky = deriveSudarskyClass(body);
             return (
-              <div
+              <button
+                type="button"
                 key={body.id}
                 id={`label-body-${body.id}`}
                 ref={(el) => {
@@ -1481,7 +1560,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                 }}
                 onMouseEnter={() => setHoveredBody(body)}
                 onMouseLeave={() => setHoveredBody(null)}
-                className="absolute top-0 left-0 pointer-events-auto cursor-pointer flex flex-col items-center group transition-opacity duration-150 ease-out"
+                className="absolute top-0 left-0 pointer-events-auto cursor-pointer flex flex-col items-center group transition-opacity duration-150 ease-out bg-transparent border-0 p-0 focus-visible:outline-2 focus-visible:outline-cyan-400"
               >
                 <div
                   id={`bubble-label-${body.id}`}
@@ -1505,9 +1584,19 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                   </span>
 
                   {/* Classification Badge */}
-                  <span className="text-[10px] bg-slate-950/80 text-cyan-300 font-mono px-1.5 py-0.5 rounded border border-cyan-400/40 shrink-0 font-semibold">
+                  <span className="text-[10px] bg-slate-950/90 text-cyan-300 font-mono px-1.5 py-0.5 rounded border border-cyan-400/40 shrink-0 font-semibold">
                     {body.classification}
                   </span>
+
+                  {sudarsky && (
+                    <span
+                      title={`${SUDARSKY_CLASS_INFO[sudarsky].fullLabel}: ${SUDARSKY_CLASS_INFO[sudarsky].cloudDeck}`}
+                      className="text-[10px] bg-slate-950/90 text-amber-200 font-mono px-1.5 py-0.5 rounded border border-amber-400/40 shrink-0 font-semibold"
+                    >
+                      <span className="sm:hidden">{sudarsky}</span>
+                      <span className="hidden sm:inline">Sudarsky {sudarsky}</span>
+                    </span>
+                  )}
 
                   {/* Multiplier Metric */}
                   <span className="text-[10px] text-cyan-200/90 font-mono shrink-0 hidden xs:inline">
@@ -1521,7 +1610,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                   {/* Upward pointer caret */}
                   <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-cyan-500 hidden group-data-[near-top=true]:block" />
                 </div>
-              </div>
+              </button>
             );
           })()}
         </div>
@@ -1970,7 +2059,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       {!isTourMode && (
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 sm:gap-3 pointer-events-none z-20">
           {/* Focused Body Info Strip (matching StarCanvas3D #stage-focused-star-strip, minus Dossier) */}
-          {activeFocusedBody && (
+          {activeFocusedBody && (() => {
+            const focusedSudarsky = deriveSudarskyClass(activeFocusedBody);
+            const focusedSudarskyMeta = focusedSudarsky ? SUDARSKY_CLASS_INFO[focusedSudarsky] : undefined;
+            return (
             <div
               id="stage-focused-star-strip"
               className="flex items-center justify-between gap-2 sm:gap-3 bg-[#040816]/95 backdrop-blur-2xl px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-cyan-500/40 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all pointer-events-auto w-full"
@@ -1990,6 +2082,18 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 font-mono border border-cyan-500/30 shrink-0">
                       {activeFocusedBody.classification}
                     </span>
+                    {focusedSudarskyMeta && (
+                      <span
+                        title={`${focusedSudarskyMeta.fullLabel}: ${focusedSudarskyMeta.cloudDeck} (${focusedSudarskyMeta.tempRangeLabel})`}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-slate-950/90 text-amber-200 font-mono border border-amber-400/35 shrink-0"
+                      >
+                        <span className="sm:hidden">{focusedSudarskyMeta.sudarskyClass}</span>
+                        <span className="hidden sm:inline xl:hidden">{focusedSudarskyMeta.fullLabel}</span>
+                        <span className="hidden xl:inline">
+                          {focusedSudarskyMeta.fullLabel} ({focusedSudarskyMeta.cloudDeck})
+                        </span>
+                      </span>
+                    )}
                   </span>
 
                   <span className="text-slate-300 shrink-0">
@@ -2029,7 +2133,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                 <span className="hidden md:inline">Unfocus</span>
               </button>
             </div>
-          )}
+            );
+          })()}
 
           {/* Filmstrip & Navigator */}
           <div className="flex flex-col gap-2 pointer-events-auto">
@@ -2041,6 +2146,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                     const originalIdx = sortedBodies.findIndex((b) => b.id === body.id);
                     const isSelected = body.id === activeBodyId;
                     const color = inferBodyColor(body);
+                    const itemSudarsky = deriveSudarskyClass(body);
                     return (
                       <button
                         key={body.id}
@@ -2064,6 +2170,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                             {body.diameterEarth >= 1.0
                               ? `${body.diameterEarth.toFixed(2)} D⊕`
                               : `${Math.round(body.diameterKm).toLocaleString()} km`}
+                            {itemSudarsky ? ` · Sudarsky ${itemSudarsky}` : ''}
                           </div>
                         </div>
                       </button>
@@ -2158,25 +2265,31 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                         <span className="hidden sm:inline">Search ({sortedBodies.length})</span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-cyan-400 bg-cyan-950/95 text-xs font-mono backdrop-blur-xl shadow-[0_0_20px_rgba(6,182,212,0.35)] w-48 sm:w-64 shrink-0">
-                        <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-cyan-400 bg-cyan-950/95 text-xs font-mono backdrop-blur-xl shadow-[0_0_20px_rgba(6,182,212,0.35)] w-48 sm:w-64 shrink-0 focus-within:ring-2 focus-within:ring-cyan-300">
+                        <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" aria-hidden="true" />
+                        <label htmlFor="stage-world-search-input" className="sr-only">
+                          Search celestial worlds and Sudarsky classes
+                        </label>
                         <input
+                          id="stage-world-search-input"
                           ref={searchInputRef}
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={`Search ${sortedBodies.length} worlds...`}
+                          placeholder={`Search ${sortedBodies.length} worlds or Class I-V...`}
                           className="bg-transparent text-white text-xs font-mono placeholder:text-slate-400 focus:outline-none w-full min-w-0"
                           autoFocus
                         />
                         <button
+                          type="button"
+                          aria-label="Close search"
                           onClick={() => {
                             setIsSearchActive(false);
                             setSearchQuery('');
                           }}
-                          className="p-0.5 text-slate-400 hover:text-white shrink-0 cursor-pointer"
+                          className="p-0.5 text-slate-300 hover:text-white shrink-0 cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-cyan-300"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>
                       </div>
                     )}
@@ -2268,6 +2381,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             const total = sortedBodies.length;
             const progressPercent = total > 0 ? (currentNum / total) * 100 : 0;
             const color = inferBodyColor(activeFocusedBody);
+            const tourSudarsky = deriveSudarskyClass(activeFocusedBody);
+            const tourSudarskyMeta = tourSudarsky ? SUDARSKY_CLASS_INFO[tourSudarsky] : undefined;
 
             return (
               <div className="absolute inset-x-0 bottom-0 pointer-events-none z-30 flex flex-col justify-end">
@@ -2314,6 +2429,14 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                         <span className="font-semibold text-cyan-200">
                           {activeFocusedBody.classification}
                         </span>
+                        {tourSudarskyMeta && (
+                          <>
+                            <span className="text-slate-500">•</span>
+                            <span className="font-mono font-semibold text-amber-200">
+                              {tourSudarskyMeta.fullLabel} ({tourSudarskyMeta.cloudDeck})
+                            </span>
+                          </>
+                        )}
                         <span className="text-slate-500">•</span>
                         <span className="text-slate-300">
                           Host System: {activeFocusedBody.hostSystem}
@@ -2345,6 +2468,14 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
                   {/* Secondary Vitals Ribbon */}
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10 text-[11px] sm:text-xs font-mono">
+                    {tourSudarskyMeta && (
+                      <span className="px-2 py-0.5 rounded bg-black/70 border border-amber-400/35 text-amber-200">
+                        <span className="text-slate-400 mr-1">Sudarsky:</span>
+                        <span className="font-semibold">
+                          {tourSudarskyMeta.sudarskyClass} ({tourSudarskyMeta.cloudDeck})
+                        </span>
+                      </span>
+                    )}
                     <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
                       <span className="text-slate-500 mr-1">Diameter:</span>
                       <span className="text-white font-semibold">
@@ -2406,6 +2537,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       {/* Keyboard Shortcuts Modal */}
       {showShortcutsHelp && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="stage-shortcuts-title"
           className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={() => setShowShortcutsHelp(false)}
         >
@@ -2416,18 +2550,22 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
-                  <Keyboard className="w-5 h-5" />
+                  <Keyboard className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white font-sans">3D Stage Shortcuts</h3>
+                  <h3 id="stage-shortcuts-title" className="text-base font-bold text-white font-sans">
+                    3D Stage Shortcuts
+                  </h3>
                   <p className="text-xs text-slate-400 font-mono">Controls for navigating exoplanets & Solar System worlds</p>
                 </div>
               </div>
               <button
+                type="button"
+                aria-label="Close shortcuts dialog"
                 onClick={() => setShowShortcutsHelp(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
