@@ -20,15 +20,15 @@ export interface ScaleMilestone {
  * 1 Terameter (Tm) = 1,000,000,000 km = 718.03 D☉ = 6.6846 AU.
  */
 export const SCALE_MILESTONES: ScaleMilestone[] = [
-  // 1. Metric: 1 Gigameter (1,000,000 km)
+  // 1. Metric: 100 Earth Diameters (1,274,200 km)
   {
-    id: 'milestone-1-gigameter',
-    name: '1 Gigameter',
+    id: 'milestone-100-earth',
+    name: '100 Earth Diameters',
     type: 'metric_threshold',
-    diameterKm: 1000000,
-    diameterSolar: +(1000000 / 1392700).toFixed(2), // 0.72 D☉
-    diameterAU: +(1000000 / 149597870.7).toFixed(6),
-    description: '1 Million Kilometers (10⁹ meters).',
+    diameterKm: 1274200,
+    diameterSolar: +(1274200 / 1392700).toFixed(2), // 0.91 D☉
+    diameterAU: +(1274200 / 149597870.7).toFixed(6),
+    description: '100 Earths aligned edge-to-edge.',
     colorHex: '#38bdf8'
   },
 
@@ -41,6 +41,42 @@ export const SCALE_MILESTONES: ScaleMilestone[] = [
     diameterSolar: +(12742000 / 1392700).toFixed(2), // 9.15 D☉
     diameterAU: +(12742000 / 149597870.7).toFixed(5),
     description: '1,000 Earths aligned edge-to-edge.',
+    colorHex: '#38bdf8'
+  },
+
+  // 3. Metric: 10,000 Earth Diameters (127,420,000 km)
+  {
+    id: 'milestone-10000-earth',
+    name: '10,000 Earth Diameters',
+    type: 'metric_threshold',
+    diameterKm: 127420000,
+    diameterSolar: +(127420000 / 1392700).toFixed(2), // 91.49 D☉
+    diameterAU: +(127420000 / 149597870.7).toFixed(4), // 0.852 AU
+    description: '10,000 Earths aligned edge-to-edge.',
+    colorHex: '#38bdf8'
+  },
+
+  // 4. Metric: 100,000 Earth Diameters (1,274,200,000 km)
+  {
+    id: 'milestone-100000-earth',
+    name: '100,000 Earth Diameters',
+    type: 'metric_threshold',
+    diameterKm: 1274200000,
+    diameterSolar: +(1274200000 / 1392700).toFixed(2), // 914.91 D☉
+    diameterAU: +(1274200000 / 149597870.7).toFixed(4), // 8.517 AU
+    description: '100,000 Earths aligned edge-to-edge.',
+    colorHex: '#38bdf8'
+  },
+
+  // 5. Metric: 1 Gigameter (1,000,000 km)
+  {
+    id: 'milestone-1-gigameter',
+    name: '1 Gigameter',
+    type: 'metric_threshold',
+    diameterKm: 1000000,
+    diameterSolar: +(1000000 / 1392700).toFixed(2), // 0.72 D☉
+    diameterAU: +(1000000 / 149597870.7).toFixed(6),
+    description: '1 Million Kilometers (10⁹ meters).',
     colorHex: '#38bdf8'
   },
 
@@ -76,13 +112,13 @@ export const SCALE_MILESTONES: ScaleMilestone[] = [
   // Semi-major axis = 1.000000 AU -> Orbit diameter = 2.000000 AU = 299,195,741 km = 214.83 D☉
   {
     id: 'milestone-orbit-earth',
-    name: 'Orbit of Earth (1 AU)',
+    name: 'Orbit of Earth (1 AU radius)',
     planetName: 'Earth',
     type: 'planetary_orbit',
     diameterKm: 299195741,
     diameterSolar: 214.83,
     diameterAU: 2.0,
-    description: 'Average diameter of Earth\'s orbit around the Sun (2 AU across).',
+    description: 'Average diameter of Earth\'s orbit around the Sun (1 AU radius / 2 AU diameter).',
     colorHex: '#38bdf8'
   },
 

@@ -54,6 +54,7 @@ import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continu
 import { soundEffects } from '../utils/soundEffects';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER, SPECTRAL_CLASS_MAP } from '../utils/starShaderUtils';
 import { computeD65StellarColor, parseSpectralType } from '../utils/stellarColorsD65';
+import { useObsStudio } from '../hooks/useObsStudio';
 import { EncyclopediaDropdown } from './EncyclopediaDropdown';
 import { AmbientSoundToggle } from './AmbientSoundToggle';
 import { FullscreenToggle } from './FullscreenToggle';
@@ -152,13 +153,15 @@ export const StageKbd: React.FC<StageKbdProps> = ({
 const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
   switch (sortKey) {
     case 'size': {
-      const isNeutronScale = star.diameterKm < 1000;
-      const miles = Math.round(star.diameterKm * 0.621371192).toLocaleString();
-      const kmFormatted = star.diameterKm < 10
-        ? `${star.diameterKm.toFixed(1)} km`
-        : `${Math.round(star.diameterKm).toLocaleString()} km`;
+      const isNeutron =
+        star.spectralClass === 'NS' ||
+        Boolean(star.stellarStage?.toLowerCase().includes('pulsar')) ||
+        Boolean(star.stellarStage?.toLowerCase().includes('neutron')) ||
+        Boolean(star.stellarStage?.toLowerCase().includes('magnetar')) ||
+        star.diameterKm < 1000;
 
-      const primary = isNeutronScale
+      // Primary header metric: km for neutron stars / pulsars, D☉ for all other stars
+      const primary = isNeutron
         ? `${star.diameterKm < 10 ? star.diameterKm.toFixed(1) : Math.round(star.diameterKm).toLocaleString()} km`
         : star.diameterSolar >= 10
         ? `${star.diameterSolar.toLocaleString(undefined, { maximumFractionDigits: star.diameterSolar > 100 ? 0 : 1 })} D☉`
@@ -166,17 +169,55 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
         ? `${star.diameterSolar.toFixed(2)} D☉`
         : `${star.diameterSolar.toFixed(3)} D☉`;
 
-      const secondary = `${kmFormatted} (${miles} mi${star.diameterAU >= 0.01 ? ` • ${star.diameterAU >= 10 ? star.diameterAU.toFixed(1) : star.diameterAU.toFixed(2)} AU` : ''})`;
+      // Secondary metric:
+      // 1) [size in km / D☉ for neutron stars]
+      // 2) [size in mi]
+      // 3) [size in D🜨 / AU]:
+      //    - Neutron stars should NOT show 0 D🜨 (format with precision or exponential if needed, e.g. < 0.01 D🜨, or toExponential if < 0.001)
+      //    - Stars with at least 1 solar diameter (diameterSolar >= 1) show both D🜨 and AU
+      //    - Smaller non-neutron bodies show D🜨
+      const size1 = isNeutron
+        ? `${star.diameterSolar < 0.0001 ? star.diameterSolar.toExponential(2) : star.diameterSolar.toFixed(5)} D☉`
+        : star.diameterKm < 10
+        ? `${star.diameterKm.toFixed(1)} km`
+        : `${Math.round(star.diameterKm).toLocaleString()} km`;
+
+      const milesVal = Math.round(star.diameterKm * 0.621371192);
+      const size2 = `${milesVal.toLocaleString()} mi`;
+
+      // Earth diameter = 12,742 km
+      const earthRatio = star.diameterKm / 12742;
+      const auVal = star.diameterAU || star.diameterKm / 149597870.7;
+
+      let size3: string;
+      if (isNeutron) {
+        // Prevent showing "0 D🜨" for tiny neutron stars: display exponential or precise notation
+        size3 = earthRatio < 0.001 ? `${earthRatio.toExponential(2)} D🜨` : `${earthRatio.toFixed(3)} D🜨`;
+      } else if (star.diameterSolar >= 1.0) {
+        // Stars with at least 1 solar diameter show D🜨 as well as AU
+        const earthFormatted = Math.round(earthRatio).toLocaleString();
+        const auFormatted = auVal >= 10 ? auVal.toFixed(1) : auVal.toFixed(2);
+        size3 = `${earthFormatted} D🜨 • ${auFormatted} AU`;
+      } else {
+        // Small stars / solar system bodies (< 1 D☉)
+        const earthFormatted = earthRatio < 1 ? earthRatio.toFixed(2) : Math.round(earthRatio).toLocaleString();
+        size3 = `${earthFormatted} D🜨`;
+      }
+
+      const secondary = `${size1} • ${size2} • ${size3}`;
       return {
         label: 'PHYSICAL DIAMETER',
         primary,
         secondary,
-        unit: isNeutronScale ? 'Kilometers (km)' : 'Solar Diameters (D☉)',
+        unit: isNeutron ? 'Kilometers (km)' : 'Solar Diameters (D☉)',
       };
     }
     case 'distance': {
       const primary = `${star.distanceLy.toLocaleString(undefined, { maximumFractionDigits: 1 })} ly`;
-      const secondary = `${star.distanceParsecs.toLocaleString(undefined, { maximumFractionDigits: 1 })} parsecs (${(star.distanceLy * 9.461e12).toExponential(2)} km)`;
+      const parsecsFormatted = `${star.distanceParsecs.toLocaleString(undefined, { maximumFractionDigits: 1 })} parsecs`;
+      const kmFormatted = `${(star.distanceLy * 9.460730472e12).toExponential(2)} km`;
+      const miFormatted = `${(star.distanceLy * 5.87862537e12).toExponential(2)} mi`;
+      const secondary = `${parsecsFormatted} • ${kmFormatted} • ${miFormatted}`;
       return {
         label: 'DISTANCE FROM EARTH',
         primary,
@@ -188,11 +229,9 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
       const primary = star.massSolar < 0.08
         ? `${(star.massSolar * 1047.57).toFixed(1)} M_Jup`
         : `${star.massSolar.toLocaleString(undefined, { maximumFractionDigits: 2 })} M☉`;
-      const kgStr = `${(star.massSolar * 1.989e30).toExponential(2)} kg`;
-      const lbsStr = `${(star.massSolar * 4.385e30).toExponential(2)} lbs`;
-      const secondary = star.massSolar < 0.08
-        ? `${star.massSolar.toFixed(4)} M☉ (${kgStr} • ${lbsStr})`
-        : `${kgStr} (${lbsStr})`;
+      const kgStr = `${(star.massSolar * 1.98847e30).toExponential(2)} kg`;
+      const lbsStr = `${(star.massSolar * 4.3838e30).toExponential(2)} lbs`;
+      const secondary = `${kgStr} • ${lbsStr}`;
       return {
         label: 'STELLAR MASS',
         primary,
@@ -217,9 +256,7 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
         ? `${star.luminositySolar.toFixed(2)} L☉`
         : `${star.luminositySolar.toFixed(star.luminositySolar < 0.001 ? 5 : 3)} L☉`;
       const wattsStr = `${(star.luminositySolar * 3.828e26).toExponential(2)} Watts`;
-      const secondary = star.luminositySolar < 0.01
-        ? `${wattsStr} (${(star.luminositySolar * 100).toFixed(star.luminositySolar < 0.0001 ? 4 : 2)}% of Solar L☉)`
-        : wattsStr;
+      const secondary = wattsStr;
       return {
         label: 'BOLOMETRIC LUMINOSITY',
         primary,
@@ -231,7 +268,7 @@ const getTourMetricDisplay = (star: StarData, sortKey: StageSortKey) => {
       const primary = star.apparentMagnitude > 0
         ? `+${star.apparentMagnitude.toFixed(2)} mag`
         : `${star.apparentMagnitude.toFixed(2)} mag`;
-      const secondary = `Absolute Magnitude M = ${star.absoluteMagnitude > 0 ? '+' : ''}${star.absoluteMagnitude.toFixed(2)}`;
+      const secondary = `Absolute Magnitude ${star.absoluteMagnitude > 0 ? '+' : ''}${star.absoluteMagnitude.toFixed(2)}`;
       return {
         label: 'APPARENT MAGNITUDE',
         primary,
@@ -370,6 +407,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   // Tour paused notification: shown at top-left when tour is paused, auto-dismisses after 5 seconds
   const [showTourPausedToast, setShowTourPausedToast] = useState(false);
   const tourPausedToastTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Active tour scale milestone toast: fades in on star focus, auto-dismisses with fade-out after 5 seconds
+  const [tourMilestoneDisplay, setTourMilestoneDisplay] = useState<{ milestone: ScaleMilestone; isVisible: boolean } | null>(null);
+  const tourMilestoneFadeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const tourMilestoneRemoveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const triggerTourPausedToast = useCallback(() => {
     setShowTourPausedToast(true);
@@ -2264,6 +2306,31 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     };
   }, []);
 
+  // OBS Studio Integration & Webhook Event Bridge:
+  // Listens to native OBS events ('obsRecordingStarted', 'obsStreamingStarted')
+  // and handles URL parameter triggers (?obs=1, ?tour=auto, ?pace=short|medium|long)
+  const obsIntegration = useObsStudio({
+    onTourStartRequested: (requestedPace) => {
+      if (requestedPace) {
+        setTourLength(requestedPace);
+      }
+      // Start tour on first body without zooming in
+      handleRestartTour();
+    },
+    onTourStopRequested: () => {
+      if (isTourModeRef.current) {
+        handleEndTour();
+      }
+    },
+  });
+
+  // When loaded with ?obs=1 or ?clean=1, automatically hide stage toolbars for broadcast clarity
+  useEffect(() => {
+    if (obsIntegration.config.cleanBroadcast) {
+      setAreControlsHidden(true);
+    }
+  }, [obsIntegration.config.cleanBroadcast]);
+
   // Main Render & Animation Loop
   useEffect(() => {
     let clock = new THREE.Clock();
@@ -2830,6 +2897,50 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
   const activeFocusedStar = sortedStars.find(s => s.id === (focusedStarId ?? selectedStarId));
   const displayStar = hoveredStar || activeFocusedStar;
   const isPreviewing = Boolean(hoveredStar && (!activeFocusedStar || hoveredStar.id !== activeFocusedStar.id));
+
+  // Synchronize Tour Mode milestone display: triggers 3-second fade-in/fade-out when triggered regardless of focused star changes
+  useEffect(() => {
+    if (!isTourMode || !activeFocusedStar) {
+      if (tourMilestoneFadeTimerRef.current) {
+        clearTimeout(tourMilestoneFadeTimerRef.current);
+        tourMilestoneFadeTimerRef.current = null;
+      }
+      if (tourMilestoneRemoveTimerRef.current) {
+        clearTimeout(tourMilestoneRemoveTimerRef.current);
+        tourMilestoneRemoveTimerRef.current = null;
+      }
+      setTourMilestoneDisplay(null);
+      return;
+    }
+
+    const milestone = milestoneStarMap.get(activeFocusedStar.id);
+    if (!milestone) {
+      // Do not prematurely unmount or cancel if a milestone display is already actively playing its 3s window
+      return;
+    }
+
+    // A new milestone has been triggered
+    if (tourMilestoneFadeTimerRef.current) {
+      clearTimeout(tourMilestoneFadeTimerRef.current);
+      tourMilestoneFadeTimerRef.current = null;
+    }
+    if (tourMilestoneRemoveTimerRef.current) {
+      clearTimeout(tourMilestoneRemoveTimerRef.current);
+      tourMilestoneRemoveTimerRef.current = null;
+    }
+
+    // Set visible with immediate fade-in
+    setTourMilestoneDisplay({ milestone, isVisible: true });
+
+    // After 3 seconds, begin fade-out (regardless of focused star navigation)
+    tourMilestoneFadeTimerRef.current = setTimeout(() => {
+      setTourMilestoneDisplay((prev) => (prev ? { ...prev, isVisible: false } : null));
+      // Remove completely after transition duration (500ms)
+      tourMilestoneRemoveTimerRef.current = setTimeout(() => {
+        setTourMilestoneDisplay(null);
+      }, 500);
+    }, 3000);
+  }, [isTourMode, activeFocusedStar?.id, milestoneStarMap]);
 
   // Comprehensive Keyboard Shortcuts: Every functionality has a distinct shortcut
   useEffect(() => {
@@ -4830,6 +4941,16 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                   </>
                 )}
               </button>
+
+              {/* OBS Status Badge in Hover Zone if running in OBS Studio */}
+              {obsIntegration.isObs && (
+                <div className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-[#040816]/95 border border-cyan-500/30 text-[10px] font-mono shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+                  <span className={`w-2 h-2 rounded-full ${obsIntegration.obsStatus.recording ? 'bg-red-500 animate-pulse' : obsIntegration.obsStatus.streaming ? 'bg-purple-500 animate-pulse' : 'bg-cyan-400'}`} />
+                  <span className="text-slate-300">
+                    {obsIntegration.obsStatus.recording ? 'OBS Rec' : obsIntegration.obsStatus.streaming ? 'OBS Live' : 'OBS Active'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -4846,31 +4967,37 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
 
             return (
               <div className="absolute inset-x-0 bottom-0 pointer-events-none z-30 flex flex-col justify-end">
-                {/* Floating Scale Milestone Bubble just above the lower third (No 'Orbital Benchmark' / 'Scale Milestone' prefix) */}
-                {activeMilestone && (
-                  <div className="px-4 sm:px-8 md:px-12 pb-2">
-                    <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-[#040816]/95 border border-cyan-500/40 shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-200">
-                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300">
-                        <Orbit className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '8s' }} />
-                      </span>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                        <span className="font-bold text-cyan-300 uppercase tracking-wide text-[11px] sm:text-xs">
-                          {activeMilestone.name}
-                        </span>
-                        <span className="text-slate-400 hidden sm:inline">•</span>
-                        <span className="text-amber-300 font-semibold text-[10px] sm:text-[11px]">
-                          {activeMilestone.diameterSolar >= 1 ? `${activeMilestone.diameterSolar.toFixed(2)} D☉` : `${activeMilestone.diameterKm.toLocaleString()} km`} ({activeMilestone.diameterKm.toLocaleString()} km)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Subtle dark vignette backdrop */}
                 <div
                   className="w-full bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-20 pb-6 px-4 sm:px-8 md:px-12 flex flex-col gap-2.5 sm:gap-3"
                   style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}
                 >
+                  {/* Floating Scale Milestone: Placed directly above '#X of Y', bigger font, no icon, 5s fade-in/fade-out */}
+                  {tourMilestoneDisplay && (
+                    <div
+                      className={`transition-all duration-500 ease-out flex items-center ${
+                        tourMilestoneDisplay.isVisible
+                          ? 'opacity-100 translate-y-0'
+                          : 'opacity-0 -translate-y-1 pointer-events-none'
+                      }`}
+                    >
+                      <div className="inline-flex items-center gap-2.5 sm:gap-3 px-4 py-2 rounded-2xl bg-[#040816]/95 border border-cyan-400/50 shadow-[0_4px_28px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.25)] backdrop-blur-xl">
+                        <span className="font-display font-extrabold text-sm sm:text-base md:text-lg tracking-tight text-cyan-300">
+                          {tourMilestoneDisplay.milestone.name}
+                        </span>
+                        <span className="text-slate-500">•</span>
+                        <span className="font-mono text-xs sm:text-sm font-semibold text-amber-300">
+                          {tourMilestoneDisplay.milestone.diameterSolar >= 1
+                            ? `${tourMilestoneDisplay.milestone.diameterSolar.toFixed(2)} D☉`
+                            : `${tourMilestoneDisplay.milestone.diameterKm.toLocaleString()} km`}{' '}
+                          <span className="text-slate-400 text-[11px] sm:text-xs font-normal">
+                            ({tourMilestoneDisplay.milestone.diameterKm.toLocaleString()} km)
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Top metadata row: Index rank badge */}
                   <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                     <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-bold uppercase tracking-wider text-[11px] sm:text-xs shadow-[0_0_12px_rgba(6,182,212,0.3)]">
