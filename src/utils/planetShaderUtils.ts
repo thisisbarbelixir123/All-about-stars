@@ -216,8 +216,10 @@ export const PLANET_FRAGMENT_SHADER = `
     float manyCycles = 5.0 + max(0.0, turbulence - 0.74) * 7.2 + shiftVal * 0.85;
     float cycles = mix(fewCycles, manyCycles, isMultiBelt);
 
-    float eddyAmp = mix(0.006, 0.022, isMultiBelt);
-    float latWave = snoise(vec3(flow.x * 1.10, uLat * 2.7, flow.z * 1.10) + seedVal * 0.31) * eddyAmp;
+    // Edge roughness grows with stripe count: broad zones stay glassy, dense multi-belt planets get ragged shear edges
+    float rough = isMultiBelt * (0.35 + 0.65 * clamp((turbulence - 0.74) / 0.33, 0.0, 1.0));
+    float eddyAmp = mix(0.006, 0.022, isMultiBelt) + rough * 0.020;
+    float latWave = snoise(vec3(flow.x * (1.10 + rough * 1.6), uLat * 2.7, flow.z * (1.10 + rough * 1.6)) + seedVal * 0.31) * eddyAmp;
     float lat = uLat + latWave;
 
     float latWarp = snoise(vec3(seedVal * 0.13, lat * cycles * 0.46 + 2.7, seedVal * 0.29)) * 1.28;
@@ -228,13 +230,13 @@ export const PLANET_FRAGMENT_SHADER = `
 
     // Belt-zone boundary shear mask where jet wind gradient is steepest
     float shearMask = pow(clamp(abs(cos(phase)), 0.0, 1.0), 2.2);
-    float festoon = snoise(vec3(flow.x * 1.65, lat * cycles * 3.3, flow.z * 1.65) + seedVal * 1.13) * shearMask * mix(0.022, 0.085, isMultiBelt);
+    float festoon = snoise(vec3(flow.x * 1.65, lat * cycles * 3.3, flow.z * 1.65) + seedVal * 1.13) * shearMask * (mix(0.022, 0.085, isMultiBelt) + rough * 0.070);
 
     // High-resolution strictly horizontal Cassini/Juno laminar cloud filaments
     float silkCoarse = snoise(vec3(flow.x * 0.24, lat * 24.0, flow.z * 0.24) + seedVal * 0.67);
     float silkFine = snoise(vec3(flow.x * 0.16, lat * 48.0, flow.z * 0.16) - seedVal * 1.21);
     float fineStreamlines = silkCoarse * 0.65 + silkFine * 0.35;
-    float silkWeight = mix(0.034, 0.086, isMultiBelt);
+    float silkWeight = mix(0.034, 0.086, isMultiBelt) + rough * 0.060;
 
     float norm = 1.0 + mix(0.14, 0.45, isMultiBelt);
     float rawBand = (z1 + z2 + z3) / norm + festoon + fineStreamlines * silkWeight;
@@ -1267,6 +1269,7 @@ export interface PlanetProceduralOptions {
   sudarskyClass?: string;
   classification?: string;
   densityGcm3?: number;
+  enableStorms?: boolean;
 }
 
 function clamp01(v: number): number {
@@ -1799,7 +1802,7 @@ export function getPlanetBucketUniforms(
     const hStormPresence = hashStringToFloat(`${identityKey}-storm`, 71);
     const hStormLat = hashStringToFloat(`${identityKey}-slat`, 83);
     const hStormLon = hashStringToFloat(`${identityKey}-slon`, 109);
-    if (hStormPresence >= 0.62) {
+    if (options?.enableStorms && hStormPresence >= 0.62) {
       const sign = hStormLat < 0.5 ? -1 : 1;
       const latMag = 0.12 + ((hStormLat * 2) % 1) * 0.40;
       const lon = (hStormLon - 0.5) * Math.PI * 2;
@@ -1826,8 +1829,9 @@ export function getPlanetBucketUniforms(
     const hStormLat = hashStringToFloat(`${identityKey}-nslat`, 89);
     const hStormLon = hashStringToFloat(`${identityKey}-nslon`, 113);
     const hasDarkSpot =
-      (!isSmoothNeptunian && hStormPresence >= 0.55) ||
-      (isSmoothNeptunian && tempK < 320 && hStormPresence >= 0.93);
+      !!options?.enableStorms &&
+      ((!isSmoothNeptunian && hStormPresence >= 0.55) ||
+        (isSmoothNeptunian && tempK < 320 && hStormPresence >= 0.93));
     if (hasDarkSpot) {
       const sign = hStormLat < 0.5 ? -1 : 1;
       const latMag = 0.14 + ((hStormLat * 2) % 1) * 0.34;
