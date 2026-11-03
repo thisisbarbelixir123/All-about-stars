@@ -307,11 +307,12 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
   // Smooth camera tracking
   const cameraTargetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
-  const currentCameraPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 15, 60));
+  const currentCameraPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
   const currentLookAtRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
   const cameraDistanceRef = useRef(40);
   const cameraAngleRef = useRef({ theta: 0, phi: Math.PI / 3 });
   const isInitialMountRef = useRef(true);
+  const hasSnappedCameraRef = useRef(false);
   const orbitVelocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const isRightDraggingRef = useRef(false);
@@ -560,7 +561,30 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.0000001, 500000);
-    camera.position.set(0, 20, 65);
+
+    // Set initial camera framing for the active world or linear stage layout
+    const initialFraming = activeBodyId
+      ? getCameraFraming(activeBodyId, false)
+      : null;
+
+    if (initialFraming) {
+      cameraTargetRef.current.copy(initialFraming.target);
+      cameraDistanceRef.current = initialFraming.distance;
+      cameraAngleRef.current = { ...initialFraming.angle };
+      const { theta, phi } = initialFraming.angle;
+      const dist = initialFraming.distance;
+      const target = initialFraming.target;
+      const initX = target.x + dist * Math.sin(phi) * Math.sin(theta);
+      const initY = target.y + dist * Math.cos(phi);
+      const initZ = target.z + dist * Math.sin(phi) * Math.cos(theta);
+      camera.position.set(initX, initY, initZ);
+      camera.lookAt(target);
+      currentCameraPosRef.current.set(initX, initY, initZ);
+      currentLookAtRef.current.copy(target);
+      hasSnappedCameraRef.current = true;
+    } else {
+      camera.position.set(0, 20, 65);
+    }
     cameraRef.current = camera;
 
     let renderer: THREE.WebGLRenderer;
@@ -891,12 +915,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       return mat;
     };
 
-    const warmedMaterials = new Set<THREE.Material>();
-    const warmScene = new THREE.Scene();
-    const warmCam = new THREE.PerspectiveCamera(45, 1, 0.1, 10);
-    warmCam.position.set(0, 0, 2);
-    warmCam.lookAt(0, 0, 0);
-
     const buildBodyGroup = (body: CelestialBody): THREE.Material | null => {
       const sc = bodyScales[body.id];
       if (!sc) return null;
@@ -1031,70 +1049,42 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       return mat;
     };
 
-    // Incremental per-frame builder and shader pre-warmer: builds 1/N objects first so the stage
-    // and progress bar paint on Frame 1, then streams 180 objects/frame until all N/N are ready.
+    // On-demand body group builder: instantiates 3D meshes without synchronous shader pre-compiles
     const totalCount = sortedBodies.length;
     let buildIdx = 0;
     let warmCancelled = false;
     let warmRafId = 0;
-    let hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     if (totalCount > 0) {
-      // Build focused body immediately on Frame 0 so it appears instantly
+      // Build focused body immediately on Frame 0 so it appears instantaneously
       const initialFocusBody =
         sortedBodies.find((b) => b.id === activeBodyId) ?? sortedBodies[0];
       buildBodyGroup(initialFocusBody);
       buildIdx = 0;
-      setLoadProgress({ loaded: 1, total: totalCount });
 
-      const stepBuildAndWarm = () => {
+      // Stream background bodies asynchronously across animation frames
+      // No synchronous renderer.compile calls: GPU compiles on-demand without stalling
+      const stepBuild = () => {
         if (warmCancelled) return;
-        const batchEnd = Math.min(totalCount, buildIdx + 180);
-        warmScene.clear();
-        let addedWarmMesh = false;
+        const batchEnd = Math.min(totalCount, buildIdx + 200);
 
         for (; buildIdx < batchEnd; buildIdx++) {
           const body = sortedBodies[buildIdx];
           if (body.id === initialFocusBody.id) continue;
-          const mat = buildBodyGroup(body);
-          if (mat && !warmedMaterials.has(mat)) {
-            warmedMaterials.add(mat);
-            const m = new THREE.Mesh(sharedLowGeo, mat);
-            m.scale.setScalar(0.0001);
-            warmScene.add(m);
-            addedWarmMesh = true;
-          }
+          buildBodyGroup(body);
         }
-
-        if (addedWarmMesh && rendererRef.current) {
-          try {
-            rendererRef.current.compile(warmScene, warmCam);
-          } catch {
-            // Ignore compile errors on restricted contexts
-          }
-          warmScene.clear();
-        }
-
-        setLoadProgress({ loaded: buildIdx, total: totalCount });
 
         if (buildIdx < totalCount) {
-          warmRafId = requestAnimationFrame(stepBuildAndWarm);
-        } else {
-          hideTimeoutId = setTimeout(() => {
-            if (!warmCancelled) setLoadProgress(null);
-          }, 220);
+          warmRafId = requestAnimationFrame(stepBuild);
         }
       };
 
-      warmRafId = requestAnimationFrame(stepBuildAndWarm);
-    } else {
-      setLoadProgress(null);
+      warmRafId = requestAnimationFrame(stepBuild);
     }
 
     return () => {
       warmCancelled = true;
       if (warmRafId) cancelAnimationFrame(warmRafId);
-      if (hideTimeoutId) clearTimeout(hideTimeoutId);
       sharedSphereGeo.dispose();
       sharedLowGeo.dispose();
       sharedHitGeo.dispose();
@@ -1151,6 +1141,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       const initZ = target.z + dist * Math.sin(phi) * Math.cos(theta);
       currentCameraPosRef.current.set(initX, initY, initZ);
       currentLookAtRef.current.copy(target);
+      hasSnappedCameraRef.current = true;
       if (cameraRef.current) {
         cameraRef.current.position.set(initX, initY, initZ);
         cameraRef.current.lookAt(target);
@@ -1181,14 +1172,22 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         const targetZ = cameraTargetRef.current.z + dist * Math.sin(phi) * Math.cos(theta);
         const targetPos = new THREE.Vector3(targetX, targetY, targetZ);
 
-        const decayRate = isTourPlayingRef.current ? 5.5 : 4.5;
-        const lerpFactor = Math.min(1.0, 1.0 - Math.exp(-decayRate * delta));
+        if (!hasSnappedCameraRef.current) {
+          hasSnappedCameraRef.current = true;
+          currentCameraPosRef.current.copy(targetPos);
+          currentLookAtRef.current.copy(cameraTargetRef.current);
+          cameraRef.current.position.copy(targetPos);
+          cameraRef.current.lookAt(cameraTargetRef.current);
+        } else {
+          const decayRate = isTourPlayingRef.current ? 5.5 : 4.5;
+          const lerpFactor = Math.min(1.0, 1.0 - Math.exp(-decayRate * delta));
 
-        currentCameraPosRef.current.lerp(targetPos, lerpFactor);
-        currentLookAtRef.current.lerp(cameraTargetRef.current, lerpFactor);
+          currentCameraPosRef.current.lerp(targetPos, lerpFactor);
+          currentLookAtRef.current.lerp(cameraTargetRef.current, lerpFactor);
 
-        cameraRef.current.position.copy(currentCameraPosRef.current);
-        cameraRef.current.lookAt(currentLookAtRef.current);
+          cameraRef.current.position.copy(currentCameraPosRef.current);
+          cameraRef.current.lookAt(currentLookAtRef.current);
+        }
 
         // Dynamic clip planes: completely prevents Z-fighting and near-plane black clipping blind spots
         const targetNear = Math.max(0.0000001, Math.min(0.01, dist * 0.0002));
