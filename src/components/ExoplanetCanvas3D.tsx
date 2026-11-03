@@ -232,7 +232,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const sortMenuRef = useRef<HTMLDivElement>(null);
 
   // Scene Controls
-  const [layoutMode, setLayoutMode] = useState<'linear' | 'spiral'>('spiral');
+  const [layoutMode, setLayoutMode] = useState<'linear' | 'spiral'>('linear');
   const [isLayoutMenuOpen, setIsLayoutMenuOpen] = useState(false);
   const layoutMenuRef = useRef<HTMLDivElement>(null);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
@@ -290,7 +290,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const cameraLightRef = useRef<THREE.DirectionalLight | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const lodFrameRef = useRef(0);
   const [webglError, setWebglError] = useState<string | null>(null);
+  const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
   const bodyObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
   const labelElementsRef = useRef<Map<string, HTMLElement>>(new Map());
   const animFrameIdRef = useRef<number | null>(null);
@@ -580,7 +582,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     }
     setWebglError(null);
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     container.innerHTML = '';
@@ -694,8 +696,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     bodyObjectsRef.current.clear();
     interactiveMeshesRef.current = [];
 
-    const sharedSphereGeo = new THREE.SphereGeometry(1, 64, 64);
-    const sharedHitGeo = new THREE.SphereGeometry(1, 16, 16);
+    const sharedSphereGeo = new THREE.SphereGeometry(1, 48, 48);
+    const sharedLowGeo = new THREE.SphereGeometry(1, 20, 20);
+    const sharedHitGeo = new THREE.SphereGeometry(1, 12, 12);
+    const sharedHitMat = new THREE.MeshBasicMaterial({ visible: false });
     const customGeometryCache = new Map<string, THREE.BufferGeometry>();
 
     const textureLoader = new THREE.TextureLoader();
@@ -709,7 +713,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         if (!mat) {
           let texture = textureCacheRef.current.get(body.texturePath);
           if (!texture) {
-            texture = textureLoader.load(body.texturePath);
+            texture = textureLoader.load(body.texturePath, (loadedTex) => {
+              rendererRef.current?.initTexture(loadedTex);
+            });
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -725,7 +731,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             const specPath = '/textures/planets/earth-specular.jpg';
             roughnessMap = textureCacheRef.current.get(specPath);
             if (!roughnessMap) {
-              roughnessMap = textureLoader.load(specPath);
+              roughnessMap = textureLoader.load(specPath, (loadedSpec) => {
+                rendererRef.current?.initTexture(loadedSpec);
+              });
               roughnessMap.wrapS = THREE.RepeatWrapping;
               roughnessMap.wrapT = THREE.ClampToEdgeWrapping;
               textureCacheRef.current.set(specPath, roughnessMap);
@@ -783,18 +791,68 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           ? 5.514 * (body.massEarth / Math.pow(body.diameterEarth, 3))
           : undefined;
 
-      // Deterministic biome bucket for habitable/Hycean worlds; per-planet key preserves exact albedo, temperature, and chemistry palette
+      // Quantized astrophysical material bucket (~160 shared ShaderMaterials instead of 2,126) prevents
+      // thousands of per-frame WebGL material switches and first-zoom initMaterial stalls while preserving
+      // exact Sudarsky classes, Neptunian composition/albedo regimes, and showcase planet appearances.
       const bucket = body.id === 'sol-earth' ? 0 : Math.floor(hashStringToFloat(body.id, 97) * 16.0) % 16;
-      const key = `planet-${body.id}-${wireframe ? 'w' : 's'}`;
+      const isShowcaseBody =
+        body.id === 'exo-gliese-436-b' ||
+        body.id === 'exo-kepler-22-b' ||
+        body.id === 'exo-gj-1214-b' ||
+        body.id === 'exo-ltt-9779-b' ||
+        body.id === 'exo-tres-2-b' ||
+        body.id === 'exo-hd-189733-b' ||
+        body.id === 'exo-hd-209458-b' ||
+        body.id === 'exo-kepler-7-b' ||
+        body.id === 'exo-wasp-12-b' ||
+        body.id === 'exo-wasp-121-b' ||
+        body.id === 'exo-hat-p-7-b' ||
+        body.id === 'exo-55-cancri-e' ||
+        body.id === 'exo-k2-18-b' ||
+        body.id === 'exo-kelt-9-b' ||
+        body.id === 'exo-hat-p-11-b' ||
+        body.id === 'exo-ngts-4-b';
+
+      const qTemp =
+        tempK <= 160 ? 120
+        : tempK <= 240 ? 200
+        : tempK <= 360 ? 300
+        : tempK <= 520 ? 440
+        : tempK <= 720 ? 620
+        : tempK <= 920 ? 820
+        : tempK <= 1200 ? 1050
+        : tempK <= 1550 ? 1380
+        : tempK <= 2100 ? 1800
+        : 2500;
+      const qAlbedo =
+        bodyAlbedo < 0.065 ? 0.04
+        : bodyAlbedo < 0.14 ? 0.10
+        : bodyAlbedo < 0.25 ? 0.20
+        : bodyAlbedo < 0.39 ? 0.32
+        : bodyAlbedo < 0.56 ? 0.48
+        : 0.68;
+      const qDensity =
+        densityGcm3 === undefined ? 1.65
+        : densityGcm3 < 1.05 ? 0.75
+        : densityGcm3 >= 2.15 ? 2.60
+        : 1.65;
+      const variantSlot = bucket % 6;
+      const syntheticId = isShowcaseBody
+        ? body.id
+        : `q-${themeIdx}-${sudarskyClass ?? 'n'}-${qTemp}-${qAlbedo}-${qDensity}-v${variantSlot}`;
+      const key = `${syntheticId}-${wireframe ? 'w' : 's'}`;
 
       let mat = materialCacheRef.current.get(key);
       if (!mat) {
-        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, tempK, {
-          bodyId: body.id,
-          albedo: bodyAlbedo,
+        const effTemp = isShowcaseBody ? tempK : qTemp;
+        const effAlb = isShowcaseBody ? bodyAlbedo : qAlbedo;
+        const effDens = isShowcaseBody ? densityGcm3 : qDensity;
+        const bucketUniforms = getPlanetBucketUniforms(themeIdx, bucket, effTemp, {
+          bodyId: syntheticId,
+          albedo: effAlb,
           sudarskyClass,
           classification: body.classification,
-          densityGcm3,
+          densityGcm3: effDens,
         });
         mat = new THREE.ShaderMaterial({
           wireframe,
@@ -803,10 +861,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           uniforms: {
             time: sharedTimeUniformRef.current,
             themeIndex: { value: themeIdx },
-            temperatureK: { value: tempK },
+            temperatureK: { value: effTemp },
             lightDir: { value: new THREE.Vector3(1.0, 0.4, 0.8).normalize() },
             seed: { value: bucketUniforms.seed },
-            albedo: { value: bodyAlbedo },
+            albedo: { value: effAlb },
             colorTint: { value: bucketUniforms.colorTint },
             bandShift: { value: bucketUniforms.bandShift },
             bandTurbulence: { value: bucketUniforms.bandTurbulence },
@@ -831,9 +889,15 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       return mat;
     };
 
-    sortedBodies.forEach((body) => {
+    const warmedMaterials = new Set<THREE.Material>();
+    const warmScene = new THREE.Scene();
+    const warmCam = new THREE.PerspectiveCamera(45, 1, 0.1, 10);
+    warmCam.position.set(0, 0, 2);
+    warmCam.lookAt(0, 0, 0);
+
+    const buildBodyGroup = (body: CelestialBody): THREE.Material | null => {
       const sc = bodyScales[body.id];
-      if (!sc) return;
+      if (!sc) return null;
 
       const geoConfig = getBodyGeometryConfig(body);
       const groundY = sc.radius * geoConfig.verticalOffsetFactor;
@@ -844,7 +908,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
       const mat = getMaterial(body);
 
-      // Select geometry: custom irregular mesh for sub-600 km bodies or shared sphere
       let meshGeo: THREE.BufferGeometry = sharedSphereGeo;
       if (geoConfig.geometryType === 'irregular') {
         let customGeo = customGeometryCache.get(body.id);
@@ -856,24 +919,31 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       }
 
       const mesh = new THREE.Mesh(meshGeo, mat);
+      if (meshGeo === sharedSphereGeo) {
+        mesh.geometry = sharedLowGeo;
+        group.userData.sphereMesh = mesh;
+        group.userData.lodHi = sharedSphereGeo;
+        group.userData.lodLo = sharedLowGeo;
+      }
+      group.userData.radius = sc.radius;
       mesh.scale.set(
         sc.radius * geoConfig.scaleMultiplier.x,
         sc.radius * geoConfig.scaleMultiplier.y,
         sc.radius * geoConfig.scaleMultiplier.z
       );
       mesh.name = `Sphere-${body.id}`;
-      mesh.userData = { bodyData: body };
+      mesh.userData = { ...mesh.userData, bodyData: body };
       group.add(mesh);
       interactiveMeshesRef.current.push(mesh);
 
-      // Atmospheric & Cloud Layers for Major Bodies
       if (!wireframe) {
         if (body.id === 'sol-earth') {
-          // Floating clouds with additive transparency
           const cloudPath = '/textures/planets/earth-clouds.png';
           let cloudTex = textureCacheRef.current.get(cloudPath);
           if (!cloudTex) {
-            cloudTex = textureLoader.load(cloudPath);
+            cloudTex = textureLoader.load(cloudPath, (loadedCloud) => {
+              rendererRef.current?.initTexture(loadedCloud);
+            });
             cloudTex.wrapS = THREE.RepeatWrapping;
             cloudTex.wrapT = THREE.ClampToEdgeWrapping;
             textureCacheRef.current.set(cloudPath, cloudTex);
@@ -891,7 +961,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           cloudMesh.scale.set(cloudScale, cloudScale, cloudScale);
           group.add(cloudMesh);
 
-          // Rayleigh atmospheric rim glow
           const atmoMat = new THREE.MeshBasicMaterial({
             color: 0x38bdf8,
             transparent: true,
@@ -904,7 +973,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           atmoMesh.scale.set(atmoScale, atmoScale, atmoScale);
           group.add(atmoMesh);
         } else if (body.id === 'sol-venus') {
-          // Venusian dense sulfuric acid haze shell
           const venusAtmoMat = new THREE.MeshBasicMaterial({
             color: 0xfde047,
             transparent: true,
@@ -917,7 +985,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           venusAtmoMesh.scale.set(atmoScale, atmoScale, atmoScale);
           group.add(venusAtmoMesh);
         } else if (body.id === 'sol-titan') {
-          // Titan thick nitrogen-methane photochemical orange haze
           const titanHazeMat = new THREE.MeshBasicMaterial({
             color: 0xf97316,
             transparent: true,
@@ -930,7 +997,6 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
           titanHazeMesh.scale.set(hazeScale, hazeScale, hazeScale);
           group.add(titanHazeMesh);
         } else if (body.id === 'sol-mars') {
-          // Mars tenuous CO2 blue/violet Rayleigh scattering horizon
           const marsAtmoMat = new THREE.MeshBasicMaterial({
             color: 0x93c5fd,
             transparent: true,
@@ -945,25 +1011,87 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         }
       }
 
-      // Tap hit target for small moons/asteroids
-      const hitR = Math.max(sc.radius * 1.35, 0.0008);
-      const hitMesh = new THREE.Mesh(sharedHitGeo, new THREE.MeshBasicMaterial({ visible: false }));
-      hitMesh.scale.set(
-        hitR * geoConfig.scaleMultiplier.x,
-        hitR * geoConfig.scaleMultiplier.y,
-        hitR * geoConfig.scaleMultiplier.z
-      );
-      hitMesh.userData = { bodyData: body };
-      group.add(hitMesh);
-      interactiveMeshesRef.current.push(hitMesh);
+      if (sc.radius < 0.002) {
+        const hitR = Math.max(sc.radius * 1.35, 0.0008);
+        const hitMesh = new THREE.Mesh(sharedHitGeo, sharedHitMat);
+        hitMesh.scale.set(
+          hitR * geoConfig.scaleMultiplier.x,
+          hitR * geoConfig.scaleMultiplier.y,
+          hitR * geoConfig.scaleMultiplier.z
+        );
+        hitMesh.userData = { bodyData: body };
+        group.add(hitMesh);
+        interactiveMeshesRef.current.push(hitMesh);
+      }
 
       scene.add(group);
       bodyObjectsRef.current.set(body.id, group);
-    });
+      return mat;
+    };
+
+    // Incremental per-frame builder and shader pre-warmer: builds 1/N objects first so the stage
+    // and progress bar paint on Frame 1, then streams 180 objects/frame until all N/N are ready.
+    const totalCount = sortedBodies.length;
+    let buildIdx = 0;
+    let warmCancelled = false;
+    let warmRafId = 0;
+    let hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    if (totalCount > 0) {
+      buildBodyGroup(sortedBodies[0]);
+      buildIdx = 1;
+      setLoadProgress({ loaded: 1, total: totalCount });
+
+      const stepBuildAndWarm = () => {
+        if (warmCancelled) return;
+        const batchEnd = Math.min(totalCount, buildIdx + 180);
+        warmScene.clear();
+        let addedWarmMesh = false;
+
+        for (; buildIdx < batchEnd; buildIdx++) {
+          const mat = buildBodyGroup(sortedBodies[buildIdx]);
+          if (mat && !warmedMaterials.has(mat)) {
+            warmedMaterials.add(mat);
+            const m = new THREE.Mesh(sharedLowGeo, mat);
+            m.scale.setScalar(0.0001);
+            warmScene.add(m);
+            addedWarmMesh = true;
+          }
+        }
+
+        if (addedWarmMesh && rendererRef.current) {
+          try {
+            rendererRef.current.compile(warmScene, warmCam);
+          } catch {
+            // Ignore compile errors on restricted contexts
+          }
+          warmScene.clear();
+        }
+
+        setLoadProgress({ loaded: buildIdx, total: totalCount });
+
+        if (buildIdx < totalCount) {
+          warmRafId = requestAnimationFrame(stepBuildAndWarm);
+        } else {
+          hideTimeoutId = setTimeout(() => {
+            if (!warmCancelled) setLoadProgress(null);
+          }, 220);
+        }
+      };
+
+      warmRafId = requestAnimationFrame(stepBuildAndWarm);
+    } else {
+      setLoadProgress(null);
+    }
 
     return () => {
+      warmCancelled = true;
+      if (warmRafId) cancelAnimationFrame(warmRafId);
+      if (hideTimeoutId) clearTimeout(hideTimeoutId);
       sharedSphereGeo.dispose();
+      sharedLowGeo.dispose();
       sharedHitGeo.dispose();
+      sharedHitMat.dispose();
       customGeometryCache.forEach((geo) => geo.dispose());
       customGeometryCache.clear();
     };
@@ -1095,25 +1223,45 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // Time uniform update
       sharedTimeUniformRef.current.value = (elapsedTime % 600.0) * rotationSpeed;
 
-      // Axial rotation & differential atmospheric dynamics (only for visible groups)
-      if (isAutoRotating) {
+      // Axial rotation and zero-allocation LOD check (skips sub-pixel distant bodies to avoid 2,142 matrix updates/frame)
+      lodFrameRef.current = (lodFrameRef.current + 1) % 12;
+      const runLodCheck = lodFrameRef.current === 0;
+      if ((isAutoRotating || runLodCheck) && cameraRef.current) {
+        const camX = cameraRef.current.position.x;
+        const camY = cameraRef.current.position.y;
+        const camZ = cameraRef.current.position.z;
         const baseRot = delta * 0.18 * rotationSpeed;
+
         bodyObjectsRef.current.forEach((grp, id) => {
           if (!grp.visible) return;
-          grp.rotation.y += baseRot;
+          const dx = grp.position.x - camX;
+          const dy = grp.position.y - camY;
+          const dz = grp.position.z - camZ;
+          const distSq = dx * dx + dy * dy + dz * dz;
+          const r = (grp.userData.radius as number) || 0.001;
+          const rSq = r * r;
 
-          // Differential cloud rotation for Earth
-          if (id === 'sol-earth') {
-            const clouds = grp.getObjectByName('Clouds-sol-earth');
-            if (clouds) {
-              clouds.rotation.y += delta * 0.06 * rotationSpeed;
+          if (isAutoRotating && rSq > distSq * 0.000004) {
+            grp.rotation.y += baseRot;
+            if (id === 'sol-earth') {
+              const clouds = grp.getObjectByName('Clouds-sol-earth');
+              if (clouds) {
+                clouds.rotation.y += delta * 0.06 * rotationSpeed;
+              }
+            }
+          }
+
+          if (runLodCheck) {
+            const sphereMesh = grp.userData.sphereMesh as THREE.Mesh | undefined;
+            const hi = grp.userData.lodHi as THREE.BufferGeometry | undefined;
+            const lo = grp.userData.lodLo as THREE.BufferGeometry | undefined;
+            if (sphereMesh && hi && lo) {
+              const want = rSq > distSq * 0.0009 ? hi : lo;
+              if (sphereMesh.geometry !== want) sphereMesh.geometry = want;
             }
           }
         });
       }
-
-      // Throttled raycasting
-
       // Update continuous grid
       if (continuousGridRef.current && cameraRef.current) {
         const distToFocus = currentCameraPosRef.current.distanceTo(currentLookAtRef.current);
@@ -1516,6 +1664,35 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         onWheel={handleWheel}
         onContextMenu={(e) => e.preventDefault()}
       />
+
+      {loadProgress && !webglError && (() => {
+        const pct = Math.min(100, Math.round((loadProgress.loaded / Math.max(1, loadProgress.total)) * 100));
+        return (
+          <div
+            role="progressbar"
+            aria-label="Loading celestial objects"
+            aria-valuemin={0}
+            aria-valuemax={loadProgress.total}
+            aria-valuenow={loadProgress.loaded}
+            className="absolute inset-x-0 bottom-28 z-20 flex justify-center px-4 pointer-events-none"
+          >
+            <div className="w-full max-w-sm rounded-xl border border-slate-700 bg-slate-900/95 px-4 py-3 text-slate-100">
+              <div className="flex items-center justify-between gap-3 text-xs font-mono tabular-nums">
+                <span className="text-slate-200">
+                  Loading {loadProgress.loaded.toLocaleString()} / {loadProgress.total.toLocaleString()} objects...
+                </span>
+                <span className="font-semibold text-cyan-300">{pct}%</span>
+              </div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-md bg-slate-800">
+                <div
+                  className="h-full bg-cyan-400 transition-[width] duration-75 ease-out motion-reduce:transition-none"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {webglError && (
         <div
