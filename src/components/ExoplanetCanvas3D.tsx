@@ -40,6 +40,7 @@ import {
 import { deriveSudarskyClass, SUDARSKY_CLASS_INFO } from '../utils/exoplanetArchetypes';
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUtils';
 import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
+import { LoadingSprite } from './LoadingSprite';
 
 export type CelestialSortKey = 'size' | 'mass' | 'temperature' | 'discoveryYear';
 export type SortDirection = 'asc' | 'desc';
@@ -294,6 +295,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const lodFrameRef = useRef(0);
   const [webglError, setWebglError] = useState<string | null>(null);
+  const [isSceneReady, setIsSceneReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
   const bodyObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
   const labelElementsRef = useRef<Map<string, HTMLElement>>(new Map());
@@ -531,7 +533,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   // Camera framing for body (matching StarCanvas3D proportions)
   const getCameraFraming = useCallback(
     (bodyId: string, isTour: boolean) => {
-      const sc = bodyScalesRef.current[bodyId];
+      const sc = bodyScalesRef.current[bodyId] ?? bodyScales[bodyId];
       if (!sc) return null;
       const r = sc.radius;
 
@@ -545,7 +547,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         angle: { theta: 0, phi: Math.PI / 3 },
       };
     },
-    []
+    [bodyScales]
   );
 
   // Setup Three.js WebGL viewport
@@ -563,9 +565,8 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.0000001, 500000);
 
     // Set initial camera framing for the active world or linear stage layout
-    const initialFraming = activeBodyId
-      ? getCameraFraming(activeBodyId, false)
-      : null;
+    const targetBodyId = activeBodyId || 'sol-earth';
+    const initialFraming = getCameraFraming(targetBodyId, false);
 
     if (initialFraming) {
       cameraTargetRef.current.copy(initialFraming.target);
@@ -583,7 +584,13 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       currentLookAtRef.current.copy(target);
       hasSnappedCameraRef.current = true;
     } else {
-      camera.position.set(0, 20, 65);
+      camera.position.set(0.49, 0.0091, 0.035);
+      camera.lookAt(0.49, 0.0091, 0);
+      currentCameraPosRef.current.set(0.49, 0.0091, 0.035);
+      currentLookAtRef.current.set(0.49, 0.0091, 0);
+      cameraTargetRef.current.set(0.49, 0.0091, 0);
+      cameraDistanceRef.current = 0.035;
+      hasSnappedCameraRef.current = true;
     }
     cameraRef.current = camera;
 
@@ -768,7 +775,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             metalness = 0.15;
           }
 
+          const baseColor = inferBodyColor(body);
           mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(baseColor),
             map: texture,
             roughnessMap,
             wireframe,
@@ -1322,6 +1331,9 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
 
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
         rendererRef.current.render(sceneRef.current, cameraRef.current);
+        if (!isSceneReady) {
+          setIsSceneReady(true);
+        }
       }
     };
 
@@ -1670,6 +1682,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         onWheel={handleWheel}
         onContextMenu={(e) => e.preventDefault()}
       />
+
+      {/* Loading Sprite during startup initialization */}
+      {!isSceneReady && !webglError && (
+        <LoadingSprite label="INITIALIZING EXOPLANET COMPARATOR..." />
+      )}
 
       {loadProgress && !webglError && (() => {
         const pct = Math.min(100, Math.round((loadProgress.loaded / Math.max(1, loadProgress.total)) * 100));

@@ -44,9 +44,25 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,jpg}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globIgnores: ['**/textures/**', '**/aistudio/**'],
           runtimeCaching: [
+            {
+              // On-demand caching for 3D textures rather than heavy startup precaching
+              urlPattern: /\/textures\/.*\.(?:png|jpg|jpeg|webp)$/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'celestial-textures-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
