@@ -246,6 +246,7 @@ export interface CelestialBody {
   temperatureK?: number;
   massEarth?: number;
   massJupiter?: number;
+  massType?: 'measured' | 'estimated';
   orbitalPeriodDays?: number;
   semiMajorAxisAU?: number;
   discoveryYear?: number;

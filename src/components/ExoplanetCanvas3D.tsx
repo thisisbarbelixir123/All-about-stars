@@ -68,8 +68,15 @@ function inferBodyColor(body: CelestialBody): string {
   if (name === 'neptune') return '#60a5fa';
   if (name === 'io') return '#facc15';
   if (name === 'europa' || name === 'enceladus') return '#e0f2fe';
+  if (name === 'callisto' || name === 'ganymede') return '#d6d3d1';
   if (name === 'titan') return '#f59e0b';
   if (name === 'pluto' || name === 'charon') return '#d6d3d1';
+  // Dwarf planets & major TNOs with specific observed spectroscopic colors:
+  if (name === 'makemake') return '#ea580c'; // Distinct deep reddish-orange tholin color
+  if (name === 'sedna' || name === 'gonggong') return '#dc2626'; // Deep crimson-red tholin surface
+  if (name === 'quaoar' || name === 'varuna' || name === 'ixion' || name === 'chaos') return '#c2410c'; // Moderate red-brown tholin
+  if (name === 'haumea' || name === 'eris' || name === 'orcus') return '#f1f5f9'; // Bright pristine crystalline water/nitrogen ice
+  if (name === 'ceres') return '#94a3b8'; // Neutral dark grey clay/carbonate asteroid belt regolith
 
   switch (body.classification) {
     case 'Jovian':
@@ -122,19 +129,31 @@ function inferBodyColor(body: CelestialBody): string {
   }
 }
 
+function formatCompactBodyMass(body: CelestialBody): string {
+  const mEarth = body.massEarth ?? 0;
+  if (mEarth <= 0) return 'Unknown Mass';
+  const mJup = body.massJupiter ?? mEarth / 317.828;
+  const approx = body.massType === 'estimated' ? '~' : '';
+  if (mJup >= 0.1) return `${approx}${mJup.toFixed(2)} M♃`;
+  if (mEarth >= 0.1) return `${approx}${mEarth.toFixed(2)} M⊕`;
+  if (mEarth >= 0.001) return `${approx}${mEarth.toFixed(3)} M⊕`;
+  return `${approx}${mEarth.toExponential(2)} M⊕`;
+}
+
 function getTourMetricDisplay(body: CelestialBody, sortKey: CelestialSortKey) {
   switch (sortKey) {
     case 'mass': {
       const mEarth = body.massEarth ?? 0;
       const mJup = body.massJupiter ?? (mEarth > 0 ? mEarth / 317.828 : 0);
       const isGiant = mJup >= 0.1;
-      const primary = isGiant
-        ? `${mJup.toFixed(2)} M♃`
-        : mEarth > 0
-        ? `${mEarth.toFixed(2)} M⊕`
-        : 'Unknown Mass';
+      const primary = formatCompactBodyMass(body);
+      const earthFormatted =
+        mEarth < 0.01
+          ? mEarth.toPrecision(3)
+          : mEarth.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      const estTag = body.massType === 'estimated' ? ' • M–R estimate' : '';
       const secondary = mEarth > 0
-        ? `${mEarth.toLocaleString(undefined, { maximumFractionDigits: 2 })} Earth masses (${(mEarth * 5.972e24).toExponential(2)} kg)`
+        ? `${earthFormatted} Earth masses (${(mEarth * 5.972e24).toExponential(2)} kg)${estTag}`
         : 'Mass unmeasured';
       return {
         label: 'PLANETARY MASS',
@@ -775,9 +794,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
             metalness = 0.15;
           }
 
-          const baseColor = inferBodyColor(body);
+          // For official textures (Earth, Moon, Callisto, Ganymede, etc.),
+          // material.color MUST be pure neutral white (#ffffff).
+          // Otherwise, Three.js multiplies the photo texture pixels by baseColor (which tinted Earth, Callisto, Ganymede blue).
           mat = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(baseColor),
+            color: new THREE.Color(0xffffff),
             map: texture,
             roughnessMap,
             wireframe,
@@ -831,6 +852,11 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       // exact Sudarsky classes, Neptunian composition/albedo regimes, and showcase planet appearances.
       const bucket = body.id === 'sol-earth' ? 0 : Math.floor(hashStringToFloat(body.id, 97) * 16.0) % 16;
       const isShowcaseBody =
+        body.id === 'sol-makemake' ||
+        body.id === 'sol-sedna' ||
+        body.id === 'sol-gonggong' ||
+        body.id === 'sol-haumea' ||
+        body.id === 'sol-eris' ||
         body.id === 'exo-gliese-436-b' ||
         body.id === 'exo-kepler-22-b' ||
         body.id === 'exo-gj-1214-b' ||
@@ -2698,9 +2724,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
                       <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
                         <span className="text-slate-500 mr-1">Mass:</span>
                         <span className="text-white font-semibold">
-                          {activeFocusedBody.massEarth >= 50
-                            ? `${(activeFocusedBody.massEarth / 317.828).toFixed(2)} M♃`
-                            : `${activeFocusedBody.massEarth.toFixed(2)} M⊕`}
+                          {formatCompactBodyMass(activeFocusedBody)}
                         </span>
                       </span>
                     )}

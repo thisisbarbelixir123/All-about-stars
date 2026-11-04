@@ -17,7 +17,10 @@
     "textureTheme": "terrestrial-rocky",
     "temperatureK": 701,
     "albedo": 0.16,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 0.015,
+    "massJupiter": 0.000047,
+    "massType": "estimated"
   },
   {
     "id": "exo-draugr",
@@ -256,7 +259,10 @@
     "textureTheme": "terrestrial-rocky",
     "temperatureK": 600,
     "albedo": 0.16,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 0.309,
+    "massJupiter": 0.00097,
+    "massType": "estimated"
   },
   {
     "id": "exo-k2-413-b",
@@ -1153,7 +1159,10 @@
     "textureSource": "procedural",
     "textureTheme": "terrestrial-ocean",
     "albedo": 0.3,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 1.13,
+    "massJupiter": 0.0036,
+    "massType": "estimated"
   },
   {
     "id": "exo-gj-273-c",
@@ -1364,12 +1373,15 @@
     "discoveryYear": 2014,
     "discoveryMethod": "transit",
     "confirmed": true,
-    "description": "Kepler-186 f is the first Earth-size planet in the habitable zone. The mass of the planet is not known, therefore one can only speculate about the planet's composition. If it is rocky, it could have liquid water on its surface. Kepler-186 orbits an M-dwarf, a star that is much cooler than the Sun. This is why the system's habitable zone is much closer to the star than in the Solar system.",
+    "description": "Kepler-186 f is the first Earth-size planet in the habitable zone. Its direct radial-velocity mass remains unmeasured, so its mass (~1.31 M⊕) is estimated via empirical mass-radius relations. If it is rocky, it could have liquid water on its surface. Kepler-186 orbits an M-dwarf, a star that is much cooler than the Sun. This is why the system's habitable zone is much closer to the star than in the Solar system.",
     "textureSource": "procedural",
     "textureTheme": "terrestrial-ocean",
     "temperatureK": 200,
     "albedo": 0.3,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 1.31,
+    "massJupiter": 0.0041,
+    "massType": "estimated"
   },
   {
     "id": "exo-wolf1061b",
@@ -1455,7 +1467,10 @@
     "textureTheme": "terrestrial-rocky",
     "temperatureK": 591,
     "albedo": 0.16,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 1.36,
+    "massJupiter": 0.0043,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-589-c",
@@ -1651,7 +1666,10 @@
     "textureSource": "procedural",
     "textureTheme": "terrestrial-ocean",
     "albedo": 0.3,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 1.46,
+    "massJupiter": 0.0046,
+    "massType": "estimated"
   },
   {
     "id": "exo-ltt-1445-a-c",
@@ -3270,7 +3288,10 @@
     "textureTheme": "super-earth",
     "temperatureK": 376,
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 2.3,
+    "massJupiter": 0.0072,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-100-b",
@@ -3312,7 +3333,10 @@
     "semiMajorAxisAU": 0.02085,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "albedo": 0.08,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 7.8,
+    "massJupiter": 0.0245,
+    "massType": "measured"
   },
   {
     "id": "exo-k2-368-c",
@@ -3787,11 +3811,14 @@
     "discoveryYear": 2013,
     "discoveryMethod": "transit",
     "confirmed": true,
-    "description": "The Kepler-62 system has five planets. Two of them orbit in the habitable zone. Kepler-62 f is one of them. Only the size, not the mass of planets in this system is known. Kepler-62 could be the Holy Grail of exoplanetology: a system with a rocky or water planet in the habitable zone.",
+    "description": "The Kepler-62 system has five planets. Two of them orbit in the habitable zone. Kepler-62 f is one of them. Direct radial-velocity masses in this distant system remain unmeasured, so planetary mass is estimated from empirical mass-radius models. Kepler-62 could be the Holy Grail of exoplanetology: a system with a rocky or water planet in the habitable zone.",
     "textureSource": "procedural",
     "textureTheme": "terrestrial-ocean",
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 2.57,
+    "massJupiter": 0.0081,
+    "massType": "estimated"
   },
   {
     "id": "exo-toi-237-b",
@@ -5167,11 +5194,14 @@
     "discoveryYear": 2013,
     "discoveryMethod": "transit",
     "confirmed": true,
-    "description": "The Kepler-62 system has five planets. Two of them orbit in the habitable zone. Kepler-62 e is one of them.  Only the size, not the mass of planets in this system is known. Kepler-62 could be the Holy Grail of exoplanetology: a system with a rocky or water planet in the habitable zone.",
+    "description": "The Kepler-62 system has five planets. Two of them orbit in the habitable zone. Kepler-62 e is one of them. Direct radial-velocity masses in this distant system remain unmeasured, so planetary mass is estimated from empirical mass-radius models. Kepler-62 could be the Holy Grail of exoplanetology: a system with a rocky or water planet in the habitable zone.",
     "textureSource": "procedural",
     "textureTheme": "hycean-ocean",
     "albedo": 0.38,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 3.22,
+    "massJupiter": 0.0101,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-105-c",
@@ -5321,7 +5351,10 @@
     "textureSource": "procedural",
     "textureTheme": "hycean-ocean",
     "albedo": 0.38,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 3.29,
+    "massJupiter": 0.0104,
+    "massType": "estimated"
   },
   {
     "id": "exo-toi-178-c",
@@ -5757,7 +5790,10 @@
     "semiMajorAxisAU": 0.0186,
     "description": "This planet was discovered by Vanderburg et al. 2016. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Livingston et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.08,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 4.73,
+    "massJupiter": 0.0149,
+    "massType": "measured"
   },
   {
     "id": "exo-hd-20329-b",
@@ -5908,7 +5944,10 @@
     "orbitalPeriodDays": 7.107163,
     "description": "Kepler-23 b has been discovered by the Kepler spacecraft and was originally classified as a planet candidate. A new statistical analysis led by a team at NASA Ames Research Center has validated the planet with more than 99 percent confidence. Although many parameters of Kepler-23 b are still unknown, the object is highly unlikely to be a false positive.",
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 3.5,
+    "massJupiter": 0.011,
+    "massType": "estimated"
   },
   {
     "id": "exo-k2-376-b",
@@ -7024,7 +7063,10 @@
     "semiMajorAxisAU": 0.0674,
     "description": "This planet was discovered by Vanderburg et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Vanderburg et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 3.8,
+    "massJupiter": 0.012,
+    "massType": "estimated"
   },
   {
     "id": "exo-epic-249893012-b",
@@ -7632,7 +7674,10 @@
     "textureTheme": "super-earth",
     "temperatureK": 460,
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 5.4,
+    "massJupiter": 0.017,
+    "massType": "measured"
   },
   {
     "id": "exo-kepler-98-b",
@@ -8024,7 +8069,10 @@
     "semiMajorAxisAU": 0.048,
     "description": "This planet was discovered by Vanderburg et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Vanderburg et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.08,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 4.82,
+    "massJupiter": 0.0152,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-1312-b",
@@ -8437,7 +8485,10 @@
     "semiMajorAxisAU": 0.0719,
     "description": "This planet was discovered by Mann et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Mann et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 5.09,
+    "massJupiter": 0.016,
+    "massType": "estimated"
   },
   {
     "id": "exo-hd-86226-c",
@@ -8479,7 +8530,10 @@
     "semiMajorAxisAU": 0.1027,
     "description": "This planet was discovered by Vanderburg et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Vanderburg et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.18,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 5.14,
+    "massJupiter": 0.0162,
+    "massType": "estimated"
   },
   {
     "id": "exo-toi-1470-b",
@@ -9131,7 +9185,10 @@
     "orbitalPeriodDays": 15.274299,
     "description": "Kepler-23 d has been discovered by the Kepler spacecraft and was originally classified as a planet candidate. A new statistical analysis led by a team at NASA Ames Research Center has validated the planet with more than 99 percent confidence. Although many parameters of Kepler-23 d are still unknown, the object is highly unlikely to be a false positive.",
     "albedo": 0.081,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 5.48,
+    "massJupiter": 0.0172,
+    "massType": "estimated"
   },
   {
     "id": "exo-hd-207496-b",
@@ -10618,7 +10675,10 @@
     "textureSource": "procedural",
     "textureTheme": "hycean-ocean",
     "albedo": 0.38,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 6.26,
+    "massJupiter": 0.0197,
+    "massType": "estimated"
   },
   {
     "id": "exo-poltergeist",
@@ -12147,7 +12207,10 @@
     "semiMajorAxisAU": 0.1458,
     "description": "This planet was discovered by Mann et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Mann et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.417,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 7.34,
+    "massJupiter": 0.0231,
+    "massType": "estimated"
   },
   {
     "id": "exo-k2-358-b",
@@ -13173,7 +13236,10 @@
     "orbitalPeriodDays": 9.9775,
     "description": "This planet was announced as part of a batch of 149 validated planets from the K2 mission.",
     "albedo": 0.381,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 6.5,
+    "massJupiter": 0.0205,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-1738-b",
@@ -13347,7 +13413,10 @@
     "semiMajorAxisAU": 0.1841,
     "description": "This planet was discovered by Vanderburg et al. 2016. The discovery was made with a space based telescope (0.95 m Kepler Telescope). The parameters listed here are those reported by Livingston et al. 2018 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.2,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 11.13,
+    "massJupiter": 0.035,
+    "massType": "measured"
   },
   {
     "id": "exo-kepler-307-c",
@@ -13563,7 +13632,10 @@
     "semiMajorAxisAU": 0.1226,
     "description": "Kepler-410 b is a Neptune sized exoplanet aroud the bright star Kepler-410. The host star is in fact one of the brightest hosts of all currently known transiting exoplanets. The confirmation was difficult because there is a second, fainter star nearby. Transit timing variations indicate the presence of another planet in the system.",
     "albedo": 0.063,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 8.46,
+    "massJupiter": 0.0266,
+    "massType": "estimated"
   },
   {
     "id": "exo-hd-63935-c",
@@ -14790,7 +14862,10 @@
     "semiMajorAxisAU": 0.215,
     "description": "This planet was discovered by Badenas-Agusti et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Badenas-Agusti et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.47,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 2.8,
+    "massJupiter": 0.0088,
+    "massType": "measured"
   },
   {
     "id": "exo-kepler-11-d",
@@ -15008,7 +15083,10 @@
     "semiMajorAxisAU": 0.113,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "albedo": 0.202,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 9.98,
+    "massJupiter": 0.0314,
+    "massType": "estimated"
   },
   {
     "id": "exo-k2-341-b",
@@ -15136,7 +15214,10 @@
     "semiMajorAxisAU": 0.04813,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "albedo": 0.209,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 19.2,
+    "massJupiter": 0.0604,
+    "massType": "measured"
   },
   {
     "id": "exo-hd-164922-e",
@@ -15221,7 +15302,10 @@
     "semiMajorAxisAU": 0.1762,
     "description": "This planet was discovered by Badenas-Agusti et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Badenas-Agusti et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.47,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 8,
+    "massJupiter": 0.0252,
+    "massType": "measured"
   },
   {
     "id": "exo-gliese-3634-b",
@@ -15284,7 +15368,10 @@
     "semiMajorAxisAU": 0.411,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "albedo": 0.193,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 5.7,
+    "massJupiter": 0.0179,
+    "massType": "measured"
   },
   {
     "id": "exo-kepler-1883-b",
@@ -16026,7 +16113,10 @@
     "semiMajorAxisAU": 0.0814,
     "description": "This planet was discovered by Badenas-Agusti et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Badenas-Agusti et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.471,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 10,
+    "massJupiter": 0.0315,
+    "massType": "measured"
   },
   {
     "id": "exo-kepler-277-c",
@@ -17034,7 +17124,10 @@
     "orbitalPeriodDays": 10.742371,
     "description": "Kepler-23 c has been discovered by the Kepler spacecraft and was originally classified as a planet candidate. A new statistical analysis led by a team at NASA Ames Research Center has validated the planet with more than 99 percent confidence. Although many parameters of Kepler-23 c are still unknown, the object is highly unlikely to be a false positive.",
     "albedo": 0.081,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 13.75,
+    "massJupiter": 0.0433,
+    "massType": "estimated"
   },
   {
     "id": "exo-kepler-1661-b",
@@ -17995,7 +18088,10 @@
     "semiMajorAxisAU": 0.308,
     "description": "The parameters listed here were imported into the Open Exoplanet Catalogue from the exoplanet.eu website.",
     "albedo": 0.195,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 7.9,
+    "massJupiter": 0.0249,
+    "massType": "measured"
   },
   {
     "id": "exo-gj-422-b",
@@ -20134,7 +20230,10 @@
     "orbitalPeriodDays": 8.138268,
     "description": "This planet was discovered by Newton et al. 2019. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Newton et al. 2019 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.107,
-    "albedoType": "estimated"
+    "albedoType": "estimated",
+    "massEarth": 13.2,
+    "massJupiter": 0.0415,
+    "massType": "estimated"
   },
   {
     "id": "exo-61-virc",
@@ -23540,7 +23639,10 @@
     "description": "This planet was discovered by Rizzuto et al. 2020. The discovery was made with a space based telescope (0.1 m TESS Telescope). The parameters listed here are those reported by Rizzuto et al. 2020 and were imported into the Open Exoplanet Catalogue from the NASA Exoplanet Archive.",
     "albedo": 0.092,
     "albedoType": "estimated",
-    "sudarskyClass": "Class IV"
+    "sudarskyClass": "Class IV",
+    "massEarth": 13.8,
+    "massJupiter": 0.0434,
+    "massType": "measured"
   },
   {
     "id": "exo-hd-177830-ac",
@@ -24427,7 +24529,10 @@
     "description": "This planet was announced as part of a batch of 149 validated planets from the K2 mission.",
     "albedo": 0.067,
     "albedoType": "estimated",
-    "sudarskyClass": "Class IV"
+    "sudarskyClass": "Class IV",
+    "massEarth": 182.433,
+    "massJupiter": 0.574,
+    "massType": "measured"
   },
   {
     "id": "exo-hd208487b",
