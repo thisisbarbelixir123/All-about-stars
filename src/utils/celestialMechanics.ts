@@ -44,26 +44,23 @@ export const extractBounds = (rangeStr: string, isRa: boolean): [number, number]
   return [results[0], results[results.length - 1]];
 };
 
+/**
+ * True polar constellations that physically contain or immediately envelope the Celestial Poles
+ * (North Celestial Pole: Ursa Minor; South Celestial Pole: Octans).
+ */
 export const POLAR_CONSTELLATION_IDS = new Set([
   'ursa-minor', 'umi',
-  'octans', 'oct',
-  'draco', 'dra',
-  'cepheus', 'cep',
-  'camelopardalis', 'cam',
-  'apus', 'aps',
-  'chamaeleon', 'cha',
-  'mensa', 'men',
-  'hydrus', 'hyi'
+  'octans', 'oct'
 ]);
 
 export const isPolarConstellation = (cId: string, decBounds: number[]): boolean => {
   const idClean = (cId || '').toLowerCase().trim();
-  // Ensure Ursa Major and other mid-latitude constellations never trigger polar mode
-  if (idClean === 'ursa-major' || idClean === 'uma') return false;
+  // True celestial pole hosts
   if (POLAR_CONSTELLATION_IDS.has(idClean)) return true;
   if (!decBounds || decBounds.length === 0) return false;
-  const decCenter = (decBounds[0] + decBounds[1]) / 2;
-  return Math.abs(decCenter) >= 65;
+  // A constellation is only polar-centered if its astronomical boundary extends all the way to the celestial pole (>= 88° or <= -88°)
+  const [minDec, maxDec] = decBounds;
+  return maxDec >= 88 || minDec <= -88;
 };
 
 /**
