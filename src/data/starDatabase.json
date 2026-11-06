@@ -90510,9 +90510,12 @@
     "surfaceGravityLogG": 2.5,
     "colorHex": "#ff924d",
     "coronaColorHex": "#ff661d",
-    "solarEngulfment": "Enormous giant/supergiant spanning roughly 4.93 AU (738.1 Million km)!",
+    "solarEngulfment": "Engulfs Mercury, Venus, Earth, and Mars out to 2.47 AU (Asteroid Belt)!",
     "engulfsPlanets": [
-      "Mercury"
+      "Mercury",
+      "Venus",
+      "Earth",
+      "Mars"
     ],
     "habitableZoneAU": {
       "inner": 243.09,
@@ -95558,8 +95561,11 @@
     "surfaceGravityLogG": 4.2,
     "colorHex": "#ff924d",
     "coronaColorHex": "#ff661d",
-    "solarEngulfment": "Enormous giant/supergiant spanning roughly 1.99 AU (298.0 Million km)!",
-    "engulfsPlanets": [],
+    "solarEngulfment": "Engulfs Mercury and Venus (reaches 0.996 AU, near Earth orbit)!",
+    "engulfsPlanets": [
+      "Mercury",
+      "Venus"
+    ],
     "habitableZoneAU": {
       "inner": 63.96,
       "outer": 92.14
