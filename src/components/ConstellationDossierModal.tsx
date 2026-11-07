@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
-import { ConstellationInfo } from '../data/constellationsData';
+import { ConstellationInfo, resolveConstellationByName } from '../data/constellationsData';
 import { CelestialData } from '../hooks/useCelestialData';
 import { ConstellationSkyMapGlobe, SkyMapLayerOptions } from './ConstellationSkyMapGlobe';
 import { MapToolbarToggle } from './common/MapToolbarToggle';
@@ -347,6 +347,43 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {constellation.borders.boundarySummary}
                 </p>
+
+                {/* Bordering Neighbor Constellations Badges */}
+                {constellation.borders.borderingConstellations && constellation.borders.borderingConstellations.length > 0 && (
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-cyan-900/40">
+                    <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold flex items-center gap-1.5">
+                      <Navigation className="w-3 h-3 text-cyan-400" />
+                      <span>Bordering Constellations ({constellation.borders.borderingConstellations.length}):</span>
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {constellation.borders.borderingConstellations.map((neighborName) => {
+                        const resolved = resolveConstellationByName(neighborName);
+                        return (
+                          <button
+                            key={neighborName}
+                            onClick={() => {
+                              if (resolved) {
+                                onSelectNeighbor(resolved);
+                              }
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+                              resolved
+                                ? 'bg-slate-900/90 hover:bg-cyan-950 text-cyan-300 border-cyan-500/30 hover:border-cyan-400 shadow-sm'
+                                : 'bg-slate-950 text-slate-500 border-slate-800 cursor-default'
+                            }`}
+                            title={resolved ? `Fly camera to ${resolved.name} and open dossier` : neighborName}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                            <span>{neighborName}</span>
+                            {resolved && (
+                              <span className="text-[9px] text-cyan-400/80 font-bold">[{resolved.abbreviation}]</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Metrics Grid */}
