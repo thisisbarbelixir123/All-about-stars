@@ -252,8 +252,73 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
   // Store active 2D projected objects for pixel-accurate hit-testing
   const renderedBoundariesRef = useRef<Array<{ id: string; constInfo?: ConstellationInfo; ring: Array<{ x: number; y: number }> }>>([]);
+  const renderedBadgesRef = useRef<Array<{ id: string; constInfo: ConstellationInfo; rect: { x: number; y: number; w: number; h: number } }>>([]);
   const renderedStarsRef = useRef<Array<{ id: string; data: any; x: number; y: number; r: number }>>([]);
   const renderedDsosRef = useRef<Array<{ id: string; data: any; x: number; y: number; r: number }>>([]);
+
+  // Smooth Camera Flight Animation
+  const animFrameRef = useRef<number | null>(null);
+  const cameraRef = useRef({ centerRa, centerDec, zoom });
+  useEffect(() => {
+    cameraRef.current = { centerRa, centerDec, zoom };
+  }, [centerRa, centerDec, zoom]);
+
+  const flyTo = useCallback((targetRa: number, targetDec: number, targetZoom: number, duration = 700, onComplete?: () => void) => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+
+    const startRa = cameraRef.current.centerRa;
+    const startDec = cameraRef.current.centerDec;
+    const startZoom = cameraRef.current.zoom;
+
+    let deltaRa = (targetRa - startRa) % 360;
+    if (deltaRa > 180) deltaRa -= 360;
+    if (deltaRa < -180) deltaRa += 360;
+
+    const deltaDec = targetDec - startDec;
+    const deltaZoom = targetZoom - startZoom;
+
+    const startTime = performance.now();
+
+    const easeInOutCubic = (t: number) => {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = easeInOutCubic(progress);
+
+      const nextRa = ((startRa + deltaRa * ease) % 360 + 360) % 360;
+      const nextDec = Math.max(-90, Math.min(90, startDec + deltaDec * ease));
+      const nextZoom = Math.max(0.6, Math.min(12.0, startZoom + deltaZoom * ease));
+
+      setCenterRa(nextRa);
+      setCenterDec(nextDec);
+      setZoom(nextZoom);
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(step);
+      } else {
+        animFrameRef.current = null;
+        if (onComplete) onComplete();
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
+  }, []);
+
+  // Cancel animation on component unmount
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, []);
+
   // Camera Change notification
   useEffect(() => {
     if (onCameraChange) {
@@ -284,25 +349,36 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     return () => observer.disconnect();
   }, [fitContainer, variant, aspectRatio]);
 
-  // Synchronize when focalConstellation or selectedConstellationId changes
+  // Track previous focal constellation ID for smooth animated transitions
+  const prevFocalIdRef = useRef<string | null>(focalConstellation?.id || null);
+
+  // Synchronize camera when focalConstellation or selectedConstellationId changes
   useEffect(() => {
     if (focalConstellation) {
       const { cLon, cLat, optimalZoom } = getConstellationBoundingSpan(focalConstellation, celestialData.bounds);
-      setCenterRa((cLon % 360 + 360) % 360);
-      setCenterDec(cLat);
-      if (initialZoom === undefined) {
-        setZoom(optimalZoom);
+      const targetRa = (cLon % 360 + 360) % 360;
+      const targetDec = cLat;
+      const targetZoom = initialZoom !== undefined ? initialZoom : optimalZoom;
+
+      if (prevFocalIdRef.current && prevFocalIdRef.current !== focalConstellation.id) {
+        // Smoothly fly camera to new neighboring constellation
+        flyTo(targetRa, targetDec, targetZoom, 700);
+      } else {
+        setCenterRa(targetRa);
+        setCenterDec(targetDec);
+        if (initialZoom === undefined) {
+          setZoom(optimalZoom);
+        }
       }
+      prevFocalIdRef.current = focalConstellation.id;
       return;
     }
     if (!selectedConstellationId) return;
     const target = constellationCenters.find((item) => item.constInfo.id === selectedConstellationId);
     if (target) {
-      setCenterRa(target.raDeg);
-      setCenterDec(target.decDeg);
-      setZoom(Math.max(1.8, zoom));
+      flyTo(target.raDeg, target.decDeg, Math.max(1.8, zoom), 700);
     }
-  }, [focalConstellation, selectedConstellationId, constellationCenters, celestialData.bounds, initialZoom]);
+  }, [focalConstellation, selectedConstellationId, constellationCenters, celestialData.bounds, initialZoom, flyTo]);
 
   // Main Canvas Rendering Loop
   useEffect(() => {
@@ -825,7 +901,9 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       }
     }
 
-    // 9. Constellation Names / Abbreviation Labels
+    // 9. Constellation Names / Abbreviation Labels & Interactive Badges
+    const currentRenderedBadges: Array<{ id: string; constInfo: ConstellationInfo; rect: { x: number; y: number; w: number; h: number } }> = [];
+
     if (effectiveShowLabels) {
       ctx.font = zoom >= 1.6 ? 'bold 10px monospace' : '9px monospace';
       ctx.textAlign = 'center';
@@ -834,25 +912,75 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       constellationCenters.forEach(({ constInfo, label, fullName, raDeg, decDeg }) => {
         const pt = projectDynamicSphericalPoint(raDeg, decDeg, projOpts);
         if (pt.isVisible) {
+          const isFocal = focalConstellation?.id === constInfo.id;
           const isHovered = hoveredConstellation?.id === constInfo.id;
           const displayLabel = zoom >= 1.7 || isHovered
             ? (label.startsWith('Ser') ? label : fullName.toUpperCase())
             : label;
+
+          const textMetrics = ctx.measureText(displayLabel);
+          const badgeW = textMetrics.width + 14;
+          const badgeH = 16;
+          const bx = pt.x - badgeW / 2;
+          const by = pt.y - badgeH / 2;
+
+          // Render pill badge in dossier mode or on hover/focal
+          if (variant === 'dossier' || isHovered || isFocal) {
+            ctx.save();
+            ctx.beginPath();
+            const r = 4;
+            ctx.moveTo(bx + r, by);
+            ctx.lineTo(bx + badgeW - r, by);
+            ctx.arcTo(bx + badgeW, by, bx + badgeW, by + r, r);
+            ctx.lineTo(bx + badgeW, by + badgeH - r);
+            ctx.arcTo(bx + badgeW, by + badgeH, bx + badgeW - r, by + badgeH, r);
+            ctx.lineTo(bx + r, by + badgeH);
+            ctx.arcTo(bx, by + badgeH, bx, by + badgeH - r, r);
+            ctx.lineTo(bx, by + r);
+            ctx.arcTo(bx, by, bx + r, by, r);
+            ctx.closePath();
+
+            ctx.fillStyle = isFocal
+              ? 'rgba(6, 78, 59, 0.88)'
+              : isHovered
+              ? 'rgba(8, 47, 73, 0.95)'
+              : 'rgba(3, 8, 22, 0.82)';
+            ctx.fill();
+
+            ctx.lineWidth = isFocal ? 1.4 : isHovered ? 1.4 : 0.8;
+            ctx.strokeStyle = isFocal
+              ? '#10b981'
+              : isHovered
+              ? '#38bdf8'
+              : 'rgba(51, 65, 85, 0.8)';
+            ctx.stroke();
+            ctx.restore();
+
+            currentRenderedBadges.push({
+              id: constInfo.id,
+              constInfo,
+              rect: { x: bx, y: by, w: badgeW, h: badgeH }
+            });
+          }
 
           // Text shadow
           ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
           ctx.fillText(displayLabel, pt.x + 1, pt.y + 1);
 
           // Text foreground
-          ctx.fillStyle = isHovered
-            ? (constInfo.isZodiac ? '#fbbf24' : '#22d3ee')
+          ctx.fillStyle = isFocal
+            ? '#34d399'
+            : isHovered
+            ? (constInfo.isZodiac ? '#fbbf24' : '#38bdf8')
             : constInfo.isZodiac
             ? '#fef08a'
-            : 'rgba(224, 231, 255, 0.85)';
+            : 'rgba(224, 231, 255, 0.88)';
           ctx.fillText(displayLabel, pt.x, pt.y);
         }
       });
     }
+
+    renderedBadgesRef.current = currentRenderedBadges;
 
     ctx.restore(); // Restore unclipped state
 
@@ -870,6 +998,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     centerDec,
     zoom,
     projection,
+    variant,
     effectiveShowMilkyWay,
     effectiveShowBoundaries,
     effectiveShowAsterisms,
@@ -891,6 +1020,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
   // Mouse & Touch Drag Handlers (Continuous Dynamic Rotation)
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
     isDraggingRef.current = true;
     dragStartRef.current = {
       x: e.clientX,
@@ -948,16 +1081,31 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       setMouseCoord(null);
     }
 
-    // 1. Primary Hit-Testing: True Boundary Polygon Containment (Ray-casting)
+    // 1. Primary Hit-Testing: Check Interactive Constellation Badges first
     let matchedConstellation: ConstellationInfo | null = null;
-    for (const pb of renderedBoundariesRef.current) {
-      if (pointInPolygon(mouseX, mouseY, pb.ring)) {
-        matchedConstellation = pb.constInfo || null;
+    for (const b of renderedBadgesRef.current) {
+      if (
+        mouseX >= b.rect.x &&
+        mouseX <= b.rect.x + b.rect.w &&
+        mouseY >= b.rect.y &&
+        mouseY <= b.rect.y + b.rect.h
+      ) {
+        matchedConstellation = b.constInfo;
         break;
       }
     }
 
-    // 2. Secondary Fallback: Proximity to constellation center label anchor
+    // 2. Secondary Hit-Testing: True Boundary Polygon Containment (Ray-casting)
+    if (!matchedConstellation) {
+      for (const pb of renderedBoundariesRef.current) {
+        if (pointInPolygon(mouseX, mouseY, pb.ring)) {
+          matchedConstellation = pb.constInfo || null;
+          break;
+        }
+      }
+    }
+
+    // 3. Tertiary Fallback: Proximity to constellation center label anchor
     if (!matchedConstellation && spherical) {
       let minDistance = Infinity;
       for (const item of constellationCenters) {
@@ -988,6 +1136,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
   // Touch Drag & Pinch-to-Zoom Handlers for Mobile
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
     if (e.touches.length === 1) {
       isDraggingRef.current = true;
       dragStartRef.current = {
@@ -1031,7 +1183,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     touchDistanceRef.current = null;
   }, []);
 
-  // Click on Canvas: handles star selection, DSO selection, and constellation selection
+  // Click on Canvas: handles star selection, DSO selection, and constellation territory/badge selection
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1075,8 +1227,21 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
       }
     }
 
-    // 3. Constellation boundary selection
-    let target = hoveredConstellation;
+    // 3. Check if user clicked directly on a constellation pill badge
+    let target: ConstellationInfo | null = null;
+    for (const b of renderedBadgesRef.current) {
+      if (
+        clickX >= b.rect.x &&
+        clickX <= b.rect.x + b.rect.w &&
+        clickY >= b.rect.y &&
+        clickY <= b.rect.y + b.rect.h
+      ) {
+        target = b.constInfo;
+        break;
+      }
+    }
+
+    // 4. Check if user clicked within boundary polygon territory
     if (!target) {
       for (const pb of renderedBoundariesRef.current) {
         if (pointInPolygon(clickX, clickY, pb.ring)) {
@@ -1085,10 +1250,24 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         }
       }
     }
-    if (target) {
-      setHoveredConstellation(target);
+
+    if (!target) {
+      target = hoveredConstellation;
     }
-  }, [hoveredConstellation, onSelectStar, onSelectDso]);
+
+    if (target) {
+      // In dossier mode, clicking a neighboring constellation territory or badge smoothly flies to it and opens its dossier
+      if (variant === 'dossier' && target.id !== focalConstellation?.id && onSelectConstellation) {
+        const { cLon, cLat, optimalZoom } = getConstellationBoundingSpan(target, celestialData.bounds);
+        const targetRa = (cLon % 360 + 360) % 360;
+        const targetDec = cLat;
+        flyTo(targetRa, targetDec, optimalZoom, 700);
+        onSelectConstellation(target);
+      } else {
+        setHoveredConstellation(target);
+      }
+    }
+  }, [hoveredConstellation, onSelectStar, onSelectDso, variant, focalConstellation, onSelectConstellation, celestialData.bounds, flyTo]);
 
   // Double Click on Canvas: opens the Constellation Dossier
   const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -1099,18 +1278,35 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const clickY = e.clientY - rect.top;
-        for (const pb of renderedBoundariesRef.current) {
-          if (pointInPolygon(clickX, clickY, pb.ring)) {
-            target = pb.constInfo || null;
+        for (const b of renderedBadgesRef.current) {
+          if (
+            clickX >= b.rect.x &&
+            clickX <= b.rect.x + b.rect.w &&
+            clickY >= b.rect.y &&
+            clickY <= b.rect.y + b.rect.h
+          ) {
+            target = b.constInfo;
             break;
+          }
+        }
+        if (!target) {
+          for (const pb of renderedBoundariesRef.current) {
+            if (pointInPolygon(clickX, clickY, pb.ring)) {
+              target = pb.constInfo || null;
+              break;
+            }
           }
         }
       }
     }
     if (target && onSelectConstellation) {
+      const { cLon, cLat, optimalZoom } = getConstellationBoundingSpan(target, celestialData.bounds);
+      const targetRa = (cLon % 360 + 360) % 360;
+      const targetDec = cLat;
+      flyTo(targetRa, targetDec, optimalZoom, 700);
       onSelectConstellation(target);
     }
-  }, [hoveredConstellation, onSelectConstellation]);
+  }, [hoveredConstellation, onSelectConstellation, celestialData.bounds, flyTo]);
 
   const activeConstellation = hoveredConstellation || (
     selectedConstellationId
@@ -1355,7 +1551,11 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           <canvas
             ref={canvasRef}
             style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
-            className="cursor-grab active:cursor-grabbing block touch-none"
+            className={`${
+              hoveredConstellation && hoveredConstellation.id !== focalConstellation?.id
+                ? 'cursor-pointer'
+                : 'cursor-grab active:cursor-grabbing'
+            } block touch-none`}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -1423,7 +1623,15 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           {activeConstellation && (variant !== 'dossier' || activeConstellation.id !== focalConstellation?.id) && (
             <div className="absolute bottom-3 left-4 right-4 sm:left-auto sm:right-4 z-20 pointer-events-auto">
               <div
-                onClick={() => onSelectConstellation && onSelectConstellation(activeConstellation)}
+                onClick={() => {
+                  if (activeConstellation && onSelectConstellation) {
+                    const { cLon, cLat, optimalZoom } = getConstellationBoundingSpan(activeConstellation, celestialData.bounds);
+                    const targetRa = (cLon % 360 + 360) % 360;
+                    const targetDec = cLat;
+                    flyTo(targetRa, targetDec, optimalZoom, 700);
+                    onSelectConstellation(activeConstellation);
+                  }
+                }}
                 className="p-2 sm:p-2.5 rounded-xl bg-[#040c24]/95 border border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#071338] transition-all"
                 title={variant === 'dossier' ? `Switch dossier to ${activeConstellation.name}` : `Click to open Constellation Dossier for ${activeConstellation.name}`}
               >
