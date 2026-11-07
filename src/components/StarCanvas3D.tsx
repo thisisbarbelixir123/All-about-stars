@@ -1326,6 +1326,11 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
+      // Explicitly dispose all cached planet textures and materials to free GPU VRAM immediately on unmount
+      planetTextureCacheRef.current.forEach((tex) => tex.dispose());
+      planetTextureCacheRef.current.clear();
+      planetMaterialCacheRef.current.forEach((mat) => mat.dispose());
+      planetMaterialCacheRef.current.clear();
     };
   }, []);
 
