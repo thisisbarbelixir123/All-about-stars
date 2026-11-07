@@ -105,12 +105,40 @@ export function abbreviateConstellation(str?: string): string {
   return str.slice(0, 3);
 }
 
+const ABBR_TO_GENITIVE_MAP = new Map<string, string>();
+for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
+  if (!ABBR_TO_GENITIVE_MAP.has(abbr)) {
+    ABBR_TO_GENITIVE_MAP.set(abbr, full);
+  }
+}
+
+/**
+ * Returns the full Latin genitive of the constellation (e.g. "Orionis", "Pavonis", "Scorpii").
+ */
+export function getConstellationGenitive(constellationOrAbbr?: string): string {
+  if (!constellationOrAbbr) return '';
+  const abbr = abbreviateConstellation(constellationOrAbbr);
+  return ABBR_TO_GENITIVE_MAP.get(abbr) || constellationOrAbbr;
+}
+
 export const GREEK_WORDS_MAP: Record<string, string> = {
   alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε',
   zeta: 'ζ', eta: 'η', theta: 'θ', iota: 'ι', kappa: 'κ',
   lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', omicron: 'ο',
   pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ',
   phi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω'
+};
+
+export const GREEK_CHAR_TO_WORD: Record<string, string> = {
+  'α': 'Alpha', 'β': 'Beta', 'γ': 'Gamma', 'δ': 'Delta', 'ε': 'Epsilon',
+  'ζ': 'Zeta', 'η': 'Eta', 'θ': 'Theta', 'ι': 'Iota', 'κ': 'Kappa',
+  'λ': 'Lambda', 'μ': 'Mu', 'ν': 'Nu', 'ξ': 'Xi', 'ο': 'Omicron',
+  'π': 'Pi', 'ρ': 'Rho', 'σ': 'Sigma', 'τ': 'Tau', 'υ': 'Upsilon',
+  'φ': 'Phi', 'χ': 'Chi', 'ψ': 'Psi', 'ω': 'Omega'
+};
+
+const SUPERSCRIPT_TO_DIGIT: Record<string, string> = {
+  '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9'
 };
 
 const GREEK_CHARS = new Set(Object.values(GREEK_WORDS_MAP));
@@ -127,6 +155,7 @@ export interface DossierStarNameInfo {
   bayerDesignation?: string;
   badge?: string;
   displayFullName: string;
+  hoverFullName: string;
 }
 
 /**
@@ -177,17 +206,20 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
     return {
       tier: 'other',
       primaryName: 'Unknown Star',
-      displayFullName: 'Unknown Star'
+      displayFullName: 'Unknown Star',
+      hoverFullName: 'Unknown Star'
     };
   }
 
   const cAbbr = abbreviateConstellation(star.constellation);
+  const cGenitive = getConstellationGenitive(star.constellation);
 
   // 1. Try to find Proper Name
   const proper = extractProperName(star.name);
 
   // 2. Find Bayer designation (Greek letter + abbreviated genitive)
   let bayer: string | null = null;
+  let fullBayer: string | null = null;
   const allDesignations: string[] = [
     star.bayerDesignation,
     star.primaryDesignation,
@@ -199,13 +231,19 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
   for (const n of allDesignations) {
     const trimmed = n.trim();
     if ([...GREEK_CHARS].some((c) => trimmed.startsWith(c))) {
-      const match = trimmed.match(/^([α-ωΑ-Ω][¹²³⁴⁵⁶⁷⁸⁹0-9]?)\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
+      const match = trimmed.match(/^([α-ωΑ-Ω])([¹²³⁴⁵⁶⁷⁸⁹0-9])?\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
       if (match) {
         const symbol = match[1];
-        const constName = match[2].trim();
-        const comp = match[3] ? ` ${match[3]}` : '';
+        const num = match[2] || '';
+        const constName = match[3].trim();
+        const comp = match[4] ? ` ${match[4]}` : '';
         const abbr = abbreviateConstellation(constName) || cAbbr;
-        bayer = `${symbol} ${abbr}${comp}`.trim();
+        const genitive = getConstellationGenitive(constName) || cGenitive;
+        bayer = `${symbol}${num} ${abbr}${comp}`.trim();
+        const greekWord = GREEK_CHAR_TO_WORD[symbol] || symbol;
+        const digitNum = num ? (SUPERSCRIPT_TO_DIGIT[num] || num) : '';
+        const numPart = digitNum ? `-${digitNum}` : '';
+        fullBayer = `${greekWord}${numPart} ${genitive}${comp}`.trim();
         break;
       }
       bayer = trimmed;
@@ -217,7 +255,11 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
       if (gChar) {
         const num = m[2] ? (SUPERSCRIPTS[m[2]] || m[2]) : '';
         const abbr = m[3] ? (abbreviateConstellation(m[3]) || cAbbr) : cAbbr;
+        const genitive = m[3] ? (getConstellationGenitive(m[3]) || cGenitive) : cGenitive;
         bayer = `${gChar}${num} ${abbr}`.trim();
+        const greekWord = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+        const numPart = m[2] ? `-${m[2]}` : '';
+        fullBayer = `${greekWord}${numPart} ${genitive}`.trim();
         break;
       }
     }
@@ -225,6 +267,7 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
 
   // 3. Find other designations (numbered/Flamsteed, variable, catalog with abbreviated genitive)
   let other: string | null = null;
+  let fullOther: string | null = null;
   // Flamsteed
   for (const n of allDesignations) {
     const trimmed = n.trim();
@@ -234,7 +277,9 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
       const constName = fMatch[2].trim();
       const comp = fMatch[3] ? ` ${fMatch[3]}` : '';
       const abbr = abbreviateConstellation(constName) || cAbbr;
+      const genitive = getConstellationGenitive(constName) || cGenitive;
       other = `${num} ${abbr}${comp}`.trim();
+      fullOther = `${num} ${genitive}${comp}`.trim();
       break;
     }
   }
@@ -249,7 +294,9 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
         const constName = vMatch[2].trim();
         const comp = vMatch[3] ? ` ${vMatch[3]}` : '';
         const abbr = abbreviateConstellation(constName) || cAbbr;
+        const genitive = getConstellationGenitive(constName) || cGenitive;
         other = `${varId} ${abbr}${comp}`.trim();
+        fullOther = `${varId} ${genitive}${comp}`.trim();
         break;
       }
     }
@@ -259,6 +306,7 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
   if (!other) {
     const clean = star.name ? star.name.replace(/\s*\([^)]+\)/g, '').trim() : '';
     other = clean || star.primaryDesignation || '';
+    fullOther = other;
   }
 
   // Final Hierarchy:
@@ -266,31 +314,37 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
   // 2. then Bayer designation (Greek + abbreviated genitive)
   // 3. other designations (numbered/Flamsteed, variable, etc. with abbreviated genitive)
   if (proper) {
+    const hoverFullName = bayer ? `${proper} (${bayer})` : (other && other !== proper ? `${proper} (${other})` : proper);
     return {
       tier: 'proper',
       primaryName: proper,
       bayerDesignation: bayer || undefined,
       badge: bayer || other || undefined,
-      displayFullName: bayer ? `${proper} (${bayer})` : proper
+      displayFullName: bayer ? `${proper} (${bayer})` : proper,
+      hoverFullName
     };
   }
 
   if (bayer) {
+    const hoverFullName = fullBayer || (star.name ? star.name.replace(/\s*\([^)]+\)/g, '').trim() : bayer);
     return {
       tier: 'bayer',
       primaryName: bayer,
       bayerDesignation: bayer,
       badge: undefined,
-      displayFullName: bayer
+      displayFullName: bayer,
+      hoverFullName
     };
   }
 
+  const hoverFullName = fullOther || (star.name ? star.name.replace(/\s*\([^)]+\)/g, '').trim() : other);
   return {
     tier: 'other',
     primaryName: other,
     bayerDesignation: undefined,
     badge: undefined,
-    displayFullName: other
+    displayFullName: other,
+    hoverFullName
   };
 }
 

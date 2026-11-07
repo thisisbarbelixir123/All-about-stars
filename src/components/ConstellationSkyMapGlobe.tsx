@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { getDsoCategory, DSO_LEGEND_CONFIG } from './ConstellationMap';
 import { resolveDossierStarName } from '../utils/starDesignationUtils';
+import { StarDot2D } from './StarDot2D';
 
 export interface SkyMapLayerOptions {
   showMilkyWay?: boolean;
@@ -1771,12 +1772,9 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
               {(() => {
                 const tooltipNameInfo = resolveDossierStarName(hoveredStarTooltip.star);
                 return (
-                  <div className="flex items-center gap-1.5 font-bold text-white text-[12px] whitespace-nowrap">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                    <span>{tooltipNameInfo.primaryName}</span>
-                    {tooltipNameInfo.badge && (
-                      <span className="text-cyan-300 font-normal">({tooltipNameInfo.badge})</span>
-                    )}
+                  <div className="flex items-center gap-2 font-bold text-white text-[12px] whitespace-nowrap">
+                    <StarDot2D star={hoveredStarTooltip.star} sizeClassName="w-2.5 h-2.5" />
+                    <span>{tooltipNameInfo.hoverFullName}</span>
                   </div>
                 );
               })()}
