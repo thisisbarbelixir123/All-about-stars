@@ -15029,8 +15029,8 @@
     "diameterKm": 487445,
     "diameterAU": 0.0032583685698141427,
     "distanceParsecs": 3.789597615864801,
-    "rightAscension": "19h 16m 55.26s",
-    "declination": "+05° 10′ 08.0″",
+    "rightAscension": "07h 27m 24.50s",
+    "declination": "+05° 13′ 32.8″",
     "primaryDesignation": "HD 180617",
     "designations": [
       "HD 180617",
@@ -54153,31 +54153,13 @@
     "diameterKm": 2437225000,
     "diameterAU": 16.291842849070715,
     "distanceParsecs": 60400.544524705976,
-    "rightAscension": "00h 50m 56.09s",
-    "declination": "-72° 15′ 06.2″",
-    "primaryDesignation": "PMMR 37",
+    "rightAscension": "01h 10m 03.87s",
+    "declination": "-72° 36′ 52.6″",
+    "primaryDesignation": "HV 2112",
     "designations": [
-      "PMMR 37",
-      "2MASS J01100385-7236526",
-      "2MASS J01100560-7227400",
-      "Gaia DR2 4687439865638979712",
-      "Gaia DR3 4687439865638979712",
-      "TIC 183306762",
-      "[GDN2015] SMC401",
-      "[YBJ2019] 36106",
-      "AP J01100385-7236526",
-      "ASASSN-V J011003.77-723652.5",
-      "BBB SMC 120",
-      "EV* SMC V2156",
-      "MSX SMC 241",
-      "OGLE SMC-LPV-17785",
-      "PMMR 187",
-      "SSTISAGEMA J011003.86-723652.4",
-      "SV* HV 2112",
-      "UCAC2 1080740",
-      "UCAC4 087-004529",
-      "WISE J011003.85-723652.5",
-      "WISEA J011003.86-723652.6"
+      "HV 2112",
+      "PMMR 37-var",
+      "2MASS J01100388-7236526"
     ]
   },
   {
@@ -77634,117 +77616,6 @@
     ]
   },
   {
-    "id": "gliese-729",
-    "name": "Gliese 729 (V1216 Sagittarii)",
-    "alternateNames": [
-      "V1216 Sagittarii",
-      "HIP 92403",
-      "LHS 3405"
-    ],
-    "primaryDesignation": "V1216 Sag",
-    "constellation": "Sagittarius",
-    "rightAscension": "18h 49m 49.36s",
-    "declination": "-23° 50′ 10.4″",
-    "diameterSolar": 0.19,
-    "diameterKm": 264613,
-    "diameterAU": 0.0017688286521848203,
-    "temperature": 3120,
-    "spectralType": "M3.5Ve",
-    "spectralClass": "M",
-    "luminositySolar": 0.0039,
-    "massSolar": 0.17,
-    "estimatedAge": "3.0 Billion Years",
-    "estimatedAgeMyr": 3000,
-    "distanceLy": 9.7,
-    "distanceParsecs": 2.97,
-    "apparentMagnitude": 10.49,
-    "absoluteMagnitude": 13.13,
-    "surfaceGravityLogG": 5.08,
-    "colorHex": "#ffcc6f",
-    "coronaColorHex": "#ea580c",
-    "solarEngulfment": "Fits deep within Sun (0.19 D_sun)",
-    "engulfsPlanets": [],
-    "habitableZoneAU": {
-      "inner": 0.046,
-      "outer": 0.092
-    },
-    "exoplanetSystem": {
-      "hasPlanets": false,
-      "planetCount": 0,
-      "planets": [],
-      "systemOverview": "Active flare star without confirmed planets."
-    },
-    "stellarStage": "Red Dwarf",
-    "lifespanEstimate": "Trillions of Years",
-    "futureFate": "Helium White Dwarf",
-    "fusionProcess": "Proton-Proton Chain",
-    "notableFacts": [
-      "One of the closest stars to the Solar System, residing at a distance of under 10 light-years.",
-      "Active UV Ceti-type flare star exhibiting occasional brief magnetic eruptions."
-    ],
-    "description": "Gliese 729 is a close flare star in Sagittarius situated less than 10 light-years from Earth.",
-    "designations": [
-      "V1216 Sag",
-      "GJ 729",
-      "CD-23°14742",
-      "LHS 3405",
-      "LHS 3414",
-      "LTT 7462",
-      "NLTT 47045",
-      "Ross 154",
-      "HIP 92403",
-      "TYC 6859-1332-1",
-      "2MASS J18494929-2350101",
-      "Gaia DR2 4075141768785646848",
-      "Gaia DR3 4075141768785646848",
-      "TIC 224752354",
-      "[FS2003] 0993",
-      "[GKL99] 365",
-      "[RHG95] 2960",
-      "1ES 1846-23.8",
-      "1RXS J184948.7-235003",
-      "2E 1846.7-2353",
-      "2E 4140",
-      "2EUVE J1849-23.8",
-      "8pc 336.48",
-      "AAVSO 1843-23",
-      "AC -24 2822-183",
-      "AC -24 2833-183",
-      "ASAS J184948-2350.0",
-      "Ci 20 1108",
-      "CNS5 4678",
-      "CSI-23-18467",
-      "EPIC 215632069",
-      "EPIC 215632123",
-      "EUVE J1849-23.8",
-      "GCRV 11260",
-      "GEN# +6.00107462",
-      "GEN# +6.10010729",
-      "GEN# +6.10220154",
-      "HIC 92403",
-      "IRAS 18467-2353",
-      "JP11 5165",
-      "JP11 5166",
-      "JP11 5192",
-      "Karmn J18498-238",
-      "LFT 1437",
-      "LPM 688",
-      "PLX 4338",
-      "PLX 4338.00",
-      "PM J18498-2350",
-      "PPM 734465",
-      "StKM 2-1392",
-      "TNN 13A",
-      "UBV M 42977",
-      "UCAC4 331-182994",
-      "V1216 Sagittarii",
-      "WDS J18498-2350A",
-      "WEB 15960",
-      "WISEA J184949.85-235012.5",
-      "Zkh 282"
-    ]
-  },
-  {
     "id": "gliese-48",
     "name": "Gliese 48",
     "alternateNames": [
@@ -78166,13 +78037,14 @@
   },
   {
     "id": "ross-154",
-    "name": "Ross 154 (V1216 Sagittarii companion)",
+    "name": "Ross 154 (V1216 Sagittarii)",
     "alternateNames": [
-      "GJ 729 A",
+      "Ross 154",
       "Gliese 729",
+      "GJ 729",
       "V1216 Sagittarii",
-      "LHS 473",
-      "HIP 92403"
+      "HIP 92403",
+      "LHS 3414"
     ],
     "primaryDesignation": "V1216 Sag",
     "constellation": "Sagittarius",
@@ -78217,7 +78089,7 @@
       "Ross 154 is one of the closest stars to the Sun, located at 9.69 light-years.",
       "It is an active UV Ceti-type flare star with prominent X-ray coronal emissions observed by Chandra."
     ],
-    "description": "Ross 154 is an active nearby red dwarf flare star in Sagittarius at 9.69 light-years.",
+    "description": "Ross 154 (Gliese 729) is an active nearby red dwarf flare star in Sagittarius at 9.69 light-years from the Sun.",
     "designations": [
       "V1216 Sag",
       "Ross 154",
@@ -88658,12 +88530,13 @@
     ]
   },
   {
-    "id": "beemim-upsilon-4-eri",
-    "name": "Beemim (Upsilon-4 Eridani)",
+    "id": "upsilon-4-eridani",
+    "name": "Upsilon-4 Eridani",
     "alternateNames": [
-      "Beemim",
-      "Upsilon-4 Eridani",
-      "HD 27376"
+      "υ⁴ Eridani",
+      "HIP 20042",
+      "HD 27376",
+      "HR 1347"
     ],
     "constellation": "Eridanus",
     "diameterSolar": 2.32,
@@ -88700,25 +88573,26 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Hydrogen Core Fusion (Proton-Proton Chain / CNO Cycle)",
     "notableFacts": [
-      "Officially assigned the proper name \"Beemim\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 73 light-years from Earth in the constellation Eridanus.",
-      "Known astronomically as Upsilon-4 Eridani and cataloged as HIP 20042."
+      "A bright B9V main-sequence star and spectroscopic binary in the southern reaches of Eridanus.",
+      "Exhibits high rotational velocity and forms part of the prominent curved river arc near the border of Fornax.",
+      "Located approximately 178 light-years from Earth and cataloged as HIP 20042."
     ],
-    "description": "Beemim (Upsilon-4 Eridani) is a B9IV blue subgiant star situated 73 light-years away in the constellation Eridanus. It shines with an apparent visual magnitude of 3.55.",
+    "description": "Upsilon-4 Eridani is a bright B9V star located approximately 178 light-years away in the constellation Eridanus.",
     "diameterKm": 3231064,
     "diameterAU": 0.021598328805625174,
     "distanceParsecs": 54.6,
     "rightAscension": "04h 17m 53.66s",
     "declination": "-33° 47′ 00.9″",
     "primaryDesignation": "υ⁴ Eri",
-    "bayerDesignation": "Upsilon-4 Eridani",
+    "bayerDesignation": "υ⁴ Eridani",
     "designations": [
       "υ⁴ Eri",
-      "Beemim (Upsilon-4 Eridani)",
-      "Beemim",
       "Upsilon-4 Eridani",
       "HD 27376",
-      "HIP 20042"
+      "HIP 20042",
+      "HR 1347",
+      "CD-34 1632",
+      "SAO 194883"
     ]
   },
   {
@@ -90749,12 +90623,14 @@
     ]
   },
   {
-    "id": "nembus-persei",
-    "name": "Nembus (c Persei)",
+    "id": "c-persei",
+    "name": "c Persei (MX Persei)",
     "alternateNames": [
-      "Nembus",
       "c Persei",
-      "HD 25940"
+      "MX Persei",
+      "HD 25642",
+      "HIP 19266",
+      "HR 1261"
     ],
     "constellation": "Perseus",
     "diameterSolar": 7.1,
@@ -90791,11 +90667,11 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Hydrogen Core Fusion (Proton-Proton Chain / CNO Cycle)",
     "notableFacts": [
-      "Officially assigned the proper name \"Nembus\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 88 light-years from Earth in the constellation Perseus.",
-      "Known astronomically as c Persei and cataloged as HIP 19343."
+      "A hot B3Ve emission-line star (classical Be star) with a circumstellar decretion gas disk.",
+      "Cataloged as variable star MX Persei and Bayer letter c Persei.",
+      "Located approximately 550 light-years from Earth in the constellation Perseus."
     ],
-    "description": "Nembus (c Persei) is a B9IV blue subgiant star situated 88 light-years away in the constellation Perseus. It shines with an apparent visual magnitude of 3.96.",
+    "description": "c Persei (MX Persei) is a rapidly rotating B3Ve emission star situated 550 light-years away in Perseus.",
     "diameterKm": 9888170,
     "diameterAU": 0.06609833384480118,
     "distanceParsecs": 169,
@@ -90804,13 +90680,12 @@
     "primaryDesignation": "MX Per",
     "bayerDesignation": "c Persei",
     "designations": [
+      "c Per",
       "MX Per",
-      "Nembus (c Persei)",
-      "Nembus",
       "c Persei",
-      "HD 25940",
-      "HIP 19343",
-      "MX Persei"
+      "HD 25642",
+      "HIP 19266",
+      "HR 1261"
     ]
   },
   {
@@ -90869,7 +90744,7 @@
     "distanceParsecs": 90.5,
     "rightAscension": "04h 24m 02.21s",
     "declination": "-34° 01′ 00.0″",
-    "primaryDesignation": "HD 28028",
+    "primaryDesignation": "υ³ Eri",
     "bayerDesignation": "υ³ Eridani",
     "designations": [
       "υ³ Eri",
@@ -91659,13 +91534,12 @@
     ]
   },
   {
-    "id": "grafias-hd-144069",
-    "name": "Grafias (HD 144069)",
+    "id": "hd-144069",
+    "name": "HD 144069",
     "alternateNames": [
-      "Grafias",
-      "HD 144069",
-      "HD 144069",
-      "Grafias (HD 144069)"
+      "HIP 78727",
+      "SAO 159670",
+      "BD-10 4166"
     ],
     "constellation": "Orion",
     "diameterSolar": 1.6,
@@ -91702,11 +91576,10 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Hydrogen Core Fusion (Proton-Proton Chain / CNO Cycle)",
     "notableFacts": [
-      "Officially assigned the proper name \"Grafias\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 51 light-years from Earth in the constellation Orion.",
-      "Known astronomically as HD 144069 and cataloged as HIP 78727."
+      "A main-sequence F-type star located approximately 105 light-years away in Libra near the Scorpius border.",
+      "Cataloged as HIP 78727 and HD 144069."
     ],
-    "description": "Grafias (HD 144069) is a F6V white main sequence star situated 51 light-years away in the constellation Orion. It shines with an apparent visual magnitude of 4.16.",
+    "description": "HD 144069 is a F5V main sequence star located 105 light-years from Earth.",
     "diameterKm": 2228320,
     "diameterAU": 0.014895399176293223,
     "distanceParsecs": 32.2,
@@ -91715,10 +91588,10 @@
     "primaryDesignation": "HD 144069",
     "bayerDesignation": "HD 144069",
     "designations": [
-      "Grafias (HD 144069)",
-      "Grafias",
       "HD 144069",
-      "HIP 78727"
+      "HIP 78727",
+      "SAO 159670",
+      "BD-10 4166"
     ]
   },
   {
@@ -92176,12 +92049,13 @@
     ]
   },
   {
-    "id": "castula-nu-cep",
-    "name": "Castula (Nu Cephei)",
+    "id": "nu-cephei",
+    "name": "Nu Cephei",
     "alternateNames": [
-      "Castula",
-      "Nu Cephei",
-      "HD 207260"
+      "ν Cephei",
+      "HD 207260",
+      "HIP 107418",
+      "HR 8334"
     ],
     "constellation": "Cepheus",
     "diameterSolar": 65,
@@ -92218,11 +92092,11 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Hydrogen Core Fusion (Proton-Proton Chain / CNO Cycle)",
     "notableFacts": [
-      "Officially assigned the proper name \"Castula\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 53 light-years from Earth in the constellation Cepheus.",
-      "Known astronomically as Nu Cephei and cataloged as HIP 107418."
+      "A luminous white-blue supergiant of spectral class A2Ia located in Cepheus.",
+      "Lies at a remote distance of over 5,000 light-years in the Milky Way disc, shining with over 40,000 solar luminosities.",
+      "Cataloged as HIP 107418 and HD 207260."
     ],
-    "description": "Castula (Nu Cephei) is a F7V white main sequence star situated 53 light-years away in the constellation Cepheus. It shines with an apparent visual magnitude of 4.25.",
+    "description": "Nu Cephei is a luminous A2Ia supergiant star located over 5,000 light-years away in the constellation Cepheus.",
     "diameterKm": 90525500,
     "diameterAU": 0.6051255915369123,
     "distanceParsecs": 1560,
@@ -92232,11 +92106,10 @@
     "bayerDesignation": "Nu Cephei",
     "designations": [
       "ν Cep",
-      "Castula (Nu Cephei)",
-      "Castula",
       "Nu Cephei",
       "HD 207260",
-      "HIP 107418"
+      "HIP 107418",
+      "HR 8334"
     ]
   },
   {
@@ -93922,37 +93795,36 @@
     ]
   },
   {
-    "id": "beemim-upsilon-1-eri",
-    "name": "Beemim (Upsilon-1 Eridani)",
+    "id": "upsilon-1-eridani",
+    "name": "Upsilon-1 Eridani",
     "alternateNames": [
-      "Beemim",
-      "Upsilon-1 Eridani",
-      "HD 29085"
+      "υ¹ Eridani",
+      "HIP 21248",
+      "HD 29085",
+      "HR 1452"
     ],
     "constellation": "Eridanus",
-    "diameterSolar": 12,
-    "temperature": 4800,
-    "spectralType": "K0III",
+    "diameterSolar": 8.7,
+    "temperature": 5040,
+    "spectralType": "K0IIIb",
     "spectralClass": "K",
-    "luminositySolar": 65,
-    "massSolar": 1.7,
+    "luminositySolar": 42,
+    "massSolar": 2,
     "estimatedAge": "~2.0 - 4.5 Billion Years",
     "estimatedAgeMyr": 3000,
     "metallicityFeH": 0.02,
     "rotationalVelocityKmS": 15,
-    "distanceLy": 240,
+    "distanceLy": 138,
     "apparentMagnitude": 4.49,
-    "absoluteMagnitude": 0.15,
+    "absoluteMagnitude": 1.34,
     "surfaceGravityLogG": 2.5,
     "colorHex": "#ffd2a1",
     "coronaColorHex": "#ffb366",
-    "solarEngulfment": "Evolved star spanning roughly 16.7 Million km (0.112 AU)!",
-    "engulfsPlanets": [
-      "Mercury"
-    ],
+    "solarEngulfment": "Spans roughly 0.081 AU (12.1 Million km). Fits easily within Mercury’s orbit (~0.387 AU).",
+    "engulfsPlanets": [],
     "habitableZoneAU": {
-      "inner": 7.69,
-      "outer": 11.07
+      "inner": 6.1,
+      "outer": 8.9
     },
     "exoplanetSystem": {
       "hasExoplanets": false,
@@ -93966,25 +93838,26 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Core Helium Fusion (Triple-Alpha Process)",
     "notableFacts": [
-      "Officially assigned the proper name \"Beemim\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 235 light-years from Earth in the constellation Eridanus.",
-      "Known astronomically as Upsilon-1 Eridani and cataloged as HIP 21248."
+      "One of the four stars sharing the Bayer letter Upsilon in the southern celestial river of Eridanus.",
+      "An evolved red clump giant steadily fusing core helium into carbon and oxygen via the triple-alpha process.",
+      "Located approximately 138 light-years away from Earth and cataloged as HIP 21248."
     ],
-    "description": "Beemim (Upsilon-1 Eridani) is a K3III red giant star situated 235 light-years away in the constellation Eridanus. It shines with an apparent visual magnitude of 4.49.",
-    "diameterKm": 16712400,
-    "diameterAU": 0.11171549382219918,
-    "distanceParsecs": 73.6,
+    "description": "Upsilon-1 Eridani is an evolved K0III giant star situated approximately 138 light-years away in the constellation Eridanus.",
+    "diameterKm": 12116489.999999998,
+    "diameterAU": 0.08099373302109439,
+    "distanceParsecs": 42.3,
     "rightAscension": "04h 33m 30.55s",
     "declination": "-29° 45′ 01.0″",
     "primaryDesignation": "υ¹ Eri",
-    "bayerDesignation": "Upsilon-1 Eridani",
+    "bayerDesignation": "υ¹ Eridani",
     "designations": [
       "υ¹ Eri",
-      "Beemim (Upsilon-1 Eridani)",
-      "Beemim",
       "Upsilon-1 Eridani",
       "HD 29085",
-      "HIP 21248"
+      "HIP 21248",
+      "HR 1452",
+      "CD-29 1819",
+      "SAO 195047"
     ]
   },
   {
@@ -94765,12 +94638,13 @@
     ]
   },
   {
-    "id": "ukdah-tau-1-hya",
-    "name": "Ukdah (Tau-1 Hydrae)",
+    "id": "tau-1-hydrae",
+    "name": "Tau-1 Hydrae",
     "alternateNames": [
-      "Ukdah",
-      "Tau-1 Hydrae",
-      "HD 81997"
+      "τ¹ Hydrae",
+      "HD 81997",
+      "HIP 46509",
+      "HR 3759"
     ],
     "constellation": "Hydra",
     "diameterSolar": 1.7,
@@ -94807,11 +94681,11 @@
     "futureFate": "Helium Flash / White Dwarf",
     "fusionProcess": "Hydrogen Core Fusion (Proton-Proton Chain / CNO Cycle)",
     "notableFacts": [
-      "Officially assigned the proper name \"Ukdah\" by the IAU Working Group on Star Names (WGSN).",
-      "Located approximately 62 light-years from Earth in the constellation Hydra.",
-      "Known astronomically as Tau-1 Hydrae and cataloged as HIP 46509."
+      "A nearby F6V white main-sequence star situated approximately 56 light-years from Earth in Hydra.",
+      "Known historically in Arabic astronomy as part of Ukdah al-Shuja' (the Knots of the Serpent).",
+      "Cataloged as HIP 46509 and HD 81997."
     ],
-    "description": "Ukdah (Tau-1 Hydrae) is a F5V white main sequence star situated 62 light-years away in the constellation Hydra. It shines with an apparent visual magnitude of 4.59.",
+    "description": "Tau-1 Hydrae is a bright F6V white dwarf/main-sequence star located 56 light-years away in Hydra.",
     "diameterKm": 2367590,
     "diameterAU": 0.01582636162481155,
     "distanceParsecs": 17.2,
@@ -94821,11 +94695,10 @@
     "bayerDesignation": "Tau-1 Hydrae",
     "designations": [
       "τ¹ Hya",
-      "Ukdah (Tau-1 Hydrae)",
-      "Ukdah",
       "Tau-1 Hydrae",
       "HD 81997",
-      "HIP 46509"
+      "HIP 46509",
+      "HR 3759"
     ]
   },
   {
