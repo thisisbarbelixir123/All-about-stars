@@ -290,6 +290,11 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   } | null>(null);
 
   // Store active 2D projected objects for pixel-accurate hit-testing
+  const mountTimeRef = useRef<number>(Date.now());
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, [focalConstellation?.id]);
+
   const renderedBoundariesRef = useRef<Array<{ id: string; constInfo?: ConstellationInfo; ring: Array<{ x: number; y: number }> }>>([]);
   const renderedBadgesRef = useRef<Array<{ id: string; constInfo: ConstellationInfo; rect: { x: number; y: number; w: number; h: number } }>>([]);
   const renderedStarsRef = useRef<Array<{
@@ -1374,6 +1379,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Guard against ghost click-through from the card or triggering element on initial mount
+    if (Date.now() - mountTimeRef.current < 450) return;
+
     const rect = canvas.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
@@ -1435,10 +1444,19 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
     // 4. Check if user clicked within boundary polygon territory
     if (!target) {
-      for (const pb of renderedBoundariesRef.current) {
-        if (pointInPolygon(clickX, clickY, pb.ring)) {
-          target = pb.constInfo || null;
-          break;
+      // Prioritize focalConstellation boundary first so clicks inside it never match an overlapping/neighboring ring
+      if (focalConstellation) {
+        const focalPb = renderedBoundariesRef.current.find((pb) => pb.constInfo?.id === focalConstellation.id);
+        if (focalPb && pointInPolygon(clickX, clickY, focalPb.ring)) {
+          target = focalPb.constInfo || null;
+        }
+      }
+      if (!target) {
+        for (const pb of renderedBoundariesRef.current) {
+          if (pointInPolygon(clickX, clickY, pb.ring)) {
+            target = pb.constInfo || null;
+            break;
+          }
         }
       }
     }

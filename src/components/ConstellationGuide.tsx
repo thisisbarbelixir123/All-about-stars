@@ -371,7 +371,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 return (
                   <div
                     key={constellation.id}
-                    onClick={() => setInspectedConstellation(constellation)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInspectedConstellation(constellation);
+                    }}
                     className="group p-2 sm:p-2.5 rounded-xl bg-[#040a1c] border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] transition-all flex flex-col justify-between shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] cursor-pointer"
                     title={`Click to open Constellation Dossier for ${constellation.name}`}
                   >
@@ -460,7 +463,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               return (
                 <div
                   key={constellation.id}
-                  onClick={() => setInspectedConstellation(constellation)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setInspectedConstellation(constellation);
+                  }}
                   className="group p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#040a1c] border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] transition-all flex flex-col justify-between shadow-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] cursor-pointer"
                   title={`Click to open Constellation Dossier for ${constellation.name}`}
                 >
