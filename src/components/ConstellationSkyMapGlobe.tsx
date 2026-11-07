@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ConstellationInfo, ALL_88_CONSTELLATIONS } from '../data/constellationsData';
 import { CelestialData } from '../hooks/useCelestialData';
+import { StarData } from '../types';
 import {
   SkyMapProjectionType,
   DynamicSphericalProjectOptions,
@@ -9,7 +10,8 @@ import {
   getConstellationSphericalCenter,
   getConstellationBoundingSpan,
   pointInPolygon,
-  isProminentDso
+  isProminentDso,
+  parseCoordinate
 } from '../utils/celestialMechanics';
 import {
   Globe,
@@ -56,6 +58,12 @@ export interface ConstellationSkyMapGlobeProps {
   focalConstellation?: ConstellationInfo | null;
   /** Specific catalog star to highlight / circle on the canvas (e.g. Peacock in Pavo) */
   focalStarId?: string | null;
+  /** Specific catalog stars to map and make interactive (e.g. for constellation dossiers) */
+  catalogStars?: StarData[];
+  /** Currently hovered catalog star ID (for synchronized highlighting) */
+  hoveredStarId?: string | null;
+  /** Callback when user hovers over a catalog star */
+  onHoverStar?: (star: StarData | null) => void;
   /** Callback when user clicks on a star in the canvas */
   onSelectStar?: (starData: any) => void;
   /** Callback when user clicks on a DSO in the canvas */
@@ -88,6 +96,9 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   initialZoom,
   focalConstellation,
   focalStarId,
+  catalogStars,
+  hoveredStarId,
+  onHoverStar,
   onSelectStar,
   onSelectDso,
   variant = 'explorer',
@@ -250,10 +261,45 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   });
   const touchDistanceRef = useRef<number | null>(null);
 
+  // Map catalog stars for focal constellation to spherical RA/Dec coordinates
+  const mappedCatalogStars = useMemo(() => {
+    if (!catalogStars || catalogStars.length === 0) return [];
+    return catalogStars.map((st) => {
+      const raH = parseCoordinate(st.rightAscension || (st as any).ra);
+      const decDeg = parseCoordinate(st.declination || (st as any).dec);
+      const raDeg = isNaN(raH) ? 0 : (raH * 15);
+      const isPrincipal = Boolean(
+        (focalStarId && st.id === focalStarId) ||
+        (!focalStarId && focalConstellation && st.id === focalConstellation.principalStarId)
+      );
+      return {
+        star: st,
+        raDeg,
+        decDeg: isNaN(decDeg) ? 0 : decDeg,
+        isPrincipal
+      };
+    });
+  }, [catalogStars, focalConstellation, focalStarId]);
+
+  const [hoveredStarTooltip, setHoveredStarTooltip] = useState<{
+    star: StarData;
+    x: number;
+    y: number;
+  } | null>(null);
+
   // Store active 2D projected objects for pixel-accurate hit-testing
   const renderedBoundariesRef = useRef<Array<{ id: string; constInfo?: ConstellationInfo; ring: Array<{ x: number; y: number }> }>>([]);
   const renderedBadgesRef = useRef<Array<{ id: string; constInfo: ConstellationInfo; rect: { x: number; y: number; w: number; h: number } }>>([]);
-  const renderedStarsRef = useRef<Array<{ id: string; data: any; x: number; y: number; r: number }>>([]);
+  const renderedStarsRef = useRef<Array<{
+    id: string;
+    data: any;
+    catalogStar?: StarData;
+    isCatalog: boolean;
+    isPrincipal?: boolean;
+    x: number;
+    y: number;
+    r: number;
+  }>>([]);
   const renderedDsosRef = useRef<Array<{ id: string; data: any; x: number; y: number; r: number }>>([]);
 
   // Smooth Camera Flight Animation
@@ -675,13 +721,23 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     }
 
     // 7. Full Astrometric Starfield (down to mag 6.0 with B-V chromaticity)
-    const currentRenderedStars: Array<{ id: string; data: any; x: number; y: number; r: number }> = [];
+    const currentRenderedStars: Array<{
+      id: string;
+      data: any;
+      catalogStar?: StarData;
+      isCatalog: boolean;
+      isPrincipal?: boolean;
+      x: number;
+      y: number;
+      r: number;
+    }> = [];
 
     if (effectiveShowStars) {
       if (celestialData.stars && celestialData.stars.length > 0) {
         // Real astrometric starfield
         // Limit faintest stars at low zoom to maintain crisp 60 FPS Canvas performance
         const maxMag = zoom < 0.9 ? 4.8 : zoom < 1.4 ? 5.5 : 6.0;
+        const renderedCatalogIds = new Set<string>();
 
         for (const starFeat of celestialData.stars) {
           const mag = starFeat.properties?.mag ?? 6;
@@ -694,6 +750,30 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           const pt = projectDynamicSphericalPoint(sRa, sDec, projOpts);
           if (!pt.isVisible) continue;
 
+          // Check if this star matches any mapped catalog star in the active constellation
+          let matchedCatalog: typeof mappedCatalogStars[0] | undefined;
+          if (mappedCatalogStars.length > 0) {
+            for (const cat of mappedCatalogStars) {
+              let dRa = sRa - cat.raDeg;
+              while (dRa > 180) dRa -= 360;
+              while (dRa < -180) dRa += 360;
+              const distDeg = Math.hypot(dRa * Math.cos((cat.decDeg * Math.PI) / 180), sDec - cat.decDeg);
+              if (distDeg < 0.08) {
+                matchedCatalog = cat;
+                renderedCatalogIds.add(cat.star.id);
+                break;
+              }
+            }
+          }
+
+          const isCatalog = Boolean(matchedCatalog);
+          const catalogStar = matchedCatalog?.star;
+          const isFocalStar = Boolean(
+            matchedCatalog?.isPrincipal ||
+            (focalStarId && (starFeat.id === focalStarId || starFeat.properties?.id === focalStarId)) ||
+            (!focalStarId && focalConstellation && (starFeat.id === focalConstellation.principalStarId || starFeat.properties?.id === focalConstellation.principalStarId))
+          );
+
           // Realistic magnitude scaling: brighter stars (lower mag) are larger
           // Sirius is -1.44, Vega is 0.03, Polaris is 1.98, limit is ~6.0
           const clampedMag = Math.max(-1.5, mag);
@@ -701,18 +781,15 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
           // Record for interactive star hit-testing
           currentRenderedStars.push({
-            id: String(starFeat.id || ''),
-            data: starFeat,
+            id: String(catalogStar?.id || starFeat.id || ''),
+            data: catalogStar || starFeat,
+            catalogStar,
+            isCatalog,
+            isPrincipal: isFocalStar,
             x: pt.x,
             y: pt.y,
             r: baseRadius
           });
-
-          // Check if this star is the focal star (e.g. principal anchor star)
-          const isFocalStar = Boolean(
-            (focalStarId && (starFeat.id === focalStarId || starFeat.properties?.id === focalStarId)) ||
-            (!focalStarId && focalConstellation && (starFeat.id === focalConstellation.principalStarId || starFeat.properties?.id === focalConstellation.principalStarId))
-          );
 
           // B-V Chromaticity Color Tuning
           const bvVal = parseFloat(starFeat.properties?.bv ?? '0.4');
@@ -749,30 +826,112 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             ctx.fill();
           }
 
-          // Focal star special target ring
-          if (isFocalStar) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, Math.max(7, baseRadius * 3.2), 0, 2 * Math.PI);
-            ctx.strokeStyle = '#facc15';
-            ctx.lineWidth = 1.6;
-            ctx.setLineDash([3, 2]);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, Math.max(11, baseRadius * 4.6), 0, 2 * Math.PI);
-            ctx.strokeStyle = 'rgba(250, 204, 21, 0.4)';
-            ctx.lineWidth = 1.0;
-            ctx.setLineDash([]);
-            ctx.stroke();
-            ctx.restore();
-          }
-
           // Core disc
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, baseRadius, 0, 2 * Math.PI);
           ctx.fillStyle = starColor;
           ctx.fill();
+
+          // In dossier mode: special interactive visual target reticles for catalog stars
+          if (variant === 'dossier' && isCatalog && catalogStar) {
+            const isHovered = Boolean(hoveredStarId === catalogStar.id || hoveredStarTooltip?.star.id === catalogStar.id);
+
+            if (isFocalStar) {
+              // Principal anchor star target ring
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, Math.max(7, baseRadius * 3.2), 0, 2 * Math.PI);
+              ctx.strokeStyle = '#facc15';
+              ctx.lineWidth = isHovered ? 2.2 : 1.6;
+              ctx.setLineDash([3, 2]);
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, Math.max(11, baseRadius * 4.6), 0, 2 * Math.PI);
+              ctx.strokeStyle = isHovered ? 'rgba(250, 204, 21, 0.7)' : 'rgba(250, 204, 21, 0.4)';
+              ctx.lineWidth = 1.0;
+              ctx.setLineDash([]);
+              ctx.stroke();
+              ctx.restore();
+            } else {
+              // Regular catalog star in active constellation
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, Math.max(6, baseRadius * 2.4), 0, 2 * Math.PI);
+              ctx.strokeStyle = isHovered ? '#38bdf8' : 'rgba(56, 189, 248, 0.65)';
+              ctx.lineWidth = isHovered ? 1.8 : 1.2;
+              ctx.setLineDash(isHovered ? [] : [2, 2]);
+              ctx.stroke();
+              ctx.restore();
+            }
+
+            // Star Name / Bayer Label
+            if (effectiveShowLabels || isHovered) {
+              const labelText = catalogStar.bayerDesignation || catalogStar.name.replace(/\s*\([^)]+\)/g, '').trim();
+              ctx.save();
+              ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
+              ctx.fillStyle = isFocalStar ? '#fef08a' : isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+              ctx.shadowColor = '#020617';
+              ctx.shadowBlur = 4;
+              ctx.fillText(labelText, pt.x + Math.max(9, baseRadius * 2.8), pt.y - 1);
+              ctx.restore();
+            }
+          }
+        }
+
+        // Render any remaining catalog stars not in stars.6.json (e.g. faint red dwarfs, brown dwarfs)
+        if (variant === 'dossier' && mappedCatalogStars.length > 0) {
+          for (const cat of mappedCatalogStars) {
+            if (renderedCatalogIds.has(cat.star.id)) continue;
+            const pt = projectDynamicSphericalPoint(cat.raDeg, cat.decDeg, projOpts);
+            if (!pt.isVisible) continue;
+
+            const mag = cat.star.apparentMagnitude ?? 8.0;
+            const clampedMag = Math.max(-1.5, Math.min(12, mag));
+            const baseRadius = Math.max(1.8, (7.0 - Math.min(6.5, clampedMag)) * 0.45 * Math.sqrt(Math.max(1, zoom * 0.8)));
+
+            currentRenderedStars.push({
+              id: cat.star.id,
+              data: cat.star,
+              catalogStar: cat.star,
+              isCatalog: true,
+              isPrincipal: cat.isPrincipal,
+              x: pt.x,
+              y: pt.y,
+              r: baseRadius
+            });
+
+            // Core disc
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, baseRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = cat.star.colorHex || '#93c5fd';
+            ctx.fill();
+
+            const isHovered = Boolean(hoveredStarId === cat.star.id || hoveredStarTooltip?.star.id === cat.star.id);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, Math.max(6, baseRadius * 2.4), 0, 2 * Math.PI);
+            ctx.strokeStyle = isHovered ? '#38bdf8' : 'rgba(56, 189, 248, 0.65)';
+            ctx.lineWidth = isHovered ? 1.8 : 1.2;
+            ctx.setLineDash(isHovered ? [] : [2, 2]);
+            ctx.stroke();
+            ctx.restore();
+
+            if (effectiveShowLabels || isHovered) {
+              const labelText = cat.star.bayerDesignation || cat.star.name.replace(/\s*\([^)]+\)/g, '').trim();
+              ctx.save();
+              ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
+              ctx.fillStyle = isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+              ctx.shadowColor = '#020617';
+              ctx.shadowBlur = 4;
+              ctx.fillText(labelText, pt.x + Math.max(9, baseRadius * 2.8), pt.y - 1);
+              ctx.restore();
+            }
+          }
         }
       } else {
         // Fallback: prominent constellation anchor stars if star catalog is still loading
@@ -1121,7 +1280,31 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     }
 
     setHoveredConstellation(matchedConstellation);
-  }, [centerRa, centerDec, dimensions, zoom, projection, constellationCenters]);
+
+    // 4. Star Hit-Testing: Check if hovering over any rendered star
+    let hoveredStarTarget: any = null;
+    let minStarDist = Infinity;
+    for (const s of renderedStarsRef.current) {
+      const dist = Math.hypot(s.x - mouseX, s.y - mouseY);
+      const hitRadius = Math.max(s.r * 2.8, 10);
+      if (dist <= hitRadius && dist < minStarDist) {
+        minStarDist = dist;
+        hoveredStarTarget = s;
+      }
+    }
+
+    if (hoveredStarTarget && hoveredStarTarget.isCatalog && hoveredStarTarget.catalogStar) {
+      onHoverStar?.(hoveredStarTarget.catalogStar);
+      setHoveredStarTooltip({
+        star: hoveredStarTarget.catalogStar,
+        x: hoveredStarTarget.x,
+        y: hoveredStarTarget.y
+      });
+    } else {
+      onHoverStar?.(null);
+      setHoveredStarTooltip(null);
+    }
+  }, [centerRa, centerDec, dimensions, zoom, projection, constellationCenters, onHoverStar]);
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
@@ -1192,20 +1375,25 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
     const clickY = e.clientY - rect.top;
 
     // 1. Check if user clicked directly on a rendered star
-    if (onSelectStar && renderedStarsRef.current.length > 0) {
+    if (renderedStarsRef.current.length > 0) {
       let closestStar: any = null;
       let minStarDist = Infinity;
       for (const s of renderedStarsRef.current) {
         const dist = Math.hypot(s.x - clickX, s.y - clickY);
-        const hitRadius = Math.max(s.r * 2.8, 8);
+        const hitRadius = Math.max(s.r * 2.8, 10);
         if (dist <= hitRadius && dist < minStarDist) {
           minStarDist = dist;
-          closestStar = s.data;
+          closestStar = s;
         }
       }
       if (closestStar) {
-        onSelectStar(closestStar);
-        return;
+        if (closestStar.isCatalog && closestStar.catalogStar && onSelectStar) {
+          onSelectStar(closestStar.catalogStar);
+          return;
+        } else {
+          // Handle non-catalog stars: it is not greyed out, but it does not open any dossier as those aren't in the catalog
+          return;
+        }
       }
     }
 
@@ -1552,7 +1740,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             ref={canvasRef}
             style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
             className={`${
-              hoveredConstellation && hoveredConstellation.id !== focalConstellation?.id
+              hoveredStarTooltip || (hoveredConstellation && hoveredConstellation.id !== focalConstellation?.id)
                 ? 'cursor-pointer'
                 : 'cursor-grab active:cursor-grabbing'
             } block touch-none`}
@@ -1567,6 +1755,36 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
           />
+
+          {/* Interactive Catalog Star Tooltip in Dossier Mode */}
+          {variant === 'dossier' && hoveredStarTooltip && (
+            <div
+              className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 px-3 py-2 rounded-xl bg-[#030718]/95 border border-cyan-400/50 backdrop-blur-md shadow-[0_4px_20px_rgba(6,182,212,0.35)] text-xs font-mono animate-in fade-in zoom-in-95 duration-150"
+              style={{
+                left: `${hoveredStarTooltip.x}px`,
+                top: `${hoveredStarTooltip.y - 12}px`
+              }}
+            >
+              <div className="flex items-center gap-1.5 font-bold text-white text-[12px] whitespace-nowrap">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>{hoveredStarTooltip.star.name}</span>
+                {hoveredStarTooltip.star.bayerDesignation && (
+                  <span className="text-cyan-300 font-normal">({hoveredStarTooltip.star.bayerDesignation})</span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-300 whitespace-nowrap">
+                <span className="px-1.5 py-0.2 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                  {hoveredStarTooltip.star.spectralType}
+                </span>
+                <span>mag {hoveredStarTooltip.star.apparentMagnitude}</span>
+                <span>•</span>
+                <span>{hoveredStarTooltip.star.distanceLy.toLocaleString()} ly</span>
+              </div>
+              <div className="mt-1.5 pt-1 border-t border-cyan-500/20 text-[10px] text-cyan-300 font-semibold flex items-center gap-1 whitespace-nowrap">
+                <span>★ Click to open 3D Star Dossier</span>
+              </div>
+            </div>
+          )}
 
           {/* Mini Zoom & Reset Floating Overlay when Header is Hidden */}
           {!showHeader && (

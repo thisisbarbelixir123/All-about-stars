@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { ConstellationInfo, resolveConstellationByName } from '../data/constellationsData';
@@ -58,6 +58,28 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
     showAsterisms: true,
     showStars: true
   });
+
+  const [hoveredStarId, setHoveredStarId] = useState<string | null>(null);
+
+  const cCatalogStars = useMemo(() => {
+    if (!constellation) return [];
+    const seenIds = new Set<string>();
+    return STARS_CATALOG.filter((s) => {
+      if (seenIds.has(s.id)) return false;
+      const belongs = isStarBelongingToConstellation(s, constellation, celestialData.bounds);
+      if (belongs) {
+        seenIds.add(s.id);
+        return true;
+      }
+      return false;
+    }).sort((a, b) => {
+      // Principal anchor star pinned at the top
+      if (a.id === constellation.principalStarId) return -1;
+      if (b.id === constellation.principalStarId) return 1;
+      // Brightest / most prominent stars first
+      return (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99);
+    });
+  }, [constellation, celestialData.bounds]);
 
   useEffect(() => {
     if (constellation && dossierScrollRef.current) {
@@ -151,6 +173,9 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               celestialData={celestialData}
               focalConstellation={constellation}
               focalStarId={constellation.principalStarId}
+              catalogStars={cCatalogStars}
+              hoveredStarId={hoveredStarId}
+              onHoverStar={(star) => setHoveredStarId(star ? star.id : null)}
               variant="dossier"
               fitContainer={true}
               layerOptions={skyMapOptions}
@@ -159,19 +184,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                   onSelectNeighbor(targetConst);
                 }
               }}
-              onSelectStar={(starFeat) => {
-                const starId = String(starFeat.id || starFeat.properties?.id || '');
-                const matchedStar =
-                  starMap.get(starId) ||
-                  STARS_CATALOG.find(
-                    (s) =>
-                      s.id === starId ||
-                      (starFeat.properties?.name &&
-                        s.name.toLowerCase() === String(starFeat.properties.name).toLowerCase())
-                  );
-                if (matchedStar) {
+              onSelectStar={(star) => {
+                if (star) {
                   onClose();
-                  onSelectStar(matchedStar);
+                  onSelectStar(star);
                 }
               }}
               className="w-full h-full border-0 rounded-2xl shadow-none"
@@ -437,28 +453,8 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               })()}
 
               {/* Cataloged Constellation Stars List with Dynamic Coordinates & Locations */}
-              {(() => {
-                const seenIds = new Set<string>();
-                const cCatalogStars = STARS_CATALOG.filter((s) => {
-                  if (seenIds.has(s.id)) return false;
-                  const belongs = isStarBelongingToConstellation(s, constellation, celestialData.bounds);
-                  if (belongs) {
-                    seenIds.add(s.id);
-                    return true;
-                  }
-                  return false;
-                }).sort((a, b) => {
-                  // Principal anchor star pinned at the top
-                  if (a.id === constellation.principalStarId) return -1;
-                  if (b.id === constellation.principalStarId) return 1;
-                  // Brightest / most prominent stars first
-                  return (a.apparentMagnitude ?? 99) - (b.apparentMagnitude ?? 99);
-                });
-
-                if (cCatalogStars.length === 0) return null;
-
-                return (
-                  <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/30 flex flex-col gap-3 shadow-md">
+              {cCatalogStars.length > 0 && (
+                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/30 flex flex-col gap-3 shadow-md">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-slate-800">
                       <div className="flex items-center gap-2">
                         <Star className="w-4 h-4 text-cyan-400 shrink-0" />
@@ -474,16 +470,21 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                     <div className="max-h-72 overflow-y-auto pr-1.5 space-y-2 divide-y divide-slate-800/60">
                       {cCatalogStars.map((st) => {
                         const isPrincipal = st.id === constellation.principalStarId;
+                        const isHovered = hoveredStarId === st.id;
                         const cleanName = st.name.replace(/\s*\([^)]+\)/g, '').trim();
                         const locationDesc = getDynamicStarLocationDescription(st, constellation);
 
                         return (
                           <div
                             key={st.id}
+                            onMouseEnter={() => setHoveredStarId(st.id)}
+                            onMouseLeave={() => setHoveredStarId(null)}
                             className={`pt-2 first:pt-0 p-2.5 rounded-lg border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                              isPrincipal
-                                ? 'bg-cyan-950/40 border-cyan-500/40 hover:border-cyan-400'
-                                : 'bg-slate-900/50 border-slate-800/80 hover:bg-slate-900 hover:border-cyan-500/30'
+                              isHovered
+                                ? 'bg-cyan-950/70 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/50'
+                                : isPrincipal
+                                  ? 'bg-cyan-950/40 border-cyan-500/40 hover:border-cyan-400'
+                                  : 'bg-slate-900/50 border-slate-800/80 hover:bg-slate-900 hover:border-cyan-500/30'
                             }`}
                           >
                             <div className="flex flex-col gap-1 min-w-0">
@@ -552,8 +553,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                       })}
                     </div>
                   </div>
-                );
-              })()}
+                )}
 
               {/* Bottom Section: Description & Mythology */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
