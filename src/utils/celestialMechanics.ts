@@ -384,6 +384,39 @@ export const getConstellationSphericalCenter = (
   return { cLon, cLat, boundaryRings };
 };
 
+/**
+ * Computes maximum angular diameter span and recommended zoom level to frame a constellation cleanly in the viewport
+ */
+export const getConstellationBoundingSpan = (
+  constellation: ConstellationInfo,
+  boundsList?: any[]
+): { cLon: number; cLat: number; spanDeg: number; optimalZoom: number } => {
+  const { cLon, cLat, boundaryRings } = getConstellationSphericalCenter(constellation, boundsList || []);
+
+  if (boundaryRings.length === 0) {
+    return { cLon, cLat, spanDeg: 30, optimalZoom: 2.5 };
+  }
+
+  let maxDist = 0;
+  boundaryRings.forEach(ring => {
+    for (let i = 0; i < ring.length; i++) {
+      for (let j = i + 1; j < ring.length; j++) {
+        let dLon = Math.abs(ring[i][0] - ring[j][0]);
+        if (dLon > 180) dLon = 360 - dLon;
+        const midLat = (ring[i][1] + ring[j][1]) / 2;
+        const dist = Math.hypot(dLon * Math.cos((midLat * Math.PI) / 180), ring[i][1] - ring[j][1]);
+        if (dist > maxDist) maxDist = dist;
+      }
+    }
+  });
+
+  const spanDeg = Math.max(8, maxDist);
+  // Calculate zoom so constellation occupies ~55-65% of viewport width
+  const optimalZoom = Math.max(1.1, Math.min(6.5, 75 / spanDeg));
+
+  return { cLon, cLat, spanDeg, optimalZoom };
+};
+
 export const isStarInsideConstellation = (
   star: StarData,
   constellation: ConstellationInfo,
