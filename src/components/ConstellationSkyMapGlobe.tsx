@@ -1411,7 +1411,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
           {/* Real-time Cursor Coordinates Readout Pill */}
           {mouseCoord && (
-            <div className="absolute top-3 left-4 px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-700/80 text-[10px] font-mono text-cyan-300 pointer-events-none shadow-md flex items-center gap-1.5">
+            <div className={`absolute ${variant === 'dossier' ? 'bottom-3 left-4' : 'top-3 left-4'} z-20 px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-700/80 text-[10px] font-mono text-cyan-300 pointer-events-none shadow-md flex items-center gap-1.5`}>
               <MapPin className="w-3 h-3 text-cyan-400" />
               <span>RA: {mouseCoord.raStr}</span>
               <span>•</span>

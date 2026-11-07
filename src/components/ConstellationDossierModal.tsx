@@ -3,7 +3,7 @@ import { StarData } from '../types';
 import { STARS_CATALOG } from '../data/stars';
 import { ConstellationInfo } from '../data/constellationsData';
 import { CelestialData } from '../hooks/useCelestialData';
-import { ConstellationMap, SkyMapOptions } from './ConstellationMap';
+import { ConstellationSkyMapGlobe, SkyMapLayerOptions } from './ConstellationSkyMapGlobe';
 import { MapToolbarToggle } from './common/MapToolbarToggle';
 import { StarDot2D } from './StarDot2D';
 import { RunningText } from './RunningText';
@@ -48,25 +48,21 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 }) => {
   const dossierScrollRef = useRef<HTMLDivElement>(null);
 
-  const [skyMapOptions, setSkyMapOptions] = useState<SkyMapOptions>({
+  const [skyMapOptions, setSkyMapOptions] = useState<SkyMapLayerOptions>({
     showGraticule: true,
     showBoundaries: true,
-    showStarLabels: false,
-    showEquatorEcliptic: true,
-    showDeepSky: true,
-    showNeighborGuides: true,
-    showMilkyWay: true
+    showLabels: true,
+    showEcliptic: true,
+    showDSOs: true,
+    showMilkyWay: true,
+    showAsterisms: true,
+    showStars: true
   });
-
-  const [activeStarLabelId, setActiveStarLabelId] = useState<string | null>(null);
-  const [hoveredStarId, setHoveredStarId] = useState<string | null>(null);
 
   useEffect(() => {
     if (constellation && dossierScrollRef.current) {
       dossierScrollRef.current.scrollTop = 0;
     }
-    setActiveStarLabelId(null);
-    setHoveredStarId(null);
   }, [constellation]);
 
   useEffect(() => {
@@ -90,7 +86,6 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
       className="fixed inset-0 z-50 w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
       onClick={(e) => {
         e.stopPropagation();
-        setActiveStarLabelId(null);
       }}
     >
       {/* Header Bar matching Encyclopedia mode */}
@@ -134,120 +129,129 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
       <div className="flex-1 min-h-0 flex flex-col landscape:flex-row lg:flex-row overflow-y-auto landscape:overflow-hidden lg:overflow-hidden bg-transparent">
         {/* Left Column: Astrometric Map Container without scrolling in landscape */}
         <div className="w-full shrink-0 landscape:w-3/5 lg:w-3/5 xl:w-[62%] landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-hidden p-2 sm:p-3 md:p-4 flex flex-col justify-center items-center">
-          {/* Constellation Visualizer Banner - 2D Astrometric Map (Expanded Viewport filling available height) */}
+          {/* Constellation Visualizer Banner - Interactive Astrometric Sky Map Globe */}
           <div
             className="w-full h-full max-h-[calc(100vh-80px)] aspect-square max-w-[min(100%,calc(100vh-80px))] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
-            onClick={() => setActiveStarLabelId(null)}
           >
-                {/* Astrometric Metadata Header Badge */}
-                <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
-                  <span className="text-cyan-300 font-semibold uppercase">{constellation.name}</span>
-                  {isPolar && (
-                    <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
-                      Polar Centered
-                    </span>
-                  )}
-                  <span className="text-slate-500">•</span>
-                  <span>RA {constellation.borders.raRange.split('|')[0].trim()}</span>
-                  <span className="text-slate-500 hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">Dec {constellation.borders.decRange.split('|')[0].trim()}</span>
-                </div>
-
-                <div className="flex items-center justify-center w-full h-full p-1 sm:p-2">
-                  <ConstellationMap
-                    constellation={constellation}
-                    celestialData={celestialData}
-                    mode="dossier"
-                    size={600}
-                    className="w-full h-full"
-                    options={skyMapOptions}
-                    onSelectNeighbor={onSelectNeighbor}
-                    onSelectFigureStar={onSelectStar}
-                    activeStarLabelId={activeStarLabelId}
-                    setActiveStarLabelId={setActiveStarLabelId}
-                    hoveredStarId={hoveredStarId}
-                    setHoveredStarId={setHoveredStarId}
-                  />
-                </div>
-              </div>
+            {/* Astrometric Metadata Header Badge */}
+            <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
+              <span className="text-cyan-300 font-semibold uppercase">{constellation.name}</span>
+              {isPolar && (
+                <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
+                  Polar Centered
+                </span>
+              )}
+              <span className="text-slate-500">•</span>
+              <span>RA {constellation.borders.raRange.split('|')[0].trim()}</span>
+              <span className="text-slate-500 hidden sm:inline">•</span>
+              <span className="hidden sm:inline">Dec {constellation.borders.decRange.split('|')[0].trim()}</span>
             </div>
 
-            {/* Right Column: Data/Telemetry panel */}
-            <div className="w-full shrink-0 landscape:w-2/5 lg:w-2/5 xl:w-[38%] landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
-              {/* Astrometric Map Viewport Controls Toolbar (Top of Right Panel) */}
-              <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono shadow-sm">
-                <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-cyan-400 font-bold shrink-0">
-                  <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Astrometric Map</span>
-                </div>
+            <ConstellationSkyMapGlobe
+              celestialData={celestialData}
+              focalConstellation={constellation}
+              focalStarId={constellation.principalStarId}
+              variant="dossier"
+              fitContainer={true}
+              layerOptions={skyMapOptions}
+              onSelectConstellation={(targetConst) => {
+                if (targetConst.id !== constellation.id) {
+                  onSelectNeighbor(targetConst);
+                }
+              }}
+              onSelectStar={(starFeat) => {
+                const starId = String(starFeat.id || starFeat.properties?.id || '');
+                const matchedStar =
+                  starMap.get(starId) ||
+                  STARS_CATALOG.find(
+                    (s) =>
+                      s.id === starId ||
+                      (starFeat.properties?.name &&
+                        s.name.toLowerCase() === String(starFeat.properties.name).toLowerCase())
+                  );
+                if (matchedStar) {
+                  onClose();
+                  onSelectStar(matchedStar);
+                }
+              }}
+              className="w-full h-full border-0 rounded-2xl shadow-none"
+            />
+          </div>
+        </div>
 
-                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full py-0.5">
-                  <MapToolbarToggle
-                    label="Grid"
-                    icon={<Grid className="w-3 h-3" />}
-                    active={skyMapOptions.showGraticule}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showGraticule: !prev.showGraticule }))}
-                    title="Toggle Coordinate Graticule (RA/Dec Grid)"
-                  />
+        {/* Right Column: Data/Telemetry panel */}
+        <div className="w-full shrink-0 landscape:w-2/5 lg:w-2/5 xl:w-[38%] landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
+          {/* Astrometric Map Viewport Controls Toolbar (Top of Right Panel) */}
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono shadow-sm">
+            <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-cyan-400 font-bold shrink-0">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Astrometric Map</span>
+            </div>
 
-                  <MapToolbarToggle
-                    label="Borders"
-                    icon={<Layers className="w-3 h-3" />}
-                    active={skyMapOptions.showBoundaries}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showBoundaries: !prev.showBoundaries }))}
-                    title="Toggle IAU Delporte Stepped Orthogonal Boundaries"
-                  />
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full py-0.5">
+              <MapToolbarToggle
+                label="Grid"
+                icon={<Grid className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showGraticule)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showGraticule: !prev.showGraticule }))}
+                title="Toggle Coordinate Graticule (RA/Dec Grid)"
+              />
 
-                  <MapToolbarToggle
-                    label="Labels"
-                    icon={<Tag className="w-3 h-3" />}
-                    active={skyMapOptions.showStarLabels}
-                    onClick={() => {
-                      setActiveStarLabelId(null);
-                      setSkyMapOptions((prev) => ({ ...prev, showStarLabels: !prev.showStarLabels }));
-                    }}
-                    title="Toggle Star Bayer Designations and Proper Names"
-                  />
+              <MapToolbarToggle
+                label="Borders"
+                icon={<Layers className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showBoundaries)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showBoundaries: !prev.showBoundaries }))}
+                title="Toggle IAU Delporte Stepped Orthogonal Boundaries"
+              />
 
-                  <MapToolbarToggle
-                    label="Ecliptic"
-                    icon={<Orbit className="w-3 h-3" />}
-                    active={skyMapOptions.showEquatorEcliptic}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showEquatorEcliptic: !prev.showEquatorEcliptic }))}
-                    title="Toggle 0° Celestial Equator and Solar Ecliptic Lines"
-                    activeColorClass="bg-cyan-950/90 text-amber-300 border-amber-500/50"
-                  />
+              <MapToolbarToggle
+                label="Labels"
+                icon={<Tag className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showLabels)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showLabels: !prev.showLabels }))}
+                title="Toggle Constellation Names and Identification Labels"
+              />
 
-                  <MapToolbarToggle
-                    label="DSO"
-                    icon={<Sparkles className="w-3 h-3" />}
-                    active={skyMapOptions.showDeepSky}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDeepSky: !prev.showDeepSky }))}
-                    title="Toggle Iconic Messier / NGC Deep Sky Objects (Max 6)"
-                    activeColorClass="bg-rose-950/80 text-rose-300 border-rose-500/50"
-                  />
+              <MapToolbarToggle
+                label="Ecliptic"
+                icon={<Orbit className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showEcliptic)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showEcliptic: !prev.showEcliptic }))}
+                title="Toggle Solar Ecliptic Line and Today's Sun"
+                activeColorClass="bg-cyan-950/90 text-amber-300 border-amber-500/50"
+              />
 
-                  <MapToolbarToggle
-                    label="Milky Way"
-                    icon={<Waves className="w-3 h-3" />}
-                    active={skyMapOptions.showMilkyWay ?? true}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showMilkyWay: !prev.showMilkyWay }))}
-                    title="Toggle Milky Way Galactic Plane & Core Contours"
-                    activeColorClass="bg-cyan-950/90 text-sky-300 border-sky-500/50"
-                  />
+              <MapToolbarToggle
+                label="DSO"
+                icon={<Sparkles className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showDSOs)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDSOs: !prev.showDSOs }))}
+                title="Toggle Deep-Sky Objects (Nebulae, Star Clusters, Galaxies)"
+                activeColorClass="bg-rose-950/80 text-rose-300 border-rose-500/50"
+              />
 
-                  <MapToolbarToggle
-                    label="Neighbors"
-                    icon={<Navigation className="w-3 h-3" />}
-                    active={skyMapOptions.showNeighborGuides}
-                    onClick={() => setSkyMapOptions((prev) => ({ ...prev, showNeighborGuides: !prev.showNeighborGuides }))}
-                    title="Toggle Adjacent Constellation Perimeter Guides"
-                  />
-                </div>
-              </div>
+              <MapToolbarToggle
+                label="Milky Way"
+                icon={<Waves className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showMilkyWay)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showMilkyWay: !prev.showMilkyWay }))}
+                title="Toggle Milky Way Galactic Plane & Core Contours"
+                activeColorClass="bg-cyan-950/90 text-sky-300 border-sky-500/50"
+              />
 
-              {/* DSO Category Color Legends Indicator when DSO Toggle is ON */}
-              {skyMapOptions.showDeepSky && (
+              <MapToolbarToggle
+                label="Lines"
+                icon={<Sparkles className="w-3 h-3" />}
+                active={Boolean(skyMapOptions.showAsterisms)}
+                onClick={() => setSkyMapOptions((prev) => ({ ...prev, showAsterisms: !prev.showAsterisms }))}
+                title="Toggle Constellation Stick-Figure Asterism Lines"
+              />
+            </div>
+          </div>
+
+          {/* DSO Category Color Legends Indicator when DSO Toggle is ON */}
+          {skyMapOptions.showDSOs && (
                 <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[10px] sm:text-[11px] font-mono shadow-sm">
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <Sparkles className="w-3 h-3 text-rose-400" />
