@@ -466,12 +466,12 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       return fid !== centerAbbr && fid !== centerId && pid !== centerAbbr && pid !== centerId && pname !== centerName;
     });
 
-    const results: Array<{
+    const rawCandidates: Array<{
       name: string;
       abbr: string;
       neighborObj: ConstellationInfo | null;
       pathData: string;
-      badgePos: { x: number; y: number } | null;
+      ringsSvg: Array<Array<{ x: number; y: number }>>;
       badgeWidth: number;
       badgeHeight: number;
       isDirectNeighbor: boolean;
@@ -523,26 +523,42 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
       if (ringsSvg.length === 0) return;
 
       const pathData = ringsSvg.map(ring => 'M ' + ring.map(p => `${p.x} ${p.y}`).join(' L ') + ' Z').join(' ');
-
       const bw = Math.max(8.0, Math.min(24.0, constName.length * 1.15 + 3.2));
       const bh = 3.6;
 
-      // Create name badges for any constellation whose visible territory has sufficient area and clearance
-      const badgePos = findOptimalNeighborBadgePos(ringsSvg, boundaryRingsSvg, bw, bh);
-
-      results.push({
+      rawCandidates.push({
         name: constName,
         abbr,
         neighborObj,
         pathData,
-        badgePos,
+        ringsSvg,
         badgeWidth: bw,
         badgeHeight: bh,
         isDirectNeighbor
       });
     });
 
-    return results;
+    // Create name badges ensuring candidate positions are strictly within their own territory
+    // and never inside any other neighboring constellation's territory
+    return rawCandidates.map((cand, idx) => {
+      const otherNeighborRingsSvg = rawCandidates
+        .filter((_, i) => i !== idx)
+        .flatMap(c => c.ringsSvg);
+
+      const badgePos = findOptimalNeighborBadgePos(
+        cand.ringsSvg,
+        boundaryRingsSvg,
+        cand.badgeWidth,
+        cand.badgeHeight,
+        otherNeighborRingsSvg
+      );
+
+      return {
+        ...cand,
+        badgePos,
+        otherNeighborRingsSvg
+      };
+    });
   }, [celestialData.bounds, constellation.id, constellation.abbreviation, constellation.name, neighbors, boundaryRingsSvg, cLon, cLat, toSvg]);
 
   // Project asterism stick lines for non-highlighted surrounding constellations
@@ -747,12 +763,15 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
     return { raLabels, decLabels };
   }, [isPolar, zoom, pan.x, pan.y, span, midX, midY, cLon, cLat, boxMargin]);
 
-  // Gentle relaxation pass to prevent neighboring badges from overlapping
+  // Gentle relaxation pass to prevent neighboring badges from overlapping,
+  // strictly verifying containment so badges never push into neighboring territories
   const badgesWithPos = borderingConstellationsSvg.filter(b => b.badgePos !== null) as Array<{
     name: string;
     badgePos: { x: number; y: number };
     badgeWidth: number;
     badgeHeight: number;
+    ringsSvg: Array<Array<{ x: number; y: number }>>;
+    otherNeighborRingsSvg: Array<Array<{ x: number; y: number }>>;
   }>;
 
   for (let iter = 0; iter < 15; iter++) {
@@ -770,27 +789,46 @@ export const ConstellationMap: React.FC<ConstellationMapProps> = ({
           const overlapX = minGapX - Math.abs(cdx);
           const overlapY = minGapY - Math.abs(cdy);
 
-          if (overlapX / minGapX < overlapY / minGapY) {
-            const push = overlapX * 0.45;
-            const sign = cdx >= 0 ? 1 : -1;
-            bj.badgePos.x += push * sign;
-            bi.badgePos.x -= push * sign;
-          } else {
-            const push = overlapY * 0.45;
-            const sign = cdy >= 0 ? 1 : -1;
-            bj.badgePos.y += push * sign;
-            bi.badgePos.y -= push * sign;
+          const pushX = (overlapX / minGapX < overlapY / minGapY) ? overlapX * 0.45 * (cdx >= 0 ? 1 : -1) : 0;
+          const pushY = (overlapX / minGapX >= overlapY / minGapY) ? overlapY * 0.45 * (cdy >= 0 ? 1 : -1) : 0;
+
+          // Attempt push for bj only if new position stays strictly inside bj's polygon and outside others
+          const candBjX = bj.badgePos.x + pushX;
+          const candBjY = bj.badgePos.y + pushY;
+          if (
+            bj.ringsSvg.some(ring => pointInPolygon(candBjX, candBjY, ring)) &&
+            !boundaryRingsSvg.some(ring => pointInPolygon(candBjX, candBjY, ring)) &&
+            !bj.otherNeighborRingsSvg.some(ring => pointInPolygon(candBjX, candBjY, ring))
+          ) {
+            bj.badgePos.x = candBjX;
+            bj.badgePos.y = candBjY;
+          }
+
+          // Attempt push for bi only if new position stays strictly inside bi's polygon and outside others
+          const candBiX = bi.badgePos.x - pushX;
+          const candBiY = bi.badgePos.y - pushY;
+          if (
+            bi.ringsSvg.some(ring => pointInPolygon(candBiX, candBiY, ring)) &&
+            !boundaryRingsSvg.some(ring => pointInPolygon(candBiX, candBiY, ring)) &&
+            !bi.otherNeighborRingsSvg.some(ring => pointInPolygon(candBiX, candBiY, ring))
+          ) {
+            bi.badgePos.x = candBiX;
+            bi.badgePos.y = candBiY;
           }
         }
       }
     }
 
-    // Clamp within visible screen margins
+    // Clamp within visible screen margins while respecting polygon boundary containment
     for (const b of badgesWithPos) {
       const hw = b.badgeWidth / 2;
       const hh = b.badgeHeight / 2;
-      b.badgePos.x = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, b.badgePos.x));
-      b.badgePos.y = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, b.badgePos.y));
+      const clampedX = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, b.badgePos.x));
+      const clampedY = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, b.badgePos.y));
+      if (b.ringsSvg.some(ring => pointInPolygon(clampedX, clampedY, ring))) {
+        b.badgePos.x = clampedX;
+        b.badgePos.y = clampedY;
+      }
     }
   }
 

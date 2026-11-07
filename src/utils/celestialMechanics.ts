@@ -238,13 +238,14 @@ export const clipPolygonSutherlandHodgman = (
 
 /**
  * Finds the optimal interior point (Pole of Inaccessibility) inside a neighbor's visible polygon
- * that is strictly outside the central constellation boundary.
+ * that is strictly outside the central constellation boundary and any other neighbor's polygon.
  */
 export const findOptimalNeighborBadgePos = (
   ringsSvg: Array<Array<{ x: number; y: number }>>,
   boundaryRingsSvg: Array<Array<{ x: number; y: number }>>,
   badgeWidth: number,
-  badgeHeight: number
+  badgeHeight: number,
+  otherNeighborRingsSvg?: Array<Array<{ x: number; y: number }>>
 ): { x: number; y: number } | null => {
   const hw = badgeWidth / 2;
   const hh = badgeHeight / 2;
@@ -286,6 +287,11 @@ export const findOptimalNeighborBadgePos = (
       const isInsideCentral = boundaryRingsSvg.some(ring => pointInPolygon(gx, gy, ring));
       if (isInsideCentral) continue;
 
+      // Reject candidates that fall inside any other neighboring constellation's territory
+      if (otherNeighborRingsSvg && otherNeighborRingsSvg.some(ring => pointInPolygon(gx, gy, ring))) {
+        continue;
+      }
+
       let clearance = Infinity;
       ringsSvg.forEach(ring => {
         const d = minDistanceToPolygonEdges(gx, gy, ring);
@@ -298,6 +304,9 @@ export const findOptimalNeighborBadgePos = (
         if (d < distToCentral) distToCentral = d;
       });
 
+      // Require interior clearance to be at least 1.0 to prevent badge cutting through border lines
+      if (clearance < 1.0) continue;
+
       const dCenter = Math.hypot(gx - 50, gy - 50);
       const score = clearance * 2.0 + Math.min(distToCentral, 10) * 0.5 - (dCenter > 46 ? (dCenter - 46) * 0.35 : 0);
 
@@ -309,8 +318,8 @@ export const findOptimalNeighborBadgePos = (
     }
   }
 
-  // Must have an interior clearance of at least 0.8 units to avoid overlapping boundary lines
-  if (bestScore < 0.8) return null;
+  // Must have a healthy score of at least 1.5 units to place a stable interior label
+  if (bestScore < 1.5) return null;
 
   bestX = Math.max(hw + 1.0, Math.min(100 - hw - 1.0, bestX));
   bestY = Math.max(hh + 1.5, Math.min(100 - hh - 1.5, bestY));
