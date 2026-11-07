@@ -13,7 +13,7 @@ import {
   isStarBelongingToConstellation,
   getDynamicStarLocationDescription
 } from '../utils/celestialMechanics';
-import { getStarDesignationTag } from '../utils/starDesignationUtils';
+import { getStarDesignationTag, resolveDossierStarName } from '../utils/starDesignationUtils';
 import {
   X,
   Compass,
@@ -427,15 +427,23 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               {/* Principal Star Action */}
               {starMap.get(constellation.principalStarId) && (() => {
                 const pStar = starMap.get(constellation.principalStarId)!;
+                const pStarNameInfo = resolveDossierStarName(pStar);
                 return (
                   <div className="p-3.5 rounded-xl bg-[#04091c] border border-cyan-500/20 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 text-xs">
                       <StarDot2D star={pStar} sizeClassName="w-3.5 h-3.5" />
                       <div>
                         <span className="text-slate-400 block text-[10px]">Principal Star:</span>
-                        <span className="text-white font-bold text-sm">
-                          {pStar.name}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-bold text-sm">
+                            {pStarNameInfo.primaryName}
+                          </span>
+                          {pStarNameInfo.badge && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                              {pStarNameInfo.badge}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -471,7 +479,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                       {cCatalogStars.map((st) => {
                         const isPrincipal = st.id === constellation.principalStarId;
                         const isHovered = hoveredStarId === st.id;
-                        const cleanName = st.name.replace(/\s*\([^)]+\)/g, '').trim();
+                        const nameInfo = resolveDossierStarName(st);
                         const locationDesc = getDynamicStarLocationDescription(st, constellation);
 
                         return (
@@ -492,12 +500,12 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                                 <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
                                 <RunningText
                                   as="span"
-                                  text={cleanName}
+                                  text={nameInfo.primaryName}
                                   className="font-bold text-xs sm:text-sm text-white"
                                 />
-                                {getStarDesignationTag(st) && (
+                                {nameInfo.badge && (
                                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                                    {getStarDesignationTag(st)}
+                                    {nameInfo.badge}
                                   </span>
                                 )}
                                 {isPrincipal && (
@@ -543,7 +551,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                                 onSelectStar(st);
                               }}
                               className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/50 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0 shadow"
-                              title={`Open 3D Star Dossier for ${cleanName}`}
+                              title={`Open 3D Star Dossier for ${nameInfo.displayFullName}`}
                             >
                               <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
                               <span>Inspect in 3D</span>

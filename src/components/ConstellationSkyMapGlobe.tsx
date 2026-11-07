@@ -30,6 +30,7 @@ import {
   CircleDot
 } from 'lucide-react';
 import { getDsoCategory, DSO_LEGEND_CONFIG } from './ConstellationMap';
+import { resolveDossierStarName } from '../utils/starDesignationUtils';
 
 export interface SkyMapLayerOptions {
   showMilkyWay?: boolean;
@@ -867,7 +868,8 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
 
             // Star Name / Bayer Label
             if (effectiveShowLabels || isHovered) {
-              const labelText = catalogStar.bayerDesignation || catalogStar.name.replace(/\s*\([^)]+\)/g, '').trim();
+              const nameInfo = resolveDossierStarName(catalogStar);
+              const labelText = nameInfo.primaryName;
               ctx.save();
               ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
               ctx.fillStyle = isFocalStar ? '#fef08a' : isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
@@ -920,7 +922,8 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             ctx.restore();
 
             if (effectiveShowLabels || isHovered) {
-              const labelText = cat.star.bayerDesignation || cat.star.name.replace(/\s*\([^)]+\)/g, '').trim();
+              const nameInfo = resolveDossierStarName(cat.star);
+              const labelText = nameInfo.primaryName;
               ctx.save();
               ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
               ctx.fillStyle = isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
@@ -1765,13 +1768,18 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
                 top: `${hoveredStarTooltip.y - 12}px`
               }}
             >
-              <div className="flex items-center gap-1.5 font-bold text-white text-[12px] whitespace-nowrap">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>{hoveredStarTooltip.star.name}</span>
-                {hoveredStarTooltip.star.bayerDesignation && (
-                  <span className="text-cyan-300 font-normal">({hoveredStarTooltip.star.bayerDesignation})</span>
-                )}
-              </div>
+              {(() => {
+                const tooltipNameInfo = resolveDossierStarName(hoveredStarTooltip.star);
+                return (
+                  <div className="flex items-center gap-1.5 font-bold text-white text-[12px] whitespace-nowrap">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>{tooltipNameInfo.primaryName}</span>
+                    {tooltipNameInfo.badge && (
+                      <span className="text-cyan-300 font-normal">({tooltipNameInfo.badge})</span>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-300 whitespace-nowrap">
                 <span className="px-1.5 py-0.2 rounded bg-slate-900 border border-slate-700 text-slate-200">
                   {hoveredStarTooltip.star.spectralType}

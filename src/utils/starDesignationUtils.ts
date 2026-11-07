@@ -121,6 +121,179 @@ const SUPERSCRIPTS: Record<string, string> = {
 
 export type DesignationTier = 'greek_bayer' | 'numbered' | 'variable' | 'catalog';
 
+export interface DossierStarNameInfo {
+  tier: 'proper' | 'bayer' | 'other';
+  primaryName: string;
+  bayerDesignation?: string;
+  badge?: string;
+  displayFullName: string;
+}
+
+/**
+ * Extracts a genuine proper name for a star if one exists,
+ * filtering out Greek Bayers, numbered designations, variable codes, and catalog IDs.
+ */
+export function extractProperName(name?: string): string | null {
+  if (!name) return null;
+  const trimmed = name.trim();
+
+  // If there are parentheses, e.g. "Shaula (Lambda Scorpii)" or "Sadatoni (Zeta Aurigae)"
+  const parenMatch = trimmed.match(/^([^(]+)\s*\(([^)]+)\)$/);
+  if (parenMatch) {
+    const beforeParen = parenMatch[1].trim();
+    if (extractProperName(beforeParen)) {
+      return beforeParen;
+    }
+    return null;
+  }
+
+  // Check if starts with spelled-out Greek letter
+  const greekMatch = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)[-\s]/i);
+  if (greekMatch) return null;
+
+  // Check if starts with a Greek character directly
+  if ([...GREEK_CHARS].some((c) => trimmed.startsWith(c))) return null;
+
+  // Check if starts with number (Flamsteed / Gould / Survey)
+  if (/^\d+\s+[A-Za-z]/.test(trimmed)) return null;
+
+  // Check if variable format (e.g. "AH Scorpii", "UY Scuti", "V818 Scorpii", "W Ursae Majoris")
+  if (/^([R-Z]|[A-Q][A-Z]|[R-Z]{2}|V\d{2,4})\s+[A-Za-z\s]+$/i.test(trimmed)) return null;
+
+  // Check if survey / catalog prefix
+  if (/^(HD|HR|HIP|GJ|Gliese|SCR|2MASS|Gaia|TIC|TYC|LHS|Wolf|Ross|BD|CD)\s+/i.test(trimmed)) return null;
+
+  return trimmed;
+}
+
+/**
+ * Resolves the display naming hierarchy for constellation dossiers:
+ * 1. Proper name first
+ * 2. Bayer designation (Greek letter + abbreviated genitive)
+ * 3. Other designations (numbered/Flamsteed, variable, catalog with abbreviated genitive)
+ */
+export function resolveDossierStarName(star: Partial<StarData> | null | undefined): DossierStarNameInfo {
+  if (!star) {
+    return {
+      tier: 'other',
+      primaryName: 'Unknown Star',
+      displayFullName: 'Unknown Star'
+    };
+  }
+
+  const cAbbr = abbreviateConstellation(star.constellation);
+
+  // 1. Try to find Proper Name
+  const proper = extractProperName(star.name);
+
+  // 2. Find Bayer designation (Greek letter + abbreviated genitive)
+  let bayer: string | null = null;
+  const allDesignations: string[] = [
+    star.bayerDesignation,
+    star.primaryDesignation,
+    ...(star.alternateNames || []),
+    ...(star.designations || []),
+    star.name
+  ].filter(Boolean) as string[];
+
+  for (const n of allDesignations) {
+    const trimmed = n.trim();
+    if ([...GREEK_CHARS].some((c) => trimmed.startsWith(c))) {
+      const match = trimmed.match(/^([α-ωΑ-Ω][¹²³⁴⁵⁶⁷⁸⁹0-9]?)\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
+      if (match) {
+        const symbol = match[1];
+        const constName = match[2].trim();
+        const comp = match[3] ? ` ${match[3]}` : '';
+        const abbr = abbreviateConstellation(constName) || cAbbr;
+        bayer = `${symbol} ${abbr}${comp}`.trim();
+        break;
+      }
+      bayer = trimmed;
+      break;
+    }
+    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)[-\s]?(\d+)?\s*(.*)$/i);
+    if (m) {
+      const gChar = GREEK_WORDS_MAP[m[1].toLowerCase()];
+      if (gChar) {
+        const num = m[2] ? (SUPERSCRIPTS[m[2]] || m[2]) : '';
+        const abbr = m[3] ? (abbreviateConstellation(m[3]) || cAbbr) : cAbbr;
+        bayer = `${gChar}${num} ${abbr}`.trim();
+        break;
+      }
+    }
+  }
+
+  // 3. Find other designations (numbered/Flamsteed, variable, catalog with abbreviated genitive)
+  let other: string | null = null;
+  // Flamsteed
+  for (const n of allDesignations) {
+    const trimmed = n.trim();
+    const fMatch = trimmed.match(/^(\d+)\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
+    if (fMatch) {
+      const num = fMatch[1];
+      const constName = fMatch[2].trim();
+      const comp = fMatch[3] ? ` ${fMatch[3]}` : '';
+      const abbr = abbreviateConstellation(constName) || cAbbr;
+      other = `${num} ${abbr}${comp}`.trim();
+      break;
+    }
+  }
+
+  // Variable
+  if (!other) {
+    for (const n of allDesignations) {
+      const trimmed = n.trim();
+      const vMatch = trimmed.match(/^([R-Z]|[A-Q][A-Z]|[R-Z]{2}|V\d{2,4})\s+([A-Za-z\s]+?)(?:\s+([A-Z][a-z0-9]?))?$/);
+      if (vMatch && !trimmed.startsWith('PSR') && !trimmed.startsWith('SGR')) {
+        const varId = vMatch[1];
+        const constName = vMatch[2].trim();
+        const comp = vMatch[3] ? ` ${vMatch[3]}` : '';
+        const abbr = abbreviateConstellation(constName) || cAbbr;
+        other = `${varId} ${abbr}${comp}`.trim();
+        break;
+      }
+    }
+  }
+
+  // Fallback other: prefer readable catalog/survey name from star.name
+  if (!other) {
+    const clean = star.name ? star.name.replace(/\s*\([^)]+\)/g, '').trim() : '';
+    other = clean || star.primaryDesignation || '';
+  }
+
+  // Final Hierarchy:
+  // 1. Proper name first
+  // 2. then Bayer designation (Greek + abbreviated genitive)
+  // 3. other designations (numbered/Flamsteed, variable, etc. with abbreviated genitive)
+  if (proper) {
+    return {
+      tier: 'proper',
+      primaryName: proper,
+      bayerDesignation: bayer || undefined,
+      badge: bayer || other || undefined,
+      displayFullName: bayer ? `${proper} (${bayer})` : proper
+    };
+  }
+
+  if (bayer) {
+    return {
+      tier: 'bayer',
+      primaryName: bayer,
+      bayerDesignation: bayer,
+      badge: undefined,
+      displayFullName: bayer
+    };
+  }
+
+  return {
+    tier: 'other',
+    primaryName: other,
+    bayerDesignation: undefined,
+    badge: undefined,
+    displayFullName: other
+  };
+}
+
 /**
  * Resolves the canonical star designation tag following the strict hierarchy:
  * 1. Greek Bayer -> 2. Numbered (Flamsteed/Gould) -> 3. Variable designations -> 4. Catalogs (HD, HR, etc.)
