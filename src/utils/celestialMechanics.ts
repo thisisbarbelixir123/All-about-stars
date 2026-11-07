@@ -535,7 +535,7 @@ export const getDynamicStarLocationDescription = (
 
   // 2. Dynamic astrometric role & identity
   if (isPrincipal) {
-    parts.push(`Principal Anchor Star (${star.bayerDesignation || 'Alpha Star'} of ${constellation.name})`);
+    parts.push(`Principal Star of ${constellation.name}`);
   } else if (STAR_CONSTELLATION_LOCATIONS[star.id]) {
     // Supplementary historical asterism location (e.g. "Left Shoulder", "Urn Pour Point")
     parts.push(STAR_CONSTELLATION_LOCATIONS[star.id]);
