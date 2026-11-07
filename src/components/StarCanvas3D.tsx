@@ -1230,20 +1230,26 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
     cameraRef.current = camera;
 
     // 2. Renderer with logarithmic depth buffer to prevent Z-fighting across massive scale disparities
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      logarithmicDepthBuffer: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(width, height);
-    const isMobInit = checkIsMobile();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobInit ? 1.5 : 2.0));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+    let renderer: THREE.WebGLRenderer | null = null;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        logarithmicDepthBuffer: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.setSize(width, height);
+      const isMobInit = checkIsMobile();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobInit ? 1.5 : 2.0));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
+    } catch (e) {
+      console.error('Fatal WebGL creation failure in StarCanvas3D:', e);
+      throw e; // Caught by WebGLErrorBoundary
+    }
 
     // 3. Cosmic Starfield Background
     const starCount = 6000;
@@ -1325,6 +1331,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
       resizeObserver.disconnect();
       if (rendererRef.current) {
         rendererRef.current.dispose();
+        rendererRef.current.forceContextLoss();
       }
       // Explicitly dispose all cached planet textures and materials to free GPU VRAM immediately on unmount
       planetTextureCacheRef.current.forEach((tex) => tex.dispose());

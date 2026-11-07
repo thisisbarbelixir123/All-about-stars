@@ -33,6 +33,7 @@ import { StellarSystemCatalog } from './components/StellarSystemCatalog';
 import { StellarSystemDossierModal } from './components/StellarSystemDossierModal';
 import { MultipleStarSystemData } from './data/multipleStarSystemsData';
 import { LoadingSprite } from './components/LoadingSprite';
+import { WebGLErrorBoundary } from './components/WebGLErrorBoundary';
 
 import { 
   Sun, 
@@ -907,128 +908,130 @@ export default function App() {
 
       {/* Main Full-Viewport 3D Stage (displayed on the entire webpage) */}
       <main className="flex-1 w-full h-full relative overflow-hidden">
-        <StarCanvas3D
-          stars={selectedStars}
-          selectedStarId={focusedStar?.id || null}
-          onSelectStar={(star) => setFocusedStar(star)}
-          showCorona={showCorona}
-          viewMode="3d-comparator"
-          focusedStarId={focusedStar?.id || null}
-          onInspectStar={(star) => setDetailModalStar(star)}
-          sortKey={stageSortKey}
-          sortDirection={stageSortDirection}
-          onSortChange={setStageSortKey}
-          onToggleSortDirection={() => setStageSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))}
-          presets={allPresets}
-          activePresetId={activePresetId}
-          onSelectPreset={handleSelectPreset}
-          onOpenCreatePreset={handleOpenCreatePreset}
-          onEditPreset={handleOpenEditPreset}
-          onDeletePreset={handleDeleteCustomPreset}
-          onOpenEditStage={handleOpenEditStage}
-          onOpenHome={() => setIsHomeOpen(true)}
-          onCloseHome={() => setIsHomeOpen(false)}
-          isHomeOpen={isHomeOpen}
-          onTourStateChange={setIsStageTourActive}
-          onOpenAbout={() => {
-            setActiveOverlay(null);
-            setIsAboutOpen(true);
-          }}
-          onOpenFrontpage={() => {
-            setFrontpageInitialSection('what-is-a-star');
-            setActiveOverlay('frontpage');
-          }}
-          onOpenCatalog={() => setActiveOverlay('catalog')}
-          onOpenStellarSystems={() => {
-            setIsHomeOpen(false);
-            setActiveOverlay('stellar-systems');
-          }}
-          onOpenHRDiagram={() => setActiveOverlay('hr-diagram')}
-          onOpenClassification={() => setActiveOverlay('classification')}
-          onOpenGuide={() => setActiveOverlay('classification')}
-          onOpenConstellations={() => setActiveOverlay('constellations')}
-          onOpenDiscovery={() => setActiveOverlay('discovery')}
-          onOpenNomenclature={() => setActiveOverlay('nomenclature')}
-          isMobile={isMobile}
-          isTablet={isTablet}
-        >
-          {/* Homepage Overlay over 3D Stage (Open on startup) */}
-          {isHomeOpen && (
-            <div className="absolute inset-0 z-20 overflow-y-auto bg-black/25 md:bg-[#02040a] animate-in fade-in duration-200 scrollbar-thin flex flex-col justify-between rounded-none pt-12 md:pt-0 pointer-events-auto">
-              <div className={`max-w-7xl w-full mx-auto flex-1 flex flex-col justify-center min-h-0 rounded-none ${
-                isTablet ? 'p-4 sm:p-5' : 'p-0 sm:p-5 lg:p-6'
-              } ${isMobile && !isTablet ? 'landscape:p-0' : ''}`}>
-                <HomeScreen
-                  onClose={() => setIsHomeOpen(false)}
-                  onNavigateTab={(tab) => {
-                    setIsHomeOpen(false);
-                    if (tab === 'guide') {
-                      setActiveOverlay('classification');
-                    } else if (tab === 'catalog' || tab === 'hr-diagram' || tab === 'constellations') {
-                      setActiveOverlay(tab);
-                    } else if (tab === 'about') {
-                      setIsAboutOpen(true);
-                    }
-                  }}
-                  onSelectPreset={(presetId) => {
-                    handleSelectPreset(presetId);
-                    setIsHomeOpen(false);
-                  }}
-                  onInspectStar={(star) => setDetailModalStar(star)}
-                  onAddStarToCompare={(star) => {
-                    handleAddStarToCompare(star);
-                    setFocusedStar(star);
-                    setIsHomeOpen(false);
-                  }}
-                  selectedStars={selectedStars}
-                  presets={allPresets}
-                  onOpenCreatePreset={handleOpenCreatePreset}
-                  onDeletePreset={handleDeleteCustomPreset}
-                  isMobile={isMobile}
-                />
-              </div>
-
-              {/* Footer inside Homepage - visible directly in principal view */}
-              <footer className={`border-t border-cyan-500/15 bg-[#030611] px-4 font-mono relative z-10 shrink-0 ${
-                isTablet ? 'py-3 sm:py-3.5 text-xs' : 'py-2 sm:py-3.5 text-[11px] sm:text-xs'
-              } ${isMobile && !isTablet ? 'landscape:py-1.5' : ''}`}>
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
-                  <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center sm:text-left">
-                    <span className="text-slate-300 font-bold">Copyright © 2026 B123 Entertainment.</span>
-                    <span className="hidden sm:inline text-slate-600">•</span>
-                    <span className="hidden xs:inline flex items-center gap-1.5">
-                      <span>Starpedia 3D: Stars of the Universe</span>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-[11px] sm:text-xs">
-                    <button
-                      id="btn-footer-about"
-                      onClick={() => {
-                        setIsHomeOpen(false);
-                        setActiveOverlay(null);
+        <WebGLErrorBoundary fallbackTitle="3D Star Stage Acceleration Paused">
+          <StarCanvas3D
+            stars={selectedStars}
+            selectedStarId={focusedStar?.id || null}
+            onSelectStar={(star) => setFocusedStar(star)}
+            showCorona={showCorona}
+            viewMode="3d-comparator"
+            focusedStarId={focusedStar?.id || null}
+            onInspectStar={(star) => setDetailModalStar(star)}
+            sortKey={stageSortKey}
+            sortDirection={stageSortDirection}
+            onSortChange={setStageSortKey}
+            onToggleSortDirection={() => setStageSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))}
+            presets={allPresets}
+            activePresetId={activePresetId}
+            onSelectPreset={handleSelectPreset}
+            onOpenCreatePreset={handleOpenCreatePreset}
+            onEditPreset={handleOpenEditPreset}
+            onDeletePreset={handleDeleteCustomPreset}
+            onOpenEditStage={handleOpenEditStage}
+            onOpenHome={() => setIsHomeOpen(true)}
+            onCloseHome={() => setIsHomeOpen(false)}
+            isHomeOpen={isHomeOpen}
+            onTourStateChange={setIsStageTourActive}
+            onOpenAbout={() => {
+              setActiveOverlay(null);
+              setIsAboutOpen(true);
+            }}
+            onOpenFrontpage={() => {
+              setFrontpageInitialSection('what-is-a-star');
+              setActiveOverlay('frontpage');
+            }}
+            onOpenCatalog={() => setActiveOverlay('catalog')}
+            onOpenStellarSystems={() => {
+              setIsHomeOpen(false);
+              setActiveOverlay('stellar-systems');
+            }}
+            onOpenHRDiagram={() => setActiveOverlay('hr-diagram')}
+            onOpenClassification={() => setActiveOverlay('classification')}
+            onOpenGuide={() => setActiveOverlay('classification')}
+            onOpenConstellations={() => setActiveOverlay('constellations')}
+            onOpenDiscovery={() => setActiveOverlay('discovery')}
+            onOpenNomenclature={() => setActiveOverlay('nomenclature')}
+            isMobile={isMobile}
+            isTablet={isTablet}
+          >
+            {/* Homepage Overlay over 3D Stage (Open on startup) */}
+            {isHomeOpen && (
+              <div className="absolute inset-0 z-20 overflow-y-auto bg-black/25 md:bg-[#02040a] animate-in fade-in duration-200 scrollbar-thin flex flex-col justify-between rounded-none pt-12 md:pt-0 pointer-events-auto">
+                <div className={`max-w-7xl w-full mx-auto flex-1 flex flex-col justify-center min-h-0 rounded-none ${
+                  isTablet ? 'p-4 sm:p-5' : 'p-0 sm:p-5 lg:p-6'
+                } ${isMobile && !isTablet ? 'landscape:p-0' : ''}`}>
+                  <HomeScreen
+                    onClose={() => setIsHomeOpen(false)}
+                    onNavigateTab={(tab) => {
+                      setIsHomeOpen(false);
+                      if (tab === 'guide') {
+                        setActiveOverlay('classification');
+                      } else if (tab === 'catalog' || tab === 'hr-diagram' || tab === 'constellations') {
+                        setActiveOverlay(tab);
+                      } else if (tab === 'about') {
                         setIsAboutOpen(true);
-                      }}
-                      className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <Info className="w-3.5 h-3.5" />
-                      <span>About app</span>
-                    </button>
-                    <span className="text-slate-700">|</span>
-                    <a
-                      href="https://youtube.com/comparisonfarts"
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="text-red-400 hover:text-red-300 hover:underline flex items-center gap-1"
-                    >
-                      <span>youtube.com/comparisonfarts</span>
-                    </a>
-                  </div>
+                      }
+                    }}
+                    onSelectPreset={(presetId) => {
+                      handleSelectPreset(presetId);
+                      setIsHomeOpen(false);
+                    }}
+                    onInspectStar={(star) => setDetailModalStar(star)}
+                    onAddStarToCompare={(star) => {
+                      handleAddStarToCompare(star);
+                      setFocusedStar(star);
+                      setIsHomeOpen(false);
+                    }}
+                    selectedStars={selectedStars}
+                    presets={allPresets}
+                    onOpenCreatePreset={handleOpenCreatePreset}
+                    onDeletePreset={handleDeleteCustomPreset}
+                    isMobile={isMobile}
+                  />
                 </div>
-              </footer>
-            </div>
-          )}
-        </StarCanvas3D>
+
+                {/* Footer inside Homepage - visible directly in principal view */}
+                <footer className={`border-t border-cyan-500/15 bg-[#030611] px-4 font-mono relative z-10 shrink-0 ${
+                  isTablet ? 'py-3 sm:py-3.5 text-xs' : 'py-2 sm:py-3.5 text-[11px] sm:text-xs'
+                } ${isMobile && !isTablet ? 'landscape:py-1.5' : ''}`}>
+                  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center sm:text-left">
+                      <span className="text-slate-300 font-bold">Copyright © 2026 B123 Entertainment.</span>
+                      <span className="hidden sm:inline text-slate-600">•</span>
+                      <span className="hidden xs:inline flex items-center gap-1.5">
+                        <span>Starpedia 3D: Stars of the Universe</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-[11px] sm:text-xs">
+                      <button
+                        id="btn-footer-about"
+                        onClick={() => {
+                          setIsHomeOpen(false);
+                          setActiveOverlay(null);
+                          setIsAboutOpen(true);
+                        }}
+                        className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                        <span>About app</span>
+                      </button>
+                      <span className="text-slate-700">|</span>
+                      <a
+                        href="https://youtube.com/comparisonfarts"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="text-red-400 hover:text-red-300 hover:underline flex items-center gap-1"
+                      >
+                        <span>youtube.com/comparisonfarts</span>
+                      </a>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+            )}
+          </StarCanvas3D>
+        </WebGLErrorBoundary>
       </main>
 
       {/* Encyclopedia Fullscreen Mode: Stellar Catalog, H-R Diagram, Classification Guide, and Constellation Guide */}

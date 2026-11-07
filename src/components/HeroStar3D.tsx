@@ -46,6 +46,7 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [position, setPosition] = useState<{ xPercent: number; yPercent: number }>(initialPos);
+  const [webglFailed, setWebglFailed] = useState(false);
 
   // Synchronize when sizePx or initialPos is randomized externally (only if not actively resizing)
   useEffect(() => {
@@ -108,149 +109,160 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
     // Crisp high-resolution fixed buffer (400x400) - CSS fluidly scales container at 60/120 FPS with ZERO WebGL recreation
     const bufferRes = 400;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1.0, 0.1, 100);
-    camera.position.z = 2.65;
-
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(bufferRes, bufferRes);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
-
-    // Strict borderless styling on WebGL Canvas (NO borders, NO outlines, NO rings)
-    renderer.domElement.style.borderRadius = '50%';
-    renderer.domElement.style.display = 'block';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    renderer.domElement.style.border = 'none';
-    renderer.domElement.style.outline = 'none';
-    renderer.domElement.style.boxShadow = 'none';
-    renderer.domElement.style.pointerEvents = 'none';
-
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
-    container.appendChild(renderer.domElement);
-
-    // Identify contact binary stars like VFTS 352
-    const isContactBinary =
-      star.id === 'vfts-352' ||
-      star.stellarStage === 'Contact Binary' ||
-      star.name.toLowerCase().includes('conjoined') ||
-      star.name.toLowerCase().includes('contact binary');
-
-    const d65 = computeD65StellarColor({
-      spectralType: star.spectralType,
-      spectralClass: star.spectralClass,
-      temperature: star.temperature,
-      stellarStage: star.stellarStage,
-    });
-    const baseColor = new THREE.Color(d65.colorHex);
-    const coronaColor = new THREE.Color(d65.coronaColorHex);
-
-    const isPulsar = star.spectralClass === 'NS' || star.name.toLowerCase().includes('pulsar');
-    const bdType = getBrownDwarfType(star);
-    const { classKey, subclass } = parseSpectralType(star.spectralType, star.spectralClass);
-    const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
-
-    // High-Fidelity Ultra-Smooth Photosphere Shader with Luminous Textures & D65 Chromaticity
-    const starMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        baseColor: { value: baseColor },
-        coronaColor: { value: coronaColor },
-        temperature: { value: star.temperature || 5778 },
-        isPulsar: { value: isPulsar ? 1.0 : 0.0 },
-        isContactBinary: { value: isContactBinary ? 1.0 : 0.0 },
-        brownDwarfType: { value: bdType },
-        densityFactor: { value: 0.0 },
-        spectralClassIndex: { value: spectralClassIndex },
-        spectralSubclass: { value: subclass },
-        hasSpectralData: { value: 1.0 },
-      },
-      vertexShader: STAR_VERTEX_SHADER,
-      fragmentShader: STAR_FRAGMENT_SHADER,
-    });
-
-    // Root group to hold single or conjoined star geometry
-    const starGroup = new THREE.Group();
-
+    let renderer: THREE.WebGLRenderer | null = null;
+    let animationId: number = 0;
     const geometriesToDispose: THREE.BufferGeometry[] = [];
-
-    if (isContactBinary) {
-      // VFTS 352 Conjoined ("Kissing") Binary Star System: Two touching stellar lobes sharing a mass bridge
-      const lobeRadius = 0.58;
-      const lobeOffset = 0.38;
-
-      // Left touching lobe
-      const lobeGeoA = new THREE.SphereGeometry(lobeRadius, 48, 48);
-      geometriesToDispose.push(lobeGeoA);
-      const lobeMeshA = new THREE.Mesh(lobeGeoA, starMaterial);
-      lobeMeshA.position.set(-lobeOffset, 0, 0);
-      starGroup.add(lobeMeshA);
-
-      // Right touching lobe
-      const lobeGeoB = new THREE.SphereGeometry(lobeRadius, 48, 48);
-      geometriesToDispose.push(lobeGeoB);
-      const lobeMeshB = new THREE.Mesh(lobeGeoB, starMaterial);
-      lobeMeshB.position.set(lobeOffset, 0, 0);
-      starGroup.add(lobeMeshB);
-
-      // Conjoined mass transfer neck / bridge connecting both touching lobes smoothly
-      const bridgeGeo = new THREE.CylinderGeometry(lobeRadius * 0.82, lobeRadius * 0.82, lobeOffset * 2.0, 48);
-      bridgeGeo.rotateZ(Math.PI / 2);
-      geometriesToDispose.push(bridgeGeo);
-      const bridgeMesh = new THREE.Mesh(bridgeGeo, starMaterial);
-      starGroup.add(bridgeMesh);
-    } else {
-      // Natural 3D single star sphere geometry
-      const sphereGeo = new THREE.SphereGeometry(1.0, 64, 64);
-      geometriesToDispose.push(sphereGeo);
-      const starMesh = new THREE.Mesh(sphereGeo, starMaterial);
-      starGroup.add(starMesh);
-    }
-
+    let starMaterial: THREE.ShaderMaterial | null = null;
     let coronaMat: THREE.ShaderMaterial | null = null;
-    if (bdType < 1.5) {
-      coronaMat = createCoronaShaderMaterial(star);
-      const coronaGeo = new THREE.SphereGeometry(2.2, 48, 48);
-      geometriesToDispose.push(coronaGeo);
-      const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
-      starGroup.add(coronaMesh);
+
+    try {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1.0, 0.1, 100);
+      camera.position.z = 2.65;
+
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.setSize(bufferRes, bufferRes);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.35;
+
+      // Strict borderless styling on WebGL Canvas (NO borders, NO outlines, NO rings)
+      renderer.domElement.style.borderRadius = '50%';
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.border = 'none';
+      renderer.domElement.style.outline = 'none';
+      renderer.domElement.style.boxShadow = 'none';
+      renderer.domElement.style.pointerEvents = 'none';
+
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      container.appendChild(renderer.domElement);
+
+      // Identify contact binary stars like VFTS 352
+      const isContactBinary =
+        star.id === 'vfts-352' ||
+        star.stellarStage === 'Contact Binary' ||
+        star.name.toLowerCase().includes('conjoined') ||
+        star.name.toLowerCase().includes('contact binary');
+
+      const d65 = computeD65StellarColor({
+        spectralType: star.spectralType,
+        spectralClass: star.spectralClass,
+        temperature: star.temperature,
+        stellarStage: star.stellarStage,
+      });
+      const baseColor = new THREE.Color(d65.colorHex);
+      const coronaColor = new THREE.Color(d65.coronaColorHex);
+
+      const isPulsar = star.spectralClass === 'NS' || star.name.toLowerCase().includes('pulsar');
+      const bdType = getBrownDwarfType(star);
+      const { classKey, subclass } = parseSpectralType(star.spectralType, star.spectralClass);
+      const spectralClassIndex = SPECTRAL_CLASS_MAP[classKey] ?? 4.0;
+
+      // High-Fidelity Ultra-Smooth Photosphere Shader with Luminous Textures & D65 Chromaticity
+      starMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          baseColor: { value: baseColor },
+          coronaColor: { value: coronaColor },
+          temperature: { value: star.temperature || 5778 },
+          isPulsar: { value: isPulsar ? 1.0 : 0.0 },
+          isContactBinary: { value: isContactBinary ? 1.0 : 0.0 },
+          brownDwarfType: { value: bdType },
+          densityFactor: { value: 0.0 },
+          spectralClassIndex: { value: spectralClassIndex },
+          spectralSubclass: { value: subclass },
+          hasSpectralData: { value: 1.0 },
+        },
+        vertexShader: STAR_VERTEX_SHADER,
+        fragmentShader: STAR_FRAGMENT_SHADER,
+      });
+
+      // Root group to hold single or conjoined star geometry
+      const starGroup = new THREE.Group();
+
+      if (isContactBinary) {
+        // VFTS 352 Conjoined ("Kissing") Binary Star System: Two touching stellar lobes sharing a mass bridge
+        const lobeRadius = 0.58;
+        const lobeOffset = 0.38;
+
+        // Left touching lobe
+        const lobeGeoA = new THREE.SphereGeometry(lobeRadius, 48, 48);
+        geometriesToDispose.push(lobeGeoA);
+        const lobeMeshA = new THREE.Mesh(lobeGeoA, starMaterial);
+        lobeMeshA.position.set(-lobeOffset, 0, 0);
+        starGroup.add(lobeMeshA);
+
+        // Right touching lobe
+        const lobeGeoB = new THREE.SphereGeometry(lobeRadius, 48, 48);
+        geometriesToDispose.push(lobeGeoB);
+        const lobeMeshB = new THREE.Mesh(lobeGeoB, starMaterial);
+        lobeMeshB.position.set(lobeOffset, 0, 0);
+        starGroup.add(lobeMeshB);
+
+        // Conjoined mass transfer neck / bridge connecting both touching lobes smoothly
+        const bridgeGeo = new THREE.CylinderGeometry(lobeRadius * 0.82, lobeRadius * 0.82, lobeOffset * 2.0, 48);
+        bridgeGeo.rotateZ(Math.PI / 2);
+        geometriesToDispose.push(bridgeGeo);
+        const bridgeMesh = new THREE.Mesh(bridgeGeo, starMaterial);
+        starGroup.add(bridgeMesh);
+      } else {
+        // Natural 3D single star sphere geometry
+        const sphereGeo = new THREE.SphereGeometry(1.0, 64, 64);
+        geometriesToDispose.push(sphereGeo);
+        const starMesh = new THREE.Mesh(sphereGeo, starMaterial);
+        starGroup.add(starMesh);
+      }
+
+      if (bdType < 1.5) {
+        coronaMat = createCoronaShaderMaterial(star);
+        const coronaGeo = new THREE.SphereGeometry(2.2, 48, 48);
+        geometriesToDispose.push(coronaGeo);
+        const coronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
+        starGroup.add(coronaMesh);
+      }
+
+      scene.add(starGroup);
+
+      const clock = new THREE.Clock();
+
+      const animate = () => {
+        animationId = requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+
+        // Smooth continuous rotational spin on stellar / orbital axis
+        starGroup.rotation.y = elapsedTime * 0.22;
+        starGroup.rotation.x = 0.12;
+
+        if (starMaterial) starMaterial.uniforms.time.value = elapsedTime;
+        if (renderer) renderer.render(scene, camera);
+      };
+
+      animate();
+      setWebglFailed(false);
+    } catch (err) {
+      console.warn('WebGL context creation failed for HeroStar3D, switching to high-fidelity 2D incandescent fallback:', err);
+      setWebglFailed(true);
     }
-
-    scene.add(starGroup);
-
-    let animationId: number;
-    const clock = new THREE.Clock();
-
-    const animate = () => {
-      animationId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
-
-      // Smooth continuous rotational spin on stellar / orbital axis
-      starGroup.rotation.y = elapsedTime * 0.22;
-      starGroup.rotation.x = 0.12;
-
-      starMaterial.uniforms.time.value = elapsedTime;
-      renderer.render(scene, camera);
-    };
-
-    animate();
 
     return () => {
-      cancelAnimationFrame(animationId);
+      if (animationId) cancelAnimationFrame(animationId);
       geometriesToDispose.forEach((geo) => geo.dispose());
-      starMaterial.dispose();
+      if (starMaterial) starMaterial.dispose();
       if (coronaMat) coronaMat.dispose();
-      renderer.dispose();
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
+      if (renderer) {
+        renderer.dispose();
+        renderer.forceContextLoss();
+        if (container.contains(renderer.domElement)) {
+          container.removeChild(renderer.domElement);
+        }
       }
     };
   }, [star.id, star.colorHex, star.coronaColorHex]);
@@ -440,19 +452,32 @@ export const HeroStar3D: React.FC<HeroStar3DProps> = ({
         }}
       />
 
-      {/* 3. 3D WebGL Star Sphere (Clean 3D incandescent surface, NO borders, NO rings) */}
-      <div
-        ref={mountRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          border: '0',
-          outline: 'none',
-        }}
-        className="relative z-10 rounded-full border-0 outline-none p-0 m-0"
-      />
+      {/* 3. 3D WebGL Star Sphere or 2D Incandescent Fallback on GPU Context Failure */}
+      {webglFailed ? (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${star.colorHex} 45%, ${star.coronaColorHex || star.colorHex} 75%, #020617 100%)`,
+            boxShadow: `inset -8px -8px 24px rgba(0,0,0,0.85), inset 4px 4px 16px rgba(255,255,255,0.7)`,
+          }}
+          className="relative z-10 rounded-full border-0 outline-none p-0 m-0 pointer-events-none"
+        />
+      ) : (
+        <div
+          ref={mountRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '0',
+            outline: 'none',
+          }}
+          className="relative z-10 rounded-full border-0 outline-none p-0 m-0"
+        />
+      )}
 
       {/* Subtle Star Name Badge (in Plain Mode) */}
       {isPlainMode && (

@@ -46,8 +46,8 @@ class SoundEffectsManager {
         this.masterGain.gain.setValueAtTime(0.15, this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
       }
-    } catch (e) {
-      console.warn('Web Audio API not supported or blocked:', e);
+    } catch {
+      // AudioContext policy blocked until user gesture: silently deferred
     }
   }
 
