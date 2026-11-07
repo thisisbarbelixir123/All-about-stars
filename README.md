@@ -30,7 +30,7 @@
   - [2.2 Hydrostatic Equilibrium & Interior Transport Dynamics](#22-hydrostatic-equilibrium--interior-transport-dynamics)
   - [2.3 Thermonuclear Nucleosynthesis & Reaction Networks](#23-thermonuclear-nucleosynthesis--reaction-networks)
   - [2.4 Degeneracy Physics & Compact Stellar Remnants](#24-degeneracy-physics--compact-stellar-remnants)
-  - [2.5 Stellar Variability & the $\kappa$-Mechanism](#25-stellar-variability--the-kappa-mechanism)
+  - [2.5 Stellar Variability & the Kappa Mechanism](#25-stellar-variability--the-kappa-mechanism)
   - [2.6 Exoplanetary Architecture & Habitable Zone Thermodynamics](#26-exoplanetary-architecture--habitable-zone-thermodynamics)
   - [2.7 Keplerian Two-Body & Hierarchical Orbital Mechanics](#27-keplerian-two-body--hierarchical-orbital-mechanics)
 - [3. Complete Architectural & Functional Breakdown](#3-complete-architectural--functional-breakdown)
@@ -206,7 +206,7 @@ $$R_s = \frac{2GM}{c^2} \approx 2.95 \left(\frac{M}{M_\odot}\right)\text{ km}$$
 
 ---
 
-### 2.5 Stellar Variability & the $\kappa$-Mechanism
+### 2.5 Stellar Variability & the Kappa Mechanism
 
 Variable stars (Classical Cepheids, W Virginis, RR Lyrae, $\delta$ Scuti) pulsate through the thermodynamic **$\kappa$-mechanism** (opacity valve) operating within partial ionization zones:
 - Under ordinary stellar conditions, compression heats plasma, ionizing atoms and reducing Rosseland mean opacity ($\kappa \propto \rho T^{-3.5}$, Kramers' law), allowing radiative leakage.
