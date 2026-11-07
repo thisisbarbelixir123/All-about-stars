@@ -4630,6 +4630,67 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
       },
     ],
   },
+  // 56. Zeta Aurigae System (Sadatoni System)
+  {
+    id: 'zeta-aurigae-system',
+    name: 'Sadatoni System (Zeta Aurigae Atmospheric Eclipsing Binary)',
+    systemType: 'Spectroscopic Binary',
+    constellation: 'Auriga',
+    distanceLy: 790,
+    visualSeparationArcsec: 0.015,
+    isEclipsing: true,
+    starIds: ['sadatoni', 'zeta-aurigae-a', 'zeta-aurigae-b', 'zeta-aurigae'],
+    effectiveStarCount: 2,
+    barycenterDescription: 'Mutual center of gravity between an evolved K4Ib orange supergiant and a hot B5V blue-white dwarf.',
+    astrophysicalSignificance: 'The defining archetype of "Zeta Aurigae-type" atmospheric eclipsing binaries. Every 972 days (2.66 years), the compact blue companion passes directly behind the vast, semi-transparent extended chromosphere of the orange supergiant, providing a natural spectrometer probe of stellar chromospheric stratification and mass loss.',
+    components: [
+      {
+        id: 'sadatoni',
+        catalogStarId: 'sadatoni',
+        name: 'Sadatoni (Zeta Aurigae A)',
+        bayerDesignation: 'ζ Aur A',
+        spectralType: 'K4Ib',
+        massSolar: 5.8,
+        radiusSolar: 148.0,
+        temperature: 3950,
+        luminositySolar: 4800,
+        isPrimary: true,
+        colorHex: '#ffcda9',
+        coronaColorHex: '#ffa058',
+        description: 'Vast K-type orange supergiant primary with an extensive, tenuous outer chromosphere and strong stellar winds.',
+      },
+      {
+        id: 'zeta-aurigae-b',
+        name: 'Zeta Aurigae B (Haedus B)',
+        bayerDesignation: 'ζ Aur B',
+        spectralType: 'B5V',
+        massSolar: 4.8,
+        radiusSolar: 4.5,
+        temperature: 15000,
+        luminositySolar: 800,
+        colorHex: '#aaccff',
+        coronaColorHex: '#6699ff',
+        description: 'Hot blue-white B5 main-sequence dwarf acting as a high-temperature backlight scanning through the supergiant chromosphere.',
+      },
+    ],
+    orbits: [
+      {
+        primaryId: 'sadatoni',
+        secondaryId: 'zeta-aurigae-b',
+        label: 'Zeta Aurigae 972-Day Atmospheric Eclipsing Orbit',
+        semiMajorAxisAU: 4.2,
+        orbitalPeriodYears: 2.66,
+        orbitalPeriodDays: 972.16,
+        eccentricity: 0.40,
+        inclinationDeg: 87.0,
+        ascendingNodeDeg: 78.0,
+        argPeriastronDeg: 295.0,
+        periastronAU: 2.52,
+        apastronAU: 5.88,
+        description: 'Near-edge-on 972-day eccentric orbit producing dramatic 37-day atmospheric eclipses and chromospheric spectral line emergence.',
+      },
+    ],
+  },
 ];
 
 /**
@@ -4845,6 +4906,12 @@ STAR_TO_MULTIPLE_SYSTEM_MAP['w-ursae-majoris'] = 'w-ursae-majoris-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['w-uma'] = 'w-ursae-majoris-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['w-uma-a'] = 'w-ursae-majoris-system';
 STAR_TO_MULTIPLE_SYSTEM_MAP['w-uma-b'] = 'w-ursae-majoris-system';
+
+// Zeta Aurigae System (Sadatoni)
+STAR_TO_MULTIPLE_SYSTEM_MAP['sadatoni'] = 'zeta-aurigae-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['zeta-aurigae'] = 'zeta-aurigae-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['zeta-aurigae-a'] = 'zeta-aurigae-system';
+STAR_TO_MULTIPLE_SYSTEM_MAP['zeta-aurigae-b'] = 'zeta-aurigae-system';
 
 // Automatically calibrate all star components in multiple systems to realistic D65 chromaticity
 // preserving black holes and compact dark remnants as pure black #000000

@@ -877,7 +877,7 @@
       "outer": 480
     },
     "exoplanetSystem": {
-      "hasExoplanets": true,
+      "hasExoplanets": false,
       "confirmedCount": 0,
       "candidateCount": 1,
       "debrisDisk": true,
@@ -10192,7 +10192,7 @@
       "outer": 8.5
     },
     "exoplanetSystem": {
-      "hasExoplanets": true,
+      "hasExoplanets": false,
       "confirmedCount": 0,
       "candidateCount": 1,
       "debrisDisk": true,
@@ -10598,7 +10598,7 @@
       "outer": 5.5
     },
     "exoplanetSystem": {
-      "hasExoplanets": true,
+      "hasExoplanets": false,
       "confirmedCount": 0,
       "candidateCount": 1,
       "debrisDisk": true,
@@ -47758,7 +47758,7 @@
     "exoplanetSystem": {
       "hasExoplanets": false,
       "confirmedCount": 0,
-      "systemOverview": "Textbook atmospheric eclipsing binary system with a 972-day period.",
+      "systemOverview": "No confirmed exoplanets.",
       "planets": []
     },
     "stellarStage": "Red Supergiant",
@@ -54997,7 +54997,7 @@
       "outer": 6.1
     },
     "exoplanetSystem": {
-      "hasExoplanets": true,
+      "hasExoplanets": false,
       "confirmedCount": 0,
       "candidateCount": 2,
       "debrisDisk": true,
@@ -55622,7 +55622,7 @@
       "outer": 24
     },
     "exoplanetSystem": {
-      "hasExoplanets": true,
+      "hasExoplanets": false,
       "confirmedCount": 0,
       "candidateCount": 1,
       "debrisDisk": true,
@@ -95221,7 +95221,20 @@
       "confirmedCount": 1,
       "candidateCount": 0,
       "systemOverview": "Hosts confirmed jovian gas giant exoplanet Fortitudo (Xi Aquilae b).",
-      "planets": []
+      "planets": [
+        {
+          "name": "Fortitudo (Xi Aquilae b)",
+          "type": "Gas Giant (Super-Jupiter)",
+          "mass": "2.8 M_J",
+          "orbitalPeriodDays": 136.75,
+          "semiMajorAxisAU": 0.68,
+          "habitableZoneStatus": "Too Hot",
+          "discoveryYear": 2008,
+          "discoveryMethod": "Radial Velocity",
+          "confirmed": true,
+          "description": "A massive Jovian world orbiting an evolved giant star, discovered in 2008 via radial velocity measurements."
+        }
+      ]
     },
     "stellarStage": "Yellow Giant",
     "lifespanEstimate": "~4.0 Billion Years",

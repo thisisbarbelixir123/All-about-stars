@@ -241,6 +241,16 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   const knownMultipleSystem = useMemo(() => (star ? getMultipleStarSystemForStar(star.id) : undefined), [star]);
 
+  const hasExoplanetarySystem = useMemo(() => {
+    if (!star || !star.exoplanetSystem) return false;
+    return Boolean(
+      (star.exoplanetSystem.hasExoplanets && star.exoplanetSystem.confirmedCount && star.exoplanetSystem.confirmedCount > 0) ||
+        (star.exoplanetSystem.planets && star.exoplanetSystem.planets.length > 0) ||
+        (star.exoplanetSystem.candidateCount && star.exoplanetSystem.candidateCount > 0) ||
+        star.exoplanetSystem.debrisDisk
+    );
+  }, [star]);
+
   const [starClicks, setStarClicks] = useState<number>(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -1160,141 +1170,143 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
             )}
           </div>
 
-              {/* Exoplanetary System Section */}
-          <div className="p-5 rounded-2xl bg-[#020514]/75 backdrop-blur-md border border-cyan-500/25 shadow-[0_0_30px_rgba(6,182,212,0.12)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-cyan-500/15 pb-3">
-              <div className="flex items-center gap-2.5 text-cyan-300">
-                <Globe className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
-                  Exoplanetary System
-                </h3>
+              {/* Exoplanetary System Section - Only shown when star has exoplanets, candidate worlds, or debris architecture */}
+          {hasExoplanetarySystem && (
+            <div className="p-5 rounded-2xl bg-[#020514]/75 backdrop-blur-md border border-cyan-500/25 shadow-[0_0_30px_rgba(6,182,212,0.12)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-cyan-500/15 pb-3">
+                <div className="flex items-center gap-2.5 text-cyan-300">
+                  <Globe className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider font-sans">
+                    Exoplanetary System
+                  </h3>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {star.exoplanetSystem.hasExoplanets && star.exoplanetSystem.confirmedCount > 0 ? (
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 font-mono font-bold flex items-center gap-1 shadow-sm">
+                      <Sparkles className="w-3 h-3 text-emerald-400" />
+                      {star.exoplanetSystem.confirmedCount} Confirmed Planet{star.exoplanetSystem.confirmedCount !== 1 ? 's' : ''}
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-900/90 text-slate-400 border border-slate-700/50 font-mono">
+                      No Confirmed Planets
+                    </span>
+                  )}
+                  {star.exoplanetSystem.candidateCount && star.exoplanetSystem.candidateCount > 0 ? (
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-950/90 text-amber-300 border border-amber-500/40 font-mono font-medium">
+                      +{star.exoplanetSystem.candidateCount} Candidate{star.exoplanetSystem.candidateCount > 1 ? 's' : ''}
+                    </span>
+                  ) : null}
+                  {star.exoplanetSystem.debrisDisk && (
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-purple-950/90 text-purple-300 border border-purple-500/40 font-mono">
+                      Debris Disk
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {star.exoplanetSystem.hasExoplanets ? (
-                  <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 font-mono font-bold flex items-center gap-1 shadow-sm">
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    {star.exoplanetSystem.confirmedCount} Confirmed Planet{star.exoplanetSystem.confirmedCount !== 1 ? 's' : ''}
-                  </span>
-                ) : (
-                  <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-900/90 text-slate-400 border border-slate-700/50 font-mono">
-                    No Confirmed Planets
-                  </span>
-                )}
-                {star.exoplanetSystem.candidateCount && star.exoplanetSystem.candidateCount > 0 ? (
-                  <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-950/90 text-amber-300 border border-amber-500/40 font-mono font-medium">
-                    +{star.exoplanetSystem.candidateCount} Candidate{star.exoplanetSystem.candidateCount > 1 ? 's' : ''}
-                  </span>
-                ) : null}
-                {star.exoplanetSystem.debrisDisk && (
-                  <span className="text-xs px-2.5 py-1 rounded-lg bg-purple-950/90 text-purple-300 border border-purple-500/40 font-mono">
-                    Debris Disk
-                  </span>
-                )}
-              </div>
-            </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              {star.exoplanetSystem.systemOverview}
-            </p>
+              <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                {star.exoplanetSystem.systemOverview}
+              </p>
 
-            {star.exoplanetSystem.debrisDiskDescription && (
-              <div className="mb-4 p-3 rounded-xl bg-[#02040c]/80 border border-purple-500/25 text-xs text-purple-200/90 font-mono flex items-start gap-2 shadow-inner">
-                <Orbit className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                <span>
-                  <strong className="text-purple-300">Circumstellar Dust & Debris Architecture:</strong>{' '}
-                  {star.exoplanetSystem.debrisDiskDescription}
-                </span>
-              </div>
-            )}
+              {star.exoplanetSystem.debrisDiskDescription && (
+                <div className="mb-4 p-3 rounded-xl bg-[#02040c]/80 border border-purple-500/25 text-xs text-purple-200/90 font-mono flex items-start gap-2 shadow-inner">
+                  <Orbit className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-purple-300">Circumstellar Dust & Debris Architecture:</strong>{' '}
+                    {star.exoplanetSystem.debrisDiskDescription}
+                  </span>
+                </div>
+              )}
 
-            {/* Exoplanet Cards List */}
-            {star.exoplanetSystem.planets.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
-                  Cataloged System Bodies ({star.exoplanetSystem.planets.length})
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {star.exoplanetSystem.planets.map((planet, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-xl bg-[#020512]/90 border border-cyan-500/20 hover:border-cyan-500/40 transition-all flex flex-col justify-between gap-3 shadow-inner"
-                    >
-                      <div>
-                        <div className="flex flex-wrap items-start justify-between gap-2 mb-1.5">
-                          <div className="min-w-0 flex-1">
-                            <h5 className="text-sm font-bold text-cyan-200 font-sans break-words">
-                              {planet.name}
-                            </h5>
-                            <span className="text-[11px] text-slate-400 font-mono block">
-                              {planet.type}
-                            </span>
+              {/* Exoplanet Cards List */}
+              {star.exoplanetSystem.planets.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+                    Cataloged System Bodies ({star.exoplanetSystem.planets.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {star.exoplanetSystem.planets.map((planet, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-xl bg-[#020512]/90 border border-cyan-500/20 hover:border-cyan-500/40 transition-all flex flex-col justify-between gap-3 shadow-inner"
+                      >
+                        <div>
+                          <div className="flex flex-wrap items-start justify-between gap-2 mb-1.5">
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-sm font-bold text-cyan-200 font-sans break-words">
+                                {planet.name}
+                              </h5>
+                              <span className="text-[11px] text-slate-400 font-mono block">
+                                {planet.type}
+                              </span>
+                            </div>
+
+                            {planet.habitableZoneStatus && (
+                              <span
+                                className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium border shrink-0 max-w-full text-center leading-tight ${
+                                  planet.habitableZoneStatus.includes('Habitable')
+                                    ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.3)]'
+                                    : planet.habitableZoneStatus === 'Inner Rim'
+                                    ? 'bg-amber-950/90 text-amber-300 border-amber-500/40'
+                                    : 'bg-slate-900/90 text-slate-400 border-slate-700/40'
+                                }`}
+                              >
+                                {planet.habitableZoneStatus}
+                              </span>
+                            )}
                           </div>
 
-                          {planet.habitableZoneStatus && (
-                            <span
-                              className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium border shrink-0 max-w-full text-center leading-tight ${
-                                planet.habitableZoneStatus.includes('Habitable')
-                                  ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.3)]'
-                                  : planet.habitableZoneStatus === 'Inner Rim'
-                                  ? 'bg-amber-950/90 text-amber-300 border-amber-500/40'
-                                  : 'bg-slate-900/90 text-slate-400 border-slate-700/40'
-                              }`}
-                            >
-                              {planet.habitableZoneStatus}
-                            </span>
+                          {planet.description && (
+                            <p className="text-xs text-slate-300 leading-relaxed mt-1">
+                              {planet.description}
+                            </p>
                           )}
                         </div>
 
-                        {planet.description && (
-                          <p className="text-xs text-slate-300 leading-relaxed mt-1">
-                            {planet.description}
-                          </p>
-                        )}
+                        <div className="pt-2.5 border-t border-cyan-500/15 grid grid-cols-2 gap-2 text-[11px] font-mono">
+                          {planet.mass && (
+                            <div>
+                              <span className="text-slate-500">Mass:</span>{' '}
+                              <span className="text-slate-200 font-medium">{planet.mass}</span>
+                            </div>
+                          )}
+                          {planet.radius && (
+                            <div>
+                              <span className="text-slate-500">Radius:</span>{' '}
+                              <span className="text-slate-200 font-medium">{planet.radius}</span>
+                            </div>
+                          )}
+                          {planet.orbitalPeriodDays !== undefined && (
+                            <div>
+                              <span className="text-slate-500">Orbit Period:</span>{' '}
+                              <span className="text-cyan-300 font-medium">
+                                {planet.orbitalPeriodDays >= 365
+                                  ? `${(planet.orbitalPeriodDays / 365.25).toFixed(2)} yr (${planet.orbitalPeriodDays.toLocaleString()} d)`
+                                  : `${planet.orbitalPeriodDays.toFixed(2)} days`}
+                              </span>
+                            </div>
+                          )}
+                          {planet.semiMajorAxisAU !== undefined && (
+                            <div>
+                              <span className="text-slate-500">Distance:</span>{' '}
+                              <span className="text-emerald-300 font-medium">{planet.semiMajorAxisAU} AU</span>
+                            </div>
+                          )}
+                          {planet.discoveryMethod && (
+                            <div className="col-span-2 text-[10px] text-slate-400 flex items-center gap-1.5 pt-1">
+                              <span>Method: <strong className="text-slate-300">{planet.discoveryMethod}</strong></span>
+                              {planet.discoveryYear && <span>({planet.discoveryYear})</span>}
+                              {!planet.confirmed && <span className="text-amber-400 italic">• Candidate</span>}
+                            </div>
+                          )}
+                        </div>
                       </div>
-
-                      <div className="pt-2.5 border-t border-cyan-500/15 grid grid-cols-2 gap-2 text-[11px] font-mono">
-                        {planet.mass && (
-                          <div>
-                            <span className="text-slate-500">Mass:</span>{' '}
-                            <span className="text-slate-200 font-medium">{planet.mass}</span>
-                          </div>
-                        )}
-                        {planet.radius && (
-                          <div>
-                            <span className="text-slate-500">Radius:</span>{' '}
-                            <span className="text-slate-200 font-medium">{planet.radius}</span>
-                          </div>
-                        )}
-                        {planet.orbitalPeriodDays !== undefined && (
-                          <div>
-                            <span className="text-slate-500">Orbit Period:</span>{' '}
-                            <span className="text-cyan-300 font-medium">
-                              {planet.orbitalPeriodDays >= 365
-                                ? `${(planet.orbitalPeriodDays / 365.25).toFixed(2)} yr (${planet.orbitalPeriodDays.toLocaleString()} d)`
-                                : `${planet.orbitalPeriodDays.toFixed(2)} days`}
-                            </span>
-                          </div>
-                        )}
-                        {planet.semiMajorAxisAU !== undefined && (
-                          <div>
-                            <span className="text-slate-500">Distance:</span>{' '}
-                            <span className="text-emerald-300 font-medium">{planet.semiMajorAxisAU} AU</span>
-                          </div>
-                        )}
-                        {planet.discoveryMethod && (
-                          <div className="col-span-2 text-[10px] text-slate-400 flex items-center gap-1.5 pt-1">
-                            <span>Method: <strong className="text-slate-300">{planet.discoveryMethod}</strong></span>
-                            {planet.discoveryYear && <span>({planet.discoveryYear})</span>}
-                            {!planet.confirmed && <span className="text-amber-400 italic">• Candidate</span>}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Dedicated Link to Stellar System Dossier */}
           {knownMultipleSystem && (
