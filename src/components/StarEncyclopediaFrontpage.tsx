@@ -167,11 +167,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
   return (
     <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* Top Banner (Uniform Hero Section) */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-        <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-2 max-w-3xl">
-            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
               <Sun className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
               <span>What is a Star?</span>
             </h1>
@@ -180,7 +179,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-white/[0.04] border border-white/10 text-sky-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
               100–400B in Milky Way
             </span>
           </div>
@@ -188,14 +187,14 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       </div>
 
       {/* Main Frontpage Sub-Tabs Navigation */}
-      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 p-1 observatory-panel rounded-2xl border border-white/10 overflow-x-auto no-scrollbar shrink-0">
         <button
           id="tab-frontpage-what-is-a-star"
           onClick={() => setActiveSection('what-is-a-star')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[44px] ${
             activeSection === 'what-is-a-star'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
           <Sun className="w-3.5 h-3.5 shrink-0 text-amber-400" />
@@ -205,10 +204,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
         <button
           id="tab-frontpage-lifecycles"
           onClick={() => setActiveSection('life-cycles')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[44px] ${
             activeSection === 'life-cycles'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
           <Activity className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
@@ -218,10 +217,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
         <button
           id="tab-frontpage-myths"
           onClick={() => setActiveSection('myths')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[44px] ${
             activeSection === 'myths'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
           <Zap className="w-3.5 h-3.5 shrink-0 text-amber-300" />
@@ -231,10 +230,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
         <button
           id="tab-frontpage-quiz"
           onClick={() => setActiveSection('quiz')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[44px] ${
             activeSection === 'quiz'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
           <Award className="w-3.5 h-3.5 shrink-0 text-purple-400" />
@@ -245,11 +244,11 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           <button
             id="tab-frontpage-goto-classification"
             onClick={onOpenClassification}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-orange-300 hover:bg-white/5 transition-all cursor-pointer shrink-0 ml-auto whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-sky-300 hover:bg-white/5 transition-all cursor-pointer shrink-0 ml-auto whitespace-nowrap min-h-[44px]"
             title="Open dedicated Stellar Classification Systems page"
           >
             <Flame className="w-3.5 h-3.5 text-orange-400" />
-            <span>Classification Systems →</span>
+            <span>Classification Systems</span>
           </button>
         )}
       </div>
@@ -260,9 +259,9 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {activeSection === 'what-is-a-star' && (
         <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200">
           {/* Animated Night Sky Overview Card */}
-          <AnimatedStarrySkyPanel className="border border-cyan-500/25 mobile-landscape:p-3 mobile-landscape:py-2.5 p-4 sm:p-6 rounded-2xl shadow-lg">
+          <AnimatedStarrySkyPanel className="observatory-panel border border-white/10 mobile-landscape:p-3 mobile-landscape:py-2.5 p-4 sm:p-6 rounded-2xl shadow-sm">
             <div className="space-y-2 max-w-3xl">
-              <div className="flex items-center gap-2 text-cyan-300 font-mono text-xs uppercase tracking-wider font-semibold">
+              <div className="flex items-center gap-2 text-sky-300 font-mono text-xs uppercase tracking-wider font-semibold">
                 <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>The Cosmic Crucible</span>
               </div>
@@ -274,8 +273,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
           {/* Cosmic Statistics / Key Numbers Ribbon: Four Info Panels */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 mobile-landscape:gap-1.5">
-            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
+            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl observatory-panel border border-white/10 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-white/[0.06] text-sky-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
                 <Atom className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mobile-landscape:w-3.5 mobile-landscape:h-3.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -288,8 +287,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-indigo-950/80 text-indigo-400 border border-indigo-500/30 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
+            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl observatory-panel border border-white/10 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-white/[0.06] text-indigo-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mobile-landscape:w-3.5 mobile-landscape:h-3.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -305,8 +304,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-500/30 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
+            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl observatory-panel border border-white/10 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-white/[0.06] text-amber-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
                 <Scale className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mobile-landscape:w-3.5 mobile-landscape:h-3.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -319,8 +318,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl bg-[#040816] border border-cyan-500/20 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-rose-950/80 text-rose-400 border border-rose-500/30 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
+            <div className="p-2.5 sm:p-4 md:p-4 lg:p-5 rounded-xl observatory-panel border border-white/10 flex items-start sm:items-center gap-2 sm:gap-3 md:gap-3.5 min-w-0 overflow-hidden shadow-sm mobile-landscape:p-1.5 mobile-landscape:gap-2">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-white/[0.06] text-rose-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center mobile-landscape:w-6 mobile-landscape:h-6">
                 <Flame className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mobile-landscape:w-3.5 mobile-landscape:h-3.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -334,12 +333,12 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
             </div>
           </div>
           {/* Mobile Accessibility: Expand / Contract Toolbar with Separate Buttons */}
-          <div className="flex items-center justify-end gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl bg-[#040816] border border-cyan-500/20 mobile-landscape:p-1.5">
+          <div className="flex items-center justify-end gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl observatory-panel border border-white/10 mobile-landscape:p-1.5">
             <button
               type="button"
               id="btn-expand-all-star-panels"
               onClick={() => setAllPanels(true)}
-              className="px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer mobile-landscape:text-[11px] mobile-landscape:px-2 mobile-landscape:py-0.5"
+              className="px-3 sm:px-4 py-1.5 rounded-lg observatory-control text-slate-200 hover:text-white text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer min-h-[36px]"
             >
               Expand All
             </button>
@@ -347,52 +346,52 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               type="button"
               id="btn-collapse-all-star-panels"
               onClick={() => setAllPanels(false)}
-              className="px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer mobile-landscape:text-[11px] mobile-landscape:px-2 mobile-landscape:py-0.5"
+              className="px-3 sm:px-4 py-1.5 rounded-lg observatory-control text-slate-300 hover:text-white text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer min-h-[36px]"
             >
               Collapse All
             </button>
           </div>
 
           {/* Panel 1: Cosmic Origin Quote / Element Factory Callout (Expandable/Contractable) */}
-          <div className="rounded-2xl bg-gradient-to-r from-[#0a142e] via-[#091024] to-[#040816] border border-cyan-500/30 overflow-hidden transition-all">
+          <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden transition-all">
             <button
               type="button"
               id="btn-toggle-panel-cosmic-origin"
               onClick={() => togglePanel('cosmic-origin')}
-              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors"
+              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors min-h-[44px]"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shrink-0 aspect-square flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-300" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] text-sky-300 border border-white/10 shrink-0 aspect-square flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-sky-400" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm md:text-base font-bold text-cyan-300 uppercase tracking-wider font-mono break-words leading-snug">
+                  <h3 className="text-xs sm:text-sm md:text-base font-bold text-white uppercase tracking-wider font-mono break-words leading-snug">
                     The Cosmic Engines of Elements: "We Are Stardust"
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
+              <div className="shrink-0 p-1.5 rounded-lg observatory-control text-slate-300">
                 {expandedPanels['cosmic-origin'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
             {expandedPanels['cosmic-origin'] && (
-              <div className="px-3.5 pb-3.5 sm:px-5 sm:pb-5 pt-0 border-t border-cyan-500/15 text-xs sm:text-sm text-slate-300 leading-relaxed mt-2 animate-in fade-in duration-200 break-words">
+              <div className="px-3.5 pb-3.5 sm:px-5 sm:pb-5 pt-0 border-t border-white/10 text-xs sm:text-sm text-slate-300 leading-relaxed mt-2 animate-in fade-in duration-200 break-words">
                 {WHAT_IS_A_STAR_CORE_INFO.cosmicSignificance}
               </div>
             )}
           </div>
 
           {/* Panel 2: Hydrostatic Equilibrium Interactive Demonstrator (Expandable/Contractable) */}
-          <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all">
+          <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden transition-all">
             <button
               type="button"
               id="btn-toggle-panel-hydrostatic"
               onClick={() => togglePanel('hydrostatic')}
-              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-cyan-500/15"
+              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10 min-h-[44px]"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
-                  <Scale className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] text-sky-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center">
+                  <Scale className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-sky-400" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xs sm:text-sm md:text-base font-bold text-white uppercase tracking-wider font-mono break-words leading-snug">
@@ -400,7 +399,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
+              <div className="shrink-0 p-1.5 rounded-lg observatory-control text-slate-300">
                 {expandedPanels['hydrostatic'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
@@ -409,33 +408,33 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               <div className="p-3 sm:p-6 md:p-6 flex flex-col mobile-landscape:flex-row md:flex-col gap-3 sm:gap-5 md:gap-5 animate-in fade-in duration-200 min-w-0 mobile-landscape:p-2 mobile-landscape:h-[calc(100vh-80px)] mobile-landscape:min-h-[220px] mobile-landscape:max-h-[265px] mobile-landscape:overflow-hidden md:h-auto md:min-h-0 md:max-h-none md:overflow-visible">
                 {/* State Switcher - Restored top-right on Tablet & Desktop (Hidden on mobile landscape/portrait) */}
                 <div className="hidden md:flex flex-row items-center justify-end gap-3">
-                  <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono">
                     <button
                       onClick={() => setHydrostaticState('balanced')}
-                      className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold ${
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold min-h-[36px] ${
                         hydrostaticState === 'balanced'
-                          ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                          : 'text-slate-300 hover:text-white'
                       }`}
                     >
                       Balanced (Stable Star)
                     </button>
                     <button
                       onClick={() => setHydrostaticState('gravity-wins')}
-                      className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold ${
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold min-h-[36px] ${
                         hydrostaticState === 'gravity-wins'
-                          ? 'bg-indigo-500 text-white font-bold shadow'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-indigo-500 text-white font-bold shadow-sm'
+                          : 'text-slate-300 hover:text-white'
                       }`}
                     >
                       Gravity Wins (Collapse)
                     </button>
                     <button
                       onClick={() => setHydrostaticState('radiation-wins')}
-                      className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold ${
+                      className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold min-h-[36px] ${
                         hydrostaticState === 'radiation-wins'
-                          ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                          : 'text-slate-300 hover:text-white'
                       }`}
                     >
                       Radiation Wins (Expansion)
@@ -446,16 +445,16 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 {/* Main Demonstrator Body: 2-panel on mobile landscape, 12-col grid on Tablet/Desktop, stack on mobile portrait */}
                 <div className="flex flex-col mobile-landscape:flex-row md:grid md:grid-cols-12 md:items-center gap-3 sm:gap-6 md:gap-6 min-w-0">
                   {/* Left / Top Panel: Graphics ONLY (Animations alone on mobile landscape, with zero scrolling) */}
-                  <div className="w-full mobile-landscape:w-5/12 md:w-auto md:col-span-5 min-w-0 mobile-landscape:h-full md:h-auto mobile-landscape:overflow-hidden md:overflow-visible flex flex-col items-center justify-center p-2 sm:p-6 rounded-xl bg-[#020512] border border-cyan-500/20 relative md:min-h-[260px]">
+                  <div className="w-full mobile-landscape:w-5/12 md:w-auto md:col-span-5 min-w-0 mobile-landscape:h-full md:h-auto mobile-landscape:overflow-hidden md:overflow-visible flex flex-col items-center justify-center p-2 sm:p-6 rounded-xl bg-black/50 border border-white/10 relative md:min-h-[260px]">
                     {/* Visual Star Core Simulation Stage */}
                     <div className="h-36 mobile-landscape:h-full md:h-44 flex items-center justify-center w-full relative">
                       <div
                         className={`rounded-full transition-all duration-500 flex items-center justify-center relative ${
                           hydrostaticState === 'balanced'
-                            ? 'w-24 h-24 mobile-landscape:w-20 mobile-landscape:h-20 md:w-32 md:h-32 bg-gradient-to-r from-amber-400 to-yellow-200 shadow-[0_0_40px_rgba(251,191,36,0.5)]'
+                            ? 'w-24 h-24 mobile-landscape:w-20 mobile-landscape:h-20 md:w-32 md:h-32 bg-gradient-to-r from-amber-400 to-yellow-200 shadow-md'
                             : hydrostaticState === 'gravity-wins'
-                            ? 'w-16 h-16 mobile-landscape:w-14 mobile-landscape:h-14 md:w-20 md:h-20 bg-gradient-to-r from-indigo-500 to-blue-400 shadow-[0_0_30px_rgba(99,102,241,0.6)]'
-                            : 'w-36 h-36 mobile-landscape:w-28 mobile-landscape:h-28 md:w-44 md:h-44 bg-gradient-to-r from-red-500 to-amber-400 shadow-[0_0_60px_rgba(239,68,68,0.7)]'
+                            ? 'w-16 h-16 mobile-landscape:w-14 mobile-landscape:h-14 md:w-20 md:h-20 bg-gradient-to-r from-indigo-500 to-blue-400 shadow-md'
+                            : 'w-36 h-36 mobile-landscape:w-28 mobile-landscape:h-28 md:w-44 md:h-44 bg-gradient-to-r from-red-500 to-amber-400 shadow-md'
                         }`}
                       >
                         <span className="text-[10px] sm:text-[11px] font-mono font-bold text-slate-950 uppercase tracking-wider text-center px-1 select-none leading-tight">
@@ -476,8 +475,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                     )}
 
                     {/* Force Vector Legend (Hidden on mobile landscape, visible on tablet/desktop) */}
-                    <div className="mt-4 mobile-landscape:hidden md:flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] font-mono px-2 py-1.5 rounded-lg bg-[#040816] border border-cyan-500/15">
-                      <div className="flex items-center gap-1 text-cyan-400">
+                    <div className="mt-4 mobile-landscape:hidden md:flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] font-mono px-2 py-1.5 rounded-lg bg-black/40 border border-white/10">
+                      <div className="flex items-center gap-1 text-sky-400">
                         <ArrowRight className="w-3.5 h-3.5 rotate-180" />
                         <span>Inward Gravity (F_g)</span>
                       </div>
@@ -492,8 +491,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   {/* Right / Bottom Panel: Everything Else (Scrollable with bounded container on mobile landscape, natural on tablet/desktop) */}
                   <div className="w-full mobile-landscape:w-7/12 md:w-auto md:col-span-7 min-w-0 mobile-landscape:h-full md:h-auto mobile-landscape:overflow-y-auto md:overflow-visible scrollbar-thin flex flex-col justify-start md:justify-center gap-3 sm:gap-4 pr-1 md:pr-0">
                     {/* Telemetry / Legend for mobile landscape only */}
-                    <div className="hidden mobile-landscape:flex md:hidden flex-wrap items-center justify-between gap-1.5 text-[10px] font-mono px-2 py-1 rounded-lg bg-[#040816] border border-cyan-500/15">
-                      <div className="flex items-center gap-1 text-cyan-400">
+                    <div className="hidden mobile-landscape:flex md:hidden flex-wrap items-center justify-between gap-1.5 text-[10px] font-mono px-2 py-1 rounded-lg bg-black/40 border border-white/10">
+                      <div className="flex items-center gap-1 text-sky-400">
                         <ArrowRight className="w-3 h-3 rotate-180" />
                         <span>Gravity (F_g)</span>
                       </div>
@@ -507,33 +506,33 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                     </div>
 
                     {/* State Switcher for Mobile (Portrait & Landscape) */}
-                    <div className="flex md:hidden flex-wrap items-center gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono w-full">
+                    <div className="flex md:hidden flex-wrap items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono w-full">
                       <button
                         onClick={() => setHydrostaticState('balanced')}
-                        className={`flex-1 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-center ${
+                        className={`flex-1 px-2.5 py-2 rounded-lg transition-all cursor-pointer font-semibold text-center min-h-[44px] flex items-center justify-center ${
                           hydrostaticState === 'balanced'
-                            ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                            : 'text-slate-300 hover:text-white'
                         }`}
                       >
                         Balanced (Stable Star)
                       </button>
                       <button
                         onClick={() => setHydrostaticState('gravity-wins')}
-                        className={`flex-1 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-center ${
+                        className={`flex-1 px-2.5 py-2 rounded-lg transition-all cursor-pointer font-semibold text-center min-h-[44px] flex items-center justify-center ${
                           hydrostaticState === 'gravity-wins'
-                            ? 'bg-indigo-500 text-white font-bold shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-indigo-500 text-white font-bold shadow-sm'
+                            : 'text-slate-300 hover:text-white'
                         }`}
                       >
                         Gravity Wins (Collapse)
                       </button>
                       <button
                         onClick={() => setHydrostaticState('radiation-wins')}
-                        className={`flex-1 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-center ${
+                        className={`flex-1 px-2.5 py-2 rounded-lg transition-all cursor-pointer font-semibold text-center min-h-[44px] flex items-center justify-center ${
                           hydrostaticState === 'radiation-wins'
-                            ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                            : 'text-slate-300 hover:text-white'
                         }`}
                       >
                         Radiation Wins (Expansion)
@@ -543,14 +542,14 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                     <div className="flex flex-col gap-3 text-xs leading-relaxed my-auto md:my-0">
                       {hydrostaticState === 'balanced' && (
                         <div className="space-y-2.5">
-                          <div className="text-sm font-bold text-cyan-300 font-mono flex items-center gap-2">
+                          <div className="text-sm font-bold text-sky-300 font-mono flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>Equilibrium Maintained: The Self-Regulating Thermostat</span>
                           </div>
                           <p className="text-slate-300">
                             For normal main-sequence stars (like the Sun), gravity pulling inward is precisely matched by the outward thermal and radiation pressure generated by core fusion.
                           </p>
-                          <div className="p-3 rounded-lg bg-[#020512] border border-cyan-500/20 text-slate-300">
+                          <div className="p-3 rounded-lg bg-black/40 border border-white/10 text-slate-300">
                             <strong className="text-white block font-mono mb-1">Negative Feedback Loop:</strong>
                             If the core cools slightly, pressure drops, causing the core to compress under gravity. This compression heats the core, accelerating fusion and pushing the star back outward!
                           </div>
@@ -566,7 +565,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                           <p className="text-slate-300">
                             When a star runs out of nuclear fuel in its core, outward radiation pressure drops to zero. Gravity instantly crushes the core inward.
                           </p>
-                          <div className="p-3 rounded-lg bg-[#020512] border border-indigo-500/30 text-slate-300">
+                          <div className="p-3 rounded-lg bg-black/40 border border-white/10 text-slate-300">
                             <strong className="text-white block font-mono mb-1">Outcome:</strong>
                             Depending on remaining mass, the collapse is either halted by electron degeneracy (forming a White Dwarf), neutron degeneracy (forming a Neutron Star), or collapses into an infinite gravitational singularity (Stellar Black Hole).
                           </div>
@@ -582,7 +581,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                           <p className="text-slate-300">
                             When core hydrogen exhausts and hydrogen shell burning ignites around an inert helium core, energy production surges drastically.
                           </p>
-                          <div className="p-3 rounded-lg bg-[#020512] border border-amber-500/30 text-slate-300">
+                          <div className="p-3 rounded-lg bg-black/40 border border-white/10 text-slate-300">
                             <strong className="text-white block font-mono mb-1">Outcome:</strong>
                             The immense outward thermal pressure forces the outer stellar envelope to swell by hundreds or thousands of times, cooling into a Red Giant or Red Supergiant (like Betelgeuse).
                           </div>
@@ -596,16 +595,16 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           </div>
 
           {/* Panel 3: Stellar Anatomy Visualized Using Cross-Section (Expandable/Contractable) */}
-          <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all">
+          <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden transition-all">
             <button
               type="button"
               id="btn-toggle-panel-anatomy"
               onClick={() => togglePanel('anatomy')}
-              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-cyan-500/15"
+              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10 min-h-[44px]"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
-                  <Layers className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] text-sky-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center">
+                  <Layers className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-sky-400" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xs sm:text-sm md:text-base font-bold text-white uppercase tracking-wider font-mono break-words leading-snug">
@@ -613,7 +612,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
+              <div className="shrink-0 p-1.5 rounded-lg observatory-control text-slate-300">
                 {expandedPanels['anatomy'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
@@ -629,15 +628,15 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           </div>
 
           {/* Panel 4: Thermonuclear Engine: How Stars Generate Energy (Expandable/Contractable) */}
-          <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all">
+          <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden transition-all">
             <button
               type="button"
               id="btn-toggle-panel-thermonuclear"
               onClick={() => togglePanel('thermonuclear')}
-              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-cyan-500/15"
+              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10 min-h-[44px]"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-amber-950/80 text-amber-400 border border-amber-500/30 shrink-0 aspect-square flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] text-amber-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center">
                   <Flame className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-amber-400" />
                 </div>
                 <div className="min-w-0">
@@ -646,7 +645,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
+              <div className="shrink-0 p-1.5 rounded-lg observatory-control text-slate-300">
                 {expandedPanels['thermonuclear'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
@@ -662,16 +661,16 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
           </div>
 
           {/* Panel 5: Fundamental Physical Properties of Stars (Expandable/Contractable) */}
-          <div className="rounded-2xl bg-[#040816] border border-cyan-500/25 overflow-hidden transition-all">
+          <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden transition-all">
             <button
               type="button"
               id="btn-toggle-panel-properties"
               onClick={() => togglePanel('properties')}
-              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-cyan-500/15"
+              className="w-full p-2.5 sm:p-4 md:p-5 flex items-center justify-between gap-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10 min-h-[44px]"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 shrink-0 aspect-square flex items-center justify-center">
-                  <Sliders className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-white/[0.06] text-sky-400 border border-white/10 shrink-0 aspect-square flex items-center justify-center">
+                  <Sliders className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-sky-400" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xs sm:text-sm md:text-base font-bold text-white uppercase tracking-wider font-mono break-words leading-snug">
@@ -679,7 +678,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </h3>
                 </div>
               </div>
-              <div className="shrink-0 p-1.5 rounded-lg bg-slate-900/80 text-cyan-300 border border-cyan-500/30">
+              <div className="shrink-0 p-1.5 rounded-lg observatory-control text-slate-300">
                 {expandedPanels['properties'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
@@ -692,37 +691,37 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                     <button
                       key={prop.id}
                       onClick={() => setSelectedPropertyId(prop.id)}
-                      className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-3 py-2 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 min-h-[44px] ${
                         selectedPropertyId === prop.id
-                          ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
-                          : 'bg-[#020512] text-slate-300 border-cyan-500/20 hover:border-cyan-500/40'
+                          ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                          : 'observatory-control text-slate-300 hover:text-white'
                       }`}
                     >
-                      <span className="font-black text-cyan-300">{prop.symbol}</span>
+                      <span className={`font-black ${selectedPropertyId === prop.id ? 'text-slate-950' : 'text-sky-300'}`}>{prop.symbol}</span>
                       <span>{prop.title}</span>
                     </button>
                   ))}
                 </div>
 
                 {/* Selected Property Card */}
-                <div className="p-4 sm:p-5 rounded-xl bg-[#020512] border border-cyan-500/20 grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div className="p-4 sm:p-5 rounded-xl bg-black/40 border border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-5">
                   <div className="lg:col-span-5 flex flex-col justify-between gap-3">
                     <div>
-                      <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Astrophysical Parameter</div>
-                      <h4 className="text-lg font-black text-white mt-1 flex items-center gap-2">
+                      <div className="text-[10px] font-mono uppercase text-sky-400 font-bold">Astrophysical Parameter</div>
+                      <h4 className="text-lg font-bold text-white mt-1 flex items-center gap-2">
                         <span>{activeProperty.title}</span>
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/[0.06] text-sky-300 border border-white/10">
                           Symbol: {activeProperty.symbol}
                         </span>
                       </h4>
                       {activeProperty.formula && (
-                        <div className="text-xs font-mono text-amber-300 mt-1.5 p-2 rounded bg-[#040816] border border-amber-500/20">
+                        <div className="text-xs font-mono text-amber-300 mt-1.5 p-2 rounded bg-black/50 border border-amber-500/20">
                           {activeProperty.formula}
                         </div>
                       )}
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#040816] border border-slate-800 text-xs">
+                    <div className="p-3 rounded-lg bg-black/50 border border-white/5 text-xs">
                       <span className="text-slate-400 block text-[10px] uppercase font-mono">Standard Unit:</span>
                       <span className="text-white font-mono font-bold">{activeProperty.unit}</span>
                     </div>
@@ -730,7 +729,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
 
                   <div className="lg:col-span-7 flex flex-col justify-between gap-4">
                     <div>
-                      <h5 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1">Why It Matters</h5>
+                      <h5 className="text-xs font-mono uppercase text-sky-400 font-bold mb-1">Why It Matters</h5>
                       <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-semibold">
                         {activeProperty.whyItMatters}
                       </p>
@@ -739,7 +738,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       </p>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#040816] border border-slate-800 space-y-1.5 text-xs font-mono">
+                    <div className="p-3 rounded-lg bg-black/50 border border-white/5 space-y-1.5 text-xs font-mono">
                       <span className="text-[10px] uppercase text-slate-400 block font-bold">Dynamic Cosmic Range:</span>
                       <div className="text-indigo-300">
                         <strong>Min:</strong> {activeProperty.extremeExamples.minimum}
@@ -772,11 +771,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {activeSection === 'myths' && (
         <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200">
           {/* Sub-tab Hero Banner: Myths & Realities */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
               <div className="space-y-1 sm:space-y-2 max-w-3xl">
-                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
+                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
                   <Zap className="w-5 h-5 sm:w-6 sm:h-6 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                   <span>Myths &amp; Realities</span>
                 </h2>
@@ -785,7 +783,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+                <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-amber-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
                   {STELLAR_MYTHS_GUIDE.length} Analyzed Myths
                 </span>
               </div>
@@ -796,7 +794,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
             {STELLAR_MYTHS_GUIDE.map((item, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-2xl bg-[#040816]/90 border border-cyan-500/20 flex flex-col justify-between gap-3"
+                className="p-5 rounded-2xl observatory-panel border border-white/10 flex flex-col justify-between gap-3 shadow-sm"
               >
                 <div>
                   <div className="flex items-start gap-2 text-rose-300 text-xs font-bold font-mono">
@@ -814,8 +812,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </p>
                 </div>
 
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800 text-[11px] font-mono text-cyan-300/90">
-                  <span className="text-slate-500">Takeaway: </span>
+                <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-[11px] font-mono text-sky-300">
+                  <span className="text-slate-400">Takeaway: </span>
                   {item.keyTakeaway}
                 </div>
               </div>
@@ -830,11 +828,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
       {activeSection === 'quiz' && (
         <div className="flex flex-col gap-4 sm:gap-6 animate-in fade-in duration-200 w-full">
           {/* Sub-tab Hero Banner: Knowledge Check */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div className="space-y-1 sm:space-y-2 max-w-2xl">
-                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
+                <h2 className="text-base sm:text-xl lg:text-2xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-2.5">
                   <Award className="w-5 h-5 sm:w-6 sm:h-6 mobile-landscape:w-4 mobile-landscape:h-4 text-purple-400 shrink-0" />
                   <span>Knowledge Check</span>
                 </h2>
@@ -847,7 +844,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
                     <span className="text-[10px] font-mono uppercase text-slate-400 block">Your Score</span>
-                    <span className="text-lg font-black font-mono text-cyan-300">
+                    <span className="text-lg font-bold font-mono text-sky-300">
                       {quizScore} / {CLASSIFICATION_QUIZ.length}
                     </span>
                   </div>
@@ -856,7 +853,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       setQuizAnswers({});
                       setQuizSubmitted(false);
                     }}
-                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl observatory-control text-slate-200 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Retry</span>
@@ -866,10 +863,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                 <button
                   onClick={() => setQuizSubmitted(true)}
                   disabled={Object.keys(quizAnswers).length === 0}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer shrink-0 shadow-md ${
+                  className={`min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer shrink-0 shadow-sm active:scale-95 ${
                     Object.keys(quizAnswers).length > 0
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                      ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold'
+                      : 'bg-white/[0.04] border border-white/10 text-slate-500 cursor-not-allowed opacity-60'
                   }`}
                 >
                   Grade Quiz ({Object.keys(quizAnswers).length}/{CLASSIFICATION_QUIZ.length})
@@ -884,10 +881,10 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
               return (
                 <div
                   key={q.id}
-                  className="p-5 rounded-2xl bg-[#040816]/90 border border-cyan-500/20 flex flex-col gap-3 shadow-sm"
+                  className="p-5 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 shadow-sm"
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-xs font-mono font-black text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30">
+                    <span className="text-xs font-mono font-bold text-sky-300 px-2 py-0.5 rounded bg-white/[0.06] border border-white/10">
                       Q{idx + 1}
                     </span>
                     <h4 className="text-sm font-bold text-white leading-snug">{q.question}</h4>
@@ -899,9 +896,9 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                       const showResult = quizSubmitted;
                       const isCorrect = opt.isCorrect;
 
-                      let btnStyle = 'bg-[#020512] border-slate-800 text-slate-300 hover:border-cyan-500/40';
+                      let btnStyle = 'observatory-control text-slate-300 hover:text-white';
                       if (isSelected && !showResult) {
-                        btnStyle = 'bg-[#081530] border-cyan-400 text-white ring-1 ring-cyan-400';
+                        btnStyle = 'bg-white/[0.08] border-sky-400 text-white ring-1 ring-sky-400';
                       } else if (showResult) {
                         if (isCorrect) {
                           btnStyle = 'bg-emerald-950/70 border-emerald-500 text-emerald-200 ring-1 ring-emerald-500 font-bold';
@@ -915,7 +912,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                           key={opt.id}
                           disabled={quizSubmitted}
                           onClick={() => setQuizAnswers((prev) => ({ ...prev, [q.id]: opt.id }))}
-                          className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center justify-between ${btnStyle}`}
+                          className={`min-h-[44px] p-3 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center justify-between ${btnStyle}`}
                         >
                           <span>{opt.text}</span>
                           {showResult && isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
@@ -926,8 +923,8 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   </div>
 
                   {quizSubmitted && (
-                    <div className="mt-2 p-3 rounded-xl bg-[#020512] border border-cyan-500/20 text-xs text-slate-300">
-                      <span className="text-cyan-400 font-mono font-bold block mb-0.5">Explanation:</span>
+                    <div className="mt-2 p-3 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300">
+                      <span className="text-sky-400 font-mono font-bold block mb-0.5">Explanation:</span>
                       {q.options.find((o) => o.isCorrect)?.explanation}
                     </div>
                   )}

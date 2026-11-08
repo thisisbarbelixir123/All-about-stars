@@ -40,22 +40,22 @@
 - Consumes: `.observatory-panel`, `.observatory-control`.
 - Produces: Bespoke observatory research gateway replacing marketing-style cards.
 
-- [ ] **Step 1: Inspect and identify all slop patterns in `StarEncyclopediaFrontpage.tsx`**
+- [x] **Step 1: Inspect and identify all slop patterns in `StarEncyclopediaFrontpage.tsx`**
   - Identify all 4 `blur-3xl` ambient glow balls (amber, purple, cyan).
   - Identify heavy gradient backgrounds (`bg-gradient-to-r from-[#030a21] ...`).
   - Check for any em dashes in article blurbs.
 
-- [ ] **Step 2: Refactor hero banner and search/navigation bar**
+- [x] **Step 2: Refactor hero banner and search/navigation bar**
   - Convert hero container to `.observatory-panel`.
   - Remove floating blur orbs.
   - Refactor search input to `bg-black/50 border border-white/10 focus:border-sky-400 text-white font-mono`.
 
-- [ ] **Step 3: Refactor category cards and featured article teasers**
+- [x] **Step 3: Refactor category cards and featured article teasers**
   - Convert category cards to `.observatory-panel hover:bg-[#0c1224] border border-white/10 hover:border-sky-400/50`.
   - Replace cyan/amber drop shadows with crisp hairline borders.
   - Ensure all action buttons meet 44px minimum tap targets.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---
