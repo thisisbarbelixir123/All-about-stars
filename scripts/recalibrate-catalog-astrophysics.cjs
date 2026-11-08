@@ -202,10 +202,10 @@ const CALIBRATION_DATA = {
     colorHex: '#ffd2a1',
     coronaHex: '#ffb366'
   },
-  // 12. Delta Bootis (Thiba)
+  // 12. Delta Boötis (Thiba)
   '74666': {
     id: 'thiba',
-    name: 'Thiba (Delta Bootis)',
+    name: 'Thiba (Delta Boötis)',
     spec: 'G8III',
     stage: 'Yellow Giant',
     teff: 4940,
@@ -933,10 +933,10 @@ const CALIBRATION_DATA = {
     colorHex: '#f8f7ff',
     coronaHex: '#e0dcff'
   },
-  // 55. Theta Bootis (Asellus Primus)
+  // 55. Theta Boötis (Asellus Primus)
   '70497': {
     id: 'asellus-primus',
-    name: 'Asellus Primus (Theta Bootis)',
+    name: 'Asellus Primus (Theta Boötis)',
     spec: 'F7V',
     stage: 'White Main Sequence',
     teff: 6280,
@@ -1086,10 +1086,10 @@ const CALIBRATION_DATA = {
     colorHex: '#ffd2a1',
     coronaHex: '#ffb366'
   },
-  // 64. Lambda Bootis (Xuange)
+  // 64. Lambda Boötis (Xuange)
   '69732': {
     id: 'xuange',
-    name: 'Xuange (Lambda Bootis)',
+    name: 'Xuange (Lambda Boötis)',
     spec: 'A0Vp',
     stage: 'White Main Sequence',
     teff: 8850,
@@ -1290,10 +1290,10 @@ const CALIBRATION_DATA = {
     colorHex: '#ffe8d0',
     coronaHex: '#ffd2a1'
   },
-  // 76. Mu-1 Bootis (Alkalurops)
+  // 76. Mu-1 Boötis (Alkalurops)
   '75411': {
     id: 'alkalurops',
-    name: 'Alkalurops (Mu-1 Bootis)',
+    name: 'Alkalurops (Mu-1 Boötis)',
     spec: 'F0V',
     stage: 'White Main Sequence',
     teff: 7300,
@@ -1715,10 +1715,10 @@ const CALIBRATION_DATA = {
     colorHex: '#cad7ff',
     coronaHex: '#b0c5ff'
   },
-  // 101. Psi Bootis (Aulad Alnathlat)
+  // 101. Psi Boötis (Aulad Alnathlat)
   '73745': {
     id: 'aulad-alnathlat',
-    name: 'Aulad Alnathlat (Psi Bootis)',
+    name: 'Aulad Alnathlat (Psi Boötis)',
     spec: 'K2III',
     stage: 'Red Giant',
     teff: 4300,
@@ -1732,10 +1732,10 @@ const CALIBRATION_DATA = {
     colorHex: '#ffd2a1',
     coronaHex: '#ffb366'
   },
-  // 102. Kappa-2 Bootis (Asellus Tertius)
+  // 102. Kappa-2 Boötis (Asellus Tertius)
   '69483': {
     id: 'asellus-tertius',
-    name: 'Asellus Tertius (Kappa-2 Bootis)',
+    name: 'Asellus Tertius (Kappa-2 Boötis)',
     spec: 'A8IV',
     stage: 'White Subgiant',
     teff: 7500,

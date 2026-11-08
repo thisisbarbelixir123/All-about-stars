@@ -6952,8 +6952,8 @@
       "α Boo",
       "Arcturus",
       "Guardian of the Bear",
-      "α Bootis",
-      "16 Bootis",
+      "α Boötis",
+      "16 Boötis",
       "HD 124897",
       "HR 5340",
       "BD+19°2777",
@@ -30963,7 +30963,7 @@
   },
   {
     "id": "izar",
-    "name": "Izar (Epsilon Bootis)",
+    "name": "Izar (Epsilon Boötis)",
     "alternateNames": [
       "Epsilon Boötis",
       "ε Boo",
@@ -31025,10 +31025,10 @@
       "ε Boo",
       "Izar",
       "Pulcherrima",
-      "ε Bootis",
-      "ε Bootis A",
-      "36 Bootis",
-      "36 Bootis A",
+      "ε Boötis",
+      "ε Boötis A",
+      "36 Boötis",
+      "36 Boötis A",
       "HD 129988",
       "HD 129989",
       "HR 5505",
@@ -31072,7 +31072,7 @@
   },
   {
     "id": "muphrid",
-    "name": "Muphrid (Eta Bootis)",
+    "name": "Muphrid (Eta Boötis)",
     "alternateNames": [
       "Eta Boötis",
       "η Boo",
@@ -31132,8 +31132,8 @@
     "designations": [
       "η Boo",
       "Muphrid",
-      "η Bootis",
-      "8 Bootis",
+      "η Boötis",
+      "8 Boötis",
       "HD 121370",
       "HR 5235",
       "BD+19°2725",
@@ -46713,7 +46713,7 @@
   },
   {
     "id": "seginus",
-    "name": "Seginus (Gamma Bootis)",
+    "name": "Seginus (Gamma Boötis)",
     "alternateNames": [
       "γ Boo",
       "HD 127762",
@@ -46722,7 +46722,7 @@
       "Haris"
     ],
     "bayerDesignation": "γ Boo",
-    "constellation": "Bootes",
+    "constellation": "Boötes",
     "diameterSolar": 3.5,
     "temperature": 7800,
     "spectralType": "A7III",
@@ -46771,8 +46771,8 @@
       "γ Boo",
       "Seginus",
       "Haris",
-      "γ Bootis",
-      "27 Bootis",
+      "γ Boötis",
+      "27 Boötis",
       "HD 127762",
       "HR 5435",
       "BD+38°2565",
@@ -46823,7 +46823,7 @@
   },
   {
     "id": "nekkar",
-    "name": "Nekkar (Beta Bootis)",
+    "name": "Nekkar (Beta Boötis)",
     "alternateNames": [
       "β Boo",
       "HD 133208",
@@ -46832,7 +46832,7 @@
       "Meres"
     ],
     "bayerDesignation": "β Boo",
-    "constellation": "Bootes",
+    "constellation": "Boötes",
     "diameterSolar": 21,
     "temperature": 4950,
     "spectralType": "G8III",
@@ -46881,8 +46881,8 @@
       "β Boo",
       "Nekkar",
       "Meres",
-      "β Bootis",
-      "42 Bootis",
+      "β Boötis",
+      "42 Boötis",
       "HD 133208",
       "HR 5602",
       "BD+40°2840",
@@ -54760,7 +54760,7 @@
       "HIP 110991",
       "Archetype of Classical Cepheids"
     ],
-    "bayerDesignation": "δ Cephei",
+    "bayerDesignation": "δ Cep",
     "constellation": "Cepheus",
     "diameterSolar": 44.5,
     "diameterKm": 61975150,
@@ -54865,7 +54865,7 @@
       "Archetype of RR Lyrae Stars",
       "Horizontal Branch Standard Candle"
     ],
-    "bayerDesignation": "RR Lyrae",
+    "bayerDesignation": "RR Lyr",
     "constellation": "Lyra",
     "diameterSolar": 5.1,
     "diameterKm": 7102770,
@@ -54963,7 +54963,7 @@
       "Archetype of T Tauri Stars",
       "Young Stellar Object Prototype"
     ],
-    "bayerDesignation": "T Tauri",
+    "bayerDesignation": "T Tau",
     "constellation": "Taurus",
     "diameterSolar": 3.6,
     "diameterKm": 5013720,
@@ -55086,7 +55086,7 @@
       "HIP 65531",
       "Archetype of Type II Cepheids"
     ],
-    "bayerDesignation": "W Virginis",
+    "bayerDesignation": "W Vir",
     "constellation": "Virgo",
     "diameterSolar": 28,
     "diameterKm": 38995600,
@@ -55172,7 +55172,7 @@
       "HIP 21411",
       "Archetype of RV Tauri Variables"
     ],
-    "bayerDesignation": "RV Tauri",
+    "bayerDesignation": "RV Tau",
     "constellation": "Taurus",
     "diameterSolar": 90,
     "diameterKm": 125343000,
@@ -55475,7 +55475,7 @@
       "Archetype of Beta Cephei Stars",
       "Beta Cephei (Alfirk)"
     ],
-    "bayerDesignation": "β Cephei",
+    "bayerDesignation": "β Cep",
     "constellation": "Cepheus",
     "diameterSolar": 6.5,
     "diameterKm": 9052550,
@@ -55588,7 +55588,7 @@
       "HIP 26368",
       "Archetype of FUor Eruptive Variables"
     ],
-    "bayerDesignation": "FU Orionis",
+    "bayerDesignation": "FU Ori",
     "constellation": "Orion",
     "diameterSolar": 8.5,
     "diameterKm": 11837950,
@@ -55787,7 +55787,7 @@
       "Archetype of SX Phoenicis Subdwarfs",
       "Blue Straggler Pulsator"
     ],
-    "bayerDesignation": "SX Phoenicis",
+    "bayerDesignation": "SX Phe",
     "constellation": "Phoenix",
     "diameterSolar": 1.4,
     "diameterKm": 1949780,
@@ -55966,7 +55966,7 @@
       "Algol Tertiary Companion",
       "HD 19356 C"
     ],
-    "bayerDesignation": "β Persei C",
+    "bayerDesignation": "β Per C",
     "constellation": "Perseus",
     "diameterSolar": 1.65,
     "diameterKm": 2297955,
@@ -56103,7 +56103,7 @@
       "HD 116658 B",
       "HIP 65474 B"
     ],
-    "bayerDesignation": "α Virginis B",
+    "bayerDesignation": "α Vir B",
     "constellation": "Virgo",
     "diameterSolar": 3.6,
     "diameterKm": 5013720,
@@ -56221,7 +56221,7 @@
       "HIP 80763 B",
       "Emerald Companion of Antares"
     ],
-    "bayerDesignation": "α Scorpii B",
+    "bayerDesignation": "α Sco B",
     "constellation": "Scorpius",
     "diameterSolar": 5.2,
     "diameterKm": 7242040,
@@ -56296,7 +56296,7 @@
       "Eta Car B",
       "Hot Massive Companion"
     ],
-    "bayerDesignation": "η Carinae B",
+    "bayerDesignation": "η Car B",
     "constellation": "Carina",
     "diameterSolar": 14,
     "diameterKm": 19497800,
@@ -56434,7 +56434,7 @@
       "HR 7418",
       "Vivid Blue Companion"
     ],
-    "bayerDesignation": "β Cygni B",
+    "bayerDesignation": "β Cyg B",
     "constellation": "Cygnus",
     "diameterSolar": 2.7,
     "diameterKm": 3760290,
@@ -56865,7 +56865,7 @@
       "Mira Companion",
       "Accreting White Dwarf"
     ],
-    "bayerDesignation": "ο Ceti B",
+    "bayerDesignation": "ο Cet B",
     "constellation": "Cetus",
     "diameterSolar": 0.02,
     "diameterKm": 27854,
@@ -63528,7 +63528,7 @@
     "primaryDesignation": "ξ Boo A",
     "designations": [
       "ξ Boo A",
-      "ξ Bootis A",
+      "ξ Boötis A",
       "HD 131156 A",
       "HD 131156A",
       "HR 5544",
@@ -63608,7 +63608,7 @@
     "primaryDesignation": "ξ Boo B",
     "designations": [
       "ξ Boo B",
-      "ξ Bootis B",
+      "ξ Boötis B",
       "HD 131156 B",
       "HD 131156B",
       "GJ 566 B",
@@ -68869,9 +68869,9 @@
     "primaryDesignation": "τ Boo A",
     "designations": [
       "τ Boo A",
-      "τ Bootis",
-      "τ Bootis A",
-      "4 Bootis",
+      "τ Boötis",
+      "τ Boötis A",
+      "4 Boötis",
       "HD 120136",
       "HR 5185",
       "BD+18°2782",
@@ -68992,7 +68992,7 @@
     "primaryDesignation": "τ Boo B",
     "designations": [
       "τ Boo B",
-      "τ Bootis B",
+      "τ Boötis B",
       "HD 120136 B",
       "HD 120136B",
       "GJ 527 B",
@@ -70493,7 +70493,7 @@
       "Fomalhaut C (LP 876-10)"
     ],
     "bayerDesignation": "α PsA C",
-    "constellation": "Aquarius",
+    "constellation": "Piscis Austrinus",
     "diameterSolar": 0.22,
     "temperature": 3120,
     "spectralType": "M4V",
@@ -87505,7 +87505,7 @@
     "rightAscension": "20h 21m 00.67s",
     "declination": "-14° 46′ 00.9″",
     "primaryDesignation": "β Cap",
-    "bayerDesignation": "Beta Capricorni",
+    "bayerDesignation": "β Cap",
     "designations": [
       "β Cap",
       "Dabih (Beta Capricorni)",
@@ -87571,7 +87571,7 @@
     "rightAscension": "17h 49m 51.48s",
     "declination": "-37° 02′ 00.6″",
     "primaryDesignation": "HD 161892",
-    "bayerDesignation": "G Scorpii",
+    "bayerDesignation": "G Sco",
     "designations": [
       "Fuyue (G Scorpii)",
       "Fuyue",
@@ -87634,7 +87634,7 @@
     "rightAscension": "17h 22m 00.58s",
     "declination": "-24° 59′ 01.0″",
     "primaryDesignation": "θ Oph",
-    "bayerDesignation": "Theta Ophiuchi",
+    "bayerDesignation": "θ Oph",
     "designations": [
       "θ Oph",
       "Garafsa (Theta Ophiuchi)",
@@ -87700,7 +87700,7 @@
     "rightAscension": "17h 59m 01.58s",
     "declination": "-09° 46′ 00.4″",
     "primaryDesignation": "ν Oph",
-    "bayerDesignation": "Nu Ophiuchi",
+    "bayerDesignation": "ν Oph",
     "designations": [
       "ν Oph",
       "Sinistra (Nu Ophiuchi)",
@@ -87766,7 +87766,7 @@
     "rightAscension": "07h 49m 17.66s",
     "declination": "-24° 51′ 00.6″",
     "primaryDesignation": "ξ Pup",
-    "bayerDesignation": "Xi Puppis",
+    "bayerDesignation": "ξ Pup",
     "designations": [
       "ξ Pup",
       "Azmidi (Xi Puppis)",
@@ -87830,7 +87830,7 @@
     "rightAscension": "05h 24m 28.61s",
     "declination": "-02° 23′ 00.8″",
     "primaryDesignation": "η Ori",
-    "bayerDesignation": "Eta Orionis",
+    "bayerDesignation": "η Ori",
     "designations": [
       "η Ori",
       "Saif al Jabbar (Eta Orionis)",
@@ -87894,7 +87894,7 @@
     "rightAscension": "06h 45m 17.38s",
     "declination": "+12° 53′ 00.7″",
     "primaryDesignation": "ξ Gem",
-    "bayerDesignation": "Xi Geminorum",
+    "bayerDesignation": "ξ Gem",
     "designations": [
       "ξ Gem",
       "Alzirr (Xi Geminorum)",
@@ -87960,7 +87960,7 @@
     "rightAscension": "08h 46m 46.51s",
     "declination": "+06° 25′ 00.1″",
     "primaryDesignation": "ε Hya",
-    "bayerDesignation": "Epsilon Hydrae",
+    "bayerDesignation": "ε Hya",
     "designations": [
       "ε Hya",
       "Ashlesha (Epsilon Hydrae)",
@@ -88026,7 +88026,7 @@
     "rightAscension": "12h 55m 36.22s",
     "declination": "+03° 23′ 00.8″",
     "primaryDesignation": "δ Vir",
-    "bayerDesignation": "Delta Virginis",
+    "bayerDesignation": "δ Vir",
     "designations": [
       "δ Vir",
       "Minelauva (Delta Virginis)",
@@ -88090,7 +88090,7 @@
     "rightAscension": "04h 28m 39.74s",
     "declination": "+15° 52′ 00.3″",
     "primaryDesignation": "θ² Tau",
-    "bayerDesignation": "Theta-2 Tauri",
+    "bayerDesignation": "θ² Tau",
     "designations": [
       "θ² Tau",
       "Chamukuy (Theta-2 Tauri)",
@@ -88156,7 +88156,7 @@
     "rightAscension": "01h 08m 35.40s",
     "declination": "-10° 10′ 00.9″",
     "primaryDesignation": "η Cet",
-    "bayerDesignation": "Eta Ceti",
+    "bayerDesignation": "η Cet",
     "designations": [
       "η Cet",
       "Dheneb (Eta Ceti)",
@@ -88168,10 +88168,10 @@
   },
   {
     "id": "thiba",
-    "name": "Thiba (Delta Bootis)",
+    "name": "Thiba (Delta Boötis)",
     "alternateNames": [
       "Thiba",
-      "Delta Bootis",
+      "Delta Boötis",
       "HD 135722"
     ],
     "constellation": "Boötes",
@@ -88225,9 +88225,9 @@
     "bayerDesignation": "Delta Bootis",
     "designations": [
       "δ Boo",
-      "Thiba (Delta Bootis)",
+      "Thiba (Delta Boötis)",
       "Thiba",
-      "Delta Bootis",
+      "Delta Boötis",
       "HD 135722",
       "HIP 74666"
     ]
@@ -88286,7 +88286,7 @@
     "rightAscension": "22h 10m 11.98s",
     "declination": "+06° 11′ 00.9″",
     "primaryDesignation": "θ Peg",
-    "bayerDesignation": "Theta Pegasi",
+    "bayerDesignation": "θ Peg",
     "designations": [
       "θ Peg",
       "Biham (Theta Pegasi)",
@@ -88352,7 +88352,7 @@
     "rightAscension": "04h 28m 37.01s",
     "declination": "+19° 10′ 00.8″",
     "primaryDesignation": "ε Tau",
-    "bayerDesignation": "Epsilon Tauri",
+    "bayerDesignation": "ε Tau",
     "designations": [
       "ε Tau",
       "Ain (Epsilon Tauri)",
@@ -88417,7 +88417,7 @@
     "rightAscension": "04h 17m 53.66s",
     "declination": "-33° 47′ 00.9″",
     "primaryDesignation": "υ⁴ Eri",
-    "bayerDesignation": "υ⁴ Eridani",
+    "bayerDesignation": "υ⁴ Eri",
     "designations": [
       "υ⁴ Eri",
       "Upsilon-4 Eridani",
@@ -88484,7 +88484,7 @@
     "rightAscension": "00h 19m 25.68s",
     "declination": "-08° 49′ 00.4″",
     "primaryDesignation": "ι Cet",
-    "bayerDesignation": "Iota Ceti",
+    "bayerDesignation": "ι Cet",
     "designations": [
       "ι Cet",
       "Deneb Kaitos Shemali (Iota Ceti)",
@@ -88550,7 +88550,7 @@
     "rightAscension": "20h 18m 03.26s",
     "declination": "-12° 32′ 00.7″",
     "primaryDesignation": "α² Cap",
-    "bayerDesignation": "Alpha-2 Capricorni",
+    "bayerDesignation": "α² Cap",
     "designations": [
       "α² Cap",
       "Algedi (Alpha-2 Capricorni)",
@@ -88616,7 +88616,7 @@
     "rightAscension": "01h 37m 59.57s",
     "declination": "+48° 37′ 00.7″",
     "primaryDesignation": "51 And",
-    "bayerDesignation": "51 Andromedae",
+    "bayerDesignation": "51 And",
     "designations": [
       "51 And",
       "Nembus (51 Andromedae)",
@@ -88682,7 +88682,7 @@
     "rightAscension": "01h 24m 01.42s",
     "declination": "-08° 10′ 01.0″",
     "primaryDesignation": "θ Cet",
-    "bayerDesignation": "Theta Ceti",
+    "bayerDesignation": "θ Cet",
     "designations": [
       "θ Cet",
       "Al Naymat (Theta Ceti)",
@@ -88746,7 +88746,7 @@
     "rightAscension": "02h 49m 59.04s",
     "declination": "+27° 15′ 00.6″",
     "primaryDesignation": "HD 17573",
-    "bayerDesignation": "c Arietis",
+    "bayerDesignation": "c Ari",
     "designations": [
       "Bharani (c Arietis)",
       "Bharani",
@@ -88811,7 +88811,7 @@
     "rightAscension": "16h 54m 35.02s",
     "declination": "-42° 21′ 00.7″",
     "primaryDesignation": "ζ² Sco",
-    "bayerDesignation": "Zeta-2 Scorpii",
+    "bayerDesignation": "ζ² Sco",
     "designations": [
       "ζ² Sco",
       "Grafias (Zeta-2 Scorpii)",
@@ -88877,7 +88877,7 @@
     "rightAscension": "04h 19m 47.59s",
     "declination": "+15° 37′ 00.7″",
     "primaryDesignation": "γ Tau",
-    "bayerDesignation": "Gamma Tauri",
+    "bayerDesignation": "γ Tau",
     "designations": [
       "γ Tau",
       "Prima Hyadum (Gamma Tauri)",
@@ -88941,7 +88941,7 @@
     "rightAscension": "22h 28m 49.92s",
     "declination": "-00° 01′ 00.2″",
     "primaryDesignation": "ζ¹ Aqr",
-    "bayerDesignation": "Zeta-1 Aquarii",
+    "bayerDesignation": "ζ¹ Aqr",
     "designations": [
       "ζ¹ Aqr",
       "Sadaltager (Zeta-1 Aquarii)",
@@ -89005,7 +89005,7 @@
     "rightAscension": "00h 36m 58.30s",
     "declination": "+53° 53′ 00.8″",
     "primaryDesignation": "ζ Cas",
-    "bayerDesignation": "Zeta Cassiopeiae",
+    "bayerDesignation": "ζ Cas",
     "designations": [
       "ζ Cas",
       "Fulu (Zeta Cassiopeiae)",
@@ -89135,7 +89135,7 @@
     "rightAscension": "21h 40m 05.45s",
     "declination": "-16° 39′ 00.7″",
     "primaryDesignation": "γ Cap",
-    "bayerDesignation": "Gamma Capricorni",
+    "bayerDesignation": "γ Cap",
     "designations": [
       "γ Cap",
       "Nashira (Gamma Capricorni)",
@@ -89201,7 +89201,7 @@
     "rightAscension": "03h 19m 31.01s",
     "declination": "-21° 45′ 00.5″",
     "primaryDesignation": "τ⁴ Eri",
-    "bayerDesignation": "Tau-4 Eridani",
+    "bayerDesignation": "τ⁴ Eri",
     "designations": [
       "τ⁴ Eri",
       "Angetenar (Tau-4 Eridani)",
@@ -89267,7 +89267,7 @@
     "rightAscension": "03h 32m 55.85s",
     "declination": "-09° 27′ 00.5″",
     "primaryDesignation": "ε Eri",
-    "bayerDesignation": "Epsilon Eridani",
+    "bayerDesignation": "ε Eri",
     "designations": [
       "ε Eri",
       "Ran (Epsilon Eridani)",
@@ -89333,7 +89333,7 @@
     "rightAscension": "22h 52m 36.86s",
     "declination": "-07° 34′ 00.8″",
     "primaryDesignation": "λ Aqr",
-    "bayerDesignation": "Lambda Aquarii",
+    "bayerDesignation": "λ Aqr",
     "designations": [
       "λ Aqr",
       "Hydor (Lambda Aquarii)",
@@ -89397,7 +89397,7 @@
     "rightAscension": "17h 47m 53.57s",
     "declination": "+02° 42′ 00.4″",
     "primaryDesignation": "γ Oph",
-    "bayerDesignation": "Gamma Ophiuchi",
+    "bayerDesignation": "γ Oph",
     "designations": [
       "γ Oph",
       "Muliphen (Gamma Ophiuchi)",
@@ -89463,7 +89463,7 @@
     "rightAscension": "05h 51m 19.30s",
     "declination": "-20° 52′ 00.7″",
     "primaryDesignation": "δ Lep",
-    "bayerDesignation": "Delta Leporis",
+    "bayerDesignation": "δ Lep",
     "designations": [
       "δ Lep",
       "Arsh al Jauzah (Delta Leporis)",
@@ -89529,7 +89529,7 @@
     "rightAscension": "04h 22m 56.09s",
     "declination": "+17° 32′ 00.6″",
     "primaryDesignation": "δ Tau",
-    "bayerDesignation": "Delta Tauri",
+    "bayerDesignation": "δ Tau",
     "designations": [
       "δ Tau",
       "Secunda Hyadum (Delta Tauri)",
@@ -89595,7 +89595,7 @@
     "rightAscension": "21h 26m 40.03s",
     "declination": "-22° 24′ 00.7″",
     "primaryDesignation": "ζ Cap",
-    "bayerDesignation": "Zeta Capricorni",
+    "bayerDesignation": "ζ Cap",
     "designations": [
       "ζ Cap",
       "Yen (Zeta Capricorni)",
@@ -89659,7 +89659,7 @@
     "rightAscension": "20h 47m 40.56s",
     "declination": "-09° 29′ 00.7″",
     "primaryDesignation": "ε Aqr",
-    "bayerDesignation": "Epsilon Aquarii",
+    "bayerDesignation": "ε Aqr",
     "designations": [
       "ε Aqr",
       "Albali (Epsilon Aquarii)",
@@ -89725,7 +89725,7 @@
     "rightAscension": "03h 09m 29.76s",
     "declination": "+44° 51′ 00.5″",
     "primaryDesignation": "κ Per",
-    "bayerDesignation": "Kappa Persei",
+    "bayerDesignation": "κ Per",
     "designations": [
       "κ Per",
       "Misam (Kappa Persei)",
@@ -89791,7 +89791,7 @@
     "rightAscension": "04h 35m 33.05s",
     "declination": "-30° 33′ 00.7″",
     "primaryDesignation": "υ² Eri",
-    "bayerDesignation": "Upsilon-2 Eridani",
+    "bayerDesignation": "υ² Eri",
     "designations": [
       "υ² Eri",
       "Theemin (Upsilon-2 Eridani)",
@@ -89857,7 +89857,7 @@
     "rightAscension": "11h 31m 24.22s",
     "declination": "+69° 19′ 00.9″",
     "primaryDesignation": "λ Dra",
-    "bayerDesignation": "Lambda Draconis",
+    "bayerDesignation": "λ Dra",
     "designations": [
       "λ Dra",
       "Giausar (Lambda Draconis)",
@@ -89923,7 +89923,7 @@
     "rightAscension": "19h 48m 10.34s",
     "declination": "+70° 16′ 00.1″",
     "primaryDesignation": "ε Dra",
-    "bayerDesignation": "Epsilon Draconis",
+    "bayerDesignation": "ε Dra",
     "designations": [
       "ε Dra",
       "Tyl (Epsilon Draconis)",
@@ -89989,7 +89989,7 @@
     "rightAscension": "04h 38m 10.82s",
     "declination": "-14° 18′ 00.2″",
     "primaryDesignation": "HD 29503",
-    "bayerDesignation": "l Eridani",
+    "bayerDesignation": "l Eri",
     "designations": [
       "Sceptrum (l Eridani)",
       "Sceptrum",
@@ -90052,7 +90052,7 @@
     "rightAscension": "22h 21m 39.38s",
     "declination": "-01° 23′ 00.2″",
     "primaryDesignation": "γ Aqr",
-    "bayerDesignation": "Gamma Aquarii",
+    "bayerDesignation": "γ Aqr",
     "designations": [
       "γ Aqr",
       "Sadachbia (Gamma Aquarii)",
@@ -90116,7 +90116,7 @@
     "rightAscension": "14h 43m 03.62s",
     "declination": "-05° 39′ 00.5″",
     "primaryDesignation": "μ Vir",
-    "bayerDesignation": "Mu Virginis",
+    "bayerDesignation": "μ Vir",
     "designations": [
       "μ Vir",
       "Rijl al Awwa (Mu Virginis)",
@@ -90182,7 +90182,7 @@
     "rightAscension": "02h 56m 25.66s",
     "declination": "-08° 53′ 00.9″",
     "primaryDesignation": "η Eri",
-    "bayerDesignation": "Eta Eridani",
+    "bayerDesignation": "η Eri",
     "designations": [
       "η Eri",
       "Azha (Eta Eridani)",
@@ -90315,7 +90315,7 @@
     "rightAscension": "12h 19m 54.36s",
     "declination": "-00° 40′ 00.0″",
     "primaryDesignation": "η Vir",
-    "bayerDesignation": "Eta Virginis",
+    "bayerDesignation": "η Vir",
     "designations": [
       "η Vir",
       "Zaniah (Eta Virginis)",
@@ -90381,7 +90381,7 @@
     "rightAscension": "09h 39m 51.36s",
     "declination": "-01° 08′ 00.6″",
     "primaryDesignation": "ι Hya",
-    "bayerDesignation": "Iota Hydrae",
+    "bayerDesignation": "ι Hya",
     "designations": [
       "ι Hya",
       "Ukdah (Iota Hydrae)",
@@ -90445,7 +90445,7 @@
     "rightAscension": "01h 08m 23.09s",
     "declination": "-55° 14′ 00.7″",
     "primaryDesignation": "ζ Phe",
-    "bayerDesignation": "Zeta Phoenicis",
+    "bayerDesignation": "ζ Phe",
     "designations": [
       "ζ Phe",
       "Wurren (Zeta Phoenicis)",
@@ -90511,7 +90511,7 @@
     "rightAscension": "04h 08m 39.70s",
     "declination": "+47° 42′ 00.7″",
     "primaryDesignation": "MX Per",
-    "bayerDesignation": "c Persei",
+    "bayerDesignation": "c Per",
     "designations": [
       "c Per",
       "MX Per",
@@ -90578,7 +90578,7 @@
     "rightAscension": "04h 24m 02.21s",
     "declination": "-34° 01′ 00.0″",
     "primaryDesignation": "υ³ Eri",
-    "bayerDesignation": "υ³ Eridani",
+    "bayerDesignation": "υ³ Eri",
     "designations": [
       "υ³ Eri",
       "Beemim (Upsilon-3 Eridani)",
@@ -90644,7 +90644,7 @@
     "rightAscension": "22h 46m 31.87s",
     "declination": "+23° 33′ 00.9″",
     "primaryDesignation": "λ Peg",
-    "bayerDesignation": "Lambda Pegasi",
+    "bayerDesignation": "λ Peg",
     "designations": [
       "λ Peg",
       "Sadalnazi (Lambda Pegasi)",
@@ -90708,7 +90708,7 @@
     "rightAscension": "16h 11m 59.74s",
     "declination": "-19° 27′ 00.6″",
     "primaryDesignation": "ν Sco",
-    "bayerDesignation": "Nu Scorpii",
+    "bayerDesignation": "ν Sco",
     "designations": [
       "ν Sco",
       "Jabbah (Nu Scorpii)",
@@ -90774,7 +90774,7 @@
     "rightAscension": "18h 59m 37.37s",
     "declination": "+15° 04′ 00.1″",
     "primaryDesignation": "ε Aql",
-    "bayerDesignation": "Epsilon Aquilae",
+    "bayerDesignation": "ε Aql",
     "designations": [
       "ε Aql",
       "Deneb al Okab Borealis (Epsilon Aquilae)",
@@ -90840,7 +90840,7 @@
     "rightAscension": "08h 46m 41.83s",
     "declination": "+28° 45′ 00.6″",
     "primaryDesignation": "ι Cnc",
-    "bayerDesignation": "Iota Cancri",
+    "bayerDesignation": "ι Cnc",
     "designations": [
       "ι Cnc",
       "Zubanah (Iota Cancri)",
@@ -90904,7 +90904,7 @@
     "rightAscension": "20h 33m 12.77s",
     "declination": "+11° 18′ 00.2″",
     "primaryDesignation": "ε Del",
-    "bayerDesignation": "Epsilon Delphini",
+    "bayerDesignation": "ε Del",
     "designations": [
       "ε Del",
       "Aldulfin (Epsilon Delphini)",
@@ -90968,7 +90968,7 @@
     "rightAscension": "04h 11m 51.94s",
     "declination": "-06° 50′ 00.3″",
     "primaryDesignation": "ο¹ Eri",
-    "bayerDesignation": "Omicron-1 Eridani",
+    "bayerDesignation": "ο¹ Eri",
     "designations": [
       "ο¹ Eri",
       "Beid (Omicron-1 Eridani)",
@@ -90980,10 +90980,10 @@
   },
   {
     "id": "asellus-primus",
-    "name": "Asellus Primus (Theta Bootis)",
+    "name": "Asellus Primus (Theta Boötis)",
     "alternateNames": [
       "Asellus Primus",
-      "Theta Bootis",
+      "Theta Boötis",
       "HD 126660"
     ],
     "constellation": "Boötes",
@@ -91035,9 +91035,9 @@
     "bayerDesignation": "Theta Bootis",
     "designations": [
       "θ Boo",
-      "Asellus Primus (Theta Bootis)",
+      "Asellus Primus (Theta Boötis)",
       "Asellus Primus",
-      "Theta Bootis",
+      "Theta Boötis",
       "HD 126660",
       "HIP 70497"
     ]
@@ -91096,7 +91096,7 @@
     "rightAscension": "14h 16m 00.86s",
     "declination": "-06° 00′ 00.0″",
     "primaryDesignation": "ι Vir",
-    "bayerDesignation": "Iota Virginis",
+    "bayerDesignation": "ι Vir",
     "designations": [
       "ι Vir",
       "Syrma (Iota Virginis)",
@@ -91162,7 +91162,7 @@
     "rightAscension": "15h 48m 44.38s",
     "declination": "+18° 08′ 00.5″",
     "primaryDesignation": "κ Ser",
-    "bayerDesignation": "Kappa Serpentis",
+    "bayerDesignation": "κ Ser",
     "designations": [
       "κ Ser",
       "Gudja (Kappa Serpentis)",
@@ -91228,7 +91228,7 @@
     "rightAscension": "09h 51m 28.70s",
     "declination": "-14° 50′ 00.8″",
     "primaryDesignation": "υ¹ Hya",
-    "bayerDesignation": "Upsilon-1 Hydrae",
+    "bayerDesignation": "υ¹ Hya",
     "designations": [
       "υ¹ Hya",
       "Zhang (Upsilon-1 Hydrae)",
@@ -91292,7 +91292,7 @@
     "rightAscension": "06h 28m 57.79s",
     "declination": "+20° 12′ 00.7″",
     "primaryDesignation": "ν Gem",
-    "bayerDesignation": "Nu Geminorum",
+    "bayerDesignation": "ν Gem",
     "designations": [
       "ν Gem",
       "Nucatai (Nu Geminorum)",
@@ -91356,7 +91356,7 @@
     "rightAscension": "08h 37m 39.36s",
     "declination": "+05° 42′ 00.2″",
     "primaryDesignation": "δ Hya",
-    "bayerDesignation": "Delta Hydrae",
+    "bayerDesignation": "δ Hya",
     "designations": [
       "δ Hya",
       "Minazal (Delta Hydrae)",
@@ -91483,7 +91483,7 @@
     "rightAscension": "22h 16m 50.04s",
     "declination": "-07° 46′ 01.0″",
     "primaryDesignation": "θ Aqr",
-    "bayerDesignation": "Theta Aquarii",
+    "bayerDesignation": "θ Aqr",
     "designations": [
       "θ Aqr",
       "Ancha (Theta Aquarii)",
@@ -91549,7 +91549,7 @@
     "rightAscension": "14h 12m 53.74s",
     "declination": "-10° 16′ 00.4″",
     "primaryDesignation": "κ Vir",
-    "bayerDesignation": "Kappa Virginis",
+    "bayerDesignation": "κ Vir",
     "designations": [
       "κ Vir",
       "Kang (Kappa Virginis)",
@@ -91561,10 +91561,10 @@
   },
   {
     "id": "xuange",
-    "name": "Xuange (Lambda Bootis)",
+    "name": "Xuange (Lambda Boötis)",
     "alternateNames": [
       "Xuange",
-      "Lambda Bootis",
+      "Lambda Boötis",
       "HD 125162"
     ],
     "constellation": "Boötes",
@@ -91616,9 +91616,9 @@
     "bayerDesignation": "Lambda Bootis",
     "designations": [
       "λ Boo",
-      "Xuange (Lambda Bootis)",
+      "Xuange (Lambda Boötis)",
       "Xuange",
-      "Lambda Bootis",
+      "Lambda Boötis",
       "HD 125162",
       "HIP 69732"
     ]
@@ -91677,7 +91677,7 @@
     "rightAscension": "22h 46m 41.59s",
     "declination": "+12° 10′ 00.4″",
     "primaryDesignation": "ξ Peg",
-    "bayerDesignation": "Xi Pegasi",
+    "bayerDesignation": "ξ Peg",
     "designations": [
       "ξ Peg",
       "Suudalnujum (Xi Pegasi)",
@@ -91807,7 +91807,7 @@
     "rightAscension": "20h 29m 34.90s",
     "declination": "+62° 59′ 00.6″",
     "primaryDesignation": "θ Cep",
-    "bayerDesignation": "Theta Cephei",
+    "bayerDesignation": "θ Cep",
     "designations": [
       "θ Cep",
       "Al Kidr (Theta Cephei)",
@@ -91871,7 +91871,7 @@
     "rightAscension": "18h 20m 45.43s",
     "declination": "+71° 20′ 00.3″",
     "primaryDesignation": "φ Dra",
-    "bayerDesignation": "Phi Draconis",
+    "bayerDesignation": "φ Dra",
     "designations": [
       "φ Dra",
       "Aldhiba (Phi Draconis)",
@@ -91936,7 +91936,7 @@
     "rightAscension": "21h 45m 26.93s",
     "declination": "+61° 07′ 00.2″",
     "primaryDesignation": "ν Cep",
-    "bayerDesignation": "Nu Cephei",
+    "bayerDesignation": "ν Cep",
     "designations": [
       "ν Cep",
       "Nu Cephei",
@@ -92001,7 +92001,7 @@
     "rightAscension": "01h 45m 23.64s",
     "declination": "+09° 09′ 00.5″",
     "primaryDesignation": "ο Psc",
-    "bayerDesignation": "Omicron Piscium",
+    "bayerDesignation": "ο Psc",
     "designations": [
       "ο Psc",
       "Torcular (Omicron Piscium)",
@@ -92065,7 +92065,7 @@
     "rightAscension": "22h 03m 47.45s",
     "declination": "+64° 37′ 00.7″",
     "primaryDesignation": "ξ Cep",
-    "bayerDesignation": "Xi Cephei",
+    "bayerDesignation": "ξ Cep",
     "designations": [
       "ξ Cep",
       "Kurhah (Xi Cephei)",
@@ -92129,7 +92129,7 @@
     "rightAscension": "19h 23m 13.13s",
     "declination": "-44° 47′ 01.0″",
     "primaryDesignation": "β² Sag",
-    "bayerDesignation": "Beta-2 Sagittarii",
+    "bayerDesignation": "β² Sgr",
     "designations": [
       "β² Sag",
       "Arkab Posterior (Beta-2 Sagittarii)",
@@ -92323,7 +92323,7 @@
     "rightAscension": "20h 17m 38.88s",
     "declination": "-12° 30′ 00.5″",
     "primaryDesignation": "α¹ Cap",
-    "bayerDesignation": "Alpha-1 Capricorni",
+    "bayerDesignation": "α¹ Cap",
     "designations": [
       "α¹ Cap",
       "Prima Giedi (Alpha-1 Capricorni)",
@@ -92335,10 +92335,10 @@
   },
   {
     "id": "alkalurops",
-    "name": "Alkalurops (Mu-1 Bootis)",
+    "name": "Alkalurops (Mu-1 Boötis)",
     "alternateNames": [
       "Alkalurops",
-      "Mu-1 Bootis",
+      "Mu-1 Boötis",
       "HD 137391"
     ],
     "constellation": "Boötes",
@@ -92390,9 +92390,9 @@
     "bayerDesignation": "Mu-1 Bootis",
     "designations": [
       "μ¹ Boo",
-      "Alkalurops (Mu-1 Bootis)",
+      "Alkalurops (Mu-1 Boötis)",
       "Alkalurops",
-      "Mu-1 Bootis",
+      "Mu-1 Boötis",
       "HD 137391",
       "HIP 75411"
     ]
@@ -92451,7 +92451,7 @@
     "rightAscension": "18h 44m 46.37s",
     "declination": "+37° 36′ 00.3″",
     "primaryDesignation": "ζ¹ Lyr",
-    "bayerDesignation": "Zeta-1 Lyrae",
+    "bayerDesignation": "ζ¹ Lyr",
     "designations": [
       "ζ¹ Lyr",
       "Nasr Alwaki (Zeta-1 Lyrae)",
@@ -92517,7 +92517,7 @@
     "rightAscension": "03h 11m 37.78s",
     "declination": "+19° 43′ 00.6″",
     "primaryDesignation": "δ Ari",
-    "bayerDesignation": "Delta Arietis",
+    "bayerDesignation": "δ Ari",
     "designations": [
       "δ Ari",
       "Botein (Delta Arietis)",
@@ -92581,7 +92581,7 @@
     "rightAscension": "04h 50m 36.72s",
     "declination": "+08° 54′ 00.0″",
     "primaryDesignation": "π² Ori",
-    "bayerDesignation": "Pi-2 Orionis",
+    "bayerDesignation": "π² Ori",
     "designations": [
       "π² Ori",
       "Al Taj (Pi-2 Orionis)",
@@ -92713,7 +92713,7 @@
     "rightAscension": "02h 13m 00.00s",
     "declination": "+08° 50′ 00.8″",
     "primaryDesignation": "ξ¹ Cet",
-    "bayerDesignation": "Xi-1 Ceti",
+    "bayerDesignation": "ξ¹ Cet",
     "designations": [
       "ξ¹ Cet",
       "Al Kaff al Jidhmah (Xi-1 Ceti)",
@@ -92777,7 +92777,7 @@
     "rightAscension": "19h 36m 43.27s",
     "declination": "-01° 17′ 00.2″",
     "primaryDesignation": "ι Aql",
-    "bayerDesignation": "Iota Aquilae",
+    "bayerDesignation": "ι Aql",
     "designations": [
       "ι Aql",
       "Al Thalimain Posterior (Iota Aquilae)",
@@ -92841,7 +92841,7 @@
     "rightAscension": "20h 08m 53.35s",
     "declination": "+77° 42′ 00.7″",
     "primaryDesignation": "κ Cep",
-    "bayerDesignation": "Kappa Cephei",
+    "bayerDesignation": "κ Cep",
     "designations": [
       "κ Cep",
       "Al Aghnam (Kappa Cephei)",
@@ -92905,7 +92905,7 @@
     "rightAscension": "17h 21m 00.38s",
     "declination": "-21° 06′ 00.8″",
     "primaryDesignation": "ξ Oph",
-    "bayerDesignation": "Xi Ophiuchi",
+    "bayerDesignation": "ξ Oph",
     "designations": [
       "ξ Oph",
       "Aggia (Xi Ophiuchi)",
@@ -92969,7 +92969,7 @@
     "rightAscension": "14h 23m 02.23s",
     "declination": "-39° 30′ 00.7″",
     "primaryDesignation": "V0761 Cen",
-    "bayerDesignation": "a Centauri",
+    "bayerDesignation": "a Cen",
     "designations": [
       "V0761 Cen",
       "Bidelman's Helium Variable Star (a Centauri)",
@@ -93036,7 +93036,7 @@
     "rightAscension": "17h 30m 44.30s",
     "declination": "+26° 06′ 00.6″",
     "primaryDesignation": "λ Her",
-    "bayerDesignation": "Lambda Herculis",
+    "bayerDesignation": "λ Her",
     "designations": [
       "λ Her",
       "Maasym (Lambda Herculis)",
@@ -93100,7 +93100,7 @@
     "rightAscension": "23h 25m 22.78s",
     "declination": "+23° 24′ 00.2″",
     "primaryDesignation": "υ Peg",
-    "bayerDesignation": "Upsilon Pegasi",
+    "bayerDesignation": "υ Peg",
     "designations": [
       "υ Peg",
       "Alkarab (Upsilon Pegasi)",
@@ -93164,7 +93164,7 @@
     "rightAscension": "19h 13m 45.48s",
     "declination": "+39° 08′ 00.8″",
     "primaryDesignation": "η Lyr",
-    "bayerDesignation": "Eta Lyrae",
+    "bayerDesignation": "η Lyr",
     "designations": [
       "η Lyr",
       "Aladfar (Eta Lyrae)",
@@ -93228,7 +93228,7 @@
     "rightAscension": "20h 43m 27.53s",
     "declination": "+15° 04′ 00.5″",
     "primaryDesignation": "δ Del",
-    "bayerDesignation": "Delta Delphini",
+    "bayerDesignation": "δ Del",
     "designations": [
       "δ Del",
       "Al Ukud (Delta Delphini)",
@@ -93294,7 +93294,7 @@
     "rightAscension": "00h 48m 40.94s",
     "declination": "+07° 35′ 00.1″",
     "primaryDesignation": "δ Psc",
-    "bayerDesignation": "Delta Piscium",
+    "bayerDesignation": "δ Psc",
     "designations": [
       "δ Psc",
       "Kuton (Delta Piscium)",
@@ -93360,7 +93360,7 @@
     "rightAscension": "08h 38m 45.43s",
     "declination": "+03° 20′ 00.5″",
     "primaryDesignation": "σ Hya",
-    "bayerDesignation": "Sigma Hydrae",
+    "bayerDesignation": "σ Hya",
     "designations": [
       "σ Hya",
       "Minchir (Sigma Hydrae)",
@@ -93487,7 +93487,7 @@
     "rightAscension": "11h 11m 39.48s",
     "declination": "-22° 49′ 00.5″",
     "primaryDesignation": "β Crt",
-    "bayerDesignation": "Beta Crateris",
+    "bayerDesignation": "β Crt",
     "designations": [
       "β Crt",
       "Al Sharasif (Beta Crateris)",
@@ -93553,7 +93553,7 @@
     "rightAscension": "09h 24m 39.26s",
     "declination": "+26° 10′ 00.9″",
     "primaryDesignation": "κ Leo",
-    "bayerDesignation": "Kappa Leonis",
+    "bayerDesignation": "κ Leo",
     "designations": [
       "κ Leo",
       "Al Minlear al Asad (Kappa Leonis)",
@@ -93617,7 +93617,7 @@
     "rightAscension": "23h 03m 52.61s",
     "declination": "+03° 49′ 00.2″",
     "primaryDesignation": "β Psc",
-    "bayerDesignation": "Beta Piscium",
+    "bayerDesignation": "β Psc",
     "designations": [
       "β Psc",
       "Fumalsamakah (Beta Piscium)",
@@ -93682,7 +93682,7 @@
     "rightAscension": "04h 33m 30.55s",
     "declination": "-29° 45′ 01.0″",
     "primaryDesignation": "υ¹ Eri",
-    "bayerDesignation": "υ¹ Eridani",
+    "bayerDesignation": "υ¹ Eri",
     "designations": [
       "υ¹ Eri",
       "Upsilon-1 Eridani",
@@ -93749,7 +93749,7 @@
     "rightAscension": "21h 09m 35.64s",
     "declination": "-11° 22′ 00.3″",
     "primaryDesignation": "ν Aqr",
-    "bayerDesignation": "Nu Aquarii",
+    "bayerDesignation": "ν Aqr",
     "designations": [
       "ν Aqr",
       "Albulaan (Nu Aquarii)",
@@ -93813,7 +93813,7 @@
     "rightAscension": "21h 37m 04.82s",
     "declination": "-19° 27′ 01.0″",
     "primaryDesignation": "ε Cap",
-    "bayerDesignation": "Epsilon Capricorni",
+    "bayerDesignation": "ε Cap",
     "designations": [
       "ε Cap",
       "Kastra (Epsilon Capricorni)",
@@ -93879,7 +93879,7 @@
     "rightAscension": "02h 47m 54.55s",
     "declination": "+29° 14′ 00.8″",
     "primaryDesignation": "39 Ari",
-    "bayerDesignation": "39 Arietis",
+    "bayerDesignation": "39 Ari",
     "designations": [
       "39 Ari",
       "Lilii Borea (39 Arietis)",
@@ -93943,7 +93943,7 @@
     "rightAscension": "14h 19m 06.60s",
     "declination": "-13° 22′ 00.3″",
     "primaryDesignation": "λ Vir",
-    "bayerDesignation": "Lambda Virginis",
+    "bayerDesignation": "λ Vir",
     "designations": [
       "λ Vir",
       "Khambaliya (Lambda Virginis)",
@@ -93955,10 +93955,10 @@
   },
   {
     "id": "aulad-alnathlat",
-    "name": "Aulad Alnathlat (Psi Bootis)",
+    "name": "Aulad Alnathlat (Psi Boötis)",
     "alternateNames": [
       "Aulad Alnathlat",
-      "Psi Bootis",
+      "Psi Boötis",
       "HD 133582"
     ],
     "constellation": "Boötes",
@@ -94012,19 +94012,19 @@
     "bayerDesignation": "Psi Bootis",
     "designations": [
       "ψ Boo",
-      "Aulad Alnathlat (Psi Bootis)",
+      "Aulad Alnathlat (Psi Boötis)",
       "Aulad Alnathlat",
-      "Psi Bootis",
+      "Psi Boötis",
       "HD 133582",
       "HIP 73745"
     ]
   },
   {
     "id": "asellus-tertius",
-    "name": "Asellus Tertius (Kappa-2 Bootis)",
+    "name": "Asellus Tertius (Kappa-2 Boötis)",
     "alternateNames": [
       "Asellus Tertius",
-      "Kappa-2 Bootis",
+      "Kappa-2 Boötis",
       "HD 124675"
     ],
     "constellation": "Boötes",
@@ -94076,9 +94076,9 @@
     "bayerDesignation": "Kappa-2 Bootis",
     "designations": [
       "κ² Boo",
-      "Asellus Tertius (Kappa-2 Bootis)",
+      "Asellus Tertius (Kappa-2 Boötis)",
       "Asellus Tertius",
-      "Kappa-2 Bootis",
+      "Kappa-2 Boötis",
       "HD 124675",
       "HIP 69483"
     ]
@@ -94139,7 +94139,7 @@
     "rightAscension": "11h 15m 12.24s",
     "declination": "+23° 05′ 00.7″",
     "primaryDesignation": "72 Leo",
-    "bayerDesignation": "72 Leonis",
+    "bayerDesignation": "72 Leo",
     "designations": [
       "72 Leo",
       "Zubrah (72 Leonis)",
@@ -94203,7 +94203,7 @@
     "rightAscension": "16h 25m 24.96s",
     "declination": "+14° 01′ 01.0″",
     "primaryDesignation": "ω Her",
-    "bayerDesignation": "Omega Herculis",
+    "bayerDesignation": "ω Her",
     "designations": [
       "ω Her",
       "Cujam (Omega Herculis)",
@@ -94267,7 +94267,7 @@
     "rightAscension": "17h 41m 56.35s",
     "declination": "+72° 08′ 00.9″",
     "primaryDesignation": "ψ Dra",
-    "bayerDesignation": "Psi Draconis",
+    "bayerDesignation": "ψ Dra",
     "designations": [
       "ψ Dra",
       "Dziban (Psi Draconis)",
@@ -94331,7 +94331,7 @@
     "rightAscension": "05h 35m 23.16s",
     "declination": "-04° 50′ 00.3″",
     "primaryDesignation": "HD 37018",
-    "bayerDesignation": "c Orionis",
+    "bayerDesignation": "c Ori",
     "designations": [
       "Mizan Batil (c Orionis)",
       "Mizan Batil",
@@ -94394,7 +94394,7 @@
     "rightAscension": "23h 20m 38.23s",
     "declination": "+23° 44′ 00.4″",
     "primaryDesignation": "τ Peg",
-    "bayerDesignation": "Tau Pegasi",
+    "bayerDesignation": "τ Peg",
     "designations": [
       "τ Peg",
       "Salm (Tau Pegasi)",
@@ -94525,7 +94525,7 @@
     "rightAscension": "09h 29m 08.90s",
     "declination": "-02° 46′ 00.1″",
     "primaryDesignation": "τ¹ Hya",
-    "bayerDesignation": "Tau-1 Hydrae",
+    "bayerDesignation": "τ¹ Hya",
     "designations": [
       "τ¹ Hya",
       "Tau-1 Hydrae",
@@ -94588,7 +94588,7 @@
     "rightAscension": "19h 20m 40.08s",
     "declination": "+65° 42′ 00.9″",
     "primaryDesignation": "π Dra",
-    "bayerDesignation": "Pi Draconis",
+    "bayerDesignation": "π Dra",
     "designations": [
       "π Dra",
       "Tais (Pi Draconis)",
@@ -94654,7 +94654,7 @@
     "rightAscension": "03h 11m 17.38s",
     "declination": "+39° 36′ 00.7″",
     "primaryDesignation": "ω Per",
-    "bayerDesignation": "Omega Persei",
+    "bayerDesignation": "ω Per",
     "designations": [
       "ω Per",
       "Gorgonea Quarta (Omega Persei)",
@@ -94720,7 +94720,7 @@
     "rightAscension": "00h 56m 39.91s",
     "declination": "+59° 10′ 00.9″",
     "primaryDesignation": "υ² Cas",
-    "bayerDesignation": "Upsilon-2 Cassiopeiae",
+    "bayerDesignation": "υ² Cas",
     "designations": [
       "υ² Cas",
       "Castula (Upsilon-2 Cassiopeiae)",
@@ -94784,7 +94784,7 @@
     "rightAscension": "18h 00m 29.02s",
     "declination": "-03° 41′ 00.4″",
     "primaryDesignation": "ζ Ser",
-    "bayerDesignation": "Zeta Serpentis",
+    "bayerDesignation": "ζ Ser",
     "designations": [
       "ζ Ser",
       "Alava (Zeta Serpentis)",
@@ -94848,7 +94848,7 @@
     "rightAscension": "08h 43m 17.14s",
     "declination": "+21° 28′ 00.1″",
     "primaryDesignation": "γ Cnc",
-    "bayerDesignation": "Gamma Cancri",
+    "bayerDesignation": "γ Cnc",
     "designations": [
       "γ Cnc",
       "Asellus Borealis (Gamma Cancri)",
@@ -94977,7 +94977,7 @@
     "rightAscension": "08h 12m 12.72s",
     "declination": "+17° 38′ 00.9″",
     "primaryDesignation": "ζ¹ Cnc",
-    "bayerDesignation": "Zeta-1 Cancri",
+    "bayerDesignation": "ζ¹ Cnc",
     "designations": [
       "ζ¹ Cnc",
       "Tegmine (Zeta-1 Cancri)",
@@ -95041,7 +95041,7 @@
     "rightAscension": "02h 58m 45.67s",
     "declination": "+39° 39′ 00.8″",
     "primaryDesignation": "π Per",
-    "bayerDesignation": "Pi Persei",
+    "bayerDesignation": "π Per",
     "designations": [
       "π Per",
       "Gorgonea Secunda (Pi Persei)",
@@ -95105,7 +95105,7 @@
     "rightAscension": "21h 37m 45.12s",
     "declination": "-07° 51′ 00.3″",
     "primaryDesignation": "ξ Aqr",
-    "bayerDesignation": "Xi Aquarii",
+    "bayerDesignation": "ξ Aqr",
     "designations": [
       "ξ Aqr",
       "Bunda (Xi Aquarii)",
@@ -95169,7 +95169,7 @@
     "rightAscension": "21h 42m 05.66s",
     "declination": "+51° 11′ 00.4″",
     "primaryDesignation": "π¹ Cyg",
-    "bayerDesignation": "Pi-1 Cygni",
+    "bayerDesignation": "π¹ Cyg",
     "designations": [
       "π¹ Cyg",
       "Azelfafage (Pi-1 Cygni)",
@@ -95246,7 +95246,7 @@
     "rightAscension": "19h 54m 14.88s",
     "declination": "+08° 27′ 00.7″",
     "primaryDesignation": "ξ Aql",
-    "bayerDesignation": "Xi Aquilae",
+    "bayerDesignation": "ξ Aql",
     "designations": [
       "ξ Aql",
       "Libertas (Xi Aquilae)",
@@ -95312,7 +95312,7 @@
     "rightAscension": "04h 52m 31.97s",
     "declination": "+14° 15′ 00.0″",
     "primaryDesignation": "ο¹ Ori",
-    "bayerDesignation": "Omicron-1 Orionis",
+    "bayerDesignation": "ο¹ Ori",
     "designations": [
       "ο¹ Ori",
       "Al Kumm (Omicron-1 Orionis)",
@@ -95375,7 +95375,7 @@
     "rightAscension": "20h 52m 39.24s",
     "declination": "-08° 58′ 01.0″",
     "primaryDesignation": "μ Aqr",
-    "bayerDesignation": "Mu Aquarii",
+    "bayerDesignation": "μ Aqr",
     "designations": [
       "μ Aqr",
       "Albulan (Mu Aquarii)",

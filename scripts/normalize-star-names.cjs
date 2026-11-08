@@ -27,7 +27,7 @@ const starnames = JSON.parse(fs.readFileSync(STARNAMES_PATH, 'utf8'));
 const CONSTELLATIONS = {
   'And': 'Andromedae', 'Ant': 'Antliae', 'Aps': 'Apodis', 'Aql': 'Aquilae',
   'Aqr': 'Aquarii', 'Ara': 'Arae', 'Ari': 'Arietis', 'Aur': 'Aurigae',
-  'Boo': 'Bootis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
+  'Boo': 'Boötis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
   'Car': 'Carinae', 'Cas': 'Cassiopeiae', 'Cen': 'Centauri', 'Cep': 'Cephei',
   'Cet': 'Ceti', 'Cha': 'Chamaeleontis', 'Cir': 'Circini', 'CMa': 'Canis Majoris',
   'CMi': 'Canis Minoris', 'Cnc': 'Cancri', 'Col': 'Columbae', 'Com': 'Comae Berenices',
@@ -53,7 +53,8 @@ const CONSTELLATIONS = {
 const CONSTELLATION_NOMINATIVE_TO_GENITIVE = {
   'Andromeda': 'Andromedae', 'Antlia': 'Antliae', 'Apus': 'Apodis', 'Aquila': 'Aquilae',
   'Aquarius': 'Aquarii', 'Ara': 'Arae', 'Aries': 'Arietis', 'Auriga': 'Aurigae',
-  'Boötes': 'Bootis', 'Bootes': 'Bootis', 'Caelum': 'Caeli', 'Camelopardalis': 'Camelopardalis',
+  'Boötes': 'Boötis', 'Bootes': 'Boötis', 'Caelum': 'Caeli', 'Camelopardalis': 'Camelopardalis',
+  'Cancer': 'Cancri', 'Canes Venatici': 'Canum Venaticorum', 'Canis Major': 'Canis Majoris', 'Canis Minor': 'Canis Minoris',
   'Capricornus': 'Capricorni', 'Carina': 'Carinae', 'Cassiopeia': 'Cassiopeiae', 'Centaurus': 'Centauri',
   'Cepheus': 'Cephei', 'Cetus': 'Ceti', 'Chamaeleon': 'Chamaeleontis', 'Circinus': 'Circini',
   'Columba': 'Columbae', 'Coma Berenices': 'Comae Berenices', 'Corona Australis': 'Coronae Australis',

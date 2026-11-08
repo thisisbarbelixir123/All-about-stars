@@ -32,7 +32,7 @@ const CONSTELLATIONS_FULL = {
   'Cet': 'Cetus', 'Cha': 'Chamaeleon', 'Cir': 'Circinus', 'CMa': 'Canis Major',
   'CMi': 'Canis Minor', 'Cnc': 'Cancer', 'Col': 'Columba', 'Com': 'Coma Berenices',
   'CrA': 'Corona Australis', 'CrB': 'Corona Borealis', 'Crt': 'Crater',
-  'Cru': 'Crux', 'Crv': 'Corvus', 'CVn': 'Canum Venaticorum', 'Cyg': 'Cygnus',
+  'Cru': 'Crux', 'Crv': 'Corvus', 'CVn': 'Canes Venatici', 'Cyg': 'Cygnus',
   'Del': 'Delphinus', 'Dor': 'Dorado', 'Dra': 'Draco', 'Equ': 'Equuleus',
   'Eri': 'Eridanus', 'For': 'Fornax', 'Gem': 'Gemini', 'Gru': 'Grus',
   'Her': 'Hercules', 'Hor': 'Horologium', 'Hya': 'Hydra', 'Hyi': 'Hydrus',
@@ -53,7 +53,7 @@ const CONSTELLATIONS_FULL = {
 const CONSTELLATIONS_GENITIVE = {
   'And': 'Andromedae', 'Ant': 'Antliae', 'Aps': 'Apodis', 'Aql': 'Aquilae',
   'Aqr': 'Aquarii', 'Ara': 'Arae', 'Ari': 'Arietis', 'Aur': 'Aurigae',
-  'Boo': 'Bootis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
+  'Boo': 'Boötis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
   'Car': 'Carinae', 'Cas': 'Cassiopeiae', 'Cen': 'Centauri', 'Cep': 'Cephei',
   'Cet': 'Ceti', 'Cha': 'Chamaeleontis', 'Cir': 'Circini', 'CMa': 'Canis Majoris',
   'CMi': 'Canis Minoris', 'Cnc': 'Cancri', 'Col': 'Columbae', 'Com': 'Comae Berenices',

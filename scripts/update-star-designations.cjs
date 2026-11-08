@@ -10,7 +10,7 @@ const rawIdent = JSON.parse(fs.readFileSync(RAW_IDENT_PATH, 'utf8'));
 const CONSTELLATION_ABBR_TO_GENITIVE = {
   'And': 'Andromedae', 'Ant': 'Antliae', 'Aps': 'Apodis', 'Aql': 'Aquilae',
   'Aqr': 'Aquarii', 'Ara': 'Arae', 'Ari': 'Arietis', 'Aur': 'Aurigae',
-  'Boo': 'Bootis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
+  'Boo': 'Boötis', 'Cae': 'Caeli', 'Cam': 'Camelopardalis', 'Cap': 'Capricorni',
   'Car': 'Carinae', 'Cas': 'Cassiopeiae', 'Cen': 'Centauri', 'Cep': 'Cephei',
   'Cet': 'Ceti', 'Cha': 'Chamaeleontis', 'Cir': 'Circini', 'CMa': 'Canis Majoris',
   'CMi': 'Canis Minoris', 'Cnc': 'Cancri', 'Col': 'Columbae', 'Com': 'Comae Berenices',
