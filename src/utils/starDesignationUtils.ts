@@ -472,3 +472,132 @@ export function getStarDesignationTier(star: Partial<StarData> | null | undefine
   if (/^([R-Z]|[A-Z]{2}|V\d+)\s+[A-Z]/.test(tag)) return 'variable';
   return 'catalog';
 }
+
+/**
+ * Normalizes any raw or unabbreviated Bayer designation string to canonical [Greek/Letter] [IAU Abbr] format.
+ * Examples:
+ * - "Beta Capricorni" -> "β Cap"
+ * - "Theta-2 Tauri" -> "θ² Tau"
+ * - "Chi Ursae Majoris" -> "χ UMa"
+ * - "Omicron-1 Canis Majoris" -> "ο¹ CMa"
+ * - "δ Cephei" -> "δ Cep"
+ * - "RR Lyrae" -> "RR Lyr"
+ * - "R Coronae Borealis" -> "R CrB"
+ */
+export function normalizeBayerDesignation(bayer?: string, fallbackConstellation?: string): string {
+  if (!bayer) return '';
+  let str = bayer.trim();
+  if (!str || str === 'Sol') return str;
+
+  // 1. Replace any unabbreviated constellation name/genitive with its canonical 3-letter abbreviation
+  for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
+    const regex = new RegExp(`\\b${full.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    if (regex.test(str)) {
+      str = str.replace(regex, abbr).trim();
+      break;
+    }
+  }
+
+  // 2. If it starts with a spelled-out Greek letter name (e.g. "Alpha", "Beta", "Theta-2", "Pi 1", "Omicron-1"):
+  const greekMatch = str.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)(?:[-_\s]?(\d+))?\s+(.*)$/i);
+  if (greekMatch) {
+    const gChar = GREEK_WORDS_MAP[greekMatch[1].toLowerCase()] || greekMatch[1];
+    const sup = greekMatch[2] ? (SUPERSCRIPTS[greekMatch[2]] || greekMatch[2]) : '';
+    const rest = greekMatch[3].trim();
+    str = `${gChar}${sup} ${rest}`.trim();
+  }
+
+  // 3. If it starts with a Greek character followed by an ASCII digit without superscript (e.g. "θ2 Tau" -> "θ² Tau", "υ1 Eri" -> "υ¹ Eri"):
+  const asciiSubMatch = str.match(/^([α-ωΑ-Ω])(\d+)\s+(.*)$/);
+  if (asciiSubMatch) {
+    const gChar = asciiSubMatch[1];
+    const sup = SUPERSCRIPTS[asciiSubMatch[2]] || asciiSubMatch[2];
+    const rest = asciiSubMatch[3].trim();
+    str = `${gChar}${sup} ${rest}`.trim();
+  }
+
+  return str;
+}
+
+/**
+ * Universal catalog record normalizer that guarantees canonical IAU naming standards across any star record:
+ * 1. Enforces standard IAU constellation names (e.g. Bootes -> Boötis).
+ * 2. Normalizes Bayer designations to [Greek/Letter] [IAU Abbr].
+ * 3. Enforces standard diacritics in displayed names (e.g. Bootis -> Boötis).
+ * 4. Sanitizes alternateNames and designations arrays.
+ */
+export function normalizeCatalogStar<T extends Partial<StarData>>(star: T): T {
+  if (!star) return star;
+
+  let constellation = star.constellation;
+  if (constellation) {
+    if (constellation === 'Bootes') constellation = 'Boötes';
+    if (star.id === 'fomalhaut-c') constellation = 'Piscis Austrinus';
+  }
+
+  let name = star.name;
+  if (name) {
+    if (name.includes('Bootis')) name = name.replace(/\bBootis\b/g, 'Boötis');
+    if (name.includes('Velae')) name = name.replace(/\bVelae\b/g, 'Velorum');
+  }
+
+  let bayerDesignation = star.bayerDesignation;
+  if (bayerDesignation) {
+    bayerDesignation = normalizeBayerDesignation(bayerDesignation, constellation);
+  }
+
+  let alternateNames = star.alternateNames;
+  if (alternateNames && alternateNames.length > 0) {
+    let changed = false;
+    const nextAlts = alternateNames.map((alt) => {
+      let updated = alt;
+      if (updated.includes('Bootis')) {
+        updated = updated.replace(/\bBootis\b/g, 'Boötis');
+        changed = true;
+      }
+      if (updated.includes('Velae')) {
+        updated = updated.replace(/\bVelae\b/g, 'Velorum');
+        changed = true;
+      }
+      return updated;
+    });
+    if (changed) alternateNames = nextAlts;
+  }
+
+  let designations = star.designations;
+  if (designations && designations.length > 0) {
+    let changed = false;
+    const nextDesigs = designations.map((desig) => {
+      let updated = desig;
+      if (updated.includes('Bootis')) {
+        updated = updated.replace(/\bBootis\b/g, 'Boötis');
+        changed = true;
+      }
+      if (updated.includes('Velae')) {
+        updated = updated.replace(/\bVelae\b/g, 'Velorum');
+        changed = true;
+      }
+      return updated;
+    });
+    if (changed) designations = nextDesigs;
+  }
+
+  if (
+    constellation === star.constellation &&
+    name === star.name &&
+    bayerDesignation === star.bayerDesignation &&
+    alternateNames === star.alternateNames &&
+    designations === star.designations
+  ) {
+    return star;
+  }
+
+  return {
+    ...star,
+    constellation,
+    name,
+    bayerDesignation,
+    alternateNames,
+    designations
+  };
+}

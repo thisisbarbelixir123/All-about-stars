@@ -27529,7 +27529,7 @@
       "HIP 80000",
       "HR 6072"
     ],
-    "bayerDesignation": "γ2 Nor",
+    "bayerDesignation": "γ² Nor",
     "constellation": "Norma",
     "diameterSolar": 10.5,
     "temperature": 4960,
@@ -31213,7 +31213,7 @@
       "HIP 23595",
       "HR 1652"
     ],
-    "bayerDesignation": "γ1 Cae",
+    "bayerDesignation": "γ¹ Cae",
     "constellation": "Caelum",
     "diameterSolar": 12,
     "temperature": 4400,
@@ -55373,7 +55373,7 @@
       "The Soot Star Archetype",
       "Reverse Nova Prototype"
     ],
-    "bayerDesignation": "R Coronae Borealis",
+    "bayerDesignation": "R CrB",
     "constellation": "Corona Borealis",
     "diameterSolar": 85,
     "diameterKm": 118379500,
@@ -55684,7 +55684,7 @@
       "Archetype of RS CVn Variables",
       "Starspot Superflare Prototype"
     ],
-    "bayerDesignation": "RS Canum Venaticorum",
+    "bayerDesignation": "RS CVn",
     "constellation": "Canes Venatici",
     "diameterSolar": 4,
     "diameterKm": 5570800,
@@ -55880,7 +55880,7 @@
       "BD+88°8 B",
       "North Star Companion"
     ],
-    "bayerDesignation": "α Ursae Minoris B",
+    "bayerDesignation": "α UMi B",
     "constellation": "Ursa Minor",
     "diameterSolar": 1.38,
     "diameterKm": 1921926,
@@ -88222,7 +88222,7 @@
     "rightAscension": "15h 15m 30.17s",
     "declination": "+33° 18′ 00.9″",
     "primaryDesignation": "δ Boo",
-    "bayerDesignation": "Delta Bootis",
+    "bayerDesignation": "δ Boo",
     "designations": [
       "δ Boo",
       "Thiba (Delta Boötis)",
@@ -89071,7 +89071,7 @@
     "rightAscension": "11h 46m 03.02s",
     "declination": "+47° 46′ 00.8″",
     "primaryDesignation": "χ Urs",
-    "bayerDesignation": "Chi Ursae Majoris",
+    "bayerDesignation": "χ UMa",
     "designations": [
       "χ Urs",
       "Taiyangshou (Chi Ursae Majoris)",
@@ -90251,7 +90251,7 @@
     "rightAscension": "06h 54m 07.94s",
     "declination": "-24° 11′ 00.1″",
     "primaryDesignation": "ο¹ CMa",
-    "bayerDesignation": "Omicron-1 Canis Majoris",
+    "bayerDesignation": "ο¹ CMa",
     "designations": [
       "ο¹ CMa",
       "Udra (Omicron-1 Canis Majoris)",
@@ -91032,7 +91032,7 @@
     "rightAscension": "14h 25m 11.81s",
     "declination": "+51° 51′ 00.0″",
     "primaryDesignation": "θ Boo",
-    "bayerDesignation": "Theta Bootis",
+    "bayerDesignation": "θ Boo",
     "designations": [
       "θ Boo",
       "Asellus Primus (Theta Boötis)",
@@ -91613,7 +91613,7 @@
     "rightAscension": "14h 16m 23.02s",
     "declination": "+46° 05′ 00.3″",
     "primaryDesignation": "λ Boo",
-    "bayerDesignation": "Lambda Bootis",
+    "bayerDesignation": "λ Boo",
     "designations": [
       "λ Boo",
       "Xuange (Lambda Boötis)",
@@ -91743,7 +91743,7 @@
     "rightAscension": "16h 45m 58.25s",
     "declination": "+82° 02′ 00.2″",
     "primaryDesignation": "ε Urs",
-    "bayerDesignation": "Epsilon Ursae Minoris",
+    "bayerDesignation": "ε UMi",
     "designations": [
       "ε Urs",
       "Circitores (Epsilon Ursae Minoris)",
@@ -92193,7 +92193,7 @@
     "rightAscension": "15h 44m 03.53s",
     "declination": "+77° 47′ 00.7″",
     "primaryDesignation": "ζ Urs",
-    "bayerDesignation": "Zeta Ursae Minoris",
+    "bayerDesignation": "ζ UMi",
     "designations": [
       "ζ Urs",
       "Akfa Farkadain (Zeta Ursae Minoris)",
@@ -92257,7 +92257,7 @@
     "rightAscension": "22h 31m 30.34s",
     "declination": "-32° 20′ 00.8″",
     "primaryDesignation": "β PsA",
-    "bayerDesignation": "Beta Piscis Austrini",
+    "bayerDesignation": "β PsA",
     "designations": [
       "β PsA",
       "Fum al Hui (Beta Piscis Austrini)",
@@ -92387,7 +92387,7 @@
     "rightAscension": "15h 24m 29.42s",
     "declination": "+37° 22′ 00.6″",
     "primaryDesignation": "μ¹ Boo",
-    "bayerDesignation": "Mu-1 Bootis",
+    "bayerDesignation": "μ¹ Boo",
     "designations": [
       "μ¹ Boo",
       "Alkalurops (Mu-1 Boötis)",
@@ -92647,7 +92647,7 @@
     "rightAscension": "12h 26m 56.28s",
     "declination": "+28° 16′ 00.1″",
     "primaryDesignation": "γ Com",
-    "bayerDesignation": "Gamma Comae Berenices",
+    "bayerDesignation": "γ Com",
     "designations": [
       "γ Com",
       "Al Dafirah (Gamma Comae Berenices)",
@@ -93424,7 +93424,7 @@
     "rightAscension": "09h 08m 52.25s",
     "declination": "+51° 36′ 00.3″",
     "primaryDesignation": "f Ursae Majoris",
-    "bayerDesignation": "f Ursae Majoris",
+    "bayerDesignation": "f UMa",
     "designations": [
       "Alhaud (f Ursae Majoris)",
       "Alhaud",
@@ -94009,7 +94009,7 @@
     "rightAscension": "15h 04m 26.74s",
     "declination": "+26° 56′ 00.9″",
     "primaryDesignation": "ψ Boo",
-    "bayerDesignation": "Psi Bootis",
+    "bayerDesignation": "ψ Boo",
     "designations": [
       "ψ Boo",
       "Aulad Alnathlat (Psi Boötis)",
@@ -94073,7 +94073,7 @@
     "rightAscension": "14h 13m 29.02s",
     "declination": "+51° 47′ 00.4″",
     "primaryDesignation": "κ² Boo",
-    "bayerDesignation": "Kappa-2 Bootis",
+    "bayerDesignation": "κ² Boo",
     "designations": [
       "κ² Boo",
       "Asellus Tertius (Kappa-2 Boötis)",
@@ -94460,7 +94460,7 @@
     "rightAscension": "08h 40m 12.82s",
     "declination": "+64° 19′ 00.7″",
     "primaryDesignation": "π² Urs",
-    "bayerDesignation": "Pi-2 Ursae Majoris",
+    "bayerDesignation": "π² UMa",
     "designations": [
       "π² Urs",
       "Museida (Pi-2 Ursae Majoris)",

@@ -1,5 +1,6 @@
 import { StarData, PresetComparison } from '../types';
 import starDatabaseJson from './starDatabase.json';
+import { normalizeCatalogStar } from '../utils/starDesignationUtils';
 
 export const STAR_ID_ALIASES: Record<string, string> = {
   'castor-a': 'castor-aa',
@@ -58,10 +59,11 @@ export function resolveStarId(id: string): string {
 
 /**
  * Unified Star Catalog
- * Merged single source of truth containing all 736+ stars.
+ * Merged single source of truth containing all catalog stars,
+ * with real-time automatic normalization applied by default.
  */
 export const RAW_STARS_CATALOG: StarData[] = starDatabaseJson as StarData[];
-export const STARS_CATALOG: StarData[] = RAW_STARS_CATALOG;
+export const STARS_CATALOG: StarData[] = RAW_STARS_CATALOG.map(normalizeCatalogStar);
 
 
 /**
