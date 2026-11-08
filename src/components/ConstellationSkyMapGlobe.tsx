@@ -11,7 +11,8 @@ import {
   getConstellationBoundingSpan,
   pointInPolygon,
   isProminentDso,
-  parseCoordinate
+  parseCoordinate,
+  isStarBelongingToConstellation
 } from '../utils/celestialMechanics';
 import {
   Globe,
@@ -263,7 +264,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
   });
   const touchDistanceRef = useRef<number | null>(null);
 
-  // Map catalog stars for focal constellation to spherical RA/Dec coordinates
+  // Map catalog stars to spherical RA/Dec coordinates
   const mappedCatalogStars = useMemo(() => {
     if (!catalogStars || catalogStars.length === 0) return [];
     return catalogStars.map((st) => {
@@ -274,14 +275,30 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
         (focalStarId && st.id === focalStarId) ||
         (!focalStarId && focalConstellation && st.id === focalConstellation.principalStarId)
       );
+      const isFocalConstellation = focalConstellation
+        ? isStarBelongingToConstellation(st, focalConstellation)
+        : true;
       return {
         star: st,
         raDeg,
         decDeg: isNaN(decDeg) ? 0 : decDeg,
-        isPrincipal
+        isPrincipal,
+        isFocalConstellation
       };
     });
   }, [catalogStars, focalConstellation, focalStarId]);
+
+  // Spatial bucket index for O(1) matching against background stars
+  const catalogSpatialIndex = useMemo(() => {
+    const buckets = new Map<number, typeof mappedCatalogStars>();
+    for (const cat of mappedCatalogStars) {
+      const bucketKey = Math.floor(((cat.raDeg % 360 + 360) % 360) / 2); // 2-degree buckets (0..179)
+      const list = buckets.get(bucketKey) || [];
+      list.push(cat);
+      buckets.set(bucketKey, list);
+    }
+    return buckets;
+  }, [mappedCatalogStars]);
 
   const [hoveredStarTooltip, setHoveredStarTooltip] = useState<{
     star: StarData;
@@ -757,19 +774,26 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
           const pt = projectDynamicSphericalPoint(sRa, sDec, projOpts);
           if (!pt.isVisible) continue;
 
-          // Check if this star matches any mapped catalog star in the active constellation
+          // Check if this star matches any mapped catalog star
           let matchedCatalog: typeof mappedCatalogStars[0] | undefined;
           if (mappedCatalogStars.length > 0) {
-            for (const cat of mappedCatalogStars) {
-              let dRa = sRa - cat.raDeg;
-              while (dRa > 180) dRa -= 360;
-              while (dRa < -180) dRa += 360;
-              const distDeg = Math.hypot(dRa * Math.cos((cat.decDeg * Math.PI) / 180), sDec - cat.decDeg);
-              if (distDeg < 0.08) {
-                matchedCatalog = cat;
-                renderedCatalogIds.add(cat.star.id);
-                break;
+            const bucketKey = Math.floor(((sRa % 360 + 360) % 360) / 2);
+            for (let offset = -1; offset <= 1; offset++) {
+              const bKey = (bucketKey + offset + 180) % 180;
+              const bucket = catalogSpatialIndex.get(bKey);
+              if (!bucket) continue;
+              for (const cat of bucket) {
+                let dRa = sRa - cat.raDeg;
+                while (dRa > 180) dRa -= 360;
+                while (dRa < -180) dRa += 360;
+                const distDeg = Math.hypot(dRa * Math.cos((cat.decDeg * Math.PI) / 180), sDec - cat.decDeg);
+                if (distDeg < 0.08) {
+                  matchedCatalog = cat;
+                  renderedCatalogIds.add(cat.star.id);
+                  break;
+                }
               }
+              if (matchedCatalog) break;
             }
           }
 
@@ -861,11 +885,12 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
               ctx.stroke();
               ctx.restore();
             } else {
-              // Regular catalog star in active constellation
+              // Regular catalog star
+              const inFocal = matchedCatalog?.isFocalConstellation ?? true;
               ctx.save();
               ctx.beginPath();
               ctx.arc(pt.x, pt.y, Math.max(6, baseRadius * 2.4), 0, 2 * Math.PI);
-              ctx.strokeStyle = isHovered ? '#38bdf8' : 'rgba(56, 189, 248, 0.65)';
+              ctx.strokeStyle = isHovered ? '#38bdf8' : inFocal ? 'rgba(56, 189, 248, 0.7)' : 'rgba(56, 189, 248, 0.4)';
               ctx.lineWidth = isHovered ? 1.8 : 1.2;
               ctx.setLineDash(isHovered ? [] : [2, 2]);
               ctx.stroke();
@@ -876,9 +901,10 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             if (effectiveShowLabels || isHovered) {
               const nameInfo = resolveDossierStarName(catalogStar);
               const labelText = nameInfo.primaryName;
+              const inFocal = matchedCatalog?.isFocalConstellation ?? true;
               ctx.save();
               ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
-              ctx.fillStyle = isFocalStar ? '#fef08a' : isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
+              ctx.fillStyle = isFocalStar ? '#fef08a' : isHovered ? '#bae6fd' : inFocal ? 'rgba(186, 230, 253, 0.85)' : 'rgba(186, 230, 253, 0.6)';
               ctx.textAlign = 'left';
               ctx.textBaseline = 'middle';
               ctx.shadowColor = '#020617';
@@ -918,10 +944,11 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
             ctx.fill();
 
             const isHovered = Boolean(hoveredStarId === cat.star.id || hoveredStarTooltip?.star.id === cat.star.id);
+            const inFocal = cat.isFocalConstellation;
             ctx.save();
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, Math.max(6, baseRadius * 2.4), 0, 2 * Math.PI);
-            ctx.strokeStyle = isHovered ? '#38bdf8' : 'rgba(56, 189, 248, 0.65)';
+            ctx.strokeStyle = isHovered ? '#38bdf8' : inFocal ? 'rgba(56, 189, 248, 0.7)' : 'rgba(56, 189, 248, 0.4)';
             ctx.lineWidth = isHovered ? 1.8 : 1.2;
             ctx.setLineDash(isHovered ? [] : [2, 2]);
             ctx.stroke();
@@ -932,7 +959,7 @@ export const ConstellationSkyMapGlobe: React.FC<ConstellationSkyMapGlobeProps> =
               const labelText = nameInfo.primaryName;
               ctx.save();
               ctx.font = isHovered ? 'bold 11px ui-monospace, SFMono-Regular, monospace' : '10px ui-monospace, SFMono-Regular, monospace';
-              ctx.fillStyle = isHovered ? '#bae6fd' : 'rgba(186, 230, 253, 0.85)';
+              ctx.fillStyle = isHovered ? '#bae6fd' : inFocal ? 'rgba(186, 230, 253, 0.85)' : 'rgba(186, 230, 253, 0.6)';
               ctx.textAlign = 'left';
               ctx.textBaseline = 'middle';
               ctx.shadowColor = '#020617';

@@ -176,7 +176,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               celestialData={celestialData}
               focalConstellation={constellation}
               focalStarId={constellation.principalStarId}
-              catalogStars={cCatalogStars}
+              catalogStars={STARS_CATALOG}
               hoveredStarId={hoveredStarId}
               onHoverStar={(star) => setHoveredStarId(star ? star.id : null)}
               variant="dossier"

@@ -448,16 +448,6 @@ export const isStarInsideConstellation = (
     }
   }
 
-  // Also check equatorial (lon, lat) polygon to prevent stereographic chord-sag clipping on long Delporte boundary spans
-  let rawLon = raVal * 15;
-  if (rawLon > 180) rawLon -= 360;
-  for (const ring of boundaryRings) {
-    const geoRing = ring.map(pt => ({ x: pt[0], y: pt[1] }));
-    if (pointInPolygon(rawLon, decVal, geoRing)) {
-      return true;
-    }
-  }
-
   return false;
 };
 
@@ -475,39 +465,59 @@ export const normalizeConstellationString = (str: string): string =>
 /**
  * Checks whether a catalog star belongs to a constellation.
  * Evaluates canonical IAU name, ID, abbreviation, sector aliases (Serpens Caput/Cauda),
- * diacritic normalization (Boötes / Bootes), and Delporte spherical boundary fallback.
+ * diacritic normalization (Boötes / Bootes), and Delporte spherical boundary fallback for unclassified stars.
  */
 export const isStarBelongingToConstellation = (
   star: StarData,
   constellation: ConstellationInfo,
   boundsList?: any[]
 ): boolean => {
+  if (!star || !constellation) return false;
+
   const sNorm = normalizeConstellationString(star.constellation);
   const cNorm = normalizeConstellationString(constellation.name);
   const cId = (constellation.id || '').toLowerCase();
   const cAbbr = (constellation.abbreviation || '').toLowerCase();
 
-  // Direct normalized name, ID, or abbreviation match
-  if (sNorm === cNorm || sNorm === cId || sNorm === cAbbr) return true;
+  // If star has an assigned constellation, evaluate canonical astronomical membership
+  if (sNorm) {
+    // Direct normalized name, ID, or abbreviation match
+    if (sNorm === cNorm || sNorm === cId || sNorm === cAbbr) return true;
 
-  // Multi-sector Serpens support
-  if (cId === 'serpens' && (sNorm.includes('serpens') || sNorm.includes('caput') || sNorm.includes('cauda') || sNorm === 'ser')) {
-    return true;
+    // Multi-sector Serpens support
+    if (cId === 'serpens' && (sNorm.includes('serpens') || sNorm.includes('caput') || sNorm.includes('cauda') || sNorm === 'ser')) {
+      return true;
+    }
+
+    // Accent and spelling variants (Boötes / Bootes)
+    if (cNorm.includes('boote') && sNorm.includes('boote')) return true;
+
+    // Ursa Major / Ursa Minor abbreviation variants (UMa, UMi)
+    if (cAbbr === 'uma' && (sNorm === 'uma' || sNorm.includes('ursa major'))) return true;
+    if (cAbbr === 'umi' && (sNorm === 'umi' || sNorm.includes('ursa minor'))) return true;
+
+    // Canes Venatici / Canis Major / Minor variants
+    if (cAbbr === 'cvn' && (sNorm === 'cvn' || sNorm.includes('canes venatici'))) return true;
+    if (cAbbr === 'cma' && (sNorm === 'cma' || sNorm.includes('canis major'))) return true;
+    if (cAbbr === 'cmi' && (sNorm === 'cmi' || sNorm.includes('canis minor'))) return true;
+
+    // Triangulum / Triangulum Australe differentiation
+    if (cId === 'triangulum-australe' && (sNorm.includes('triangulum australe') || sNorm === 'tra')) return true;
+    if (cId === 'triangulum' && sNorm === 'triangulum') return true;
+
+    // Corona Borealis / Corona Australis differentiation
+    if (cId === 'corona-borealis' && (sNorm.includes('corona borealis') || sNorm === 'crb')) return true;
+    if (cId === 'corona-australis' && (sNorm.includes('corona australis') || sNorm === 'cra')) return true;
+
+    // Piscis Austrinus / Pisces differentiation
+    if (cId === 'piscis-austrinus' && (sNorm.includes('piscis austrinus') || sNorm === 'psa')) return true;
+    if (cId === 'pisces' && (sNorm === 'pisces' || sNorm === 'psc')) return true;
+
+    // Star has an explicit constellation that does not match this one
+    return false;
   }
 
-  // Accent and spelling variants (Boötes / Bootes)
-  if (cNorm.includes('boote') && sNorm.includes('boote')) return true;
-
-  // Ursa Major / Ursa Minor abbreviation variants (UMa, UMi)
-  if (cAbbr === 'uma' && (sNorm === 'uma' || sNorm.includes('ursa major'))) return true;
-  if (cAbbr === 'umi' && (sNorm === 'umi' || sNorm.includes('ursa minor'))) return true;
-
-  // Canes Venatici / Canis Major / Minor variants
-  if (cAbbr === 'cvn' && sNorm === 'cvn') return true;
-  if (cAbbr === 'cma' && sNorm === 'cma') return true;
-  if (cAbbr === 'cmi' && sNorm === 'cmi') return true;
-
-  // Geometric boundary fallback if available
+  // Geometric boundary fallback only if star has no constellation field specified
   if (boundsList && boundsList.length > 0) {
     return isStarInsideConstellation(star, constellation, boundsList);
   }
