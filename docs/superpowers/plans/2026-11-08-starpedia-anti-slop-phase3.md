@@ -72,22 +72,22 @@
 - Consumes: Morgan-Keenan spectral data, Yerkes luminosity classes, `.observatory-panel`, `.observatory-control`.
 - Produces: Technical astrophysical spectral atlas and classification browser.
 
-- [ ] **Step 1: Inspect and identify slop patterns in the classification suite**
+- [x] **Step 1: Inspect and identify slop patterns in the classification suite**
   - Identify `blur-3xl` orbs in `StellarClassificationGuide.tsx`.
   - Check button styling and tab strips for cyan gradient glow buttons.
   - Check for em dashes in descriptions.
 
-- [ ] **Step 2: Refactor `StellarClassificationGuide.tsx`**
+- [x] **Step 2: Refactor `StellarClassificationGuide.tsx`**
   - Convert hero banner and spectral class cards (O, B, A, F, G, K, M, L, T, Y, WR) to `.observatory-panel`.
   - Remove the floating blur orb.
   - Refactor class selector tabs and luminosity class pills to `.observatory-control`.
   - Ensure spectral badges use authentic Planckian D65 starlight colors without artificial neon drop shadows.
 
-- [ ] **Step 3: Refactor modal and mapped sections**
+- [x] **Step 3: Refactor modal and mapped sections**
   - In `ClassificationDirectoryModal.tsx`: refactor modal header and grid to `.observatory-panel` with 44px close button.
   - In `ClassificationMappedStarsSection.tsx` & `ClassificationMappedSystemsSection.tsx`: refactor cards to `.observatory-panel` with `JetBrains Mono` telemetry tags.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---

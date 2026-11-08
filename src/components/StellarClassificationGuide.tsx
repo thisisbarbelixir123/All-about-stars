@@ -337,8 +337,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
   return (
     <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* Hero Banner: Stellar Classification Systems */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-        <div className="absolute -top-12 -right-12 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl observatory-panel border border-white/10 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-2 max-w-3xl">
             <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
@@ -350,7 +349,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-orange-950/80 border border-orange-500/40 text-orange-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-white/5 border border-white/10 text-orange-300 font-mono text-[10px] sm:text-xs font-bold">
               8 Frameworks
             </span>
           </div>
@@ -358,7 +357,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
       </div>
 
       {/* Subsystem Switcher within Stellar Classification Systems */}
-      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 p-1 observatory-panel rounded-2xl border border-white/10 overflow-x-auto no-scrollbar shrink-0">
         {[
           { id: 0, label: 'Harvard Spectral Classes (OBAFGKM)' },
           { id: 1, label: 'Other Spectral Classes' },
@@ -373,10 +372,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
             key={sys.id}
             id={`btn-classification-subsystem-${sys.id}`}
             onClick={() => setClassificationSystemIndex(sys.id)}
-            className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+            className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0 min-h-[44px] flex items-center ${
               classificationSystemIndex === sys.id
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
           >
             {sys.label}
@@ -390,12 +389,12 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
           {classificationSystemIndex === 0 && (
             <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
               {/* Mnemonic Banner: Placed above the buttons */}
-              <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-[#030612]/90 border border-cyan-500/20 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5 sm:gap-3.5 overflow-hidden shadow-sm">
+              <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl observatory-panel border border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5 sm:gap-3.5 overflow-hidden">
                 <div className="min-w-0 w-full lg:w-auto">
-                  <span className="text-[9px] sm:text-[10px] md:text-[11px] font-mono text-cyan-400 uppercase tracking-widest font-bold block">
+                  <span className="text-[9px] sm:text-[10px] md:text-[11px] font-mono text-sky-400 uppercase tracking-widest font-bold block">
                     The Universal Astronomy Mnemonic
                   </span>
-                  <div className="text-[11px] sm:text-xs md:text-sm lg:text-[15px] font-black text-white mt-0.5 sm:mt-1 flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 items-center font-mono leading-relaxed">
+                  <div className="text-[11px] sm:text-xs md:text-sm lg:text-[15px] font-bold text-white mt-0.5 sm:mt-1 flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 items-center font-mono leading-relaxed">
                     <span className="text-[#4d88ff]">O (Oh)</span>
                     <span className="text-slate-600">•</span>
                     <span className="text-[#8cb5ff]">B (Be)</span>
@@ -414,7 +413,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                 {/* Rainbow Spectrum Visual Bar */}
                 <div
-                  className="w-full lg:w-64 xl:w-80 h-2 sm:h-2.5 shrink-0 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.3)] border border-white/20 mt-1 lg:mt-0"
+                  className="w-full lg:w-64 xl:w-80 h-2 sm:h-2.5 shrink-0 rounded-full border border-white/10 mt-1 lg:mt-0"
                   style={{
                     background: 'linear-gradient(90deg, #4d88ff 0%, #8cb5ff 16.6%, #d8e5ff 33.3%, #fff2db 50%, #ffefa6 66.6%, #ffb366 83.3%, #ff5533 100%)',
                   }}
@@ -436,21 +435,21 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         }}
                         className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[95px] sm:min-w-[120px] max-w-[160px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                           isSelected
-                            ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                            : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                            ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                            : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                         }`}
                         title={`Spectral Class ${item.code} (${item.mnemonicWord}) • ${item.temperatureKelvin}`}
                       >
                         <div className="w-full min-w-0 text-left leading-tight">
                           <RunningText
                             text={item.mnemonicWord}
-                            className="text-[9px] sm:text-[11px] font-bold text-cyan-300/90 group-hover:text-cyan-200"
+                            className="text-[9px] sm:text-[11px] font-bold text-sky-300 group-hover:text-white"
                           />
                         </div>
 
                         <div className="flex items-center justify-between w-full min-w-0 gap-1">
                           <span
-                            className="text-sm sm:text-xl font-black font-mono leading-none drop-shadow-[0_0_8px_currentColor]"
+                            className="text-sm sm:text-xl font-black font-mono leading-none"
                             style={{ color: item.colorHex }}
                           >
                             {item.code}
@@ -467,16 +466,16 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               </div>
 
               {/* Stellar Classification Card - Carousel UI */}
-              <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+              <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                 {/* Header with Carousel Navigation & Quick Filter */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     {/* Left Carousel Arrow Button directly on Card */}
                     <button
                       type="button"
                       id="btn-card-carousel-prev"
                       onClick={handlePrevSpectralClass}
-                      className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                      className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       title="Previous spectral class card"
                       aria-label="Previous card"
                     >
@@ -484,11 +483,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     </button>
 
                     <div
-                      className="w-8 h-8 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-base sm:text-2xl shadow-xl border border-white/30"
+                      className="w-8 h-8 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-base sm:text-2xl border border-white/20"
                       style={{
                         backgroundColor: activeSpectralItem.colorHex,
                         color: '#02040a',
-                        boxShadow: `0 0 20px ${activeSpectralItem.colorHex}66`,
                       }}
                     >
                       {activeSpectralItem.code}
@@ -500,7 +498,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           text={activeSpectralItem.name}
                           className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                         />
-                        <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                        <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                           ({currentSpectralIndex + 1}/7)
                         </span>
                       </div>
@@ -514,7 +512,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       type="button"
                       id="btn-card-carousel-next"
                       onClick={handleNextSpectralClass}
-                      className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                      className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       title="Next spectral class card"
                       aria-label="Next card"
                     >
@@ -527,9 +525,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <button
                       id="btn-filter-by-spectral-class"
                       onClick={() => onJumpToCatalogFilter(activeSpectralItem.code)}
-                      className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                     >
-                      <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                       <span>Filter Type {activeSpectralItem.code}</span>
                       <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                     </button>
@@ -625,21 +623,21 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={`${item.buttonTitle} (${item.abbreviation})`}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[9px] sm:text-[11px] font-bold text-cyan-300/90 group-hover:text-cyan-200"
+                          className="text-[9px] sm:text-[11px] font-bold text-sky-300 group-hover:text-white"
                         />
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <span
-                          className="text-xs sm:text-base font-black font-mono leading-none drop-shadow-[0_0_8px_currentColor]"
+                          className="text-xs sm:text-base font-black font-mono leading-none"
                           style={{ color: item.colorHex }}
                         >
                           {item.abbreviation}
@@ -663,16 +661,16 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 })();
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Filter */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         {/* Left Carousel Arrow Button directly on Card */}
                         <button
                           type="button"
                           id="btn-card-carousel-exotic-prev"
                           onClick={handlePrevExotic}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous exotic class card"
                           aria-label="Previous card"
                         >
@@ -680,11 +678,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </button>
 
                         <div
-                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-xs sm:text-base shadow-xl border border-white/30"
+                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-xs sm:text-base border border-white/20"
                           style={{
                             backgroundColor: activeExoticItem.colorHex,
                             color: '#02040a',
-                            boxShadow: `0 0 20px ${activeExoticItem.colorHex}66`,
                           }}
                         >
                           {activeExoticItem.abbreviation}
@@ -696,7 +693,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeExoticItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeExoticIndex + 1}/{EXOTIC_CLASSES_GUIDE.length})
                             </span>
                           </div>
@@ -710,7 +707,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-exotic-next"
                           onClick={handleNextExotic}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next exotic class card"
                           aria-label="Next card"
                         >
@@ -723,18 +720,18 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <button
                           id="btn-filter-by-exotic-class"
                           onClick={() => onJumpToCatalogFilter(filterableCode)}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Filter Type {filterableCode}</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
                       ) : onJumpToCatalog ? (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Open Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -866,13 +863,13 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[130px] sm:min-w-[150px] max-w-[190px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase truncate block">
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-sky-400 uppercase truncate block">
                           {item.category}
                         </span>
                       </div>
@@ -880,7 +877,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-sky-200"
                         />
                         <span
                           className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
@@ -899,15 +896,15 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const archetypeStar = mappedVariableStars[0] || null;
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Actions (No icon box) */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
                           type="button"
                           id="btn-card-carousel-variable-prev"
                           onClick={handlePrevVariable}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous variable star type"
                           aria-label="Previous card"
                         >
@@ -920,7 +917,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeVariableItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeVariableIndex + 1}/{VARIABLE_STARS_GUIDE.length})
                             </span>
                           </div>
@@ -933,7 +930,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-variable-next"
                           onClick={handleNextVariable}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next variable star type"
                           aria-label="Next card"
                         >
@@ -944,9 +941,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Explore Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -957,7 +954,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
                       {/* Left / Top Column: Variable Star Visual Graphic ONLY (Non-Hideable, top-aligned and not horizontally centered) */}
                       <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
-                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40 relative self-start shrink-0">
                           <VariableStarGraphic
                             variableId={activeVariableItem.id}
                             archetypeStar={archetypeStar}
@@ -1089,21 +1086,21 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={`${item.buttonTitle} (Class ${item.abbreviation})`}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[9px] sm:text-[11px] font-bold text-cyan-300/90 group-hover:text-cyan-200"
+                          className="text-[9px] sm:text-[11px] font-bold text-sky-300 group-hover:text-white"
                         />
                       </div>
 
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <span
-                          className="text-xs sm:text-base font-black font-mono leading-none drop-shadow-[0_0_8px_currentColor]"
+                          className="text-xs sm:text-base font-black font-mono leading-none"
                           style={{ color: itemColor }}
                         >
                           {item.abbreviation}
@@ -1123,16 +1120,16 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const activeYerkesItem = LUMINOSITY_CLASSES_GUIDE[activeYerkesIndex] || LUMINOSITY_CLASSES_GUIDE[0];
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Filter */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         {/* Left Carousel Arrow Button directly on Card */}
                         <button
                           type="button"
                           id="btn-card-carousel-yerkes-prev"
                           onClick={handlePrevYerkes}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous luminosity class card"
                           aria-label="Previous card"
                         >
@@ -1140,11 +1137,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </button>
 
                         <div
-                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-xs sm:text-base shadow-xl border border-white/30"
+                          className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 aspect-square rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono text-xs sm:text-base border border-white/20"
                           style={{
                             backgroundColor: activeYerkesItem.colorHex || '#38bdf8',
                             color: '#02040a',
-                            boxShadow: `0 0 20px ${(activeYerkesItem.colorHex || '#38bdf8')}66`,
                           }}
                         >
                           {activeYerkesItem.abbreviation}
@@ -1156,7 +1152,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeYerkesItem.title}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeYerkesIndex + 1}/{LUMINOSITY_CLASSES_GUIDE.length})
                             </span>
                           </div>
@@ -1170,7 +1166,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-yerkes-next"
                           onClick={handleNextYerkes}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next luminosity class card"
                           aria-label="Next card"
                         >
@@ -1181,9 +1177,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Open Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -1286,13 +1282,13 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[130px] sm:min-w-[150px] max-w-[190px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 uppercase truncate block">
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-sky-400 uppercase truncate block">
                           {item.multiplicity}
                         </span>
                       </div>
@@ -1300,7 +1296,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-sky-200"
                         />
                         <span
                           className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
@@ -1319,15 +1315,15 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const archetypeStar = mappedSystemStars[0] || null;
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Actions (Clean styling matching Variable Stars) */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
                           type="button"
                           id="btn-card-carousel-starsystem-prev"
                           onClick={handlePrevStarSystem}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous star system type"
                           aria-label="Previous card"
                         >
@@ -1340,7 +1336,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeStarSystemItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeStarSystemIndex + 1}/{STAR_SYSTEMS_GUIDE.length})
                             </span>
                           </div>
@@ -1353,7 +1349,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-starsystem-next"
                           onClick={handleNextStarSystem}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next star system type"
                           aria-label="Next card"
                         >
@@ -1364,9 +1360,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Explore Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -1377,7 +1373,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
                       {/* Left / Top Column: Star System Visual Graphic ONLY (Non-Hideable, top-aligned and bounded) */}
                       <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
-                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40 relative self-start shrink-0">
                           <StarSystemGraphic
                             systemId={activeStarSystemItem.id}
                             archetypeStar={archetypeStar}
@@ -1522,13 +1518,13 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-sky-400 uppercase truncate block">
                           {item.typicalAge}
                         </span>
                       </div>
@@ -1536,7 +1532,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-sky-200"
                         />
                         <span
                           className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
@@ -1553,15 +1549,15 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const activePopulationItem = STELLAR_POPULATIONS_GUIDE[activePopulationIndex] || STELLAR_POPULATIONS_GUIDE[0];
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Actions (No icon box) */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
                           type="button"
                           id="btn-card-carousel-population-prev"
                           onClick={handlePrevPopulation}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous stellar population"
                           aria-label="Previous card"
                         >
@@ -1574,7 +1570,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activePopulationItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activePopulationIndex + 1}/{STELLAR_POPULATIONS_GUIDE.length})
                             </span>
                           </div>
@@ -1587,7 +1583,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-population-next"
                           onClick={handleNextPopulation}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next stellar population"
                           aria-label="Next card"
                         >
@@ -1598,9 +1594,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Explore Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -1726,13 +1722,13 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={`${item.buttonTitle} (${item.code})`}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-sky-400 uppercase truncate block">
                           {item.code}
                         </span>
                       </div>
@@ -1740,7 +1736,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-sky-200"
                         />
                         <span
                           className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
@@ -1759,15 +1755,15 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const archetypeStar = mappedRemnantStars[0] || null;
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Actions (No icon box) */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
                           type="button"
                           id="btn-prev-remnant"
                           onClick={handlePrevRemnant}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous stellar remnant"
                           aria-label="Previous card"
                         >
@@ -1780,10 +1776,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeRemnantItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeRemnantIndex + 1}/{STELLAR_REMNANTS_GUIDE.length})
                             </span>
-                            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-white/5 text-slate-300 border border-white/10 shrink-0">
                               {activeRemnantItem.tag}
                             </span>
                           </div>
@@ -1796,7 +1792,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-next-remnant"
                           onClick={handleNextRemnant}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next stellar remnant"
                           aria-label="Next card"
                         >
@@ -1807,9 +1803,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Explore Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -1820,7 +1816,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
                       {/* Left / Top Column: 1:1 Square Animated Remnant Model ONLY (Non-Hideable, top-aligned and not horizontally centered) */}
                       <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
-                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40 relative self-start shrink-0">
                           <StellarRemnantGraphic
                             remnantId={activeRemnantItem.id}
                             archetypeStar={archetypeStar}
@@ -1966,13 +1962,13 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       }}
                       className={`p-1.5 sm:p-2 md:p-2.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between relative group shrink-0 min-w-[125px] sm:min-w-[145px] max-w-[185px] h-[52px] sm:h-[64px] min-h-[52px] max-h-[52px] sm:min-h-[64px] sm:max-h-[64px] ${
                         isSelected
-                          ? 'bg-[#09132e] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.35)] ring-2 ring-inset ring-cyan-400 z-10'
-                          : 'bg-[#040816]/90 border-cyan-500/20 hover:border-cyan-500/40 hover:bg-[#070f24] hover:z-[5]'
+                          ? 'observatory-panel border-sky-400 ring-1 ring-sky-400 z-10'
+                          : 'observatory-control border-white/10 hover:border-white/20 hover:bg-white/5 hover:z-[5]'
                       }`}
                       title={item.buttonTitle}
                     >
                       <div className="w-full min-w-0 text-left leading-tight">
-                        <span className="text-[8px] sm:text-[9.5px] font-mono text-cyan-400/80 truncate block">
+                        <span className="text-[8px] sm:text-[9.5px] font-mono text-sky-400 uppercase truncate block">
                           {item.theoreticalEra}
                         </span>
                       </div>
@@ -1980,7 +1976,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="flex items-center justify-between w-full min-w-0 gap-1">
                         <RunningText
                           text={item.buttonTitle}
-                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-cyan-200"
+                          className="text-[10px] sm:text-xs font-bold text-white group-hover:text-sky-200"
                         />
                         <span
                           className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border border-white/40 shadow-sm shrink-0 ml-1"
@@ -1999,15 +1995,15 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                 const archetypeStar = mappedHypoStars[0] || null;
 
                 return (
-                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl bg-[#040816]/95 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-3 sm:gap-5 relative">
+                  <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
                     {/* Header with Carousel Navigation & Quick Actions (No icon box) */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-cyan-500/15 pb-2.5 sm:pb-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-2.5 sm:pb-4 min-w-0">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <button
                           type="button"
                           id="btn-card-carousel-hypothetical-prev"
                           onClick={handlePrevHypothetical}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Previous hypothetical star type"
                           aria-label="Previous card"
                         >
@@ -2020,7 +2016,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                               text={activeHypotheticalItem.name}
                               className="text-sm sm:text-lg lg:text-xl font-bold text-white"
                             />
-                            <span className="text-[10px] font-mono text-cyan-400/90 font-semibold shrink-0">
+                            <span className="text-[10px] font-mono text-sky-400 font-semibold shrink-0">
                               ({activeHypotheticalIndex + 1}/{HYPOTHETICAL_STARS_GUIDE.length})
                             </span>
                           </div>
@@ -2033,7 +2029,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           type="button"
                           id="btn-card-carousel-hypothetical-next"
                           onClick={handleNextHypothetical}
-                          className="p-1.5 sm:p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 transition-all cursor-pointer shrink-0 active:scale-95"
+                          className="p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           title="Next hypothetical star type"
                           aria-label="Next card"
                         >
@@ -2044,9 +2040,9 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       {onJumpToCatalog && (
                         <button
                           onClick={onJumpToCatalog}
-                          className="flex items-center justify-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 hover:text-white text-[10px] sm:text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-end sm:self-auto"
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer shrink-0 min-h-[44px] self-end sm:self-auto"
                         >
-                          <Grid className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Grid className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                           <span>Explore Catalog</span>
                           <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </button>
@@ -2057,7 +2053,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     <div className="flex flex-col mobile-landscape:flex-row lg:flex-row gap-3 sm:gap-6 min-w-0 items-stretch mobile-landscape:h-[calc(100vh-90px)] mobile-landscape:min-h-[225px] mobile-landscape:max-h-[265px] lg:h-[480px] xl:h-[520px] lg:min-h-[440px] lg:max-h-[600px] overflow-hidden">
                       {/* Left / Top Column: 1:1 Square Animated Hypothetical Star Model ONLY */}
                       <div className="w-full mobile-landscape:w-5/12 lg:w-5/12 mobile-landscape:h-full lg:h-full flex flex-col items-start justify-start min-w-0 mobile-landscape:overflow-hidden lg:overflow-hidden p-0 sm:p-1">
-                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-cyan-500/35 bg-[#02040e] shadow-[0_0_35px_rgba(0,0,0,0.85)] relative self-start shrink-0">
+                        <div className="w-full mobile-landscape:w-auto mobile-landscape:h-full mobile-landscape:max-h-full max-w-[380px] sm:max-w-[420px] mobile-landscape:max-w-full lg:w-auto lg:h-full lg:max-h-[460px] lg:max-w-[460px] aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40 relative self-start shrink-0">
                           <HypotheticalStarGraphic
                             hypoId={activeHypotheticalItem.id}
                             archetypeStar={archetypeStar}

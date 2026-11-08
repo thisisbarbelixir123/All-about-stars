@@ -73,19 +73,19 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
   }
 
   return (
-    <div className="mt-2 p-3 sm:p-4 rounded-2xl bg-[#020512] border-2 border-cyan-500/30 shadow-lg shadow-cyan-950/30 min-w-0">
+    <div className="mt-2 p-3 sm:p-4 rounded-2xl observatory-panel border border-white/10 min-w-0">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-cyan-500/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/10">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
-            className="w-3 h-3 rounded-full shrink-0 shadow-md animate-pulse"
-            style={{ backgroundColor: categoryColor, boxShadow: `0 0 10px ${categoryColor}` }}
+            className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ backgroundColor: categoryColor }}
           />
           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            <h3 className="text-xs sm:text-sm font-mono uppercase font-bold text-cyan-300 tracking-wide break-words">
+            <h3 className="text-xs sm:text-sm font-mono uppercase font-bold text-sky-300 tracking-wide break-words">
               {title}
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-400/40 text-[10px] font-mono text-cyan-300 font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 font-medium">
               {systems.length} {systems.length === 1 ? 'System' : 'Systems'}
             </span>
           </div>
@@ -99,32 +99,32 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
               soundEffects.play('click');
               setIsExpanded((prev) => !prev);
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/40 text-cyan-200 hover:text-white text-[11px] font-mono font-semibold transition-all cursor-pointer self-start sm:self-auto shrink-0 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg observatory-control border border-white/10 hover:border-sky-400/50 text-slate-200 hover:text-white text-xs font-mono font-medium transition-colors cursor-pointer self-start sm:self-auto shrink-0 min-h-[44px]"
           >
             <span>{isExpanded ? 'Collapse to Top 4' : `View All ${filteredSystems.length} Systems`}</span>
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-cyan-400" /> : <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />}
+            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-sky-400" /> : <ChevronDown className="w-3.5 h-3.5 text-sky-400" />}
           </button>
         )}
       </div>
 
       {/* Guide explanation subtitle */}
       <div className="mt-2 text-[11px] sm:text-xs text-slate-300 leading-relaxed flex items-center gap-1.5 flex-wrap">
-        <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+        <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
         <span>
-          Click any stellar system card to inspect its complete <strong className="text-cyan-300 font-semibold">3D Keplerian Dossier</strong>, real-time co-orbital simulation, and astrophysical parameters.
+          Click any stellar system card to inspect its complete <strong className="text-sky-300 font-semibold">3D Keplerian Dossier</strong>, real-time co-orbital simulation, and astrophysical parameters.
         </span>
       </div>
 
       {/* Search Input when multiple systems exist */}
       {systems.length > 4 && (
         <div className="mt-2.5 relative">
-          <Search className="w-3.5 h-3.5 text-cyan-500/60 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={`Filter ${systems.length} systems by name, star, constellation...`}
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#01040d] border border-cyan-500/25 text-xs text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-cyan-400 transition-colors"
+            className="w-full pl-8 pr-3 py-2 rounded-lg bg-black/40 border border-white/10 text-xs text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-sky-400/60 transition-colors min-h-[44px]"
           />
         </div>
       )}
@@ -142,23 +142,23 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
                 soundEffects.play('openModal');
                 onSelectSystem?.(sys);
               }}
-              className="group relative p-3 sm:p-3.5 rounded-xl bg-[#010816]/90 hover:bg-[#021026] border border-cyan-500/20 hover:border-cyan-400/70 transition-all duration-200 flex flex-col justify-between gap-2.5 cursor-pointer shadow-md hover:shadow-cyan-950/50 hover:shadow-lg min-w-0"
+              className="group relative p-3 sm:p-3.5 rounded-xl observatory-control hover:bg-[#0c1224] border border-white/10 hover:border-sky-400/50 transition-all duration-200 flex flex-col justify-between gap-2.5 cursor-pointer min-w-0"
             >
               {/* Top Row: System Name & Badges */}
               <div className="min-w-0 space-y-1">
                 <div className="flex items-start justify-between gap-2 min-w-0">
-                  <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors font-mono leading-snug break-words">
+                  <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-sky-300 transition-colors font-mono leading-snug break-words">
                     {sys.name}
                   </h4>
-                  <span className="shrink-0 px-2 py-0.5 rounded-md bg-cyan-950/90 border border-cyan-500/40 text-[10px] font-mono text-cyan-300 font-semibold flex items-center gap-1">
-                    <Orbit className="w-2.5 h-2.5 text-cyan-400" />
+                  <span className="shrink-0 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 font-medium flex items-center gap-1">
+                    <Orbit className="w-2.5 h-2.5 text-sky-400" />
                     {sys.hasContactBinary ? 'Overcontact' : `${effectiveCount} Stars`}
                   </span>
                 </div>
 
                 {/* Sub-row: System Type & Astrometric Info */}
                 <div className="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-[11px] font-mono text-slate-400">
-                  <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/80 text-cyan-200 font-medium">
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">
                     {sys.systemType}
                   </span>
                   <span className="text-slate-500">•</span>
@@ -201,10 +201,10 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
                             onSelectStar(resolved);
                           }
                         }}
-                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#020512] border text-[9.5px] sm:text-[10px] font-mono transition-all ${
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/40 border text-[9.5px] sm:text-[10px] font-mono transition-all ${
                           resolved
-                            ? 'border-cyan-500/25 hover:border-cyan-400 hover:bg-cyan-950/40 text-slate-200 cursor-pointer'
-                            : 'border-slate-800 text-slate-300 cursor-default'
+                            ? 'border-white/10 hover:border-sky-400/50 hover:bg-sky-950/30 text-slate-200 cursor-pointer'
+                            : 'border-white/5 text-slate-400 cursor-default'
                         }`}
                         title={resolved ? `Click to view ${comp.name} stellar profile` : comp.name}
                       >
@@ -218,7 +218,7 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
                             className="font-semibold"
                           />
                         </div>
-                        <span className="text-cyan-400/90 text-[8.5px] sm:text-[9px]">
+                        <span className="text-sky-400/90 text-[8.5px] sm:text-[9px]">
                           {comp.spectralType}
                         </span>
                         {comp.massSolar && (
@@ -240,9 +240,9 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
               )}
 
               {/* Bottom Action CTA Button */}
-              <div className="pt-2 border-t border-cyan-500/15 flex items-center justify-between gap-2 mt-auto">
-                <span className="text-[10px] font-mono text-cyan-400/80 group-hover:text-cyan-300 flex items-center gap-1 transition-colors">
-                  <Orbit className="w-3 h-3 text-cyan-400 animate-spin-slow" />
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2 mt-auto">
+                <span className="text-[10px] font-mono text-slate-400 group-hover:text-sky-300 flex items-center gap-1 transition-colors">
+                  <Orbit className="w-3 h-3 text-sky-400" />
                   3D Orbit Simulation Available
                 </span>
 
@@ -253,10 +253,10 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
                     soundEffects.play('openModal');
                     onSelectSystem?.(sys);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/40 hover:border-cyan-400 text-cyan-300 hover:text-white text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm group-hover:shadow-cyan-500/20 active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-400/30 hover:border-sky-400 text-sky-300 hover:text-white text-[10px] sm:text-[11px] font-mono font-semibold uppercase tracking-wider transition-all cursor-pointer min-h-[44px]"
                 >
                   <span>Open Dossier</span>
-                  <ExternalLink className="w-3 h-3 text-cyan-300 group-hover:translate-x-0.5 transition-transform" />
+                  <ExternalLink className="w-3 h-3 text-sky-300 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             </div>
@@ -266,14 +266,14 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
 
       {/* Empty Filter State */}
       {displayedSystems.length === 0 && (
-        <div className="mt-3 p-4 rounded-xl bg-[#010816] border border-cyan-500/20 text-center space-y-2">
+        <div className="mt-3 p-4 rounded-xl observatory-panel border border-white/10 text-center space-y-2">
           <p className="text-xs font-mono text-slate-400">
             No star systems matching "{searchQuery}"
           </p>
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="px-3 py-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-[11px] font-mono text-cyan-300 hover:text-white transition-all cursor-pointer"
+            className="px-3 py-2 rounded-md observatory-control border border-white/10 text-[11px] font-mono text-sky-300 hover:text-white transition-all cursor-pointer min-h-[44px]"
           >
             Clear Search Filter
           </button>
@@ -281,13 +281,13 @@ export const ClassificationMappedSystemsSection: React.FC<ClassificationMappedSy
       )}
 
       {/* Footnote on prioritization */}
-      <div className="mt-3 pt-2.5 border-t border-cyan-500/15 flex items-center justify-between gap-2 flex-wrap text-[10px] font-mono text-slate-400">
+      <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between gap-2 flex-wrap text-[10px] font-mono text-slate-400">
         <span className="flex items-center gap-1">
-          <Layers className="w-3 h-3 text-cyan-400 shrink-0" />
+          <Layers className="w-3 h-3 text-sky-400 shrink-0" />
           Showing {displayedSystems.length} of {filteredSystems.length} mapped stellar architectures.
         </span>
-        <span className="text-cyan-400/90 font-medium">
-          Dossiers contain full Keplerian orbital solving &amp; component breakdown.
+        <span className="text-sky-400/90 font-medium">
+          Dossiers contain full Keplerian orbital solving and component breakdown.
         </span>
       </div>
     </div>
