@@ -46,7 +46,7 @@ const CONSTELLATIONS = {
   'Sco': 'Scorpii', 'Sct': 'Scuti', 'Ser': 'Serpentis', 'Sex': 'Sextantis',
   'Sge': 'Sagittae', 'Sgr': 'Sagittarii', 'Tau': 'Tauri', 'Tel': 'Telescopii',
   'TrA': 'Trianguli Australis', 'Tri': 'Trianguli', 'Tuc': 'Tucanae',
-  'UMa': 'Ursae Majoris', 'UMi': 'Ursae Minoris', 'Vel': 'Velae',
+  'UMa': 'Ursae Majoris', 'UMi': 'Ursae Minoris', 'Vel': 'Velorum',
   'Vir': 'Virginis', 'Vol': 'Volantis', 'Vul': 'Vulpeculae'
 };
 
@@ -72,7 +72,7 @@ const CONSTELLATION_NOMINATIVE_TO_GENITIVE = {
   'Scutum': 'Scuti', 'Serpens': 'Serpentis', 'Sextans': 'Sextantis', 'Taurus': 'Tauri',
   'Telescopium': 'Telescopii', 'Triangulum': 'Trianguli', 'Triangulum Australe': 'Trianguli Australis',
   'Tucana': 'Tucanae', 'Ursa Major': 'Ursae Majoris', 'Ursa Minor': 'Ursae Minoris',
-  'Vela': 'Velae', 'Virgo': 'Virginis', 'Volans': 'Volantis', 'Vulpecula': 'Vulpeculae'
+  'Vela': 'Velorum', 'Virgo': 'Virginis', 'Volans': 'Volantis', 'Vulpecula': 'Vulpeculae'
 };
 
 const GREEK_CHAR_TO_NAME = {

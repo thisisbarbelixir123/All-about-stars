@@ -29,7 +29,7 @@ const CONSTELLATION_ABBR_TO_GENITIVE = {
   'Sco': 'Scorpii', 'Sct': 'Scuti', 'Ser': 'Serpentis', 'Sex': 'Sextantis',
   'Sge': 'Sagittae', 'Sgr': 'Sagittarii', 'Tau': 'Tauri', 'Tel': 'Telescopii',
   'TrA': 'Trianguli Australis', 'Tri': 'Trianguli', 'Tuc': 'Tucanae',
-  'UMa': 'Ursae Majoris', 'UMi': 'Ursae Minoris', 'Vel': 'Velae',
+  'UMa': 'Ursae Majoris', 'UMi': 'Ursae Minoris', 'Vel': 'Velorum',
   'Vir': 'Virginis', 'Vol': 'Volantis', 'Vul': 'Vulpeculae'
 };
 

@@ -96,7 +96,7 @@ const CONSTELLATIONS_FULL_TO_ABBR = [
   ['Telescopii', 'Tel'], ['Telescopium', 'Tel'],
   ['Trianguli', 'Tri'], ['Triangulum', 'Tri'],
   ['Tucanae', 'Tuc'], ['Tucana', 'Tuc'],
-  ['Velae', 'Vel'], ['Vela', 'Vel'],
+  ['Velorum', 'Vel'], ['Vela', 'Vel'],
   ['Virginis', 'Vir'], ['Virgo', 'Vir'],
   ['Volantis', 'Vol'], ['Volans', 'Vol'],
   ['Vulpeculae', 'Vul'], ['Vulpecula', 'Vul']
