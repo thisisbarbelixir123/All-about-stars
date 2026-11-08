@@ -89,7 +89,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
       if (e.key === 'Escape' && constellation) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       }
     };
@@ -186,7 +189,6 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               }}
               onSelectStar={(star) => {
                 if (star) {
-                  onClose();
                   onSelectStar(star);
                 }
               }}
@@ -448,7 +450,6 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                     </div>
                     <button
                       onClick={() => {
-                        onClose();
                         onSelectStar(pStar);
                       }}
                       className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-transform active:scale-95 shrink-0"
@@ -547,7 +548,6 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
                             <button
                               onClick={() => {
-                                onClose();
                                 onSelectStar(st);
                               }}
                               className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/50 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0 shadow"

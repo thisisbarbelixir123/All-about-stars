@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { StarData, FilterState, SpectralClass, StellarStage, PresetComparison, StageSortKey, SortDirection } from './types';
 import { STARS_CATALOG, PRESET_COMPARISONS, resolveStarId } from './data/stars';
 import { MULTIPLE_STAR_SYSTEMS } from './data/multipleStarSystemsData';
@@ -179,42 +179,101 @@ export default function App() {
   const [focusedStar, setFocusedStar] = useState<StarData | null>(null);
   const [detailModalStar, setDetailModalStar] = useState<StarData | null>(null);
 
+  // Breadcrumb navigation memory between Star Dossier and Stellar System Dossier
+  const previousStarDossierRef = useRef<StarData | null>(null);
+  const previousSystemDossierRef = useRef<MultipleStarSystemData | null>(null);
+
+  const handleCloseStarDossier = useCallback(() => {
+    setDetailModalStar(null);
+    setDetailModalInitialMode(undefined);
+    if (previousSystemDossierRef.current) {
+      const prevSys = previousSystemDossierRef.current;
+      previousSystemDossierRef.current = null;
+      setSelectedSystemDossier(prevSys);
+    }
+  }, []);
+
+  const handleCloseSystemDossier = useCallback(() => {
+    setSelectedSystemDossier(null);
+    if (previousStarDossierRef.current) {
+      const prevStar = previousStarDossierRef.current;
+      previousStarDossierRef.current = null;
+      setDetailModalStar(prevStar);
+    }
+  }, []);
+
   // Command Palette & Keyboard Shortcuts modal states
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState<boolean>(false);
 
+  // High-priority capture-phase Escape listener:
+  // Intercepts Escape to close topmost modals (Shortcuts, Suika, Stellar System Dossier, Star Detail Modal, About Modal)
+  // before lower-level modals (like ConstellationDossierModal) can receive the event.
+  useEffect(() => {
+    const handleCaptureKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isShortcutsHelpOpen) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          setIsShortcutsHelpOpen(false);
+          return;
+        }
+        if (isSuikaOpen) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          soundEffects.play('closeModal');
+          setIsSuikaOpen(false);
+          return;
+        }
+        if (selectedSystemDossier) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          soundEffects.play('closeModal');
+          handleCloseSystemDossier();
+          return;
+        }
+        if (detailModalStar) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          soundEffects.play('closeModal');
+          handleCloseStarDossier();
+          return;
+        }
+        if (isAboutOpen) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          soundEffects.play('closeModal');
+          setIsAboutOpen(false);
+          return;
+        }
+      }
+    };
+    window.addEventListener('keydown', handleCaptureKeyDown, true);
+    return () => window.removeEventListener('keydown', handleCaptureKeyDown, true);
+  }, [
+    isShortcutsHelpOpen,
+    isSuikaOpen,
+    selectedSystemDossier,
+    detailModalStar,
+    isAboutOpen,
+    handleCloseSystemDossier,
+    handleCloseStarDossier,
+  ]);
+
   // Global Keyboard Shortcuts listener:
-  // - Escape: closes topmost modal
+  // - Escape: closes lower-level overlays (activeOverlay, isHomeOpen) if not stopped by top-level modals
   // - ⌘K / Ctrl+K / /: opens Command Palette & Star Search
   // - ?: opens Keyboard Shortcuts Cheat Sheet
   // - M: toggles ambient cosmic space audio
   // - 1-5: jumps to primary subsystems
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
       const target = e.target as HTMLElement | null;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
-      // Escape closes topmost modal (star search is re-mapped away from Esc)
+      // Escape closes lower-level overlays only when not handled by capture or modal listeners
       if (e.key === 'Escape') {
-        if (isShortcutsHelpOpen) {
-          setIsShortcutsHelpOpen(false);
-          return;
-        }
-        if (isSuikaOpen) {
-          soundEffects.play('closeModal');
-          setIsSuikaOpen(false);
-          return;
-        }
-        if (detailModalStar) {
-          soundEffects.play('closeModal');
-          setDetailModalStar(null);
-          return;
-        }
-        if (isAboutOpen) {
-          soundEffects.play('closeModal');
-          setIsAboutOpen(false);
-          return;
-        }
         if (activeOverlay) {
           soundEffects.play('closeModal');
           setActiveOverlay(null);
@@ -275,9 +334,6 @@ export default function App() {
   }, [
     isCommandPaletteOpen,
     isShortcutsHelpOpen,
-    isSuikaOpen,
-    detailModalStar,
-    isAboutOpen,
     activeOverlay,
     isHomeOpen,
   ]);
@@ -1388,7 +1444,11 @@ export default function App() {
               {activeOverlay === 'constellations' && (
                 <div className="max-w-7xl mx-auto w-full min-w-0">
                   <ConstellationGuide
-                    onSelectStar={(s) => setDetailModalStar(s)}
+                    onSelectStar={(s) => {
+                      previousStarDossierRef.current = null;
+                      previousSystemDossierRef.current = null;
+                      setDetailModalStar(s);
+                    }}
                     onCompareStar={(s) => {
                       handleAddStarToCompare(s);
                       setFocusedStar(s);
@@ -1524,12 +1584,10 @@ export default function App() {
       <StarDetailModal
         star={detailModalStar}
         initialMode={detailModalInitialMode}
-        onClose={() => {
-          setDetailModalStar(null);
-          setDetailModalInitialMode(undefined);
-        }}
+        onClose={handleCloseStarDossier}
         onSelectStar={(newStar) => setDetailModalStar(newStar)}
         onOpenStellarSystemDossier={(system) => {
+          previousStarDossierRef.current = detailModalStar;
           setSelectedSystemDossier(system);
           setDetailModalStar(null);
         }}
@@ -1556,8 +1614,9 @@ export default function App() {
       {/* Dedicated Stellar System Dossier Modal (Independent Multi-Star System Dossier) */}
       <StellarSystemDossierModal
         system={selectedSystemDossier}
-        onClose={() => setSelectedSystemDossier(null)}
+        onClose={handleCloseSystemDossier}
         onSelectStar={(star) => {
+          previousSystemDossierRef.current = selectedSystemDossier;
           setDetailModalStar(star);
           setSelectedSystemDossier(null);
         }}
