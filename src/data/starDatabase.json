@@ -3324,8 +3324,6 @@
     "id": "ix-carinae",
     "name": "IX Carinae",
     "alternateNames": [
-      "HD 95950",
-      "HIP 53965",
       "CD-59 3314"
     ],
     "constellation": "Carina",
@@ -3384,12 +3382,10 @@
       "IX Car",
       "IX Carinae",
       "HD 94096",
-      "HD 95950",
       "CD-59°3314",
       "CD-59°3368",
       "CPD-59°2775",
       "HIP 52991",
-      "HIP 53965",
       "SAO 238523",
       "TYC 8626-1670-1",
       "2MASS J10502630-5958563",
@@ -31761,10 +31757,7 @@
     "alternateNames": [
       "Epsilon Canis Majoris",
       "ε CMa",
-      "21 Canis Majoris",
-      "HD 50019",
-      "HIP 32759",
-      "HR 2540"
+      "21 Canis Majoris"
     ],
     "bayerDesignation": "ε CMa",
     "constellation": "Canis Major",
@@ -31818,13 +31811,10 @@
       "Adhara",
       "ε Canis Majoris",
       "21 Canis Majoris",
-      "HD 50019",
       "HD 52089",
-      "HR 2540",
       "HR 2618",
       "CD-28°3666",
       "CPD-28°1586",
-      "HIP 32759",
       "HIP 33579",
       "SAO 172676",
       "TYC 6535-3619-1",
@@ -55782,7 +55772,6 @@
     "name": "SX Phoenicis",
     "alternateNames": [
       "SX Phe",
-      "HD 223075",
       "HIP 117254",
       "Archetype of SX Phoenicis Subdwarfs",
       "Blue Straggler Pulsator"
@@ -55839,7 +55828,6 @@
       "Archetype of SX Phoenicis Subdwarfs",
       "Blue Straggler Pulsator",
       "HD 223065",
-      "HD 223075",
       "CD-42°16457",
       "CPD-42°9607",
       "LHS 4013",
@@ -60961,8 +60949,6 @@
     "name": "Gliese 412 A",
     "alternateNames": [
       "Gl 412 A",
-      "HD 95735 B",
-      "HIP 54035",
       "BD+44 2051 A"
     ],
     "constellation": "Ursa Major",
@@ -61012,14 +60998,12 @@
     "primaryDesignation": "HD 95735 B",
     "designations": [
       "Gl 412 A",
-      "HD 95735 B",
       "BD+44°2051",
       "BD+44°2051 A",
       "GJ 412 A",
       "LHS 38",
       "LTT 12976",
       "NLTT 26245",
-      "HIP 54035",
       "HIP 54211",
       "SAO 43609",
       "TYC 3012-2528-1",
@@ -62080,7 +62064,6 @@
     "alternateNames": [
       "Gl 205",
       "HD 36395",
-      "HR 1845",
       "HIP 25878",
       "GJ 205",
       "Gliese 205 (GJ 205)"
@@ -62133,7 +62116,6 @@
     "designations": [
       "Gl 205",
       "HD 36395",
-      "HR 1845",
       "BD-03°1123",
       "GJ 205",
       "LHS 30",
@@ -64352,8 +64334,7 @@
     "name": "GJ 1151",
     "alternateNames": [
       "GJ 1151",
-      "Gl 1151",
-      "HIP 63608"
+      "Gl 1151"
     ],
     "constellation": "Ursa Major",
     "diameterSolar": 0.19,
@@ -64418,7 +64399,6 @@
       "Gl 1151",
       "LHS 316",
       "NLTT 28752",
-      "HIP 63608",
       "2MASS J11505787+4822395",
       "Gaia DR2 786834302079285632",
       "Gaia DR3 786834302080370304",
@@ -65533,7 +65513,6 @@
       "17 G. Vir",
       "HD 115617",
       "HR 5011",
-      "HR 5019",
       "BD-17°3813",
       "GJ 506",
       "Gliese 506",
@@ -67075,7 +67054,6 @@
     "alternateNames": [
       "23 G. Car",
       "HD 85622",
-      "HIP 48331",
       "CD-60 2933",
       "HD 84810 Companion",
       "23 G. Carinae (HD 84810 Companion)"
@@ -67134,7 +67112,6 @@
       "CD-45°5508",
       "CD-60°2933",
       "CPD-45°4130",
-      "HIP 48331",
       "HIP 48374",
       "SAO 221553",
       "TYC 8181-868-1",
@@ -77458,7 +77435,7 @@
     "id": "lambda-serpentis",
     "name": "Lambda Serpentis",
     "alternateNames": [
-      "HD 141003",
+      "HD 141004",
       "HR 5868",
       "HIP 77257",
       "GJ 603"
@@ -79462,10 +79439,10 @@
     "id": "omega-tauri",
     "name": "Omega Tauri",
     "alternateNames": [
-      "HD 25204",
-      "HR 1239",
-      "HIP 18724",
-      "BD+20 710"
+      "50 Tauri",
+      "HD 28527",
+      "HR 1427",
+      "HIP 21029"
     ],
     "bayerDesignation": "ω Tau",
     "flamsteedDesignation": "50 Tau",
@@ -79514,10 +79491,10 @@
     "designations": [
       "ω Tau",
       "50 Tau",
-      "HD 25204",
-      "HR 1239",
+      "HD 28527",
+      "HR 1427",
       "BD+20°710",
-      "HIP 18724"
+      "HIP 21029"
     ]
   },
   {
@@ -79887,13 +79864,10 @@
       "ν Cen",
       "Kabkent",
       "NAME-IAU Heng",
-      "HD 120307",
       "HD 125288",
-      "HR 5190",
       "HR 5358",
       "CD-41°8171",
       "CPD-41°6479",
-      "HIP 67464",
       "HIP 70065",
       "SAO 224469",
       "TYC 7797-2744-1",
@@ -80402,7 +80376,6 @@
     "name": "Chi Centauri",
     "alternateNames": [
       "HD 122980",
-      "HR 5288",
       "HIP 68862",
       "CPD-40 6445"
     ],
@@ -80454,7 +80427,6 @@
       "χ Centauri",
       "HD 122980",
       "HR 5285",
-      "HR 5288",
       "CD-40°8405",
       "CPD-40°6441",
       "CPD-40°6445",
@@ -81825,9 +81797,6 @@
     "id": "lambda-canis-majoris",
     "name": "Lambda Canis Majoris",
     "alternateNames": [
-      "HD 44197",
-      "HR 2282",
-      "HIP 29977",
       "CD-32 2914"
     ],
     "bayerDesignation": "λ CMa",
@@ -81876,14 +81845,11 @@
     "designations": [
       "λ CMa",
       "λ Canis Majoris",
-      "HD 44197",
       "HD 45813",
-      "HR 2282",
       "HR 2361",
       "CD-32°2914",
       "CD-32°3066",
       "CPD-32°1173",
-      "HIP 29977",
       "HIP 30788",
       "SAO 196857",
       "TYC 7078-2130-1",
@@ -81917,9 +81883,6 @@
     "id": "mu-canis-majoris",
     "name": "Mu Canis Majoris",
     "alternateNames": [
-      "HD 51825",
-      "HR 2618",
-      "HIP 33547",
       "CD-23 4872"
     ],
     "bayerDesignation": "μ CMa",
@@ -81971,13 +81934,9 @@
       "18 Canis Majoris",
       "18 CMa",
       "HD 51250",
-      "HD 51825",
       "HR 2593",
-      "HR 2618",
       "BD-13°1741",
-      "CD-23°4872",
       "HIP 33345",
-      "HIP 33547",
       "SAO 152123",
       "TYC 5392-913-1",
       "2MASS J06560664-1402362",
@@ -82115,7 +82074,6 @@
     "alternateNames": [
       "Unurgunite",
       "HD 52877",
-      "HR 2657",
       "HIP 33856",
       "Sigma Canis Majoris (Unurgunite)"
     ],
@@ -82175,7 +82133,6 @@
       "22 Canis Majoris",
       "HD 52877",
       "HR 2646",
-      "HR 2657",
       "CD-27°3544",
       "CPD-27°1648",
       "HIP 33856",
@@ -83192,7 +83149,7 @@
     "alternateNames": [
       "HD 11560",
       "HR 549",
-      "HIP 8886",
+      "HIP 9007",
       "BD+68 152"
     ],
     "bayerDesignation": "ω Cas",
@@ -83243,16 +83200,13 @@
       "HD 11560",
       "HR 549",
       "BD+68°152",
-      "HIP 8886"
+      "HIP 9007"
     ]
   },
   {
     "id": "iota-cygni",
     "name": "Iota Cygni",
     "alternateNames": [
-      "HD 187123",
-      "HR 7534",
-      "HIP 97165",
       "BD+51 2601"
     ],
     "bayerDesignation": "ι Cyg",
@@ -83306,13 +83260,10 @@
       "10 Cyg",
       "10 Cygni",
       "HD 184006",
-      "HD 187123",
       "HR 7420",
-      "HR 7534",
       "BD+51°2601",
       "BD+51°2605",
       "HIP 95853",
-      "HIP 97165",
       "SAO 31702",
       "TYC 3555-2112-1",
       "2MASS J19294236+5143472",
