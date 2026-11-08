@@ -28,7 +28,7 @@ export const StarCard: React.FC<StarCardProps> = ({
           onViewDetails(star);
         }
       }}
-      className="group relative bg-[#060a1a]/95 hover:bg-[#091129] border border-cyan-500/30 hover:border-cyan-400 rounded-xl p-2.5 sm:p-3 md:p-3.5 transition-all duration-200 shadow-sm hover:shadow-[0_6px_20px_rgba(6,182,212,0.28)] hover:-translate-y-0.5 active:translate-y-0 flex flex-col justify-between gap-2 sm:gap-2.5 backdrop-blur-xl cursor-pointer select-none overflow-hidden min-h-[125px] sm:min-h-[135px] md:min-h-[148px]"
+      className="group relative observatory-panel hover:bg-[#0c1224] border border-white/10 hover:border-sky-400/50 rounded-xl p-2.5 sm:p-3 md:p-3.5 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 flex flex-col justify-between gap-2 sm:gap-2.5 cursor-pointer select-none overflow-hidden min-h-[125px] sm:min-h-[135px] md:min-h-[148px]"
       title={`Open ${star.name} Dossier`}
     >
       {/* Top: Star name */}
@@ -38,7 +38,7 @@ export const StarCard: React.FC<StarCardProps> = ({
           <div className="min-w-0 flex-1 overflow-hidden">
             <RunningText
               text={star.name}
-              className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-cyan-300 transition-colors font-sans truncate block leading-tight"
+              className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-sky-300 transition-colors font-sans truncate block leading-tight"
               title={star.name}
             />
           </div>
@@ -48,7 +48,7 @@ export const StarCard: React.FC<StarCardProps> = ({
 
       {/* Sub-header: Spectral type badge & Constellation */}
       <div className="flex items-center justify-between gap-1.5 text-[9px] sm:text-[10px] md:text-xs font-mono leading-none min-w-0">
-        <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-bold shrink-0 truncate">
+        <span className="px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-sky-300 font-bold shrink-0 truncate">
           {star.spectralType}
         </span>
         <span className="text-slate-400 truncate text-[9px] sm:text-[10px] md:text-[11px]">
@@ -57,22 +57,22 @@ export const StarCard: React.FC<StarCardProps> = ({
       </div>
 
       {/* 3-metric strip */}
-      <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-cyan-500/20 text-center font-mono">
-        <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
+      <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-white/10 text-center font-mono">
+        <div className="p-1 rounded-lg bg-black/40 border border-white/5 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Diam</span>
-          <span className="text-cyan-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={scaleObj.metricSi}>
+          <span className="text-white font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={scaleObj.metricSi}>
             {scaleObj.metricSi}
           </span>
         </div>
 
-        <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
+        <div className="p-1 rounded-lg bg-black/40 border border-white/5 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Mass</span>
-          <span className="text-blue-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`${star.massSolar} M☉`}>
+          <span className="text-sky-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`${star.massSolar} M☉`}>
             {star.massSolar < 1 ? star.massSolar.toFixed(2) : star.massSolar.toFixed(1)}
           </span>
         </div>
 
-        <div className="p-1 rounded-lg bg-[#020510]/85 border border-cyan-500/15 min-w-0 overflow-hidden">
+        <div className="p-1 rounded-lg bg-black/40 border border-white/5 min-w-0 overflow-hidden">
           <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] text-slate-400 block uppercase font-sans truncate font-medium">Temp</span>
           <span className="text-amber-300 font-bold text-[9px] sm:text-[10px] md:text-xs block truncate" title={`${star.temperature.toLocaleString()} K`}>
             {star.temperature >= 1000 ? `${(star.temperature / 1000).toFixed(star.temperature >= 10000 ? 0 : 1)}k` : star.temperature}
@@ -87,9 +87,9 @@ export const StarCard: React.FC<StarCardProps> = ({
           e.stopPropagation();
           onViewDetails(star);
         }}
-        className="w-full flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-2 rounded-lg bg-cyan-950/70 group-hover:bg-cyan-900 text-cyan-300 group-hover:text-white border border-cyan-500/40 group-hover:border-cyan-400 text-[10px] sm:text-xs font-semibold font-mono transition-all cursor-pointer shadow-xs active:scale-95 truncate overflow-hidden"
+        className="w-full flex items-center justify-center gap-1.5 py-1 sm:py-1.5 px-2 rounded-lg observatory-control text-slate-200 group-hover:text-white text-[10px] sm:text-xs font-semibold font-mono transition-all cursor-pointer shadow-xs active:scale-95 truncate overflow-hidden"
       >
-        <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 shrink-0" />
+        <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-400 shrink-0" />
         <span className="truncate">View Dossier</span>
       </button>
     </div>

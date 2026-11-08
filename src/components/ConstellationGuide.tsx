@@ -102,12 +102,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
   return (
     <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* Top Banner (Uniform Hero Section) */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-        <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-2 max-w-3xl">
-            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-              <Globe className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+            <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+              <Globe className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
               <span>Sky Map</span>
             </h1>
             <p className="text-[11px] sm:text-sm mobile-landscape:text-[10px] mobile-landscape:leading-tight text-slate-300 leading-relaxed font-sans">
@@ -115,7 +114,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-white/[0.04] border border-white/10 text-sky-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
               88 IAU Sectors
             </span>
           </div>
@@ -137,34 +136,33 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {activeTab === 'what-are' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row gap-4 sm:gap-6 items-center">
               <div className="flex-1 space-y-1.5 sm:space-y-2">
-                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                  <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                  <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                   <span>Physical Reality vs. Celestial Coordinates</span>
                 </h2>
                 <p className="text-[11px] sm:text-sm mobile-landscape:text-[10px] text-slate-300 leading-relaxed font-sans">
-                  In three-dimensional space, <strong className="text-cyan-300 font-semibold">constellations do not physically exist</strong>. The stars that form familiar patterns like Orion or the Big Dipper are separated by dozens, hundreds, or even thousands of light-years in radial depth. They have no gravitational binding, no common birth nebula, and are moving in completely different galactic orbits.
+                  In three-dimensional space, <strong className="text-sky-300 font-semibold">constellations do not physically exist</strong>. The stars that form familiar patterns like Orion or the Big Dipper are separated by dozens, hundreds, or even thousands of light-years in radial depth. They have no gravitational binding, no common birth nebula, and are moving in completely different galactic orbits.
                 </p>
-                <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-[11px] sm:text-xs text-blue-200 leading-relaxed font-sans">
+                <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3.5 rounded-xl bg-sky-950/30 border border-sky-500/20 text-[11px] sm:text-xs text-sky-200 leading-relaxed font-sans">
                   <strong className="text-white block mb-0.5">
                     📍 Why are constellations still indispensable to modern astronomy?
                   </strong>
-                  While physically meaningless in deep space, they are <strong className="text-cyan-300 font-bold">essential standardized sectors</strong> for mapping the night sky from Earth, functioning just like postal codes or country boundaries on a globe.
+                  While physically meaningless in deep space, they are <strong className="text-sky-300 font-bold">essential standardized sectors</strong> for mapping the night sky from Earth, functioning just like postal codes or country boundaries on a globe.
                 </div>
               </div>
 
               {/* Graphical Visual Diagram: 2D vs 3D */}
-              <div className="w-full md:w-80 p-5 rounded-xl bg-[#020512] border border-slate-700/60 flex flex-col items-center text-center shrink-0">
-                <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2 font-bold">
+              <div className="w-full md:w-80 p-5 rounded-xl bg-black/60 border border-white/10 flex flex-col items-center text-center shrink-0">
+                <div className="text-xs font-mono text-sky-400 uppercase tracking-wider mb-2 font-bold">
                   The Depth Illusion
                 </div>
-                <div className="relative w-64 h-36 bg-[#040818] rounded-lg border border-cyan-500/20 overflow-hidden flex items-center justify-center p-2 mb-3">
+                <div className="relative w-64 h-36 bg-black/80 rounded-lg border border-white/10 overflow-hidden flex items-center justify-center p-2 mb-3">
                   {/* Left: Earth Observer */}
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 border border-white flex items-center justify-center text-[9px] font-bold text-white shadow-[0_0_10px_#3b82f6]">
+                    <div className="w-6 h-6 rounded-full bg-sky-600 border border-white flex items-center justify-center text-[9px] font-bold text-white">
                       🌍
                     </div>
                     <span className="text-[9px] font-mono text-slate-400 mt-1">Earth</span>
@@ -205,10 +203,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             {WHAT_ARE_CONSTELLATIONS_INFO.keyPrinciples.map((principle, idx) => (
               <div
                 key={idx}
-                className="p-5 sm:p-6 rounded-2xl bg-[#060c22] border border-cyan-500/20 hover:border-cyan-500/40 transition-colors flex flex-col gap-3"
+                className="p-5 sm:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/60 font-semibold">
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/[0.04] text-sky-300 border border-white/10 font-semibold">
                     {principle.badge}
                   </span>
                   <span className="text-xs font-mono text-slate-500">Pillar 0{idx + 1}</span>
@@ -220,7 +218,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </div>
 
           {/* Interactive Asterism vs Constellation Callout */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#08122a] border border-cyan-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="p-5 sm:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h4 className="text-base font-bold text-white flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-400" />
@@ -235,7 +233,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             </div>
             <button
               onClick={() => setActiveTab('all-88')}
-              className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 cursor-pointer shadow-md"
+              className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 cursor-pointer shadow-md"
             >
               <span>Explore All 88 Constellations</span>
               <ChevronRight className="w-4 h-4" />
@@ -250,12 +248,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {activeTab === 'all-88' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
               <div className="space-y-1.5 sm:space-y-2 max-w-3xl">
-                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                  <Globe className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                  <Globe className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                   <span>All 88 Constellations Directory</span>
                 </h2>
                 <p className="text-[11px] sm:text-sm mobile-landscape:text-[10px] text-slate-300 leading-relaxed font-sans">
@@ -266,7 +263,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </div>
 
           {/* Search, Filters & Sorters */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#050c20] border border-cyan-500/25 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="p-3.5 sm:p-4 rounded-xl observatory-panel flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -276,7 +273,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by constellation name, meaning (e.g. 'Bear'), or principal star..."
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#020512] border border-slate-700/80 focus:border-cyan-500 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none transition-colors"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-black/50 border border-white/10 focus:border-sky-400 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -295,7 +292,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 id="select-constellation-hemisphere"
                 value={selectedHemisphere}
                 onChange={(e) => setSelectedHemisphere(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#020512] border border-slate-700/80 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer"
               >
                 <option value="all">All Hemispheres</option>
                 <option value="Northern">Northern Sky</option>
@@ -308,7 +305,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 id="select-constellation-family"
                 value={selectedFamily}
                 onChange={(e) => setSelectedFamily(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#020512] border border-slate-700/80 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer"
               >
                 <option value="all">All Families</option>
                 <option value="zodiac-only">Zodiac Constellations (13)</option>
@@ -326,7 +323,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 id="select-constellation-sort"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 rounded-xl bg-[#020512] border border-slate-700/80 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer"
               >
                 <option value="name">Sort: Name (A-Z)</option>
                 <option value="area-desc">Sort: Area (Largest First)</option>
@@ -338,7 +335,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           {/* Active Filter Metrics Banner */}
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
             <span>
-              Showing <strong className="text-cyan-400 font-bold">{filteredConstellations.length}</strong> of{' '}
+              Showing <strong className="text-sky-400 font-bold">{filteredConstellations.length}</strong> of{' '}
               {ALL_88_CONSTELLATIONS.length} Official IAU Constellations
             </span>
             {(searchQuery || selectedHemisphere !== 'all' || selectedFamily !== 'all') && (
@@ -349,7 +346,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   setSelectedFamily('all');
                   setSortBy('name');
                 }}
-                className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+                className="text-sky-400 hover:text-sky-300 underline cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -375,7 +372,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       e.stopPropagation();
                       setInspectedConstellation(constellation);
                     }}
-                    className="group p-2 sm:p-2.5 rounded-xl bg-[#040a1c] border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] transition-all flex flex-col justify-between shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] cursor-pointer"
+                    className="group p-2 sm:p-2.5 rounded-xl observatory-panel hover:bg-[#0c1224] border border-white/10 hover:border-sky-400/50 transition-all flex flex-col justify-between shadow-sm cursor-pointer"
                     title={`Click to open Constellation Dossier for ${constellation.name}`}
                   >
                     <div>
@@ -386,7 +383,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                             <RunningText
                               as="h4"
                               text={constellation.name}
-                              className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+                              className="text-xs sm:text-sm font-bold text-white group-hover:text-sky-300 transition-colors"
                             />
                             {constellation.isZodiac && (
                               <span
@@ -403,14 +400,14 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                             className="text-[9px] text-slate-400 italic"
                           />
                         </div>
-                        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-slate-800/80 text-slate-300 border border-slate-700/60 shrink-0">
+                        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-white/[0.04] text-slate-300 border border-white/10 shrink-0">
                           {constellation.id === 'serpens' ? 'Ser' : constellation.abbreviation}
                         </span>
                       </div>
 
                       {/* Smaller SVG Preview (Consistent 1:1 Square) */}
                       <div
-                        className="relative w-full aspect-square bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1.5"
+                        className="relative w-full aspect-square bg-black/60 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden my-1 p-1.5"
                         title={`Click to open Constellation Dossier for ${constellation.name}`}
                       >
                         <ConstellationMap
@@ -428,14 +425,14 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                       </p>
 
                       {/* Quick Specs Compact Row */}
-                      <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 py-0.5 border-t border-slate-800/80">
+                      <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 py-0.5 border-t border-white/5">
                         <span className="truncate">{constellation.hemisphere}</span>
-                        <span className="text-cyan-300 shrink-0">{constellation.areaSqDeg} sq°</span>
+                        <span className="text-sky-300 shrink-0">{constellation.areaSqDeg} sq°</span>
                       </div>
                     </div>
 
                     {/* Principal Star & Action */}
-                    <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[9px]">
+                    <div className="pt-1 border-t border-white/5 flex items-center justify-between gap-1 text-[9px]">
                       <div className="text-slate-400 flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
                         <StarDot2D star={principalStar} colorHex={principalStar?.colorHex || '#fef08a'} sizeClassName="w-2 h-2 shrink-0" />
                         <RunningText
@@ -450,7 +447,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           e.stopPropagation();
                           setInspectedConstellation(constellation);
                         }}
-                        className="py-0.5 px-1.5 rounded bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-500/30 text-[9px] font-semibold font-mono cursor-pointer shrink-0 transition-colors"
+                        className="observatory-control py-0.5 px-2 rounded text-[10px] font-mono font-medium cursor-pointer shrink-0"
                         title="Dossier"
                       >
                         Dossier
@@ -467,7 +464,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     e.stopPropagation();
                     setInspectedConstellation(constellation);
                   }}
-                  className="group p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#040a1c] border border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] transition-all flex flex-col justify-between shadow-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] cursor-pointer"
+                  className="group p-2.5 sm:p-4 rounded-xl sm:rounded-2xl observatory-panel hover:bg-[#0c1224] border border-white/10 hover:border-sky-400/50 transition-all flex flex-col justify-between shadow-sm cursor-pointer"
                   title={`Click to open Constellation Dossier for ${constellation.name}`}
                 >
                   {/* Top Header */}
@@ -478,7 +475,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           <RunningText
                             as="h4"
                             text={constellation.name}
-                            className="text-xs sm:text-base font-bold text-white group-hover:text-cyan-300 transition-colors"
+                            className="text-xs sm:text-base font-bold text-white group-hover:text-sky-300 transition-colors"
                           />
                           {constellation.isZodiac && (
                             <span
@@ -496,14 +493,14 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         />
                       </div>
 
-                      <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-slate-800/80 text-slate-300 border border-slate-700/60 shrink-0">
+                      <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-white/[0.04] text-slate-300 border border-white/10 shrink-0">
                         {constellation.id === 'serpens' ? 'Ser' : constellation.abbreviation}
                       </span>
                     </div>
 
                     {/* SVG Constellation Asterism Preview */}
                     <div
-                      className="relative w-full aspect-square bg-[#020512] rounded-lg sm:rounded-xl border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1.5 sm:my-2.5 p-2"
+                      className="relative w-full aspect-square bg-black/60 rounded-lg sm:rounded-xl border border-white/10 flex items-center justify-center overflow-hidden my-1.5 sm:my-2.5 p-2"
                       title={`Click card to open Constellation Dossier for ${constellation.name}`}
                     >
                       <ConstellationMap
@@ -513,15 +510,15 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                         size={140}
                         className="w-full h-full"
                       />
-                      <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
+                      <div className="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono text-slate-400 bg-black/80 px-1 py-0.2 rounded border border-white/10 pointer-events-none">
                         Figure
                       </div>
                     </div>
 
                     {/* Resemblance snippet */}
-                    <div className="my-1 sm:my-2 p-1.5 sm:p-2 rounded-lg bg-[#020512] border border-cyan-500/15 text-[10px] sm:text-[11px] leading-tight sm:leading-snug">
-                      <div className="flex items-center gap-1 text-[8.5px] sm:text-[9px] font-mono uppercase text-cyan-400 font-semibold mb-0.5">
-                        <Sparkles className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-cyan-400 shrink-0" />
+                    <div className="my-1 sm:my-2 p-1.5 sm:p-2 rounded-lg bg-black/40 border border-white/5 text-[10px] sm:text-[11px] leading-tight sm:leading-snug">
+                      <div className="flex items-center gap-1 text-[8.5px] sm:text-[9px] font-mono uppercase text-sky-400 font-semibold mb-0.5">
+                        <Sparkles className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-sky-400 shrink-0" />
                         <span>Resemblance</span>
                       </div>
                       <p className="line-clamp-1 sm:line-clamp-2 italic text-slate-300/90">"{constellation.resemblance}"</p>
@@ -529,11 +526,11 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
                     {/* Quick Specs */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5 text-[9.5px] sm:text-[11px] font-mono mb-2 sm:mb-3">
-                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 truncate">
+                      <div className="p-1 sm:p-1.5 rounded-lg bg-black/40 border border-white/5 text-slate-300 truncate">
                         <span className="text-slate-500 block text-[8px] sm:text-[9px] uppercase">Sky Region</span>
                         <span className="truncate">{constellation.hemisphere}</span>
                       </div>
-                      <div className="p-1 sm:p-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 truncate">
+                      <div className="p-1 sm:p-1.5 rounded-lg bg-black/40 border border-white/5 text-slate-300 truncate">
                         <span className="text-slate-500 block text-[8px] sm:text-[9px] uppercase">Area / Rank</span>
                         <span className="truncate">
                           {constellation.areaSqDeg} sq° (#{constellation.areaRank})
@@ -543,7 +540,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   </div>
 
                   {/* Principal Star Bar & Action */}
-                  <div className="pt-1.5 sm:pt-2.5 border-t border-slate-800 flex flex-col gap-1.5 sm:gap-2">
+                  <div className="pt-1.5 sm:pt-2.5 border-t border-white/5 flex flex-col gap-1.5 sm:gap-2">
                     <div className="flex items-center justify-between text-[10px] sm:text-xs">
                       <span className="text-slate-400 text-[9px] sm:text-[11px] flex items-center gap-1 shrink-0">
                         <StarDot2D star={principalStar} colorHex={principalStar?.colorHex || '#fef08a'} sizeClassName="w-2 h-2" />
@@ -565,7 +562,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                             e.stopPropagation();
                             onSelectStar(principalStar);
                           }}
-                          className="flex-1 py-1 sm:py-1.5 px-1.5 sm:px-2 rounded-lg bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 hover:text-white border border-cyan-500/40 text-[10px] sm:text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors active:scale-95"
+                          className="flex-1 py-1 sm:py-1.5 px-1.5 sm:px-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-[10px] sm:text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-colors active:scale-95"
                           title={`Inspect ${principalStar.name} in 3D Comparator`}
                         >
                           <StarDot2D star={principalStar} sizeClassName="w-2 h-2" />
@@ -578,7 +575,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           e.stopPropagation();
                           setInspectedConstellation(constellation);
                         }}
-                        className="py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg bg-slate-800/80 hover:bg-cyan-950 text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-500/40 text-[10px] sm:text-[11px] font-semibold cursor-pointer transition-colors active:scale-95"
+                        className="observatory-control py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg text-slate-300 hover:text-white text-[10px] sm:text-[11px] font-semibold cursor-pointer transition-colors active:scale-95"
                         title="Open Constellation Dossier"
                       >
                         <Info className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -598,11 +595,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {activeTab === 'zodiac-13' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
               <div className="space-y-1.5 sm:space-y-2 max-w-3xl">
-                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
                   <Sparkles className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                   <span>The 13 Signs of the Astronomical Zodiac</span>
                 </h2>
@@ -614,7 +610,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </div>
 
           {/* Explainer Details & Ophiuchus Callout */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#040816] border border-cyan-500/20">
+          <div className="p-5 sm:p-6 rounded-2xl observatory-panel border border-white/10">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="max-w-3xl space-y-3">
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -629,7 +625,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </div>
 
               {/* Ophiuchus Big Callout Card */}
-              <div className="w-full lg:w-80 p-5 rounded-xl bg-[#020512] border-2 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.25)] flex flex-col gap-2 shrink-0">
+              <div className="w-full lg:w-80 p-5 rounded-xl observatory-panel border border-amber-500/40 flex flex-col gap-2 shrink-0">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl">⛎</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-600">
@@ -661,8 +657,8 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   onClick={() => constellation && setInspectedConstellation(constellation)}
                   className={`group p-2 sm:p-2.5 rounded-xl flex flex-col justify-between border transition-all cursor-pointer shadow-sm ${
                     sign.isThirteenth
-                      ? 'bg-[#150f04] border-amber-500/70 hover:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                      : 'bg-[#040a1c] border-cyan-500/20 hover:border-cyan-400/60 hover:bg-[#060e28] hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                      ? 'observatory-panel border-amber-500/50 hover:border-amber-400'
+                      : 'observatory-panel hover:bg-[#0c1224] border-white/10 hover:border-sky-400/50'
                   }`}
                   title={constellation ? `Click to open Constellation Dossier for ${constellation.name}` : undefined}
                 >
@@ -675,7 +671,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           <RunningText
                             as="h4"
                             text={sign.name}
-                            className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors"
+                            className="text-xs sm:text-sm font-bold text-white group-hover:text-sky-300 transition-colors"
                           />
                           {sign.isThirteenth && (
                             <span className="text-[7.5px] sm:text-[8px] font-mono px-1 py-0.2 rounded bg-amber-500 text-slate-950 font-bold shrink-0">
@@ -689,7 +685,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           className="text-[9px] text-slate-400 italic"
                         />
                       </div>
-                      <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-slate-800/80 text-cyan-400 font-bold border border-slate-700/60 shrink-0">
+                      <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-white/[0.04] text-sky-400 font-bold border border-white/10 shrink-0">
                         #{sign.index}
                       </span>
                     </div>
@@ -697,7 +693,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     {/* SVG Constellation Asterism Preview (Consistent 1:1 Square) */}
                     {constellation && (
                       <div
-                        className="relative w-full aspect-square bg-[#020512] rounded-lg border border-cyan-500/15 flex items-center justify-center overflow-hidden group-hover:border-cyan-500/40 transition-colors my-1 p-1.5"
+                        className="relative w-full aspect-square bg-black/60 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden my-1 p-1.5"
                       >
                         <ConstellationMap
                           constellation={constellation}
@@ -706,7 +702,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           size={100}
                           className="w-full h-full"
                         />
-                        <div className="absolute bottom-1 right-1 text-[7px] sm:text-[8px] font-mono text-cyan-400/90 bg-slate-950/80 px-1 py-0.2 rounded border border-slate-800 pointer-events-none">
+                        <div className="absolute bottom-1 right-1 text-[7px] sm:text-[8px] font-mono text-slate-400 bg-black/80 px-1 py-0.2 rounded border border-white/10 pointer-events-none">
                           Figure
                         </div>
                       </div>
@@ -714,17 +710,17 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
 
                     {/* Date Comparison Compact Rows */}
                     <div className="space-y-0.5 text-[8px] sm:text-[9px] font-mono my-1">
-                      <div className="px-1.5 py-0.5 rounded bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-between gap-1">
-                        <span className="text-cyan-300 font-semibold truncate text-[7.5px] sm:text-[8.5px]">Real:</span>
+                      <div className="px-1.5 py-0.5 rounded bg-black/40 border border-white/5 flex items-center justify-between gap-1">
+                        <span className="text-sky-300 font-semibold truncate text-[7.5px] sm:text-[8.5px]">Real:</span>
                         <span className="text-white font-bold truncate text-[7.5px] sm:text-[8.5px]">{sign.astronomicalDates}</span>
                       </div>
-                      <div className="px-1.5 py-0.5 rounded bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-1">
+                      <div className="px-1.5 py-0.5 rounded bg-black/20 border border-white/5 flex items-center justify-between gap-1">
                         <span className="text-slate-400 truncate text-[7.5px] sm:text-[8.5px]">Astro:</span>
                         <span className="text-slate-300 truncate text-[7.5px] sm:text-[8.5px]">{sign.traditionalDates}</span>
                       </div>
                       <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] text-slate-400 px-0.5 pt-0.5">
                         <span>Duration:</span>
-                        <span className="text-cyan-400 font-bold">{sign.sunDurationDays} days</span>
+                        <span className="text-sky-400 font-bold">{sign.sunDurationDays} days</span>
                       </div>
                     </div>
 
@@ -738,14 +734,14 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   </div>
 
                   {/* Principal Star Link & Dossier Footer */}
-                  <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[9px] mt-0.5">
+                  <div className="pt-1 border-t border-white/5 flex items-center justify-between gap-1 text-[9px] mt-0.5">
                     {star ? (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectStar(star);
                         }}
-                        className="text-slate-300 hover:text-cyan-300 truncate flex items-center gap-1 cursor-pointer transition-colors max-w-[65%]"
+                        className="text-slate-300 hover:text-sky-300 truncate flex items-center gap-1 cursor-pointer transition-colors max-w-[65%]"
                         title={`Inspect alpha star ${star.name}`}
                       >
                         <StarDot2D star={star} colorHex={star?.colorHex || '#fef08a'} sizeClassName="w-2 h-2 shrink-0" />
@@ -764,7 +760,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                           e.stopPropagation();
                           setInspectedConstellation(constellation);
                         }}
-                        className="py-0.5 px-1.5 rounded bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 hover:text-white border border-cyan-500/30 text-[8px] sm:text-[9px] font-semibold font-mono cursor-pointer shrink-0 transition-colors"
+                        className="observatory-control py-0.5 px-2 rounded text-[8px] sm:text-[9px] font-mono font-medium cursor-pointer shrink-0"
                         title="Dossier"
                       >
                         Dossier
@@ -784,11 +780,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
       {activeTab === 'mythbuster' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
               <div className="space-y-1.5 sm:space-y-2 max-w-3xl">
-                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <h2 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
                   <HelpCircle className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-rose-400 shrink-0" />
                   <span>Personality Mythbuster</span>
                 </h2>
@@ -800,10 +795,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </div>
 
           {/* Big Mythbuster Verdict Card */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#140608] border border-rose-500/40 relative overflow-hidden shadow-lg">
+          <div className="p-5 sm:p-6 rounded-2xl observatory-panel border border-rose-500/30 relative overflow-hidden shadow-lg">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   {MYTHBUSTER_INFO.title}
                 </h3>
                 <div className="mt-1 text-base sm:text-lg font-bold text-rose-400">
@@ -815,12 +810,12 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
               </div>
 
               {/* Astrophysics Perspective Callout */}
-              <div className="w-full md:w-72 p-4 rounded-2xl bg-[#091530] border border-cyan-500/40 text-center flex flex-col items-center gap-2 shrink-0">
-                <div className="w-10 h-10 rounded-full bg-cyan-950/80 border border-cyan-400 flex items-center justify-center text-lg shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+              <div className="w-full md:w-72 p-4 rounded-xl observatory-panel border border-white/10 text-center flex flex-col items-center gap-2 shrink-0">
+                <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-lg">
                   🔭
                 </div>
                 <div className="text-xs font-bold text-white">Astrophysical Reality</div>
-                <p className="text-[11px] text-cyan-200/90 leading-snug">
+                <p className="text-[11px] text-slate-300 leading-snug">
                   "Astrology is charming cultural mythology and fun folklore. But as lovers of real
                   stars, we celebrate the wondrous truth: stars are nuclear titans, not mystical mood-rings!"
                 </p>
@@ -829,9 +824,9 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
           </div>
 
           {/* Interactive Birthday Real Zodiac Finder Widget */}
-          <div className="p-6 rounded-2xl bg-[#061026] border border-cyan-500/30">
-            <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase mb-2">
-              <Calendar className="w-4 h-4 text-cyan-400" />
+          <div className="p-5 sm:p-6 rounded-2xl observatory-panel border border-white/10">
+            <div className="flex items-center gap-2 text-sky-400 font-mono text-xs font-bold uppercase mb-2">
+              <Calendar className="w-4 h-4 text-sky-400" />
               <span>Interactive Precession Calculator</span>
             </div>
             <h4 className="text-lg font-bold text-white mb-2">
@@ -849,7 +844,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 <select
                   value={calcMonth}
                   onChange={(e) => setCalcMonth(Number(e.target.value))}
-                  className="px-3 py-2 rounded-xl bg-[#020512] border border-slate-700 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none cursor-pointer"
+                  className="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs sm:text-sm text-white focus:border-sky-400 focus:outline-none cursor-pointer"
                 >
                   <option value={1}>January</option>
                   <option value={2}>February</option>
@@ -871,7 +866,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                 <select
                   value={calcDay}
                   onChange={(e) => setCalcDay(Number(e.target.value))}
-                  className="px-3 py-2 rounded-xl bg-[#020512] border border-slate-700 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none cursor-pointer"
+                  className="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs sm:text-sm text-white focus:border-sky-400 focus:outline-none cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                     <option key={day} value={day}>
@@ -889,40 +884,40 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                     setCalcMonth(now.getMonth() + 1);
                     setCalcDay(now.getDate());
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-1.5"
+                  className="observatory-control px-3.5 py-2 rounded-xl text-sky-300 text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-1.5"
                   title="Reset to today's astronomical date"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                  <Calendar className="w-3.5 h-3.5 text-sky-400" />
                   <span>Today's Transit</span>
                 </button>
               </div>
             </div>
 
             {/* Calculated Result Banner */}
-            <div className="p-4 sm:p-5 rounded-xl bg-[#020512] border border-cyan-500/40 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <div className="p-4 sm:p-5 rounded-xl bg-black/60 border border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-cyan-950 border border-cyan-500 flex items-center justify-center text-2xl shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-2xl shrink-0">
                   {birthdayResult.symbol}
                 </div>
                 <div>
                   <span className="text-[10px] font-mono text-slate-400 block uppercase">
                     Physical Astronomical Constellation:
                   </span>
-                  <span className="text-base sm:text-lg font-bold text-cyan-300">
+                  <span className="text-base sm:text-lg font-bold text-sky-300">
                     {birthdayResult.astronomical}
                   </span>
                   <p className="text-xs text-slate-400">{birthdayResult.desc}</p>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs flex items-center justify-between">
+              <div className="p-3 rounded-lg bg-black/40 border border-white/5 text-xs flex items-center justify-between">
                 <div>
                   <span className="text-slate-400 block text-[10px]">What Horoscopes Call You:</span>
                   <span className="text-slate-200 font-semibold">{birthdayResult.traditional}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-400 block text-[10px]">Sun Duration:</span>
-                  <span className="text-cyan-400 font-bold">{birthdayResult.daysIn} days</span>
+                  <span className="text-sky-400 font-bold">{birthdayResult.daysIn} days</span>
                 </div>
               </div>
             </div>
@@ -933,10 +928,10 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
             {MYTHBUSTER_INFO.sections.map((sec, idx) => (
               <div
                 key={idx}
-                className="p-5 sm:p-6 rounded-2xl bg-[#050c20] border border-slate-800 hover:border-cyan-500/30 transition-colors flex flex-col gap-2.5"
+                className="p-5 sm:p-6 rounded-2xl observatory-panel border border-white/10 transition-colors flex flex-col gap-2.5"
               >
                 <h4 className="text-base font-bold text-white flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs flex items-center justify-center font-mono font-bold">
+                  <span className="w-6 h-6 rounded-full bg-white/[0.06] text-sky-400 border border-white/10 text-xs flex items-center justify-center font-mono font-bold">
                     {idx + 1}
                   </span>
                   <span>{sec.title}</span>

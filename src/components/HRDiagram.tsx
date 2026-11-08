@@ -915,12 +915,11 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
     <div className={`w-full flex flex-col ${isMobileMode ? 'gap-1.5' : 'gap-4'}`}>
       {/* Top Header Card (Uniform Hero Banner): Hidden in mobile landscape to maximize canvas viewport */}
       {(!isMobileMode || !isLandscape) && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-          <div className="absolute -top-12 -right-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-2xl observatory-panel p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
             <div className="space-y-1 sm:space-y-2 max-w-3xl">
-              <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-                <BarChart2 className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-indigo-400 shrink-0" />
+              <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-bold text-white tracking-tight flex items-center gap-2 sm:gap-3">
+                <BarChart2 className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                 <span>Hertzsprung–Russell Diagram</span>
               </h1>
               {!isMobileMode && (
@@ -933,17 +932,17 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
             <div className="flex items-center gap-2 shrink-0">
               <span
                 id="hr-diagram-star-count"
-                className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-white/[0.04] border border-white/10 text-sky-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm"
               >
                 {filteredStars.length} Stars (WR → Y)
               </span>
               {onOpenClassificationGuide && (
                 <button
                   onClick={onOpenClassificationGuide}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#020512]/90 hover:bg-cyan-950/80 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl observatory-control text-slate-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm shrink-0"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Classification Guide →</span>
+                  <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Classification Guide</span>
                 </button>
               )}
             </div>
@@ -953,13 +952,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
       {/* Desktop & Tablet Mode: "Search star" and related features located above the HR diagram */}
       {!isMobileMode && (
-        <div className="w-full bg-gradient-to-r from-[#030612]/95 via-[#060e26]/95 to-[#040817]/95 border border-cyan-500/25 rounded-2xl p-3 shadow-xl flex flex-col gap-2.5">
+        <div className="w-full observatory-panel rounded-2xl p-3 flex flex-col gap-2.5">
           {/* Top Row: Search Star Bar, Domain Scale Toggle, and Filters Button */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Search Star Bar */}
             <div className="relative flex-1 max-w-md">
-              <div className="relative flex items-center gap-2.5 px-3.5 py-2 bg-[#020512]/90 border border-cyan-500/35 rounded-xl shadow-inner focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all">
-                <Search className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div className="relative flex items-center gap-2.5 px-3.5 py-2 bg-black/50 border border-white/10 rounded-xl shadow-inner focus-within:border-sky-400 focus-within:ring-1 focus-within:ring-sky-400/40 transition-all">
+                <Search className="w-4 h-4 text-sky-400 shrink-0" />
                 <input
                   id="input-hr-search-desktop"
                   type="text"
@@ -981,8 +980,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
               {/* Instant Search Suggestions Floating Dropdown */}
               {searchQuery.trim() && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-[#030716]/98 backdrop-blur-2xl border border-cyan-500/50 rounded-xl p-1 shadow-[0_12px_35px_rgba(0,0,0,0.95)] max-h-56 overflow-y-auto z-50 flex flex-col gap-0.5">
-                  <div className="px-2.5 py-1 text-[10px] font-mono text-cyan-400 font-bold border-b border-cyan-500/20 flex items-center justify-between">
+                <div className="absolute left-0 right-0 top-full mt-1.5 observatory-panel border border-white/10 rounded-xl p-1 shadow-[0_12px_35px_rgba(0,0,0,0.95)] max-h-56 overflow-y-auto z-50 flex flex-col gap-0.5">
+                  <div className="px-2.5 py-1 text-[10px] font-mono text-sky-400 font-bold border-b border-white/10 flex items-center justify-between">
                     <span>Matching Stars</span>
                     <span className="text-slate-400">{searchResults.length} found</span>
                   </div>
@@ -992,9 +991,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       onClick={() => {
                         setPinnedStar(star);
                         setSearchQuery('');
-                        // Selecting a searched star selects the star on the HR diagram without automatically opening dossier
                       }}
-                      className="w-full px-2.5 py-1.5 rounded-lg text-left flex items-center justify-between hover:bg-cyan-950/60 transition-colors cursor-pointer group"
+                      className="w-full px-2.5 py-1.5 rounded-lg text-left flex items-center justify-between hover:bg-white/[0.06] transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span
@@ -1003,7 +1001,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                         />
                         <RunningText
                           text={star.name}
-                          className="text-xs font-bold text-white group-hover:text-cyan-300 font-sans"
+                          className="text-xs font-bold text-white group-hover:text-sky-300 font-sans"
                         />
                         {star.alternateNames.length > 0 && (
                           <span className="text-[10px] text-slate-500 font-mono hidden lg:inline truncate">
@@ -1011,7 +1009,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] font-mono text-cyan-400/80 shrink-0 ml-2">
+                      <span className="text-[10px] font-mono text-sky-300/80 shrink-0 ml-2">
                         {star.spectralType} • {star.temperature.toLocaleString()} K
                       </span>
                     </button>
@@ -1024,7 +1022,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               {/* Unified Classic Domain Badge */}
               <div
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-[#020512]/90 border border-cyan-500/30 rounded-xl text-xs font-mono font-bold text-cyan-300 shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-white/[0.04] border border-white/10 rounded-xl text-xs font-mono font-bold text-sky-300 shadow-sm"
                 title="Unified Classic Sequence: 200 K to 250,000 K (Wolf-Rayet to Class Y Brown Dwarfs)"
               >
                 <Sun className="w-3.5 h-3.5 text-amber-400" />
@@ -1035,17 +1033,17 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               <button
                 id="btn-hr-compact-filter"
                 onClick={() => setIsCompactFilterOpen(true)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all text-xs font-mono font-semibold shadow-md active:scale-95 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all text-xs font-mono font-semibold shadow-xs active:scale-95 cursor-pointer ${
                   activeGroupFilter !== 'ALL' || activeSpectralFilter !== null || !showIsoradiusLines || !showEvolutionaryZones
-                    ? 'border-cyan-400 text-cyan-200 bg-cyan-950/80 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                    : 'bg-[#020512]/90 border-cyan-500/30 text-cyan-300 hover:text-white hover:border-cyan-400/50'
+                    ? 'border-sky-400 text-slate-950 bg-sky-500 font-bold'
+                    : 'observatory-control text-slate-300 hover:text-white'
                 }`}
                 title="Open Diagram Filters & Overlay Controls"
               >
-                <Filter className="w-3.5 h-3.5 text-cyan-400" />
+                <Filter className="w-3.5 h-3.5" />
                 <span>Filters</span>
                 {(activeGroupFilter !== 'ALL' || activeSpectralFilter !== null) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee] animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
                 )}
               </button>
 
@@ -1058,7 +1056,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                     setSearchQuery('');
                     setPinnedStar(null);
                   }}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-mono text-slate-400 hover:text-cyan-300 hover:bg-white/5 border border-transparent hover:border-cyan-500/20 cursor-pointer transition-all"
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-mono text-slate-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 cursor-pointer transition-all"
                   title="Reset active search and filters"
                 >
                   Reset
@@ -1068,7 +1066,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
           </div>
 
           {/* Bottom Row: Quick Evolutionary Phase Filter Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-cyan-500/15">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-white/10">
             <span className="text-[10px] font-mono text-slate-400 uppercase font-bold shrink-0 mr-1">
               Phases:
             </span>
@@ -1092,8 +1090,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   onClick={() => handleGroupFilterChange(tab.id as EvolutionaryFilter)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-mono whitespace-nowrap transition-all cursor-pointer border ${
                     isSelected
-                      ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400 font-bold shadow-sm'
-                      : 'bg-[#020512]/60 text-slate-400 border-cyan-500/15 hover:text-slate-200 hover:border-cyan-500/30'
+                      ? 'bg-sky-500 text-slate-950 border-sky-400 font-bold shadow-xs'
+                      : 'bg-white/[0.04] text-slate-400 border-white/10 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
                   {tab.label}
@@ -1109,12 +1107,12 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         id="hr-diagram-canvas-box"
         className={`relative w-full ${
           canvasHeight ? '' : 'h-[580px] sm:h-[660px] lg:h-[720px]'
-        } bg-[#02040b] rounded-xl sm:rounded-2xl border border-cyan-500/25 overflow-hidden select-none shadow-[inset_0_4px_30px_rgba(0,0,0,0.9)] transition-[height] duration-200`}
+        } bg-black/80 rounded-xl sm:rounded-2xl border border-white/10 overflow-hidden select-none shadow-[inset_0_4px_30px_rgba(0,0,0,0.9)] transition-[height] duration-200`}
         style={canvasHeight ? { height: `${canvasHeight}px` } : undefined}
       >
         {/* Search Bar, Stellar Classification & Selected Star Preview on Mobile */}
         {isMobileMode && (
-          <div className="absolute z-40 pointer-events-auto bottom-0 left-0 right-0 w-full bg-[#020512]/98 backdrop-blur-2xl border-t border-cyan-500/30 shadow-[0_-8px_25px_rgba(0,0,0,0.85)] flex flex-col">
+          <div className="absolute z-40 pointer-events-auto bottom-0 left-0 right-0 w-full observatory-panel border-t border-white/10 rounded-none shadow-[0_-8px_25px_rgba(0,0,0,0.85)] flex flex-col">
             {/* Mobile Controls: Stellar Classification & Search Star functionalities */}
             <div className={`px-2 ${isLandscape ? 'py-1 gap-1' : 'py-1.5 gap-1.5'} flex flex-col`}>
               {/* Spectral Class Filter Buttons - Stellar Classification Functionalities */}
@@ -1127,14 +1125,14 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       onClick={() => handleSpectralFilterChange(band.label)}
                       className={`flex-1 min-w-[20px] sm:min-w-[22px] ${isLandscape ? 'py-0.5 px-0.5' : 'py-1 px-1'} rounded-md text-center transition-all cursor-pointer border ${
                         isSelected
-                          ? 'bg-cyan-950 border-cyan-400 text-white shadow-[0_0_8px_rgba(6,182,212,0.4)]'
-                          : 'bg-[#04091a]/80 border-cyan-500/20 text-slate-300 hover:border-cyan-500/40'
+                          ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold shadow-xs'
+                          : 'bg-black/40 border-white/10 text-slate-300 hover:border-white/20'
                       }`}
                       title={`${band.name}: ${band.desc}`}
                     >
                       <span
-                        style={{ color: band.color }}
-                        className="text-[10px] font-black leading-tight drop-shadow-[0_0_4px_currentColor]"
+                        style={{ color: isSelected ? '#020617' : band.color }}
+                        className="text-[10px] font-bold leading-tight"
                       >
                         {band.label}
                       </span>
@@ -1147,14 +1145,14 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   onClick={() => handleSpectralFilterChange('C')}
                   className={`flex-1 min-w-[20px] sm:min-w-[22px] ${isLandscape ? 'py-0.5 px-0.5' : 'py-1 px-1'} rounded-md text-center transition-all cursor-pointer border ${
                     activeSpectralFilter === 'C'
-                      ? 'bg-red-950 border-red-400 text-white shadow-[0_0_8px_rgba(239,68,68,0.5)]'
-                      : 'bg-[#04091a]/80 border-red-500/30 text-slate-300 hover:border-red-500/60'
+                      ? 'bg-red-500 border-red-400 text-slate-950 font-bold shadow-xs'
+                      : 'bg-black/40 border-red-500/30 text-slate-300 hover:border-red-500/60'
                   }`}
                   title="Class C: Carbon Stars (C/O > 1)"
                 >
                   <span
-                    style={{ color: '#ef4444' }}
-                    className="text-[10px] font-black leading-tight drop-shadow-[0_0_4px_currentColor]"
+                    style={{ color: activeSpectralFilter === 'C' ? '#020617' : '#ef4444' }}
+                    className="text-[10px] font-bold leading-tight"
                   >
                     C
                   </span>
@@ -1164,14 +1162,14 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   onClick={() => handleSpectralFilterChange('S')}
                   className={`flex-1 min-w-[20px] sm:min-w-[22px] ${isLandscape ? 'py-0.5 px-0.5' : 'py-1 px-1'} rounded-md text-center transition-all cursor-pointer border ${
                     activeSpectralFilter === 'S'
-                      ? 'bg-orange-950 border-orange-400 text-white shadow-[0_0_8px_rgba(255,87,34,0.5)]'
-                      : 'bg-[#04091a]/80 border-orange-500/30 text-slate-300 hover:border-orange-500/60'
+                      ? 'bg-orange-500 border-orange-400 text-slate-950 font-bold shadow-xs'
+                      : 'bg-black/40 border-orange-500/30 text-slate-300 hover:border-orange-500/60'
                   }`}
                   title="Class S: Zirconium Stars (ZrO bands)"
                 >
                   <span
-                    style={{ color: '#ff5722' }}
-                    className="text-[10px] font-black leading-tight drop-shadow-[0_0_4px_currentColor]"
+                    style={{ color: activeSpectralFilter === 'S' ? '#020617' : '#ff5722' }}
+                    className="text-[10px] font-bold leading-tight"
                   >
                     S
                   </span>
@@ -1179,7 +1177,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 {activeSpectralFilter && (
                   <button
                     onClick={() => setActiveSpectralFilter(null)}
-                    className="p-0.5 sm:p-1 rounded-md bg-slate-800 text-slate-400 hover:text-white shrink-0 text-[9px] font-mono"
+                    className="p-0.5 sm:p-1 rounded-md bg-white/[0.06] border border-white/10 text-slate-400 hover:text-white shrink-0 text-[9px] font-mono"
                     title="Clear spectral filter"
                   >
                     <X className="w-3 h-3" />
@@ -1187,13 +1185,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 )}
               </div>
 
-              {/* Selected Star Preview on Mobile: Placed just above search stars functionality without altering HR diagram view */}
+              {/* Selected Star Preview on Mobile */}
               {activeSpotlightStar && (
                 <div
                   id="mobile-selected-star-preview"
                   className={`w-full flex items-center justify-between gap-2 ${
                     isLandscape ? 'px-2 py-0.5' : 'px-2.5 py-1'
-                  } bg-gradient-to-r from-cyan-950/85 via-[#030718]/95 to-cyan-950/85 border border-cyan-500/35 rounded-lg text-white shadow-sm`}
+                  } observatory-panel border border-white/10 rounded-lg text-white shadow-sm`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -1206,7 +1204,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                           text={activeSpotlightStar.name}
                           className="text-xs font-bold text-white font-sans"
                         />
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono border border-cyan-500/40 shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/[0.04] text-sky-300 font-mono border border-white/10 shrink-0">
                           {activeSpotlightStar.spectralType}
                         </span>
                         <span className="text-[9px] text-slate-400 font-mono hidden sm:inline truncate">
@@ -1234,7 +1232,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                     <button
                       id="btn-mobile-preview-dossier"
                       onClick={() => onSelectStar(activeSpotlightStar)}
-                      className="px-2.5 py-0.5 rounded-md bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-[10px] font-mono font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                      className="px-2.5 py-0.5 rounded-md bg-sky-500 hover:bg-sky-400 text-slate-950 text-[10px] font-mono font-bold transition-all shadow-sm cursor-pointer active:scale-95"
                       title="Open Star Dossier"
                     >
                       Dossier
@@ -1257,8 +1255,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               {/* Search Input, Filters, and Domain Toggle on Mobile */}
               <div className={`flex items-center gap-1.5 ${isLandscape ? 'w-full' : 'w-full'}`}>
                 {/* Search Bar Pill */}
-                <div className="relative flex-1 sm:flex-initial flex items-center gap-1.5 px-2.5 py-1 bg-[#030716]/92 backdrop-blur-xl border border-cyan-500/40 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.85)] transition-all">
-                  <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <div className="relative flex-1 sm:flex-initial flex items-center gap-1.5 px-2.5 py-1 bg-black/50 border border-white/10 rounded-full shadow-inner transition-all">
+                  <Search className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                   <input
                     id="input-hr-search"
                     type="text"
@@ -1279,18 +1277,17 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                     </button>
                   )}
 
-                  {/* Instant Search Suggestions Floating Dropdown (Opens UPWARDS on mobile so it doesn't get hidden) */}
+                  {/* Instant Search Suggestions Floating Dropdown */}
                   {searchQuery.trim() && searchResults.length > 0 && (
-                    <div className="absolute left-0 right-0 bottom-full mb-1.5 bg-[#030716]/98 backdrop-blur-2xl border border-cyan-500/50 rounded-xl p-1 shadow-[0_12px_35px_rgba(0,0,0,0.95)] max-h-44 overflow-y-auto z-50 flex flex-col gap-0.5">
+                    <div className="absolute left-0 right-0 bottom-full mb-1.5 observatory-panel border border-white/10 rounded-xl p-1 shadow-[0_12px_35px_rgba(0,0,0,0.95)] max-h-44 overflow-y-auto z-50 flex flex-col gap-0.5">
                       {searchResults.map((star) => (
                         <button
                           key={`search-res-${star.id}`}
                           onClick={() => {
                             setPinnedStar(star);
                             setSearchQuery('');
-                            // Selecting a searched star selects it on the HR diagram without automatically opening dossier
                           }}
-                          className="w-full px-2 py-1.5 rounded-lg text-left flex items-center justify-between hover:bg-cyan-950/60 transition-colors cursor-pointer group"
+                          className="w-full px-2 py-1.5 rounded-lg text-left flex items-center justify-between hover:bg-white/[0.06] transition-colors cursor-pointer group"
                         >
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span
@@ -1299,10 +1296,10 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                             />
                             <RunningText
                               text={star.name}
-                              className="text-[11px] font-bold text-white group-hover:text-cyan-300 font-sans"
+                              className="text-[11px] font-bold text-white group-hover:text-sky-300 font-sans"
                             />
                           </div>
-                          <span className="text-[9px] font-mono text-cyan-400/80 shrink-0 ml-1">
+                          <span className="text-[9px] font-mono text-sky-300/80 shrink-0 ml-1">
                             {star.spectralType} • {star.temperature.toLocaleString()} K
                           </span>
                         </button>
@@ -1315,17 +1312,17 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 <button
                   id="btn-hr-compact-filter"
                   onClick={() => setIsCompactFilterOpen(true)}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#030716]/92 backdrop-blur-xl border transition-all text-[11px] font-mono font-semibold shadow-md active:scale-95 cursor-pointer shrink-0 ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full border transition-all text-[11px] font-mono font-semibold shadow-xs active:scale-95 cursor-pointer shrink-0 ${
                     activeGroupFilter !== 'ALL' || activeSpectralFilter !== null || !showIsoradiusLines || !showEvolutionaryZones
-                      ? 'border-cyan-400 text-cyan-200 bg-cyan-950/80 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
-                      : 'border-cyan-500/40 text-cyan-300 hover:text-white'
+                      ? 'border-sky-400 text-slate-950 bg-sky-500 font-bold'
+                      : 'observatory-control text-slate-300 hover:text-white'
                   }`}
                   title="Open Diagram Filters"
                 >
-                  <Filter className="w-3.5 h-3.5 text-cyan-400" />
+                  <Filter className="w-3.5 h-3.5" />
                   <span>Filters</span>
                   {(activeGroupFilter !== 'ALL' || activeSpectralFilter !== null) && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee] animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
                   )}
                 </button>
               </div>
@@ -1337,10 +1334,10 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         {!isMobileMode && (
           <>
             <div
-              className="absolute top-2 text-[9px] sm:text-[11px] font-bold text-cyan-400 uppercase font-mono tracking-wider z-30 pointer-events-none drop-shadow flex items-center gap-1 sm:gap-1.5"
+              className="absolute top-2 text-[9px] sm:text-[11px] font-bold text-sky-400 uppercase font-mono tracking-wider z-30 pointer-events-none drop-shadow flex items-center gap-1 sm:gap-1.5"
               style={{ left: `${plotInsetLeft}px` }}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
               <span>Luminosity (L / L☉)</span>
             </div>
 
@@ -1349,10 +1346,10 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
               style={{ right: `${plotInsetRight}px` }}
             >
               <span>Absolute Mag (M_bol)</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_6px_#c084fc]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
             </div>
 
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-bold text-cyan-300/90 uppercase font-mono tracking-wider z-30 pointer-events-none bg-[#030716]/95 px-3 py-0.5 rounded-full border border-cyan-500/30 shadow-md flex items-center gap-1">
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase font-mono tracking-wider z-30 pointer-events-none bg-black/80 px-3 py-0.5 rounded-full border border-white/10 shadow-md flex items-center gap-1">
               <span>← Effective Surface Temperature (Kelvin) [Hot to Cool]</span>
             </div>
           </>
@@ -1760,7 +1757,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
 
               {/* Main Sequence (V) Badge: Positioned between the subdwarf and subgiant labels */}
               <div
-                className="absolute pointer-events-none text-[9px] sm:text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/95 border border-cyan-400/60 px-2.5 py-0.5 rounded-full shadow-lg z-20 -translate-x-1/2 -translate-y-1/2"
+                className="absolute pointer-events-none text-[9px] sm:text-[10px] font-mono font-bold text-sky-300 bg-sky-950/90 border border-sky-400/40 px-2.5 py-0.5 rounded-full shadow-md z-20 -translate-x-1/2 -translate-y-1/2"
                 style={{
                   left: `${getTempX(5100)}%`,
                   top: `${getLumY(0.8)}%`,
@@ -1932,16 +1929,16 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
             >
               <div
                 id="hr-star-preview-card"
-                className="pointer-events-auto bg-[#05091a]/95 backdrop-blur-xl p-3.5 rounded-xl border border-cyan-400/60 shadow-[0_12px_35px_rgba(0,0,0,0.85)] flex flex-col gap-2 w-[290px] sm:w-[320px] max-w-[92vw]"
+                className="pointer-events-auto observatory-panel p-3.5 rounded-xl border border-white/10 shadow-[0_12px_35px_rgba(0,0,0,0.95)] flex flex-col gap-2 w-[290px] sm:w-[320px] max-w-[92vw]"
                 style={{
-                  boxShadow: `0 0 25px ${displayStar.colorHex}44, 0 10px 30px rgba(0,0,0,0.9)`,
+                  boxShadow: `0 0 25px ${displayStar.colorHex}33, 0 10px 30px rgba(0,0,0,0.9)`,
                 }}
                 onMouseLeave={() => {
                   if (!pinnedStar) setHoveredStar(null);
                 }}
               >
                 {/* Header: Full star name displayed in full, with classification label placed below */}
-                <div className="border-b border-cyan-500/25 pb-2">
+                <div className="border-b border-white/10 pb-2">
                   <div className="flex items-start justify-between gap-2.5">
                     <div className="flex items-start gap-2.5 min-w-0">
                       <span
@@ -1954,7 +1951,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                         </h4>
                         {/* Classification label sits below the star name */}
                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#091129] text-cyan-300 font-mono border border-cyan-500/40 font-semibold inline-block">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.04] text-sky-300 font-mono border border-white/10 font-semibold inline-block">
                             {displayStar.spectralType}
                           </span>
                           {(displayStar.stellarStage === 'Carbon Star' || displayStar.spectralClass === 'C') && (
@@ -1990,11 +1987,11 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-                  <div className="p-1.5 bg-[#020510]/90 rounded-lg border border-cyan-500/20">
+                  <div className="p-1.5 bg-black/40 rounded-lg border border-white/5">
                     <span className="text-slate-400 block text-[9px] uppercase font-sans">Temperature</span>
                     <span className="text-amber-300 font-bold">{displayStar.temperature.toLocaleString()} K</span>
                   </div>
-                  <div className="p-1.5 bg-[#020510]/90 rounded-lg border border-cyan-500/20">
+                  <div className="p-1.5 bg-black/40 rounded-lg border border-white/5">
                     <span className="text-slate-400 block text-[9px] uppercase font-sans">Luminosity</span>
                     <span className="text-purple-300 font-bold">
                       {displayStar.luminositySolar >= 1e6
@@ -2007,19 +2004,19 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       L☉
                     </span>
                   </div>
-                  <div className="p-1.5 bg-[#020510]/90 rounded-lg border border-cyan-500/20">
+                  <div className="p-1.5 bg-black/40 rounded-lg border border-white/5">
                     <span className="text-slate-400 block text-[9px] uppercase font-sans">Diameter</span>
-                    <span className="text-cyan-300 font-bold block break-words leading-tight">{sc.metricSi}</span>
+                    <span className="text-sky-300 font-bold block break-words leading-tight">{sc.metricSi}</span>
                     <span className="text-slate-400 text-[9px]">{sc.solarFormatted}</span>
                   </div>
-                  <div className="p-1.5 bg-[#020510]/90 rounded-lg border border-cyan-500/20">
+                  <div className="p-1.5 bg-black/40 rounded-lg border border-white/5">
                     <span className="text-slate-400 block text-[9px] uppercase font-sans">Stage</span>
                     <span className="text-blue-300 font-bold block break-words leading-tight">{displayStar.stellarStage}</span>
                     <span className="text-slate-400 text-[9px] block">{displayStar.massSolar.toFixed(1)} M☉</span>
                   </div>
                 </div>
 
-                <div className="text-[9px] text-cyan-300/80 font-mono text-center pt-0.5 flex items-center justify-between">
+                <div className="text-[9px] text-sky-300/80 font-mono text-center pt-0.5 flex items-center justify-between">
                   <span>{pinnedStar?.id === displayStar.id ? '★ Selected on diagram' : 'Hovered star'}</span>
                   <span>Click dot to view full dossier</span>
                 </div>
@@ -2060,7 +2057,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
         {/* X-Axis Spectral Sequence Bar at Bottom: Desktop only; on mobile it is merged into the sticky bottom bar */}
         {!isMobileMode && (
           <div
-            className="absolute pointer-events-auto bg-[#020510]/95 rounded-lg sm:rounded-xl border border-cyan-500/20 shadow-inner flex overflow-hidden"
+            className="absolute pointer-events-auto bg-black/70 rounded-lg sm:rounded-xl border border-white/10 shadow-inner flex overflow-hidden"
             style={{
               left: `${plotInsetLeft}px`,
               right: `${plotInsetRight}px`,
@@ -2081,14 +2078,14 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   style={{
                     width: `${widthPct}%`,
                   }}
-                  className={`flex flex-col items-center justify-center py-0.5 rounded transition-all cursor-pointer group border-r border-cyan-500/15 last:border-r-0 ${
-                    isSelected ? 'bg-cyan-950 ring-1 ring-cyan-400 shadow-sm z-10' : 'hover:bg-[#060e24]'
+                  className={`flex flex-col items-center justify-center py-0.5 rounded transition-all cursor-pointer group border-r border-white/10 last:border-r-0 ${
+                    isSelected ? 'bg-white/10 ring-1 ring-sky-400/50 shadow-sm z-10' : 'hover:bg-white/5'
                   }`}
                   title={`${band.name}: ${band.desc}`}
                 >
                   <span
                     style={{ color: band.color }}
-                    className="text-[9px] sm:text-[11px] font-black drop-shadow-[0_0_5px_currentColor] group-hover:scale-110 transition-transform leading-tight"
+                    className="text-[9px] sm:text-[11px] font-bold group-hover:scale-110 transition-transform leading-tight"
                   >
                     {band.label}
                   </span>
@@ -2106,13 +2103,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
           onClick={() => setIsCompactFilterOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-[#030716] border-t sm:border border-cyan-500/30 rounded-t-2xl sm:rounded-2xl p-4 shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-y-auto"
+            className="w-full max-w-lg observatory-panel border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-4 shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-cyan-500/20">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-cyan-400" />
+                <Filter className="w-4 h-4 text-sky-400" />
                 <h3 className="text-sm font-bold text-white font-sans">Diagram Filters & Controls</h3>
               </div>
               <button
@@ -2150,8 +2147,8 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                     }}
                     className={`text-xs font-mono px-3 py-2 rounded-xl border text-left transition-all cursor-pointer ${
                       activeGroupFilter === tab.id
-                        ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400 shadow-sm font-bold'
-                        : 'bg-[#050a1c] text-slate-400 border-cyan-500/15 hover:text-white'
+                        ? 'bg-sky-500 text-slate-950 font-bold border-sky-400 shadow-sm'
+                        : 'bg-black/40 text-slate-400 border-white/10 hover:text-white'
                     }`}
                   >
                     {tab.label}
@@ -2169,7 +2166,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                 {activeSpectralFilter && (
                   <button
                     onClick={() => setActiveSpectralFilter(null)}
-                    className="text-[10px] font-mono text-cyan-400 hover:underline cursor-pointer"
+                    className="text-[10px] font-mono text-sky-400 hover:underline cursor-pointer"
                   >
                     Clear Filter ({activeSpectralFilter})
                   </button>
@@ -2199,13 +2196,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       title={spec.title}
                       className={`py-2 rounded-xl border text-center transition-all cursor-pointer flex items-center justify-center ${
                         isSelected
-                          ? 'bg-cyan-950 border-cyan-400 text-white shadow-md ring-1 ring-cyan-400'
-                          : 'bg-[#050a1c] border-cyan-500/20 text-slate-300 hover:border-cyan-400/50'
+                          ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold shadow-sm'
+                          : 'bg-black/40 border-white/10 text-slate-300 hover:border-white/20'
                       }`}
                     >
                       <span
-                        style={{ color: spec.color }}
-                        className="text-xs font-black font-mono drop-shadow-[0_0_4px_currentColor]"
+                        style={{ color: isSelected ? '#020617' : spec.color }}
+                        className="text-xs font-bold font-mono"
                       >
                         {spec.label}
                       </span>
@@ -2238,13 +2235,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                       title={spec.title}
                       className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer flex items-center justify-center ${
                         isSelected
-                          ? 'bg-cyan-950 border-cyan-400 text-white shadow-md ring-1 ring-cyan-400'
-                          : 'bg-[#050a1c] border-cyan-500/20 text-slate-300 hover:border-cyan-400/50'
+                          ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold shadow-sm'
+                          : 'bg-black/40 border-white/10 text-slate-300 hover:border-white/20'
                       }`}
                     >
                       <span
-                        style={{ color: spec.color }}
-                        className="text-xs font-black font-mono drop-shadow-[0_0_4px_currentColor]"
+                        style={{ color: isSelected ? '#020617' : spec.color }}
+                        className="text-xs font-bold font-mono"
                       >
                         {spec.label}
                       </span>
@@ -2264,15 +2261,15 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   onClick={() => setShowIsoradiusLines((v) => !v)}
                   className={`px-3 py-2 rounded-xl text-xs font-mono font-semibold flex items-center justify-between border cursor-pointer ${
                     showIsoradiusLines
-                      ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400/60'
-                      : 'bg-[#050a1c] text-slate-400 border-cyan-500/15'
+                      ? 'bg-sky-500/20 text-sky-200 border-sky-400/60'
+                      : 'bg-black/40 text-slate-400 border-white/10'
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
-                    <Ruler className="w-3.5 h-3.5 text-cyan-400" />
+                    <Ruler className="w-3.5 h-3.5 text-sky-400" />
                     <span>Radius Lines</span>
                   </span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showIsoradiusLines ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showIsoradiusLines ? 'bg-sky-500 text-slate-950' : 'bg-white/10 text-slate-400'}`}>
                     {showIsoradiusLines ? 'ON' : 'OFF'}
                   </span>
                 </button>
@@ -2281,15 +2278,15 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   onClick={() => setShowEvolutionaryZones((v) => !v)}
                   className={`px-3 py-2 rounded-xl text-xs font-mono font-semibold flex items-center justify-between border cursor-pointer ${
                     showEvolutionaryZones
-                      ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400/60'
-                      : 'bg-[#050a1c] text-slate-400 border-cyan-500/15'
+                      ? 'bg-sky-500/20 text-sky-200 border-sky-400/60'
+                      : 'bg-black/40 text-slate-400 border-white/10'
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                    <Layers className="w-3.5 h-3.5 text-sky-400" />
                     <span>Tracks</span>
                   </span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showEvolutionaryZones ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showEvolutionaryZones ? 'bg-sky-500 text-slate-950' : 'bg-white/10 text-slate-400'}`}>
                     {showEvolutionaryZones ? 'ON' : 'OFF'}
                   </span>
                 </button>
@@ -2297,7 +2294,7 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
             </div>
 
             {/* Reset Filters */}
-            <div className="flex items-center justify-between pt-2 border-t border-cyan-500/20">
+            <div className="flex items-center justify-between pt-2 border-t border-white/10">
               <button
                 onClick={() => {
                   setActiveGroupFilter('ALL');
@@ -2305,13 +2302,13 @@ export const HRDiagram: React.FC<HRDiagramProps> = ({
                   setSearchQuery('');
                   setIsCompactFilterOpen(false);
                 }}
-                className="text-xs text-slate-400 hover:text-cyan-300 font-mono underline cursor-pointer"
+                className="text-xs text-slate-400 hover:text-white font-mono underline cursor-pointer"
               >
                 Reset All Filters
               </button>
               <button
                 onClick={() => setIsCompactFilterOpen(false)}
-                className="px-4 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono cursor-pointer"
+                className="px-4 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono cursor-pointer transition-colors"
               >
                 Apply & Close
               </button>

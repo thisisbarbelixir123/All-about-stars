@@ -74099,10 +74099,9 @@
     "name": "Gliese 105 C",
     "alternateNames": [
       "GJ 105 C",
-      "V436 And C",
+      "HD 16160 C",
       "2MASS J02361533+0652187",
       "LHS 16",
-      "HD 16160 C",
       "Gliese 105 C (HD 16160 C)"
     ],
     "constellation": "Cetus",
@@ -74149,19 +74148,17 @@
     "distanceParsecs": 7.248065342964717,
     "rightAscension": "02h 36m 04.70s",
     "declination": "+06° 53′ 15.0″",
-    "primaryDesignation": "V436 And C",
+    "primaryDesignation": "GJ 105 C",
     "designations": [
-      "V436 And C",
-      "V436 Andromedae C",
-      "HD 16160B",
       "GJ 105 C",
+      "HD 16160 C",
+      "Gl 105 C",
       "LHS 16",
       "2MASS J02361533+0652187",
       "WDS J02361+0653B",
       "G 73-70B",
       "GKI 1B",
       "PMSC 02307+0626Ab",
-      "HD 16160 C",
       "Gliese 105 C (HD 16160 C)"
     ]
   },

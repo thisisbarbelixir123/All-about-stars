@@ -108,20 +108,20 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
   return (
     <div
       ref={dossierScrollRef}
-      className="fixed inset-0 z-50 w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 w-full h-full bg-[#02040a] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
       onClick={(e) => {
         e.stopPropagation();
       }}
     >
       {/* Header Bar matching Encyclopedia mode */}
-      <div className="flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-cyan-500/20 bg-[#060b20] shrink-0 gap-2 sm:gap-3">
+      <div className="observatory-panel flex flex-row items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-white/10 shrink-0 gap-2 sm:gap-3 rounded-none">
         {/* Left: Constellation Identifier & Information */}
         <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar max-w-full">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm sm:text-base md:text-xl font-black text-white tracking-tight shrink-0">
+            <h3 className="text-sm sm:text-base md:text-xl font-bold text-white tracking-tight shrink-0">
               {constellation.name}
             </h3>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/[0.04] text-sky-300 border border-white/10 shrink-0">
               {constellation.abbreviation}
             </span>
             <span className="text-xs text-slate-400 italic hidden md:inline truncate">
@@ -139,7 +139,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-500/40 text-xs font-semibold transition-all cursor-pointer active:scale-95 shrink-0"
+            className="observatory-control flex items-center justify-center gap-1.5 p-2 md:px-3 md:py-1.5 rounded-lg text-slate-300 hover:text-white text-xs font-semibold cursor-pointer active:scale-95 shrink-0"
             title="Close Constellation Dossier (Esc)"
             aria-label="Close Constellation Dossier"
           >
@@ -156,13 +156,13 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
         <div className="w-full shrink-0 landscape:w-3/5 lg:w-3/5 xl:w-[62%] landscape:h-full lg:h-full landscape:overflow-hidden lg:overflow-hidden p-2 sm:p-3 md:p-4 flex flex-col justify-center items-center">
           {/* Constellation Visualizer Banner - Interactive Astrometric Sky Map Globe */}
           <div
-            className="w-full h-full max-h-[calc(100vh-80px)] aspect-square max-w-[min(100%,calc(100vh-80px))] bg-[#020512] rounded-2xl border border-cyan-500/30 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
+            className="w-full h-full max-h-[calc(100vh-80px)] aspect-square max-w-[min(100%,calc(100vh-80px))] bg-black/60 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner"
           >
             {/* Astrometric Metadata Header Badge */}
-            <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-slate-950/90 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-slate-800 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
-              <span className="text-cyan-300 font-semibold uppercase">{constellation.name}</span>
+            <div className="absolute top-2 left-2 sm:top-2.5 sm:left-3 z-10 text-[9px] sm:text-[10px] font-mono text-slate-400 bg-black/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-white/10 pointer-events-none flex items-center gap-1.5 sm:gap-2 shadow">
+              <span className="text-sky-300 font-semibold uppercase">{constellation.name}</span>
               {isPolar && (
-                <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[8px] sm:text-[9px] font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-white/[0.04] text-sky-300 border border-white/10 text-[8px] sm:text-[9px] font-bold">
                   Polar Centered
                 </span>
               )}
@@ -200,8 +200,8 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
         {/* Right Column: Data/Telemetry panel */}
         <div className="w-full shrink-0 landscape:w-2/5 lg:w-2/5 xl:w-[38%] landscape:h-full lg:h-full landscape:overflow-y-auto lg:overflow-y-auto pb-safe p-2.5 sm:p-4 md:p-6 scrollbar-thin flex flex-col gap-2.5 sm:gap-4 md:gap-5">
           {/* Astrometric Map Viewport Controls Toolbar (Top of Right Panel) */}
-          <div className="flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[11px] font-mono shadow-sm">
-            <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-cyan-400 font-bold shrink-0">
+          <div className="observatory-panel flex items-center justify-between gap-1.5 sm:gap-2 p-1.5 sm:p-2.5 rounded-xl border border-white/10 text-[11px] font-mono shadow-sm">
+            <div className="flex items-center gap-1.5 px-1.5 sm:px-2 text-sky-400 font-bold shrink-0">
               <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Astrometric Map</span>
             </div>
@@ -237,7 +237,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 active={Boolean(skyMapOptions.showEcliptic)}
                 onClick={() => setSkyMapOptions((prev) => ({ ...prev, showEcliptic: !prev.showEcliptic }))}
                 title="Toggle Solar Ecliptic Line and Today's Sun"
-                activeColorClass="bg-cyan-950/90 text-amber-300 border-amber-500/50"
+                activeColorClass="bg-amber-500 text-slate-950 font-bold border-amber-400"
               />
 
               <MapToolbarToggle
@@ -246,7 +246,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 active={Boolean(skyMapOptions.showDSOs)}
                 onClick={() => setSkyMapOptions((prev) => ({ ...prev, showDSOs: !prev.showDSOs }))}
                 title="Toggle Deep-Sky Objects (Nebulae, Star Clusters, Galaxies)"
-                activeColorClass="bg-rose-950/80 text-rose-300 border-rose-500/50"
+                activeColorClass="bg-rose-500 text-slate-950 font-bold border-rose-400"
               />
 
               <MapToolbarToggle
@@ -255,7 +255,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 active={Boolean(skyMapOptions.showMilkyWay)}
                 onClick={() => setSkyMapOptions((prev) => ({ ...prev, showMilkyWay: !prev.showMilkyWay }))}
                 title="Toggle Milky Way Galactic Plane & Core Contours"
-                activeColorClass="bg-cyan-950/90 text-sky-300 border-sky-500/50"
+                activeColorClass="bg-sky-500 text-slate-950 font-bold border-sky-400"
               />
 
               <MapToolbarToggle
@@ -270,22 +270,22 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
           {/* DSO Category Color Legends Indicator when DSO Toggle is ON */}
           {skyMapOptions.showDSOs && (
-                <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-xl bg-[#04091c] border border-cyan-500/25 text-[10px] sm:text-[11px] font-mono shadow-sm">
+                <div className="observatory-panel flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-xl border border-white/10 text-[10px] sm:text-[11px] font-mono shadow-sm">
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <Sparkles className="w-3 h-3 text-rose-400" />
                     <span className="font-bold text-slate-300 uppercase tracking-wider text-[9px] sm:text-[10px]">DSO Legend:</span>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3">
                     <span className="flex items-center gap-1 text-slate-300">
-                      <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+                      <span className="w-2 h-2 rounded-full bg-rose-500" />
                       <span className="text-rose-300 font-medium">Nebulae</span>
                     </span>
                     <span className="flex items-center gap-1 text-slate-300">
-                      <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                      <span className="w-2 h-2 rounded-full bg-purple-500" />
                       <span className="text-purple-300 font-medium">Galaxies</span>
                     </span>
                     <span className="flex items-center gap-1 text-slate-300">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
                       <span className="text-emerald-300 font-medium">Star Clusters</span>
                     </span>
                   </div>
@@ -294,12 +294,12 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               )}
 
               {/* Celestial Resemblance & Shape Callout (Compact font and padding on mobile) */}
-              <div className="p-2.5 sm:p-4 rounded-xl bg-gradient-to-r from-cyan-950/50 via-[#061430] to-blue-950/40 border border-cyan-500/35 flex items-start gap-2.5 sm:gap-3">
-                <div className="p-1.5 sm:p-2 rounded-lg bg-cyan-900/60 border border-cyan-400/30 text-cyan-300 shrink-0 mt-0.5">
-                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />
+              <div className="observatory-panel p-2.5 sm:p-4 rounded-xl border border-white/10 flex items-start gap-2.5 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-white/[0.04] border border-white/10 text-sky-300 shrink-0 mt-0.5">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-300" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[9.5px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold tracking-wider mb-0.5 sm:mb-1">
+                  <div className="text-[9.5px] sm:text-[11px] font-mono uppercase text-sky-400 font-bold tracking-wider mb-0.5 sm:mb-1">
                     <span>Celestial Resemblance & Shape</span>
                   </div>
                   <p className="text-[11px] sm:text-xs md:text-sm text-slate-200 leading-snug sm:leading-relaxed font-normal">
@@ -309,15 +309,15 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
               </div>
 
               {/* Sky Borders Section */}
-              <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/25 flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-2 pb-2 border-b border-cyan-900/40">
+              <div className="observatory-panel p-4 rounded-xl border border-white/10 flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
                   <div className="flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-cyan-400" />
+                    <Crosshair className="w-4 h-4 text-sky-400" />
                     <span className="text-xs sm:text-sm font-bold text-white">
                       Astronomical Boundaries
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-500/30">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-sky-300 border border-white/10">
                     Delporte Boundary
                   </span>
                 </div>
@@ -328,10 +328,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                     {constellation.borders.sectors.map((sec) => (
                       <div
                         key={sec.shortCode}
-                        className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 flex flex-col gap-1"
+                        className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex flex-col gap-1"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-cyan-300 font-bold text-[11px]">
+                          <span className="text-sky-300 font-bold text-[11px]">
                             {sec.name} ({sec.shortCode})
                           </span>
                           <span className="text-slate-400 text-[10px]">{sec.englishName}</span>
@@ -351,13 +351,13 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-                    <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
                       <span className="text-slate-400 block text-[10px] uppercase">Right Ascension (RA) Range</span>
-                      <span className="text-cyan-300 font-bold">{constellation.borders.raRange}</span>
+                      <span className="text-sky-300 font-bold">{constellation.borders.raRange}</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
                       <span className="text-slate-400 block text-[10px] uppercase">Declination (Dec) Range</span>
-                      <span className="text-cyan-300 font-bold">{constellation.borders.decRange}</span>
+                      <span className="text-sky-300 font-bold">{constellation.borders.decRange}</span>
                     </div>
                   </div>
                 )}
@@ -368,9 +368,9 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
                 {/* Bordering Neighbor Constellations Badges */}
                 {constellation.borders.borderingConstellations && constellation.borders.borderingConstellations.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-2 border-t border-cyan-900/40">
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/10">
                     <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold flex items-center gap-1.5">
-                      <Navigation className="w-3 h-3 text-cyan-400" />
+                      <Navigation className="w-3 h-3 text-sky-400" />
                       <span>Bordering Constellations ({constellation.borders.borderingConstellations.length}):</span>
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -386,15 +386,15 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                             }}
                             className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                               resolved
-                                ? 'bg-slate-900/90 hover:bg-cyan-950 text-cyan-300 border-cyan-500/30 hover:border-cyan-400 shadow-sm'
-                                : 'bg-slate-950 text-slate-500 border-slate-800 cursor-default'
+                                ? 'bg-white/[0.04] hover:bg-sky-500 hover:text-slate-950 text-sky-300 border-white/10 hover:border-sky-400 shadow-sm'
+                                : 'bg-black/40 text-slate-500 border-white/5 cursor-default'
                             }`}
                             title={resolved ? `Fly camera to ${resolved.name} and open dossier` : neighborName}
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
                             <span>{neighborName}</span>
                             {resolved && (
-                              <span className="text-[9px] text-cyan-400/80 font-bold">[{resolved.abbreviation}]</span>
+                              <span className="text-[9px] text-sky-400/80 font-bold">[{resolved.abbreviation}]</span>
                             )}
                           </button>
                         );
@@ -406,23 +406,23 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <span className="text-slate-500 block text-[10px]">Hemisphere</span>
                   <span className="text-white font-bold">{constellation.hemisphere}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <span className="text-slate-500 block text-[10px]">Area & Rank</span>
                   <span className="text-white font-bold">
                     {constellation.areaSqDeg} sq° (#{constellation.areaRank})
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <span className="text-slate-500 block text-[10px]">Constellation Family</span>
                   <span className="text-white font-bold">{constellation.family}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <span className="text-slate-500 block text-[10px]">Best Viewing Month</span>
-                  <span className="text-cyan-300 font-bold">{constellation.bestViewingMonth}</span>
+                  <span className="text-sky-300 font-bold">{constellation.bestViewingMonth}</span>
                 </div>
               </div>
 
@@ -431,7 +431,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                 const pStar = starMap.get(constellation.principalStarId)!;
                 const pStarNameInfo = resolveDossierStarName(pStar);
                 return (
-                  <div className="p-3.5 rounded-xl bg-[#04091c] border border-cyan-500/20 flex items-center justify-between gap-3">
+                  <div className="observatory-panel p-3.5 rounded-xl border border-white/10 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 text-xs">
                       <StarDot2D star={pStar} sizeClassName="w-3.5 h-3.5" />
                       <div>
@@ -441,7 +441,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                             {pStarNameInfo.primaryName}
                           </span>
                           {pStarNameInfo.badge && (
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.04] text-slate-300 border border-white/10">
                               {pStarNameInfo.badge}
                             </span>
                           )}
@@ -452,7 +452,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                       onClick={() => {
                         onSelectStar(pStar);
                       }}
-                      className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-transform active:scale-95 shrink-0"
+                      className="px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-transform active:scale-95 shrink-0"
                     >
                       <StarDot2D star={pStar} sizeClassName="w-2.5 h-2.5" />
                       <span>Inspect Star in 3D</span>
@@ -463,20 +463,20 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
               {/* Cataloged Constellation Stars List with Dynamic Coordinates & Locations */}
               {cCatalogStars.length > 0 && (
-                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/30 flex flex-col gap-3 shadow-md">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-slate-800">
+                <div className="observatory-panel p-4 rounded-xl border border-white/10 flex flex-col gap-3 shadow-md">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-white/10">
                       <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <Star className="w-4 h-4 text-sky-400 shrink-0" />
                         <h4 className="text-xs sm:text-sm font-mono uppercase text-slate-200 font-bold tracking-wider">
                           Catalog Stars in {constellation.name} ({cCatalogStars.length})
                         </h4>
                       </div>
-                      <span className="text-[11px] text-cyan-400 font-mono">
+                      <span className="text-[11px] text-sky-400 font-mono">
                         Coordinates & Astrometric Locations Mapped • Click to Inspect in 3D
                       </span>
                     </div>
 
-                    <div className="max-h-72 overflow-y-auto pr-1.5 space-y-2 divide-y divide-slate-800/60">
+                    <div className="max-h-72 overflow-y-auto pr-1.5 space-y-2 divide-y divide-white/5">
                       {cCatalogStars.map((st) => {
                         const isPrincipal = st.id === constellation.principalStarId;
                         const isHovered = hoveredStarId === st.id;
@@ -490,10 +490,10 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                             onMouseLeave={() => setHoveredStarId(null)}
                             className={`pt-2 first:pt-0 p-2.5 rounded-lg border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                               isHovered
-                                ? 'bg-cyan-950/70 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/50'
+                                ? 'bg-[#0c1224] border-sky-400/60 ring-1 ring-sky-400/40'
                                 : isPrincipal
-                                  ? 'bg-cyan-950/40 border-cyan-500/40 hover:border-cyan-400'
-                                  : 'bg-slate-900/50 border-slate-800/80 hover:bg-slate-900 hover:border-cyan-500/30'
+                                  ? 'bg-sky-950/20 border-sky-500/30 hover:border-sky-400'
+                                  : 'bg-black/40 border-white/5 hover:border-white/20'
                             }`}
                           >
                             <div className="flex flex-col gap-1 min-w-0">
@@ -505,7 +505,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                                   className="font-bold text-xs sm:text-sm text-white"
                                 />
                                 {nameInfo.badge && (
-                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.04] text-slate-300 border border-white/10">
                                     {nameInfo.badge}
                                   </span>
                                 )}
@@ -517,24 +517,24 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                               </div>
 
                               {/* Known Celestial Location */}
-                              <div className="flex items-start sm:items-center gap-1.5 text-[11px] font-mono text-cyan-300/90 leading-tight">
-                                <Compass className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5 sm:mt-0" />
+                              <div className="flex items-start sm:items-center gap-1.5 text-[11px] font-mono text-sky-300/90 leading-tight">
+                                <Compass className="w-3 h-3 text-sky-400 shrink-0 mt-0.5 sm:mt-0" />
                                 <span className="break-words">{locationDesc}</span>
                               </div>
 
                               {/* Astro Specs Badges */}
                               <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                                <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300">
+                                <span className="px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/5 text-slate-300">
                                   {st.spectralType}
                                 </span>
-                                <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300">
+                                <span className="px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/5 text-slate-300">
                                   mag {st.apparentMagnitude}
                                 </span>
-                                <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300">
+                                <span className="px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/5 text-slate-300">
                                   {st.distanceLy.toLocaleString()} ly
                                 </span>
                                 {st.stellarStage && (
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-300 hidden md:inline">
+                                  <span className="px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/5 text-slate-300 hidden md:inline">
                                     {st.stellarStage}
                                   </span>
                                 )}
@@ -550,7 +550,7 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
                               onClick={() => {
                                 onSelectStar(st);
                               }}
-                              className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/50 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0 shadow"
+                              className="observatory-control self-start sm:self-center px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shrink-0 shadow"
                               title={`Open 3D Star Dossier for ${nameInfo.displayFullName}`}
                             >
                               <StarDot2D star={st} sizeClassName="w-2.5 h-2.5" />
@@ -565,15 +565,15 @@ export const ConstellationDossierModal: React.FC<ConstellationDossierModalProps>
 
               {/* Bottom Section: Description & Mythology */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
-                  <strong className="text-cyan-300 block mb-1.5 font-bold flex items-center gap-1.5">
-                    <Info className="w-4 h-4 text-cyan-400" />
+                <div className="observatory-panel p-4 rounded-xl border border-white/10">
+                  <strong className="text-sky-300 block mb-1.5 font-bold flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-sky-400" />
                     <span>Astronomical Overview:</span>
                   </strong>
                   <p className="text-slate-300 leading-relaxed">{constellation.description}</p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#04091c] border border-cyan-500/20">
+                <div className="observatory-panel p-4 rounded-xl border border-white/10">
                   <strong className="text-amber-300 block mb-1.5 font-bold flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-400" />
                     <span>Mythology & Classical Lore:</span>

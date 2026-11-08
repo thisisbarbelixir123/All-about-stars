@@ -117,27 +117,24 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#060a1a]/90 backdrop-blur-2xl border border-cyan-500/20 rounded-2xl p-3.5 sm:p-5 shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col gap-3.5 sm:gap-5 relative overflow-hidden">
-      {/* Background Subtle Gradient Glow */}
-      <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="w-full observatory-panel rounded-2xl p-3.5 sm:p-5 flex flex-col gap-3.5 sm:gap-5 relative overflow-hidden">
       {/* Primary Control Bar: Search Input, Quick Filters Toggle, Sort & Reset */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
         {/* Search Bar with Clear Button */}
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-sky-400 pointer-events-none" />
           <input
             id="input-star-search"
             type="text"
             placeholder="Search stars by name, Bayer designation, constellation, or stage..."
             value={filterState.searchQuery}
             onChange={(e) => onChangeFilter({ searchQuery: e.target.value })}
-            className="w-full bg-[#020510] border border-cyan-500/30 focus:border-cyan-400 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 transition-all shadow-inner font-mono"
+            className="w-full bg-black/50 border border-white/10 focus:border-sky-400 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all shadow-inner font-mono"
           />
           {filterState.searchQuery && (
             <button
               onClick={() => onChangeFilter({ searchQuery: '' })}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 hover:text-white px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:border-cyan-500/40 transition-all cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 hover:text-white px-2 py-0.5 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:border-sky-500/40 transition-all cursor-pointer"
             >
               Clear
             </button>
@@ -153,8 +150,8 @@ export const StarFilterPanel: React.FC<StarFilterPanelProps> = ({
             aria-expanded={isExpanded}
             className={`flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-3 rounded-xl text-xs font-mono font-semibold transition-all border cursor-pointer shrink-0 ${
               isExpanded || activeFiltersCount > 0
-                ? 'bg-cyan-950/80 border-cyan-400/80 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                : 'bg-[#020510] border-cyan-500/30 text-slate-300 hover:text-white hover:border-cyan-400'
+                ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold shadow-sm'
+                : 'observatory-control text-slate-300 hover:text-white'
             }`}
             title={isExpanded ? 'Collapse Filter Controls' : 'Expand Filter Controls'}
           >

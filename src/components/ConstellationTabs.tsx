@@ -13,13 +13,13 @@ export const ConstellationTabs: React.FC<ConstellationTabsProps> = ({
   setActiveTab
 }) => {
   return (
-    <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 max-w-full overflow-x-auto no-scrollbar shrink-0">
+    <div className="flex items-center gap-1 sm:gap-1.5 p-1 observatory-panel rounded-xl max-w-full overflow-x-auto no-scrollbar shrink-0">
       <button
         id="tab-what-are-constellations"
         onClick={() => setActiveTab('what-are')}
-        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
           activeTab === 'what-are'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         }`}
       >
@@ -30,16 +30,16 @@ export const ConstellationTabs: React.FC<ConstellationTabsProps> = ({
       <button
         id="tab-all-88-constellations"
         onClick={() => setActiveTab('all-88')}
-        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
           activeTab === 'all-88'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         }`}
       >
         <Globe className="w-3.5 h-3.5" />
         <span>All 88 Constellations</span>
         <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-          activeTab === 'all-88' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-cyan-950 text-cyan-300'
+          activeTab === 'all-88' ? 'bg-slate-950/25 text-slate-950 font-bold' : 'bg-white/[0.06] text-sky-300'
         }`}>
           88
         </span>
@@ -48,16 +48,16 @@ export const ConstellationTabs: React.FC<ConstellationTabsProps> = ({
       <button
         id="tab-zodiac-13"
         onClick={() => setActiveTab('zodiac-13')}
-        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
           activeTab === 'zodiac-13'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         }`}
       >
-        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'zodiac-13' ? 'text-slate-950' : 'text-amber-400'}`} />
         <span>13 Zodiac Signs</span>
         <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-          activeTab === 'zodiac-13' ? 'bg-slate-950/30 text-slate-950 font-bold' : 'bg-amber-950 text-amber-300 font-bold'
+          activeTab === 'zodiac-13' ? 'bg-slate-950/25 text-slate-950 font-bold' : 'bg-amber-950 text-amber-300 font-bold'
         }`}>
           13
         </span>
@@ -66,13 +66,13 @@ export const ConstellationTabs: React.FC<ConstellationTabsProps> = ({
       <button
         id="tab-mythbuster"
         onClick={() => setActiveTab('mythbuster')}
-        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
           activeTab === 'mythbuster'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+            ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         }`}
       >
-        <HelpCircle className="w-3.5 h-3.5 text-rose-400" />
+        <HelpCircle className={`w-3.5 h-3.5 ${activeTab === 'mythbuster' ? 'text-slate-950' : 'text-rose-400'}`} />
         <span>Personality Mythbuster</span>
       </button>
     </div>

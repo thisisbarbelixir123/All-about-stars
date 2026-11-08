@@ -121,31 +121,31 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header Section */}
-      <div className="relative px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 border-b border-purple-500/25 bg-[#08051c]/95 backdrop-blur-xl">
+      <div className="relative px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 border-b border-white/10 observatory-panel">
         <div className="relative z-10 flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 font-mono text-[10px] sm:text-xs font-bold border border-purple-400/40 uppercase tracking-wider shadow-sm">
-                <Share2 className="w-3.5 h-3.5 text-purple-400" />
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.06] text-sky-300 font-mono text-[10px] sm:text-xs font-bold border border-white/10 uppercase tracking-wider shadow-sm">
+                <Share2 className="w-3.5 h-3.5 text-sky-400" />
                 <span>Stellar System Dossier</span>
               </span>
 
-              <span className="px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 font-mono text-[10px] sm:text-xs border border-cyan-500/30">
+              <span className="px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-300 font-mono text-[10px] sm:text-xs border border-white/10">
                 {system.systemType}
               </span>
 
-              <span className="px-2 py-0.5 rounded-full bg-black/60 text-slate-300 font-mono text-[10px] sm:text-xs border border-slate-700">
+              <span className="px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-300 font-mono text-[10px] sm:text-xs border border-white/10">
                 {system.components.length} Stars Bound
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h1 className="text-sm sm:text-base md:text-xl font-black text-white tracking-tight flex items-center gap-2">
+              <h1 className="text-sm sm:text-base md:text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 <span>{system.name}</span>
               </h1>
             </div>
 
-            <p className="text-[10px] sm:text-xs text-purple-200/70 font-mono mt-0.5 flex flex-wrap items-center gap-x-2">
+            <p className="text-[10px] sm:text-xs text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-x-2">
               <span>Constellation: <strong className="text-slate-200">{system.constellation}</strong></span>
               <span>•</span>
               <span>Distance: <strong className="text-slate-200">{system.distanceLy.toLocaleString()} ly</strong></span>
@@ -162,7 +162,7 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onClose}
-              className="p-1.5 sm:p-2 rounded-xl bg-black/60 hover:bg-purple-900/40 text-slate-400 hover:text-white border border-purple-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
+              className="min-h-[44px] min-w-[44px] p-2 rounded-xl observatory-control text-slate-400 hover:text-white transition-all cursor-pointer shrink-0 flex items-center justify-center active:scale-95"
               title="Close Stellar System Dossier"
               aria-label="Close"
             >
@@ -191,13 +191,13 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               <div id="stellar-system-toolbar-slot" className="w-full min-h-0" />
               
               {/* System Overview & Barycenter Physics */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#0c0628]/90 via-[#07041c]/90 to-[#02020f]/90 border border-purple-500/30 shadow-lg space-y-3">
-                <div className="flex items-center gap-2 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider">
-                  <Atom className="w-4 h-4 text-purple-400" />
+              <div className="p-4 sm:p-5 rounded-2xl observatory-panel border border-white/10 space-y-3">
+                <div className="flex items-center gap-2 text-sky-300 font-mono font-bold text-xs uppercase tracking-wider">
+                  <Atom className="w-4 h-4 text-sky-400" />
                   <span>Barycenter Mechanics & Astrophysics</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/50 border border-purple-500/20 text-xs text-purple-200/90 leading-relaxed font-sans">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300 leading-relaxed font-sans">
                   <strong className="text-white block mb-1">Center of Mass Dynamics:</strong>
                   {system.barycenterDescription}
                 </div>
@@ -210,8 +210,8 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               {/* Bound Component Stars Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-purple-400" />
+                  <h3 className="text-xs font-mono font-bold text-sky-300 uppercase tracking-wider flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-sky-400" />
                     <span>Gravitationally Bound Stars ({system.components.length})</span>
                   </h3>
                   <span className="text-[11px] font-mono text-slate-400">
@@ -227,18 +227,12 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                       <div
                         key={comp.id}
                         onClick={() => handleOpenStarDossier(comp.id, comp.catalogStarId)}
-                        className={`group p-3.5 sm:p-4 rounded-2xl bg-[#04081c]/90 border transition-all cursor-pointer relative overflow-hidden ${
+                        className={`group p-3.5 sm:p-4 rounded-2xl observatory-panel transition-all cursor-pointer relative overflow-hidden ${
                           isSelected
-                            ? 'border-purple-400 ring-2 ring-purple-400/40 bg-[#0a0f30]/95 shadow-[0_0_25px_rgba(168,85,247,0.25)]'
-                            : 'border-purple-500/25 hover:border-purple-400/60 hover:bg-[#080d28]/95'
+                            ? 'border-sky-400 ring-1 ring-sky-400/40 bg-[#0c1326]'
+                            : 'border-white/10 hover:border-sky-400/50 hover:bg-[#0c1224]'
                         }`}
                       >
-                        {/* Glow accent */}
-                        <div 
-                          className="absolute -right-8 -top-8 w-28 h-28 rounded-full blur-2xl opacity-15 pointer-events-none"
-                          style={{ backgroundColor: comp.colorHex === '#000000' ? '#1e293b' : comp.colorHex }}
-                        />
-
                         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
@@ -247,11 +241,11 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                                 style={{ backgroundColor: comp.colorHex }}
                                 title={`${comp.name} (${comp.spectralType})`}
                               />
-                              <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-purple-200 transition-colors">
+                              <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-sky-300 transition-colors">
                                 {comp.name}
                               </h4>
                               {comp.bayerDesignation && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/60 border border-slate-700 text-slate-300">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-slate-300">
                                   {comp.bayerDesignation}
                                 </span>
                               )}
@@ -291,22 +285,22 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
 
                             {/* Key Astrophysical Specs Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[10px]">
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800">
+                              <div className="p-1.5 rounded-lg bg-black/40 border border-white/5">
                                 <span className="text-slate-400 block text-[9px]">Mass:</span>
                                 <span className="text-white font-bold">{comp.massSolar.toFixed(comp.massSolar < 1 ? 3 : 2)} M☉</span>
                               </div>
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800">
+                              <div className="p-1.5 rounded-lg bg-black/40 border border-white/5">
                                 <span className="text-slate-400 block text-[9px]">Radius:</span>
                                 <span className="text-white font-bold">{comp.radiusSolar.toFixed(comp.radiusSolar < 0.1 ? 4 : 2)} R☉</span>
                               </div>
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800">
+                              <div className="p-1.5 rounded-lg bg-black/40 border border-white/5">
                                 <span className="text-slate-400 block text-[9px]">Temp:</span>
                                 <span className="text-amber-300 font-bold">{comp.temperature.toLocaleString()} K</span>
                               </div>
-                              <div className="p-1.5 rounded-lg bg-black/50 border border-slate-800 min-w-0 overflow-hidden">
+                              <div className="p-1.5 rounded-lg bg-black/40 border border-white/5 min-w-0 overflow-hidden">
                                 <span className="text-slate-400 block text-[9px]">Rotation:</span>
                                 <span
-                                  className="text-cyan-300 font-bold block truncate"
+                                  className="text-sky-300 font-bold block truncate"
                                   title={comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
                                 >
                                   {comp.rotationalPeriodFormatted || `${comp.rotationalPeriodDays || 1}d`}
@@ -322,10 +316,10 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                                 e.stopPropagation();
                                 handleOpenStarDossier(comp.id, comp.catalogStarId);
                               }}
-                              className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-purple-600/80 hover:bg-purple-500 text-white font-mono text-xs font-bold transition-all shadow-[0_0_12px_rgba(168,85,247,0.3)] flex items-center justify-center gap-1.5 cursor-pointer group-hover:scale-105"
+                              className="min-h-[44px] w-full sm:w-auto px-3.5 py-2 rounded-xl observatory-control hover:border-sky-400/50 text-slate-200 hover:text-white font-mono text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                             >
                               <span>Open Star Dossier</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
+                              <ExternalLink className="w-3.5 h-3.5 text-sky-400" />
                             </button>
                           </div>
                         </div>
@@ -335,10 +329,10 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                 </div>
               </div>
 
-              {/* Solved Orbits Hierarchy Reference (relocated below bound stars) */}
-              <div className="p-4 rounded-2xl bg-[#030617]/90 border border-purple-500/25 shadow-md">
-                <div className="flex items-center gap-2 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider mb-2.5">
-                  <Orbit className="w-4 h-4 text-purple-400" />
+              {/* Solved Orbits Hierarchy Reference */}
+              <div className="p-4 rounded-2xl observatory-panel border border-white/10 shadow-sm">
+                <div className="flex items-center gap-2 text-sky-300 font-mono font-bold text-xs uppercase tracking-wider mb-2.5">
+                  <Orbit className="w-4 h-4 text-sky-400" />
                   <span>Solved Keplerian Orbital Architecture</span>
                 </div>
 
@@ -346,11 +340,11 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
                   {system.orbits.map((orb, idx) => (
                     <div 
                       key={idx}
-                      className="p-2.5 rounded-xl bg-black/60 border border-purple-500/20 text-xs font-mono space-y-1 hover:border-purple-400/40 transition-colors"
+                      className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-xs font-mono space-y-1 hover:border-white/15 transition-colors"
                     >
                       <div className="flex items-center justify-between text-white font-bold">
-                        <span className="text-purple-300">{orb.label}</span>
-                        <span className="text-cyan-300 text-[11px]">
+                        <span className="text-sky-200">{orb.label}</span>
+                        <span className="text-sky-400 text-[11px]">
                           P = {orb.orbitalPeriodDays ? `${orb.orbitalPeriodDays.toFixed(2)} d` : `${orb.orbitalPeriodYears} yr`}
                         </span>
                       </div>
@@ -368,8 +362,8 @@ export const StellarSystemDossierModal: React.FC<StellarSystemDossierModalProps>
               </div>
 
               {/* Footnote / Astrophysical System Summary at the very bottom right */}
-              <div className="p-3.5 sm:p-4 rounded-xl bg-[#030614]/85 border border-purple-500/20 text-xs text-slate-400 font-mono leading-relaxed space-y-1 shadow-sm">
-                <div className="text-purple-300 font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
+              <div className="p-3.5 sm:p-4 rounded-xl observatory-panel border border-white/10 text-xs text-slate-400 font-mono leading-relaxed space-y-1 shadow-sm">
+                <div className="text-sky-300 font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
                   Astrophysical System Footnote
                 </div>
                 <p className="text-[11px] sm:text-xs text-slate-300">
