@@ -542,7 +542,7 @@ export const MODERN_CATALOGS: ModernCatalogRecord[] = [
     category: 'infrared',
     primaryPurpose: 'The historic first spaceborne all-sky infrared survey at 12, 25, 60, and 100 µm wavelengths.',
     numberingLogic: 'Equatorial coordinates: IRAS [HHMMm±DDMM], e.g. IRAS 05280-6910, IRAS 17166-3336.',
-    inDepthExplanation: 'Launched in 1983 as the first cryogenic space observatory, IRAS discovered the "Vega phenomenon"—detecting infrared-excess emission caused by dusty protoplanetary debris disks orbiting mature stars like Vega and Fomalhaut. It also pinpointed deeply embedded proto-stellar nurseries hidden inside opaque molecular clouds and discovered luminous infrared hypergiants shrouded in thick circumstellar dust cocoons.',
+    inDepthExplanation: 'Launched in 1983 as the first cryogenic space observatory, IRAS discovered the "Vega phenomenon", detecting infrared-excess emission caused by dusty protoplanetary debris disks orbiting mature stars like Vega and Fomalhaut. It also pinpointed deeply embedded proto-stellar nurseries hidden inside opaque molecular clouds and discovered luminous infrared hypergiants shrouded in thick circumstellar dust cocoons.',
     example: 'IRAS 05280-6910',
     exampleTarget: 'Extreme dust-enshrouded red supergiant in the Large Magellanic Cloud with massive mass-loss envelope',
     catalogId: 'iras-05280-6910',
@@ -820,7 +820,7 @@ export const CLUSTERS_AND_EXTRAGALACTIC_LORE: ClusterExtragalacticRecord[] = [
     category: 'Cluster Member',
     originAndNamingConvention: 'Discovered in 1990 by American astronomer Charles Bruce Stephenson during a deep photographic survey of the Milky Way plane. Also cataloged as RSGC2 (Red Supergiant Cluster 2) or DFK 1.',
     parentStructureOrGalaxy: 'Scutum-Centaurus Arm of the Milky Way, near the Scutum bar intersection',
-    detailedLore: 'Stephenson 2 is an extraordinary massive open cluster buried behind heavy interstellar dust extinction. It contains at least 26 confirmed red supergiants—the largest collection of red supergiants known in any cluster in the galaxy. Its most famous member, Stephenson 2-18 (RSGC2-18 / Stephenson 2 DFK 1), is currently considered one of the physically largest stars in existence, with an estimated radius of ~2,150 solar radii.',
+    detailedLore: 'Stephenson 2 is an extraordinary massive open cluster buried behind heavy interstellar dust extinction. It contains at least 26 confirmed red supergiants, the largest collection of red supergiants known in any cluster in the galaxy. Its most famous member, Stephenson 2-18 (RSGC2-18 / Stephenson 2 DFK 1), is currently considered one of the physically largest stars in existence, with an estimated radius of ~2,150 solar radii.',
     famousStars: [
       { name: 'Stephenson 2-18', catalogId: 'stephenson-2-18', role: 'Colossal red hypergiant with a radius that would engulf the orbit of Saturn' },
     ],
@@ -904,7 +904,7 @@ export const MISCELLANEOUS_NAMES: MiscellaneousNameRecord[] = [
     formalDesignation: 'HD 140283',
     catalogId: 'methuselah-star',
     originType: 'Astrophysical Phenomenon',
-    story: 'Nicknamed after the biblical figure Methuselah due to initial parallax estimates suggesting an age of 14.46 ± 0.8 billion years—seemingly older than the Universe itself! Modern refined measurements place its age at ~13.7 billion years, confirming it formed in the first generation after the Big Bang.',
+    story: 'Nicknamed after the biblical figure Methuselah due to initial parallax estimates suggesting an age of 14.46 ± 0.8 billion years, seemingly older than the Universe itself! Modern refined measurements place its age at ~13.7 billion years, confirming it formed in the first generation after the Big Bang.',
   },
   {
     popularName: 'The Pistol Star',
@@ -939,7 +939,7 @@ export const MISCELLANEOUS_NAMES: MiscellaneousNameRecord[] = [
     formalDesignation: 'Polaris / α Ursae Minoris Aa',
     catalogId: 'polaris',
     originType: 'Mythological / Folk',
-    story: 'A functional astronomical moniker denoting the star closest to the northern celestial pole. Due to Earth’s 25,772-year axial precession, Polaris is only our current pole star—4,000 years ago Thuban was the pole star, and in 12,000 years Vega will take its place.',
+    story: 'A functional astronomical moniker denoting the star closest to the northern celestial pole. Due to Earth’s 25,772-year axial precession, Polaris is only our current pole star, 4,000 years ago Thuban was the pole star, and in 12,000 years Vega will take its place.',
   },
 ];
 
@@ -963,7 +963,7 @@ export const NON_STAR_STELLAR_DESIGNATIONS: NonStarStellarRecord[] = [
     type: 'Flamsteed Number given to a Supernova',
     actualIdentity: 'The Cassiopeia A Supernova Remnant (c. 1680)',
     historicalContext: 'In August 1680, John Flamsteed logged a 6th-magnitude star in Cassiopeia and assigned it the designation 3 Cassiopeiae. Later astronomers could find nothing at those coordinates, and it was long dismissed as an observational error.',
-    discoveryStory: 'In the mid-20th century, radio astronomers detected one of the strongest radio sources in the sky (Cassiopeia A). Retrograde expansion calculations proved the supernova shockwave erupted around 1680—Flamsteed had caught the dying gasp of a massive star as a temporary "ghost star"!',
+    discoveryStory: 'In the mid-20th century, radio astronomers detected one of the strongest radio sources in the sky (Cassiopeia A). Retrograde expansion calculations proved the supernova shockwave erupted around 1680, Flamsteed had caught the dying gasp of a massive star as a temporary "ghost star"!',
   },
   {
     designation: 'Chi Persei (χ Persei) & h Persei',

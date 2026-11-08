@@ -801,12 +801,8 @@ export default function App() {
       {!assetsLoaded && <LoadingSprite />}
       
       <div className={`flex flex-col h-full w-full transition-opacity duration-700 ${assetsLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Deep Space Ambient Nebulae & Radial Glows */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 w-[650px] h-[650px] bg-cyan-900/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-indigo-950/15 rounded-full blur-[160px]" />
-        <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-blue-950/10 rounded-full blur-[150px]" />
-      </div>
+      {/* Deep Space Base */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[#02040a]" />
 
       {/* Top Main Navigation Header - Accessible only from 3D mode screen, removed from home screen */}
       {!isHomeOpen && !isStageTourActive && (
@@ -819,8 +815,8 @@ export default function App() {
               onClick={() => setIsHomeOpen((prev) => !prev)}
               className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                 isHomeOpen
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_18px_rgba(6,182,212,0.45)] font-bold'
-                  : 'bg-[#040816]/90 text-slate-300 hover:text-white hover:bg-cyan-950/60 border border-cyan-500/30 backdrop-blur-md shadow-md'
+                  ? 'bg-sky-500 text-slate-950 shadow-md font-bold'
+                  : 'observatory-control text-slate-300 hover:text-white shadow-sm'
               }`}
               title={isHomeOpen ? 'Close Homepage' : 'Open Homepage'}
               aria-label="Home"
@@ -930,7 +926,7 @@ export default function App() {
             {/* Fullscreen Page Toggle */}
             <FullscreenToggle id="btn-topbar-fullscreen" />
 
-            {/* About App Button (Sits right on the left-hand side of Coffee button) */}
+            {/* About App Button */}
             <button
               id="btn-topbar-about"
               onClick={() => {
@@ -938,10 +934,10 @@ export default function App() {
                 setIsAboutOpen(true);
               }}
               title="About App (Origins, Inspirations & Creator)"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-[#090e20] hover:bg-cyan-950/50 border border-cyan-500/30 transition-all cursor-pointer shrink-0 active:scale-95"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white observatory-control transition-all cursor-pointer shrink-0 active:scale-95 shadow-sm"
               aria-label="About App"
             >
-              <Info className="w-4 h-4 text-cyan-400" />
+              <Info className="w-4 h-4 text-sky-400" />
               <span className="hidden sm:inline">About App</span>
             </button>
 

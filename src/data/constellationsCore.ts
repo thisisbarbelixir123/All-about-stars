@@ -115,7 +115,7 @@ export const ZODIAC_13_EXPLAINER = {
   title: 'The 13 Signs of the Zodiac (Yes, Thirteen!)',
   subtitle: 'The Ecliptic Highway, Axial Precession, and the Forgotten Serpent Bearer',
   introduction:
-    'The Zodiac is the narrow band of the celestial sphere spanning roughly 8 degrees north and south of the ecliptic—the apparent annual path of the Sun across the background stars as viewed from Earth. Because the Moon and major planets orbit in nearly the same plane as Earth, they also wander through this same celestial highway.',
+    'The Zodiac is the narrow band of the celestial sphere spanning roughly 8 degrees north and south of the ecliptic, the apparent annual path of the Sun across the background stars as viewed from Earth. Because the Moon and major planets orbit in nearly the same plane as Earth, they also wander through this same celestial highway.',
   ophiuchusSpotlight: {
     name: 'Ophiuchus (The Serpent Bearer)',
     symbol: '⛎',
@@ -254,7 +254,7 @@ export const ZODIAC_13_SIGNS: ZodiacSignInfo[] = [
     principalStar: 'Rasalhague (Alpha Ophiuchi)',
     principalStarId: 'rasalhague',
     isThirteenth: true,
-    scientificNotes: 'The real 13th constellation of the ecliptic! The Sun spends nearly 19 days here—far longer than in Scorpius.'
+    scientificNotes: 'The real 13th constellation of the ecliptic! The Sun spends nearly 19 days here, far longer than in Scorpius.'
   },
   {
     index: 10,

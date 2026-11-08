@@ -43,7 +43,7 @@ export const WHAT_IS_A_STAR_CORE_INFO = {
   scientificDefinition:
     "A star is a gravitationally bound, massive sphere of incandescent plasma held in hydrostatic equilibrium by the balance between its inward self-gravity and outward radiation/thermal pressure, sustained by nuclear fusion occurring deep within its core.",
   cosmicSignificance:
-    "Stars are the primary engines of cosmic evolution. Almost every atomic nucleus in the universe heavier than helium—including the oxygen we breathe, the carbon in our DNA, the calcium in our bones, and the iron in our blood—was forged inside the nuclear furnaces of ancient stars or synthesized during cataclysmic supernovae and neutron star mergers.",
+    "Stars are the primary engines of cosmic evolution. Almost every atomic nucleus in the universe heavier than helium, including the oxygen we breathe, the carbon in our DNA, the calcium in our bones, and the iron in our blood, was forged inside the nuclear furnaces of ancient stars or synthesized during cataclysmic supernovae and neutron star mergers.",
   milkyWayCount: "100–400 Billion Stars",
   observableUniverseCount: "~2 × 10²⁴ Stars (2 Septillion)",
 };
@@ -128,7 +128,7 @@ export const STELLAR_ANATOMY_LAYERS: StellarAnatomyLayer[] = [
       'The optical boundary where stellar material transitions from opaque to transparent, letting light escape freely into the cosmos.',
     details: [
       'This is the layer that defines a star’s visible radius and its effective surface temperature (Teff).',
-      'Houses sunspots—regions of localized magnetic flux where convection is suppressed, resulting in cooler (~4,000 K) patches.',
+      'Houses sunspots, regions of localized magnetic flux where convection is suppressed, resulting in cooler (~4,000 K) patches.',
       'Its blackbody radiation spectrum carries the Fraunhofer absorption lines that reveal the star’s exact chemical elements.',
     ],
     color: 'from-yellow-400 to-amber-500',
@@ -234,9 +234,9 @@ export const FUNDAMENTAL_STELLAR_PROPERTIES: FundamentalStellarProperty[] = [
     description:
       'More massive stars exert vastly higher gravitational compression on their cores. This compresses the fuel and elevates temperatures, driving fusion rates up by factors of millions. Consequently, hyper-massive stars burn through their fuel in a few million years, whereas low-mass red dwarfs can burn steadily for trillions of years.',
     extremeExamples: {
-      minimum: '0.075–0.08 M☉ (~80 Jupiter masses) — Lower limit for hydrogen fusion (Brown dwarf boundary)',
-      solar: '1.0 M☉ — Typical G-type main sequence star (Lifespan ~10 billion years)',
-      maximum: '~150–250 M☉ (e.g. R136a1) — Near the Eddington Luminosity limit where radiation blows outer layers away',
+      minimum: '0.075–0.08 M☉ (~80 Jupiter masses), Lower limit for hydrogen fusion (Brown dwarf boundary)',
+      solar: '1.0 M☉, Typical G-type main sequence star (Lifespan ~10 billion years)',
+      maximum: '~150–250 M☉ (e.g. R136a1), Near the Eddington Luminosity limit where radiation blows outer layers away',
     },
   },
   {
@@ -250,9 +250,9 @@ export const FUNDAMENTAL_STELLAR_PROPERTIES: FundamentalStellarProperty[] = [
     description:
       'According to blackbody radiation physics, hotter bodies emit light at shorter, higher-energy wavelengths. Therefore, contrary to everyday faucet color conventions, in astrophysics blue stars are blistering hot (>30,000 K), white and yellow stars are intermediate (5,000–10,000 K), and red stars are the coolest (2,500–3,500 K).',
     extremeExamples: {
-      minimum: '2,400–3,000 K — Cool M-dwarfs and Red Supergiants (Betelgeuse, Proxima Centauri)',
-      solar: '5,778 K — Yellow-white G2V star',
-      maximum: '40,000–55,000+ K — Scorching O2V stars and Wolf-Rayet central stars',
+      minimum: '2,400–3,000 K, Cool M-dwarfs and Red Supergiants (Betelgeuse, Proxima Centauri)',
+      solar: '5,778 K, Yellow-white G2V star',
+      maximum: '40,000–55,000+ K, Scorching O2V stars and Wolf-Rayet central stars',
     },
   },
   {
@@ -266,9 +266,9 @@ export const FUNDAMENTAL_STELLAR_PROPERTIES: FundamentalStellarProperty[] = [
     description:
       'Notice that luminosity depends on two distinct factors: the star’s physical surface area (4π R²) and the fourth power of its temperature (Teff⁴). This explains why a cool red hypergiant can shine with 300,000 times the Sun’s luminosity simply because its diameter is immense, while a scorching tiny white dwarf glows with only a fraction of solar luminosity.',
     extremeExamples: {
-      minimum: '0.0001 L☉ (1/10,000th Sun) — Dim red dwarfs and degenerate white dwarfs',
+      minimum: '0.0001 L☉ (1/10,000th Sun), Dim red dwarfs and degenerate white dwarfs',
       solar: '1.0 L☉ (383 yottawatts)',
-      maximum: '4,000,000–8,000,000 L☉ — Monster hypergiants (R136a1, Eta Carinae)',
+      maximum: '4,000,000–8,000,000 L☉, Monster hypergiants (R136a1, Eta Carinae)',
     },
   },
   {
@@ -282,9 +282,9 @@ export const FUNDAMENTAL_STELLAR_PROPERTIES: FundamentalStellarProperty[] = [
     description:
       'A star’s physical size varies dramatically across its life cycle. On the main sequence, size is dictated by hydrostatic mass balance. When core hydrogen ceases, shell burning swells the outer envelope outward into a gigantic, low-density sphere.',
     extremeExamples: {
-      minimum: '~10–12 km (0.000015 R☉) — Neutron Star / Crab Pulsar',
+      minimum: '~10–12 km (0.000015 R☉), Neutron Star / Crab Pulsar',
       solar: '696,340 km (1.0 R☉)',
-      maximum: '2,150 R☉ (~1.5 billion km) — Stephenson 2-18 (would engulf Saturn’s orbit)',
+      maximum: '2,150 R☉ (~1.5 billion km), Stephenson 2-18 (would engulf Saturn’s orbit)',
     },
   },
   {
@@ -296,7 +296,7 @@ export const FUNDAMENTAL_STELLAR_PROPERTIES: FundamentalStellarProperty[] = [
     whyItMatters:
       'The cosmic law that keeps every living star stable for millions or billions of years instead of collapsing into a black hole or blowing apart.',
     description:
-      'At every concentric shell inside a stable star, the inward force of gravity (pulling all mass toward the center) is precisely balanced by the outward gradient of gas pressure and radiation pressure created by core nuclear fusion. If the core cools slightly, gravity compresses it, raising the temperature and restoring equilibrium. If the core overheats, it expands and cools automatically—a self-regulating cosmic thermostat!',
+      'At every concentric shell inside a stable star, the inward force of gravity (pulling all mass toward the center) is precisely balanced by the outward gradient of gas pressure and radiation pressure created by core nuclear fusion. If the core cools slightly, gravity compresses it, raising the temperature and restoring equilibrium. If the core overheats, it expands and cools automatically, a self-regulating cosmic thermostat!',
     extremeExamples: {
       minimum: 'Instability Strip: Stars pulsate periodically (e.g. Cepheid variables)',
       solar: 'In steady hydrostatic equilibrium for 4.6 billion years (and 5 billion more to come)',

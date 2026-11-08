@@ -8,7 +8,6 @@ import { FullscreenToggle } from './FullscreenToggle';
 import { PWAInstallButton } from './PWAInstallButton';
 import { RunningText } from './RunningText';
 import {
-  ArrowRight,
   Play,
   RotateCcw,
 } from 'lucide-react';
@@ -213,29 +212,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <div className="flex flex-col flex-1 w-full justify-center animate-in fade-in duration-300 rounded-none">
-      {/* SEMI-TRANSPARENT HERO WINDOW (ON MOBILE) / DECORATIVE 3D STARS (ON DESKTOP & TABLETS) */}
+      {/* OBSERVATORY HERO STAGE */}
       <section
         ref={heroBoundsRef}
-        className={`relative rounded-none md:rounded-3xl overflow-hidden border-y md:border border-cyan-500/20 md:border-cyan-500/30 bg-black/35 backdrop-blur-[1px] md:bg-[#000000] md:backdrop-blur-none ${
+        className={`relative rounded-none md:rounded-3xl overflow-hidden border-y md:border border-white/10 bg-[#02040a] ${
           isMobile && !isTablet ? 'p-3 py-2.5 min-h-0 h-auto' : 'p-4 sm:p-10 lg:p-12 min-h-[320px] sm:min-h-[460px] lg:min-h-[500px]'
         } shadow-[0_15px_60px_rgba(0,0,0,0.95)] flex flex-col items-center justify-center text-center w-full flex-1 my-auto`}
       >
-        {/* Deep Black Cosmic Grid Background */}
-        <div 
-          className="absolute inset-0 opacity-10 md:opacity-20 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(rgba(56, 189, 248, 0.25) 1px, transparent 1px), radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px)`,
-            backgroundSize: '40px 40px, 80px 80px',
-            backgroundPosition: '0 0, 20px 20px',
-          }}
-        />
-
-        {/* Ambient Dark Glows (Desktop & Tablets only) */}
-        <div className={`${isTablet ? 'block' : 'hidden md:block'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-950/30 rounded-full blur-[120px] pointer-events-none`} />
-        <div className={`${isTablet ? 'block' : 'hidden md:block'} absolute top-10 left-10 w-72 h-72 bg-blue-950/20 rounded-full blur-[100px] pointer-events-none`} />
-        <div className={`${isTablet ? 'block' : 'hidden md:block'} absolute bottom-10 right-10 w-72 h-72 bg-amber-950/20 rounded-full blur-[100px] pointer-events-none`} />
-
-        {/* TOP CONTROLS: 3D MODE BUTTON, PWA INSTALL & AMBIENT SOUND (ACCESSIBLE ON ALL DEVICES) */}
+        {/* TOP CONTROLS: 3D MODE BUTTON, PWA INSTALL & AMBIENT SOUND */}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30">
           <button
             id="btn-homescreen-enter-3d"
@@ -244,9 +228,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               else onNavigateTab('3d-stage');
             }}
             title="Enter 3D Stage Comparator"
-            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group active:scale-95"
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl observatory-control text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-md group active:scale-95"
           >
-            <Play className="w-3.5 h-3.5 fill-cyan-400 group-hover:fill-white transition-colors" />
+            <Play className="w-3.5 h-3.5 fill-sky-400 group-hover:fill-white transition-colors" />
             <span className="text-[10px] sm:text-[11px] font-bold">3D Mode</span>
           </button>
         </div>
@@ -261,7 +245,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               id="btn-reroll-hero-stars"
               onClick={handleShuffleHeroStars}
               title="Randomize Hero 3D Stars & Positions"
-              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#040816]/80 hover:bg-[#081232] border border-cyan-500/30 hover:border-cyan-400 text-slate-400 hover:text-cyan-300 text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-lg group"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl observatory-control text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shadow-md group"
             >
               <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-90 transition-transform" />
               <span className="text-[11px] hidden sm:inline">Shuffle 3D Stars</span>
@@ -269,11 +253,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
         </div>
 
-        {/* 3D FLOATING STARS: ENABLED ON DESKTOP & TABLETS (NONE ON MOBILE) */}
+        {/* 3D FLOATING STARS: ENABLED ON DESKTOP & TABLETS */}
         {!isMobile && (
           <div className={isTablet ? 'contents' : 'hidden md:contents'}>
 
-            {/* 4 MOVEABLE, GLOWING & RESIZABLE 3D STAR MODELS FROM CATALOG (30PX-300PX TABLET, 40PX-400PX DESKTOP) - BACK LAYER (Z-10) */}
+            {/* 4 MOVEABLE, GLOWING & RESIZABLE 3D STAR MODELS FROM CATALOG */}
             {heroStars.map((star, idx) => (
               <HeroStar3D
                 key={`${star.id}-${idx}`}
@@ -290,7 +274,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               />
             ))}
 
-            {/* STAR ON-HOVER OVERVIEW - FRONT LAYER (Z-40) ALONGSIDE & IN FRONT OF HERO CONTENT */}
+            {/* STAR ON-HOVER OVERVIEW */}
             {activeHeroStar && (() => {
               const overviewPos = getActiveOverviewPosition(activeHeroStar);
               const dimensions = formatPhysicalDiameter(
@@ -307,8 +291,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     transform: overviewPos.transform || 'none',
                   }}
                 >
-                  <div className="bg-[#040816]/95 backdrop-blur-xl px-3.5 py-2.5 rounded-2xl border border-cyan-500/40 shadow-[0_8px_32px_rgba(0,0,0,0.95)] flex flex-col gap-1 w-[220px] text-center">
-                    <div className="flex items-center justify-center gap-1.5 border-b border-cyan-500/20 pb-1.5 min-w-0">
+                  <div className="observatory-panel px-3.5 py-2.5 rounded-xl border border-white/10 flex flex-col gap-1 w-[220px] text-center">
+                    <div className="flex items-center justify-center gap-1.5 border-b border-white/10 pb-1.5 min-w-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full aspect-square inline-block shrink-0 shadow-sm border-0"
                         style={{ backgroundColor: activeHeroStar.star.colorHex }}
@@ -321,7 +305,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] font-mono text-cyan-300 min-w-0">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-sky-300 min-w-0">
                       <span>{activeHeroStar.star.spectralType}</span>
                       <span className="text-slate-300 truncate ml-1 text-right max-w-[120px]">
                         {activeHeroStar.star.stellarStage}
@@ -332,7 +316,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       {dimensions.metricSi} • {dimensions.solarFormatted}
                     </div>
 
-                    <div className="text-[9px] font-mono text-cyan-400/90 pt-1 border-t border-cyan-500/15 flex items-center justify-between">
+                    <div className="text-[9px] font-mono text-sky-400/90 pt-1 border-t border-white/10 flex items-center justify-between">
                       <span className="text-slate-400">Size: {activeHeroStar.sizePx}px</span>
                       <span>Drag / Resize</span>
                     </div>
@@ -343,31 +327,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         )}
 
-        {/* CENTERED HERO CONTENT & APP TITLE - FRONT LAYER (Z-20) */}
+        {/* CENTERED HERO CONTENT & APP TITLE */}
         <div className={`relative z-20 flex flex-col items-center justify-center ${
           isMobile && !isTablet ? 'gap-2.5' : 'gap-3.5 sm:gap-4'
         } max-w-4xl mx-auto my-auto pointer-events-none px-3 text-center`}>
-          {/* Starpedia 3D Logo (without favicon) */}
-          <div className="inline-flex items-center px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-xl bg-[#04081c]/90 border border-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.3)] backdrop-blur-xl pointer-events-auto">
-            <span className="font-['Orbitron',sans-serif] font-bold tracking-widest text-xs sm:text-sm text-white">
-              STARPEDIA <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">3D</span>
-            </span>
+          {/* Starpedia 3D Title Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 font-mono text-xs tracking-wider pointer-events-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+            <span className="font-semibold text-white">STARPEDIA 3D</span>
+            <span className="text-slate-500">•</span>
+            <span className="text-slate-400 text-[11px]">ASTROPHYSICAL ATLAS</span>
           </div>
 
-          {/* The Bigger Headline Text: Stars of the Universe */}
+          {/* Headline Text: Stars of the Universe */}
           <h1 className={`${
             isMobile && !isTablet ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
-          } font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-cyan-200 tracking-tight leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)] font-['Orbitron',sans-serif]`}>
+          } font-bold text-white tracking-tight leading-none`}>
             Stars of the Universe
           </h1>
 
           <p className={`${
             isMobile && !isTablet ? 'text-[11px] leading-snug max-w-md' : 'text-xs sm:text-sm md:text-base max-w-xl leading-relaxed'
-          } text-slate-200 font-mono drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]`}>
-            Compare cosmic titans 1:1, discover stellar physics, and explore astronomical wonders in interactive 3D.
+          } text-slate-300 font-normal`}>
+            A physical-scale comparative atlas and interactive 3D observatory of stars across nine orders of magnitude.
           </p>
 
-          {/* Quick Action Buttons Centered */}
+          {/* Action Button */}
           <div className={`flex flex-wrap items-center justify-center gap-2.5 ${
             isMobile && !isTablet ? 'pt-1' : 'pt-2 sm:pt-3'
           } pointer-events-auto`}>
@@ -378,12 +363,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 else onNavigateTab('3d-stage');
               }}
               className={`${
-                isMobile && !isTablet ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm'
-              } rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-bold tracking-wide shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:shadow-[0_0_40px_rgba(6,182,212,0.7)] transition-all flex items-center gap-2 cursor-pointer active:scale-95`}
+                isMobile && !isTablet ? 'px-4 py-2 text-xs' : 'px-6 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm'
+              } rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold tracking-wide transition-all shadow-[0_4px_20px_rgba(14,165,233,0.35)] hover:shadow-[0_6px_25px_rgba(14,165,233,0.5)] flex items-center gap-2 cursor-pointer active:scale-95`}
             >
               <Play className="w-4 h-4 fill-slate-950" />
               <span>Start Exploring</span>
-              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>

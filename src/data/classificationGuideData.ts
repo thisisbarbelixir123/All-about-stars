@@ -790,7 +790,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
     periodRange: 'Outbursts recur over months to millennia; orbital period hours',
     variabilityType: 'Intrinsic (Cataclysmic)',
     explanation:
-      'Close binary systems consisting of a white dwarf accretor and a mass-losing secondary star. Hydrogen gas transferred via an accretion disk builds up on the degenerate white dwarf surface until crushing pressure and temperatures trigger explosive runaway thermonuclear fusion — a Classical or Recurrent Nova.',
+      'Close binary systems consisting of a white dwarf accretor and a mass-losing secondary star. Hydrogen gas transferred via an accretion disk builds up on the degenerate white dwarf surface until crushing pressure and temperatures trigger explosive runaway thermonuclear fusion, a Classical or Recurrent Nova.',
     mechanism:
       'Degenerate hydrogen envelope at the base of the accreted layer reaches ignition temperature (~20 million K), triggering unquenched thermonuclear runaway without expansion cooling.',
     distinguishingFeatures: [
@@ -832,7 +832,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
     periodRange: 'Hours to months (synchronized with stellar rotation)',
     variabilityType: 'Extrinsic (Rotational)',
     explanation:
-      'Stars whose apparent brightness modulates strictly with their rotational period because of non-uniform surface brightness — such as gigantic cool starspots, bright faculae, or chemical and magnetic patches that rotate in and out of view.',
+      'Stars whose apparent brightness modulates strictly with their rotational period because of non-uniform surface brightness, such as gigantic cool starspots, bright faculae, or chemical and magnetic patches that rotate in and out of view.',
     mechanism:
       'Deep convective dynamo magnetic fields suppress convective heat transport locally, forming gargantuan starspot clusters covering up to 40% of the photosphere.',
     distinguishingFeatures: [
@@ -956,7 +956,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
     tag: 'High-Energy Accretion',
     multiplicity: '2 Bodies (Star + Compact Object)',
     explanation:
-      'Systems composed of a normal donor star and a compact stellar corpse — a neutron star or stellar-mass black hole. Gravitational potential energy released as matter falls from the donor onto or towards the compact object superheats to tens of millions of Kelvin, blazing fiercely in high-energy X-rays.',
+      'Systems composed of a normal donor star and a compact stellar corpse, a neutron star or stellar-mass black hole. Gravitational potential energy released as matter falls from the donor onto or towards the compact object superheats to tens of millions of Kelvin, blazing fiercely in high-energy X-rays.',
     orbitalDynamics:
       'Mass transfer occurs via Roche lobe overflow or powerful focused stellar winds, swirling into an ultra-hot accretion disk with relativistic jets.',
     distinguishingFeatures: [
@@ -1369,7 +1369,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     explanation:
       'The theoretical final state of a white dwarf after it has radiated away all of its residual thermal energy and cooled down to near absolute zero, matching the cosmic microwave background temperature. A cold, dark crystal ball composed of electron-degenerate carbon, oxygen, or neon.',
     physicsMechanism:
-      'White dwarfs have high thermal conductivity but opaque outer crusts. The cooling timescale to drop below 5 K exceeds 10¹⁵ years — over 100,000 times the current age of our universe!',
+      'White dwarfs have high thermal conductivity but opaque outer crusts. The cooling timescale to drop below 5 K exceeds 10¹⁵ years, over 100,000 times the current age of our universe!',
     distinguishingFeatures: [
       'Completely non-luminous: emits zero visible light, detectable only by its immense gravitational pull',
       'Solid crystalline lattice: interior carbon forms colossal quantum diamond structures',
@@ -1388,7 +1388,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     theoreticalEra: 'Extreme Ultra-Dense Relativistic Regimes',
     energySource: 'Strong nuclear binding of de-confined u, d, s strange quarks',
     explanation:
-      'Hypothetical ultra-dense compact stars composed of strange quark matter—a roughly equal liquid mixture of up, down, and strange quarks. Based on the Bodmer-Witten hypothesis that strange matter is the true, absolute ground state of baryonic matter at zero pressure. Bound by the strong nuclear force rather than gravity alone, strange stars can spin at extreme sub-millisecond rates (> 2,000 Hz) without shedding mass.',
+      'Hypothetical ultra-dense compact stars composed of strange quark matter, a roughly equal liquid mixture of up, down, and strange quarks. Based on the Bodmer-Witten hypothesis that strange matter is the true, absolute ground state of baryonic matter at zero pressure. Bound by the strong nuclear force rather than gravity alone, strange stars can spin at extreme sub-millisecond rates (> 2,000 Hz) without shedding mass.',
     physicsMechanism:
       'Under extreme compression (> 10¹⁵ g/cm³), nucleons dissolve into free quarks. Strange quarks lower the Fermi energy of the system, creating a self-bound stable liquid held together by strong color forces, separated from an external nuclear crust by a mammoth electrostatic dipole gap.',
     distinguishingFeatures: [
@@ -1417,7 +1417,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
       'Apple-Sized Electroweak Engine: Core energy generation occurs in a microscopic central volume roughly the size of an apple (radius ~ 10 cm, mass ~ 2 M☉)',
       'Neutrino-Dominated Luminosity: Emits a torrential neutrino wind equaling the luminosity of an entire galaxy, with minimal electromagnetic radiation',
       'Stellar Lifespan of 10 Million Years: Sufficient fuel to pause gravitational collapse to a black hole for roughly 10⁷ years',
-      'Extreme Core Density: Central core density reaches 10²⁹ g/cm³—surpassing neutron star core density by more than 14 orders of magnitude',
+      'Extreme Core Density: Central core density reaches 10²⁹ g/cm³, surpassing neutron star core density by more than 14 orders of magnitude',
     ],
     exampleStarIds: ['sgr-1806-20', 'psr-j1748-2446ad'],
     externalExamples: ['Starkman-Dai-Stojkovic Electroweak Core Model (2009)', 'Pre-Black Hole Electroweak Stage Candidate'],
@@ -1432,7 +1432,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     theoreticalEra: 'Primordial Halos & Supermassive Core Candidates',
     energySource: 'Zero nuclear fusion; self-gravitating quantum Bose-Einstein ground state',
     explanation:
-      'Hypothetical stable astronomical bodies formed of fundamental scalar bosons (such as axions or complex spin-0 particles) bound together by their own gravitational field (Kaup 1968; Ruffini & Bonazzola 1969). Because bosons do not obey the Pauli exclusion principle, they collapse into a single macroscopic quantum wave packet—a macroscopic Bose-Einstein condensate and gravitational soliton. Completely transparent to electromagnetic light, they bend background starlight through gravitational lensing.',
+      'Hypothetical stable astronomical bodies formed of fundamental scalar bosons (such as axions or complex spin-0 particles) bound together by their own gravitational field (Kaup 1968; Ruffini & Bonazzola 1969). Because bosons do not obey the Pauli exclusion principle, they collapse into a single macroscopic quantum wave packet, a macroscopic Bose-Einstein condensate and gravitational soliton. Completely transparent to electromagnetic light, they bend background starlight through gravitational lensing.',
     physicsMechanism:
       'Described by the coupled Einstein-Klein-Gordon equations. The balance between gravitational attraction and Heisenberg uncertainty principle (or scalar self-interaction λ|φ|⁴) supports the star against collapse.',
     distinguishingFeatures: [
@@ -1496,7 +1496,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     theoreticalEra: '10¹⁴ to 10¹⁵ years from now (Far Stelliferous / Degenerate Era)',
     energySource: 'Low-temperature core proton-proton fusion catalyzed by extreme metallicity',
     explanation:
-      'Hypothetical sub-stellar mass stars predicted by astrophysicists Fred Adams and Gregory Laughlin (1997) that could form in the far future when the interstellar medium is enriched to extreme metallicities (hundreds of times solar). High molecular opacity and heavy elements lower the hydrogen-burning mass limit down to ~0.04 M☉ (the mass of current brown dwarfs). With a nuclear furnace operating at barely 10⁵ K, their surface temperature plummets to 0°C (273 K / 32°F)—cold enough for water ice clouds to condense in their atmospheres!',
+      'Hypothetical sub-stellar mass stars predicted by astrophysicists Fred Adams and Gregory Laughlin (1997) that could form in the far future when the interstellar medium is enriched to extreme metallicities (hundreds of times solar). High molecular opacity and heavy elements lower the hydrogen-burning mass limit down to ~0.04 M☉ (the mass of current brown dwarfs). With a nuclear furnace operating at barely 10⁵ K, their surface temperature plummets to 0°C (273 K / 32°F), cold enough for water ice clouds to condense in their atmospheres!',
     physicsMechanism:
       'Extreme heavy-element enrichment increases atmospheric opacity and nuclear cross-sections, allowing stable p-p fusion in sub-brown-dwarf masses (0.04–0.08 M☉) at core temperatures an order of magnitude cooler than today’s stars.',
     distinguishingFeatures: [
@@ -1518,7 +1518,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     theoreticalEra: 'Relativistic Compact Regimes',
     energySource: 'Interior de Sitter dark energy vacuum repulsive pressure',
     explanation:
-      'Gravitational Vacuum Condensate Stars — a proposed quantum-gravitational alternative to classical black holes conceived by Pawel Mazur and Emil Mottola (2001). Rather than collapsing into an infinite-density singularity surrounded by an event horizon, quantum vacuum phase transitions halt collapse, creating a core of de Sitter dark energy surrounded by an ultra-thin shell of ultra-dense relativistic matter.',
+      'Gravitational Vacuum Condensate Stars, a proposed quantum-gravitational alternative to classical black holes conceived by Pawel Mazur and Emil Mottola (2001). Rather than collapsing into an infinite-density singularity surrounded by an event horizon, quantum vacuum phase transitions halt collapse, creating a core of de Sitter dark energy surrounded by an ultra-thin shell of ultra-dense relativistic matter.',
     physicsMechanism:
       'Interior dark energy vacuum has negative pressure (w = -1), balancing inward gravitational pressure without an event horizon or central singularity.',
     distinguishingFeatures: [
@@ -1539,7 +1539,7 @@ export const HYPOTHETICAL_STARS_GUIDE: HypotheticalStarGuideItem[] = [
     theoreticalEra: '10¹⁵⁰⁰ years from now (Deep Cosmic Time)',
     energySource: 'Zero active heat; extremely slow spontaneous quantum tunneling fusion/decay',
     explanation:
-      'Hypothetical cold stellar relics predicted by physicist Freeman Dyson to emerge in the unimaginably distant future of the universe (around 10¹⁵⁰⁰ years, assuming protons do not decay). Over these astronomical timescales, quantum tunneling causes atoms in cold degenerate white dwarfs and black dwarfs to spontaneously fuse and decay into Iron-56 — the most nuclear-binding-energy stable isotope in the universe.',
+      'Hypothetical cold stellar relics predicted by physicist Freeman Dyson to emerge in the unimaginably distant future of the universe (around 10¹⁵⁰⁰ years, assuming protons do not decay). Over these astronomical timescales, quantum tunneling causes atoms in cold degenerate white dwarfs and black dwarfs to spontaneously fuse and decay into Iron-56, the most nuclear-binding-energy stable isotope in the universe.',
     physicsMechanism:
       'Even at absolute zero, quantum wavefunctions have non-zero probability of tunneling through the Coulomb barrier. Over 10¹⁵⁰⁰ years, lighter elements fuse to iron while heavier elements spontaneously fission to iron.',
     distinguishingFeatures: [

@@ -460,12 +460,12 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[70] w-full h-full bg-[#030714] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[70] w-full h-full bg-[#02040a] flex flex-col overflow-hidden pointer-events-auto animate-in fade-in duration-200"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header / Title Section */}
       <div 
-        className="relative z-40 px-3 sm:px-6 py-2 sm:py-3 shrink-0 border-b border-cyan-500/20 bg-[#060b20]/95 backdrop-blur-xl transition-all"
+        className="relative z-40 px-3 sm:px-6 py-2 sm:py-3 shrink-0 border-b border-white/10 bg-[#060a16]/95 backdrop-blur-md transition-all"
       >
         {/* Subtle radial glow background */}
         <div 
@@ -508,21 +508,21 @@ export const StarDetailModal: React.FC<StarDetailModalProps> = ({
                   }}
                   aria-expanded={showDesignationsPopover}
                   aria-label={`View catalog designations for ${star.name}`}
-                  className={`group inline-flex items-center gap-1.5 text-[9px] md:text-xs px-2 md:px-2.5 py-0.5 rounded-full font-mono border transition-all cursor-pointer select-none ${
+                  className={`group inline-flex items-center gap-1.5 text-[9px] md:text-xs px-2 md:px-2.5 py-0.5 rounded-md font-mono border transition-all cursor-pointer select-none ${
                     showDesignationsPopover
-                      ? 'bg-cyan-900/90 text-cyan-200 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                      : 'bg-[#091129]/95 hover:bg-[#0e1d3e] text-cyan-300 border-cyan-500/35 hover:border-cyan-400/80 shadow-sm'
+                      ? 'bg-sky-500 text-slate-950 border-sky-400 font-semibold shadow-sm'
+                      : 'observatory-control text-sky-300'
                   }`}
                   title="Hover or click to display all designations & catalog identifiers"
                 >
                   <span className="font-semibold">{primaryDesignation}</span>
-                  <Tag className="w-2.5 h-2.5 md:w-3 md:h-3 text-cyan-400/80 group-hover:text-cyan-300 shrink-0" />
+                  <Tag className={`w-2.5 h-2.5 md:w-3 md:h-3 ${showDesignationsPopover ? 'text-slate-950' : 'text-sky-400/80 group-hover:text-sky-300'} shrink-0`} />
                 </button>
 
                 {/* Popover Listing Designations (Paginated: 10 per page with < and > controls) */}
                 {showDesignationsPopover && (
                   <div
-                    className="absolute left-0 top-full mt-2 z-50 w-72 sm:w-80 md:w-96 max-w-[calc(100vw-2rem)] rounded-xl bg-[#060b1c]/98 border border-cyan-500/40 p-3 sm:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.95)] backdrop-blur-2xl text-left animate-in fade-in zoom-in-95 duration-150"
+                    className="absolute left-0 top-full mt-2 z-50 w-72 sm:w-80 md:w-96 max-w-[calc(100vw-2rem)] rounded-xl observatory-panel p-3 sm:p-4 text-left animate-in fade-in zoom-in-95 duration-150"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Header */}

@@ -87,19 +87,19 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
         title="Star Encyclopedia: Browse cosmic modules (E)"
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className={`flex items-center ${isMobile ? 'p-2 justify-center' : 'gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5'} rounded-xl border text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shadow-md ${
+        className={`flex items-center ${isMobile ? 'p-2 justify-center' : 'gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5'} rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shadow-md ${
           isOpen || isAnyActive
-            ? 'bg-gradient-to-r from-cyan-950/90 to-blue-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_16px_rgba(6,182,212,0.35)]'
-            : 'bg-[#040816]/90 text-slate-300 hover:text-white hover:bg-cyan-950/60 border-cyan-500/30 backdrop-blur-md'
+            ? 'bg-sky-500 text-slate-950 border border-sky-400 font-bold shadow-md'
+            : 'observatory-control text-slate-300 hover:text-white'
         }`}
       >
-        <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
+        <BookOpen className={`w-4 h-4 shrink-0 ${isOpen || isAnyActive ? 'text-slate-950' : 'text-sky-400'}`} />
         {!isMobile && <span className="hidden sm:inline">Encyclopedia</span>}
         {!isMobile && (
           <ChevronDown
-            className={`w-3.5 h-3.5 text-cyan-400 transition-transform duration-200 shrink-0 ${
-              isOpen ? 'rotate-180 text-cyan-300' : ''
-            }`}
+            className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
+              isOpen || isAnyActive ? 'text-slate-950' : 'text-sky-400'
+            } ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
       </button>
@@ -108,9 +108,9 @@ export const EncyclopediaDropdown: React.FC<EncyclopediaDropdownProps> = ({
       {isOpen && (
         <div
           id={menuId}
-          className="absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] max-h-[75vh] overflow-y-auto scrollbar-thin bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.92),0_0_24px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl text-xs"
+          className="absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] max-h-[75vh] overflow-y-auto scrollbar-thin observatory-panel rounded-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs"
         >
-          <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1.5 mb-1.5 font-mono">
+          <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/10 pb-1.5 mb-1.5 font-mono">
             <span>Star Encyclopedia</span>
           </div>
 

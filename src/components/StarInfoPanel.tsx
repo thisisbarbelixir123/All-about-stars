@@ -31,7 +31,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
     const defaultLargest = allStars.length > 0 ? [...allStars].sort((a, b) => b.diameterKm - a.diameterKm)[0] : null;
 
     return (
-      <div className="p-2.5 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl bg-[#080d20]/85 backdrop-blur-xl border border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-full overflow-hidden">
+      <div className="p-2.5 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl observatory-panel flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 max-w-full overflow-hidden">
         <div className="min-w-0 max-w-full">
           <h3 className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5 sm:gap-2 break-words">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
@@ -95,7 +95,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
       : star.luminositySolar.toFixed(2);
 
   return (
-    <div className="p-2.5 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl bg-[#080d20]/90 backdrop-blur-xl border border-cyan-500/30 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-full overflow-hidden animate-in fade-in duration-150">
+    <div className="p-2.5 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl observatory-panel flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 max-w-full overflow-hidden animate-in fade-in duration-150">
       {/* Star Profile & Core Astrophysics */}
       <div className="flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0 max-w-full">
         {/* Glowing Star Avatar */}
@@ -103,7 +103,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
           className="w-7 h-7 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full aspect-square shrink-0 flex-shrink-0 shadow-lg relative mt-0.5 sm:mt-0"
           style={{
             backgroundColor: star.colorHex,
-            boxShadow: `0 0 20px ${star.colorHex}88`,
+            boxShadow: `0 0 16px ${star.colorHex}66`,
           }}
         />
 
@@ -113,7 +113,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
             <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white flex items-center gap-1.5 sm:gap-2 font-sans break-words leading-tight">
               {star.name}
             </h3>
-            <span className="text-[10px] sm:text-xs px-1.5 sm:px-2.5 py-0.2 sm:py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 font-mono border border-cyan-500/35 font-semibold shrink-0">
+            <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-md bg-white/[0.06] text-sky-300 font-mono border border-white/10 font-semibold shrink-0">
               {star.spectralType}
             </span>
             <span className="text-[10px] sm:text-xs text-slate-400 font-mono hidden sm:inline shrink-0">
@@ -154,7 +154,7 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
         <button
           id={`btn-info-panel-dossier-${star.id}`}
           onClick={() => onInspect(star)}
-          className="p-2 sm:py-2 sm:px-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-[11px] sm:text-xs shadow-[0_0_20px_rgba(6,182,212,0.35)] transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+          className="p-2 sm:py-2 sm:px-3.5 rounded-lg sm:rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-[11px] sm:text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
           title="Open comprehensive astrophysical dossier"
         >
           <Menu className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
@@ -167,8 +167,8 @@ export const StarInfoPanel: React.FC<StarInfoPanelProps> = ({
             onClick={() => onToggleCompare(star)}
             className={`p-2 sm:py-2 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer border active:scale-95 ${
               isInComparisonDock
-                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
-                : 'bg-[#091129] hover:bg-[#101e44] text-slate-200 border-cyan-500/30'
+                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 shadow-sm'
+                : 'observatory-control text-slate-200'
             }`}
             title={isInComparisonDock ? 'Remove star from 3D stage' : 'Add star to 3D stage comparison'}
           >

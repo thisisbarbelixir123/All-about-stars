@@ -3891,7 +3891,7 @@ export const MULTIPLE_STAR_SYSTEMS: MultipleStarSystemData[] = [
     visualSeparationArcsec: 165.0,
     starIds: ['gliese-105-a', 'gliese-105-b', 'gliese-105-c'],
     barycenterDescription: 'Center of mass between orange dwarf Gliese 105 A and the tight low-mass binary pair Gliese 105 BC.',
-    astrophysicalSignificance: 'A nearby benchmark triple system containing an orange K-dwarf (A), a red dwarf (B), and Gliese 105 C—one of the lowest-mass true stars known (0.082 M_sun), sitting directly on the hydrogen-burning limit.',
+    astrophysicalSignificance: 'A nearby benchmark triple system containing an orange K-dwarf (A), a red dwarf (B), and Gliese 105 C, one of the lowest-mass true stars known (0.082 M_sun), sitting directly on the hydrogen-burning limit.',
     components: [
       {
         id: 'gliese-105-a',

@@ -396,7 +396,7 @@ export const SOLAR_SYSTEM_TOUR_BODIES: SolarReferenceBody[] = [
     fusionProcess: 'None (Molecular Hydrogen & Helium Envelope, Metallic Hydrogen Core)',
     notableFacts: [
       'Famous for its spectacular, highly reflective planetary ring system composed of 99% pure water ice.',
-      'Least dense planet in the Solar System (0.687 g/cm³)—less dense than liquid water.',
+      'Least dense planet in the Solar System (0.687 g/cm³), less dense than liquid water.',
       'Hosts Titan, a moon with a dense nitrogen atmosphere and liquid methane-ethane lakes.'
     ],
     description: 'Second-largest planet in the Solar System, adorned with majestic ice rings and dozens of icy moons.',
@@ -438,7 +438,7 @@ export const SOLAR_SYSTEM_TOUR_BODIES: SolarReferenceBody[] = [
     futureFate: 'Stable outer orbit around the remnant white dwarf Sun',
     fusionProcess: 'None (Kelvin-Helmholtz Gravitational Contraction, Metallic Hydrogen Core)',
     notableFacts: [
-      'Largest planet in the Solar System—more than twice as massive as all other planets combined (317.8 M⊕).',
+      'Largest planet in the Solar System, more than twice as massive as all other planets combined (317.8 M⊕).',
       'The Great Red Spot is a persistent anticyclonic storm larger than Earth, active for at least 350 years.',
       'Possesses the strongest planetary magnetosphere, extending up to 7 million km sunward.'
     ],

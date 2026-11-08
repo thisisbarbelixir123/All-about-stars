@@ -3744,7 +3744,7 @@ export const StarCanvas3D: React.FC<StarCanvas3DProps> = ({
                       {isPresetMenuOpen && (
                         <div
                           id="menu-mobile-preset-dropdown"
-                          className="fixed left-2 right-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:w-96 sm:right-auto top-[52px] sm:top-full mt-1 sm:mt-2 max-h-[75vh] overflow-y-auto bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl font-mono text-xs scrollbar-thin pointer-events-auto"
+                          className="fixed left-2 right-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:w-96 sm:right-auto top-[52px] sm:top-full mt-1 sm:mt-2 max-h-[75vh] overflow-y-auto observatory-panel rounded-xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 font-mono text-xs scrollbar-thin pointer-events-auto"
                         >
                           {/* The Complete Catalog - Placed on the very top, not a preset, not editable, separated from presets */}
                           {completeCatalogItem && (

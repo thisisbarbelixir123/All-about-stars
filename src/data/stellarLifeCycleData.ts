@@ -242,7 +242,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Helium White Dwarf',
         colorHex: '#e2e8f0',
         glowColorHex: '#cbd5e1',
-        coreEngine: 'Zero Fusion — Newly Formed Degenerate Helium Core',
+        coreEngine: 'Zero Fusion, Newly Formed Degenerate Helium Core',
         dominantPressure: 'Electron Degeneracy Pressure',
         shortDescription:
           'Nuclear fusion ceases completely. Without any explosion or planetary nebula, the star contracts peacefully into an Earth-sized Helium White Dwarf remnant.',
@@ -266,7 +266,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Cool Helium Dwarf',
         colorHex: '#ea580c',
         glowColorHex: '#9a3412',
-        coreEngine: 'Zero Fusion — Faint Residual Thermal Glow',
+        coreEngine: 'Zero Fusion, Faint Residual Thermal Glow',
         dominantPressure: 'Electron Degeneracy Pressure',
         shortDescription:
           'Shifting through yellow, orange, and dark red as the helium white dwarf slowly radiates its stored thermal heat into deep space.',
@@ -290,7 +290,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Helium Black Dwarf',
         colorHex: '#020617',
         glowColorHex: '#0f172a',
-        coreEngine: 'Zero Fusion — Permanent Cosmic Stasis',
+        coreEngine: 'Zero Fusion, Permanent Cosmic Stasis',
         dominantPressure: 'Electron Degeneracy Pressure',
         shortDescription: 'All thermal heat is exhausted. A cold, dark sphere of degenerate helium floats in eternal cosmic stasis.',
         detailedPhysics:
@@ -330,7 +330,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Dark Molecular Cloud',
         colorHex: '#3b82f6',
         glowColorHex: '#60a5fa',
-        coreEngine: 'No Fusion — Gravitational Jeans Instability',
+        coreEngine: 'No Fusion, Gravitational Jeans Instability',
         dominantPressure: 'Interstellar Gas & Dust Thermal Pressure',
         shortDescription:
           'A cold, dark interstellar cloud of molecular hydrogen (H₂) and dust begins collapsing under gravity.',
@@ -515,7 +515,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Planetary Nebula + Nascent Core',
         colorHex: '#38bdf8',
         glowColorHex: '#06b6d4',
-        coreEngine: 'Fusion Ends — Exposed Ultra-Hot Degenerate Carbon-Oxygen Core',
+        coreEngine: 'Fusion Ends, Exposed Ultra-Hot Degenerate Carbon-Oxygen Core',
         dominantPressure: 'Electron Degeneracy Pressure in Core; Expanding Ionized Shell',
         shortDescription:
           'The outer AGB envelope detaches completely as an iridescent glowing planetary nebula ionized by the scorching central core.',
@@ -539,7 +539,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'WD (Class DA)',
         colorHex: '#93c5fd',
         glowColorHex: '#60a5fa',
-        coreEngine: 'Zero Fusion — Stored Thermal Heat Radiating into Space',
+        coreEngine: 'Zero Fusion, Stored Thermal Heat Radiating into Space',
         dominantPressure: 'Electron Degeneracy Pressure (Pauli Exclusion Principle)',
         shortDescription:
           'The nebula disperses into deep interstellar space, leaving behind an Earth-sized Carbon-Oxygen White Dwarf remnant.',
@@ -563,7 +563,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Cooling White Dwarf (Class DC / DZ)',
         colorHex: '#ea580c',
         glowColorHex: '#9a3412',
-        coreEngine: 'Zero Fusion — Stored Thermal Glow & Core Crystallization',
+        coreEngine: 'Zero Fusion, Stored Thermal Glow & Core Crystallization',
         dominantPressure: 'Electron Degeneracy Pressure',
         shortDescription:
           'With no fusion source, the degenerate Earth-sized core slowly cools across tens of billions of years, shifting through white, yellow, orange, and dark red as its interior freezes into a solid diamond crystal lattice.',
@@ -587,7 +587,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Black Dwarf',
         colorHex: '#0f172a',
         glowColorHex: '#1e293b',
-        coreEngine: 'Zero Fusion — Cold Thermal Equilibrium with CMB',
+        coreEngine: 'Zero Fusion, Cold Thermal Equilibrium with CMB',
         dominantPressure: 'Electron Degeneracy Pressure',
         shortDescription:
           'An utterly cold, pitch-black sphere of crystallized carbon (diamond) and oxygen in eternal thermal equilibrium with deep space.',
@@ -860,7 +860,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Cold Black Neutron Star',
         colorHex: '#0f172a',
         glowColorHex: '#1e293b',
-        coreEngine: 'Zero Energy Output — Permanent Degenerate Thermal Stasis',
+        coreEngine: 'Zero Energy Output, Permanent Degenerate Thermal Stasis',
         dominantPressure: 'Neutron Degeneracy Pressure & Strong Force Repulsion',
         shortDescription:
           'All rotational, magnetic, and thermal energy is exhausted. A pitch-black, cold 20-km sphere of nuclear matter rests in eternal stasis.',
@@ -1017,7 +1017,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         colorHex: '#38bdf8',
         glowColorHex: '#0284c7',
         coreEngine: 'Helium, Carbon & Neon Core Burning + Eddington Instability',
-        dominantPressure: 'Eddington Limit Breached — Episodic Envelope Ejection',
+        dominantPressure: 'Eddington Limit Breached, Episodic Envelope Ejection',
         shortDescription:
           'Shining at millions of Suns near the Eddington limit, violent mass-loss eruptions swell into a colossal hypergiant with expanding bipolar nebular lobes.',
         detailedPhysics:
@@ -1109,7 +1109,7 @@ export const STELLAR_TRACKS: StellarTrack[] = [
         spectralClassEquivalent: 'Isolated Black Hole -> Hawking Evaporation',
         colorHex: '#020617',
         glowColorHex: '#0f172a',
-        coreEngine: 'Zero Accretion — Quantum Hawking Radiation Evaporation (10^67 yr)',
+        coreEngine: 'Zero Accretion, Quantum Hawking Radiation Evaporation (10^67 yr)',
         dominantPressure: 'Vacuum Spacetime Curvature',
         shortDescription:
           'With its accretion disk completely exhausted, the black hole sits in pitch-black isolation, slowly evaporating over 10⁶⁷ years via quantum Hawking radiation.',

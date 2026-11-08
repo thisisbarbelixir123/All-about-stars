@@ -255,7 +255,7 @@ export const CONSTELLATION_ASTRONOMICAL_DETAILS: Record<string, ConstellationExt
     }
   },
   "aries": {
-    "resemblance": "The legendary Ram with the Golden Fleece, represented by an iconic bent line of three prominent stars—Hamal, Sheratan, and Mesarthim—depicting its curved horns and proud head.",
+    "resemblance": "The legendary Ram with the Golden Fleece, represented by an iconic bent line of three prominent stars, Hamal, Sheratan, and Mesarthim, depicting its curved horns and proud head.",
     "borders": {
       "raRange": "01h 47m – 03h 30m",
       "decRange": "+10° 22′ – +31° 13′",
@@ -701,7 +701,7 @@ export const CONSTELLATION_ASTRONOMICAL_DETAILS: Record<string, ConstellationExt
     }
   },
   "centaurus": {
-    "resemblance": "A wise, noble centaur—half human, half stallion—poised above the Southern Cross. The radiant pointers Alpha and Beta Centauri mark his front hooves, with sweeping arcs forming his torso and equine flanks.",
+    "resemblance": "A wise, noble centaur, half human, half stallion, poised above the Southern Cross. The radiant pointers Alpha and Beta Centauri mark his front hooves, with sweeping arcs forming his torso and equine flanks.",
     "borders": {
       "raRange": "11h 05m – 15h 03m",
       "decRange": "-64° 42′ – -30° 00′",
