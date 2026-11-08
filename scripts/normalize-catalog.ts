@@ -26,6 +26,9 @@ const normalizedStars = stars.map((star) => {
   if (norm.bayerDesignation !== star.bayerDesignation) {
     changeLog.push({ id: star.id, field: 'bayerDesignation', from: star.bayerDesignation, to: norm.bayerDesignation });
   }
+  if (norm.primaryDesignation !== star.primaryDesignation) {
+    changeLog.push({ id: star.id, field: 'primaryDesignation', from: star.primaryDesignation, to: norm.primaryDesignation });
+  }
   if (JSON.stringify(norm.alternateNames) !== JSON.stringify(star.alternateNames)) {
     changeLog.push({ id: star.id, field: 'alternateNames', from: star.alternateNames, to: norm.alternateNames });
   }

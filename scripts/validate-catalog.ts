@@ -81,6 +81,24 @@ for (const star of stars) {
       }
     }
   }
+
+  // Non-standard constellation abbreviation checks (e.g. "Sag" instead of canonical "Sgr" or "Sge")
+  const allNamesAndDesigs = [
+    star.name,
+    star.bayerDesignation,
+    star.primaryDesignation,
+    ...(star.alternateNames || []),
+    ...(star.designations || [])
+  ].filter(Boolean) as string[];
+
+  for (const str of allNamesAndDesigs) {
+    if (/\bSag\b/.test(str)) {
+      errors.push(`[${star.id}] Uses non-standard abbreviation "Sag" in "${str}". Must be "Sgr" (Sagittarius) or "Sge" (Sagitta).`);
+    }
+    if (str === 'π sto' || str === 'π nwh') {
+      errors.push(`[${star.id}] Uses corrupted Bayer designation: "${str}".`);
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------

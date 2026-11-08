@@ -20,6 +20,8 @@ export const CONSTELLATIONS_FULL_TO_ABBR: [string, string][] = (() => {
     ['Ursae Minoris', 'UMi'], ['Ursa Minoris', 'UMi'], ['Ursa Minor', 'UMi'],
     ['Boötis', 'Boo'], ['Bootis', 'Boo'], ['Boötes', 'Boo'], ['Bootes', 'Boo'],
     ['Velorum', 'Vel'], ['Vela', 'Vel'], ['Velae', 'Vel'],
+    ['Sagittarii', 'Sgr'], ['Sagittarius', 'Sgr'], ['Sgr', 'Sgr'], ['Sag', 'Sgr'],
+    ['Sagittae', 'Sge'], ['Sagitta', 'Sge'], ['Sge', 'Sge'],
   ];
 
   for (const c of ALL_88_CONSTELLATIONS) {
@@ -41,12 +43,27 @@ export const CONSTELLATIONS_FULL_TO_ABBR: [string, string][] = (() => {
 
 export function abbreviateConstellation(str?: string): string {
   if (!str) return '';
+  const trimmed = str.trim();
+
+  // Explicit prefix handling for constellations sharing common prefixes (Sagittarius vs Sagitta)
+  if (/^sagittar/i.test(trimmed) || /^sgr\b/i.test(trimmed) || /^sag\b/i.test(trimmed)) {
+    return 'Sgr';
+  }
+  if (/^sagitta/i.test(trimmed) || /^sge\b/i.test(trimmed)) {
+    return 'Sge';
+  }
+
   for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
-    if (new RegExp(`\\b${full.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(str)) {
+    if (new RegExp(`\\b${full.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(trimmed)) {
       return abbr;
     }
   }
-  return str.slice(0, 3);
+
+  if (/^sag/i.test(trimmed)) {
+    return 'Sgr';
+  }
+
+  return trimmed.slice(0, 3);
 }
 
 /**
@@ -193,7 +210,7 @@ export function resolveDossierStarName(star: Partial<StarData> | null | undefine
       bayer = trimmed;
       break;
     }
-    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)[-\s]?(\d+)?\s*(.*)$/i);
+    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)(?:[-_\s]+(\d+)|(?=[¹²³⁴⁵⁶⁷⁸⁹])|\b)\s*(.*)$/i);
     if (m) {
       const gChar = GREEK_WORDS_MAP[m[1].toLowerCase()];
       if (gChar) {
@@ -346,7 +363,7 @@ export function getStarDesignationTag(star: Partial<StarData> | null | undefined
   // 1B. Spelled-out Greek Bayer (e.g. "Beta Capricorni", "Saif al Jabbar (Eta Orionis)", "Theta-2 Tauri")
   for (const n of allNames) {
     const trimmed = n.trim();
-    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)[-\s]?(\d+)?\s*(.*)$/i);
+    const m = trimmed.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)(?:[-_\s]+(\d+)|(?=[¹²³⁴⁵⁶⁷⁸⁹])|\b)\s*(.*)$/i);
     if (m) {
       const gChar = GREEK_WORDS_MAP[m[1].toLowerCase()];
       if (gChar) {
@@ -499,7 +516,7 @@ export function normalizeBayerDesignation(bayer?: string, fallbackConstellation?
   }
 
   // 2. If it starts with a spelled-out Greek letter name (e.g. "Alpha", "Beta", "Theta-2", "Pi 1", "Omicron-1"):
-  const greekMatch = str.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)(?:[-_\s]?(\d+))?\s+(.*)$/i);
+  const greekMatch = str.match(/^(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega)(?:[-_\s]+(\d+)|(?=[¹²³⁴⁵⁶⁷⁸⁹])|\b)\s+(.*)$/i);
   if (greekMatch) {
     const gChar = GREEK_WORDS_MAP[greekMatch[1].toLowerCase()] || greekMatch[1];
     const sup = greekMatch[2] ? (SUPERSCRIPTS[greekMatch[2]] || greekMatch[2]) : '';
@@ -546,46 +563,72 @@ export function normalizeCatalogStar<T extends Partial<StarData>>(star: T): T {
     bayerDesignation = normalizeBayerDesignation(bayerDesignation, constellation);
   }
 
+  let primaryDesignation = star.primaryDesignation;
+  if (primaryDesignation) {
+    if (primaryDesignation.includes('Sag')) {
+      primaryDesignation = primaryDesignation.replace(/\bSag\b/g, constellation === 'Sagitta' ? 'Sge' : 'Sgr');
+    }
+    if (primaryDesignation === 'π sto' && star.id === 'pistol-star') {
+      primaryDesignation = 'V4647 Sgr';
+    }
+    if (primaryDesignation === 'π nwh' && star.id === 'wr-104') {
+      primaryDesignation = 'WR 104';
+    }
+  }
+
   let alternateNames = star.alternateNames;
   if (alternateNames && alternateNames.length > 0) {
     let changed = false;
-    const nextAlts = alternateNames.map((alt) => {
-      let updated = alt;
-      if (updated.includes('Bootis')) {
-        updated = updated.replace(/\bBootis\b/g, 'Boötis');
-        changed = true;
-      }
-      if (updated.includes('Velae')) {
-        updated = updated.replace(/\bVelae\b/g, 'Velorum');
-        changed = true;
-      }
-      return updated;
-    });
-    if (changed) alternateNames = nextAlts;
+    const nextAlts = alternateNames
+      .filter((alt) => alt !== 'π sto' && alt !== 'π nwh')
+      .map((alt) => {
+        let updated = alt;
+        if (updated.includes('Bootis')) {
+          updated = updated.replace(/\bBootis\b/g, 'Boötis');
+          changed = true;
+        }
+        if (updated.includes('Velae')) {
+          updated = updated.replace(/\bVelae\b/g, 'Velorum');
+          changed = true;
+        }
+        if (updated.includes('Sag') && !updated.includes('Sagittarius') && !updated.includes('Sagitta')) {
+          updated = updated.replace(/\bSag\b/g, constellation === 'Sagitta' ? 'Sge' : 'Sgr');
+          changed = true;
+        }
+        return updated;
+      });
+    if (changed || nextAlts.length !== alternateNames.length) alternateNames = nextAlts;
   }
 
   let designations = star.designations;
   if (designations && designations.length > 0) {
     let changed = false;
-    const nextDesigs = designations.map((desig) => {
-      let updated = desig;
-      if (updated.includes('Bootis')) {
-        updated = updated.replace(/\bBootis\b/g, 'Boötis');
-        changed = true;
-      }
-      if (updated.includes('Velae')) {
-        updated = updated.replace(/\bVelae\b/g, 'Velorum');
-        changed = true;
-      }
-      return updated;
-    });
-    if (changed) designations = nextDesigs;
+    const nextDesigs = designations
+      .filter((desig) => desig !== 'π sto' && desig !== 'π nwh')
+      .map((desig) => {
+        let updated = desig;
+        if (updated.includes('Bootis')) {
+          updated = updated.replace(/\bBootis\b/g, 'Boötis');
+          changed = true;
+        }
+        if (updated.includes('Velae')) {
+          updated = updated.replace(/\bVelae\b/g, 'Velorum');
+          changed = true;
+        }
+        if (updated.includes('Sag') && !updated.includes('Sagittarius') && !updated.includes('Sagitta')) {
+          updated = updated.replace(/\bSag\b/g, constellation === 'Sagitta' ? 'Sge' : 'Sgr');
+          changed = true;
+        }
+        return updated;
+      });
+    if (changed || nextDesigs.length !== designations.length) designations = nextDesigs;
   }
 
   if (
     constellation === star.constellation &&
     name === star.name &&
     bayerDesignation === star.bayerDesignation &&
+    primaryDesignation === star.primaryDesignation &&
     alternateNames === star.alternateNames &&
     designations === star.designations
   ) {
@@ -597,6 +640,7 @@ export function normalizeCatalogStar<T extends Partial<StarData>>(star: T): T {
     constellation,
     name,
     bayerDesignation,
+    primaryDesignation,
     alternateNames,
     designations
   };
