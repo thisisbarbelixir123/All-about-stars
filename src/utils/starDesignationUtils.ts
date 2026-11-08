@@ -1,119 +1,63 @@
 import { StarData } from '../types';
+import { ALL_88_CONSTELLATIONS } from '../data/constellationsData';
 
 /**
- * Constellation full/genitive to 3-letter IAU abbreviation mapping.
- * Sorted by length descending so compound names like "Canis Majoris" match before "Canis".
+ * Constellation full name/genitive to 3-letter IAU abbreviation mapping.
+ * Sorted by length descending so compound names (e.g. "Canis Majoris") match before single names ("Canis").
  */
-export const CONSTELLATIONS_FULL_TO_ABBR: [string, string][] = [
-  ['Canis Majoris', 'CMa'], ['Canis Major', 'CMa'],
-  ['Canis Minoris', 'CMi'], ['Canis Minor', 'CMi'],
-  ['Coma Berenices', 'Com'],
-  ['Corona Australis', 'CrA'], ['Coronae Australis', 'CrA'],
-  ['Corona Borealis', 'CrB'], ['Coronae Borealis', 'CrB'],
-  ['Canum Venaticorum', 'CVn'],
-  ['Leo Minoris', 'LMi'], ['Leo Minor', 'LMi'],
-  ['Piscis Austrini', 'PsA'], ['Piscis Austrinus', 'PsA'],
-  ['Triangulum Australe', 'TrA'], ['Trianguli Australis', 'TrA'],
-  ['Ursa Majoris', 'UMa'], ['Ursa Major', 'UMa'],
-  ['Ursa Minoris', 'UMi'], ['Ursa Minor', 'UMi'],
-  ['Andromedae', 'And'], ['Andromeda', 'And'],
-  ['Antliae', 'Ant'], ['Antlia', 'Ant'],
-  ['Apodis', 'Aps'], ['Apus', 'Aps'],
-  ['Aquilae', 'Aql'], ['Aquila', 'Aql'],
-  ['Aquarii', 'Aqr'], ['Aquarius', 'Aqr'],
-  ['Arae', 'Ara'], ['Ara', 'Ara'],
-  ['Arietis', 'Ari'], ['Aries', 'Ari'],
-  ['Aurigae', 'Aur'], ['Auriga', 'Aur'],
-  ['Bootis', 'Boo'], ['Boötes', 'Boo'], ['Bootes', 'Boo'],
-  ['Caeli', 'Cae'], ['Caelum', 'Cae'],
-  ['Camelopardalis', 'Cam'],
-  ['Capricorni', 'Cap'], ['Capricornus', 'Cap'],
-  ['Carinae', 'Car'], ['Carina', 'Car'],
-  ['Cassiopeiae', 'Cas'], ['Cassiopeia', 'Cas'],
-  ['Centauri', 'Cen'], ['Centaurus', 'Cen'],
-  ['Cephei', 'Cep'], ['Cepheus', 'Cep'],
-  ['Ceti', 'Cet'], ['Cetus', 'Cet'],
-  ['Chamaeleontis', 'Cha'], ['Chamaeleon', 'Cha'],
-  ['Circini', 'Cir'], ['Circinus', 'Cir'],
-  ['Cancri', 'Cnc'], ['Cancer', 'Cnc'],
-  ['Columbae', 'Col'], ['Columba', 'Col'],
-  ['Crateris', 'Crt'], ['Crater', 'Crt'],
-  ['Crucis', 'Cru'], ['Crux', 'Cru'],
-  ['Corvi', 'Crv'], ['Corvus', 'Crv'],
-  ['Cygni', 'Cyg'], ['Cygnus', 'Cyg'],
-  ['Delphini', 'Del'], ['Delphinus', 'Del'],
-  ['Doradus', 'Dor'], ['Dorado', 'Dor'],
-  ['Draconis', 'Dra'], ['Draco', 'Dra'],
-  ['Equulei', 'Equ'], ['Equuleus', 'Equ'],
-  ['Eridani', 'Eri'], ['Eridanus', 'Eri'],
-  ['Fornacis', 'For'], ['Fornax', 'For'],
-  ['Geminorum', 'Gem'], ['Gemini', 'Gem'],
-  ['Gruis', 'Gru'], ['Grus', 'Gru'],
-  ['Herculis', 'Her'], ['Hercules', 'Her'],
-  ['Horologii', 'Hor'], ['Horologium', 'Hor'],
-  ['Hydrae', 'Hya'], ['Hydra', 'Hya'],
-  ['Hydri', 'Hyi'], ['Hydrus', 'Hyi'],
-  ['Indi', 'Ind'], ['Indus', 'Ind'],
-  ['Lacertae', 'Lac'], ['Lacerta', 'Lac'],
-  ['Leonis', 'Leo'], ['Leo', 'Leo'],
-  ['Leporis', 'Lep'], ['Lepus', 'Lep'],
-  ['Librae', 'Lib'], ['Libra', 'Lib'],
-  ['Lupi', 'Lup'], ['Lupus', 'Lup'],
-  ['Lyncis', 'Lyn'], ['Lynx', 'Lyn'],
-  ['Lyrae', 'Lyr'], ['Lyra', 'Lyr'],
-  ['Mensae', 'Men'], ['Mensa', 'Men'],
-  ['Microscopii', 'Mic'], ['Microscopium', 'Mic'],
-  ['Monocerotis', 'Mon'], ['Monoceros', 'Mon'],
-  ['Muscae', 'Mus'], ['Musca', 'Mus'],
-  ['Normae', 'Nor'], ['Norma', 'Nor'],
-  ['Octantis', 'Oct'], ['Octans', 'Oct'],
-  ['Ophiuchi', 'Oph'], ['Ophiuchus', 'Oph'],
-  ['Orionis', 'Ori'], ['Orion', 'Ori'],
-  ['Pavonis', 'Pav'], ['Pavo', 'Pav'],
-  ['Pegasi', 'Peg'], ['Pegasus', 'Peg'],
-  ['Persei', 'Per'], ['Perseus', 'Per'],
-  ['Phoenicis', 'Phe'], ['Phoenix', 'Phe'],
-  ['Pictoris', 'Pic'], ['Pictor', 'Pic'],
-  ['Piscium', 'Psc'], ['Pisces', 'Psc'],
-  ['Puppis', 'Pup'],
-  ['Pyxidis', 'Pyx'], ['Pyxis', 'Pyx'],
-  ['Reticuli', 'Ret'], ['Reticulum', 'Ret'],
-  ['Sculptoris', 'Scl'], ['Sculptor', 'Scl'],
-  ['Scorpii', 'Sco'], ['Scorpius', 'Sco'],
-  ['Scuti', 'Sct'], ['Scutum', 'Sct'],
-  ['Serpentis', 'Ser'], ['Serpens', 'Ser'],
-  ['Sextantis', 'Sex'], ['Sextans', 'Sex'],
-  ['Sagittae', 'Sge'], ['Sagitta', 'Sge'],
-  ['Sagittarii', 'Sgr'], ['Sagittarius', 'Sgr'],
-  ['Tauri', 'Tau'], ['Taurus', 'Tau'],
-  ['Telescopii', 'Tel'], ['Telescopium', 'Tel'],
-  ['Trianguli', 'Tri'], ['Triangulum', 'Tri'],
-  ['Tucanae', 'Tuc'], ['Tucana', 'Tuc'],
-  ['Velae', 'Vel'], ['Vela', 'Vel'],
-  ['Virginis', 'Vir'], ['Virgo', 'Vir'],
-  ['Volantis', 'Vol'], ['Volans', 'Vol'],
-  ['Vulpeculae', 'Vul'], ['Vulpecula', 'Vul']
-];
+export const CONSTELLATIONS_FULL_TO_ABBR: [string, string][] = (() => {
+  const pairs: [string, string][] = [
+    ['Canum Venaticorum', 'CVn'], ['Canes Venatici', 'CVn'],
+    ['Canis Majoris', 'CMa'], ['Canis Major', 'CMa'],
+    ['Canis Minoris', 'CMi'], ['Canis Minor', 'CMi'],
+    ['Comae Berenices', 'Com'], ['Coma Berenices', 'Com'],
+    ['Coronae Australis', 'CrA'], ['Corona Australis', 'CrA'],
+    ['Coronae Borealis', 'CrB'], ['Corona Borealis', 'CrB'],
+    ['Leonis Minoris', 'LMi'], ['Leo Minoris', 'LMi'], ['Leo Minor', 'LMi'],
+    ['Piscis Austrini', 'PsA'], ['Piscis Austrinus', 'PsA'],
+    ['Trianguli Australis', 'TrA'], ['Triangulum Australe', 'TrA'],
+    ['Ursae Majoris', 'UMa'], ['Ursa Majoris', 'UMa'], ['Ursa Major', 'UMa'],
+    ['Ursae Minoris', 'UMi'], ['Ursa Minoris', 'UMi'], ['Ursa Minor', 'UMi'],
+    ['Boötis', 'Boo'], ['Bootis', 'Boo'], ['Boötes', 'Boo'], ['Bootes', 'Boo'],
+    ['Velorum', 'Vel'], ['Vela', 'Vel'], ['Velae', 'Vel'],
+  ];
+
+  for (const c of ALL_88_CONSTELLATIONS) {
+    pairs.push([c.genitive, c.abbreviation]);
+    pairs.push([c.name, c.abbreviation]);
+  }
+
+  const seen = new Set<string>();
+  const sorted: [string, string][] = [];
+  for (const [full, abbr] of pairs) {
+    const key = full.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      sorted.push([full, abbr]);
+    }
+  }
+  return sorted.sort((a, b) => b[0].length - a[0].length);
+})();
 
 export function abbreviateConstellation(str?: string): string {
   if (!str) return '';
   for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
-    if (new RegExp(`\\b${full}\\b`, 'i').test(str)) {
+    if (new RegExp(`\\b${full.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(str)) {
       return abbr;
     }
   }
   return str.slice(0, 3);
 }
 
-const ABBR_TO_GENITIVE_MAP = new Map<string, string>();
-for (const [full, abbr] of CONSTELLATIONS_FULL_TO_ABBR) {
-  if (!ABBR_TO_GENITIVE_MAP.has(abbr)) {
-    ABBR_TO_GENITIVE_MAP.set(abbr, full);
-  }
-}
+/**
+ * Standard IAU 3-letter abbreviation to full Latin genitive map for all 88 modern constellations.
+ */
+export const ABBR_TO_GENITIVE_MAP = new Map<string, string>(
+  ALL_88_CONSTELLATIONS.map((c) => [c.abbreviation, c.genitive])
+);
 
 /**
- * Returns the full Latin genitive of the constellation (e.g. "Orionis", "Pavonis", "Scorpii").
+ * Returns the full Latin genitive of the constellation (e.g. "Orionis", "Pavonis", "Velorum", "Ursae Majoris").
  */
 export function getConstellationGenitive(constellationOrAbbr?: string): string {
   if (!constellationOrAbbr) return '';
