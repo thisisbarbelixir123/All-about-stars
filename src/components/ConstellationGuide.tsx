@@ -152,7 +152,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   <strong className="text-white block mb-0.5">
                     📍 Why are constellations still indispensable to modern astronomy?
                   </strong>
-                  While physically meaningless in deep space, they are <strong className="text-cyan-300 font-bold">essential standardized sectors</strong> for mapping the night sky from Earth—functioning just like postal codes or country boundaries on a globe.
+                  While physically meaningless in deep space, they are <strong className="text-cyan-300 font-bold">essential standardized sectors</strong> for mapping the night sky from Earth, functioning just like postal codes or country boundaries on a globe.
                 </div>
               </div>
 
@@ -607,7 +607,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   <span>The 13 Signs of the Astronomical Zodiac</span>
                 </h2>
                 <p className="text-[11px] sm:text-sm mobile-landscape:text-[10px] text-slate-300 leading-relaxed font-sans">
-                  The ecliptic path of the Sun physically crosses 13 distinct astronomical constellations—not 12—including Ophiuchus the Serpent Bearer. Over the last 2,500 years, axial precession has shifted the actual dates the Sun spends in each constellation by almost a full month.
+                  The ecliptic path of the Sun physically crosses 13 distinct astronomical constellations, not 12, including Ophiuchus the Serpent Bearer. Over the last 2,500 years, axial precession has shifted the actual dates the Sun spends in each constellation by almost a full month.
                 </p>
               </div>
             </div>
@@ -640,7 +640,7 @@ export const ConstellationGuide: React.FC<ConstellationGuideProps> = ({
                   Ophiuchus (The Serpent Bearer)
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  The Sun spends <strong>18.6 days</strong> traveling through Ophiuchus (Nov 29 – Dec 17)—nearly three times longer than Scorpius!
+                  The Sun spends <strong>18.6 days</strong> traveling through Ophiuchus (Nov 29 – Dec 17), nearly three times longer than Scorpius!
                 </p>
                 <p className="text-[11px] text-slate-400 leading-relaxed italic mt-1">
                   Why was it excluded? Ancient Babylonians had a 12-month calendar, so they sliced the sky into 12 equal wedges and ignored the 13th!

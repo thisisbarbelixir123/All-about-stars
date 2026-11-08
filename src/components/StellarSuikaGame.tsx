@@ -1613,7 +1613,7 @@ export const StellarSuikaGame: React.FC<StellarSuikaGameProps> = ({ onHome, onBa
                     <div>
                       <div className="font-bold text-slate-200">Merge &amp; Shockwave Force</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Touch identical stars to fuse into a larger star. Merges create a blast force that moves nearby stars — the bigger the merge, the stronger the force!
+                        Touch identical stars to fuse into a larger star. Merges create a blast force that moves nearby stars, the bigger the merge, the stronger the force!
                       </div>
                     </div>
                   </div>

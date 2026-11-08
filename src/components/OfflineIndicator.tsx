@@ -29,7 +29,7 @@ export const OfflineIndicator: React.FC = () => {
       </div>
       <div className="flex items-center gap-1.5">
         <WifiOff className="w-3.5 h-3.5 text-amber-400" />
-        <span>Offline Mode — Cached data active</span>
+        <span>Offline Mode, Cached data active</span>
       </div>
     </div>
   );

@@ -123,7 +123,7 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
-            <span className="text-[11px] font-bold text-white tracking-wider flex items-center gap-1.5 font-['Orbitron',sans-serif]">
+            <span className="text-[11px] font-bold text-white tracking-wider flex items-center gap-1.5 font-sans">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
               AUDIO CONTROLS
             </span>

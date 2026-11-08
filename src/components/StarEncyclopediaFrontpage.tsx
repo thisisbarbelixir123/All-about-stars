@@ -781,7 +781,7 @@ export const StarEncyclopediaFrontpage: React.FC<StarEncyclopediaFrontpageProps>
                   <span>Myths &amp; Realities</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 leading-relaxed font-sans">
-                  Uncover widespread science-fiction tropes, visual misconceptions, and historical lore—contrasted directly against empirical astrophysical measurements and nuclear realities.
+                  Uncover widespread science-fiction tropes, visual misconceptions, and historical lore, contrasted directly against empirical astrophysical measurements and nuclear realities.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">

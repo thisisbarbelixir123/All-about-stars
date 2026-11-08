@@ -178,7 +178,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 <span>How Stars Received Their Proper Names</span>
               </h2>
               <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
-                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy—such as Betelgeuse, Vega, and Aldebaran—formally standardized by the IAU Working Group on Star Names (WGSN).
+                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy, such as Betelgeuse, Vega, and Aldebaran, formally standardized by the IAU Working Group on Star Names (WGSN).
               </p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               <p>
-                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy—such as <strong className="text-cyan-300">Betelgeuse</strong> (<em>Ibṭ al-Jawzāʼ</em>, "armpit of the giant"), <strong className="text-cyan-300">Vega</strong> (<em>an-Nasr al-Wāqi‘</em>, "the swooping eagle"), and <strong className="text-cyan-300">Aldebaran</strong> (<em>al-Dabarān</em>, "the follower").
+                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy, such as <strong className="text-cyan-300">Betelgeuse</strong> (<em>Ibṭ al-Jawzāʼ</em>, "armpit of the giant"), <strong className="text-cyan-300">Vega</strong> (<em>an-Nasr al-Wāqi‘</em>, "the swooping eagle"), and <strong className="text-cyan-300">Aldebaran</strong> (<em>al-Dabarān</em>, "the follower").
               </p>
               <p>
                 In the 10th century AD, Persian astronomer <strong className="text-white">Abd al-Rahman al-Sufi</strong> published the landmark <em>Book of Fixed Stars</em> (Kitāb Ṣuwar al-Kawākib), translating Ptolemy's 2nd-century <em>Almagest</em> into Arabic and integrating rich indigenous Bedouin sky lore.
@@ -446,7 +446,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
               <span>Greek Alphabet Astronomical Sequence</span>
             </h3>
             <p className="text-xs text-slate-400 font-sans">
-              All 24 letters used in Bayer designations. Stars with 2D dots exist in Starpedia’s catalog—click to open their dossiers directly.
+              All 24 letters used in Bayer designations. Stars with 2D dots exist in Starpedia’s catalog, click to open their dossiers directly.
             </p>
 
             <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-2.5">
@@ -1225,7 +1225,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 <span>Non-Stars with Stellar Designations</span>
               </h2>
               <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
-                Before modern high-resolution telescopes and spectroscopy, astronomers frequently mistook star clusters, nebulae, and supernovae for single stars—leaving celestial wonders bearing Bayer Greek letters or Flamsteed numbers today.
+                Before modern high-resolution telescopes and spectroscopy, astronomers frequently mistook star clusters, nebulae, and supernovae for single stars, leaving celestial wonders bearing Bayer Greek letters or Flamsteed numbers today.
               </p>
             </div>
           </div>

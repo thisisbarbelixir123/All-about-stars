@@ -74,28 +74,28 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
 
             <div className="flex flex-col gap-2">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-950/40 border border-cyan-400/40 backdrop-blur-md shadow-md w-fit">
-                <div className="font-['Orbitron',sans-serif] font-bold text-sm sm:text-base text-white tracking-wider">
+                <div className="font-sans font-bold text-sm sm:text-base text-white tracking-wider">
                   STARPEDIA <span className="bg-gradient-to-r from-cyan-400 to-sky-300 bg-clip-text text-transparent">3D</span>
                 </div>
               </div>
 
               <h1 
                 id="about-title" 
-                className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-['Orbitron',sans-serif]"
+                className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white font-sans"
               >
                 Stars of the Universe
               </h1>
             </div>
 
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
-              An interactive 3D WebGL astrophysical comparator, comprehensive stellar catalog, dynamic Hertzsprung–Russell phase-space simulator, and 88-constellation celestial atlas spanning nine orders of spatial magnitude—from compact relativistic neutron stars to colossal red hypergiants.
+              An interactive 3D WebGL astrophysical comparator, comprehensive stellar catalog, dynamic Hertzsprung–Russell phase-space simulator, and 88-constellation celestial atlas spanning nine orders of spatial magnitude, from compact relativistic neutron stars to colossal red hypergiants.
             </p>
 
             {/* Personal Childhood Passion Note */}
             <div className="p-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs sm:text-sm leading-relaxed max-w-2xl flex items-start gap-3 shadow-inner backdrop-blur-sm">
               <Heart className="w-4 h-4 text-rose-400 shrink-0 mt-0.5 fill-rose-400/30" />
               <span>
-                This project is inspired by my childhood passion for stars, astronomy, and universe size comparison videos on YouTube—created to turn the celestial wonders I grew up admiring into an interactive, real-time 3D universe for everyone.
+                This project is inspired by my childhood passion for stars, astronomy, and universe size comparison videos on YouTube, created to turn the celestial wonders I grew up admiring into an interactive, real-time 3D universe for everyone.
               </span>
             </div>
           </div>
@@ -139,7 +139,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono uppercase tracking-wider">
             <Sparkles className="w-4 h-4" /> Provenance & Creative Roots
           </div>
-          <h2 id="inspirations-heading" className="text-xl sm:text-2xl font-bold text-white font-['Orbitron',sans-serif]">
+          <h2 id="inspirations-heading" className="text-xl sm:text-2xl font-bold text-white font-sans">
             Inspirations Behind The Project
           </h2>
         </div>
@@ -210,7 +210,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
               </div>
 
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                The groundbreaking interactive scale tool at htwins.net. Its effortless logarithmic zoom across orders of magnitude—from subatomic particles to cosmic superclusters—served as the enduring paradigm for our interactive comparative scales.
+                The groundbreaking interactive scale tool at htwins.net. Its effortless logarithmic zoom across orders of magnitude, from subatomic particles to cosmic superclusters, served as the enduring paradigm for our interactive comparative scales.
               </p>
             </div>
             <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-cyan-300 font-mono">
@@ -281,7 +281,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
           <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono uppercase tracking-wider">
             <Compass className="w-4 h-4" /> Complete Capability Matrix
           </div>
-          <h2 id="features-heading" className="text-xl sm:text-2xl font-bold text-white font-['Orbitron',sans-serif]">
+          <h2 id="features-heading" className="text-xl sm:text-2xl font-bold text-white font-sans">
             Comprehensive Application Subsystems
           </h2>
         </div>
@@ -455,7 +455,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
         <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono uppercase tracking-wider">
           <Database className="w-4 h-4" /> Empirical Validation
         </div>
-        <h2 id="data-sources-heading" className="text-lg sm:text-xl font-bold text-white font-['Orbitron',sans-serif]">
+        <h2 id="data-sources-heading" className="text-lg sm:text-xl font-bold text-white font-sans">
           Astrophysics Rigor & Primary Catalogs
         </h2>
 
@@ -504,7 +504,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
         <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono uppercase tracking-wider">
           <GraduationCap className="w-4 h-4" /> Academic Literature
         </div>
-        <h2 id="citations-heading" className="text-lg sm:text-xl font-bold text-white font-['Orbitron',sans-serif]">
+        <h2 id="citations-heading" className="text-lg sm:text-xl font-bold text-white font-sans">
           Scientific References & Theoretical Models
         </h2>
 
@@ -557,7 +557,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
         <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono uppercase tracking-wider">
           <Cpu className="w-4 h-4" /> Engineering Core
         </div>
-        <h2 id="tech-stack-heading" className="text-lg sm:text-xl font-bold text-white font-['Orbitron',sans-serif]">
+        <h2 id="tech-stack-heading" className="text-lg sm:text-xl font-bold text-white font-sans">
           Open-Source Technologies & Tooling
         </h2>
 
@@ -582,7 +582,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigateTab }) => {
         aria-label="Navigation Shortcuts"
       >
         <div className="flex flex-col gap-0.5">
-          <div className="text-sm font-bold text-white font-['Orbitron',sans-serif]">Ready to explore the cosmos?</div>
+          <div className="text-sm font-bold text-white font-sans">Ready to explore the cosmos?</div>
           <div className="text-xs text-slate-400">Launch directly into the interactive stages or browse catalogs.</div>
         </div>
 

@@ -70,7 +70,7 @@ export const PIONEER_SPOTLIGHTS = [
     eraBadge: '1609 CE',
     location: 'Padua, Venice',
     title: 'Father of Observational Astronomy',
-    desc: 'Turned his handcrafted refractor to the heavens in 1617, discovering that Mizar in the Big Dipper is a telescopic binary star system—the first telescopic double star in human history.',
+    desc: 'Turned his handcrafted refractor to the heavens in 1617, discovering that Mizar in the Big Dipper is a telescopic binary star system, the first telescopic double star in human history.',
     starId: 'mizar-a',
     image: '/assets/galileo_galilei.jpg',
     caption: 'Portrait: Justus Sustermans (1636)',
@@ -252,7 +252,7 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                   <span>How Stars Are Discovered</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
-                  Explore the fundamental observational methodologies humankind uses to detect, resolve, and characterize stars across cosmic distances—from astrometric parallax and spectroscopy to gravitational microlensing and space interferometry.
+                  Explore the fundamental observational methodologies humankind uses to detect, resolve, and characterize stars across cosmic distances, from astrometric parallax and spectroscopy to gravitational microlensing and space interferometry.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -636,7 +636,7 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                   <span>The Telescopes That Unmasked the Stars</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
-                  Explore the legendary instruments—from Galileo’s 1609 refracting tube to modern giant segmented reflectors and space infrared observatories—that expanded humanity's cosmic vision.
+                  Explore the legendary instruments, from Galileo’s 1609 refracting tube to modern giant segmented reflectors and space infrared observatories, that expanded humanity's cosmic vision.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -758,7 +758,7 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                       <div className="p-3 sm:p-4 rounded-xl bg-slate-950/60 border border-cyan-500/20 space-y-1.5">
                         <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold block">Optics Specimen</span>
                         <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                          {activeTelescope.name} — operational in {activeTelescope.wavelengthBands}.
+                          {activeTelescope.name}, operational in {activeTelescope.wavelengthBands}.
                         </p>
                       </div>
                     )}
@@ -846,7 +846,7 @@ export const StellarDiscoveryGuide: React.FC<StellarDiscoveryGuideProps> = ({
                   <span>Discovery Milestones by Stellar Class</span>
                 </h2>
                 <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
-                  Every class of star in astrophysics—from pulsars and white dwarfs to black holes, brown dwarfs, and extreme lensed hypergiants—has a historic first discovery that opened a brand-new frontier of observational science.
+                  Every class of star in astrophysics, from pulsars and white dwarfs to black holes, brown dwarfs, and extreme lensed hypergiants, has a historic first discovery that opened a brand-new frontier of observational science.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">

@@ -1818,7 +1818,7 @@ export const StellarLifeCycleVisualizer2D: React.FC<StellarLifeCycleVisualizer2D
               <span>Stellar Life Cycles</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-              Trace how stellar birth mass dictates cosmic destiny—from multi-trillion-year red dwarf stability and Sun-like planetary nebulae to runaway core collapse, supernova nucleosynthesis, and neutron star or black hole remnants.
+              Trace how stellar birth mass dictates cosmic destiny, from multi-trillion-year red dwarf stability and Sun-like planetary nebulae to runaway core collapse, supernova nucleosynthesis, and neutron star or black hole remnants.
             </p>
           </div>
         </div>

@@ -198,7 +198,7 @@ export async function exportStarDossierCard(star: StarData): Promise<string> {
 
   // Primary Headline: Star Name
   ctx.save();
-  ctx.font = '900 38px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '900 38px "Instrument Sans", sans-serif';
   ctx.fillStyle = '#ffffff';
   ctx.fillText(star.name, infoLeft, cursorY);
   ctx.restore();
@@ -218,7 +218,7 @@ export async function exportStarDossierCard(star: StarData): Promise<string> {
   // Alternate names
   if (star.alternateNames && star.alternateNames.length > 0) {
     ctx.save();
-    ctx.font = '12px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '12px "Instrument Sans", sans-serif';
     ctx.fillStyle = '#64748b';
     ctx.fillText(`Designations: ${star.alternateNames.slice(0, 4).join(', ')}`, infoLeft, cursorY);
     ctx.restore();
@@ -270,7 +270,7 @@ export async function exportStarDossierCard(star: StarData): Promise<string> {
     ctx.fillText(m.val, bx + 10, by + 40);
 
     // Subtitle
-    ctx.font = '10px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '10px "Instrument Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.fillText(m.sub, bx + 10, by + 58);
     ctx.restore();
@@ -296,7 +296,7 @@ export async function exportStarDossierCard(star: StarData): Promise<string> {
   ctx.fillText('ASTROPHYSICAL SUMMARY', infoLeft + 12, cursorY + 20);
 
   // Wrap description text
-  ctx.font = '12px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '12px "Instrument Sans", sans-serif';
   ctx.fillStyle = '#cbd5e1';
 
   const fullText = star.description || 'Stellar body cataloged in the astrophysical survey.';
