@@ -101,21 +101,21 @@
 - Consumes: Astronomical discovery methods, space mission timelines, `.observatory-panel`, `.observatory-control`.
 - Produces: Observational astrophysics methodology guide.
 
-- [ ] **Step 1: Inspect and identify slop patterns in `StellarDiscoveryGuide.tsx`**
+- [x] **Step 1: Inspect and identify slop patterns in `StellarDiscoveryGuide.tsx`**
   - Identify all 5 `blur-3xl` orbs across sections (hero, detection methods, space telescopes).
   - Identify gradient badges and drop shadows.
 
-- [ ] **Step 2: Refactor hero banner and methodology tabs**
+- [x] **Step 2: Refactor hero banner and methodology tabs**
   - Replace hero container with `.observatory-panel`.
   - Remove all floating blur balls.
   - Refactor method selector tabs (Radial Velocity, Transit, Astrometry, Microlensing, Direct Imaging) to `.observatory-control` and `bg-sky-500 text-slate-950 font-bold` for active state.
 
-- [ ] **Step 3: Refactor mission cards and detection mechanism diagrams**
+- [x] **Step 3: Refactor mission cards and detection mechanism diagrams**
   - Convert space telescope cards (Hipparcos, Kepler, Gaia, TESS, JWST) to `.observatory-panel border border-white/10`.
   - Style telemetry metrics with `JetBrains Mono`.
   - Ensure minimum 44px tap targets on all interactive triggers.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---
@@ -129,21 +129,21 @@
 - Consumes: IAU designation hierarchies, Bayer/Flamsteed/Gould catalogs, variable star rules, `.observatory-panel`.
 - Produces: Astronomical designation reference handbook.
 
-- [ ] **Step 1: Inspect and identify slop patterns in `StellarNomenclatureGuide.tsx`**
+- [x] **Step 1: Inspect and identify slop patterns in `StellarNomenclatureGuide.tsx`**
   - Identify all 8 `blur-3xl` ambient glow balls.
   - Identify gradient cards and glowing CTA buttons.
 
-- [ ] **Step 2: Refactor hero banner and catalog hierarchy breakdown**
+- [x] **Step 2: Refactor hero banner and catalog hierarchy breakdown**
   - Convert hero to `.observatory-panel`.
   - Remove all floating blur orbs.
   - Convert catalog cards (Bayer Greek, Flamsteed numbered, Gould Argentine, Variable star, HD, HIP, GJ, 2MASS, Gaia) to `.observatory-panel`.
 
-- [ ] **Step 3: Refactor interactive designation decoder widget**
+- [x] **Step 3: Refactor interactive designation decoder widget**
   - Replace legacy inputs with `.observatory-control` styled fields.
   - Format designation breakdowns with clean `JetBrains Mono` chips.
   - Ensure 44px tap targets on all clickable catalog example pills.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---

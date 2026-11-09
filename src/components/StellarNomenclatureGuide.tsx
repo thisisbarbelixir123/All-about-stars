@@ -124,12 +124,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
   return (
     <div className="flex flex-col gap-4 sm:gap-6 w-full text-slate-200">
       {/* HEADER SECTION - Uniform Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-6 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-        <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
+      <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mobile-landscape:gap-2">
           <div className="space-y-1 sm:space-y-1.5 md:space-y-2 max-w-4xl">
             <h1 className="text-base sm:text-2xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-3">
-              <Bookmark className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+              <Bookmark className="w-5 h-5 sm:w-7 sm:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
               <span>Stellar Nomenclature &amp; Designations</span>
             </h1>
             <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
@@ -137,7 +136,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 mobile-landscape:px-2 mobile-landscape:py-0.5 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs font-bold shadow-sm">
+            <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-sky-300 font-mono text-[10px] sm:text-xs font-bold">
               7 Naming Systems
             </span>
           </div>
@@ -145,16 +144,17 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       </div>
 
       {/* TOP NAVIGATION TABS - Clean typographic tabs without badges */}
-      <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#020512]/90 rounded-2xl border border-cyan-500/25 overflow-x-auto no-scrollbar shrink-0">
+      <div className="flex items-center gap-1.5 p-1.5 bg-[#020512]/90 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar shrink-0">
         {NOMENCLATURE_TOPICS.map((topic) => {
           const isActive = activeTab === topic.id;
           return (
             <button
               key={topic.id}
+              type="button"
               onClick={() => setActiveTab(topic.id)}
-              className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -170,9 +170,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'proper-names' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>How Stars Received Their Proper Names</span>
@@ -183,10 +182,10 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               <p>
-                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy, such as <strong className="text-cyan-300">Betelgeuse</strong> (<em>Ibṭ al-Jawzāʼ</em>, "armpit of the giant"), <strong className="text-cyan-300">Vega</strong> (<em>an-Nasr al-Wāqi‘</em>, "the swooping eagle"), and <strong className="text-cyan-300">Aldebaran</strong> (<em>al-Dabarān</em>, "the follower").
+                Most traditional proper star names in the night sky originated in classical antiquity and the Islamic Golden Age. Over 200 of the brightest naked-eye stars possess names derived from Arabic astronomy, such as <strong className="text-sky-300">Betelgeuse</strong> (<em>Ibṭ al-Jawzāʼ</em>, "armpit of the giant"), <strong className="text-sky-300">Vega</strong> (<em>an-Nasr al-Wāqi‘</em>, "the swooping eagle"), and <strong className="text-sky-300">Aldebaran</strong> (<em>al-Dabarān</em>, "the follower").
               </p>
               <p>
                 In the 10th century AD, Persian astronomer <strong className="text-white">Abd al-Rahman al-Sufi</strong> published the landmark <em>Book of Fixed Stars</em> (Kitāb Ṣuwar al-Kawākib), translating Ptolemy's 2nd-century <em>Almagest</em> into Arabic and integrating rich indigenous Bedouin sky lore.
@@ -194,11 +193,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
               {/* Shortened & Merged Cultural Roots Breakdown */}
               <div className="pt-1">
-                <div className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider font-semibold mb-2">
+                <div className="text-[11px] font-mono text-sky-400 uppercase tracking-wider font-semibold mb-2">
                   Cultural Roots Breakdown:
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="p-2.5 rounded-xl bg-slate-900/70 border border-amber-500/30 space-y-1">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                     <div className="font-bold text-amber-300 font-mono text-xs flex items-center justify-between">
                       <span>Arabic (~60%)</span>
                       <span className="text-[10px] text-slate-400 font-normal">Al-Sufi &amp; Bedouin</span>
@@ -208,8 +207,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     </p>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-900/70 border border-cyan-500/30 space-y-1">
-                    <div className="font-bold text-cyan-300 font-mono text-xs flex items-center justify-between">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                    <div className="font-bold text-sky-300 font-mono text-xs flex items-center justify-between">
                       <span>Greek (~20%)</span>
                       <span className="text-[10px] text-slate-400 font-normal">Antiquity &amp; Myth</span>
                     </div>
@@ -218,7 +217,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     </p>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-900/70 border border-emerald-500/30 space-y-1">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                     <div className="font-bold text-emerald-300 font-mono text-xs flex items-center justify-between">
                       <span>Latin (~15%)</span>
                       <span className="text-[10px] text-slate-400 font-normal">Roman &amp; Navigational</span>
@@ -230,8 +229,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-400/30 space-y-1.5">
-                <div className="text-xs font-bold text-cyan-300 font-mono uppercase tracking-wider">
+              <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+                <div className="text-xs font-bold text-sky-300 font-mono uppercase tracking-wider">
                   The 2016 IAU Working Group on Star Names (WGSN)
                 </div>
                 <p className="text-xs text-slate-200">
@@ -242,7 +241,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           </div>
 
           {/* Interactive Famous Proper Names Table */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white">
@@ -262,14 +261,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     placeholder="Search name, meaning, constellation..."
                     value={properNameSearch}
                     onChange={(e) => setProperNameSearch(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 rounded-xl bg-[#020512] border border-cyan-500/30 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 w-48 sm:w-60"
+                    className="min-h-[44px] pl-8 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 w-48 sm:w-60"
                   />
                 </div>
 
                 <select
                   value={languageFilter}
                   onChange={(e) => setLanguageFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-xl bg-[#020512] border border-cyan-500/30 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
+                  className="min-h-[44px] px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-400 cursor-pointer"
                 >
                   <option value="all">All Languages</option>
                   <option value="arabic">Arabic</option>
@@ -289,7 +288,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     onClick={() => {
                       if (catalogStar && onSelectStar) onSelectStar(catalogStar);
                     }}
-                    className="p-3.5 rounded-xl bg-[#04081c]/80 hover:bg-[#071233] border border-cyan-500/25 hover:border-cyan-400/70 transition-all space-y-2.5 flex flex-col justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.25)] select-none"
+                    className="observatory-control min-h-[44px] p-3.5 rounded-xl border border-white/10 hover:border-sky-400/50 transition-all space-y-2.5 flex flex-col justify-between group cursor-pointer shadow-sm select-none"
                     title={`Click to open ${catalogStar ? catalogStar.name : record.name} Dossier`}
                   >
                     <div>
@@ -297,7 +296,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         <div className="flex items-center gap-2">
                           <StarDot2D star={catalogStar} colorHex={catalogStar?.colorHex || '#ffffff'} />
                           <div>
-                            <div className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                            <div className="text-base font-bold text-white group-hover:text-sky-300 transition-colors">
                               {record.name}
                             </div>
                             {record.pronunciation && (
@@ -308,12 +307,12 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                           </div>
                         </div>
 
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-cyan-300 border border-cyan-500/30 shrink-0">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5 text-sky-300 border border-white/10 shrink-0">
                           {record.language}
                         </span>
                       </div>
 
-                      <div className="mt-2 text-xs font-semibold text-cyan-200 font-sans">
+                      <div className="mt-2 text-xs font-semibold text-sky-200 font-sans">
                         "{record.meaning}"
                       </div>
 
@@ -322,13 +321,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
                       <div>
                         <span>{record.bayerOrId}</span> · <span className="text-slate-300">{record.constellation}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-cyan-400 group-hover:text-white font-semibold transition-colors">
+                      <div className="flex items-center gap-1 text-sky-400 group-hover:text-white font-semibold transition-colors">
                         <span>Dossier</span>
-                        <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -351,9 +350,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'bayer' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner: Bayer Designations */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>The Multi-Tier Bayer System</span>
@@ -364,14 +362,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               <p>
                 A widespread misconception is that Bayer designations only use Greek letters. In reality, Johann Bayer designed a systematic, multi-tier sequence to label hundreds of stars in rich constellations where the 24 letters of the Greek alphabet were quickly exhausted:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                <div className="p-3.5 rounded-xl bg-slate-900/70 border border-amber-500/40 space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
                   <div className="text-xs font-bold font-mono text-amber-300">
                     Tier 1: Greek Letters (α to ω)
                   </div>
@@ -383,19 +381,19 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/70 border border-cyan-500/40 space-y-1.5">
-                  <div className="text-xs font-bold font-mono text-cyan-300">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+                  <div className="text-xs font-bold font-mono text-sky-300">
                     Tier 2: Lowercase Latin (a to z)
                   </div>
                   <p className="text-xs text-slate-300 leading-snug">
                     When Greek letters ran out, Bayer continued with lowercase Latin letters a through z (deliberately omitting "j" to prevent confusion with "i").
                   </p>
-                  <div className="text-[11px] font-mono text-cyan-200/90 pt-1">
+                  <div className="text-[11px] font-mono text-sky-200/90 pt-1">
                     Examples: b Centauri, c Centauri, l Carinae, q Carinae
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/70 border border-purple-500/40 space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
                   <div className="text-xs font-bold font-mono text-purple-300">
                     Tier 3: Uppercase Latin (A to Q)
                   </div>
@@ -413,9 +411,10 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 const pCygni = getCatalogStar('p-cygni');
                 if (!pCygni) return null;
                 return (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => onSelectStar && onSelectStar(pCygni)}
-                    className="p-4 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/40 transition-all flex items-center justify-between gap-3 cursor-pointer group shadow-sm"
+                    className="observatory-control w-full min-h-[44px] p-4 rounded-xl border border-purple-500/30 hover:border-purple-400/60 transition-all flex items-center justify-between gap-3 cursor-pointer group shadow-sm text-left"
                     title="Open P Cygni Dossier"
                   >
                     <div className="flex items-center gap-3">
@@ -433,23 +432,23 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       <span>View Dossier</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
-                  </div>
+                  </button>
                 );
               })()}
             </div>
           </div>
 
           {/* Greek Alphabet Reference Table with Real Catalog Links */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <List className="w-4 h-4 text-cyan-400" />
+              <List className="w-4 h-4 text-sky-400" />
               <span>Greek Alphabet Astronomical Sequence</span>
             </h3>
             <p className="text-xs text-slate-400 font-sans">
               All 24 letters used in Bayer designations. Stars with 2D dots exist in Starpedia’s catalog, click to open their dossiers directly.
             </p>
 
-            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 sm:gap-2.5">
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1.5 sm:gap-2.5">
               {GREEK_ALPHABET_REFERENCE.map((item) => {
                 const catalogStar = getCatalogStar(item.catalogId);
                 return (
@@ -458,22 +457,22 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     onClick={() => {
                       if (catalogStar && onSelectStar) onSelectStar(catalogStar);
                     }}
-                    className={`p-1 sm:p-2.5 rounded-md sm:rounded-xl bg-[#04081c] border border-cyan-500/20 transition-all text-center space-y-0.5 sm:space-y-1 ${
-                      catalogStar ? 'hover:border-cyan-400 hover:bg-[#071333] cursor-pointer group shadow-sm' : ''
+                    className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-black/40 border border-white/10 transition-all text-center space-y-0.5 sm:space-y-1 min-h-[44px] flex flex-col justify-center ${
+                      catalogStar ? 'hover:border-sky-400/60 hover:bg-white/5 cursor-pointer group shadow-sm' : ''
                     }`}
                   >
-                    <div className="text-xs sm:text-2xl font-serif font-bold text-cyan-300 leading-tight">{item.letter}</div>
+                    <div className="text-xs sm:text-2xl font-serif font-bold text-sky-300 leading-tight">{item.letter}</div>
                     <div className="min-w-0 overflow-hidden">
                       <RunningText
                         text={item.name}
                         className="text-[8px] sm:text-xs font-bold text-white font-mono leading-tight"
                       />
                     </div>
-                    <div className="text-[7px] sm:text-[10px] text-slate-300 font-sans pt-0.5 sm:pt-1 border-t border-cyan-500/15 flex items-center justify-center gap-0.5 sm:gap-1 leading-tight min-w-0 overflow-hidden">
+                    <div className="text-[7px] sm:text-[10px] text-slate-300 font-sans pt-0.5 sm:pt-1 border-t border-white/10 flex items-center justify-center gap-0.5 sm:gap-1 leading-tight min-w-0 overflow-hidden">
                       {catalogStar && <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} sizeClassName="w-1 h-1 sm:w-2 sm:h-2 shrink-0" />}
                       <RunningText
                         text={item.example}
-                        className={catalogStar ? 'group-hover:text-cyan-300 font-semibold' : ''}
+                        className={catalogStar ? 'group-hover:text-sky-300 font-semibold' : ''}
                         title={item.example}
                       />
                     </div>
@@ -484,30 +483,30 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           </div>
 
           {/* Multiple Stars Sharing a Bayer Designation */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
-            <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-wider">
-              <Binary className="w-4 h-4 text-cyan-400" />
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
+            <div className="flex items-center gap-2 text-sky-400 font-mono text-xs uppercase tracking-wider">
+              <Binary className="w-4 h-4 text-sky-400" />
               <span>Bayer Nomenclature Nuances · Multi-Star Systems &amp; Visual Pairs</span>
             </div>
             <h3 className="text-base sm:text-lg font-bold text-white">
               Multiple Stars Sharing a Bayer Designation
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed">
-              When Johann Bayer assigned designations in his 1603 <em>Uranometria</em>, stars that appeared visually close together, formed asterisms, or shared naked-eye proximity were frequently assigned the <strong className="text-cyan-300">exact same Greek letter</strong>. Later astronomers systematically distinguished them using <strong className="text-amber-300">numerical superscripts</strong> (e.g. π¹ / π², ζ¹ / ζ², μ¹ / μ², θ¹ / θ²) or uppercase component letters (e.g. α Centauri A, B, C):
+              When Johann Bayer assigned designations in his 1603 <em>Uranometria</em>, stars that appeared visually close together, formed asterisms, or shared naked-eye proximity were frequently assigned the <strong className="text-sky-300">exact same Greek letter</strong>. Later astronomers systematically distinguished them using <strong className="text-amber-300">numerical superscripts</strong> (e.g. π¹ / π², ζ¹ / ζ², μ¹ / μ², θ¹ / θ²) or uppercase component letters (e.g. α Centauri A, B, C):
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
               {BAYER_SHARED_DESIGNATIONS_LORE.map((group) => (
                 <div
                   key={group.baseDesignation}
-                  className="p-4 rounded-xl bg-[#04081c] border border-cyan-500/20 hover:border-cyan-400/50 transition-all flex flex-col justify-between space-y-3"
+                  className="observatory-panel p-4 rounded-xl border border-white/10 transition-all flex flex-col justify-between space-y-3"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-bold font-mono text-cyan-300">
+                      <span className="text-sm font-bold font-mono text-sky-300">
                         {group.baseDesignation}
                       </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/30 text-cyan-300">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-sky-300">
                         {group.constellation}
                       </span>
                     </div>
@@ -519,7 +518,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     </p>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-cyan-500/20">
+                  <div className="space-y-1.5 pt-2 border-t border-white/10">
                     <div className="text-[10px] uppercase tracking-wider font-mono text-slate-400">
                       Mapped Catalog Stars:
                     </div>
@@ -533,7 +532,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             onClick={() => {
                               if (catalogStar && onSelectStar) onSelectStar(catalogStar);
                             }}
-                            className={`w-full text-left p-2 rounded-lg bg-slate-900/80 border border-slate-700/60 hover:border-cyan-400/60 hover:bg-[#071333] transition-all flex items-center justify-between gap-2 group cursor-pointer ${
+                            className={`observatory-control min-h-[44px] w-full text-left p-2 rounded-lg border border-white/10 hover:border-sky-400/50 hover:bg-white/5 transition-all flex items-center justify-between gap-2 group cursor-pointer ${
                               catalogStar ? '' : 'opacity-60 pointer-events-none'
                             }`}
                             title={`Open ${st.name} Dossier`}
@@ -543,14 +542,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                               <div className="min-w-0 flex-1 overflow-hidden">
                                 <RunningText
                                   text={st.designation}
-                                  className="text-xs font-mono font-bold text-white group-hover:text-cyan-300"
+                                  className="text-xs font-mono font-bold text-white group-hover:text-sky-300"
                                 />
                                 <div className="text-[10px] text-slate-400 font-sans truncate">
                                   {st.role}
                                 </div>
                               </div>
                             </div>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                           </button>
                         );
                       })}
@@ -562,7 +561,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           </div>
 
           {/* The Famous "Elnath" Case: Stars on Constellation Borders */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-amber-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="flex items-center gap-2 text-amber-400 font-mono text-xs uppercase tracking-wider">
               <Bookmark className="w-4 h-4 text-amber-400" />
               <span>Historical Nomenclature Case Study · Constellation Border Stars</span>
@@ -591,11 +590,12 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 {(() => {
                   const elnathStar = getCatalogStar(ELNATH_CASE_LORE.starId);
                   return (
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         if (elnathStar && onSelectStar) onSelectStar(elnathStar);
                       }}
-                      className="p-4 rounded-xl bg-gradient-to-br from-[#071333] to-[#04081c] border border-amber-500/40 hover:border-amber-400 transition-all cursor-pointer group shadow-lg space-y-3"
+                      className="observatory-control w-full min-h-[44px] p-4 rounded-xl border border-amber-500/30 hover:border-amber-400/60 transition-all cursor-pointer group shadow-lg space-y-3 text-left"
                       title="Open Elnath (Beta Tauri) Dossier"
                     >
                       <div className="flex items-center justify-between">
@@ -609,7 +609,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         <div className="text-base font-bold font-mono text-white group-hover:text-amber-300 transition-colors">
                           {ELNATH_CASE_LORE.starName}
                         </div>
-                        <div className="text-xs font-mono text-cyan-300">
+                        <div className="text-xs font-mono text-sky-300">
                           {ELNATH_CASE_LORE.modernDesignation}
                         </div>
                       </div>
@@ -625,7 +625,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         </div>
                         <div>
                           <span className="text-slate-500 block text-[9px] uppercase">Spectral Type</span>
-                          <span className="text-cyan-200">{ELNATH_CASE_LORE.spectralType}</span>
+                          <span className="text-sky-200">{ELNATH_CASE_LORE.spectralType}</span>
                         </div>
                         <div>
                           <span className="text-slate-500 block text-[9px] uppercase">Distance</span>
@@ -637,7 +637,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         <span>Open Stellar Dossier</span>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </div>
+                    </button>
                   );
                 })()}
               </div>
@@ -658,9 +658,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'numbered' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <List className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                 <span>Numbered Designations: Flamsteed &amp; Gould Systems</span>
@@ -671,36 +670,36 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               <p>
-                Unlike Greek letters, numbered stellar designations are <strong className="text-cyan-300">not ordered by brightness</strong>. Instead, stars within each constellation are numbered sequentially from <strong className="text-white">West to East by Right Ascension (RA)</strong>.
+                Unlike Greek letters, numbered stellar designations are <strong className="text-sky-300">not ordered by brightness</strong>. Instead, stars within each constellation are numbered sequentially from <strong className="text-white">West to East by Right Ascension (RA)</strong>.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 {/* Flamsteed Numbers */}
-                <div className="p-4 rounded-xl bg-slate-900/70 border border-sky-500/40 space-y-2">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                   <div className="text-xs font-bold font-mono text-sky-300 uppercase">
                     1. Flamsteed Numbers (1725)
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     Compiled by England’s first Astronomer Royal, <strong className="text-white">John Flamsteed</strong>, in <em>Historia Coelestis Britannica</em>. Covers northern and equatorial constellations visible from Greenwich (+51° N).
                   </p>
-                  <div className="font-mono text-[11px] text-sky-200 p-2 rounded bg-black/40 border border-sky-500/20">
+                  <div className="font-mono text-[11px] text-sky-200 p-2 rounded bg-black/40 border border-white/10">
                     Format: [Number] [Constellation Genitive]<br />
                     Examples: 51 Pegasi, 61 Cygni, 18 Scorpii
                   </div>
                 </div>
 
                 {/* Gould Designations */}
-                <div className="p-4 rounded-xl bg-slate-900/70 border border-emerald-500/40 space-y-2">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                   <div className="text-xs font-bold font-mono text-emerald-300 uppercase">
                     2. Gould Designations (1879)
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     Compiled by American astronomer <strong className="text-white">Benjamin Apthorp Gould</strong> in <em>Uranometria Argentina</em>. Because Flamsteed could not see deep southern skies from England, Gould created the southern hemisphere equivalent from Córdoba, Argentina!
                   </p>
-                  <div className="font-mono text-[11px] text-emerald-200 p-2 rounded bg-black/40 border border-emerald-500/20">
+                  <div className="font-mono text-[11px] text-emerald-200 p-2 rounded bg-black/40 border border-white/10">
                     Format: [Number] G. [Constellation Genitive]<br />
                     The "G." explicitly stands for <strong>Gould</strong>!<br />
                     Examples: 82 G. Eridani, 33 G. Librae
@@ -711,7 +710,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           </div>
 
           {/* Real Showcase Stars from Catalog */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-white">
               Numbered Stars in Starpedia’s Catalog
             </h3>
@@ -728,7 +727,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     onClick={() => {
                       if (star && onSelectStar) onSelectStar(star);
                     }}
-                    className="p-3.5 rounded-xl bg-[#04081c] hover:bg-[#071333] border border-cyan-500/20 hover:border-cyan-400/60 transition-all space-y-2 cursor-pointer group shadow-sm flex flex-col justify-between"
+                    className="observatory-control min-h-[44px] p-3.5 rounded-xl border border-white/10 hover:border-sky-400/50 transition-all space-y-2 cursor-pointer group shadow-sm flex flex-col justify-between select-none"
                     title={`Open ${item.title} Dossier`}
                   >
                     <div>
@@ -738,11 +737,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                           <div className="min-w-0 flex-1 overflow-hidden">
                             <RunningText
                               text={item.title}
-                              className="text-sm font-bold font-mono text-white group-hover:text-cyan-300 transition-colors"
+                              className="text-sm font-bold font-mono text-white group-hover:text-sky-300 transition-colors"
                             />
                           </div>
                         </div>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 shrink-0">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 border border-white/10 text-sky-300 shrink-0">
                           {item.numberStr}
                         </span>
                       </div>
@@ -750,11 +749,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       <p className="text-[11px] text-slate-300 font-sans mt-1 leading-snug">{item.significance}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
                       <span>{item.constellation}</span>
-                      <div className="flex items-center gap-1 text-cyan-400 font-semibold group-hover:text-white">
+                      <div className="flex items-center gap-1 text-sky-400 font-semibold group-hover:text-white">
                         <span>Open Dossier</span>
-                        <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -777,9 +776,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'variable' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Activity className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-rose-400 shrink-0" />
                 <span>The 4-Phase Argelander Variable System</span>
@@ -790,14 +788,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               <p>
                 As astronomers discovered pulsating and eruptive stars, German astronomer <strong className="text-white">Friedrich Wilhelm Argelander</strong> devised a standardized naming sequence. Because Johann Bayer had already used Latin letters <em>A through Q</em> (like P Cygni), Argelander began strictly with the letter <strong className="text-rose-400">R</strong> to guarantee zero collisions!
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/60 space-y-1">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                   <div className="text-xs font-bold font-mono text-amber-300 flex items-center justify-between">
                     <span>Phase 1: Single Letters (R to Z)</span>
                     <span className="text-[10px] text-slate-400">9 Stars</span>
@@ -807,8 +805,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/60 space-y-1">
-                  <div className="text-xs font-bold font-mono text-cyan-300 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                  <div className="text-xs font-bold font-mono text-sky-300 flex items-center justify-between">
                     <span>Phase 2: Double Letters (RR to ZZ)</span>
                     <span className="text-[10px] text-slate-400">54 Stars</span>
                   </div>
@@ -817,7 +815,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/60 space-y-1">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                   <div className="text-xs font-bold font-mono text-emerald-300 flex items-center justify-between">
                     <span>Phase 3: Double Letters (AA to QZ)</span>
                     <span className="text-[10px] text-slate-400">280 Stars (Total: 334)</span>
@@ -827,7 +825,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/60 space-y-1">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                   <div className="text-xs font-bold font-mono text-rose-300 flex items-center justify-between">
                     <span>Phase 4: Numerical V-Numbers</span>
                     <span className="text-[10px] text-slate-400">Star #335 to Infinity</span>
@@ -841,7 +839,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
           </div>
 
           {/* Showcased Variable Stars Across All 4 Argelander Phases */}
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="flex items-center gap-2 text-rose-400 font-mono text-xs uppercase tracking-wider">
               <Activity className="w-4 h-4 text-rose-400" />
               <span>Variable Stars Showcased Across All 4 Argelander Phases</span>
@@ -862,7 +860,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     onClick={() => {
                       if (star && onSelectStar) onSelectStar(star);
                     }}
-                    className="p-3.5 rounded-xl bg-[#04081c] hover:bg-[#071333] border border-cyan-500/20 hover:border-rose-400/60 transition-all space-y-2 cursor-pointer group shadow-sm flex flex-col justify-between"
+                    className="observatory-control min-h-[44px] p-3.5 rounded-xl border border-white/10 hover:border-rose-400/50 transition-all space-y-2 cursor-pointer group shadow-sm flex flex-col justify-between select-none"
                     title={`Open ${item.name} Dossier`}
                   >
                     <div>
@@ -876,7 +874,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             />
                           </div>
                         </div>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950/80 border border-rose-500/30 text-rose-300 shrink-0">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 border border-white/10 text-rose-300 shrink-0">
                           {item.designation}
                         </span>
                       </div>
@@ -884,15 +882,15 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                         <span className="text-amber-300 font-semibold">{item.phase}</span>
                         <span className="text-slate-400">{item.constellation}</span>
                       </div>
-                      <div className="text-[11px] font-mono text-cyan-300 mt-0.5">{item.variableType}</div>
+                      <div className="text-[11px] font-mono text-sky-300 mt-0.5">{item.variableType}</div>
                       <p className="text-[11px] text-slate-300 font-sans mt-1 leading-snug">{item.significance}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
                       <span>{star?.spectralType || item.constellation}</span>
                       <div className="flex items-center gap-1 text-rose-400 font-semibold group-hover:text-white">
                         <span>Open Dossier</span>
-                        <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -915,11 +913,10 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'catalogs' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
-                <Database className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-cyan-400 shrink-0" />
+                <Database className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-sky-400 shrink-0" />
                 <span>Major Astronomical Catalogs</span>
               </h2>
               <p className="text-xs sm:text-sm md:text-base mobile-landscape:text-[11px] mobile-landscape:leading-snug text-slate-300 font-sans leading-relaxed">
@@ -935,16 +932,16 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
               return (
                 <div
                   key={cat.prefix}
-                  className="p-5 rounded-2xl bg-[#030718]/90 border border-cyan-500/30 space-y-3.5 shadow-lg flex flex-col justify-between"
+                  className="observatory-panel p-5 rounded-2xl border border-white/10 space-y-3.5 shadow-lg flex flex-col justify-between"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-2 border-b border-cyan-500/20 pb-2.5">
+                    <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-2.5">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-black font-mono" style={{ color: cat.accentColor }}>
                             {cat.prefix}
                           </span>
-                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold">
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-sky-300 border border-white/10 font-bold">
                             {cat.yearIntroduced}
                           </span>
                         </div>
@@ -952,7 +949,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                           {cat.fullName}
                         </div>
                       </div>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 border border-cyan-500/20 text-cyan-400 uppercase shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-sky-400 uppercase shrink-0">
                         {cat.category}
                       </span>
                     </div>
@@ -968,26 +965,26 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       </div>
                       <div>
                         <strong className="text-slate-400 font-mono text-[11px]">Numbering Scheme:</strong>{' '}
-                        <span className="font-mono text-[11px] text-cyan-300/90">{cat.numberingLogic}</span>
+                        <span className="font-mono text-[11px] text-sky-300/90">{cat.numberingLogic}</span>
                       </div>
                     </div>
 
                     {cat.imageUrl && (
-                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-black/50 border border-slate-700/60">
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
                         <img
                           src={cat.imageUrl}
                           alt={cat.imageCaption || cat.fullName}
-                          className="w-16 h-16 rounded-lg object-contain bg-black/70 border border-cyan-500/40 p-1 shadow shrink-0"
+                          className="w-16 h-16 rounded-lg object-contain bg-black/70 border border-white/10 p-1 shadow shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="text-[10px] font-mono text-cyan-300 uppercase font-semibold">Survey Instrument / Pioneer</div>
+                          <div className="text-[10px] font-mono text-sky-300 uppercase font-semibold">Survey Instrument / Pioneer</div>
                           <div className="text-xs text-slate-200 font-sans">{cat.imageCaption}</div>
                         </div>
                       </div>
                     )}
 
                     {/* Expanded in-depth explanation */}
-                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-xs text-slate-300 font-sans leading-relaxed">
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 font-sans leading-relaxed">
                       <strong className="text-white font-mono text-[11px]">In-Depth Architecture: </strong>
                       {cat.inDepthExplanation}
                     </div>
@@ -1002,7 +999,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       return (
                         <div
                           onClick={() => onSelectStar && onSelectStar(catalogStar)}
-                          className="p-3 rounded-xl bg-slate-900/80 hover:bg-[#071333] border border-cyan-500/30 hover:border-cyan-400/60 transition-all flex items-center justify-between gap-2 cursor-pointer group shadow-sm"
+                          className="observatory-control min-h-[44px] p-3 rounded-xl border border-white/10 hover:border-sky-400/50 transition-all flex items-center justify-between gap-2 cursor-pointer group shadow-sm select-none"
                           title={`Open ${catalogStar.name} Dossier`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -1010,14 +1007,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             <div className="min-w-0 flex-1 overflow-hidden">
                               <RunningText
                                 text={displayTitle}
-                                className="font-mono text-xs font-bold text-white group-hover:text-cyan-300 transition-colors"
+                                className="font-mono text-xs font-bold text-white group-hover:text-sky-300 transition-colors"
                               />
                               <div className="text-[11px] text-slate-400 truncate">
                                 {cat.exampleTarget}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-[11px] font-mono text-cyan-400 font-semibold shrink-0">
+                          <div className="flex items-center gap-1 text-[11px] font-mono text-sky-400 font-semibold shrink-0">
                             <span>Dossier</span>
                             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                           </div>
@@ -1026,7 +1023,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     })()}
                   </div>
 
-                  <div className="text-[11px] text-slate-400 font-sans pt-2 border-t border-cyan-500/15">
+                  <div className="text-[11px] text-slate-400 font-sans pt-2 border-t border-white/10">
                     <strong className="text-slate-300">Significance:</strong> {cat.significance}
                   </div>
                 </div>
@@ -1048,9 +1045,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'clusters-extragalactic' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Globe className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-emerald-400 shrink-0" />
                 <span>Star Clusters &amp; Extragalactic Nomenclature</span>
@@ -1065,19 +1061,19 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             {CLUSTERS_AND_EXTRAGALACTIC_LORE.map((item) => (
               <div
                 key={item.systemName}
-                className="p-5 rounded-2xl bg-[#030718]/90 border border-cyan-500/30 space-y-3.5 shadow-lg flex flex-col justify-between"
+                className="observatory-panel p-5 rounded-2xl border border-white/10 space-y-3.5 shadow-lg flex flex-col justify-between"
               >
                 <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2 border-b border-cyan-500/20 pb-2.5">
+                  <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-2.5">
                     <div>
                       <div className="text-lg font-bold font-mono text-white">
                         {item.systemName}
                       </div>
-                      <div className="text-xs font-mono text-cyan-400 mt-0.5">
+                      <div className="text-xs font-mono text-sky-400 mt-0.5">
                         {item.parentStructureOrGalaxy}
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30 shrink-0">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-amber-300 border border-white/10 shrink-0">
                       {item.category}
                     </span>
                   </div>
@@ -1087,7 +1083,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     {item.originAndNamingConvention}
                   </div>
 
-                  <p className="text-xs text-slate-300 font-sans leading-relaxed p-3 rounded-xl bg-slate-900/60 border border-slate-700/60">
+                  <p className="text-xs text-slate-300 font-sans leading-relaxed p-3 rounded-xl bg-white/5 border border-white/10">
                     {item.detailedLore}
                   </p>
 
@@ -1105,8 +1101,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             onClick={() => {
                               if (catalogStar && onSelectStar) onSelectStar(catalogStar);
                             }}
-                            className={`p-2.5 rounded-xl bg-black/40 border border-cyan-500/20 flex items-center justify-between gap-2 transition-all ${
-                              catalogStar ? 'hover:border-cyan-400 hover:bg-[#071333] cursor-pointer group shadow-sm' : ''
+                            className={`observatory-control min-h-[44px] p-2.5 rounded-xl border border-white/10 flex items-center justify-between gap-2 transition-all select-none ${
+                              catalogStar ? 'hover:border-sky-400/50 hover:bg-white/5 cursor-pointer group shadow-sm' : ''
                             }`}
                             title={catalogStar ? `Open ${catalogStar.name} Dossier` : undefined}
                           >
@@ -1115,7 +1111,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                               <div className="min-w-0 flex-1 overflow-hidden">
                                 <RunningText
                                   text={starRef.name}
-                                  className="text-xs font-bold font-mono text-white group-hover:text-cyan-300 transition-colors"
+                                  className="text-xs font-bold font-mono text-white group-hover:text-sky-300 transition-colors"
                                 />
                                 <div className="text-[11px] text-slate-400 font-sans truncate">
                                   {starRef.role}
@@ -1123,9 +1119,9 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                               </div>
                             </div>
                             {catalogStar && (
-                              <div className="flex items-center gap-1 text-[11px] font-mono text-cyan-400 font-semibold shrink-0">
+                              <div className="flex items-center gap-1 text-[11px] font-mono text-sky-400 font-semibold shrink-0">
                                 <span>Dossier</span>
-                                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                               </div>
                             )}
                           </div>
@@ -1152,9 +1148,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'misc-names' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Tag className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
                 <span>Miscellaneous Astronomical Names</span>
@@ -1174,7 +1169,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   onClick={() => {
                     if (star && onSelectStar) onSelectStar(star);
                   }}
-                  className="p-4 rounded-xl bg-[#04081c] hover:bg-[#071333] border border-cyan-500/25 hover:border-cyan-400/60 transition-all space-y-2.5 flex flex-col justify-between cursor-pointer group shadow-sm"
+                  className="observatory-control min-h-[44px] p-4 rounded-xl border border-white/10 hover:border-sky-400/50 transition-all space-y-2.5 flex flex-col justify-between cursor-pointer group shadow-sm select-none"
                   title={`Open ${item.popularName} Dossier`}
                 >
                   <div className="space-y-2">
@@ -1182,14 +1177,14 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       <div className="flex items-center gap-2">
                         {star && <StarDot2D star={star} colorHex={star.colorHex} />}
                         <div>
-                          <div className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                          <div className="text-base font-bold text-white group-hover:text-sky-300 transition-colors">
                             {item.popularName}
                           </div>
-                          <div className="text-xs font-mono text-cyan-400">{item.formalDesignation}</div>
+                          <div className="text-xs font-mono text-sky-400">{item.formalDesignation}</div>
                         </div>
                       </div>
 
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30 shrink-0">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-amber-300 border border-white/10 shrink-0">
                         {item.originType}
                       </span>
                     </div>
@@ -1199,11 +1194,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>{star?.constellation}</span>
-                    <div className="flex items-center gap-1 text-cyan-400 group-hover:text-white font-semibold">
+                    <div className="flex items-center gap-1 text-sky-400 group-hover:text-white font-semibold">
                       <span>Open Dossier</span>
-                      <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
                 </div>
@@ -1217,9 +1212,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'non-stars' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-rose-400 shrink-0" />
                 <span>Non-Stars with Stellar Designations</span>
@@ -1236,10 +1230,10 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
               return (
                 <div
                   key={item.designation}
-                  className="p-5 rounded-2xl bg-[#030718]/90 border border-cyan-500/30 space-y-3 shadow-lg flex flex-col justify-between"
+                  className="observatory-panel p-5 rounded-2xl border border-white/10 space-y-3 shadow-lg flex flex-col justify-between"
                 >
                   <div className="space-y-2.5">
-                    <div className="flex items-start justify-between gap-2 border-b border-cyan-500/20 pb-2">
+                    <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-2">
                       <div>
                         <div className="text-lg font-bold font-mono text-white">
                           {item.designation}
@@ -1250,8 +1244,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs">
-                      <strong className="text-cyan-300 font-mono">Actual Identity:</strong>{' '}
+                    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+                      <strong className="text-sky-300 font-mono">Actual Identity:</strong>{' '}
                       <span className="text-white font-medium">{item.actualIdentity}</span>
                     </div>
 
@@ -1268,10 +1262,11 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </div>
 
                   {catalogStar && onSelectStar && (
-                    <div className="pt-3 border-t border-cyan-500/20 flex items-center justify-end">
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-end">
                       <button
+                        type="button"
                         onClick={() => onSelectStar(catalogStar)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-semibold transition-all cursor-pointer"
+                        className="observatory-control min-h-[44px] flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 hover:border-sky-400/50 text-sky-300 hover:text-white text-xs font-mono font-semibold transition-all cursor-pointer"
                       >
                         <StarDot2D star={catalogStar} colorHex={catalogStar.colorHex} />
                         <span>Open Stellar Dossier</span>
@@ -1290,9 +1285,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'components-planets' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 space-y-1 sm:space-y-1.5 md:space-y-2">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                 <Binary className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-purple-400 shrink-0" />
                 <span>Stellar Components vs. Exoplanet Lettering</span>
@@ -1303,20 +1297,20 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             <div className="text-xs sm:text-sm text-slate-300 font-sans space-y-3 leading-relaxed">
               {/* Two Tiers of Stellar Components */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 {/* Tier 1: Major Physical Components */}
-                <div className="p-4 rounded-xl bg-slate-900/80 border border-cyan-500/40 space-y-2">
-                  <div className="text-sm font-bold font-mono text-cyan-300 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-cyan-400" />
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                  <div className="text-sm font-bold font-mono text-sky-300 flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-sky-400" />
                     <span>Tier 1: Uppercase Letters (A, B, C...)</span>
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     Assigned to wide visual or major physical components in order of decreasing brightness or mass. <strong>Component A</strong> is the primary star; <strong>Component B</strong> is the secondary companion; <strong>Component C</strong> is tertiary.
                   </p>
-                  <div className="p-2.5 rounded-lg bg-black/50 border border-slate-700 font-mono text-[11px] text-cyan-200 space-y-1.5">
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[11px] text-sky-200 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <StarDot2D star={getCatalogStar('alpha-centauri-a')} sizeClassName="w-2 h-2" />
                       <span>Alpha Centauri A (Rigil Kentaurus)</span>
@@ -1333,7 +1327,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 </div>
 
                 {/* Tier 2: Close Sub-Components */}
-                <div className="p-4 rounded-xl bg-slate-900/80 border border-amber-500/40 space-y-2">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                   <div className="text-sm font-bold font-mono text-amber-300 flex items-center gap-2">
                     <Binary className="w-4 h-4 text-amber-400" />
                     <span>Tier 2: Lowercase Sub-Suffixes (Aa, Ab, Ba...)</span>
@@ -1341,7 +1335,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   <p className="text-xs text-slate-300 leading-relaxed">
                     When high-resolution spectroscopy, speckle interferometry, or space astrometry splits a primary component into a close spectroscopic sub-binary, lowercase letters are appended!
                   </p>
-                  <div className="p-2.5 rounded-lg bg-black/50 border border-slate-700 font-mono text-[11px] text-amber-200 space-y-1.5">
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[11px] text-amber-200 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <StarDot2D star={getCatalogStar('polaris')} sizeClassName="w-2 h-2" />
                       <span>Polaris Aa (F7Ib supergiant primary)</span>
@@ -1359,7 +1353,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
               </div>
 
               {/* Exoplanet Naming Hierarchy */}
-              <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/40 space-y-3 mt-2">
+              <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/30 space-y-3 mt-2">
                 <div className="text-sm font-bold font-mono text-purple-300 flex items-center gap-2">
                   <Globe className="w-4 h-4 text-purple-400" />
                   <span>Exoplanet Naming System (IAU Commission 53 / F2 Rules)</span>
@@ -1375,7 +1369,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg bg-black/50 border border-purple-500/30 font-mono text-[11px] text-purple-200 space-y-1.5">
+                <div className="p-3 rounded-lg bg-black/40 border border-purple-500/20 font-mono text-[11px] text-purple-200 space-y-1.5">
                   <div className="flex items-center gap-2">
                     <StarDot2D colorHex="#fbbf24" sizeClassName="w-2 h-2" />
                     <span><strong>Circumbinary Planet (orbiting both stars):</strong> Kepler-16(AB)b</span>
@@ -1403,9 +1397,8 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
       {activeTab === 'quiz' && (
         <div className="space-y-4 sm:space-y-6">
           {/* Sub-tab Hero Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#030a21] via-[#050f2e] to-[#03081a] border border-cyan-500/25 p-3.5 sm:p-5 md:p-6 lg:p-7 mobile-landscape:p-2.5 mobile-landscape:py-2 shadow-xl backdrop-blur-md">
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="observatory-panel p-4 sm:p-6 rounded-2xl border border-white/10 shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
               <div className="space-y-1 sm:space-y-1.5 md:space-y-2 max-w-2xl">
                 <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl mobile-landscape:text-sm font-black text-white tracking-tight flex items-center gap-2 sm:gap-2.5 md:gap-3">
                   <Award className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mobile-landscape:w-4 mobile-landscape:h-4 text-amber-400 shrink-0" />
@@ -1418,12 +1411,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
               {isQuizSubmitted && (
                 <div className="flex items-center gap-3 shrink-0">
-                  <div className="px-2.5 sm:px-3 md:px-3.5 py-1 sm:py-1.5 md:py-2 rounded-xl bg-cyan-950/80 border border-cyan-400 text-cyan-300 font-mono text-[11px] sm:text-xs font-bold">
+                  <div className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-sky-300 font-mono text-xs font-bold flex items-center">
                     Score: {quizScore} / {NOMENCLATURE_QUIZ_QUESTIONS.length}
                   </div>
                   <button
+                    type="button"
                     onClick={handleResetQuiz}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 cursor-pointer transition-all"
+                    className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-200 cursor-pointer transition-all"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Reset</span>
@@ -1433,7 +1427,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             </div>
           </div>
 
-          <div className="rounded-2xl bg-[#030718]/90 border border-cyan-500/30 p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+          <div className="observatory-panel p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl space-y-4">
             {/* Questions List */}
             <div className="space-y-5">
               {NOMENCLATURE_QUIZ_QUESTIONS.map((q, qIndex) => {
@@ -1444,10 +1438,10 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                 return (
                   <div
                     key={q.id}
-                    className="p-4 rounded-xl bg-[#020512] border border-cyan-500/20 space-y-3"
+                    className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3"
                   >
                     <div className="flex items-start gap-2.5">
-                      <span className="w-6 h-6 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5">
+                      <span className="w-6 h-6 rounded-full bg-white/5 text-sky-400 border border-white/10 flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5">
                         {qIndex + 1}
                       </span>
                       <div className="font-semibold text-xs sm:text-sm text-white font-sans leading-relaxed">
@@ -1459,7 +1453,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 pl-8">
                       {q.options.map((option, optIdx) => {
                         const isThisChosen = userPick === optIdx;
-                        let optionStyle = 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800';
+                        let optionStyle = 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10';
 
                         if (isQuizSubmitted) {
                           if (optIdx === q.correctIndex) {
@@ -1468,12 +1462,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                             optionStyle = 'bg-rose-950/80 border-rose-500 text-rose-200 line-through';
                           }
                         } else if (isThisChosen) {
-                          optionStyle = 'bg-cyan-950/80 border-cyan-400 text-cyan-200 font-bold shadow-[0_0_10px_rgba(6,182,212,0.3)]';
+                          optionStyle = 'bg-sky-950/80 border-sky-400 text-sky-200 font-bold shadow-sm';
                         }
 
                         return (
                           <button
                             key={optIdx}
+                            type="button"
                             disabled={isQuizSubmitted}
                             onClick={() =>
                               setSelectedAnswers((prev) => ({
@@ -1481,7 +1476,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
                                 [q.id]: optIdx,
                               }))
                             }
-                            className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center gap-2 ${optionStyle}`}
+                            className={`min-h-[44px] p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center gap-2 ${optionStyle}`}
                           >
                             <span className="w-5 h-5 rounded-md bg-black/40 flex items-center justify-center font-mono text-[10px] text-slate-400 shrink-0">
                               {String.fromCharCode(65 + optIdx)}
@@ -1494,7 +1489,7 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
 
                     {/* Explanation if submitted */}
                     {isQuizSubmitted && (
-                      <div className="ml-8 mt-2 p-3 rounded-lg bg-cyan-950/30 border border-cyan-500/25 text-xs text-slate-300 flex items-start gap-2">
+                      <div className="ml-8 mt-2 p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 flex items-start gap-2">
                         {isCorrect ? (
                           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                         ) : (
@@ -1515,12 +1510,13 @@ export const StellarNomenclatureGuide: React.FC<StellarNomenclatureGuideProps> =
             {!isQuizSubmitted && (
               <div className="flex justify-end pt-2">
                 <button
+                  type="button"
                   disabled={Object.keys(selectedAnswers).length < NOMENCLATURE_QUIZ_QUESTIONS.length}
                   onClick={() => setIsQuizSubmitted(true)}
-                  className={`px-5 py-2.5 rounded-xl font-bold font-mono text-xs transition-all flex items-center gap-2 ${
+                  className={`min-h-[44px] px-5 py-2.5 rounded-xl font-bold font-mono text-xs transition-all flex items-center gap-2 ${
                     Object.keys(selectedAnswers).length === NOMENCLATURE_QUIZ_QUESTIONS.length
-                      ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                      ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 cursor-pointer shadow-md active:scale-95'
+                      : 'bg-white/5 border border-white/10 text-slate-500 cursor-not-allowed'
                   }`}
                 >
                   <Award className="w-4 h-4" />
