@@ -158,21 +158,21 @@
 - Consumes: Stellar evolution branches (low-mass, solar-mass, massive, supermassive), `.observatory-panel`.
 - Produces: Astrophysics evolutionary track diagram and remnant visualizer.
 
-- [ ] **Step 1: Inspect and identify slop patterns in both visualizers**
+- [x] **Step 1: Inspect and identify slop patterns in both visualizers**
   - Identify `blur-3xl` orbs in `StellarLifeCycleVisualizer2D.tsx`.
   - Check stage selection timeline for neon drop shadows and cyan glows.
 
-- [ ] **Step 2: Refactor `StellarLifeCycleVisualizer2D.tsx`**
+- [x] **Step 2: Refactor `StellarLifeCycleVisualizer2D.tsx`**
   - Convert header and track selector to `.observatory-panel`.
   - Remove blur orbs.
   - Refactor track selection buttons (Low-Mass Dwarf, Solar Analog, Massive Star, Hypergiant) to `.observatory-control`.
   - Clean up stage inspection cards with `JetBrains Mono` telemetry (temperatures, timescales, fusion reactions).
 
-- [ ] **Step 3: Refactor `StellarLifeCycleVisualizer.tsx`**
+- [x] **Step 3: Refactor `StellarLifeCycleVisualizer.tsx`**
   - Clean up 3D/stage overlay controls and stage description drawer to match `.observatory-panel`.
   - Ensure minimum 44px tap targets for all evolution step nodes.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---

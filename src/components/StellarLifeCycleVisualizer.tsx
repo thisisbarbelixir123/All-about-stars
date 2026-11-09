@@ -996,23 +996,23 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
   };
 
   return (
-    <div className={`p-4 sm:p-6 rounded-2xl bg-[#030614] border border-cyan-500/25 flex flex-col gap-6 shadow-2xl transition-all duration-300 ${isExpanded ? 'fixed inset-2 sm:inset-4 z-50 overflow-y-auto max-w-none bg-[#020512]/98' : ''}`}>
+    <div className={`p-4 sm:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-6 shadow-2xl transition-all duration-300 ${isExpanded ? 'fixed inset-2 sm:inset-4 z-50 overflow-y-auto max-w-none bg-[#020512]/98' : ''}`}>
       
       {/* 1. Header with Mass Branch Selector */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-cyan-500/15 pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-sky-400">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
                 <span>Stellar Life Cycles</span>
-                <span className="text-[11px] font-mono font-normal text-cyan-400/90 px-2 py-0.5 rounded-md bg-cyan-950/60 border border-cyan-500/30">
+                <span className="text-[11px] font-mono font-normal text-sky-300 px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
                   3D Scalable Visualizer
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5 font-sans">
                 From molecular cloud collapse to cosmic remnants: scrub through billions of years of nuclear astrophysics.
               </p>
             </div>
@@ -1026,14 +1026,15 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
             return (
               <button
                 key={track.id}
+                type="button"
                 onClick={() => {
                   setActiveTrackId(track.id);
                   jumpToStage(0);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 cursor-pointer border ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all shrink-0 cursor-pointer border ${
                   isActive
-                    ? 'bg-gradient-to-r from-cyan-500/25 to-blue-600/25 border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.35)]'
-                    : 'bg-[#020512] border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold shadow-sm'
+                    : 'observatory-control bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {track.shortTitle}
@@ -1048,7 +1049,7 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
         
         {/* Left Column: 3D Stage Viewport (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-3">
-          <div className="relative w-full h-[340px] sm:h-[420px] rounded-2xl bg-[#02040d] border border-cyan-500/25 overflow-hidden shadow-inner flex flex-col justify-between select-none">
+          <div className="relative w-full h-[340px] sm:h-[420px] rounded-2xl bg-black/60 border border-white/10 overflow-hidden shadow-inner flex flex-col justify-between select-none">
             
             {/* 3D WebGL Canvas */}
             <div
@@ -1063,10 +1064,10 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
             {/* Stage Badge Overlay (Top Left) */}
             <div className="relative z-10 m-3 pointer-events-none flex flex-col gap-1 max-w-[80%]">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 px-2 py-0.5 rounded bg-[#040816]/90 border border-cyan-500/30 backdrop-blur-md">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400 px-2.5 py-1 rounded-lg bg-black/70 border border-white/10 backdrop-blur-md">
                   {currentStage.epochLabel}
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded bg-[#040816]/90 border border-slate-800 backdrop-blur-md">
+                <span className="text-[10px] font-mono text-slate-300 px-2.5 py-1 rounded-lg bg-black/70 border border-white/10 backdrop-blur-md">
                   {currentStage.ageYears}
                 </span>
               </div>
@@ -1078,40 +1079,43 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
             {/* 3D Controls Overlay (Top Right) */}
             <div className="relative z-10 m-3 flex items-center gap-1.5 self-end pointer-events-auto">
               <button
+                type="button"
                 onClick={() => setAutoRotate(!autoRotate)}
                 title={autoRotate ? 'Pause 3D auto-orbit' : 'Resume 3D auto-orbit'}
-                className={`p-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer backdrop-blur-md ${
+                className={`observatory-control min-h-[44px] min-w-[44px] p-2.5 rounded-xl border text-xs font-mono transition-all cursor-pointer backdrop-blur-md flex items-center justify-center ${
                   autoRotate
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
-                    : 'bg-[#040816]/80 border-slate-700 text-slate-400 hover:text-white'
+                    ? 'bg-sky-500 border-sky-400 text-slate-950 font-bold'
+                    : 'bg-black/60 border-white/10 text-slate-400 hover:text-white'
                 }`}
               >
-                <Compass className="w-3.5 h-3.5" />
+                <Compass className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={resetCamera}
                 title="Reset Camera Angle"
-                className="p-1.5 rounded-lg bg-[#040816]/80 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md"
+                className="observatory-control min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-black/60 border border-white/10 hover:border-sky-400/50 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md flex items-center justify-center"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
                 title={isExpanded ? 'Collapse view' : 'Expand view'}
-                className="p-1.5 rounded-lg bg-[#040816]/80 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md"
+                className="observatory-control min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-black/60 border border-white/10 hover:border-sky-400/50 text-slate-400 hover:text-white text-xs font-mono transition-all cursor-pointer backdrop-blur-md flex items-center justify-center"
               >
-                {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
             </div>
 
             {/* 3D Hint Bottom Left */}
             <div className="relative z-10 m-3 pointer-events-none flex items-center justify-between text-[10px] font-mono text-slate-500">
-              <div className="flex items-center gap-1 bg-[#020512]/80 px-2 py-0.5 rounded border border-slate-800/80 backdrop-blur-sm">
+              <div className="flex items-center gap-1 bg-black/70 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-sm text-slate-400">
                 <span>Drag to Orbit</span>
                 <span>•</span>
                 <span>Scroll to Zoom</span>
               </div>
-              <div className="flex items-center gap-1 bg-[#020512]/80 px-2 py-0.5 rounded border border-slate-800/80 backdrop-blur-sm text-cyan-400">
+              <div className="flex items-center gap-1 bg-black/70 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-sm text-sky-400">
                 <span>Stage {currentStageIndex + 1} of {activeTrack.stages.length}</span>
               </div>
             </div>
@@ -1122,13 +1126,13 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
         <div className="lg:col-span-5 flex flex-col justify-between gap-3">
           
           {/* Hydrostatic Balance Meter */}
-          <div className="p-4 rounded-xl bg-[#040818]/90 border border-cyan-500/20 flex flex-col gap-2.5">
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white font-mono">
-                <Scale className="w-4 h-4 text-cyan-400" />
+                <Scale className="w-4 h-4 text-sky-400" />
                 <span>Hydrostatic Balance State</span>
               </div>
-              <span className="text-[10px] font-mono font-bold text-cyan-400">
+              <span className="text-[10px] font-mono font-bold text-sky-400">
                 {currentStage.hydrostaticLabel}
               </span>
             </div>
@@ -1140,7 +1144,7 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 <span className="text-emerald-400">Equilibrium</span>
                 <span className="text-rose-400">Radiation Expansion</span>
               </div>
-              <div className="h-2 rounded-full bg-[#020512] border border-slate-800 relative overflow-hidden flex items-center">
+              <div className="h-2 rounded-full bg-black/60 border border-white/10 relative overflow-hidden flex items-center">
                 {/* Center marker */}
                 <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-full bg-slate-600 z-10" />
                 {/* Dynamic Balance indicator bar */}
@@ -1165,7 +1169,7 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
 
           {/* Real-time Physical Metrics Grid */}
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="p-3 rounded-xl bg-[#040818]/90 border border-slate-800 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
                 <Sun className="w-3.5 h-3.5 text-amber-400" />
                 <span>Physical Radius</span>
@@ -1178,7 +1182,7 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-[#040818]/90 border border-slate-800 flex flex-col gap-1">
+            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
                 <Thermometer className="w-3.5 h-3.5 text-rose-400" />
                 <span>Surface Temp (T_eff)</span>
@@ -1193,21 +1197,21 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
           </div>
 
           {/* Nuclear Fusion Mechanism Card */}
-          <div className="p-3.5 rounded-xl bg-[#040818]/90 border border-cyan-500/20 flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-300 font-mono">
-              <Atom className="w-4 h-4 text-cyan-400" />
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-sky-300 font-mono">
+              <Atom className="w-4 h-4 text-sky-400" />
               <span>Core Fusion Engine</span>
             </div>
             <div className="text-xs font-bold text-white">
               {currentStage.coreFusionFuel}
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
+            <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
               {currentStage.fusionMechanism}
             </p>
           </div>
 
           {/* Cosmic Analog Star Card (Clickable to Catalog!) */}
-          <div className="p-3.5 rounded-xl bg-[#040818]/90 border border-slate-800 flex items-center justify-between gap-3">
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <StarDot2D star={catalogStar} colorHex={catalogStar?.colorHex || '#38bdf8'} sizeClassName="w-3.5 h-3.5" />
               <div className="min-w-0">
@@ -1230,19 +1234,21 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
 
             {catalogStar && onSelectStar ? (
               <button
+                type="button"
                 onClick={() => onSelectStar(catalogStar)}
-                className="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                className="observatory-control min-h-[44px] px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
                 <span>View Star</span>
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </button>
             ) : onOpenCatalog ? (
               <button
+                type="button"
                 onClick={onOpenCatalog}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                className="observatory-control min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
                 <span>Catalog</span>
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </button>
             ) : null}
           </div>
@@ -1251,21 +1257,21 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. 3D-STYLE SCALABLE SLIDER INTERFACE                                     */}
+      {/* 3. SCALABLE SLIDER INTERFACE                                              */}
       {/* ========================================================================= */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#020512] border border-cyan-500/30 flex flex-col gap-4 shadow-xl">
+      <div className="p-4 sm:p-5 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-4">
         
         {/* Controls Ribbon: Playback, Speed, Zoom, Navigation */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-500/15 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
           
           {/* Left: Playback Controls */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsPlaying(!isPlaying)}
               title={isPlaying ? 'Pause simulation' : 'Play evolutionary simulation'}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2 min-h-[44px] rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono flex items-center gap-2 transition-all cursor-pointer active:scale-95"
             >
-              {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
               <span>{isPlaying ? 'Pause' : 'Play Lifecycle'}</span>
             </button>
 
@@ -1275,20 +1281,20 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 jumpToStage(0);
               }}
               title="Reset to Stage 1"
-              className="p-1.5 rounded-xl bg-[#040816] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+              className="p-2 min-w-[44px] min-h-[44px] rounded-xl observatory-control bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-4 h-4" />
             </button>
 
             {/* Prev / Next Stage Buttons */}
-            <div className="flex items-center gap-1 bg-[#040816] p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 min-h-[44px]">
               <button
                 onClick={() => jumpToStage(currentStageIndex - 1)}
                 disabled={currentStageIndex === 0}
                 title="Previous stage"
-                className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="p-2 min-w-[36px] min-h-[36px] rounded-lg hover:bg-white/10 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono text-slate-400 px-1">
                 {currentStageIndex + 1}/{activeTrack.stages.length}
@@ -1297,23 +1303,23 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                 onClick={() => jumpToStage(currentStageIndex + 1)}
                 disabled={currentStageIndex === activeTrack.stages.length - 1}
                 title="Next stage"
-                className="p-1 rounded-lg hover:bg-slate-800 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="p-2 min-w-[36px] min-h-[36px] rounded-lg hover:bg-white/10 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Center: Playback Speed Selector */}
-          <div className="flex items-center gap-1 bg-[#040816] p-1 rounded-xl border border-slate-800 text-[10px] font-mono">
-            <span className="text-slate-500 px-1">Speed:</span>
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 text-[10px] font-mono min-h-[44px]">
+            <span className="text-slate-400 px-1.5">Speed:</span>
             {[0.5, 1, 2, 4].map((spd) => (
               <button
                 key={spd}
                 onClick={() => setPlaybackSpeed(spd)}
-                className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 min-h-[32px] rounded-md font-bold transition-all cursor-pointer ${
                   playbackSpeed === spd
-                    ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                    ? 'bg-sky-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -1324,69 +1330,69 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
 
           {/* Right: Scalable Granularity Zoom */}
           <div className="flex items-center gap-1.5 text-xs font-mono">
-            <span className="text-[10px] text-slate-500">Timeline Scale:</span>
-            <div className="flex items-center gap-1 bg-[#040816] p-1 rounded-xl border border-slate-800">
+            <span className="text-[10px] text-slate-400">Timeline Scale:</span>
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 min-h-[44px]">
               <button
                 onClick={() => setTimelineZoom(Math.max(1, timelineZoom - 0.5))}
                 disabled={timelineZoom <= 1}
                 title="Zoom out timescale"
-                className="p-1 rounded-md text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                className="p-2 min-w-[32px] min-h-[32px] rounded-md text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer flex items-center justify-center"
               >
-                <ZoomOut className="w-3 h-3" />
+                <ZoomOut className="w-3.5 h-3.5" />
               </button>
-              <span className="text-[10px] font-bold text-cyan-300 px-1">
+              <span className="text-[10px] font-bold text-sky-300 px-1">
                 {timelineZoom}x
               </span>
               <button
                 onClick={() => setTimelineZoom(Math.min(3, timelineZoom + 0.5))}
                 disabled={timelineZoom >= 3}
                 title="Zoom in timescale"
-                className="p-1 rounded-md text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                className="p-2 min-w-[32px] min-h-[32px] rounded-md text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer flex items-center justify-center"
               >
-                <ZoomIn className="w-3 h-3" />
+                <ZoomIn className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* 3D Interactive Scalable Slider Rail */}
+        {/* Interactive Scalable Slider Rail */}
         <div className="flex flex-col gap-2.5 pt-2 select-none">
           <div className="flex items-center justify-between text-[11px] font-mono">
             <span className="text-slate-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
               <span>Cosmic Time Scrubbing</span>
             </span>
-            <span className="text-cyan-300 font-bold">
+            <span className="text-sky-300 font-bold">
               Epoch: {currentStage.ageYears} ({sliderValue.toFixed(1)}% Lifespan)
             </span>
           </div>
 
-          {/* 3D Beveled Track Container */}
+          {/* Track Container */}
           <div className="relative py-4">
             
-            {/* Background 3D Rail Track with Glowing Recessed Channel */}
-            <div className="h-4 w-full rounded-full bg-[#04081a] border border-cyan-500/35 relative shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)] overflow-hidden">
+            {/* Background Rail Track with Recessed Channel */}
+            <div className="h-4 w-full rounded-full bg-slate-950/80 border border-white/15 relative overflow-hidden">
               
-              {/* Millimeter Scale Hatching Lines */}
+              {/* Scale Hatching Lines */}
               <div className="absolute inset-0 opacity-25 flex justify-between px-1 items-center pointer-events-none">
                 {Array.from({ length: 40 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`w-0.5 ${i % 5 === 0 ? 'h-3 bg-cyan-400' : 'h-1.5 bg-slate-600'}`}
+                    className={`w-0.5 ${i % 5 === 0 ? 'h-3 bg-sky-400' : 'h-1.5 bg-white/20'}`}
                   />
                 ))}
               </div>
 
-              {/* Glowing Progress Fill */}
+              {/* Progress Fill */}
               <div
-                className="h-full bg-gradient-to-r from-cyan-600 via-blue-500 to-cyan-400 transition-all duration-75 relative shadow-[0_0_12px_rgba(6,182,212,0.6)]"
+                className="h-full bg-sky-500 transition-all duration-75 relative"
                 style={{ width: `${sliderValue}%` }}
               >
-                <div className="absolute right-0 top-0 bottom-0 w-1 bg-white shadow-[0_0_8px_#ffffff]" />
+                <div className="absolute right-0 top-0 bottom-0 w-1 bg-white" />
               </div>
             </div>
 
-            {/* Native Scalable Range Input (Invisible overlay for smooth drag & touch) */}
+            {/* Native Scalable Range Input */}
             <input
               type="range"
               min="0"
@@ -1414,11 +1420,11 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                       title={`${stage.stageName} (${stage.ageYears})`}
                       className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer flex items-center justify-center ${
                         isSelected
-                          ? 'bg-cyan-400 border-white scale-125 shadow-[0_0_16px_rgba(6,182,212,0.9)] z-30'
-                          : 'bg-[#030614] border-cyan-500/60 hover:border-cyan-300 hover:scale-110 z-10'
+                          ? 'bg-sky-400 border-white scale-125 z-30 shadow-md'
+                          : 'bg-slate-900 border-white/30 hover:border-sky-400 hover:scale-110 z-10'
                       }`}
                     >
-                      <span className={`text-[9px] font-mono font-bold ${isSelected ? 'text-slate-950' : 'text-cyan-300'}`}>
+                      <span className={`text-[9px] font-mono font-bold ${isSelected ? 'text-slate-950' : 'text-sky-300'}`}>
                         {idx + 1}
                       </span>
                     </button>
@@ -1427,7 +1433,7 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
                     <span
                       onClick={() => jumpToStage(idx)}
                       className={`text-[9px] font-mono mt-3 text-center whitespace-nowrap cursor-pointer transition-colors max-w-[80px] sm:max-w-[100px] truncate ${
-                        isSelected ? 'text-cyan-300 font-bold' : 'text-slate-500 hover:text-slate-300'
+                        isSelected ? 'text-sky-300 font-bold' : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {stage.stageName.split(' ')[0]}
@@ -1440,21 +1446,21 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
         </div>
 
         {/* Detailed Stage Narrative Box */}
-        <div className="mt-4 p-4 rounded-xl bg-[#040816]/90 border border-cyan-500/20 flex flex-col gap-2">
+        <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
             <span className="font-bold text-white flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
               <span>{currentStage.stageName}</span>
             </span>
-            <span className="text-cyan-400/90 font-mono text-[11px]">
+            <span className="text-sky-300 font-mono text-[11px]">
               Duration: {currentStage.duration}
             </span>
           </div>
           <p className="text-xs text-slate-200 leading-relaxed">
             {currentStage.description}
           </p>
-          <div className="p-2.5 rounded-lg bg-[#020512] border border-slate-800 text-[11px] text-slate-400 font-mono leading-relaxed mt-1">
-            <span className="text-cyan-400 font-bold">Astrophysics Mechanism: </span>
+          <div className="p-2.5 rounded-lg bg-black/40 border border-white/10 text-[11px] text-slate-300 font-mono leading-relaxed mt-1">
+            <span className="text-sky-400 font-bold">Astrophysics Mechanism: </span>
             {currentStage.astrophysicsDetail}
           </div>
         </div>
@@ -1467,10 +1473,10 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Layers className="w-4 h-4 text-cyan-400" />
+            <Layers className="w-4 h-4 text-sky-400" />
             <span>Complete Evolutionary Roadmap ({activeTrack.title})</span>
           </h4>
-          <span className="text-[10px] font-mono text-cyan-400">
+          <span className="text-[10px] font-mono text-sky-400">
             Click any milestone to jump
           </span>
         </div>
@@ -1482,30 +1488,30 @@ export const StellarLifeCycleVisualizer: React.FC<StellarLifeCycleVisualizerProp
               <div
                 key={stage.id}
                 onClick={() => jumpToStage(idx)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden group ${
+                className={`p-3.5 min-h-[44px] rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden group ${
                   isSelected
-                    ? 'bg-gradient-to-b from-cyan-950/50 to-[#020512] border-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.25)]'
-                    : 'bg-[#040816]/90 border-slate-800/80 hover:border-slate-700 hover:bg-[#060c22]'
+                    ? 'observatory-panel bg-sky-950/40 border-sky-400 text-white shadow-sm'
+                    : 'observatory-control bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/[0.08] text-slate-300'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between text-[10px] font-mono mb-1.5">
-                    <span className={`px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
+                    <span className={`px-1.5 py-0.5 rounded font-bold ${isSelected ? 'bg-sky-400 text-slate-950' : 'bg-white/10 text-slate-400'}`}>
                       STAGE {idx + 1}
                     </span>
                     <span className="text-slate-500 font-mono text-[9px]">{stage.ageYears}</span>
                   </div>
-                  <div className={`text-xs font-bold transition-colors ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-cyan-300'}`}>
+                  <div className={`text-xs font-bold transition-colors ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-sky-300'}`}>
                     {stage.stageName}
                   </div>
-                  <div className="text-[10px] text-cyan-400/80 font-mono mt-0.5">
+                  <div className="text-[10px] text-sky-400/90 font-mono mt-0.5">
                     {stage.duration}
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] font-mono">
-                  <span className="text-slate-500">{stage.temperatureLabel}</span>
-                  <span className="text-slate-400 truncate max-w-[60px]">{stage.radiusLabel.split(' ')[0]}</span>
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-slate-400">{stage.temperatureLabel}</span>
+                  <span className="text-slate-300 truncate max-w-[60px]">{stage.radiusLabel.split(' ')[0]}</span>
                 </div>
               </div>
             );
