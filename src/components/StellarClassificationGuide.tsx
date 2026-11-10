@@ -892,8 +892,22 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Variable Stars Card - Carousel UI */}
               {(() => {
                 const activeVariableItem = VARIABLE_STARS_GUIDE[activeVariableIndex] || VARIABLE_STARS_GUIDE[0];
-                const mappedVariableStars = getMappedStarsForVariable(activeVariableItem.id, STARS_CATALOG);
-                const archetypeStar = mappedVariableStars[0] || null;
+                const targetArchetypeId = activeVariableItem.archetypeStarId || activeVariableItem.exampleStarIds?.[0];
+                const targetArchetype = targetArchetypeId ? STARS_CATALOG.find((s) => s.id === targetArchetypeId) : null;
+                const rawMappedVariableStars = getMappedStarsForVariable(activeVariableItem.id, STARS_CATALOG);
+                const archetypeStar = targetArchetype || rawMappedVariableStars[0] || null;
+
+                // Ensure archetype star is prioritized at index 0 of mapped stars
+                const mappedVariableStars = [...rawMappedVariableStars];
+                if (archetypeStar) {
+                  const existingIdx = mappedVariableStars.findIndex((s) => s.id === archetypeStar.id);
+                  if (existingIdx > 0) {
+                    mappedVariableStars.splice(existingIdx, 1);
+                    mappedVariableStars.unshift(archetypeStar);
+                  } else if (existingIdx === -1) {
+                    mappedVariableStars.unshift(archetypeStar);
+                  }
+                }
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
@@ -973,19 +987,26 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                         {/* Astrophysical Profile Quick Stats */}
                         <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
                             <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.category}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Cycle Period</span>
-                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.periodRange}</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Cycle Period</span>
+                            <span className="text-sky-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeVariableItem.periodRange}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype Star</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0 col-span-2">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype Star</span>
                             <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
                               {archetypeStar ? (
-                                <span>{archetypeStar.name} ({archetypeStar.spectralType})</span>
+                                <button
+                                  type="button"
+                                  onClick={() => onSelectStar && onSelectStar(archetypeStar)}
+                                  className="hover:underline hover:text-amber-200 cursor-pointer text-left transition-colors"
+                                  title={`Inspect archetype star ${archetypeStar.name}`}
+                                >
+                                  {archetypeStar.name} ({archetypeStar.spectralType})
+                                </button>
                               ) : (
                                 activeVariableItem.tag
                               )}
@@ -995,7 +1016,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                         <div className="min-w-0 space-y-3">
                           <div>
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1">
+                            <h4 className="text-xs font-mono uppercase text-sky-400 font-bold mb-1">
                               Variability Nature &amp; Behavior
                             </h4>
                             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
@@ -1003,7 +1024,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                             </p>
                           </div>
 
-                          <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20">
+                          <div className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10">
                             <span className="text-[10px] sm:text-[11px] font-mono uppercase text-amber-300 font-bold block mb-1">
                               Physical Driving Mechanism:
                             </span>
@@ -1015,16 +1036,16 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                         {activeVariableItem.distinguishingFeatures && activeVariableItem.distinguishingFeatures.length > 0 && (
                           <div className="space-y-1.5 sm:space-y-2 min-w-0">
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold">
+                            <h4 className="text-xs font-mono uppercase text-sky-400 font-bold">
                               Key Observational Characteristics
                             </h4>
                             <div className="grid grid-cols-1 gap-1 sm:gap-2 min-w-0">
                               {activeVariableItem.distinguishingFeatures.map((feat, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-1.5 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-[11px] sm:text-xs text-slate-300 flex items-start gap-1.5 sm:gap-2 min-w-0"
+                                  className="p-1.5 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] sm:text-xs text-slate-300 flex items-start gap-1.5 sm:gap-2 min-w-0"
                                 >
-                                  <span className="text-cyan-400 font-bold font-mono mt-0.5 shrink-0">•</span>
+                                  <span className="text-sky-400 font-bold font-mono mt-0.5 shrink-0">•</span>
                                   <span className="break-words min-w-0">{feat}</span>
                                 </div>
                               ))}
@@ -1036,21 +1057,22 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         <ClassificationMappedStarsSection
                           title={`Mapped ${activeVariableItem.name}`}
                           categoryColor={activeVariableItem.colorHex}
+                          benchmarkStarIds={activeVariableItem.exampleStarIds}
                           allMappedStars={mappedVariableStars}
                           onSelectStar={onSelectStar}
                         />
 
                         {/* Observational Benchmarks */}
                         {activeVariableItem.externalExamples && activeVariableItem.externalExamples.length > 0 && (
-                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
-                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1 break-words">
+                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-sky-400 font-bold block mb-1 break-words">
                               Notable Archetypes:
                             </span>
                             <div className="flex flex-wrap gap-1 min-w-0">
                               {activeVariableItem.externalExamples.map((ext, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
+                                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
                                 >
                                   {ext}
                                 </span>
@@ -1252,10 +1274,10 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
           {classificationSystemIndex === 4 && (
             <div className="flex flex-col gap-3.5 sm:gap-5 animate-in fade-in duration-200">
               {/* Introduction Banner: "What are star systems?" */}
-              <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-r from-[#04091e] via-[#071330] to-[#04091e] border border-cyan-500/30 shadow-[0_4px_24px_rgba(6,182,212,0.15)] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 relative overflow-hidden">
+              <div className="p-3.5 sm:p-5 rounded-2xl observatory-panel border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 relative overflow-hidden">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30">
+                    <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/20">
                       Astrophysical Overview
                     </span>
                     <h3 className="text-sm sm:text-lg font-bold text-white font-sans">
@@ -1263,7 +1285,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                     </h3>
                   </div>
                   <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-                    Star systems are gravitationally bound celestial configurations ranging from close binary pairs co-orbiting their mutual center of mass (barycenter) to complex hierarchical multiple architectures (<span className="text-cyan-300 font-semibold">triples</span>, <span className="text-cyan-300 font-semibold">quadruples</span>, up to <span className="text-amber-300 font-semibold">sextuple systems</span> like Castor), <span className="text-cyan-300 font-semibold">exoplanet architectures</span>, and massive <span className="text-amber-300 font-semibold">star clusters</span> containing hundreds of thousands of co-eval stellar members bound in a shared gravitational potential.
+                    Star systems are gravitationally bound celestial configurations ranging from close binary pairs co-orbiting their mutual center of mass (barycenter) to complex hierarchical multiple architectures (<span className="text-sky-300 font-semibold">triples</span>, <span className="text-sky-300 font-semibold">quadruples</span>, up to <span className="text-amber-300 font-semibold">sextuple systems</span> like Castor), <span className="text-sky-300 font-semibold">exoplanet architectures</span>, and massive <span className="text-amber-300 font-semibold">star clusters</span> containing hundreds of thousands of co-eval stellar members bound in a shared gravitational potential.
                   </p>
                 </div>
               </div>
@@ -1311,8 +1333,22 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Star Systems Card - Carousel UI */}
               {(() => {
                 const activeStarSystemItem = STAR_SYSTEMS_GUIDE[activeStarSystemIndex] || STAR_SYSTEMS_GUIDE[0];
-                const mappedSystemStars = getMappedStarsForStarSystem(activeStarSystemItem.id, STARS_CATALOG);
-                const archetypeStar = mappedSystemStars[0] || null;
+                const targetArchetypeId = activeStarSystemItem.archetypeStarId || activeStarSystemItem.exampleStarIds?.[0];
+                const targetArchetype = targetArchetypeId ? STARS_CATALOG.find((s) => s.id === targetArchetypeId) : null;
+                const rawMappedSystemStars = getMappedStarsForStarSystem(activeStarSystemItem.id, STARS_CATALOG);
+                const archetypeStar = targetArchetype || rawMappedSystemStars[0] || null;
+
+                // Ensure archetype star is prioritized at index 0 of mapped stars
+                const mappedSystemStars = [...rawMappedSystemStars];
+                if (archetypeStar) {
+                  const existingIdx = mappedSystemStars.findIndex((s) => s.id === archetypeStar.id);
+                  if (existingIdx > 0) {
+                    mappedSystemStars.splice(existingIdx, 1);
+                    mappedSystemStars.unshift(archetypeStar);
+                  } else if (existingIdx === -1) {
+                    mappedSystemStars.unshift(archetypeStar);
+                  }
+                }
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
@@ -1395,19 +1431,26 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
 
                         {/* Astrophysical Profile Quick Stats */}
                         <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Multiplicity</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Multiplicity</span>
                             <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.multiplicity}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
-                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.category}</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Category</span>
+                            <span className="text-sky-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeStarSystemItem.category}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype System / Star</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0 col-span-2">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Archetype System / Star</span>
                             <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
                               {archetypeStar ? (
-                                <span>{archetypeStar.name} ({archetypeStar.spectralType})</span>
+                                <button
+                                  type="button"
+                                  onClick={() => onSelectStar && onSelectStar(archetypeStar)}
+                                  className="hover:underline hover:text-amber-200 cursor-pointer text-left transition-colors"
+                                  title={`Inspect archetype star ${archetypeStar.name}`}
+                                >
+                                  {archetypeStar.name} ({archetypeStar.spectralType})
+                                </button>
                               ) : (
                                 activeStarSystemItem.tag
                               )}
@@ -1418,7 +1461,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         {/* Architecture & Dynamics */}
                         <div className="min-w-0 space-y-3">
                           <div>
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold mb-1">
+                            <h4 className="text-xs font-mono uppercase text-sky-400 font-bold mb-1">
                               System Architecture &amp; Dynamics
                             </h4>
                             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
@@ -1426,7 +1469,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                             </p>
                           </div>
 
-                          <div className="p-2.5 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20">
+                          <div className="p-2.5 sm:p-3 rounded-xl bg-white/5 border border-white/10">
                             <span className="text-[10px] sm:text-[11px] font-mono uppercase text-amber-300 font-bold block mb-1">
                               Orbital Mechanics:
                             </span>
@@ -1439,16 +1482,16 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         {/* Key Observational Hallmarks */}
                         {activeStarSystemItem.distinguishingFeatures && activeStarSystemItem.distinguishingFeatures.length > 0 && (
                           <div className="space-y-1.5 sm:space-y-2 min-w-0">
-                            <h4 className="text-xs font-mono uppercase text-cyan-400 font-bold">
+                            <h4 className="text-xs font-mono uppercase text-sky-400 font-bold">
                               Key Observational Hallmarks
                             </h4>
                             <div className="grid grid-cols-1 gap-1 sm:gap-2 min-w-0">
                               {activeStarSystemItem.distinguishingFeatures.map((feat, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-1.5 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 text-[11px] sm:text-xs text-slate-300 flex items-start gap-1.5 sm:gap-2 min-w-0"
+                                  className="p-1.5 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] sm:text-xs text-slate-300 flex items-start gap-1.5 sm:gap-2 min-w-0"
                                 >
-                                  <span className="text-cyan-400 font-bold font-mono mt-0.5 shrink-0">•</span>
+                                  <span className="text-sky-400 font-bold font-mono mt-0.5 shrink-0">•</span>
                                   <span className="break-words min-w-0">{feat}</span>
                                 </div>
                               ))}
@@ -1470,20 +1513,21 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                           title={`Individual Catalog Stars in ${activeStarSystemItem.name}`}
                           categoryColor={activeStarSystemItem.colorHex}
                           allMappedStars={mappedSystemStars}
+                          benchmarkStarIds={activeStarSystemItem.exampleStarIds}
                           onSelectStar={onSelectStar}
                         />
 
                         {/* Observational Benchmarks / Notable Archetypes */}
                         {activeStarSystemItem.externalExamples && activeStarSystemItem.externalExamples.length > 0 && (
-                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
-                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1 break-words">
+                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-sky-400 font-bold block mb-1 break-words">
                               Notable Archetypes:
                             </span>
                             <div className="flex flex-wrap gap-1 min-w-0">
                               {activeStarSystemItem.externalExamples.map((ext, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
+                                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
                                 >
                                   {ext}
                                 </span>

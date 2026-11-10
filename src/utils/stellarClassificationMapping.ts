@@ -246,14 +246,17 @@ export function getStarVariableCategories(star: StarData): string[] {
   // 5. Cataclysmic & Nova Variables
   if (
     combined.includes('cataclysmic') ||
-    combined.includes('nova') ||
-    combined.includes('supernova') ||
     combined.includes('dwarf nova') ||
     combined.includes('recurrent nova') ||
-    combined.includes('accretion disk') ||
-    combined.includes('symbiotic star')
+    combined.includes('classical nova') ||
+    combined.includes('u geminorum') ||
+    combined.includes('ss cygni') ||
+    combined.includes('t coronae borealis') ||
+    (combined.includes('accretion disk') && (combined.includes('white dwarf') || combined.includes('degenerate'))) ||
+    combined.includes('symbiotic nova') ||
+    (/\bnova\b/i.test(combined) && !combined.includes('supernova') && !combined.includes('sn 1987a'))
   ) {
-    vars.push('Cataclysmic / Eclipsing Binary');
+    vars.push('Cataclysmic Variable');
   }
 
   // 6. Eruptive & Flare Variables
@@ -277,6 +280,7 @@ export function getStarVariableCategories(star: StarData): string[] {
     combined.includes('rotational variable') ||
     combined.includes('by draconis') ||
     combined.includes('alpha-2 canum venaticorum') ||
+    combined.includes('cor caroli') ||
     combined.includes('roap') ||
     combined.includes('magnetic patch')
   ) {
@@ -292,9 +296,7 @@ export function getStarVariableCategories(star: StarData): string[] {
     combined.includes('beta lyrae-type') ||
     combined.includes('w ursae majoris')
   ) {
-    if (!vars.includes('Cataclysmic / Eclipsing Binary')) {
-      vars.push('Cataclysmic / Eclipsing Binary');
-    }
+    vars.push('Eclipsing Binary');
   }
 
   return vars;
@@ -311,7 +313,15 @@ export function getStarSystemType(star: StarData): string {
   if (star.isContactBinary || combined.includes('contact binary') || combined.includes('kissing binary') || combined.includes('overcontact')) {
     return 'Contact Binary';
   }
-  if (combined.includes('x-ray binary') || combined.includes('microquasar') || combined.includes('lmxb') || combined.includes('hmxb')) {
+  if (
+    combined.includes('x-ray binary') ||
+    combined.includes('xray binary') ||
+    combined.includes('cygnus x-1') ||
+    combined.includes('scorpius x-1') ||
+    combined.includes('microquasar') ||
+    combined.includes('lmxb') ||
+    combined.includes('hmxb')
+  ) {
     return 'X-Ray Binary';
   }
   if (
@@ -602,25 +612,52 @@ export function getMappedStarsForVariable(varId: string, catalog: StarData[]): S
     // 6. Cataclysmic Variables
     if (id.includes('cataclysmic')) {
       return (
+        vars.includes('Cataclysmic Variable') ||
         vars.includes('Cataclysmic / Eclipsing Binary') ||
         combined.includes('cataclysmic') ||
-        combined.includes('nova')
+        combined.includes('dwarf nova') ||
+        combined.includes('recurrent nova') ||
+        combined.includes('u geminorum') ||
+        combined.includes('ss cygni') ||
+        combined.includes('t coronae borealis') ||
+        (/\bnova\b/i.test(combined) && !combined.includes('supernova') && !combined.includes('sn 1987a'))
       );
     }
 
     // 7. Eruptive & Flare Variables
     if (id.includes('eruptive') || id.includes('flare')) {
-      return vars.includes('Eruptive / Flare Variable') || combined.includes('flare') || combined.includes('eruptive');
+      return (
+        vars.includes('Eruptive / Flare Variable') ||
+        combined.includes('flare') ||
+        combined.includes('eruptive') ||
+        combined.includes('uv ceti') ||
+        combined.includes('proxima centauri')
+      );
     }
 
     // 8. Rotational Variables
     if (id.includes('rotational')) {
-      return vars.includes('Rotational / Magnetic Variable') || combined.includes('rotational') || combined.includes('starspot');
+      return (
+        vars.includes('Rotational / Magnetic Variable') ||
+        combined.includes('rotational variable') ||
+        combined.includes('rotational modulation') ||
+        combined.includes('starspot') ||
+        combined.includes('by draconis') ||
+        combined.includes('alpha-2 canum venaticorum') ||
+        combined.includes('cor caroli')
+      );
     }
 
     // 9. Eclipsing Binaries
     if (id.includes('eclipsing')) {
-      return s.isContactBinary || combined.includes('eclipsing') || combined.includes('algol');
+      return (
+        vars.includes('Eclipsing Binary') ||
+        vars.includes('Cataclysmic / Eclipsing Binary') ||
+        s.isContactBinary ||
+        combined.includes('eclipsing binary') ||
+        combined.includes('eclipsing variable') ||
+        combined.includes('algol')
+      );
     }
 
     return vars.length > 0;

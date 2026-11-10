@@ -30,6 +30,7 @@ export interface ExoticClassGuideItem {
   tag: string;
   explanation: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -63,6 +64,7 @@ export interface VariableStarGuideItem {
   explanation: string;
   mechanism: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -78,6 +80,7 @@ export interface StarSystemGuideItem {
   explanation: string;
   orbitalDynamics: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -95,6 +98,7 @@ export interface StellarPopulationGuideItem {
   explanation: string;
   nucleosyntheticOrigin: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -117,6 +121,7 @@ export interface StellarRemnantGuideItem {
   explanation: string;
   formationMechanism: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -133,6 +138,7 @@ export interface HypotheticalStarGuideItem {
   explanation: string;
   physicsMechanism: string;
   distinguishingFeatures: string[];
+  archetypeStarId?: string;
   exampleStarIds: string[];
   externalExamples?: string[];
 }
@@ -693,8 +699,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Surface temperature peaks at maximum expansion velocity rather than maximum radius',
       'Encompasses Cepheids, RR Lyraes, Miras, RV Tauri, and Delta Scuti stars',
     ],
-    exampleStarIds: ['polaris', 'delta-cephei', 'betelgeuse', 'mira-a'],
-    externalExamples: ['Polaris (Alpha UMi)', 'Delta Cephei', 'RR Lyrae', 'Betelgeuse (Alpha Ori)'],
+    archetypeStarId: 'delta-cephei',
+    exampleStarIds: ['delta-cephei', 'polaris', 'rr-lyrae', 'mira-a', 'betelgeuse'],
+    externalExamples: ['Delta Cephei (Archetype)', 'Polaris (Alpha UMi)', 'RR Lyrae', 'Betelgeuse (Alpha Ori)'],
   },
   {
     id: 'cepheid-variables',
@@ -714,6 +721,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Rapid brightness rise followed by a gentler, asymmetric decline',
       'Subdivided into Classical Cepheids (Pop I, massive young stars) and Type II Cepheids (Pop II, older low-mass stars like W Virginis)',
     ],
+    archetypeStarId: 'delta-cephei',
     exampleStarIds: ['delta-cephei', 'polaris', 'mekbuda', 'beta-doradus'],
     externalExamples: ['Delta Cephei (Archetype)', 'Polaris (Closest Cepheid)', 'Eta Aquilae', 'V1 in Andromeda (Hubble’s discovery)'],
   },
@@ -735,6 +743,7 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Nearly constant average luminosity (~40–50 L☉) across the entire class',
       'Characteristic Blazhko Effect: Periodic modulation of pulsation amplitude and phase over cycles of tens to hundreds of days',
     ],
+    archetypeStarId: 'rr-lyrae',
     exampleStarIds: ['rr-lyrae', 'delta-scuti', 'gamma-doradus', 'methuselah-star'],
     externalExamples: ['RR Lyrae (Archetype)', 'XZ Cygni', 'V445 Lyr', 'Globular Cluster M3 Variables'],
   },
@@ -756,8 +765,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Surrounded by vast expanding circumstellar dust and gas envelopes',
       'Major cosmic factories for interstellar dust grains that seed future planetary systems',
     ],
+    archetypeStarId: 'mira-a',
     exampleStarIds: ['mira-a', 'chi-cygni', 'r-andromedae'],
-    externalExamples: ['Mira / Omicron Ceti ("The Wonderful")', 'Chi Cygni', 'R Hydrae', 'R Leonis'],
+    externalExamples: ['Mira / Omicron Ceti ("The Wonderful" / Archetype)', 'Chi Cygni', 'R Hydrae', 'R Leonis'],
   },
   {
     id: 'semiregular-variables',
@@ -777,8 +787,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Episodes of sudden dimming caused by dust condensation from convective mass ejections (e.g. Betelgeuse "Great Dimming" of 2019-2020)',
       'High mass-loss rates via slow, cool stellar winds',
     ],
+    archetypeStarId: 'betelgeuse',
     exampleStarIds: ['betelgeuse', 'antares', 'mu-cephei', 'scheat'],
-    externalExamples: ['Betelgeuse (Alpha Orionis)', 'Antares (Alpha Scorpii)', 'Mu Cephei (Garnet Star)', 'Rasalgethi'],
+    externalExamples: ['Betelgeuse (Alpha Orionis / Archetype)', 'Antares (Alpha Scorpii)', 'Mu Cephei (Garnet Star)', 'Rasalgethi'],
   },
   {
     id: 'cataclysmic-variables',
@@ -798,8 +809,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Dwarf novae (like SS Cygni) exhibit frequent milder outbursts driven by disk gravitational instabilities',
       'Does not destroy the white dwarf; mass continues to accumulate towards the Chandrasekhar limit (potential Type Ia supernova)',
     ],
-    exampleStarIds: ['t-coronae-borealis', 'u-geminorum', 'v838-monocerotis'],
-    externalExamples: ['T Coronae Borealis ("Blaze Star", recurrent nova)', 'SS Cygni (Dwarf Nova archetype)', 'U Geminorum', 'Nova Muscae 1991'],
+    archetypeStarId: 'ss-cygni',
+    exampleStarIds: ['ss-cygni', 't-coronae-borealis', 'u-geminorum', 'v838-monocerotis'],
+    externalExamples: ['SS Cygni (Dwarf Nova archetype)', 'T Coronae Borealis ("Blaze Star", recurrent nova)', 'U Geminorum', 'Nova Muscae 1991'],
   },
   {
     id: 'eruptive-variables',
@@ -819,8 +831,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Luminous Blue Variables (LBVs) undergo massive mass-ejection "giant eruptions" lasting years',
       'P Cygni and Eta Carinae are legendary historical archetypes of eruptive hypergiant variability',
     ],
-    exampleStarIds: ['proxima-centauri', 'eta-carinae-a', 'pistol-star', 'p-cygni'],
-    externalExamples: ['Proxima Centauri (Frequent superflares)', 'UV Ceti (Luyten 726-8 B)', 'EV Lacertae', 'Eta Carinae (1843 Great Eruption)'],
+    archetypeStarId: 'uv-ceti',
+    exampleStarIds: ['uv-ceti', 'proxima-centauri', 'eta-carinae-a', 'p-cygni'],
+    externalExamples: ['UV Ceti (Luyten 726-8 B / Archetype)', 'Proxima Centauri (Frequent superflares)', 'EV Lacertae', 'Eta Carinae (1843 Great Eruption)'],
   },
   {
     id: 'rotational-variables',
@@ -840,8 +853,9 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'BY Draconis stars feature giant starspots shifting across differential rotational latitudes',
       'Alpha² Canum Venaticorum stars display extreme magnetic and chemical abundance patches of silicon, chromium, and europium',
     ],
-    exampleStarIds: ['cor-caroli', 'barnards-star', 'kapteyns-star'],
-    externalExamples: ['BY Draconis (Archetype)', 'Alpha² Canum Venaticorum (Cor Caroli)', 'FK Comae Berenices', 'V410 Tauri'],
+    archetypeStarId: 'cor-caroli',
+    exampleStarIds: ['cor-caroli', 'by-draconis', 'barnards-star', 'kapteyns-star'],
+    externalExamples: ['Alpha² Canum Venaticorum (Cor Caroli / Archetype)', 'BY Draconis (Archetype)', 'FK Comae Berenices', 'V410 Tauri'],
   },
   {
     id: 'eclipsing-binaries',
@@ -861,7 +875,8 @@ export const VARIABLE_STARS_GUIDE: VariableStarGuideItem[] = [
       'Algol (Beta Persei) is the historical archetype, dimming from mag 2.1 to 3.4 every 2.87 days',
       'Revealed the famous "Algol Paradox" of stellar mass transfer across the L1 Lagrange point',
     ],
-    exampleStarIds: ['algol-a', 'algol-b'],
+    archetypeStarId: 'algol-a',
+    exampleStarIds: ['algol-a', 'algol-b', 'vfts-352'],
     externalExamples: ['Algol A & B (Beta Persei / EA archetype)', 'Beta Lyrae (EB mass transfer)', 'W Ursae Majoris (EW contact)', 'Castor C (YY Gem)'],
   },
 ];
@@ -884,6 +899,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Measured via position angle (PA, in degrees) and angular separation (ρ, in arcseconds)',
       'Classic pairs exhibit striking color contrasts due to different spectral temperatures (e.g. Albireo: golden K-giant + azure B-dwarf)',
     ],
+    archetypeStarId: 'sirius-a',
     exampleStarIds: ['sirius-a', 'sirius-b', 'alpha-centauri-a', 'alpha-centauri-b', 'procyon-a'],
     externalExamples: ['Sirius A & B (Pup / First discovered white dwarf)', 'Alpha Centauri AB (Closest stellar system, 4.37 ly)', 'Albireo (Archetypal golden-blue optical double)', '61 Cygni (Flying Star / Bessel parallax benchmark)'],
   },
@@ -904,6 +920,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Single-Lined Spectroscopic Binaries (SB1): One star dominates the light, producing periodic sinusoidal wavelength oscillations',
       'Radial velocity curves provide direct measurement of orbital velocities, eccentricity, and minimum mass function M sin³(i)',
     ],
+    archetypeStarId: 'mizar-aa',
     exampleStarIds: ['mizar-aa', 'spica', 'capella', 'polaris'],
     externalExamples: ['Mizar A (First discovered spectroscopic binary by Pickering in 1889)', 'Spica (Alpha Virginis / Massive SB2 pair orbiting every 4.01 days)', 'Capella (Alpha Aurigae / Dual yellow giant SB2)', 'Plaskett\'s Star (One of the most massive spectroscopic binaries known)'],
   },
@@ -924,6 +941,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Algol (Beta Persei) archetype: "Demon Star" dims from mag 2.1 to 3.4 every 2.87 days',
       'Allows direct calculation of true physical stellar radii without requiring interferometry',
     ],
+    archetypeStarId: 'algol-a',
     exampleStarIds: ['algol-a', 'algol-b'],
     externalExamples: ['Algol (Beta Persei / The Demon Star)', 'Beta Lyrae (Sheliak / Mass transfer system)', 'Castor C (YY Geminorum)', 'EE Cephei'],
   },
@@ -944,6 +962,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Continuous, smooth photometric light curve variations with mutual eclipses and gravity darkening',
       'Doomed to eventually merge into a single rapid rotator/LBV or undergo a double core collapse',
     ],
+    archetypeStarId: 'vfts-352',
     exampleStarIds: ['vfts-352'],
     externalExamples: ['VFTS 352 (Massive blue contact binary in Tarantula Nebula)', 'W Ursae Majoris (W UMa archetype)', 'KIC 9832227', 'V1309 Scorpii (Observed 2008 stellar merger)'],
   },
@@ -964,6 +983,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Cygnus X-1 was the first universally accepted stellar black hole candidate discovered in astronomy',
       'Generate relativistic plasma jets and quasi-periodic oscillations (QPOs)',
     ],
+    archetypeStarId: 'hde-226868',
     exampleStarIds: ['hde-226868', 'vfts-352'],
     externalExamples: ['Cygnus X-1 (First confirmed stellar black hole)', 'Scorpius X-1 (Brightest X-ray source outside the Solar System)', 'V404 Cygni', 'SS 433 (Relativistic microquasar)'],
   },
@@ -986,6 +1006,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Septuple Systems (7 stars): Nu Scorpii (Jabbah) and AR Cassiopeiae',
       'Octuple & Nonuple Systems (8 & 9 stars): HD 98800 (quadruple with protoplanetary disks), candidate nonuple systems like QZ Carinae complex!',
     ],
+    archetypeStarId: 'castor-aa',
     exampleStarIds: ['castor-aa', 'alpha-centauri-a', 'polaris', 'mizar-aa'],
     externalExamples: ['Castor (Alpha Geminorum, 6 stars)', 'Nu Scorpii (7 stars)', 'AR Cassiopeiae (7 stars)', 'HD 98800 (4 stars + disk)', 'Candidate 9-star system in Carina OB1'],
   },
@@ -1006,6 +1027,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Host architecture extremes: TRAPPIST-1 holds 7 Earth-sized worlds; Kepler-90 holds 8 planets (tied with Solar System!)',
       'Habitable zone worlds where liquid surface water could potentially support life',
     ],
+    archetypeStarId: 'sun',
     exampleStarIds: ['sun', 'trappist-1', '51-pegasi', 'proxima-centauri', '55-cancri-a', 'tau-ceti'],
     externalExamples: ['TRAPPIST-1 (7 Earth-sized rocky planets)', '51 Pegasi (First exoplanet around Sun-like star)', 'Kepler-90 (8-planet system)', 'Proxima Centauri (Nearest exoplanet host)'],
   },
@@ -1026,6 +1048,7 @@ export const STAR_SYSTEMS_GUIDE: StarSystemGuideItem[] = [
       'Globular Clusters: Ancient Pop II stars (100,000s to millions) tightly packed in dense spherical halos (e.g. Omega Centauri, Messier 13)',
       'Stellar Superclusters: Ultra-massive, compact starburst regions (e.g. Westerlund 1, R136 in the Tarantula Nebula) harboring hundreds of O-type and Wolf-Rayet monsters',
     ],
+    archetypeStarId: 'alcyone',
     exampleStarIds: ['alcyone', 'electra', 'maia', 'r136a1'],
     externalExamples: ['Pleiades / M45 (Archetypal open cluster)', 'Omega Centauri (Largest globular cluster, 10 million stars)', 'Westerlund 1 (Milky Way supercluster)', 'R136 (Tarantula Nebula supercluster)'],
   },
