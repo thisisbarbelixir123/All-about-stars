@@ -1260,7 +1260,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         {activeSubTab === 'simulation' && (
           <>
             {/* Interactive Particle Canvas */}
-            <div className="relative w-full mobile-landscape:w-auto h-full max-h-full aspect-[4/3] max-w-[500px] rounded-xl sm:rounded-2xl bg-[#020512] border border-cyan-500/30 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+            <div className="relative w-full mobile-landscape:w-auto h-full max-h-full aspect-[4/3] max-w-[500px] rounded-xl sm:rounded-2xl observatory-panel border border-white/10 overflow-hidden shadow-xl">
               <canvas
                 ref={canvasRef}
                 onClick={handleInjectProton}
@@ -1269,13 +1269,13 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               />
 
               {/* Tap to inject prompt on mobile */}
-              <div className="absolute top-2.5 right-2.5 text-[9px] sm:text-[10px] font-mono text-cyan-400/80 bg-[#040816]/80 px-2 py-0.5 rounded border border-cyan-500/20 pointer-events-none">
+              <div className="absolute top-2.5 right-2.5 text-[9px] sm:text-[10px] font-mono text-sky-400 bg-slate-950/80 px-2 py-0.5 rounded border border-white/15 pointer-events-none">
                 Tap core to inject
               </div>
 
               {/* Live In-Canvas Minimal Status HUD (non-overlapping) */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none px-2.5 py-1 rounded-lg bg-[#040816]/85 border border-cyan-500/20 text-[10px] sm:text-[11px] font-mono">
-                <span className="text-cyan-300 font-bold">
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none px-2.5 py-1 rounded-lg bg-slate-950/85 border border-white/15 text-[10px] sm:text-[11px] font-mono">
+                <span className="text-sky-300 font-bold">
                   Energy: <span className="text-amber-300">+{totalEnergyMeV.toFixed(2)} MeV</span>
                 </span>
                 <span className="text-slate-300">
@@ -1288,33 +1288,33 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             </div>
 
             {/* Particle Legend Row - Clean, accessible (Hidden on left in mobile landscape) */}
-            <div className="mobile-landscape:hidden flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/15 text-[10px] sm:text-xs font-mono text-slate-300">
+            <div className="mobile-landscape:hidden flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl observatory-panel border border-white/10 text-[10px] sm:text-xs font-mono text-slate-300">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
                   <span>p⁺ (Proton)</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
                   <span>n⁰ (Neutron)</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_5px_#06b6d4]" />
+                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
                   <span>e⁺ (Positron)</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-indigo-200 shadow-[0_0_5px_#e0e7ff]" />
+                  <span className="w-2 h-2 rounded-full bg-indigo-200" />
                   <span>νe (Neutrino)</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_5px_#fbbf24]" />
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
                   <span>γ (Gamma)</span>
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowParticleLabels(!showParticleLabels)}
-                className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px] sm:text-xs ml-auto"
+                className="text-sky-400 hover:text-sky-300 underline cursor-pointer text-[10px] sm:text-xs ml-auto"
               >
                 {showParticleLabels ? 'Hide Labels' : 'Show Labels'}
               </button>
@@ -1323,12 +1323,12 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         )}
 
         {activeSubTab === 'tunneling' && (
-          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
-            <span className="text-xs font-mono uppercase text-cyan-400 font-bold">
+          <div className="p-3 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-2.5">
+            <span className="text-xs font-mono uppercase text-sky-400 font-bold">
               Coulomb Potential Hill vs. Wave Penetration
             </span>
 
-            <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
+            <div className="w-full aspect-[16/10] bg-black/40 rounded-lg border border-white/10 p-1.5 flex items-center justify-center relative overflow-hidden">
               <svg viewBox="0 0 400 240" className="w-full h-full">
                 <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
                 <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
@@ -1369,13 +1369,13 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             </div>
 
             <div className="text-[11px] font-mono text-slate-400">
-              <span className="text-amber-300 font-bold">The Astonishing Ratio:</span> Classical protons need ~1,000 keV to touch. Solar protons only have ~1.3 keV. The quantum tunneling probability is roughly <span className="text-cyan-300 font-bold">1 in 10²⁸</span> per collision!
+              <span className="text-amber-300 font-bold">The Astonishing Ratio:</span> Classical protons need ~1,000 keV to touch. Solar protons only have ~1.3 keV. The quantum tunneling probability is roughly <span className="text-sky-300 font-bold">1 in 10²⁸</span> per collision!
             </div>
           </div>
         )}
 
         {activeSubTab === 'onion' && (
-          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col items-center justify-center">
+          <div className="p-3 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col items-center justify-center">
             <svg viewBox="0 0 320 320" className="w-full max-w-[300px] aspect-square">
               <circle cx="160" cy="160" r="140" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
               <circle cx="160" cy="160" r="115" fill="#0369a1" stroke="#0284c7" strokeWidth="1.5" />
@@ -1411,12 +1411,12 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         )}
 
         {activeSubTab === 'binding' && (
-          <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-2.5">
+          <div className="p-3 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-2.5">
             <span className="text-xs font-mono uppercase text-emerald-400 font-bold">
               Binding Energy / Nucleon (MeV) vs. Mass (A)
             </span>
 
-            <div className="w-full aspect-[16/10] bg-[#030718] rounded-lg border border-slate-800 p-1.5 flex items-center justify-center relative overflow-hidden">
+            <div className="w-full aspect-[16/10] bg-black/40 rounded-lg border border-white/10 p-1.5 flex items-center justify-center relative overflow-hidden">
               <svg viewBox="0 0 400 240" className="w-full h-full">
                 <line x1="40" y1="200" x2="380" y2="200" stroke="#475569" strokeWidth="1.5" />
                 <line x1="40" y1="20" x2="40" y2="200" stroke="#475569" strokeWidth="1.5" />
@@ -1469,33 +1469,33 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
       <div className="w-full mobile-landscape:w-7/12 lg:w-auto mobile-landscape:flex-none lg:flex-1 min-w-0 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-3.5 sm:gap-4 pr-1">
         {/* Particle Legend on mobile landscape */}
         {activeSubTab === 'simulation' && (
-          <div className="hidden mobile-landscape:flex flex-wrap items-center justify-between gap-1.5 p-1.5 rounded-xl bg-[#030616] border border-cyan-500/20 text-[10px] font-mono text-slate-300">
+          <div className="hidden mobile-landscape:flex flex-wrap items-center justify-between gap-1.5 p-1.5 rounded-xl observatory-panel border border-white/10 text-[10px] font-mono text-slate-300">
             <div className="flex flex-wrap items-center gap-2">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
+                <span className="w-2 h-2 rounded-full bg-red-500" />
                 <span>p⁺</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
                 <span>n⁰</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_5px_#06b6d4]" />
+                <span className="w-2 h-2 rounded-full bg-cyan-400" />
                 <span>e⁺</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-indigo-200 shadow-[0_0_5px_#e0e7ff]" />
+                <span className="w-2 h-2 rounded-full bg-indigo-200" />
                 <span>νe</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_5px_#fbbf24]" />
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <span>γ</span>
               </span>
             </div>
             <button
               type="button"
               onClick={() => setShowParticleLabels(!showParticleLabels)}
-              className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px] ml-auto"
+              className="text-sky-400 hover:text-sky-300 underline cursor-pointer text-[10px] ml-auto"
             >
               {showParticleLabels ? 'Hide Labels' : 'Show Labels'}
             </button>
@@ -1503,17 +1503,17 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         )}
 
         {/* Fusion Mechanism Switcher & Subtab Switcher */}
-        <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#030718] border border-cyan-500/25 shadow-md flex flex-col gap-2.5">
+        <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl observatory-panel border border-white/10 flex flex-col gap-2.5">
           {onSelectFusionId && (
-            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 p-1 bg-[#020512] rounded-xl border border-cyan-500/20 text-xs font-mono w-full">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 text-xs font-mono w-full">
               {FUSION_MECHANISMS.map((mechanism) => (
                 <button
                   key={mechanism.id}
                   type="button"
                   onClick={() => onSelectFusionId(mechanism.id)}
-                  className={`flex-1 px-2 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs text-center ${
+                  className={`flex-1 min-h-[44px] px-2 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs text-center flex items-center justify-center ${
                     selectedFusionId === mechanism.id
-                      ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold shadow'
+                      ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -1524,13 +1524,13 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
           )}
 
           {/* View Mode Switcher */}
-          <div className="flex flex-wrap items-center gap-1 p-1 bg-[#020512] rounded-lg border border-cyan-500/20 text-[11px] sm:text-xs font-mono w-full">
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-lg border border-white/10 text-[11px] sm:text-xs font-mono w-full">
             <button
               type="button"
               onClick={() => setActiveSubTab('simulation')}
-              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+              className={`flex-1 min-h-[40px] px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center flex items-center justify-center ${
                 activeSubTab === 'simulation'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -1539,9 +1539,9 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             <button
               type="button"
               onClick={() => setActiveSubTab('tunneling')}
-              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+              className={`flex-1 min-h-[40px] px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center flex items-center justify-center ${
                 activeSubTab === 'tunneling'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -1551,9 +1551,9 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               <button
                 type="button"
                 onClick={() => setActiveSubTab('onion')}
-                className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+                className={`flex-1 min-h-[40px] px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center flex items-center justify-center ${
                   activeSubTab === 'onion'
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                    ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -1563,9 +1563,9 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             <button
               type="button"
               onClick={() => setActiveSubTab('binding')}
-              className={`flex-1 px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center ${
+              className={`flex-1 min-h-[40px] px-2 py-1.5 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap text-center flex items-center justify-center ${
                 activeSubTab === 'binding'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -1577,17 +1577,17 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         {/* Mode 1 Controls & Telemetry: Particle Reaction Simulation */}
         {activeSubTab === 'simulation' && (
           <div className="flex flex-col gap-3">
-            {/* Dedicated Clean Mobile-Optimized Controls Toolbar */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
+            {/* Dedicated Clean Controls Toolbar */}
+            <div className="p-2 sm:p-2.5 rounded-xl observatory-panel border border-white/10 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
                   id="btn-fusion-toggle-play"
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-mono font-bold active:scale-95 min-h-[38px] sm:min-h-[40px]"
+                  className="px-3.5 py-2 rounded-xl observatory-control bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs font-mono flex items-center gap-2 cursor-pointer active:scale-95 min-h-[44px]"
                   title={isPlaying ? 'Pause animation' : 'Play animation'}
                 >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 text-emerald-400 fill-current" />}
+                  {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
                   <span>{isPlaying ? 'Pause' : 'Play'}</span>
                 </button>
 
@@ -1595,14 +1595,14 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                   type="button"
                   id="btn-fusion-reset"
                   onClick={handleReset}
-                  className="p-2 rounded-lg bg-slate-900 hover:bg-cyan-950 text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer active:scale-95 min-h-[38px] sm:min-h-[40px] min-w-[38px] flex items-center justify-center"
+                  className="p-2 rounded-xl observatory-control bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                   title="Reset animation step"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
 
                 {/* Speed Choices */}
-                <div className="flex items-center p-0.5 bg-[#020512] rounded-lg border border-slate-800 text-[11px] font-mono">
+                <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/10 text-[11px] font-mono min-h-[44px]">
                   {[
                     { val: 1.0, label: '1x' },
                     { val: 2.0, label: '2x' },
@@ -1612,9 +1612,9 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                       key={s.val}
                       type="button"
                       onClick={() => setSimSpeed(s.val)}
-                      className={`px-2 py-1 rounded font-semibold transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 min-h-[32px] rounded-md font-bold transition-all cursor-pointer ${
                         simSpeed === s.val
-                          ? 'bg-amber-500 text-slate-950 font-bold'
+                          ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
@@ -1628,10 +1628,10 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                 <button
                   type="button"
                   onClick={() => setAutoAdvanceSteps(!autoAdvanceSteps)}
-                  className={`text-[10px] sm:text-xs font-mono px-2 py-1 rounded border transition-all cursor-pointer ${
+                  className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer flex items-center ${
                     autoAdvanceSteps
                       ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
-                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                      : 'observatory-control bg-white/5 border-white/10 text-slate-400'
                   }`}
                 >
                   {autoAdvanceSteps ? 'Auto-Cycle: ON' : 'Auto-Cycle: OFF'}
@@ -1641,7 +1641,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                   type="button"
                   id="btn-fusion-inject-proton"
                   onClick={handleInjectProton}
-                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-mono text-xs font-bold transition-all shadow-[0_0_12px_rgba(239,68,68,0.35)] flex items-center gap-1.5 cursor-pointer active:scale-95 min-h-[38px]"
+                  className="px-4 py-2 min-h-[44px] rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-mono text-xs font-bold transition-all flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5 fill-current" />
                   <span>Inject Proton</span>
@@ -1679,10 +1679,10 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                       setActiveStepIndex(s.step);
                       initSimulation();
                     }}
-                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    className={`p-3 min-h-[44px] rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                       activeStepIndex === s.step
-                        ? 'bg-amber-950/40 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400'
-                        : 'bg-[#040816] border-slate-800 hover:border-slate-700'
+                        ? 'observatory-panel bg-sky-950/40 border-sky-400 text-white shadow-sm'
+                        : 'observatory-control bg-white/5 border-white/10 hover:border-white/20 text-slate-300'
                     }`}
                   >
                     <div>
@@ -1690,7 +1690,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
                         <span className="text-[11px] font-mono font-bold text-white">{s.title}</span>
                         <span className="text-[10px] font-mono text-amber-300 font-bold">{s.energy}</span>
                       </div>
-                      <div className="text-[10px] sm:text-[11px] font-mono text-cyan-300 mt-1">{s.eq}</div>
+                      <div className="text-[10px] sm:text-[11px] font-mono text-sky-300 mt-1">{s.eq}</div>
                     </div>
                   </button>
                 ))}
@@ -1700,7 +1700,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             {/* Core Temperature & Reaction Diagnostics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Core Temperature Controller */}
-              <div className="p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5">
+              <div className="p-3 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Flame className="w-4 h-4 text-amber-400" />
@@ -1740,32 +1740,32 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               </div>
 
               {/* Subatomic Output Metrics */}
-              <div className="p-3 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/20 flex flex-col gap-2.5 justify-between">
-                <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-3 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-2.5 justify-between">
+                <span className="text-xs font-mono font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5" />
                   Reaction Output Ticker
                 </span>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-slate-400 text-[10px] block">Total Energy</span>
                     <span className="text-amber-300 font-bold text-sm">+{totalEnergyMeV.toFixed(2)} MeV</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-slate-400 text-[10px] block">Fusion Events</span>
                     <span className="text-emerald-400 font-bold text-sm">{reactionsCompleted}</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-slate-400 text-[10px] block">Positrons (e⁺)</span>
-                    <span className="text-cyan-400 font-bold text-sm">{positronsEmitted}</span>
+                    <span className="text-sky-400 font-bold text-sm">{positronsEmitted}</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#020512] border border-slate-800">
+                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-slate-400 text-[10px] block">Neutrinos (νe)</span>
                     <span className="text-indigo-300 font-bold text-sm">{neutrinosEmitted}</span>
                   </div>
                 </div>
 
-                <div className="p-2 rounded-lg bg-[#020512] border border-slate-800 text-[10px] sm:text-[11px] font-mono text-slate-300 flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-mono text-slate-300 flex items-center justify-between">
                   <span>Mass Defect (Δm = ΔE/c²):</span>
                   <span className="text-amber-300 font-bold">
                     {((totalEnergyMeV * 1.78e-30) / 1e-30).toFixed(2)} × 10⁻³⁰ kg
@@ -1778,10 +1778,10 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
 
         {/* Mode 2 Explanation: Quantum Mechanical Tunneling */}
         {activeSubTab === 'tunneling' && (
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
-            <div className="border-b border-cyan-500/15 pb-2.5">
+          <div className="p-3.5 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-3">
+            <div className="border-b border-white/10 pb-2.5">
               <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
-                <Zap className="w-4 h-4 text-cyan-400 shrink-0" />
+                <Zap className="w-4 h-4 text-sky-400 shrink-0" />
                 Quantum Mechanical Tunneling: The Key to Stellar Life
               </h4>
               <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
@@ -1790,21 +1790,21 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             </div>
 
             <div className="space-y-2.5">
-              <div className="p-3 rounded-lg bg-[#020512] border border-slate-800">
+              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                 <h5 className="text-xs font-mono font-bold text-amber-300 uppercase">1. The Electrostatic Coulomb Wall</h5>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                   Both protons possess identical positive electrical charges (+1e). Electrostatic repulsion skyrockets as distance shrinks ($F \propto 1/r^2$). To touch classically, core temperatures would need to reach billions of Kelvin.
                 </p>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#020512] border border-slate-800">
-                <h5 className="text-xs font-mono font-bold text-cyan-300 uppercase">2. Wave-Particle Duality & The Gamow Window</h5>
+              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                <h5 className="text-xs font-mono font-bold text-sky-300 uppercase">2. Wave-Particle Duality & The Gamow Window</h5>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                   In quantum mechanics, protons are probabilistic wave packets. A finite probability exists that the wave penetrates right through the barrier into the attractive strong force well.
                 </p>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#020512] border border-slate-800">
+              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                 <h5 className="text-xs font-mono font-bold text-emerald-300 uppercase">3. The Weak Nuclear Force Bottleneck</h5>
                 <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                   Even when two protons tunnel together, they usually separate in $10^{-21}$ seconds unless one proton simultaneously undergoes weak beta decay ($u \rightarrow d + e^+ + \nu_e$) to become a neutron. This bottleneck is why stars live for billions of years!
@@ -1816,8 +1816,8 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
 
         {/* Mode 3 Explanation: Advanced Massive Star Onion Core */}
         {activeSubTab === 'onion' && (
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
-            <div className="border-b border-cyan-500/15 pb-2.5">
+          <div className="p-3.5 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-3">
+            <div className="border-b border-white/10 pb-2.5">
               <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
                 <Layers className="w-4 h-4 text-amber-400 shrink-0" />
                 The Onion-Skin Core of Massive Stars (Pre-Supernova)
@@ -1831,23 +1831,23 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               <span className="text-xs uppercase text-amber-400 font-bold block mb-1">
                 Burning Phase Lifetimes (25 M☉ Star)
               </span>
-              <div className="p-2 rounded bg-[#040816] border border-slate-800 flex justify-between">
+              <div className="p-2 rounded bg-white/5 border border-white/10 flex justify-between">
                 <span className="text-white">Hydrogen → Helium:</span>
-                <span className="text-cyan-400 font-bold">~7,000,000 Yrs</span>
+                <span className="text-sky-400 font-bold">~7,000,000 Yrs</span>
               </div>
-              <div className="p-2 rounded bg-[#040816] border border-slate-800 flex justify-between">
+              <div className="p-2 rounded bg-white/5 border border-white/10 flex justify-between">
                 <span className="text-white">Helium → Carbon:</span>
-                <span className="text-cyan-400 font-bold">~500,000 Yrs</span>
+                <span className="text-sky-400 font-bold">~500,000 Yrs</span>
               </div>
-              <div className="p-2 rounded bg-[#040816] border border-slate-800 flex justify-between">
+              <div className="p-2 rounded bg-white/5 border border-white/10 flex justify-between">
                 <span className="text-white">Carbon → Neon/Mg:</span>
                 <span className="text-amber-400 font-bold">~600 Yrs</span>
               </div>
-              <div className="p-2 rounded bg-[#040816] border border-slate-800 flex justify-between">
+              <div className="p-2 rounded bg-white/5 border border-white/10 flex justify-between">
                 <span className="text-white">Neon → Oxygen:</span>
                 <span className="text-amber-400 font-bold">~1 Year</span>
               </div>
-              <div className="p-2 rounded bg-[#040816] border border-slate-800 flex justify-between">
+              <div className="p-2 rounded bg-white/5 border border-white/10 flex justify-between">
                 <span className="text-white">Oxygen → Silicon:</span>
                 <span className="text-rose-400 font-bold">~6 Months</span>
               </div>
@@ -1861,8 +1861,8 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
 
         {/* Mode 4 Explanation: Nuclear Binding Energy Curve */}
         {activeSubTab === 'binding' && (
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[#030616] border border-cyan-500/25 flex flex-col gap-3">
-            <div className="border-b border-cyan-500/15 pb-2.5">
+          <div className="p-3.5 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-3">
+            <div className="border-b border-white/10 pb-2.5">
               <h4 className="text-sm sm:text-base font-bold text-white font-mono flex items-center gap-2">
                 <Gauge className="w-4 h-4 text-emerald-400 shrink-0" />
                 The Nuclear Binding Energy Curve: Why Fusion Stops at Iron
@@ -1872,8 +1872,8 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
               </p>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#020512] border border-slate-800 space-y-2 text-xs text-slate-300 leading-relaxed font-sans">
-              <span className="font-mono text-cyan-300 font-bold block uppercase text-xs">
+            <div className="p-3.5 rounded-xl observatory-panel border border-white/10 space-y-2 text-xs text-slate-300 leading-relaxed font-sans">
+              <span className="font-mono text-sky-300 font-bold block uppercase text-xs">
                 Why Iron Triggers Core Collapse Supernovae
               </span>
               <p>
@@ -1887,11 +1887,11 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
         )}
 
         {/* Active Fusion Mechanism Details */}
-        <div className="p-3.5 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 flex flex-col gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+        <div className="p-3.5 sm:p-4 rounded-xl observatory-panel border border-white/10 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
             <div>
               <h4 className="text-sm sm:text-base font-bold text-white font-mono">{activeFusion.title}</h4>
-              <p className="text-xs text-cyan-400 font-mono mt-0.5">{activeFusion.primaryMassRange}</p>
+              <p className="text-xs text-sky-400 font-mono mt-0.5">{activeFusion.primaryMassRange}</p>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono">
               <span className="text-slate-400">Core Temp Needed:</span>
@@ -1901,7 +1901,7 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-3 rounded-lg bg-[#040816] border border-amber-500/20 font-mono text-xs text-amber-200">
+          <div className="p-2.5 sm:p-3 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-amber-200">
             <span className="text-slate-400 block text-[10px] uppercase">Net Nuclear Reaction Equation:</span>
             <span className="text-amber-300 font-bold text-xs sm:text-sm break-words">{activeFusion.fuelAndProduct}</span>
           </div>
@@ -1912,19 +1912,19 @@ export const ThermonuclearEngineVisualizer: React.FC<ThermonuclearEngineVisualiz
 
           {/* Reaction Step Sequence */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono uppercase text-cyan-400 font-bold">Sequential Reaction Stages</span>
+            <span className="text-[11px] font-mono uppercase text-sky-400 font-bold">Sequential Reaction Stages</span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {activeFusion.stepSequence.map((step, idx) => (
-                <div key={idx} className="p-2.5 rounded-lg bg-[#040816] border border-slate-800 text-xs text-slate-300 break-words">
-                  <span className="text-cyan-400 font-bold font-mono mr-1.5">{idx + 1}.</span>
+                <div key={idx} className="p-2.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 break-words">
+                  <span className="text-sky-400 font-bold font-mono mr-1.5">{idx + 1}.</span>
                   <span>{step}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-xs font-mono text-slate-400 border-t border-slate-800 pt-2 flex items-center gap-1.5 break-words">
-            <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <div className="text-xs font-mono text-slate-400 border-t border-white/10 pt-2 flex items-center gap-1.5 break-words">
+            <Info className="w-3.5 h-3.5 text-sky-400 shrink-0" />
             <span>{activeFusion.keyCharacteristic}</span>
           </div>
         </div>

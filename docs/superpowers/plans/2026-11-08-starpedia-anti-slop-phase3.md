@@ -189,21 +189,21 @@
 - Consumes: Nuclear fusion reaction steps (P-P I/II/III, CNO, Triple-Alpha), stellar interior layer mechanics, `.observatory-panel`.
 - Produces: Technical nuclear physics and interior stellar anatomy visualizers.
 
-- [ ] **Step 1: Inspect slop patterns in Thermonuclear and Cross-Section visualizers**
+- [x] **Step 1: Inspect slop patterns in Thermonuclear and Cross-Section visualizers**
   - Check for gradient backgrounds, glowing text shadows, and em dashes.
   - Identify reaction stage nodes and interactive layer selectors.
 
-- [ ] **Step 2: Refactor `ThermonuclearEngineVisualizer.tsx`**
+- [x] **Step 2: Refactor `ThermonuclearEngineVisualizer.tsx`**
   - Convert header and reaction pathway tabs to `.observatory-panel` and `.observatory-control`.
   - Style reaction steps ($p + p \to d + e^+ + \nu_e$, etc.) with clean monospace telemetry and crisp isotope badges.
   - Ensure temperature/pressure requirements use authentic scientific notation without neon gradients.
 
-- [ ] **Step 3: Refactor `StellarCrossSectionVisualizer.tsx`**
+- [x] **Step 3: Refactor `StellarCrossSectionVisualizer.tsx`**
   - Convert layer cards (Core, Radiative Zone, Tachocline, Convective Zone, Photosphere, Corona) to `.observatory-panel`.
   - Refactor layer inspection controls to `.observatory-control`.
   - Ensure minimum 44px tap targets on all layer buttons.
 
-- [ ] **Step 4: Verify typecheck, catalog, and em dashes**
+- [x] **Step 4: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---
