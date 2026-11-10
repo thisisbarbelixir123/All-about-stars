@@ -217,17 +217,17 @@
 - Consumes: Active comparison stars, `.observatory-panel`, `.observatory-control`.
 - Produces: Tactical side-by-side comparative scale bar.
 
-- [ ] **Step 1: Inspect slop patterns in `StarComparisonDock.tsx`**
+- [x] **Step 1: Inspect slop patterns in `StarComparisonDock.tsx`**
   - Identify line 11: `<div className="absolute top-0 right-1/4 w-80 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />`.
   - Check border styles and scale metric chips.
 
-- [ ] **Step 2: Refactor dock container and scale metrics**
+- [x] **Step 2: Refactor dock container and scale metrics**
   - Replace container with `.observatory-panel border border-white/10`.
   - Remove the floating blur orb.
   - Refactor star slot cards and removal buttons to `.observatory-control` with minimum 44px tap targets.
   - Format comparative ratios ($R/R_\odot$, $M/M_\odot$, $L/L_\odot$) with crisp `JetBrains Mono` telemetry.
 
-- [ ] **Step 3: Verify typecheck, catalog, and em dashes**
+- [x] **Step 3: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---
