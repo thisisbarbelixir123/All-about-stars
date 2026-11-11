@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-display: 'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-title: 'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-title: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer base {
   body {
     background-color: #02040a;
     color: #e2e8f0;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Instrument Sans', system-ui, -apple-system, sans-serif;
   }
 
   a[href],
@@ -35,8 +35,13 @@
   }
   
   h1, h2, h3, .font-title, .font-display {
-    font-family: 'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif;
-    letter-spacing: 0.03em;
+    font-family: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
   }
 }
 
@@ -62,41 +67,32 @@
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
   border-radius: 9999px;
-  border: 1px solid rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #0284c7;
 }
 
-/* Cosmic Ambient Glows & Starlight Effects */
-.cosmic-glass {
-  background: linear-gradient(135deg, rgba(11, 17, 36, 0.85) 0%, rgba(4, 7, 18, 0.92) 100%);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+/* Precision Observatory Surface & Control Tokens */
+.observatory-panel {
+  background-color: rgba(6, 10, 22, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.85);
 }
 
-.cosmic-glass-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.observatory-control {
+  background-color: rgba(9, 14, 32, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.cosmic-glass-hover:hover {
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 12px 40px 0 rgba(6, 182, 212, 0.15), 0 0 20px 0 rgba(14, 165, 233, 0.08);
-  transform: translateY(-2px);
-}
-
-.cosmic-glow-cyan {
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
-}
-
-.cosmic-glow-amber {
-  box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
-}
-
-.cosmic-glow-star {
-  filter: drop-shadow(0 0 16px currentColor);
+.observatory-control:hover {
+  background-color: rgba(15, 23, 51, 0.95);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #ffffff;
 }
 
 .dual-range-thumb {
