@@ -76,12 +76,12 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           e.preventDefault();
           setShowMenu((prev) => !prev);
         }}
-        className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer select-none active:scale-95 ${
+        className={`min-h-[44px] flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer select-none active:scale-95 ${
           isBgmActive
-            ? 'bg-cyan-950/70 hover:bg-cyan-900/80 border-cyan-500/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+            ? 'observatory-control border-sky-400/50 bg-sky-500/15 text-sky-300'
             : isSfxOn
-            ? 'bg-[#040816]/90 hover:bg-[#091330] border-cyan-500/35 text-slate-300 hover:text-white shadow-md'
-            : 'bg-slate-900/70 hover:bg-slate-850 border-slate-700/60 text-slate-500 hover:text-slate-300'
+            ? 'observatory-control border-white/10 hover:border-white/20 text-slate-200 hover:text-white'
+            : 'observatory-control border-white/10 text-slate-500 hover:text-slate-300'
         } ${className || ''}`}
         title="Audio Controls (BGM & SFX) • Press [M] to toggle BGM"
         aria-label="Audio Controls"
@@ -91,16 +91,16 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           <>
             {/* Animated Equalizer Waveform */}
             <div className="flex items-end gap-0.5 h-3.5 w-3.5 px-0.5 justify-center py-0.5 shrink-0" aria-hidden="true">
-              <span className="w-0.5 bg-cyan-400 rounded-full animate-[pulse_0.8s_ease-in-out_infinite] h-full" />
-              <span className="w-0.5 bg-cyan-300 rounded-full animate-[pulse_1.2s_ease-in-out_infinite_0.2s] h-2/3" />
-              <span className="w-0.5 bg-cyan-400 rounded-full animate-[pulse_0.6s_ease-in-out_infinite_0.4s] h-4/5" />
+              <span className="w-0.5 bg-sky-400 rounded-full animate-[pulse_0.8s_ease-in-out_infinite] h-full" />
+              <span className="w-0.5 bg-sky-300 rounded-full animate-[pulse_1.2s_ease-in-out_infinite_0.2s] h-2/3" />
+              <span className="w-0.5 bg-sky-400 rounded-full animate-[pulse_0.6s_ease-in-out_infinite_0.4s] h-4/5" />
             </div>
             <span className="hidden sm:inline font-semibold">Audio</span>
           </>
         ) : isSfxOn ? (
           <>
-            <Volume2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-            <span className="hidden sm:inline font-semibold text-slate-300">SFX</span>
+            <Volume2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            <span className="hidden sm:inline font-semibold text-slate-200">SFX</span>
           </>
         ) : (
           <>
@@ -110,7 +110,7 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
         )}
         <ChevronDown
           className={`w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0 ${
-            showMenu ? 'rotate-180 text-cyan-300' : ''
+            showMenu ? 'rotate-180 text-sky-300' : ''
           }`}
         />
       </button>
@@ -119,17 +119,18 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
       {showMenu && (
         <div
           id="menu-audio-controls-popover"
-          className="absolute right-0 top-full mt-2 z-50 p-3 bg-[#040816]/98 border border-cyan-500/40 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] backdrop-blur-2xl w-64 animate-in fade-in zoom-in-95 duration-150 flex flex-col gap-2.5 font-mono text-xs pointer-events-auto"
+          className="absolute right-0 top-full mt-2 z-50 p-3 observatory-panel border border-white/10 rounded-2xl shadow-2xl w-64 animate-in fade-in zoom-in-95 duration-150 flex flex-col gap-2.5 font-mono text-xs pointer-events-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <span className="text-[11px] font-bold text-white tracking-wider flex items-center gap-1.5 font-sans">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
               AUDIO CONTROLS
             </span>
             <button
+              type="button"
               onClick={() => setShowMenu(false)}
-              className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 rounded-xl cursor-pointer transition-colors"
               title="Close audio controls"
               aria-label="Close audio controls"
             >
@@ -138,10 +139,10 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           </div>
 
           {/* Section 1: Background Music (BGM) */}
-          <div className="flex flex-col gap-1.5 bg-[#060c22] p-2.5 rounded-xl border border-cyan-500/15">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1.5 bg-white/5 p-2.5 rounded-xl border border-white/10">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <Music className={`w-4 h-4 shrink-0 ${isBgmActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                <Music className={`w-4 h-4 shrink-0 ${isBgmActive ? 'text-sky-400' : 'text-slate-500'}`} />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-slate-200 truncate">Background Music</span>
                   <span className="text-[10px] text-slate-400 truncate">Cosmic Drone & Chimes</span>
@@ -151,10 +152,10 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
                 type="button"
                 id="btn-toggle-bgm"
                 onClick={handleToggleBgm}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer shrink-0 ${
+                className={`min-h-[44px] px-3 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shrink-0 ${
                   isBgmActive
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-sky-400 hover:bg-sky-300 text-slate-950'
+                    : 'observatory-control border border-white/10 text-slate-400 hover:text-white'
                 }`}
               >
                 {isBgmActive ? 'ON' : 'OFF'}
@@ -163,10 +164,10 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
 
             {/* BGM Volume Slider (visible when BGM is on) */}
             {isBgmActive && (
-              <div className="pt-2 mt-1 border-t border-cyan-500/10 flex flex-col gap-1">
+              <div className="pt-2 mt-1 border-t border-white/10 flex flex-col gap-1">
                 <div className="flex justify-between text-[10px] text-slate-400">
                   <span>BGM Volume</span>
-                  <span className="text-cyan-300 font-bold">{Math.round(audioState.volume * 100)}%</span>
+                  <span className="text-sky-300 font-bold">{Math.round(audioState.volume * 100)}%</span>
                 </div>
                 <input
                   type="range"
@@ -175,7 +176,7 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
                   step="0.05"
                   value={audioState.volume}
                   onChange={handleVolumeChange}
-                  className="w-full accent-cyan-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-full accent-sky-400 h-1.5 bg-white/15 rounded-lg cursor-pointer"
                   aria-label="BGM Volume"
                 />
               </div>
@@ -183,9 +184,9 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           </div>
 
           {/* Section 2: Sound Effects (SFX) */}
-          <div className="flex items-center justify-between bg-[#060c22] p-2.5 rounded-xl border border-cyan-500/15">
+          <div className="flex items-center justify-between gap-2 bg-white/5 p-2.5 rounded-xl border border-white/10">
             <div className="flex items-center gap-2 min-w-0">
-              <Volume2 className={`w-4 h-4 shrink-0 ${isSfxOn ? 'text-cyan-400' : 'text-slate-500'}`} />
+              <Volume2 className={`w-4 h-4 shrink-0 ${isSfxOn ? 'text-sky-400' : 'text-slate-500'}`} />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-slate-200 truncate">Sound Effects (SFX)</span>
                 <span className="text-[10px] text-slate-400 truncate">UI clicks & celestial cues</span>
@@ -195,10 +196,10 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
               type="button"
               id="btn-toggle-sfx"
               onClick={handleToggleSfx}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer shrink-0 ${
+              className={`min-h-[44px] px-3 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shrink-0 ${
                 isSfxOn
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-sky-400 hover:bg-sky-300 text-slate-950'
+                  : 'observatory-control border border-white/10 text-slate-400 hover:text-white'
               }`}
             >
               {isSfxOn ? 'ON' : 'OFF'}
@@ -206,9 +207,9 @@ export const AmbientSoundToggle: React.FC<AmbientSoundToggleProps> = ({
           </div>
 
           {/* Quick keyboard shortcut tip */}
-          <div className="flex justify-between items-center pt-1 text-[10px] text-slate-400 border-t border-cyan-500/15">
+          <div className="flex justify-between items-center pt-1.5 text-[10px] text-slate-400 border-t border-white/10">
             <span>Shortcut</span>
-            <span className="text-cyan-400 font-mono">Press [M] for BGM</span>
+            <span className="text-sky-300 font-mono">Press [M] for BGM</span>
           </div>
         </div>
       )}

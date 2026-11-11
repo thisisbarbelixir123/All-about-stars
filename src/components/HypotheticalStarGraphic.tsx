@@ -1620,14 +1620,14 @@ export const HypotheticalStarGraphic: React.FC<HypotheticalStarGraphicProps> = (
 
       {/* Interactive Controls Overlay for Structure Stars (Dark Stars & Quasi-Stars) */}
       {isStructureStar && (
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10 bg-slate-950/85 backdrop-blur-md px-2 py-1 rounded-lg border border-cyan-500/30 shadow-md">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10 observatory-panel rounded-xl border border-white/10 shadow-md">
           <button
             type="button"
             onClick={() => setShowCutaway((prev) => !prev)}
-            className="flex items-center gap-1 text-[9px] font-mono text-cyan-300 hover:text-white transition-all cursor-pointer"
+            className="min-h-[44px] px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-mono text-sky-300 hover:text-white transition-all cursor-pointer"
             title="Toggle between structural cutaway and outer photosphere"
           >
-            <Layers className="w-3 h-3 text-cyan-400" />
+            <Layers className="w-3.5 h-3.5 text-sky-400" />
             <span>{showCutaway ? 'Cutaway View' : 'Full Surface'}</span>
           </button>
         </div>
@@ -1635,7 +1635,7 @@ export const HypotheticalStarGraphic: React.FC<HypotheticalStarGraphicProps> = (
 
       {/* Interactive Controls Overlay for Exotic Stars (Strange / Electroweak / Boson) */}
       {isExotic && (
-        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10 bg-slate-950/90 backdrop-blur-md p-1 rounded-xl border border-purple-500/30 shadow-md">
+        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10 observatory-panel p-1 rounded-xl border border-white/10 shadow-md">
           {(['strange', 'electroweak', 'boson'] as const).map((mode) => {
             const isSelected = exoticMode === mode;
             const label = mode === 'strange' ? 'Strange Quark' : mode === 'electroweak' ? 'Electroweak' : 'Boson Soliton';
@@ -1644,10 +1644,10 @@ export const HypotheticalStarGraphic: React.FC<HypotheticalStarGraphicProps> = (
                 key={mode}
                 type="button"
                 onClick={() => handleExoticSelect(mode)}
-                className={`flex-1 text-[8.5px] font-mono font-bold py-1 px-1 rounded-lg text-center transition-all cursor-pointer ${
+                className={`min-h-[44px] flex-1 text-[9px] font-mono font-bold py-1.5 px-1.5 rounded-lg text-center transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-purple-300/80 hover:text-white hover:bg-purple-950/50'
+                    ? 'bg-purple-500 text-white'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {label}

@@ -285,15 +285,15 @@
 - Consumes: Audio ambient volume, PWA offline status, inline science SVG graphics.
 - Produces: Polished secondary floating controls and diagram widgets.
 
-- [ ] **Step 1: Refactor floating toolbars and dropdowns**
+- [x] **Step 1: Refactor floating toolbars and dropdowns**
   - In `AmbientSoundToggle.tsx`: convert dropdown menu to `.observatory-panel`, replace cyan drop shadow with crisp hairline border.
   - In `PresetSlider.tsx`: convert floating preset slider popover to `.observatory-panel`, replace cyan border with `border-white/10`.
   - In `OfflineIndicator.tsx` and `PWAInstallButton.tsx`: style as clean telemetry indicators with 44px tap targets.
 
-- [ ] **Step 2: Audit and refine graphic components**
+- [x] **Step 2: Audit and refine graphic components**
   - Ensure inline SVG diagrams (remnants, hypothetical stars, variable stars, detection methods) use clean starlight palettes matching the observatory design system.
 
-- [ ] **Step 3: Verify typecheck, catalog, and em dashes**
+- [x] **Step 3: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---

@@ -2349,7 +2349,7 @@ export const StellarRemnantGraphic: React.FC<StellarRemnantGraphicProps> = ({
 
   return (
     <div
-      className={`w-full aspect-square relative bg-[#02040e] overflow-hidden select-none cursor-grab active:cursor-grabbing ${className}`}
+      className={`w-full aspect-square relative bg-black/40 overflow-hidden select-none cursor-grab active:cursor-grabbing ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onTouchMove={handleTouchMove}
@@ -2357,8 +2357,8 @@ export const StellarRemnantGraphic: React.FC<StellarRemnantGraphicProps> = ({
     >
       {/* Interactive 3D Lensing Badge for Black Holes */}
       {isBlackHole && (
-        <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/85 border border-cyan-500/35 text-[9px] sm:text-[10px] font-mono text-cyan-300 shadow-lg backdrop-blur-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+        <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-full observatory-panel border border-white/10 text-[9px] sm:text-[10px] font-mono text-sky-300 shadow-lg">
+          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
           <span>Interactive GR Lensing (Hover / Drag to Tilt)</span>
         </div>
       )}

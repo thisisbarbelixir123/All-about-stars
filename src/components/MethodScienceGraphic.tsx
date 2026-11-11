@@ -61,15 +61,15 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
   }, [isPlaying]);
 
   return (
-    <div className="rounded-2xl bg-[#020514] border border-cyan-500/35 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.6)] flex flex-col">
+    <div className="rounded-2xl observatory-panel border border-white/10 overflow-hidden shadow-xl flex flex-col">
       {/* Header Bar */}
-      <div className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#030922] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2.5">
+      <div className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-white/5 border-b border-white/10 flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full animate-ping shrink-0" style={{ backgroundColor: accentColor }} />
-          <span className="text-xs font-mono uppercase tracking-wider text-cyan-300 font-bold">
+          <span className="text-xs font-mono uppercase tracking-wider text-sky-300 font-bold">
             Interactive Scientific Demonstration
           </span>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-slate-900 border border-cyan-500/30 text-[10px] font-mono text-cyan-400 font-semibold truncate max-w-[210px]">
+          <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-sky-400 font-semibold truncate max-w-[210px]">
             {methodName.split('&')[0].trim()}
           </span>
         </div>
@@ -79,7 +79,7 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
           <button
             type="button"
             onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-            className="md:hidden flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-semibold transition-all cursor-pointer active:scale-95"
+            className="min-h-[44px] md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-sky-300 text-xs font-mono font-semibold transition-all cursor-pointer active:scale-95"
             aria-expanded={isMobileExpanded}
           >
             <span>{isMobileExpanded ? 'Hide Graphic' : 'Show Graphic'}</span>
@@ -91,7 +91,7 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
             <button
               type="button"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-mono font-semibold transition-all cursor-pointer active:scale-95"
+              className="min-h-[44px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-sky-300 text-xs font-mono font-semibold transition-all cursor-pointer active:scale-95"
               title={isPlaying ? 'Pause simulation' : 'Play simulation'}
             >
               {isPlaying ? (
@@ -112,8 +112,9 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
                 setAnimProgress(0);
                 setDopplerPhase(0);
               }}
-              className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl observatory-control border border-white/10 hover:border-sky-400/50 text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95"
               title="Reset simulation to initial position"
+              aria-label="Reset simulation to initial position"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -123,15 +124,15 @@ export const MethodScienceGraphic: React.FC<MethodScienceGraphicProps> = ({
 
       {/* Mobile Teaser Prompt (Visible only on mobile when collapsed) */}
       {!isMobileExpanded && (
-        <div className="md:hidden px-4 py-3 bg-[#020512] flex items-center justify-between text-xs font-mono text-slate-400 border-b border-cyan-500/10">
+        <div className="md:hidden px-4 py-2.5 bg-white/5 flex items-center justify-between text-xs font-mono text-slate-400 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-cyan-400" />
+            <Eye className="w-4 h-4 text-sky-400" />
             <span>Interactive animated model</span>
           </div>
           <button
             type="button"
             onClick={() => setIsMobileExpanded(true)}
-            className="text-cyan-300 font-bold hover:text-white flex items-center gap-1"
+            className="min-h-[44px] px-2 text-sky-300 font-bold hover:text-white flex items-center gap-1 cursor-pointer"
           >
             <span>Tap to View</span>
             <ChevronDown className="w-3.5 h-3.5" />
@@ -235,22 +236,25 @@ const ParallaxGraphic: React.FC<{
           <strong className="text-white">Earth’s 300-Million-km Orbit (2 AU)</strong> provides the geometric triangulation baseline.
         </span>
         {/* Season Selector */}
-        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/60 border border-cyan-500/30 text-[10px] font-mono">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono">
           <button
+            type="button"
             onClick={() => onSelectSeason('animate')}
-            className={`px-2 py-0.5 rounded ${season === 'animate' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${season === 'animate' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             Orbit Animation
           </button>
           <button
+            type="button"
             onClick={() => onSelectSeason('january')}
-            className={`px-2 py-0.5 rounded ${season === 'january' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${season === 'january' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             January (Baseline Left)
           </button>
           <button
+            type="button"
             onClick={() => onSelectSeason('july')}
-            className={`px-2 py-0.5 rounded ${season === 'july' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${season === 'july' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             July (Baseline Right)
           </button>
@@ -259,7 +263,7 @@ const ParallaxGraphic: React.FC<{
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 items-center">
         {/* Left: Triangulation Geometry Diagram */}
-        <div className="md:col-span-7 relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden shadow-inner flex items-center justify-center">
+        <div className="md:col-span-7 relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden shadow-inner flex items-center justify-center">
           <svg viewBox="0 0 300 170" className="w-full h-full select-none">
             <defs>
               <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
@@ -314,14 +318,14 @@ const ParallaxGraphic: React.FC<{
         </div>
 
         {/* Right: Telescopic Sensor Shift & Astrometric Solution */}
-        <div className="md:col-span-5 p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-between rounded-xl bg-slate-950/80 border border-cyan-500/25 space-y-2">
+        <div className="md:col-span-5 p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-between rounded-xl bg-white/5 border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-xs font-mono">
-            <span className="text-cyan-300 font-bold uppercase tracking-wide">Telescope Sky Plane View:</span>
+            <span className="text-sky-300 font-bold uppercase tracking-wide">Telescope Sky Plane View:</span>
             <span className="text-amber-300 font-bold">p = {parallaxArcsec}"</span>
           </div>
 
           {/* Mini Sky Sensor view */}
-          <div className="relative h-18 sm:h-20 lg:h-22 w-full rounded-lg bg-[#010410] border border-slate-800 overflow-hidden flex items-center justify-center">
+          <div className="relative h-18 sm:h-20 lg:h-22 w-full rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
             <svg viewBox="0 0 200 60" className="w-full h-full select-none absolute inset-0">
               {/* Crosshair grid */}
               <line x1="0" y1="30" x2="200" y2="30" stroke="#1e293b" strokeWidth="0.8" />
@@ -345,15 +349,15 @@ const ParallaxGraphic: React.FC<{
             </svg>
 
             {/* Shift label */}
-            <div className="absolute bottom-1 right-2 text-[8px] font-mono text-cyan-400/80">
+            <div className="absolute bottom-1 right-2 text-[8px] font-mono text-sky-400/80">
               Apparent Shift: ±{(Math.abs(Math.cos(angle)) * 0.77).toFixed(2)}"
             </div>
           </div>
 
           {/* Mathematical Solution Callout */}
-          <div className="px-2 py-1 rounded bg-[#030718] border border-cyan-500/30 flex items-center justify-between text-[10px] font-mono">
+          <div className="px-2 py-1 rounded bg-black/40 border border-white/10 flex items-center justify-between text-[10px] font-mono">
             <span className="text-slate-300 font-bold">d = 1 / p</span>
-            <span className="text-cyan-300 font-semibold">{distanceLy} light-years (3.50 pc)</span>
+            <span className="text-sky-300 font-semibold">{distanceLy} light-years (3.50 pc)</span>
           </div>
         </div>
       </div>
@@ -408,7 +412,7 @@ const SpectroscopyGraphic: React.FC<{
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 items-center">
         {/* Left: Star & Planet Orbiting */}
-        <div className="md:col-span-6 relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden flex items-center justify-center">
+        <div className="md:col-span-6 relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
           <svg viewBox="0 0 280 180" className="w-full h-full select-none">
             {/* Center of Mass (Barycenter) */}
             <circle cx="140" cy="90" r="2.5" fill="#e2e8f0" />
@@ -446,9 +450,9 @@ const SpectroscopyGraphic: React.FC<{
         </div>
 
         {/* Right: Spectral Dispersion Rainbow with Absorption Lines */}
-        <div className="md:col-span-6 p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-between rounded-xl bg-slate-950/80 border border-cyan-500/25 space-y-2">
+        <div className="md:col-span-6 p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-between rounded-xl bg-white/5 border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-xs font-mono">
-            <span className="text-cyan-300 font-bold uppercase tracking-wide">Starlight Absorption Spectrum:</span>
+            <span className="text-sky-300 font-bold uppercase tracking-wide">Starlight Absorption Spectrum:</span>
             <span className="text-slate-400">400 nm → 700 nm</span>
           </div>
 
@@ -475,7 +479,7 @@ const SpectroscopyGraphic: React.FC<{
           {/* Doppler Shifted Observed Spectrum */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-[10px] font-mono">
-              <span className="text-cyan-300 uppercase font-semibold">Observed Star Spectrum (Doppler Shifted):</span>
+              <span className="text-sky-300 uppercase font-semibold">Observed Star Spectrum (Doppler Shifted):</span>
               <span className={vRadial < 0 ? 'text-blue-400 font-bold' : 'text-rose-400 font-bold'}>
                 Δv = {(vRadial * 56.4).toFixed(1)} m/s
               </span>
@@ -511,7 +515,8 @@ const SpectroscopyGraphic: React.FC<{
               max="360"
               value={phase}
               onChange={(e) => onSetPhase(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+              className="w-full h-1.5 bg-white/15 rounded-lg appearance-none cursor-pointer accent-sky-400"
+              aria-label="Manual Orbital Phase"
             />
           </div>
         </div>
@@ -549,14 +554,14 @@ const TransitPhotometryGraphic: React.FC<{
         <span className="text-slate-300">
           <strong className="text-white">Transit Photometry:</strong> Detecting tiny periodic dips in starlight as an exoplanet eclipses the star disk.
         </span>
-        <span className="text-cyan-300 font-bold">
+        <span className="text-sky-300 font-bold">
           Flux: {(flux * 100).toFixed(2)}% (Dip: {((1 - flux) * 100).toFixed(2)}%)
         </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 items-center">
         {/* Top/Left: Star Disk and Transiting Planet */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
           <svg viewBox="0 0 400 200" className="w-full h-full select-none">
             <defs>
               <radialGradient id="transitStarGlow" cx="50%" cy="50%" r="50%">
@@ -568,7 +573,7 @@ const TransitPhotometryGraphic: React.FC<{
             </defs>
 
             {/* Star Disk with Limb Darkening */}
-            <circle cx="200" cy="100" r={starRadius} fill="url(#transitStarGlow)" filter="drop-shadow(0 0 25px rgba(245,158,11,0.5))" />
+            <circle cx="200" cy="100" r={starRadius} fill="url(#transitStarGlow)" />
 
             {/* Orbit Path Guide Line */}
             <line x1="30" y1="100" x2="370" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="3,3" />
@@ -582,10 +587,10 @@ const TransitPhotometryGraphic: React.FC<{
         </div>
 
         {/* Bottom/Right: Synchronized Light Curve Graph */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-slate-950/80 border border-cyan-500/25 flex flex-col justify-between">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-mono text-slate-300">
             <span className="font-bold">LIGHT CURVE (RELATIVE STELLAR BRIGHTNESS)</span>
-            <span className="text-cyan-400 font-bold">ΔF = (R_p / R_*)²</span>
+            <span className="text-sky-400 font-bold">ΔF = (R_p / R_*)²</span>
           </div>
 
           <svg viewBox="0 0 300 120" className="w-full h-24 sm:h-28 select-none">
@@ -603,7 +608,7 @@ const TransitPhotometryGraphic: React.FC<{
             <path
               d="M 30 20 L 110 20 Q 125 20, 130 65 L 170 65 Q 175 20, 190 20 L 280 20"
               fill="none"
-              stroke="#06b6d4"
+              stroke="#38bdf8"
               strokeWidth="2"
             />
 
@@ -629,7 +634,8 @@ const TransitPhotometryGraphic: React.FC<{
               step="0.005"
               value={progress}
               onChange={(e) => onSetProgress(Number(e.target.value))}
-              className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400"
+              className="w-full h-1.5 bg-white/15 rounded appearance-none cursor-pointer accent-sky-400"
+              aria-label="Scrub Transit Phase"
             />
           </div>
         </div>
@@ -674,14 +680,14 @@ const MicrolensingGraphic: React.FC<{
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 items-center">
         {/* Alignment Geometry */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
           <svg viewBox="0 0 400 200" className="w-full h-full select-none">
             {/* Observer Earth */}
             <circle cx="200" cy="180" r="5" fill="#38bdf8" />
             <text x="210" y="184" fill="#38bdf8" fontSize="8" fontFamily="monospace">Earth Observer</text>
 
             {/* Distant Source Star */}
-            <circle cx={sourceStarX} cy={sourceStarY} r={8} fill="#f8fafc" filter="drop-shadow(0 0 10px rgba(255,255,255,0.8))" />
+            <circle cx={sourceStarX} cy={sourceStarY} r={8} fill="#f8fafc" />
             <text x={sourceStarX - 35} y={sourceStarY - 14} fill="#f8fafc" fontSize="8" fontFamily="monospace">
               Distant Source Star (Earendel, z=6.2)
             </text>
@@ -712,7 +718,7 @@ const MicrolensingGraphic: React.FC<{
         </div>
 
         {/* Magnification Light Curve Spike */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-slate-950/80 border border-cyan-500/25 flex flex-col justify-between">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-mono text-slate-300">
             <span className="font-bold">GRAVITATIONAL LENSING LIGHT CURVE</span>
             <span className="text-amber-400 font-bold">Caustic Crossing Peak</span>
@@ -750,7 +756,8 @@ const MicrolensingGraphic: React.FC<{
               step="0.005"
               value={progress}
               onChange={(e) => onSetProgress(Number(e.target.value))}
-              className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-cyan-400"
+              className="w-full h-1.5 bg-white/15 rounded appearance-none cursor-pointer accent-sky-400"
+              aria-label="Scrub Alignment"
             />
           </div>
         </div>
@@ -786,7 +793,7 @@ const PulsarTimingGraphic: React.FC<{
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 items-center">
         {/* Rotating Neutron Star & Beams */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
           <svg viewBox="0 0 300 200" className="w-full h-full select-none">
             {/* Magnetic axis sweeping cones */}
             <g transform={`translate(150, 100) rotate(${spinAngle})`}>
@@ -801,7 +808,7 @@ const PulsarTimingGraphic: React.FC<{
 
             {/* Central Neutron Star (Ultra-dense) */}
             <circle cx="150" cy="100" r="14" fill="#1e1b4b" stroke="#c084fc" strokeWidth="2" />
-            <circle cx="150" cy="100" r="6" fill="#ffffff" filter="drop-shadow(0 0 8px #a78bfa)" />
+            <circle cx="150" cy="100" r="6" fill="#ffffff" />
             <text x="120" y="128" fill="#e2e8f0" fontSize="8" fontFamily="monospace">
               Pulsar Core (20 km)
             </text>
@@ -815,7 +822,7 @@ const PulsarTimingGraphic: React.FC<{
         </div>
 
         {/* Oscilloscope Pulse Train */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-slate-950/80 border border-cyan-500/25 flex flex-col justify-between">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-mono text-slate-300">
             <span className="font-bold">RADIO OSCILLOSCOPE (PERIODIC PULSE TRAIN)</span>
             <span className={isBeamAligned ? 'text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40' : 'text-slate-500'}>
@@ -862,22 +869,25 @@ const InfraredAOGraphic: React.FC<{
           <strong className="text-white">Infrared Penetration &amp; Adaptive Optics:</strong> Piercing dust extinction &amp; counteracting atmospheric turbulence.
         </span>
         {/* Mode Selector */}
-        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/60 border border-cyan-500/30 text-[10px] font-mono">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono">
           <button
+            type="button"
             onClick={() => onChangeMode('optical')}
-            className={`px-2 py-0.5 rounded ${mode === 'optical' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${mode === 'optical' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             1. Optical (Dust Blocked)
           </button>
           <button
+            type="button"
             onClick={() => onChangeMode('infrared')}
-            className={`px-2 py-0.5 rounded ${mode === 'infrared' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${mode === 'infrared' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             2. Infrared (Penetrating)
           </button>
           <button
+            type="button"
             onClick={() => onChangeMode('laser-ao')}
-            className={`px-2 py-0.5 rounded ${mode === 'laser-ao' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${mode === 'laser-ao' ? 'bg-sky-400 text-slate-950 font-bold' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
             3. Laser Guide Star AO
           </button>
@@ -886,7 +896,7 @@ const InfraredAOGraphic: React.FC<{
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 items-center">
         {/* Simulated Telescope Sensor Field */}
-        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-[#010410] border border-cyan-500/20 overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[16/10] md:h-[200px] lg:h-[215px] xl:h-[225px] lg:aspect-auto rounded-xl bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
           <svg viewBox="0 0 300 200" className="w-full h-full select-none">
             <defs>
               <radialGradient id="starClusterGlow" cx="50%" cy="50%" r="50%">
@@ -1000,8 +1010,8 @@ const InfraredAOGraphic: React.FC<{
         </div>
 
         {/* Technical Callout */}
-        <div className="p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-center rounded-xl bg-slate-950/80 border border-cyan-500/25 space-y-2 text-xs font-sans">
-          <div className="text-xs font-mono text-cyan-300 font-bold uppercase">
+        <div className="p-3 md:h-[200px] lg:h-[215px] xl:h-[225px] flex flex-col justify-center rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs font-sans">
+          <div className="text-xs font-mono text-sky-300 font-bold uppercase">
             {mode === 'optical'
               ? 'Stage 1: Interstellar Dust Extinction (Visible Light)'
               : mode === 'infrared'

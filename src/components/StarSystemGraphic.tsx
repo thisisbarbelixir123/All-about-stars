@@ -1532,14 +1532,14 @@ export const StarSystemGraphic: React.FC<StarSystemGraphicProps> = ({
     <div className={`relative w-full h-full flex items-center justify-center ${className}`}>
       {/* Switcher Controls for Star Clusters (Open Cluster vs Globular Cluster) */}
       {systemId === 'star-clusters' && (
-        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 p-1 rounded-xl bg-[#030718]/90 border border-cyan-500/40 shadow-lg backdrop-blur-md">
+        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 p-1 rounded-xl observatory-panel border border-white/10 shadow-lg">
           <button
             type="button"
             onClick={() => handleClusterToggle('open')}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
+            className={`min-h-[44px] px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
               activeClusterMode === 'open'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-sky-400 text-slate-950'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
             title="Switch to Open Cluster (Pleiades reflection nebula)"
           >
@@ -1548,10 +1548,10 @@ export const StarSystemGraphic: React.FC<StarSystemGraphicProps> = ({
           <button
             type="button"
             onClick={() => handleClusterToggle('globular')}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
+            className={`min-h-[44px] px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
               activeClusterMode === 'globular'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-amber-400 text-slate-950'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
             title="Switch to Globular Cluster (Omega Centauri dense core)"
           >
@@ -1954,46 +1954,46 @@ export const StarSystemActivityMonitor: React.FC<StarSystemActivityMonitorProps>
 
   return (
     <div
-      className={`w-full p-2.5 sm:p-3 rounded-2xl bg-[#020512] border border-cyan-500/25 shadow-lg flex flex-col gap-2 min-w-0 ${className}`}
+      className={`w-full p-2.5 sm:p-3 rounded-2xl observatory-panel border border-white/10 shadow-lg flex flex-col gap-2 min-w-0 ${className}`}
     >
       {/* Telemetry Header */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="p-1 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
+          <div className="p-1 rounded-md bg-white/5 border border-white/10 text-sky-400 shrink-0">
             <Orbit className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0">
             <div className="text-[10px] sm:text-xs font-mono font-bold text-white uppercase tracking-wider truncate">
               {telemetry.title}
             </div>
-            <div className="text-[9px] sm:text-[10px] font-sans text-cyan-300/80 truncate">
+            <div className="text-[9px] sm:text-[10px] font-sans text-sky-300/80 truncate">
               {telemetry.status}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-[9px] font-mono text-cyan-300 shrink-0">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono text-sky-300 shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span>REAL-TIME DYNAMICS</span>
         </div>
       </div>
 
       {/* Live Waveform Canvas */}
-      <div className="w-full h-18 sm:h-20 rounded-xl overflow-hidden border border-cyan-500/20 bg-[#01030b] relative">
+      <div className="w-full h-18 sm:h-20 rounded-xl overflow-hidden border border-white/10 bg-black/40 relative">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
       {/* Triad Metric Readouts */}
       <div className="grid grid-cols-3 gap-1.5 text-[9px] sm:text-[10px] font-mono">
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
+        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric1Name}</span>
           <span className="text-white font-bold truncate block">{telemetry.metric1Val}</span>
         </div>
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
+        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric2Name}</span>
-          <span className="text-cyan-300 font-bold truncate block">{telemetry.metric2Val}</span>
+          <span className="text-sky-300 font-bold truncate block">{telemetry.metric2Val}</span>
         </div>
-        <div className="p-1.5 rounded-lg bg-[#04081c] border border-cyan-500/15 min-w-0">
+        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 min-w-0">
           <span className="text-slate-400 block text-[8px] uppercase truncate">{telemetry.metric3Name}</span>
           <span className="text-amber-300 font-bold truncate block">{telemetry.metric3Val}</span>
         </div>

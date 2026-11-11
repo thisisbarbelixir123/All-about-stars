@@ -1564,20 +1564,20 @@ export const VariableStarActivityMonitor: React.FC<VariableStarActivityMonitorPr
 
   return (
     <div
-      className={`p-2.5 sm:p-3.5 rounded-xl bg-[#020512] border border-cyan-500/25 shadow-[0_4px_20px_rgba(6,182,212,0.12)] min-w-0 w-full flex flex-col gap-1.5 sm:gap-2 ${className}`}
+      className={`p-2.5 sm:p-3.5 rounded-xl observatory-panel border border-white/10 min-w-0 w-full flex flex-col gap-1.5 sm:gap-2 ${className}`}
     >
       {/* Header with Title and Real-Time Tag */}
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="flex items-center gap-2 min-w-0 flex-1 truncate">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-          <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider shrink-0">
+          <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
+          <span className="text-[10px] font-mono uppercase text-sky-400 font-bold tracking-wider shrink-0">
             Activity Telemetry:
           </span>
           <span className="text-xs sm:text-sm font-bold font-mono text-white truncate">
             {telemetry.title}
           </span>
         </div>
-        <span className="text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
+        <span className="text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/5 text-sky-300 border border-white/10 shrink-0">
           Φ = {telemetry.phasePercent}%
         </span>
       </div>
@@ -1595,7 +1595,7 @@ export const VariableStarActivityMonitor: React.FC<VariableStarActivityMonitorPr
       </div>
 
       {/* Live Waveform Canvas */}
-      <div className="w-full h-11 sm:h-12 rounded-lg overflow-hidden border border-cyan-500/15 bg-[#01030a] relative">
+      <div className="w-full h-11 sm:h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 relative">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
     </div>
