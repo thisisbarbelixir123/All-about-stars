@@ -411,37 +411,43 @@ export function getComprehensiveStarMapping(star: StarData): MappedClassificatio
   if (
     star.spectralClass === 'WD' ||
     stage.includes('white dwarf') ||
-    spec.includes('wd') ||
-    spec.startsWith('d') ||
-    desc.includes('white dwarf')
+    spec.startsWith('wd') ||
+    /^d[abcoqzx]/i.test(spec)
   ) {
     remnantClass = 'WD';
   } else if (
+    spec.includes('magnetar') ||
     desc.includes('magnetar') ||
     desc.includes('soft gamma repeater') ||
-    desc.includes('sgr') ||
+    /\bsgr\b/.test(desc) ||
     desc.includes('anomalous x-ray pulsar') ||
-    desc.includes('axp')
+    /\baxp\b/.test(desc)
   ) {
     remnantClass = 'SGR';
   } else if (
-    desc.includes('millisecond') ||
-    desc.includes('spider') ||
+    spec.includes('msp') ||
+    desc.includes('millisecond pulsar') ||
+    desc.includes('spider pulsar') ||
     desc.includes('black widow') ||
-    desc.includes('redback')
+    desc.includes('redback') ||
+    desc.includes('double pulsar')
   ) {
     remnantClass = 'MSP';
   } else if (
+    spec.includes('lmxb') ||
+    spec.includes('hmxb') ||
     desc.includes('accreting') ||
-    desc.includes('lmxb') ||
-    desc.includes('hmxb') ||
-    desc.includes('x-ray burst')
+    /\blmxb\b|\bhmxb\b/.test(desc) ||
+    desc.includes('x-ray burst') ||
+    desc.includes('low-mass x-ray binary')
   ) {
     remnantClass = 'X-NS';
   } else if (
-    desc.includes('pulsar') ||
-    star.name.toLowerCase().includes('pulsar') ||
-    star.id.includes('pulsar')
+    (desc.includes('pulsar') ||
+      star.name.toLowerCase().includes('pulsar') ||
+      star.id.includes('pulsar')) &&
+    !desc.includes('radio-quiet') &&
+    !spec.includes('gamma')
   ) {
     remnantClass = 'PSR';
   } else if (
@@ -904,23 +910,26 @@ export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[])
       return (
         sc === 'WD' ||
         stage.includes('white dwarf') ||
-        spec.includes('wd') ||
-        spec.startsWith('d') ||
-        desc.includes('white dwarf')
+        spec.startsWith('wd') ||
+        /^d[abcoqzx]/i.test(spec)
       );
     }
 
     // 2. Radio-Quiet Neutron Stars
     if (id.includes('radio-quiet')) {
       return (
-        (sc === 'NS' || stage.includes('neutron star')) &&
-        (desc.includes('radio-quiet') ||
+        (sc === 'NS' || stage.includes('neutron star') || stage.includes('pulsar')) &&
+        !spec.includes('msp') &&
+        !spec.includes('magnetar') &&
+        (spec.includes('(ins)') ||
+          spec.includes('(cco)') ||
+          spec.includes('(gamma)') ||
+          desc.includes('radio-quiet') ||
           desc.includes('isolated neutron star') ||
           desc.includes('magnificent seven') ||
           desc.includes('central compact object') ||
-          desc.includes('cco') ||
-          desc.includes('calvera') ||
-          (spec.includes('(ins)') && !s.id.includes('pulsar')))
+          /\bcco\b/.test(desc) ||
+          desc.includes('calvera'))
       );
     }
 
@@ -928,11 +937,17 @@ export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[])
     if (id.includes('radio-pulsar')) {
       return (
         (sc === 'NS' || stage.includes('neutron star') || stage.includes('pulsar')) &&
-        desc.includes('pulsar') &&
-        !desc.includes('millisecond') &&
-        !desc.includes('spider') &&
+        (desc.includes('pulsar') || spec.includes('pulsar')) &&
+        !spec.includes('msp') &&
+        !spec.includes('gamma') &&
+        !spec.includes('magnetar') &&
+        !spec.includes('lmxb') &&
+        !desc.includes('radio-quiet') &&
+        !desc.includes('millisecond pulsar') &&
+        !desc.includes('spider pulsar') &&
         !desc.includes('black widow') &&
-        !desc.includes('redback')
+        !desc.includes('redback') &&
+        !s.id.startsWith('double-pulsar')
       );
     }
 
@@ -940,8 +955,9 @@ export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[])
     if (id.includes('millisecond')) {
       return (
         (sc === 'NS' || stage.includes('neutron star') || stage.includes('pulsar')) &&
-        (desc.includes('millisecond') ||
-          desc.includes('spider') ||
+        (spec.includes('msp') ||
+          desc.includes('millisecond pulsar') ||
+          desc.includes('spider pulsar') ||
           desc.includes('black widow') ||
           desc.includes('redback') ||
           desc.includes('double pulsar'))
@@ -952,11 +968,12 @@ export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[])
     if (id.includes('magnetar')) {
       return (
         (sc === 'NS' || stage.includes('neutron star')) &&
-        (desc.includes('magnetar') ||
+        (spec.includes('magnetar') ||
+          desc.includes('magnetar') ||
           desc.includes('soft gamma repeater') ||
-          desc.includes('sgr') ||
+          /\bsgr\b/.test(desc) ||
           desc.includes('anomalous x-ray pulsar') ||
-          desc.includes('axp'))
+          /\baxp\b/.test(desc))
       );
     }
 
@@ -964,34 +981,25 @@ export function getMappedStarsForRemnant(remnantId: string, catalog: StarData[])
     if (id.includes('accreting')) {
       return (
         (sc === 'NS' || stage.includes('neutron star')) &&
-        (desc.includes('accreting') ||
-          desc.includes('lmxb') ||
-          desc.includes('hmxb') ||
+        !spec.includes('magnetar') &&
+        !desc.includes('anomalous x-ray pulsar') &&
+        (spec.includes('lmxb') ||
+          spec.includes('hmxb') ||
+          desc.includes('accreting') ||
+          /\blmxb\b|\bhmxb\b/.test(desc) ||
           desc.includes('x-ray burst') ||
-          desc.includes('x-ray pulsar') ||
           desc.includes('low-mass x-ray binary'))
       );
     }
 
     // 7. Stellar-Mass Black Holes
     if (id.includes('stellar-black-hole')) {
-      return (
-        stage.includes('black hole') ||
-        desc.includes('stellar-mass black hole') ||
-        desc.includes('microquasar') ||
-        desc.includes('black hole candidate') ||
-        desc.includes('cygnus x-1')
-      );
+      return stage.includes('black hole') && !stage.includes('supermassive');
     }
 
     // 8. Supermassive Black Holes
     if (id.includes('supermassive')) {
-      return (
-        stage.includes('supermassive') ||
-        desc.includes('supermassive black hole') ||
-        desc.includes('sagittarius a*') ||
-        desc.includes('galactic center')
-      );
+      return stage.includes('supermassive');
     }
 
     return false;

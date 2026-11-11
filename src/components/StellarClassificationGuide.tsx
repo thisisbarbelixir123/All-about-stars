@@ -1795,8 +1795,17 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
               {/* Stellar Remnants Card - Carousel UI */}
               {(() => {
                 const activeRemnantItem = STELLAR_REMNANTS_GUIDE[activeRemnantIndex] || STELLAR_REMNANTS_GUIDE[0];
-                const mappedRemnantStars = getMappedStarsForRemnant(activeRemnantItem.id, STARS_CATALOG);
-                const archetypeStar = mappedRemnantStars[0] || null;
+                const rawMappedRemnantStars = getMappedStarsForRemnant(activeRemnantItem.id, STARS_CATALOG);
+                const preferredArchetypeId = activeRemnantItem.archetypeStarId || activeRemnantItem.exampleStarIds?.[0];
+                const archetypeStar =
+                  (preferredArchetypeId &&
+                    (rawMappedRemnantStars.find((s) => s.id === preferredArchetypeId) ||
+                      STARS_CATALOG.find((s) => s.id === preferredArchetypeId))) ||
+                  rawMappedRemnantStars[0] ||
+                  null;
+                const mappedRemnantStars = archetypeStar
+                  ? [archetypeStar, ...rawMappedRemnantStars.filter((s) => s.id !== archetypeStar.id)]
+                  : rawMappedRemnantStars;
 
                 return (
                   <div className="w-full max-w-full p-3 sm:p-5 lg:p-6 rounded-2xl observatory-panel border border-white/10 flex flex-col gap-3 sm:gap-5 relative">
@@ -1873,27 +1882,34 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                       <div className="w-full mobile-landscape:w-7/12 lg:w-7/12 mobile-landscape:h-full lg:h-full overflow-y-auto scrollbar-thin flex flex-col gap-2.5 sm:gap-3.5 min-w-0 pr-1">
                         {/* Astrophysical Profile Quick Stats */}
                         <div className="w-full grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono min-w-0">
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Density & Gravity</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Density & Gravity</span>
                             <span className="text-white font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.density}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Mass</span>
-                            <span className="text-cyan-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.typicalMass}</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Mass</span>
+                            <span className="text-sky-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.typicalMass}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Diameter</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Typical Diameter</span>
                             <span className="text-purple-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.typicalDiameter}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Support / Horizon</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Support / Horizon</span>
                             <span className="text-emerald-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal">{activeRemnantItem.quantumSupportOrHorizon}</span>
                           </div>
-                          <div className="p-2 sm:p-2.5 rounded-xl bg-[#020512] border border-cyan-500/15 min-w-0 col-span-2">
-                            <span className="text-slate-500 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Benchmark / Archetype Star</span>
+                          <div className="p-2 sm:p-2.5 rounded-xl bg-white/5 border border-white/10 min-w-0 col-span-2">
+                            <span className="text-slate-400 block text-[8px] sm:text-[10px] uppercase font-semibold leading-tight mb-0.5 break-words">Benchmark / Archetype Star</span>
                             <span className="text-amber-300 font-bold text-[11px] sm:text-sm break-words whitespace-normal flex items-center gap-1.5">
                               {archetypeStar ? (
-                                <RunningText text={archetypeStar.name} className="truncate" />
+                                <button
+                                  type="button"
+                                  onClick={() => onSelectStar && onSelectStar(archetypeStar)}
+                                  className="hover:underline hover:text-amber-200 cursor-pointer text-left transition-colors"
+                                  title={`Inspect archetype star ${archetypeStar.name}`}
+                                >
+                                  {archetypeStar.name} ({archetypeStar.spectralType})
+                                </button>
                               ) : (
                                 <span>{activeRemnantItem.externalExamples?.[0] || 'Relativistic Benchmark'}</span>
                               )}
@@ -1902,8 +1918,8 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </div>
 
                         {/* Plain-English Explanation */}
-                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15">
-                          <span className="text-xs font-bold text-cyan-400 font-mono block mb-1">
+                        <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+                          <span className="text-xs font-bold text-sky-400 font-mono block mb-1">
                             Physical Explanation:
                           </span>
                           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
@@ -1912,7 +1928,7 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </div>
 
                         {/* Formation Mechanism */}
-                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15">
+                        <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
                           <span className="text-xs font-bold text-indigo-400 font-mono block mb-1">
                             Formation & Collapse Pathway:
                           </span>
@@ -1922,14 +1938,14 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </div>
 
                         {/* Distinguishing Astrophysical Features */}
-                        <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/15 flex flex-col gap-2 min-w-0">
+                        <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2 min-w-0">
                           <span className="text-xs font-bold text-amber-400 font-mono block">
                             Key Distinguishing Astrophysical Features:
                           </span>
                           <ul className="space-y-1.5 text-xs text-slate-300 font-sans list-none">
                             {activeRemnantItem.distinguishingFeatures.map((feat, idx) => (
                               <li key={idx} className="flex items-start gap-2">
-                                <span className="text-cyan-400 font-bold mt-0.5 shrink-0">✓</span>
+                                <span className="text-sky-400 font-bold mt-0.5 shrink-0">✓</span>
                                 <span className="leading-snug">{feat}</span>
                               </li>
                             ))}
@@ -1937,41 +1953,36 @@ export const StellarClassificationGuide: React.FC<StellarClassificationGuideProp
                         </div>
 
                         {/* Mapped Stars from Catalog or Benchmark Note */}
-                        {(() => {
-                          const mappedStars = getMappedStarsForRemnant(activeRemnantItem.id, STARS_CATALOG);
-                          if (mappedStars.length > 0) {
-                            return (
-                              <ClassificationMappedStarsSection
-                                title={`Mapped ${activeRemnantItem.name}`}
-                                categoryColor={activeRemnantItem.colorHex}
-                                allMappedStars={mappedStars}
-                                onSelectStar={onSelectStar}
-                              />
-                            );
-                          }
-                          return (
-                            <div className="p-3 sm:p-4 rounded-xl bg-[#020512] border border-cyan-500/20 text-xs font-mono space-y-1.5">
-                              <div className="flex items-center gap-2 text-cyan-300 font-semibold">
-                                <span>Astrophysical Singularity Benchmark Note</span>
-                              </div>
-                              <p className="text-slate-300 font-sans text-xs leading-relaxed">
-                                Gravitational singularities and black hole candidates (Cygnus X-1, Gaia BH1, Sagittarius A*) are modeled as general-relativistic classification benchmarks. Individual stellar dossiers in the catalog are currently reserved for thermonuclear and degenerate stars.
-                              </p>
+                        {mappedRemnantStars.length > 0 ? (
+                          <ClassificationMappedStarsSection
+                            title={`Mapped ${activeRemnantItem.name}`}
+                            categoryColor={activeRemnantItem.colorHex}
+                            allMappedStars={mappedRemnantStars}
+                            onSelectStar={onSelectStar}
+                            benchmarkStarIds={activeRemnantItem.exampleStarIds}
+                          />
+                        ) : (
+                          <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 text-xs font-mono space-y-1.5">
+                            <div className="flex items-center gap-2 text-sky-300 font-semibold">
+                              <span>Astrophysical Singularity Benchmark Note</span>
                             </div>
-                          );
-                        })()}
+                            <p className="text-slate-300 font-sans text-xs leading-relaxed">
+                              Gravitational singularities and black hole candidates (Cygnus X-1, Gaia BH1, Sagittarius A*) are modeled as general-relativistic classification benchmarks. Individual stellar dossiers in the catalog are currently reserved for thermonuclear and degenerate stars.
+                            </p>
+                          </div>
+                        )}
 
                         {/* Observational Benchmarks */}
                         {activeRemnantItem.externalExamples && activeRemnantItem.externalExamples.length > 0 && (
-                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-[#020512] border border-cyan-500/20 min-w-0">
-                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-cyan-400 font-bold block mb-1 break-words">
+                          <div className="mt-0.5 sm:mt-1 p-2 sm:p-3 rounded-xl bg-white/5 border border-white/10 min-w-0">
+                            <span className="text-[10px] sm:text-[11px] font-mono uppercase text-sky-400 font-bold block mb-1 break-words">
                               Historic &amp; Observational Benchmarks:
                             </span>
                             <div className="flex flex-wrap gap-1 min-w-0">
                               {activeRemnantItem.externalExamples.map((ext, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
+                                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 break-words whitespace-normal leading-normal"
                                 >
                                   {ext}
                                 </span>
