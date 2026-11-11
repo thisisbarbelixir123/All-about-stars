@@ -245,25 +245,25 @@
 - Consumes: Global app state, search index, lighting presets, keyboard shortcuts, `.observatory-panel`.
 - Produces: Polished observatory command palette and settings modals.
 
-- [ ] **Step 1: Inspect slop patterns in modals and About page**
+- [x] **Step 1: Inspect slop patterns in modals and About page**
   - Check `CommandPaletteModal.tsx` search input, result rows, and category badges.
   - Check `StageAndPresetModal.tsx` and `CreatePresetModal.tsx` sliders and preset cards.
   - Check `AboutPage.tsx` for marketing buzzwords or legacy gradient cards.
 
-- [ ] **Step 2: Refactor `CommandPaletteModal.tsx`**
+- [x] **Step 2: Refactor `CommandPaletteModal.tsx`**
   - Convert dialog shell to `.observatory-panel border border-white/10`.
   - Refactor search input to clean obsidian styling with `JetBrains Mono` shortcut hints.
   - Style result items with `.observatory-control` hover states and clean keyboard selection highlight.
 
-- [ ] **Step 3: Refactor Preset & Help Modals**
+- [x] **Step 3: Refactor Preset & Help Modals**
   - In `StageAndPresetModal.tsx` & `CreatePresetModal.tsx`: convert preset grid to `.observatory-panel`, style range sliders with clean slate tracks, ensure 44px touch targets.
   - In `KeyboardShortcutsHelpModal.tsx`: style shortcut keys (`[Space]`, `[Tab]`, etc.) as crisp physical keycaps with `JetBrains Mono`.
 
-- [ ] **Step 4: Refactor `AboutPage.tsx`**
+- [x] **Step 4: Refactor `AboutPage.tsx`**
   - Convert About page hero, mission statement, astrophysical data sources (Gaia, Hipparcos, SIMBAD, NASA Exoplanet Archive), and credits into `.observatory-panel`.
   - Sanitize all copy to ensure objective, authoritative observatory tone.
 
-- [ ] **Step 5: Verify typecheck, catalog, and em dashes**
+- [x] **Step 5: Verify typecheck, catalog, and em dashes**
   - Run: `npm run lint`
 
 ---

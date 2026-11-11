@@ -675,12 +675,18 @@ export function getMappedStarsForStarSystem(systemId: string, catalog: StarData[
     const combined = `${s.description || ''} ${(s.notableFacts || []).join(' ')} ${s.name} ${s.stellarStage || ''}`.toLowerCase();
     const hierarchy = (s.systemHierarchy || '').toLowerCase();
 
+    // Check parent system relationships in MULTIPLE_STAR_SYSTEMS
+    const parentSystem = MULTIPLE_STAR_SYSTEMS.find(
+      (ms) => ms.starIds.includes(s.id) || ms.components.some((c) => c.id === s.id || c.catalogStarId === s.id)
+    );
+    const parentSystemType = parentSystem ? parentSystem.systemType.toLowerCase() : '';
+
     // 1. Visual Binary Systems (Telescope-Resolved Pairs)
     // Strictly only visual binary stars; exclude triples and higher multiplicity
     if (id.includes('visual-binar')) {
       return (
-        sys === 'Binary Star System' &&
-        (hierarchy.includes('visual') || combined.includes('visual binary')) &&
+        (sys === 'Binary Star System' || parentSystemType.includes('visual')) &&
+        (hierarchy.includes('visual') || combined.includes('visual binary') || parentSystemType.includes('visual')) &&
         !combined.includes('spectroscopic') &&
         !combined.includes('triple') &&
         !combined.includes('multiple') &&
@@ -691,8 +697,8 @@ export function getMappedStarsForStarSystem(systemId: string, catalog: StarData[
     // 2. Spectroscopic Binary Systems (Doppler Shift Detected Pairs)
     if (id.includes('spectroscopic-binar')) {
       return (
-        (sys === 'Binary Star System' || combined.includes('binary')) &&
-        (hierarchy.includes('spectroscopic') || combined.includes('spectroscopic')) &&
+        (sys === 'Binary Star System' || combined.includes('binary') || parentSystemType.includes('spectroscopic')) &&
+        (hierarchy.includes('spectroscopic') || combined.includes('spectroscopic') || parentSystemType.includes('spectroscopic')) &&
         !combined.includes('triple') &&
         !combined.includes('multiple')
       );
@@ -704,29 +710,46 @@ export function getMappedStarsForStarSystem(systemId: string, catalog: StarData[
         sys === 'Binary Star System' ||
         sys === 'Contact Binary' ||
         sys === 'X-Ray Binary' ||
+        Boolean(parentSystem) ||
         combined.includes('binary')
       );
     }
 
     // 4. Eclipsing Binaries
     if (id.includes('eclipsing')) {
-      return s.isContactBinary || combined.includes('eclipsing');
+      return s.isContactBinary || combined.includes('eclipsing') || parentSystemType.includes('eclipsing');
     }
 
     // 5. Contact Binaries
     if (id.includes('contact')) {
-      return s.isContactBinary || sys === 'Contact Binary' || combined.includes('contact binary') || combined.includes('overcontact');
+      return (
+        s.isContactBinary ||
+        sys === 'Contact Binary' ||
+        parentSystemType.includes('contact') ||
+        combined.includes('contact binary') ||
+        combined.includes('overcontact')
+      );
     }
 
     // 6. X-Ray Binaries
     if (id.includes('xray') || id.includes('x-ray')) {
-      return sys === 'X-Ray Binary' || combined.includes('x-ray binary') || combined.includes('microquasar') || combined.includes('lmxb') || combined.includes('hmxb');
+      return (
+        sys === 'X-Ray Binary' ||
+        parentSystemType.includes('x-ray') ||
+        combined.includes('x-ray binary') ||
+        combined.includes('cygnus x-1') ||
+        combined.includes('scorpius x-1') ||
+        combined.includes('microquasar') ||
+        combined.includes('lmxb') ||
+        combined.includes('hmxb')
+      );
     }
 
     // 7. Multiple Star Systems (Triple, Quadruple, etc.)
     if (id.includes('multiple')) {
       return (
         sys === 'Multiple Star System' ||
+        (parentSystem && parentSystem.effectiveStarCount >= 3) ||
         hierarchy.includes('triple') ||
         hierarchy.includes('quadruple') ||
         hierarchy.includes('sextuple') ||
@@ -739,7 +762,14 @@ export function getMappedStarsForStarSystem(systemId: string, catalog: StarData[
 
     // 8. Star Clusters
     if (id.includes('cluster')) {
-      return sys === 'Star Cluster Member' || combined.includes('cluster member') || combined.includes('open cluster') || combined.includes('globular cluster');
+      return (
+        sys === 'Star Cluster Member' ||
+        parentSystemType.includes('cluster') ||
+        combined.includes('cluster member') ||
+        combined.includes('open cluster') ||
+        combined.includes('globular cluster') ||
+        combined.includes('pleiades')
+      );
     }
 
     // 9. Exoplanetary Host Stars

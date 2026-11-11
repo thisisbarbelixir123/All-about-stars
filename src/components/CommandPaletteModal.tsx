@@ -66,7 +66,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         title: 'Go to Home / Overview',
         category: 'Navigation',
         shortcut: '1',
-        icon: <Compass className="w-4 h-4 text-cyan-400" />,
+        icon: <Compass className="w-4 h-4 text-sky-400" />,
         action: () => {
           onNavigateTab('overview');
           onClose();
@@ -87,7 +87,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         id: 'action-stellar-systems',
         title: 'Open Stellar Systems Catalog (14 Multi-Star Systems)',
         category: 'Navigation',
-        icon: <Share2 className="w-4 h-4 text-cyan-400" />,
+        icon: <Share2 className="w-4 h-4 text-sky-400" />,
         action: () => {
           onNavigateTab('stellar-systems');
           onClose();
@@ -141,7 +141,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         title: 'Toggle Ambient Cosmic Audio',
         category: 'Audio',
         shortcut: 'M',
-        icon: <Volume2 className="w-4 h-4 text-cyan-300" />,
+        icon: <Volume2 className="w-4 h-4 text-sky-400" />,
         action: () => {
           onToggleSound();
           onClose();
@@ -234,14 +234,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
       <div
-        className="w-full max-w-xl rounded-2xl bg-[#030712] border border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden flex flex-col max-h-[80vh] text-slate-100"
+        className="w-full max-w-xl rounded-2xl observatory-panel border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-cyan-500/20 bg-slate-900/60">
-          <Search className="w-5 h-5 text-cyan-400 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-black/40">
+          <Search className="w-5 h-5 text-sky-400 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -250,14 +250,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Search all 557+ stars, constellations, or commands..."
+            placeholder="Search 1,007 stars, constellations, or commands..."
             className="w-full bg-transparent border-0 text-sm sm:text-base font-sans text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="p-1 rounded text-slate-500 hover:text-white transition-colors cursor-pointer"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
               title="Clear search text"
               aria-label="Clear search text"
             >
@@ -268,7 +268,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             type="button"
             id="btn-close-command-palette"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
             title="Close search"
             aria-label="Close search"
           >
@@ -277,11 +277,11 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         </div>
 
         {/* Results List */}
-        <div ref={listRef} className="overflow-y-auto p-2 divide-y divide-slate-800/40 divide-dashed space-y-1">
+        <div ref={listRef} className="overflow-y-auto p-2 divide-y divide-white/5 divide-dashed space-y-1">
           {/* Actions Section */}
           {matchingActions.length > 0 && (
             <div className="pb-1.5">
-              <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400/80 font-bold">
+              <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-sky-400 font-bold">
                 Quick Actions
               </div>
               {matchingActions.map((action) => {
@@ -294,23 +294,23 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                     data-index={globalIdx}
                     onClick={() => action.action()}
                     onMouseEnter={() => setSelectedIndex(globalIdx)}
-                    className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                    className={`w-full min-h-[44px] flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-gradient-to-r from-cyan-950/80 to-blue-950/40 border border-cyan-500/40 text-white'
-                        : 'text-slate-300 hover:bg-slate-900/60'
+                        ? 'observatory-panel border border-sky-400/50 bg-sky-500/10 text-white ring-1 ring-sky-400/30'
+                        : 'observatory-control border border-transparent text-slate-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-slate-850 border border-slate-700/60 shrink-0">
+                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 shrink-0">
                         {action.icon}
                       </div>
                       <div>
                         <div className="text-xs sm:text-sm font-semibold">{action.title}</div>
-                        <div className="text-[10px] font-mono text-slate-500">{action.category}</div>
+                        <div className="text-[10px] font-mono text-slate-400">{action.category}</div>
                       </div>
                     </div>
                     {action.shortcut && (
-                      <kbd className="px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-400 font-mono text-[10px]">
+                      <kbd className="px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-slate-300 font-mono text-[10px]">
                         {action.shortcut}
                       </kbd>
                     )}
@@ -323,7 +323,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           {/* Stars Section */}
           {matchingStars.length > 0 && (
             <div className="pt-1.5">
-              <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400/80 font-bold">
+              <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-sky-400 font-bold">
                 Stars ({matchingStars.length})
               </div>
               {matchingStars.map((star) => {
@@ -340,14 +340,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                       onClose();
                     }}
                     onMouseEnter={() => setSelectedIndex(globalIdx)}
-                    className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                    className={`w-full min-h-[44px] flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-gradient-to-r from-cyan-950/80 to-blue-950/40 border border-cyan-500/40 text-white'
-                        : 'text-slate-300 hover:bg-slate-900/60'
+                        ? 'observatory-panel border border-sky-400/50 bg-sky-500/10 text-white ring-1 ring-sky-400/30'
+                        : 'observatory-control border border-transparent text-slate-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: star.colorHex }} />
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/20" style={{ backgroundColor: star.colorHex }} />
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="text-xs sm:text-sm font-bold flex items-center gap-2 min-w-0">
                           <RunningText
@@ -358,12 +358,12 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                             {star.constellation}
                           </span>
                         </div>
-                        <div className="text-[10px] font-mono text-slate-500 truncate">
+                        <div className="text-[10px] font-mono text-slate-400 truncate">
                           Class {star.spectralClass} • {star.diameterSolar} D☉ • {star.temperature} K
                         </div>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
                   </button>
                 );
               })}
@@ -372,21 +372,21 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
           {/* Empty State */}
           {allItems.length === 0 && (
-            <div className="py-12 text-center text-slate-500 font-mono text-xs">
+            <div className="py-12 text-center text-slate-400 font-mono text-xs">
               No celestial bodies or actions found matching "{query}".
             </div>
           )}
         </div>
 
         {/* Footer helper */}
-        <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+        <div className="px-4 py-2.5 bg-black/60 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
             <span className="text-slate-400">Click ✕ or press ⌘K to close</span>
           </div>
-          <div className="text-[10px] text-cyan-400 flex items-center gap-1">
-            <Zap className="w-3 h-3 text-cyan-400" />
+          <div className="text-[10px] text-sky-400 flex items-center gap-1 font-semibold">
+            <Zap className="w-3 h-3 text-sky-400" />
             Quick Command
           </div>
         </div>

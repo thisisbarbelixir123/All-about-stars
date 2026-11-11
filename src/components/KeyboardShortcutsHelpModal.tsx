@@ -45,14 +45,14 @@ export const KeyboardShortcutsHelpModal: React.FC<KeyboardShortcutsHelpModalProp
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
       <div
-        className="w-full max-w-lg rounded-2xl bg-[#030712] border border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden text-slate-100 p-6"
+        className="w-full max-w-lg rounded-2xl observatory-panel border border-white/10 overflow-hidden text-slate-100 p-5 sm:p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-sky-400">
               <Keyboard className="w-5 h-5" />
             </div>
             <div>
@@ -63,26 +63,27 @@ export const KeyboardShortcutsHelpModal: React.FC<KeyboardShortcutsHelpModalProp
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Close keyboard shortcuts"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-5 my-5 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-5 my-5 max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
           {shortcutGroups.map((group) => (
             <div key={group.title}>
-              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 mb-2">
+              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-400 mb-2">
                 {group.title}
               </div>
               <div className="space-y-1.5">
                 {group.shortcuts.map((sc) => (
                   <div
                     key={sc.key}
-                    className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 text-xs"
+                    className="flex items-center justify-between py-2 px-3 rounded-xl observatory-control border border-white/10 text-xs min-h-[44px]"
                   >
                     <span className="text-slate-300 font-sans">{sc.desc}</span>
-                    <kbd className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-300 font-mono text-[11px] font-semibold">
+                    <kbd className="px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-sky-300 font-mono text-[11px] font-semibold shadow-inner">
                       {sc.key}
                     </kbd>
                   </div>
@@ -92,11 +93,11 @@ export const KeyboardShortcutsHelpModal: React.FC<KeyboardShortcutsHelpModalProp
           ))}
         </div>
 
-        <div className="pt-3 border-t border-slate-800 flex justify-end">
+        <div className="pt-3 border-t border-white/10 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition-colors cursor-pointer font-mono"
+            className="min-h-[44px] px-5 py-2 rounded-xl observatory-control border border-white/10 hover:border-white/20 hover:bg-white/10 text-xs font-semibold text-white transition-colors cursor-pointer font-mono flex items-center justify-center"
           >
             Close [ESC]
           </button>

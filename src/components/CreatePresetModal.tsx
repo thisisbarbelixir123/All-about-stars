@@ -98,12 +98,12 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
     >
       <div
         id="modal-create-preset"
-        className="relative w-full max-w-2xl bg-[#040817] border border-cyan-500/30 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_30px_rgba(6,182,212,0.15)] flex flex-col max-h-[90vh] overflow-hidden"
+        className="relative w-full max-w-2xl observatory-panel border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-slate-100"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-cyan-500/20 bg-[#060c22]/80">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-black/40">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-sky-400">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -116,7 +116,8 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
           <button
             id="btn-close-create-preset-modal"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -124,12 +125,12 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
 
         {/* Content Form */}
         <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-hidden">
-          <div className="p-5 overflow-y-auto space-y-4 flex-1 scrollbar-thin">
+          <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 scrollbar-thin">
             {/* Title & Description Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/5 p-3.5 rounded-xl border border-white/10">
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 font-sans">
-                  Preset Title <span className="text-cyan-400">*</span>
+                  Preset Title <span className="text-sky-400">*</span>
                 </label>
                 <input
                   id="input-preset-title"
@@ -138,7 +139,7 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                   placeholder="e.g. My Favorite Supergiants"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#020512] border border-cyan-500/30 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-500"
                 />
               </div>
 
@@ -158,15 +159,15 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                   placeholder="e.g. Comparative lineup of massive O-stars (max 100 chars)"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value.slice(0, 100))}
-                  className="w-full bg-[#020512] border border-cyan-500/30 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-500"
                 />
               </div>
             </div>
 
             {/* Quick Actions Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-cyan-500/15">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-b border-white/10 pb-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-cyan-300 font-mono">
+                <span className="text-xs font-bold text-sky-300 font-mono">
                   {selectedStarIds.length} Stars Selected
                 </span>
                 {currentSelectedStars.length > 0 && (
@@ -174,9 +175,9 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                     type="button"
                     id="btn-use-current-stage-stars"
                     onClick={handleUseCurrentStage}
-                    className="px-2.5 py-1 text-[11px] rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/80 transition-all cursor-pointer flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 hover:bg-sky-500/20 transition-all cursor-pointer flex items-center gap-1.5 font-medium min-h-[36px]"
                   >
-                    <Sparkles className="w-3 h-3 text-cyan-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-sky-400" />
                     Load Active 3D Stage ({currentSelectedStars.length})
                   </button>
                 )}
@@ -187,7 +188,7 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                   type="button"
                   id="btn-select-all-filtered"
                   onClick={handleSelectAllFiltered}
-                  className="px-2.5 py-1 text-[11px] rounded-lg bg-[#071026] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all cursor-pointer"
+                  className="px-3 py-1.5 text-xs rounded-xl observatory-control border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition-all cursor-pointer font-medium min-h-[36px]"
                 >
                   Select All Shown
                 </button>
@@ -195,7 +196,7 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                   type="button"
                   id="btn-clear-preset-selection"
                   onClick={handleClearSelection}
-                  className="px-2.5 py-1 text-[11px] rounded-lg bg-[#071026] border border-slate-700 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 transition-all cursor-pointer"
+                  className="px-3 py-1.5 text-xs rounded-xl observatory-control border border-white/10 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 transition-all cursor-pointer font-medium min-h-[36px]"
                 >
                   Clear Selection
                 </button>
@@ -212,7 +213,7 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                   placeholder="Search by star name, constellation, spectral type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#020512] border border-cyan-500/20 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400"
                 />
               </div>
 
@@ -221,10 +222,10 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedClass('ALL')}
-                  className={`px-2 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition-all cursor-pointer min-h-[32px] ${
                     selectedClass === 'ALL'
-                      ? 'bg-cyan-500 text-slate-950 font-bold'
-                      : 'bg-[#030614] border border-cyan-500/20 text-slate-400 hover:text-white'
+                      ? 'bg-sky-400 text-slate-950 font-bold'
+                      : 'observatory-control border border-white/10 text-slate-400 hover:text-white'
                   }`}
                 >
                   All
@@ -234,10 +235,10 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                     key={sc.key}
                     type="button"
                     onClick={() => setSelectedClass(sc.key)}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition-all cursor-pointer min-h-[32px] ${
                       selectedClass === sc.key
-                        ? 'bg-cyan-500 text-slate-950 font-bold'
-                        : 'bg-[#030614] border border-cyan-500/20 text-slate-400 hover:text-white'
+                        ? 'bg-sky-400 text-slate-950 font-bold'
+                        : 'observatory-control border border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     {sc.key}
@@ -257,25 +258,24 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                     key={star.id}
                     id={`preset-star-item-${star.id}`}
                     onClick={() => handleToggleStar(star.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                    className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer select-none min-h-[44px] ${
                       isSelected
-                        ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.15)]'
-                        : 'bg-[#020512]/70 border-cyan-500/15 text-slate-300 hover:border-cyan-500/30 hover:bg-[#070e24]'
+                        ? 'bg-sky-500/10 border-sky-400/50 text-white'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 overflow-hidden pr-2">
-                      <div className="flex-shrink-0 text-cyan-400">
+                      <div className="flex-shrink-0 text-sky-400">
                         {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-cyan-400" />
+                          <CheckSquare className="w-4 h-4 text-sky-400" />
                         ) : (
                           <Square className="w-4 h-4 text-slate-500" />
                         )}
                       </div>
                       <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        className="w-3 h-3 rounded-full flex-shrink-0 border border-white/20"
                         style={{
                           backgroundColor: star.colorHex,
-                          boxShadow: `0 0 6px ${star.colorHex}`,
                         }}
                       />
                       <div className="min-w-0 flex-1 overflow-hidden">
@@ -290,7 +290,7 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
                     </div>
 
                     <div className="text-right flex-shrink-0">
-                      <div className="text-[10px] font-mono text-cyan-300">
+                      <div className="text-[10px] font-mono text-sky-300">
                         {sc.metricSi}
                       </div>
                       <div className="text-[9px] font-mono text-slate-400">
@@ -304,12 +304,12 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-cyan-500/20 bg-[#060c22]/90 flex items-center justify-between gap-3">
+          <div className="p-4 border-t border-white/10 bg-black/40 flex items-center justify-between gap-3">
             <button
               type="button"
               id="btn-cancel-create-preset"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+              className="px-4 py-2.5 rounded-xl observatory-control border border-white/10 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer min-h-[44px]"
             >
               Cancel
             </button>
@@ -318,10 +318,10 @@ export const CreatePresetModal: React.FC<CreatePresetModalProps> = ({
               type="submit"
               id="btn-save-custom-preset"
               disabled={!title.trim() || selectedStarIds.length === 0}
-              className={`px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer min-h-[44px] ${
                 !title.trim() || selectedStarIds.length === 0
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                  : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 hover:brightness-110 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                  : 'bg-sky-400 text-slate-950 hover:bg-sky-300'
               }`}
             >
               <Plus className="w-4 h-4" />
