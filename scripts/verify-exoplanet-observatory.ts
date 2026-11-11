@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-type Phase = 'tokens' | 'loading-formatters' | 'shortcuts' | 'hud' | 'safety' | 'all';
+type Phase = 'tokens' | 'loading-formatters' | 'shortcuts' | 'shortcuts-modal' | 'hud' | 'safety' | 'all';
 
 interface CheckResult {
   name: string;
@@ -258,6 +258,101 @@ async function checkLoadingFormattersPhase(): Promise<CheckResult[]> {
   return results;
 }
 
+function checkShortcutsModalPhase(): CheckResult[] {
+  const results: CheckResult[] = [];
+
+  const modalPath = path.join(ROOT_DIR, 'src', 'components', 'ExoplanetShortcutsModal.tsx');
+  const canvasPath = path.join(ROOT_DIR, 'src', 'components', 'ExoplanetCanvas3D.tsx');
+
+  // 1. ExoplanetShortcutsModal.tsx exists
+  if (!fs.existsSync(modalPath)) {
+    results.push({
+      name: 'src/components/ExoplanetShortcutsModal.tsx exists',
+      passed: false,
+      message: 'ExoplanetShortcutsModal.tsx not found',
+    });
+    return results;
+  }
+  results.push({
+    name: 'src/components/ExoplanetShortcutsModal.tsx exists',
+    passed: true,
+  });
+
+  const modalCode = fs.readFileSync(modalPath, 'utf-8');
+
+  // 2. Renders role="dialog" and aria-modal="true"
+  const hasDialogRole = modalCode.includes('role="dialog"');
+  const hasAriaModal = modalCode.includes('aria-modal="true"');
+  results.push({
+    name: 'ExoplanetShortcutsModal renders role="dialog" and aria-modal="true"',
+    passed: hasDialogRole && hasAriaModal,
+    message: !hasDialogRole ? 'missing role="dialog"' : !hasAriaModal ? 'missing aria-modal="true"' : undefined,
+  });
+
+  // 3. Uses observatory-panel and eliminates slop tokens
+  const hasObservatoryPanel = modalCode.includes('observatory-panel');
+  const hasSlopBg = modalCode.includes('bg-[#040816]');
+  const hasCyanBorder = /border-cyan-500/i.test(modalCode);
+  const hasGlowShadow = /shadow-\[0_0_/i.test(modalCode);
+  results.push({
+    name: 'ExoplanetShortcutsModal uses observatory-panel and removes cyan slop',
+    passed: hasObservatoryPanel && !hasSlopBg && !hasCyanBorder && !hasGlowShadow,
+    message: !hasObservatoryPanel
+      ? 'missing observatory-panel'
+      : hasSlopBg
+        ? 'still contains bg-[#040816]'
+        : hasCyanBorder
+          ? 'still contains border-cyan-500'
+          : hasGlowShadow
+            ? 'still contains cyan glow shadow'
+            : undefined,
+  });
+
+  // 4. Close button and dismiss button include min-h-11 (and close icon includes min-w-11)
+  const hasMinH11 = /min-h-11/i.test(modalCode);
+  const hasMinW11 = /min-w-11/i.test(modalCode);
+  results.push({
+    name: 'ExoplanetShortcutsModal buttons meet minimum 44px tap targets',
+    passed: hasMinH11 && hasMinW11,
+    message: !hasMinH11 ? 'missing min-h-11 on buttons' : !hasMinW11 ? 'missing min-w-11 on icon button' : undefined,
+  });
+
+  // 5. Zero em dashes
+  const hasEmDash = modalCode.includes('\u2014');
+  results.push({
+    name: 'ExoplanetShortcutsModal has zero em dashes',
+    passed: !hasEmDash,
+    message: hasEmDash ? 'contains em dash (U+2014)' : undefined,
+  });
+
+  // 6. ExoplanetCanvas3D renders <ExoplanetShortcutsModal
+  if (!fs.existsSync(canvasPath)) {
+    results.push({
+      name: 'ExoplanetCanvas3D renders ExoplanetShortcutsModal',
+      passed: false,
+      message: 'ExoplanetCanvas3D.tsx not found',
+    });
+  } else {
+    const canvasCode = fs.readFileSync(canvasPath, 'utf-8');
+    const importsModal = /import\s+.*ExoplanetShortcutsModal.*from/i.test(canvasCode);
+    const rendersModal = /<ExoplanetShortcutsModal/i.test(canvasCode);
+    const hasInlineShortcutsDialog = canvasCode.includes('aria-labelledby="stage-shortcuts-title"');
+    results.push({
+      name: 'ExoplanetCanvas3D renders ExoplanetShortcutsModal and removes inline modal JSX',
+      passed: importsModal && rendersModal && !hasInlineShortcutsDialog,
+      message: !importsModal
+        ? 'ExoplanetCanvas3D does not import ExoplanetShortcutsModal'
+        : !rendersModal
+          ? 'ExoplanetCanvas3D does not render <ExoplanetShortcutsModal'
+          : hasInlineShortcutsDialog
+            ? 'ExoplanetCanvas3D still contains inline shortcuts dialog JSX'
+            : undefined,
+    });
+  }
+
+  return results;
+}
+
 function parsePhaseArg(): Phase {
   const phaseArg = process.argv.find((arg) => arg.startsWith('--phase='));
   if (phaseArg) {
@@ -282,6 +377,10 @@ async function main() {
 
   if (phase === 'loading-formatters' || phase === 'all') {
     results.push(...(await checkLoadingFormattersPhase()));
+  }
+
+  if (phase === 'shortcuts' || phase === 'shortcuts-modal' || phase === 'all') {
+    results.push(...checkShortcutsModalPhase());
   }
 
   let failures = 0;

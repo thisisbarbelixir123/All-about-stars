@@ -41,6 +41,7 @@ import { deriveSudarskyClass, SUDARSKY_CLASS_INFO } from '../utils/exoplanetArch
 import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUtils';
 import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
 import { LoadingSprite } from './LoadingSprite';
+import { ExoplanetShortcutsModal } from './ExoplanetShortcutsModal';
 import {
   CelestialSortKey,
   SortDirection,
@@ -2607,129 +2608,10 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
       )}
 
       {/* Keyboard Shortcuts Modal */}
-      {showShortcutsHelp && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="stage-shortcuts-title"
-          className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150"
-          onClick={() => setShowShortcutsHelp(false)}
-        >
-          <div
-            className="bg-[#040816] border border-cyan-500/40 rounded-2xl max-w-lg w-full p-6 shadow-[0_0_50px_rgba(6,182,212,0.3)] text-slate-100 flex flex-col gap-4 pointer-events-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
-                  <Keyboard className="w-5 h-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 id="stage-shortcuts-title" className="text-base font-bold text-white font-sans">
-                    3D Stage Shortcuts
-                  </h3>
-                  <p className="text-xs text-slate-400 font-mono">Controls for navigating exoplanets & Solar System worlds</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Close shortcuts dialog"
-                onClick={() => setShowShortcutsHelp(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400"
-              >
-                <X className="w-5 h-5" aria-hidden="true" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono max-h-[60vh] overflow-y-auto pr-1">
-              <div className="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-cyan-500/15">
-                <div className="text-[11px] uppercase tracking-wider text-cyan-400 font-bold mb-1">Navigation</div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Step Prev / Next</span>
-                  <span className="text-cyan-300 font-bold">← / → or [ / ]</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">First / Last World</span>
-                  <span className="text-cyan-300 font-bold">1 / 9</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-amber-300 font-semibold">Unfocus Object</span>
-                  <span className="text-amber-300 font-bold">U</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-cyan-500/15">
-                <div className="text-[11px] uppercase tracking-wider text-cyan-400 font-bold mb-1">Camera & Stage</div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Zoom In / Out</span>
-                  <span className="text-cyan-300 font-bold">+ / −</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Reset View</span>
-                  <span className="text-cyan-300 font-bold">R</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Fit All</span>
-                  <span className="text-cyan-300 font-bold">A</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Toggle Fullscreen</span>
-                  <span className="text-cyan-300 font-bold">F</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Spiral / Linear Layout</span>
-                  <span className="text-cyan-300 font-bold">L</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-cyan-500/15">
-                <div className="text-[11px] uppercase tracking-wider text-cyan-400 font-bold mb-1">Tour & Scene</div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Toggle Tour</span>
-                  <span className="text-cyan-300 font-bold">T</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Tour Pace</span>
-                  <span className="text-cyan-300 font-bold">P</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Axial Spin</span>
-                  <span className="text-cyan-300 font-bold">S</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-amber-300 font-bold">Wireframe</span>
-                  <span className="text-amber-300 font-bold">W</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Floor Grid</span>
-                  <span className="text-cyan-300 font-bold">G</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 bg-slate-900/60 p-3 rounded-xl border border-cyan-500/15">
-                <div className="text-[11px] uppercase tracking-wider text-cyan-400 font-bold mb-1">Search & Controls</div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Search Worlds</span>
-                  <span className="text-cyan-300 font-bold">B</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Hide Controls</span>
-                  <span className="text-cyan-300 font-bold">H</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2 border-t border-cyan-500/20">
-              <button
-                onClick={() => setShowShortcutsHelp(false)}
-                className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold cursor-pointer"
-              >
-                Got It
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ExoplanetShortcutsModal
+        isOpen={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
+      />
     </div>
   );
 };
