@@ -6,6 +6,7 @@ export interface MultipleStarComponent {
   name: string; // e.g. 'Sirius A'
   bayerDesignation?: string; // e.g. 'α CMa A'
   spectralType: string; // e.g. 'A1V'
+  spectralClass?: string; // e.g. 'A'
   massSolar: number; // e.g. 2.06
   radiusSolar: number; // in Solar Radii
   temperature: number; // in Kelvin
