@@ -9,20 +9,21 @@ export const LoadingSprite: React.FC<LoadingSpriteProps> = ({
   label = 'INITIALIZING 3D STAGE...',
 }) => {
   return (
-    <div className="fixed inset-0 z-[100] w-screen h-screen flex flex-col items-center justify-center bg-[#02040c] select-none pointer-events-none transition-opacity duration-500">
-      <div className="relative flex items-center justify-center mb-5">
-        <div className="absolute w-20 h-20 rounded-full border border-cyan-500/20 animate-ping" />
-        <div className="w-14 h-14 rounded-full border-2 border-cyan-500/30 border-t-cyan-400 animate-spin flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.4)]">
-          <Loader2 className="w-6 h-6 text-cyan-300 animate-pulse" />
+    <div className="fixed inset-0 z-[100] w-screen h-screen flex flex-col items-center justify-center bg-[#02040c]/90 backdrop-blur-sm select-none pointer-events-none transition-opacity duration-500">
+      <div className="observatory-panel rounded-2xl p-6 flex flex-col items-center gap-4 max-w-sm mx-4 text-center">
+        <div className="relative flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full border border-white/10 border-t-sky-400 animate-spin flex items-center justify-center">
+            <Loader2 className="w-5 h-5 text-sky-400" />
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col items-center gap-1.5 font-mono text-center px-4">
-        <span className="text-xs font-bold text-cyan-300 tracking-[0.25em] uppercase">
-          {label}
-        </span>
-        <span className="text-[11px] text-slate-400">
-          Framing coordinate grid and planetary benchmarks
-        </span>
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="text-xs font-semibold tracking-wider text-slate-200 uppercase font-sans">
+            {label}
+          </span>
+          <span className="text-[11px] text-slate-400 font-sans">
+            Framing coordinate grid and planetary benchmarks
+          </span>
+        </div>
       </div>
     </div>
   );

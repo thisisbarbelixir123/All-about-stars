@@ -134,6 +134,130 @@ function checkTokensPhase(): CheckResult[] {
   return results;
 }
 
+async function checkLoadingFormattersPhase(): Promise<CheckResult[]> {
+  const results: CheckResult[] = [];
+
+  const loadingSpritePath = path.join(ROOT_DIR, 'src', 'components', 'LoadingSprite.tsx');
+  const formattersPath = path.join(ROOT_DIR, 'src', 'utils', 'exoplanetFormatters.ts');
+  const canvasPath = path.join(ROOT_DIR, 'src', 'components', 'ExoplanetCanvas3D.tsx');
+
+  // 1. LoadingSprite checks
+  if (!fs.existsSync(loadingSpritePath)) {
+    results.push({ name: 'LoadingSprite.tsx exists', passed: false, message: 'LoadingSprite.tsx not found' });
+  } else {
+    const code = fs.readFileSync(loadingSpritePath, 'utf-8');
+    const hasPing = code.includes('animate-ping');
+    const hasGlow = /shadow-\[0_0_/i.test(code);
+    const hasObservatoryPanel = code.includes('observatory-panel');
+    results.push({
+      name: 'LoadingSprite.tsx removes animate-ping and cyan glow shadows',
+      passed: !hasPing && !hasGlow,
+      message: hasPing
+        ? 'LoadingSprite.tsx still contains animate-ping'
+        : hasGlow
+          ? 'LoadingSprite.tsx still contains glow shadow'
+          : undefined,
+    });
+    results.push({
+      name: 'LoadingSprite.tsx uses observatory-panel container',
+      passed: hasObservatoryPanel,
+      message: hasObservatoryPanel ? undefined : 'LoadingSprite.tsx missing observatory-panel',
+    });
+  }
+
+  // 2. exoplanetFormatters.ts checks
+  if (!fs.existsSync(formattersPath)) {
+    results.push({
+      name: 'src/utils/exoplanetFormatters.ts exists',
+      passed: false,
+      message: 'src/utils/exoplanetFormatters.ts does not exist',
+    });
+  } else {
+    results.push({
+      name: 'src/utils/exoplanetFormatters.ts exists',
+      passed: true,
+    });
+
+    try {
+      const mod = await import('../src/utils/exoplanetFormatters.ts');
+      const hasInferColor = typeof mod.inferBodyColor === 'function';
+      const hasFormatMass = typeof mod.formatCompactBodyMass === 'function';
+      const hasGetTourMetric = typeof mod.getTourMetricDisplay === 'function';
+
+      results.push({
+        name: 'exoplanetFormatters exports required functions',
+        passed: hasInferColor && hasFormatMass && hasGetTourMetric,
+        message: !hasInferColor
+          ? 'missing inferBodyColor'
+          : !hasFormatMass
+            ? 'missing formatCompactBodyMass'
+            : !hasGetTourMetric
+              ? 'missing getTourMetricDisplay'
+              : undefined,
+      });
+
+      if (hasInferColor) {
+        const earthColor = mod.inferBodyColor({ name: 'Earth', classification: 'Terran' } as any);
+        results.push({
+          name: 'inferBodyColor resolves Earth to #38bdf8',
+          passed: earthColor === '#38bdf8',
+          message: earthColor !== '#38bdf8' ? `Expected #38bdf8 but got ${earthColor}` : undefined,
+        });
+      }
+
+      if (hasFormatMass) {
+        const unknownMass = mod.formatCompactBodyMass({ massEarth: 0 } as any);
+        results.push({
+          name: 'formatCompactBodyMass returns Unknown Mass for 0 mass',
+          passed: unknownMass === 'Unknown Mass',
+          message: unknownMass !== 'Unknown Mass' ? `Expected "Unknown Mass" but got "${unknownMass}"` : undefined,
+        });
+      }
+
+      if (hasGetTourMetric) {
+        const metric = mod.getTourMetricDisplay(
+          { diameterEarth: 1.0, diameterJupiter: 0.089, diameterKm: 12742, classification: 'Terran' } as any,
+          'size'
+        );
+        results.push({
+          name: 'getTourMetricDisplay formats size metric for Earth',
+          passed: metric && metric.primary === '1.00 D⊕',
+          message: metric?.primary !== '1.00 D⊕' ? `Expected "1.00 D⊕" but got "${metric?.primary}"` : undefined,
+        });
+      }
+    } catch (err: any) {
+      results.push({
+        name: 'exoplanetFormatters imports and runs tests cleanly',
+        passed: false,
+        message: err.message,
+      });
+    }
+  }
+
+  // 3. ExoplanetCanvas3D imports formatters
+  if (!fs.existsSync(canvasPath)) {
+    results.push({ name: 'ExoplanetCanvas3D.tsx exists', passed: false, message: 'ExoplanetCanvas3D.tsx not found' });
+  } else {
+    const canvasCode = fs.readFileSync(canvasPath, 'utf-8');
+    const importsFormatters = /from\s+['"][^'"]*exoplanetFormatters['"]/i.test(canvasCode);
+    const hasInlineInfer = /function\s+inferBodyColor\s*\(/i.test(canvasCode);
+    const hasInlineMass = /function\s+formatCompactBodyMass\s*\(/i.test(canvasCode);
+    results.push({
+      name: 'ExoplanetCanvas3D.tsx imports extracted formatters and eliminates inline duplicates',
+      passed: importsFormatters && !hasInlineInfer && !hasInlineMass,
+      message: !importsFormatters
+        ? 'ExoplanetCanvas3D.tsx does not import from exoplanetFormatters'
+        : hasInlineInfer
+          ? 'ExoplanetCanvas3D.tsx still contains inline inferBodyColor'
+          : hasInlineMass
+            ? 'ExoplanetCanvas3D.tsx still contains inline formatCompactBodyMass'
+            : undefined,
+    });
+  }
+
+  return results;
+}
+
 function parsePhaseArg(): Phase {
   const phaseArg = process.argv.find((arg) => arg.startsWith('--phase='));
   if (phaseArg) {
@@ -146,7 +270,7 @@ function parsePhaseArg(): Phase {
   return 'tokens';
 }
 
-function main() {
+async function main() {
   const phase = parsePhaseArg();
   console.log(`Running Exoplanet Observatory verification for phase: [${phase}]`);
 
@@ -154,6 +278,10 @@ function main() {
 
   if (phase === 'tokens' || phase === 'all') {
     results.push(...checkTokensPhase());
+  }
+
+  if (phase === 'loading-formatters' || phase === 'all') {
+    results.push(...(await checkLoadingFormattersPhase()));
   }
 
   let failures = 0;
