@@ -1,32 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as THREE from 'three';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Keyboard,
-  X,
-  ArrowUpDown,
-  Check,
-  Grid,
-  Telescope,
-  RotateCcw,
-  RotateCw,
-  Layers,
-  Eye,
-  EyeOff,
-  Play,
-  Pause,
-  Clock,
-  Search,
-  Square,
-  Sliders,
-  Maximize2,
-  Minimize2,
-  Orbit,
-  MoveHorizontal,
-} from 'lucide-react';
-import { CelestialBody, TourLength, CelestialClassification } from '../types';
+import { CelestialBody, TourLength } from '../types';
 import { MASTER_CELESTIAL_BY_ID } from '../data/masterCelestialCatalog';
 import { createContinuousGridMesh, ContinuousGridHandle } from '../utils/continuousGrid';
 import { soundEffects } from '../utils/soundEffects';
@@ -42,12 +16,12 @@ import { STAR_VERTEX_SHADER, STAR_FRAGMENT_SHADER } from '../utils/starShaderUti
 import { getBodyGeometryConfig, createIrregularBodyGeometry } from '../utils/celestialGeometry';
 import { LoadingSprite } from './LoadingSprite';
 import { ExoplanetShortcutsModal } from './ExoplanetShortcutsModal';
+import { ExoplanetStageHud } from './ExoplanetStageHud';
+import { useObsStudio } from '../hooks/useObsStudio';
 import {
   CelestialSortKey,
   SortDirection,
   inferBodyColor,
-  formatCompactBodyMass,
-  getTourMetricDisplay,
 } from '../utils/exoplanetFormatters';
 
 export type { CelestialSortKey, SortDirection };
@@ -166,7 +140,7 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
   const [isSceneReady, setIsSceneReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
   const bodyObjectsRef = useRef<Map<string, THREE.Group>>(new Map());
-  const labelElementsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const labelElementsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const animFrameIdRef = useRef<number | null>(null);
   const continuousGridRef = useRef<ContinuousGridHandle | null>(null);
   const sharedTimeUniformRef = useRef<{ value: number }>({ value: 0 });
@@ -1438,6 +1412,23 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
     isTourPlayingRef.current = true;
   }, [sortedBodies, handleSelect]);
 
+  // OBS Studio integration: auto-hide toolbars and handle broadcast recording triggers
+  const obsIntegration = useObsStudio({
+    onTourStartRequested: (pace) => {
+      if (pace) setTourLength(pace);
+      handleRestartTour();
+    },
+    onTourStopRequested: () => {
+      if (isTourModeRef.current) handleEndTour();
+    },
+  });
+
+  useEffect(() => {
+    if (obsIntegration.config.cleanBroadcast) {
+      setAreControlsHidden(true);
+    }
+  }, [obsIntegration.config.cleanBroadcast]);
+
   // Auto Tour playback effect
   useEffect(() => {
     if (!isTourPlaying || sortedBodies.length === 0) return;
@@ -1563,1049 +1554,105 @@ export const ExoplanetCanvas3D: React.FC<ExoplanetCanvas3DProps> = ({
         <LoadingSprite label="INITIALIZING EXOPLANET COMPARATOR..." />
       )}
 
-      {loadProgress && !webglError && (() => {
-        const pct = Math.min(100, Math.round((loadProgress.loaded / Math.max(1, loadProgress.total)) * 100));
-        return (
-          <div
-            role="progressbar"
-            aria-label="Loading celestial objects"
-            aria-valuemin={0}
-            aria-valuemax={loadProgress.total}
-            aria-valuenow={loadProgress.loaded}
-            className="absolute inset-x-0 bottom-28 z-20 flex justify-center px-4 pointer-events-none"
-          >
-            <div className="w-full max-w-sm rounded-xl border border-slate-700 bg-slate-900/95 px-4 py-3 text-slate-100">
-              <div className="flex items-center justify-between gap-3 text-xs font-mono tabular-nums">
-                <span className="text-slate-200">
-                  Loading {loadProgress.loaded.toLocaleString()} / {loadProgress.total.toLocaleString()} objects...
-                </span>
-                <span className="font-semibold text-cyan-300">{pct}%</span>
-              </div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-md bg-slate-800">
-                <div
-                  className="h-full bg-cyan-400 transition-[width] duration-75 ease-out motion-reduce:transition-none"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {webglError && (
-        <div
-          role="alert"
-          className="absolute inset-0 z-20 flex items-center justify-center p-6 pointer-events-auto bg-slate-950/90"
-        >
-          <div className="max-w-md rounded-xl border border-slate-700 bg-slate-900 p-5 text-slate-100">
-            <h2 className="text-base font-semibold text-cyan-300">3D Viewport Unavailable</h2>
-            <p className="mt-2 text-sm text-slate-200">{webglError}</p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="mt-4 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 cursor-pointer"
-            >
-              Reload Viewport
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Floating 3D Pill Label above focused/hovered body (matching StarCanvas3D) */}
-      {!isTourMode && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
-          {displayBody && (() => {
-            const body = displayBody;
-            const isSelected = body.id === activeBodyId;
-            const color = inferBodyColor(body);
-            const sudarsky = deriveSudarskyClass(body);
-            return (
-              <button
-                type="button"
-                key={body.id}
-                id={`label-body-${body.id}`}
-                ref={(el) => {
-                  if (el) labelElementsRef.current.set(body.id, el);
-                  else labelElementsRef.current.delete(body.id);
-                }}
-                style={{ opacity: 0, willChange: 'transform, opacity' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelect(body);
-                }}
-                onMouseEnter={() => setHoveredBody(body)}
-                onMouseLeave={() => setHoveredBody(null)}
-                className="absolute top-0 left-0 pointer-events-auto cursor-pointer flex flex-col items-center group transition-opacity duration-150 ease-out bg-transparent border-0 p-0 focus-visible:outline-2 focus-visible:outline-cyan-400"
-              >
-                <div
-                  id={`bubble-label-${body.id}`}
-                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border text-xs shadow-xl transition-all select-none whitespace-nowrap active:scale-95 ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 border-cyan-300 text-white font-bold shadow-[0_0_20px_rgba(6,182,212,0.6)] ring-2 ring-cyan-400/80'
-                      : 'bg-[#040816]/95 hover:bg-[#0c1636] border-cyan-400/80 text-white font-semibold backdrop-blur-xl shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                  }`}
-                >
-                  {/* Color Dot with Ping Animation */}
-                  <span
-                    className="w-2.5 h-2.5 rounded-full aspect-square shrink-0 relative flex items-center justify-center"
-                    style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }}
-                  >
-                    {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping opacity-90" />}
-                  </span>
-
-                  {/* Body Name */}
-                  <span className="font-extrabold tracking-tight text-white max-w-[200px] truncate leading-normal">
-                    {body.name}
-                  </span>
-
-                  {/* Classification Badge */}
-                  <span className="text-[10px] bg-slate-950/90 text-cyan-300 font-mono px-1.5 py-0.5 rounded border border-cyan-400/40 shrink-0 font-semibold">
-                    {body.classification}
-                  </span>
-
-                  {sudarsky && (
-                    <span
-                      title={`${SUDARSKY_CLASS_INFO[sudarsky].fullLabel}: ${SUDARSKY_CLASS_INFO[sudarsky].cloudDeck}`}
-                      className="text-[10px] bg-slate-950/90 text-amber-200 font-mono px-1.5 py-0.5 rounded border border-amber-400/40 shrink-0 font-semibold"
-                    >
-                      <span className="sm:hidden">{sudarsky}</span>
-                      <span className="hidden sm:inline">Sudarsky {sudarsky}</span>
-                    </span>
-                  )}
-
-                  {/* Multiplier Metric */}
-                  <span className="text-[10px] text-cyan-200/90 font-mono shrink-0 hidden xs:inline">
-                    {body.diameterEarth >= 1.0
-                      ? `${body.diameterEarth.toFixed(2)} D⊕`
-                      : `${Math.round(body.diameterKm).toLocaleString()} km`}
-                  </span>
-
-                  {/* Downward pointer caret */}
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-[6px] border-t-cyan-500 group-data-[near-top=true]:hidden" />
-                  {/* Upward pointer caret */}
-                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-b-[6px] border-b-cyan-500 hidden group-data-[near-top=true]:block" />
-                </div>
-              </button>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* Top Floating Control Bar */}
-      {!areControlsHidden && !isTourMode && (
-        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-30">
-          {/* Top-Left: Sort & Auto Tour */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pointer-events-auto">
-            {/* Sort Toggle & Dropdown */}
-            <div className="relative pointer-events-auto" ref={sortMenuRef}>
-              <div className="flex items-center bg-[#040816]/90 backdrop-blur-xl rounded-xl border border-cyan-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-xs font-mono overflow-hidden">
-                <button
-                  id="btn-sort-cycle"
-                  onClick={() => {
-                    const keys: CelestialSortKey[] = ['size', 'mass', 'temperature', 'discoveryYear'];
-                    const idx = keys.indexOf(sortKey);
-                    setSortKey(keys[(idx + 1) % keys.length]);
-                  }}
-                  title="Click to cycle sort metric"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-all cursor-pointer select-none"
-                >
-                  <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="text-slate-400 hidden sm:inline">Sort:</span>
-                  <span className="text-cyan-300 font-bold capitalize">
-                    {sortKey === 'discoveryYear' ? 'Discovery' : sortKey}
-                  </span>
-                </button>
-
-                <div className="w-[1px] h-4 bg-cyan-500/20" />
-
-                <button
-                  id="btn-sort-direction"
-                  onClick={() => setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))}
-                  title={`Currently ${sortDirection === 'asc' ? 'Ascending' : 'Descending'}`}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-all cursor-pointer select-none"
-                >
-                  <span className="text-[11px] font-semibold text-cyan-400">
-                    {sortDirection === 'asc' ? 'Asc ↑' : 'Desc ↓'}
-                  </span>
-                </button>
-
-                <div className="w-[1px] h-4 bg-cyan-500/20" />
-
-                <button
-                  id="btn-sort-menu-trigger"
-                  onClick={() => setIsSortMenuOpen((prev) => !prev)}
-                  title="Open Sort Menu"
-                  className={`px-1.5 py-1.5 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer ${
-                    isSortMenuOpen ? 'text-cyan-300 bg-cyan-500/20' : ''
-                  }`}
-                >
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSortMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-
-              {isSortMenuOpen && (
-                <div className="absolute left-0 top-full mt-2 w-56 bg-[#040817] border border-cyan-500/40 rounded-xl shadow-2xl p-2 z-50 backdrop-blur-xl font-mono text-xs flex flex-col gap-1">
-                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20">
-                    Sort Metric
-                  </div>
-                  {[
-                    { key: 'size', label: 'Size', desc: 'Diameter (km / D⊕)' },
-                    { key: 'mass', label: 'Mass', desc: 'Planetary mass (M⊕ / M♃)' },
-                    { key: 'temperature', label: 'Temperature', desc: 'Equilibrium temp (K)' },
-                    { key: 'discoveryYear', label: 'Discovery Year', desc: 'Year of discovery' },
-                  ].map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() => {
-                        setSortKey(item.key as CelestialSortKey);
-                        setIsSortMenuOpen(false);
-                      }}
-                      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-all ${
-                        sortKey === item.key
-                          ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30'
-                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="font-semibold">{item.label}</div>
-                        <div className="text-[9px] text-slate-500">{item.desc}</div>
-                      </div>
-                      {sortKey === item.key && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Auto Tour & Pace Controls */}
-            <div className="flex items-center gap-1 sm:gap-1.5 pointer-events-auto">
-              <button
-                id="btn-auto-tour"
-                onClick={handleToggleTour}
-                title={isTourPlaying ? 'Pause Auto Tour (T)' : 'Play Auto Tour (T)'}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl backdrop-blur-xl border text-xs font-mono font-semibold transition-all cursor-pointer shadow-lg active:scale-95 ${
-                  isTourPlaying
-                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 animate-pulse'
-                    : 'bg-[#040816]/90 border-cyan-500/30 text-slate-300 hover:text-white hover:bg-cyan-500/20'
-                }`}
-              >
-                {isTourPlaying ? (
-                  <Pause className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                ) : (
-                  <Play className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                )}
-                <span>{isTourPlaying ? 'Playing' : 'Auto Tour'}</span>
-              </button>
-
-              <div className="relative pointer-events-auto" ref={tourPaceMenuRef}>
-                <button
-                  id="btn-tour-pace"
-                  onClick={() => setIsTourPaceMenuOpen((prev) => !prev)}
-                  title="Tour Pace (P)"
-                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl backdrop-blur-xl border border-cyan-500/30 bg-[#040816]/90 text-slate-300 hover:text-white text-xs font-mono active:scale-95 cursor-pointer shadow-lg"
-                >
-                  <Clock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="text-slate-400 hidden sm:inline">Pace:</span>
-                  <span className="text-cyan-300 font-bold capitalize">{tourLength}</span>
-                  <ChevronDown className="w-3 h-3 text-cyan-400 shrink-0" />
-                </button>
-
-                {isTourPaceMenuOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-36 bg-[#040817] border border-cyan-500/40 rounded-xl shadow-2xl p-1.5 z-50 backdrop-blur-xl font-mono text-xs flex flex-col gap-1">
-                    {(['short', 'medium', 'long'] as const).map((len) => (
-                      <button
-                        key={len}
-                        onClick={() => {
-                          setTourLength(len);
-                          setIsTourPaceMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-left capitalize ${
-                          tourLength === len
-                            ? 'text-cyan-300 font-bold bg-cyan-950/80'
-                            : 'text-slate-300 hover:bg-white/5'
-                        }`}
-                      >
-                        <span>{len}</span>
-                        {tourLength === len && <Check className="w-3 h-3 text-cyan-400" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Top-Right: Zoom, Unfocus/Reset, Fit All, More..., Shortcuts, Minimize */}
-          <div className="flex items-center gap-1 sm:gap-1.5 bg-[#040816]/90 backdrop-blur-xl p-1 sm:p-1.5 rounded-xl border border-cyan-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.5)] pointer-events-auto">
-            {isTopPanelMinimized ? (
-              <button
-                id="btn-top-maximize"
-                onClick={() => setIsTopPanelMinimized(false)}
-                title="Stage Controls"
-                className="px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
-              >
-                <Sliders className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Stage Controls</span>
-              </button>
-            ) : (
-              <>
-                {/* Zoom In & Out */}
-                <button
-                  id="btn-zoom-in"
-                  onClick={() => handleZoom('in')}
-                  title="Zoom In (+)"
-                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 font-bold text-sm transition-colors cursor-pointer active:scale-95"
-                >
-                  +
-                </button>
-                <button
-                  id="btn-zoom-out"
-                  onClick={() => handleZoom('out')}
-                  title="Zoom Out (−)"
-                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 font-bold text-sm transition-colors cursor-pointer active:scale-95"
-                >
-                  −
-                </button>
-
-                {/* Focus / Unfocus / Reset */}
-                {activeFocusedBody ? (
-                  <button
-                    id="btn-unfocus"
-                    onClick={handleUnfocus}
-                    title="Unfocus Object (U)"
-                    className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 border border-amber-500/40 text-amber-300 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
-                  >
-                    <X className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden sm:inline">Unfocus</span>
-                  </button>
-                ) : (
-                  <button
-                    id="btn-reset-cam"
-                    onClick={handleResetCamera}
-                    title="Reset Camera (R)"
-                    className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden sm:inline">Reset</span>
-                  </button>
-                )}
-
-                {/* Fit All */}
-                <button
-                  id="btn-fit-all"
-                  onClick={handleFitAll}
-                  title="Fit All Objects (A)"
-                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-mono font-medium transition-all cursor-pointer shadow-sm active:scale-95"
-                >
-                  <Telescope className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
-                  <span className="hidden sm:inline">Fit All</span>
-                </button>
-
-                {/* Spiral / Linear Layout Mode Toggle (matching StarCanvas3D) */}
-                <div className="relative pointer-events-auto" ref={layoutMenuRef}>
-                  <div
-                    className={`flex items-center rounded-lg border text-xs font-mono font-semibold transition-all shadow-sm ${
-                      layoutMode === 'spiral'
-                        ? 'bg-purple-950/80 border-purple-500/50 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
-                        : 'bg-emerald-950/80 border-emerald-400/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                    }`}
-                  >
-                    <button
-                      id="btn-toggle-layout"
-                      onClick={() => {
-                        setLayoutMode((m) => (m === 'linear' ? 'spiral' : 'linear'));
-                        soundEffects.play('toggleOn');
-                      }}
-                      title={`Stage Layout: ${layoutMode === 'spiral' ? 'Spiral Mode (L)' : 'Linear Mode (L)'}. Click to toggle.`}
-                      className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-l-lg select-none"
-                    >
-                      {layoutMode === 'spiral' ? (
-                        <Orbit className="w-3.5 h-3.5 shrink-0 text-purple-400 animate-spin-slow" />
-                      ) : (
-                        <MoveHorizontal className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                      )}
-                      <span className="hidden sm:inline">
-                        {layoutMode === 'spiral' ? 'Spiral' : 'Linear'}
-                      </span>
-                    </button>
-
-                    <div className="w-[1px] h-4 bg-white/20" />
-
-                    <button
-                      id="btn-layout-menu-trigger"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsLayoutMenuOpen((prev) => !prev);
-                      }}
-                      title="Select Layout Mode (Spiral / Linear)"
-                      className="px-1.5 py-1.5 hover:bg-white/10 active:scale-95 transition-all cursor-pointer rounded-r-lg"
-                    >
-                      <ChevronDown
-                        className={`w-3 h-3 transition-transform duration-200 ${
-                          isLayoutMenuOpen ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {isLayoutMenuOpen && (
-                    <div
-                      id="menu-layout-mode-dropdown"
-                      className="absolute right-0 top-full mt-2 w-44 bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.95),0_0_20px_rgba(6,182,212,0.25)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl font-mono text-xs flex flex-col gap-1"
-                    >
-                      <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20 pb-1 mb-1">
-                        Catalog Layout
-                      </div>
-                      {(['spiral', 'linear'] as const).map((mode) => {
-                        const isActive = layoutMode === mode;
-                        return (
-                          <button
-                            key={mode}
-                            id={`btn-layout-option-${mode}`}
-                            onClick={() => {
-                              setLayoutMode(mode);
-                              setIsLayoutMenuOpen(false);
-                              soundEffects.play('toggleOn');
-                            }}
-                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                              isActive
-                                ? mode === 'spiral'
-                                  ? 'bg-purple-950/80 text-purple-300 font-bold border border-purple-500/30'
-                                  : 'bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-500/30'
-                                : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                            }`}
-                          >
-                            <span className="flex items-center gap-2">
-                              {mode === 'spiral' ? (
-                                <Orbit
-                                  className={`w-3.5 h-3.5 ${
-                                    isActive ? 'text-purple-400' : 'text-slate-400'
-                                  }`}
-                                />
-                              ) : (
-                                <MoveHorizontal
-                                  className={`w-3.5 h-3.5 ${
-                                    isActive ? 'text-emerald-400' : 'text-slate-400'
-                                  }`}
-                                />
-                              )}
-                              <span>{mode === 'spiral' ? 'Spiral Mode' : 'Linear Mode'}</span>
-                            </span>
-                            {isActive && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="h-4 w-[1px] bg-cyan-500/20 mx-0.5" />
-
-                {/* More... Menu for Spin, Wireframe, Floor Grid */}
-                <div className="relative" ref={togglesMenuRef}>
-                  <button
-                    id="btn-more-menu"
-                    onClick={() => setIsTogglesMenuOpen((prev) => !prev)}
-                    title="More Scene Options"
-                    className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer select-none active:scale-95 ${
-                      isAutoRotating || wireframe || showGrid
-                        ? 'bg-cyan-950/80 border-cyan-400/50 text-cyan-300 shadow-sm'
-                        : 'border-cyan-500/20 text-slate-300 hover:text-white hover:bg-cyan-500/20'
-                    }`}
-                  >
-                    <span>More...</span>
-                    <ChevronDown
-                      className={`w-3 h-3 text-cyan-400 transition-transform ${isTogglesMenuOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-
-                  {isTogglesMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#040817]/98 border border-cyan-500/40 rounded-xl shadow-2xl p-2 z-50 backdrop-blur-xl font-mono text-xs flex flex-col gap-1">
-                      <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-cyan-500/20">
-                        Scene Toggles
-                      </div>
-
-                      <button
-                        onClick={() => setIsAutoRotating((prev) => !prev)}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all ${
-                          isAutoRotating ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <RotateCw className={`w-3.5 h-3.5 ${isAutoRotating ? 'text-cyan-400 animate-spin-slow' : 'text-slate-400'}`} />
-                          <span>Spin Worlds</span>
-                        </span>
-                        {isAutoRotating && <Check className="w-3.5 h-3.5 text-cyan-400" />}
-                      </button>
-
-                      <button
-                        onClick={() => setWireframe((prev) => !prev)}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all ${
-                          wireframe ? 'bg-amber-950/80 text-amber-300 font-bold border border-amber-500/30' : 'text-slate-300 hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <Layers className={`w-3.5 h-3.5 ${wireframe ? 'text-amber-400' : 'text-slate-400'}`} />
-                          <span>Wireframe</span>
-                        </span>
-                        {wireframe && <Check className="w-3.5 h-3.5 text-amber-400" />}
-                      </button>
-
-                      <button
-                        onClick={() => setShowGrid((prev) => !prev)}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all ${
-                          showGrid ? 'bg-cyan-950/80 text-cyan-300 font-bold border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <Grid className={`w-3.5 h-3.5 ${showGrid ? 'text-cyan-400' : 'text-slate-400'}`} />
-                          <span>Floor Grid</span>
-                        </span>
-                        {showGrid && <Check className="w-3.5 h-3.5 text-cyan-400" />}
-                      </button>
-
-                      <div className="border-t border-cyan-500/20 my-1" />
-
-                      <button
-                        onClick={() => {
-                          setLayoutMode((m) => (m === 'linear' ? 'spiral' : 'linear'));
-                          setIsTogglesMenuOpen(false);
-                          soundEffects.play('toggleOn');
-                        }}
-                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all text-slate-300 hover:bg-white/5 cursor-pointer"
-                      >
-                        <span className="flex items-center gap-2">
-                          {layoutMode === 'spiral' ? (
-                            <Orbit className="w-3.5 h-3.5 text-purple-400" />
-                          ) : (
-                            <MoveHorizontal className="w-3.5 h-3.5 text-emerald-400" />
-                          )}
-                          <span>Layout: {layoutMode === 'spiral' ? 'Spiral' : 'Linear'}</span>
-                        </span>
-                        <span className="text-[10px] text-cyan-400 font-bold uppercase">Toggle (L)</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Keyboard Shortcuts */}
-                <button
-                  id="btn-shortcuts"
-                  onClick={() => setShowShortcutsHelp(true)}
-                  title="Keyboard Shortcuts (?)"
-                  className="hidden lg:flex px-2 py-1 rounded-lg text-xs font-mono text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition-colors cursor-pointer items-center gap-1.5"
-                >
-                  <Keyboard className="w-3.5 h-3.5" />
-                  <span>Shortcuts</span>
-                </button>
-
-                {/* Fullscreen Toggle Button */}
-                <button
-                  id="btn-fullscreen-top"
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
-                  className="px-2 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer flex items-center gap-1 active:scale-95"
-                >
-                  {isFullscreen ? (
-                    <Minimize2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  ) : (
-                    <Maximize2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  )}
-                  <span className="hidden sm:inline">{isFullscreen ? 'Exit' : 'Full'}</span>
-                </button>
-
-                {/* Minimize Button */}
-                <button
-                  id="btn-minimize-panel"
-                  onClick={() => setIsTopPanelMinimized(true)}
-                  title="Minimize Panel"
-                  className="px-2 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer flex items-center gap-1 active:scale-95"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="hidden sm:inline">Minimize</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Floating Control Caliper & Interactive Filmstrip */}
-      {!isTourMode && (
-        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 sm:gap-3 pointer-events-none z-20">
-          {/* Focused Body Info Strip (matching StarCanvas3D #stage-focused-star-strip, minus Dossier) */}
-          {activeFocusedBody && (() => {
-            const focusedSudarsky = deriveSudarskyClass(activeFocusedBody);
-            const focusedSudarskyMeta = focusedSudarsky ? SUDARSKY_CLASS_INFO[focusedSudarsky] : undefined;
-            return (
-            <div
-              id="stage-focused-star-strip"
-              className="flex items-center justify-between gap-2 sm:gap-3 bg-[#040816]/95 backdrop-blur-2xl px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-cyan-500/40 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all pointer-events-auto w-full"
-            >
-              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 overflow-hidden">
-                <span
-                  className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full aspect-square shrink-0 shadow-md ring-1 ring-white/30"
-                  style={{
-                    backgroundColor: inferBodyColor(activeFocusedBody),
-                    boxShadow: `0 0 10px ${inferBodyColor(activeFocusedBody)}`,
-                  }}
-                />
-
-                <div className="flex items-center gap-x-1.5 sm:gap-x-2 text-xs font-mono min-w-0 flex-1 overflow-hidden">
-                  <span className="font-bold text-white flex items-center gap-1.5 min-w-0 shrink truncate">
-                    <span className="text-cyan-300 font-bold truncate">{activeFocusedBody.name}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 font-mono border border-cyan-500/30 shrink-0">
-                      {activeFocusedBody.classification}
-                    </span>
-                    {focusedSudarskyMeta && (
-                      <span
-                        title={`${focusedSudarskyMeta.fullLabel}: ${focusedSudarskyMeta.cloudDeck} (${focusedSudarskyMeta.tempRangeLabel})`}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-slate-950/90 text-amber-200 font-mono border border-amber-400/35 shrink-0"
-                      >
-                        <span className="sm:hidden">{focusedSudarskyMeta.sudarskyClass}</span>
-                        <span className="hidden sm:inline xl:hidden">{focusedSudarskyMeta.fullLabel}</span>
-                        <span className="hidden xl:inline">
-                          {focusedSudarskyMeta.fullLabel} ({focusedSudarskyMeta.cloudDeck})
-                        </span>
-                      </span>
-                    )}
-                  </span>
-
-                  <span className="text-slate-300 shrink-0">
-                    {activeFocusedBody.diameterEarth >= 1.0
-                      ? `${activeFocusedBody.diameterEarth.toFixed(2)} D⊕`
-                      : `${activeFocusedBody.diameterEarth.toFixed(3)} D⊕`}
-                  </span>
-
-                  <span className="hidden sm:inline text-slate-400 shrink-0">
-                    ({Math.round(activeFocusedBody.diameterKm).toLocaleString()} km)
-                  </span>
-
-                  {activeFocusedBody.temperatureK && activeFocusedBody.temperatureK > 0 && (
-                    <>
-                      <span className="hidden md:inline text-slate-500 shrink-0">•</span>
-                      <span className="hidden md:inline text-slate-300 shrink-0">
-                        {activeFocusedBody.temperatureK} K
-                      </span>
-                    </>
-                  )}
-
-                  <span className="hidden lg:inline text-slate-500 shrink-0">•</span>
-                  <span className="hidden lg:inline text-slate-400 shrink-0 truncate">
-                    {activeFocusedBody.hostSystem}
-                  </span>
-                </div>
-              </div>
-
-              {/* Unfocus button (No Dossier) */}
-              <button
-                id="btn-preview-unfocus"
-                onClick={handleUnfocus}
-                className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 shrink-0"
-                title="Unfocus Object (U)"
-              >
-                <X className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden md:inline">Unfocus</span>
-              </button>
-            </div>
-            );
-          })()}
-
-          {/* Filmstrip & Navigator */}
-          <div className="flex flex-col gap-2 pointer-events-auto">
-            {/* Horizontal Search Strip */}
-            {!areControlsHidden && isSearchActive && (
-              <div className="flex items-center gap-2 max-w-full overflow-x-auto pb-1.5 scrollbar-thin animate-in fade-in duration-200">
-                {filteredBodies.length > 0 ? (
-                  filteredBodies.map((body) => {
-                    const originalIdx = sortedBodies.findIndex((b) => b.id === body.id);
-                    const isSelected = body.id === activeBodyId;
-                    const color = inferBodyColor(body);
-                    const itemSudarsky = deriveSudarskyClass(body);
-                    return (
-                      <button
-                        key={body.id}
-                        onClick={() => handleSelect(body)}
-                        className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl backdrop-blur-xl border text-left transition-all shrink-0 cursor-pointer ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-cyan-950/95 to-blue-950/95 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400 scale-105 font-bold'
-                            : 'bg-[#040816]/85 border-cyan-500/20 text-slate-300 hover:border-cyan-500/40 hover:bg-[#0c142e]'
-                        }`}
-                      >
-                        <span
-                          className="w-2.5 h-2.5 rounded-full aspect-square shrink-0"
-                          style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
-                        />
-                        <div>
-                          <div className="text-xs font-semibold leading-tight group-hover:text-cyan-300 whitespace-nowrap flex items-center gap-1.5">
-                            <span className="text-[10px] text-cyan-400/80 font-mono">#{originalIdx + 1}</span>
-                            <span>{body.name}</span>
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
-                            {body.diameterEarth >= 1.0
-                              ? `${body.diameterEarth.toFixed(2)} D⊕`
-                              : `${Math.round(body.diameterKm).toLocaleString()} km`}
-                            {itemSudarsky ? ` · Sudarsky ${itemSudarsky}` : ''}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#040816]/95 border border-cyan-500/40 text-xs font-mono text-slate-300">
-                    <Search className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>No worlds matching &quot;{searchQuery}&quot;</span>
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="text-cyan-400 hover:text-white underline font-semibold ml-1 cursor-pointer"
-                    >
-                      Show all ({sortedBodies.length})
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Bottom Bar: Navigator + Search + Shortcuts + Hide */}
-            <div className={`flex items-center ${areControlsHidden ? 'justify-end' : 'justify-between'} gap-2 w-full`}>
-              {areControlsHidden ? (
-                <button
-                  id="btn-show-controls"
-                  onClick={() => setAreControlsHidden(false)}
-                  title="Show Controls (H)"
-                  className="p-2 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-1.5 bg-cyan-950/90 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.4)] ml-auto"
-                >
-                  <Eye className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <span className="hidden sm:inline">Show controls</span>
-                </button>
-              ) : (
-                <>
-                  {/* Integrated Navigator */}
-                  <div className="flex items-center gap-0.5 sm:gap-1 bg-[#040816]/95 backdrop-blur-xl p-0.5 sm:p-1 rounded-xl border border-cyan-500/35 shadow-[0_4px_20px_rgba(0,0,0,0.6)] shrink-0 font-mono">
-                    <button
-                      id="btn-nav-first"
-                      onClick={handleFirst}
-                      title={`First Object (#1: ${sortedBodies[0]?.name || 'First'})`}
-                      className="px-2 sm:px-2.5 py-1 rounded-lg text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer text-xs font-semibold shrink-0"
-                    >
-                      <span className="sm:hidden">#1</span>
-                      <span className="hidden sm:inline">First (#1)</span>
-                    </button>
-
-                    <button
-                      id="btn-nav-prev"
-                      onClick={handlePrev}
-                      title="Previous Object (←)"
-                      className="p-1 sm:px-2 sm:py-1 rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer flex items-center gap-1"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-                      <span className="hidden md:inline text-[11px]">Prev</span>
-                    </button>
-
-                    <span className="text-[10px] sm:text-xs font-mono px-1 sm:px-2 text-cyan-300 font-bold border-x border-cyan-500/30 shrink-0">
-                      {activeIndex >= 0 ? `${activeIndex + 1} / ${sortedBodies.length}` : 'All'}
-                    </span>
-
-                    <button
-                      id="btn-nav-next"
-                      onClick={handleNext}
-                      title="Next Object (→)"
-                      className="p-1 sm:px-2 sm:py-1 rounded-lg text-slate-300 hover:text-white hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer flex items-center gap-1"
-                    >
-                      <span className="hidden md:inline text-[11px]">Next</span>
-                      <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-                    </button>
-
-                    <button
-                      id="btn-nav-last"
-                      onClick={handleLast}
-                      title={`Last Object (#${sortedBodies.length}: ${sortedBodies[sortedBodies.length - 1]?.name || 'Last'})`}
-                      className="px-2 sm:px-2.5 py-1 rounded-lg text-slate-300 hover:text-amber-300 hover:bg-cyan-500/20 active:scale-95 transition-colors cursor-pointer text-xs font-semibold shrink-0"
-                    >
-                      <span className="sm:hidden">#{sortedBodies.length}</span>
-                      <span className="hidden sm:inline">Last (#{sortedBodies.length})</span>
-                    </button>
-                  </div>
-
-                  {/* Right Actions */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    {!isSearchActive ? (
-                      <button
-                        id="btn-open-search"
-                        onClick={() => setIsSearchActive(true)}
-                        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 bg-[#040816]/90 hover:bg-[#091330] border-cyan-500/30 text-slate-200 hover:text-white hover:border-cyan-400 shrink-0"
-                        title="Search Objects (B)"
-                      >
-                        <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                        <span className="hidden sm:inline">Search ({sortedBodies.length})</span>
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-cyan-400 bg-cyan-950/95 text-xs font-mono backdrop-blur-xl shadow-[0_0_20px_rgba(6,182,212,0.35)] w-48 sm:w-64 shrink-0 focus-within:ring-2 focus-within:ring-cyan-300">
-                        <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" aria-hidden="true" />
-                        <label htmlFor="stage-world-search-input" className="sr-only">
-                          Search celestial worlds and Sudarsky classes
-                        </label>
-                        <input
-                          id="stage-world-search-input"
-                          ref={searchInputRef}
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={`Search ${sortedBodies.length} worlds or Class I-V...`}
-                          className="bg-transparent text-white text-xs font-mono placeholder:text-slate-400 focus:outline-none w-full min-w-0"
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          aria-label="Close search"
-                          onClick={() => {
-                            setIsSearchActive(false);
-                            setSearchQuery('');
-                          }}
-                          className="p-0.5 text-slate-300 hover:text-white shrink-0 cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-cyan-300"
-                        >
-                          <X className="w-3.5 h-3.5" aria-hidden="true" />
-                        </button>
-                      </div>
-                    )}
-
-                    <button
-                      id="btn-shortcuts-bottom"
-                      onClick={() => setShowShortcutsHelp(true)}
-                      className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#040816]/90 hover:bg-cyan-950/50 border border-cyan-500/30 text-xs font-mono text-cyan-300 hover:text-white backdrop-blur-xl transition-all cursor-pointer shadow-md"
-                    >
-                      <Keyboard className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Shortcuts</span>
-                    </button>
-
-                    <button
-                      id="btn-hide-controls"
-                      onClick={() => setAreControlsHidden(true)}
-                      title="Hide Controls (H)"
-                      className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border text-xs font-mono font-semibold backdrop-blur-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-1.5 bg-[#040816]/90 hover:bg-[#091330] border-cyan-500/30 text-slate-300 hover:text-white shrink-0"
-                    >
-                      <EyeOff className="w-3.5 h-3.5 text-slate-400 hover:text-cyan-300 shrink-0" />
-                      <span className="hidden md:inline text-[11px]">Hide controls</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cinematic 3D Tour Mode Overlay (matching StarCanvas3D Screenshot 2) */}
-      {isTourMode && (
-        <>
-          {/* Top-Left Hover Zone */}
-          <div className="absolute top-0 left-0 pt-3 pl-3 sm:pt-4 sm:pl-4 pb-16 pr-20 z-40 group pointer-events-auto select-none">
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300 transform -translate-y-1 group-hover:translate-y-0">
-              <button
-                id="btn-tour-end"
-                onClick={handleEndTour}
-                title="End Tour (Esc)"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#040816]/95 hover:bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
-              >
-                <Square className="w-3.5 h-3.5 fill-rose-400 text-rose-400" />
-                <span>End Tour</span>
-              </button>
-
-              <button
-                id="btn-tour-restart"
-                onClick={handleRestartTour}
-                title="Restart Tour from First World"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#040816]/95 hover:bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Restart</span>
-              </button>
-
-              <button
-                id="btn-tour-play-pause"
-                onClick={() => {
-                  if (activeIndex >= sortedBodies.length - 1 && !isTourPlaying) {
-                    handleRestartTour();
-                    return;
-                  }
-                  setIsTourPlaying((prev) => !prev);
-                  isTourPlayingRef.current = !isTourPlaying;
-                  soundEffects.play(!isTourPlaying ? 'toggleOn' : 'toggleOff');
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#040816]/95 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white shadow-[0_4px_24px_rgba(0,0,0,0.85)] backdrop-blur-xl text-xs font-mono transition-all cursor-pointer active:scale-95"
-              >
-                {isTourPlaying ? (
-                  <>
-                    <Pause className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-amber-300 font-semibold">Pause</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-cyan-300 font-semibold">Resume</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Lower Third Cinematic Vitals Display */}
-          {activeFocusedBody && (() => {
-            const metric = getTourMetricDisplay(activeFocusedBody, sortKey);
-            const currentNum = activeIndex >= 0 ? activeIndex + 1 : 1;
-            const total = sortedBodies.length;
-            const progressPercent = total > 0 ? (currentNum / total) * 100 : 0;
-            const color = inferBodyColor(activeFocusedBody);
-            const tourSudarsky = deriveSudarskyClass(activeFocusedBody);
-            const tourSudarskyMeta = tourSudarsky ? SUDARSKY_CLASS_INFO[tourSudarsky] : undefined;
-
-            return (
-              <div className="absolute inset-x-0 bottom-0 pointer-events-none z-30 flex flex-col justify-end">
-                <div
-                  className="w-full bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-20 pb-6 px-4 sm:px-8 md:px-12 flex flex-col gap-2.5 sm:gap-3"
-                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}
-                >
-                  {/* Top metadata row */}
-                  <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-                    <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/50 text-cyan-300 font-bold uppercase tracking-wider text-[11px] sm:text-xs shadow-[0_0_12px_rgba(6,182,212,0.3)]">
-                      #{currentNum} of {total} • {metric.label}
-                    </span>
-
-                    {isTourPlaying ? (
-                      <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/70 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px]">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                        Auto Tour Playing
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-slate-900/80 border border-slate-700 text-slate-300 text-[10px] sm:text-[11px]">
-                        Tour Paused
-                      </span>
-                    )}
-
-                    <span className="text-slate-400 text-xs hidden sm:inline">
-                      Host: {activeFocusedBody.hostSystem}
-                    </span>
-                  </div>
-
-                  {/* Giant Name & Comparison Metrics */}
-                  <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-3 lg:gap-8">
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-2.5 sm:gap-3.5">
-                        <span
-                          className="w-4 h-4 sm:w-5 sm:h-5 rounded-full aspect-square shrink-0 ring-2 ring-white/50 shadow-[0_0_20px_currentColor]"
-                          style={{ backgroundColor: color, color }}
-                        />
-                        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-display text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] truncate">
-                          {activeFocusedBody.name}
-                        </h1>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-slate-300 font-sans mt-2">
-                        <span className="font-semibold text-cyan-200">
-                          {activeFocusedBody.classification}
-                        </span>
-                        {tourSudarskyMeta && (
-                          <>
-                            <span className="text-slate-500">•</span>
-                            <span className="font-mono font-semibold text-amber-200">
-                              {tourSudarskyMeta.fullLabel} ({tourSudarskyMeta.cloudDeck})
-                            </span>
-                          </>
-                        )}
-                        <span className="text-slate-500">•</span>
-                        <span className="text-slate-300">
-                          Host System: {activeFocusedBody.hostSystem}
-                        </span>
-                        {activeFocusedBody.discoveryYear && activeFocusedBody.discoveryYear > 0 && (
-                          <>
-                            <span className="text-slate-500">•</span>
-                            <span className="text-slate-400">
-                              Discovered: {activeFocusedBody.discoveryYear}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Right-hand Giant Comparison Metric */}
-                    <div className="flex flex-col lg:items-end shrink-0">
-                      <div className="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase">
-                        {metric.label}
-                      </div>
-                      <div className="text-3xl sm:text-5xl md:text-6xl font-mono font-black text-cyan-300 tracking-tight leading-none drop-shadow-[0_0_30px_rgba(6,182,212,0.6)]">
-                        {metric.primary}
-                      </div>
-                      <div className="text-[11px] sm:text-xs font-mono text-slate-400 mt-1">
-                        {metric.secondary}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Secondary Vitals Ribbon */}
-                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10 text-[11px] sm:text-xs font-mono">
-                    {tourSudarskyMeta && (
-                      <span className="px-2 py-0.5 rounded bg-black/70 border border-amber-400/35 text-amber-200">
-                        <span className="text-slate-400 mr-1">Sudarsky:</span>
-                        <span className="font-semibold">
-                          {tourSudarskyMeta.sudarskyClass} ({tourSudarskyMeta.cloudDeck})
-                        </span>
-                      </span>
-                    )}
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Diameter:</span>
-                      <span className="text-white font-semibold">
-                        {Math.round(activeFocusedBody.diameterKm).toLocaleString()} km
-                      </span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Earth Scale:</span>
-                      <span className="text-white font-semibold">
-                        {activeFocusedBody.diameterEarth.toFixed(activeFocusedBody.diameterEarth < 0.1 ? 3 : 2)} D⊕
-                      </span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                      <span className="text-slate-500 mr-1">Jupiter Scale:</span>
-                      <span className="text-white font-semibold">
-                        {activeFocusedBody.diameterJupiter.toFixed(activeFocusedBody.diameterJupiter < 0.05 ? 4 : 2)} D♃
-                      </span>
-                    </span>
-                    {activeFocusedBody.massEarth !== undefined && activeFocusedBody.massEarth > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                        <span className="text-slate-500 mr-1">Mass:</span>
-                        <span className="text-white font-semibold">
-                          {formatCompactBodyMass(activeFocusedBody)}
-                        </span>
-                      </span>
-                    )}
-                    {activeFocusedBody.temperatureK !== undefined && activeFocusedBody.temperatureK > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                        <span className="text-slate-500 mr-1">Temp:</span>
-                        <span className="text-white font-semibold">{activeFocusedBody.temperatureK} K</span>
-                      </span>
-                    )}
-                    {activeFocusedBody.albedo !== undefined && (
-                      <span className="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-300">
-                        <span className="text-slate-500 mr-1">Albedo:</span>
-                        <span className="text-cyan-300 font-semibold">
-                          {(activeFocusedBody.albedo * 100).toFixed(1)}% ({activeFocusedBody.albedo.toFixed(2)})
-                        </span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Bottom Slim Tour Progress Bar */}
-                <div className="w-full h-1 bg-black/80 relative overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 transition-all duration-300 shadow-[0_0_10px_rgba(6,182,212,0.8)]"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })()}
-        </>
-      )}
+      {/* HUD, Telemetry, and Stage Overlays */}
+      <ExoplanetStageHud
+        sortedBodies={sortedBodies}
+        filteredBodies={filteredBodies}
+        activeIndex={activeIndex}
+        activeBodyId={activeBodyId}
+        activeFocusedBody={activeFocusedBody}
+        displayBody={displayBody}
+        loadProgress={loadProgress}
+        webglError={webglError}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        layoutMode={layoutMode}
+        isAutoRotating={isAutoRotating}
+        wireframe={wireframe}
+        showGrid={showGrid}
+        isTourMode={isTourMode}
+        isTourPlaying={isTourPlaying}
+        tourLength={tourLength}
+        isSearchActive={isSearchActive}
+        searchQuery={searchQuery}
+        isFullscreen={isFullscreen}
+        areControlsHidden={areControlsHidden}
+        isTopPanelMinimized={isTopPanelMinimized}
+        isSortMenuOpen={isSortMenuOpen}
+        isLayoutMenuOpen={isLayoutMenuOpen}
+        isTogglesMenuOpen={isTogglesMenuOpen}
+        isTourPaceMenuOpen={isTourPaceMenuOpen}
+        isObs={obsIntegration.isObs}
+        obsStatus={obsIntegration.obsStatus}
+        sortMenuRef={sortMenuRef}
+        layoutMenuRef={layoutMenuRef}
+        togglesMenuRef={togglesMenuRef}
+        tourPaceMenuRef={tourPaceMenuRef}
+        searchInputRef={searchInputRef}
+        labelElementsRef={labelElementsRef}
+        onSelect={handleSelect}
+        onHover={setHoveredBody}
+        onZoom={handleZoom}
+        onResetCamera={handleResetCamera}
+        onFitAll={handleFitAll}
+        onUnfocus={handleUnfocus}
+        onToggleTour={handleToggleTour}
+        onEndTour={handleEndTour}
+        onToggleTourPlay={handleToggleTour}
+        onRestartTour={handleRestartTour}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onFirst={handleFirst}
+        onLast={handleLast}
+        onToggleFullscreen={toggleFullscreen}
+        onSortChange={(key) => {
+          soundEffects.play('click');
+          setSortKey(key);
+          setIsSortMenuOpen(false);
+        }}
+        onSortDirectionToggle={() => {
+          soundEffects.play('click');
+          setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+        }}
+        onLayoutChange={(mode) => {
+          soundEffects.play('toggleOn');
+          setLayoutMode(mode);
+          setIsLayoutMenuOpen(false);
+        }}
+        onToggleAutoRotate={() => {
+          const next = !isAutoRotating;
+          soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+          setIsAutoRotating(next);
+        }}
+        onToggleWireframe={() => {
+          const next = !wireframe;
+          soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+          setWireframe(next);
+        }}
+        onToggleGrid={() => {
+          const next = !showGrid;
+          soundEffects.play(next ? 'toggleOn' : 'toggleOff');
+          setShowGrid(next);
+        }}
+        onSetTourLength={(len) => {
+          soundEffects.play('click');
+          setTourLength(len);
+          setIsTourPaceMenuOpen(false);
+        }}
+        onSearchChange={setSearchQuery}
+        onToggleSearch={(active) => {
+          soundEffects.play('click');
+          setIsSearchActive(active);
+          if (!active) setSearchQuery('');
+        }}
+        onToggleControlsHidden={setAreControlsHidden}
+        onToggleTopPanelMinimized={setIsTopPanelMinimized}
+        onToggleSortMenu={setIsSortMenuOpen}
+        onToggleLayoutMenu={setIsLayoutMenuOpen}
+        onToggleTogglesMenu={setIsTogglesMenuOpen}
+        onToggleTourPaceMenu={setIsTourPaceMenuOpen}
+        onOpenShortcutsHelp={() => setShowShortcutsHelp(true)}
+      />
 
       {/* Keyboard Shortcuts Modal */}
       <ExoplanetShortcutsModal

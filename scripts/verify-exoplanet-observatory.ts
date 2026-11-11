@@ -353,6 +353,129 @@ function checkShortcutsModalPhase(): CheckResult[] {
   return results;
 }
 
+function checkHudPhase(): CheckResult[] {
+  const results: CheckResult[] = [];
+
+  const hudPath = path.join(ROOT_DIR, 'src', 'components', 'ExoplanetStageHud.tsx');
+  const canvasPath = path.join(ROOT_DIR, 'src', 'components', 'ExoplanetCanvas3D.tsx');
+  const obsBridgePath = path.join(ROOT_DIR, 'src', 'utils', 'obsBridge.ts');
+  const useObsPath = path.join(ROOT_DIR, 'src', 'hooks', 'useObsStudio.ts');
+
+  // 1. ExoplanetStageHud.tsx exists
+  if (!fs.existsSync(hudPath)) {
+    results.push({
+      name: 'src/components/ExoplanetStageHud.tsx exists',
+      passed: false,
+      message: 'ExoplanetStageHud.tsx not found',
+    });
+    return results;
+  }
+  results.push({
+    name: 'src/components/ExoplanetStageHud.tsx exists',
+    passed: true,
+  });
+
+  const hudCode = fs.readFileSync(hudPath, 'utf-8');
+
+  // 2. Zero occurrences of legacy slop tokens in ExoplanetStageHud.tsx
+  const hasSlopBlur = /backdrop-blur-(?:xl|2xl)/i.test(hudCode);
+  const hasSlopShadow = /shadow-\[0_0_/i.test(hudCode);
+  const hasSlopGradient = /from-cyan-600/i.test(hudCode);
+  const hasSlopBorder = /border-cyan-500/i.test(hudCode);
+  const hasSlopBg = hudCode.includes('bg-[#040816]');
+  const hasPing = hudCode.includes('animate-ping');
+  const isSlopFree = !hasSlopBlur && !hasSlopShadow && !hasSlopGradient && !hasSlopBorder && !hasSlopBg && !hasPing;
+
+  results.push({
+    name: 'ExoplanetStageHud.tsx purges legacy cyan glows, deep blur, and slop tokens',
+    passed: isSlopFree,
+    message: hasSlopBlur
+      ? 'contains backdrop-blur-xl/2xl'
+      : hasSlopShadow
+        ? 'contains shadow-[0_0_...]'
+        : hasSlopGradient
+          ? 'contains from-cyan-600 gradient'
+          : hasSlopBorder
+            ? 'contains border-cyan-500'
+            : hasSlopBg
+              ? 'contains bg-[#040816]'
+              : hasPing
+                ? 'contains animate-ping'
+                : undefined,
+  });
+
+  // 3. Container chrome uses observatory-panel
+  const hasObservatoryPanel = hudCode.includes('observatory-panel');
+  results.push({
+    name: 'ExoplanetStageHud.tsx uses observatory-panel surfaces',
+    passed: hasObservatoryPanel,
+    message: hasObservatoryPanel ? undefined : 'missing observatory-panel',
+  });
+
+  // 4. Clickable HUD buttons meet minimum 44px tap targets (min-h-11)
+  const hasMinH11 = /min-h-11/i.test(hudCode);
+  results.push({
+    name: 'ExoplanetStageHud.tsx controls provide minimum 44px tap targets (min-h-11)',
+    passed: hasMinH11,
+    message: hasMinH11 ? undefined : 'missing min-h-11 on HUD controls',
+  });
+
+  // 5. Zero em dashes
+  const hasEmDash = hudCode.includes('\u2014');
+  results.push({
+    name: 'ExoplanetStageHud.tsx has zero em dashes',
+    passed: !hasEmDash,
+    message: hasEmDash ? 'contains em dash (U+2014)' : undefined,
+  });
+
+  // 6. OBS Studio integration in ExoplanetStageHud.tsx
+  const hasObsBadge = hudCode.includes('isObs') && (hudCode.includes('OBS Rec') || hudCode.includes('OBS Live') || hudCode.includes('OBS Active'));
+  results.push({
+    name: 'ExoplanetStageHud.tsx renders OBS broadcast status badge',
+    passed: hasObsBadge,
+    message: hasObsBadge ? undefined : 'missing OBS status telemetry badge in ExoplanetStageHud',
+  });
+
+  // 7. OBS Studio bridge and hook existence
+  const hasObsBridge = fs.existsSync(obsBridgePath) && fs.existsSync(useObsPath);
+  results.push({
+    name: 'OBS Studio bridge and hook exist (obsBridge.ts and useObsStudio.ts)',
+    passed: hasObsBridge,
+    message: hasObsBridge ? undefined : 'obsBridge.ts or useObsStudio.ts missing',
+  });
+
+  // 8. ExoplanetCanvas3D.tsx renders ExoplanetStageHud and wires useObsStudio
+  if (!fs.existsSync(canvasPath)) {
+    results.push({
+      name: 'ExoplanetCanvas3D renders ExoplanetStageHud and wires OBS Studio',
+      passed: false,
+      message: 'ExoplanetCanvas3D.tsx not found',
+    });
+  } else {
+    const canvasCode = fs.readFileSync(canvasPath, 'utf-8');
+    const importsHud = /import\s+.*ExoplanetStageHud.*from/i.test(canvasCode);
+    const rendersHud = /<ExoplanetStageHud/i.test(canvasCode);
+    const usesObsHook = /useObsStudio/i.test(canvasCode);
+    const handlesCleanBroadcast = /cleanBroadcast/i.test(canvasCode);
+
+    results.push({
+      name: 'ExoplanetCanvas3D renders ExoplanetStageHud and connects useObsStudio',
+      passed: importsHud && rendersHud && usesObsHook && handlesCleanBroadcast,
+      message: !importsHud
+        ? 'ExoplanetCanvas3D does not import ExoplanetStageHud'
+        : !rendersHud
+          ? 'ExoplanetCanvas3D does not render <ExoplanetStageHud'
+          : !usesObsHook
+            ? 'ExoplanetCanvas3D does not use useObsStudio hook'
+            : !handlesCleanBroadcast
+              ? 'ExoplanetCanvas3D does not handle cleanBroadcast'
+              : undefined,
+    });
+  }
+
+  return results;
+}
+
 function parsePhaseArg(): Phase {
   const phaseArg = process.argv.find((arg) => arg.startsWith('--phase='));
   if (phaseArg) {
@@ -381,6 +504,10 @@ async function main() {
 
   if (phase === 'shortcuts' || phase === 'shortcuts-modal' || phase === 'all') {
     results.push(...checkShortcutsModalPhase());
+  }
+
+  if (phase === 'hud' || phase === 'all') {
+    results.push(...checkHudPhase());
   }
 
   let failures = 0;
